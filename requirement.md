@@ -14,6 +14,44 @@ Next.js (App Router) をベースとし、Supabase Auth/Realtime と Prisma を�
 
 ### Local Development: Supabase CLI (Docker)
 
+### Tailwind CSS
+
+- tailwind variantsを使用してコンポーネントを細分化したい
+```
+import { tv } from 'tailwind-variants';
+ 
+const button = tv({
+  base: 'font-medium bg-blue-500 text-white rounded-full active:opacity-80',
+  variants: {
+    color: {
+      primary: 'bg-blue-500 text-white',
+      secondary: 'bg-purple-500 text-white'
+    },
+    size: {
+      sm: 'text-sm',
+      md: 'text-base',
+      lg: 'px-4 py-3 text-lg'
+    }
+  },
+  compoundVariants: [
+    {
+      size: ['sm', 'md'],
+      class: 'px-3 py-1'
+    }
+  ],
+  defaultVariants: {
+    size: 'md',
+    color: 'primary'
+  }
+});
+ 
+return (
+  <button className={button({ size: 'sm', color: 'secondary' })}>
+    Click me
+  </button>
+);
+```
+
 # 3. データベース設計 (Prisma)
 ユーザー情報の整合性とセキュリティを担保するため、認証情報とアプリケーション情報を分離する。
 
@@ -65,3 +103,4 @@ Auth トリガーの SQL 実行。
 Next.js 上でのサインアップ・ログイン・ログアウト機能の実装。
 
 ブラウザを2枚開き、DB更新がリアルタイムに同期されることの確認。
+

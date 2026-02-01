@@ -2,7 +2,8 @@
 
 import { createClient } from '@/frontend/lib/supabase/client'
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { Button } from '@/frontend/components/ui/Button'
+import { Card } from '@/frontend/components/ui/Card'
 
 export default function AuthForm() {
     const [loading, setLoading] = useState(false)
@@ -27,14 +28,16 @@ export default function AuthForm() {
     }
 
     return (
-        <div className="p-8 border rounded-lg max-w-md mx-auto bg-brand-400 text-brand-900 shadow-lg">
+        <Card className="max-w-md mx-auto bg-brand-400 text-brand-900 border-none shadow-lg" padding="lg">
             <h2 className="text-2xl mb-6 text-brand-900 font-bold text-center">Login</h2>
             {error && <div className="p-3 mb-4 bg-red-100 text-red-900 border border-red-700 rounded text-sm whitespace-pre-wrap">{error}</div>}
 
-            <button
+            <Button
                 onClick={handleGoogleLogin}
                 disabled={loading}
-                className="bg-white text-gray-800 hover:bg-gray-50 border border-gray-300 focus:ring-4 focus:ring-gray-200 font-medium rounded-lg text-sm px-5 py-2.5 flex items-center justify-center gap-2 w-full transition-all"
+                variant="outline"
+                fullWidth
+                className="gap-2 font-medium"
             >
                 {loading ? 'Connecting...' : (
                     <>
@@ -47,10 +50,11 @@ export default function AuthForm() {
                         Sign in with Google
                     </>
                 )}
-            </button>
+            </Button>
             <p className="mt-4 text-xs text-center text-brand-900 opacity-70">
                 By continuing, you agree to our Terms of Service and Privacy Policy.
             </p>
-        </div>
+        </Card>
     )
 }
+
