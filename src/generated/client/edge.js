@@ -99,6 +99,20 @@ exports.Prisma.UserScalarFieldEnum = {
   createdAt: 'createdAt'
 };
 
+exports.Prisma.RoomScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  createdAt: 'createdAt',
+  createdBy: 'createdBy'
+};
+
+exports.Prisma.RoomUserScalarFieldEnum = {
+  id: 'id',
+  roomId: 'roomId',
+  userId: 'userId',
+  createdAt: 'createdAt'
+};
+
 exports.Prisma.UserIDPScalarFieldEnum = {
   id: 'id',
   supabaseUid: 'supabaseUid',
@@ -118,6 +132,8 @@ exports.Prisma.QueryMode = {
 
 exports.Prisma.ModelName = {
   User: 'User',
+  Room: 'Room',
+  RoomUser: 'RoomUser',
   UserIDP: 'UserIDP'
 };
 /**
@@ -128,10 +144,10 @@ const config = {
   "clientVersion": "7.3.0",
   "engineVersion": "9d6ad21cbbceab97458517b147a6a09ff43aa735",
   "activeProvider": "postgresql",
-  "inlineSchema": "// This is your Prisma schema file,\n// learn more about it in the docs: https://pris.ly/d/prisma-schema\n\ngenerator client {\n  provider = \"prisma-client-js\"\n  output   = \"../src/generated/client\"\n}\n\ndatasource db {\n  provider = \"postgresql\"\n}\n\nmodel User {\n  id        String   @id @default(dbgenerated(\"gen_random_uuid()\")) @db.Uuid\n  name      String\n  email     String   @unique\n  createdAt DateTime @default(now()) @map(\"created_at\")\n\n  userIDPs UserIDP[] // Relation to UserIDP\n\n  @@map(\"users\")\n}\n\nmodel UserIDP {\n  id          String @id @default(dbgenerated(\"gen_random_uuid()\")) @db.Uuid\n  supabaseUid String @unique @map(\"supabase_uid\") @db.Uuid\n  userId      String @map(\"user_id\") @db.Uuid\n\n  user User @relation(fields: [userId], references: [id], onDelete: Cascade)\n\n  @@map(\"user_idp\")\n}\n"
+  "inlineSchema": "// This is your Prisma schema file,\n// learn more about it in the docs: https://pris.ly/d/prisma-schema\n\ngenerator client {\n  provider = \"prisma-client-js\"\n  output   = \"../src/generated/client\"\n}\n\ndatasource db {\n  provider = \"postgresql\"\n}\n\nmodel User {\n  id        String   @id @default(dbgenerated(\"gen_random_uuid()\")) @db.Uuid\n  name      String\n  email     String   @unique\n  createdAt DateTime @default(now()) @map(\"created_at\")\n\n  userIDPs     UserIDP[]\n  createdRooms Room[]     @relation(\"CreatedRooms\")\n  joinedRooms  RoomUser[]\n\n  @@map(\"users\")\n}\n\nmodel Room {\n  id        String   @id @default(dbgenerated(\"gen_random_uuid()\")) @db.Uuid\n  name      String\n  createdAt DateTime @default(now()) @map(\"created_at\")\n  createdBy String   @map(\"created_by\") @db.Uuid\n\n  users   RoomUser[]\n  creator User       @relation(\"CreatedRooms\", fields: [createdBy], references: [id])\n\n  @@map(\"rooms\")\n}\n\nmodel RoomUser {\n  id        String   @id @default(dbgenerated(\"gen_random_uuid()\")) @db.Uuid\n  roomId    String   @map(\"room_id\") @db.Uuid\n  userId    String   @map(\"user_id\") @db.Uuid\n  createdAt DateTime @default(now()) @map(\"created_at\")\n\n  room Room @relation(fields: [roomId], references: [id], onDelete: Cascade)\n  user User @relation(fields: [userId], references: [id], onDelete: Cascade)\n\n  @@unique([roomId, userId])\n  @@map(\"room_users\")\n}\n\nmodel UserIDP {\n  id          String @id @default(dbgenerated(\"gen_random_uuid()\")) @db.Uuid\n  supabaseUid String @unique @map(\"supabase_uid\") @db.Uuid\n  userId      String @map(\"user_id\") @db.Uuid\n\n  user User @relation(fields: [userId], references: [id], onDelete: Cascade)\n\n  @@map(\"user_idp\")\n}\n"
 }
 
-config.runtimeDataModel = JSON.parse("{\"models\":{\"User\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"name\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"email\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"created_at\"},{\"name\":\"userIDPs\",\"kind\":\"object\",\"type\":\"UserIDP\",\"relationName\":\"UserToUserIDP\"}],\"dbName\":\"users\"},\"UserIDP\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"supabaseUid\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"supabase_uid\"},{\"name\":\"userId\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"user_id\"},{\"name\":\"user\",\"kind\":\"object\",\"type\":\"User\",\"relationName\":\"UserToUserIDP\"}],\"dbName\":\"user_idp\"}},\"enums\":{},\"types\":{}}")
+config.runtimeDataModel = JSON.parse("{\"models\":{\"User\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"name\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"email\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"created_at\"},{\"name\":\"userIDPs\",\"kind\":\"object\",\"type\":\"UserIDP\",\"relationName\":\"UserToUserIDP\"},{\"name\":\"createdRooms\",\"kind\":\"object\",\"type\":\"Room\",\"relationName\":\"CreatedRooms\"},{\"name\":\"joinedRooms\",\"kind\":\"object\",\"type\":\"RoomUser\",\"relationName\":\"RoomUserToUser\"}],\"dbName\":\"users\"},\"Room\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"name\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"created_at\"},{\"name\":\"createdBy\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"created_by\"},{\"name\":\"users\",\"kind\":\"object\",\"type\":\"RoomUser\",\"relationName\":\"RoomToRoomUser\"},{\"name\":\"creator\",\"kind\":\"object\",\"type\":\"User\",\"relationName\":\"CreatedRooms\"}],\"dbName\":\"rooms\"},\"RoomUser\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"roomId\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"room_id\"},{\"name\":\"userId\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"user_id\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"created_at\"},{\"name\":\"room\",\"kind\":\"object\",\"type\":\"Room\",\"relationName\":\"RoomToRoomUser\"},{\"name\":\"user\",\"kind\":\"object\",\"type\":\"User\",\"relationName\":\"RoomUserToUser\"}],\"dbName\":\"room_users\"},\"UserIDP\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"supabaseUid\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"supabase_uid\"},{\"name\":\"userId\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"user_id\"},{\"name\":\"user\",\"kind\":\"object\",\"type\":\"User\",\"relationName\":\"UserToUserIDP\"}],\"dbName\":\"user_idp\"}},\"enums\":{},\"types\":{}}")
 defineDmmfProperty(exports.Prisma, config.runtimeDataModel)
 config.compilerWasm = {
   getRuntime: async () => require('./query_compiler_fast_bg.js'),

@@ -1,0 +1,72 @@
+'use client'
+
+import { createClient } from '@/frontend/lib/supabase/client'
+import { useEffect, useState } from 'react'
+import { Card } from '@/frontend/components/ui/Card'
+
+type Member = {
+    id: string
+    name: string
+    user_id: string
+    // join date
+    created_at: string
+}
+
+export function MemberList({ roomId, initialMembers }: { roomId: string, initialMembers: any[] }) {
+    const [members, setMembers] = useState<any[]>(initialMembers)
+    const supabase = createClient()
+
+    useEffect(() => {
+        const channel = supabase
+            .channel(`room_${roomId}`)
+            .on('postgres_changes', {
+                event: '*',
+                schema: 'public',
+                table: 'room_users',
+                filter: `room_id=eq.${roomId}`
+            }, async (payload) => {
+                if (payload.eventType === 'INSERT') {
+                    // Need to fetch User name since room_users only has user_id
+                    // For now, simpler to reload page or trigger server action to re-fetch
+                    // Or, fetch single user profile from Supabase/API?
+                    // Let's rely on full refresh or implement a simple fetch for now?
+                    // Actually, Realtime payload only includes the columns of the table (userId, roomId).
+                    // We need the User's name.
+                    // Option 1: Subscribe to Users table too (but that's global)
+                    // Option 2: Fetch user info on Insert.
+                    const { data } = await supabase.from('users').select('*').eq('id', payload.new.user_id).single()
+                    if (data) {
+                        setMembers(prev => [...prev, {
+                            id: payload.new.id,
+                            createdAt: new Date(payload.new.created_at),
+                            user: data
+                        }])
+                    }
+
+                } else if (payload.eventType === 'DELETE') {
+                    setMembers(prev => prev.filter(m => m.id !== payload.old.id))
+                }
+            })
+            .subscribe()
+
+        return () => {
+            supabase.removeChannel(channel)
+        }
+    }, [supabase, roomId])
+
+    return (
+        <Card className="p-4 bg-white" padding="sm">
+            <h3 className="font-bold mb-4">Members ({members.length})</h3>
+            <ul className="space-y-2">
+                {members.map(member => (
+                    <li key={member.id} className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-full bg-brand-200 flex items-center justify-center text-xs font-bold text-brand-700">
+                            {member.user.name.substring(0, 2).toUpperCase()}
+                        </div>
+                        <span>{member.user.name}</span>
+                    </li>
+                ))}
+            </ul>
+        </Card>
+    )
+}

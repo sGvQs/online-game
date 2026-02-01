@@ -127,6 +127,20 @@ exports.Prisma.UserScalarFieldEnum = {
   createdAt: 'createdAt'
 };
 
+exports.Prisma.RoomScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  createdAt: 'createdAt',
+  createdBy: 'createdBy'
+};
+
+exports.Prisma.RoomUserScalarFieldEnum = {
+  id: 'id',
+  roomId: 'roomId',
+  userId: 'userId',
+  createdAt: 'createdAt'
+};
+
 exports.Prisma.UserIDPScalarFieldEnum = {
   id: 'id',
   supabaseUid: 'supabaseUid',
@@ -146,6 +160,8 @@ exports.Prisma.QueryMode = {
 
 exports.Prisma.ModelName = {
   User: 'User',
+  Room: 'Room',
+  RoomUser: 'RoomUser',
   UserIDP: 'UserIDP'
 };
 

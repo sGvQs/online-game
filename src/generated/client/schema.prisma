@@ -16,9 +16,36 @@ model User {
   email     String   @unique
   createdAt DateTime @default(now()) @map("created_at")
 
-  userIDPs UserIDP[] // Relation to UserIDP
+  userIDPs     UserIDP[]
+  createdRooms Room[]     @relation("CreatedRooms")
+  joinedRooms  RoomUser[]
 
   @@map("users")
+}
+
+model Room {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name      String
+  createdAt DateTime @default(now()) @map("created_at")
+  createdBy String   @map("created_by") @db.Uuid
+
+  users   RoomUser[]
+  creator User       @relation("CreatedRooms", fields: [createdBy], references: [id])
+
+  @@map("rooms")
+}
+
+model RoomUser {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  roomId    String   @map("room_id") @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at")
+
+  room Room @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([roomId, userId])
+  @@map("room_users")
 }
 
 model UserIDP {
