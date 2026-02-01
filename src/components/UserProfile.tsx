@@ -19,7 +19,6 @@ export default function UserProfile({ initialData }: { initialData: any }) {
                 table: 'users',
                 filter: `id=eq.${initialData.id}`
             }, (payload) => {
-                console.log('Change received!', payload)
                 setData(payload.new)
             })
             .subscribe()
