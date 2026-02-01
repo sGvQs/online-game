@@ -1,7 +1,7 @@
 'use client'
-import { createClient } from '@/lib/supabase/client'
+import { createClient } from '@/frontend/lib/supabase/client'
 import { useEffect, useState } from 'react'
-import { updateName } from '@/app/actions/user'
+import { updateName } from '@/backend/actions/user'
 
 export default function UserProfile({ initialData }: { initialData: any }) {
     const [data, setData] = useState(initialData)

@@ -1,7 +1,7 @@
-import { createClient } from '@/lib/supabase/server'
+import { createClient } from '@/backend/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { prisma } from '@/lib/prisma'
-import UserProfile from '@/components/UserProfile'
+import { prisma } from '@/backend/lib/prisma'
+import UserProfile from '@/frontend/components/UserProfile'
 
 export default async function RealtimePage() {
     const supabase = await createClient()

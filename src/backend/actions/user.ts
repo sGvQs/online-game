@@ -1,6 +1,6 @@
 'use server'
-import { prisma } from '@/lib/prisma'
-import { createClient } from '@/lib/supabase/server'
+import { prisma } from '@/backend/lib/prisma'
+import { createClient } from '@/backend/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 
 export async function updateName(newName: string) {
