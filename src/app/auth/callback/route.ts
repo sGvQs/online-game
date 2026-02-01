@@ -4,22 +4,15 @@ import { NextResponse } from 'next/server'
 
 export async function GET(request: Request) {
     const { searchParams, origin } = new URL(request.url)
-    console.log('Search Params:', searchParams.toString()) // ← ここで確認
     const url = new URL(request.url)
     const code = searchParams.get('code') || url.searchParams.get('code')
 
-    console.log('Code:', code)
     // if "next" is in param, use it as the redirect URL
     const next = searchParams.get('next') ?? '/realtime'
 
     if (code) {
-        console.log('code is not null')
         const supabase = await createClient()
         const { error, data } = await supabase.auth.exchangeCodeForSession(code)
-        console.log('code is not null 2')
-
-        console.log('error:', error)
-        console.log('data:', data)
 
         if (!error && data?.user) {
             // ユーザー同期ロジック (Prisma)
@@ -74,20 +67,15 @@ export async function GET(request: Request) {
             const forwardedHost = request.headers.get('x-forwarded-host') // original origin before load balancer
             const isLocalEnv = process.env.NODE_ENV === 'development'
             if (isLocalEnv) {
-                console.log('code is not null 3')
                 // we can be sure that there is no load balancer in between, so no need to watch for X-Forwarded-Host
                 return NextResponse.redirect(`${origin}${next}`)
             } else if (forwardedHost) {
-                console.log('code is not null 4')
                 return NextResponse.redirect(`https://${forwardedHost}${next}`)
             } else {
-                console.log('code is not null 5')
                 return NextResponse.redirect(`${origin}${next}`)
             }
         }
     }
-
-    console.log('Search Params:', searchParams.toString())
 
     // return the user to an error page with instructions
     return NextResponse.redirect(`${origin}/auth/auth-code-error`)
