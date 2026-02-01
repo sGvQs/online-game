@@ -20,5 +20,5 @@ export async function updateName(newName: string) {
         data: { name: newName }
     })
 
-    revalidatePath('/realtime')
+    revalidatePath('/dashboard')
 }

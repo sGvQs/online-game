@@ -8,7 +8,7 @@ export async function GET(request: Request) {
     const code = searchParams.get('code') || url.searchParams.get('code')
 
     // if "next" is in param, use it as the redirect URL
-    const next = searchParams.get('next') ?? '/realtime'
+    const next = searchParams.get('next') ?? '/dashboard'
 
     if (code) {
         const supabase = await createClient()

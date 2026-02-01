@@ -9,15 +9,13 @@ export default function UserProfile({ initialData }: { initialData: any }) {
     const supabase = createClient()
 
     useEffect(() => {
-        // Subscribe to changes on THIS user
-        console.log("Subscribing to realtime changes for user:", initialData.id)
         const channel = supabase
-            .channel('realtime users')
+            .channel('users')
             .on('postgres_changes', {
-                event: 'UPDATE',
+                event: 'UPDATE', // INSERT, UPDATE, DELETE, *, の種類がある
                 schema: 'public',
                 table: 'users',
-                filter: `id=eq.${initialData.id}`
+                filter: `id=eq.${initialData.id}` // eqは等しいという意味なので,id=initalData.idと同じ意味
             }, (payload) => {
                 setData(payload.new)
             })
