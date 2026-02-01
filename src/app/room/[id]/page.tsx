@@ -38,27 +38,49 @@ export default async function RoomPage({ params }: { params: { id: string } }) {
     }
 
     return (
-        <div className="min-h-screen p-8 bg-brand-50 text-brand-900">
-            <div className="max-w-4xl mx-auto">
-                <div className="flex justify-between items-center mb-8">
+        <div className="min-h-screen p-8 bg-transparent text-foreground">
+            <div className="max-w-6xl mx-auto space-y-6">
+                {/* Header */}
+                <header className="flex justify-between items-center bg-white/50 backdrop-blur-sm p-6 rounded-2xl border border-white/60 shadow-sm">
                     <div>
-                        <h1 className="text-3xl font-bold">{room.name}</h1>
-                        <p className="text-sm text-brand-500">Room ID: {room.id}</p>
+                        <div className="flex items-center gap-3">
+                            <span className="bg-brand-100 text-brand-600 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide">
+                                Game Room
+                            </span>
+                            <span className="text-sm text-gray-500 font-mono">#{room.id.substring(0, 8)}</span>
+                        </div>
+                        <h1 className="text-3xl font-black mt-2 text-brand-900">
+                            {room.name}
+                        </h1>
                     </div>
                     <form action={leaveRoom.bind(null, room.id)}>
-                        <Button variant="outline" className="border-red-200 text-red-700 hover:bg-red-50">
+                        <Button variant="outline" className="border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700 hover:border-red-300 font-medium transition-colors">
                             Leave Room
                         </Button>
                     </form>
-                </div>
+                </header>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    <div className="md:col-span-2">
-                        <div className="bg-white p-8 rounded-xl shadow-sm border border-brand-100 h-64 flex items-center justify-center text-brand-400">
-                            Game Board Placeholder
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    {/* Game Board Area */}
+                    <div className="lg:col-span-2 space-y-4">
+                        <div className="glass-card h-[600px] rounded-3xl flex flex-col items-center justify-center text-brand-400 relative overflow-hidden group border-2 border-white/50 bg-white/40">
+
+                            {/* Decorative elements - using solid colors now */}
+                            <div className="w-32 h-32 rounded-full bg-brand-100/50 absolute top-1/4 left-1/4 animate-pulse duration-[3000ms]" />
+                            <div className="w-48 h-48 rounded-full bg-blue-100/30 absolute bottom-1/3 right-1/4 animate-pulse duration-[4000ms]" />
+
+                            <div className="text-center z-10 space-y-4 p-8">
+                                <span className="text-6xl mb-4 block" style={{ animation: 'float 6s ease-in-out infinite' }}>🎲</span>
+                                <h3 className="text-2xl font-bold text-brand-900">Waiting for Game to Start...</h3>
+                                <p className="text-brand-600 max-w-md mx-auto leading-relaxed">
+                                    The game board will appear here once the session begins. Invite more players to get started!
+                                </p>
+                            </div>
                         </div>
                     </div>
-                    <div>
+
+                    {/* Sidebar / Members */}
+                    <div className="lg:col-span-1">
                         <MemberList roomId={room.id} initialMembers={room.users} />
                     </div>
                 </div>

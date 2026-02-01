@@ -11,23 +11,38 @@ export function CreateRoomForm() {
 
     if (!open) {
         return (
-            <Button onClick={() => setOpen(true)} variant="solid">
-                Create Room
+            <Button
+                onClick={() => setOpen(true)}
+                className="w-full bg-brand-600 hover:bg-brand-700 text-white shadow-md hover:shadow-lg transition-all duration-300"
+            >
+                + Create New Room
             </Button>
         )
     }
 
     return (
-        <Card className="p-4 border shadow-sm bg-white" padding="sm">
-            <h3 className="font-bold mb-2">Create New Room</h3>
+        <div className="animate-in fade-in slide-in-from-top-2 duration-300">
+            <h3 className="font-bold mb-3 text-sm text-brand-800 uppercase tracking-wider">New Room Details</h3>
             <form action={async (formData) => {
                 await createRoom(formData)
                 setOpen(false)
-            }} className="flex gap-2">
-                <Input name="name" placeholder="Room Name" required className="w-64" />
-                <Button type="submit" variant="solid">Create</Button>
-                <Button type="button" variant="ghost" onClick={() => setOpen(false)}>Cancel</Button>
+            }} className="flex flex-col gap-3">
+                <Input
+                    name="name"
+                    placeholder="Enter room name..."
+                    required
+                    className="w-full bg-white/50 border-brand-200 focus:border-brand-500 focus:ring-brand-500/20"
+                    autoFocus
+                />
+                <div className="flex gap-2 mt-1">
+                    <Button type="submit" className="flex-1 bg-brand-600 hover:bg-brand-700 text-white">
+                        Create
+                    </Button>
+                    <Button type="button" variant="ghost" onClick={() => setOpen(false)} className="text-gray-500 hover:text-gray-700 hover:bg-gray-100">
+                        Cancel
+                    </Button>
+                </div>
             </form>
-        </Card>
+        </div>
     )
 }
