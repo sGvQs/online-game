@@ -3,6 +3,11 @@ import { NextResponse, type NextRequest } from 'next/server'
 import 'dotenv/config';
 
 export async function updateSession(request: NextRequest) {
+
+    if (request.nextUrl.pathname.startsWith('/auth/callback')) {
+        return NextResponse.next()
+    }
+
     let supabaseResponse = NextResponse.next({
         request,
     })
