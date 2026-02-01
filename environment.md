@@ -85,3 +85,27 @@ Chrome などのブラウザで [http://localhost:3000](http://localhost:3000) �
     -   GUIツール（Studio）も付いてくるので、ブラウザで簡単にデータを閲覧・編集できる。
 
 つまり、**「Supabase CLI が docker-compose.yml の代わりを全自動でやってくれている」**と考えてください。
+
+---
+
+## 4. Google認証 (OAuth) の設定情報
+
+Google Cloud Console で「認証情報 (Credentials)」を作成する際、**「承認済みのリダイレクト URI (Authorized redirect URIs)」** に設定すべき値は環境によって異なります。
+
+### ローカル環境 (Local Development)
+Supabase CLI が立ち上げる Auth サーバーのアドレスを指定します。
+- **Redirect URI**: `http://127.0.0.1:54321/auth/v1/callback`
+
+> **注意**: `http://localhost:3000/auth/callback` ではありません。Supabaseを経由させる必要があります。
+
+### 商用環境 (Production)
+Supabase Cloud (本番プロジェクト) の URL を使用します。
+
+1. **Supabase ダッシュボード**を開きます。
+2. 左メニューの **Settings (設定)** > **API** を選択します。
+3. **Project URL** (例: `https://xxxxxxxxxxxx.supabase.co`) をコピーします。
+4. この URL の後ろに `/auth/v1/callback` を付けたものが設定値です。
+
+- **Redirect URI**: `https://<YOUR_PROJECT_ID>.supabase.co/auth/v1/callback`
+
+Google Cloud Console にはこの **Supabase の URL** を登録してください。アプリケーション（Vercelなど）の URL ではありません。
