@@ -6,14 +6,14 @@ import { revalidatePath } from 'next/cache'
 export async function updateName(newName: string) {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
-    if (!user) throw new Error("Unauthorized")
+    if (!user) throw new Error("認証されていません")
 
     const idp = await prisma.userIDP.findUnique({
         where: { supabaseUid: user.id },
         include: { user: true }
     })
 
-    if (!idp) throw new Error("User profile not found")
+    if (!idp) throw new Error("ユーザープロファイルが見つかりません")
 
     await prisma.user.update({
         where: { id: idp.userId },

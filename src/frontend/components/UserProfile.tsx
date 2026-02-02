@@ -36,7 +36,7 @@ export default function UserProfile({ initialData }: { initialData: any }) {
 
     return (
         <Card className="bg-white border-brand-700 shadow-md" padding="sm">
-            <h2 className="text-xl font-bold mb-2">DB Data (Realtime)</h2>
+            <h2 className="text-xl font-bold mb-2">DBデータ (リアルタイム)</h2>
             <pre className="bg-brand-900 text-brand-100 p-2 rounded mb-4 text-xs font-mono overflow-auto">
                 {JSON.stringify(data, null, 2)}
             </pre>
@@ -46,10 +46,10 @@ export default function UserProfile({ initialData }: { initialData: any }) {
                     value={newName}
                     onChange={e => setNewName(e.target.value)}
                     className="bg-brand-100 text-brand-900 placeholder:text-brand-700 border-brand-400 focus-visible:ring-brand-700"
-                    placeholder="Enter New Name..."
+                    placeholder="新しい名前を入力..."
                 />
                 <Button onClick={handleUpdate} variant="solid" className="whitespace-nowrap">
-                    Update via Server Action
+                    更新
                 </Button>
             </div>
         </Card>

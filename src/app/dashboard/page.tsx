@@ -26,15 +26,15 @@ export default async function DashboardPage() {
 
     return (
         <div className="min-h-screen p-8 bg-transparent text-foreground">
-            <div className="max-w-6xl mx-auto space-y-8">
+            <div className="max-w-7xl mx-auto space-y-8">
                 {/* Header Section */}
                 <header className="glass-card flex justify-between items-center p-6 rounded-2xl shadow-sm">
                     <div>
                         <h1 className="text-4xl font-black tracking-tight text-brand-900">
-                            Dashboard
+                            ダッシュボード
                         </h1>
                         <p className="text-brand-900 font-medium mt-1 opacity-80">
-                            Welcome back, {idp.user.name}
+                            おかえりなさい、{idp.user.name}さん
                         </p>
                     </div>
                     <div className="flex gap-4 items-center">
@@ -50,11 +50,11 @@ export default async function DashboardPage() {
                     {/* Sidebar / Actions */}
                     <aside className="lg:col-span-1 space-y-6">
                         <div className="glass-card p-6 rounded-2xl">
-                            <h2 className="text-xl font-bold mb-4 text-brand-900">Actions</h2>
+                            <h2 className="text-xl font-bold mb-4 text-brand-900">アクション</h2>
                             <CreateRoomForm />
                             <div className="mt-6 pt-6 border-t border-brand-100">
                                 <p className="text-xs text-brand-900 leading-relaxed">
-                                    Create a new room to start a game session with your friends.
+                                    新しいルームを作成して、友達とゲームを始めましょう。
                                 </p>
                             </div>
                         </div>
@@ -63,9 +63,9 @@ export default async function DashboardPage() {
                     {/* Room List */}
                     <section className="lg:col-span-3">
                         <div className="flex items-center justify-between mb-6">
-                            <h2 className="text-2xl font-bold text-brand-800">Active Rooms</h2>
+                            <h2 className="text-2xl font-bold text-brand-800">アクティブなルーム</h2>
                             <span className="text-sm font-medium px-3 py-1 bg-brand-300 text-brand-700 rounded-full">
-                                {rooms.length} Online
+                                {rooms.length}件
                             </span>
                         </div>
                         <RoomList initialRooms={rooms} userId={idp.user.id} />

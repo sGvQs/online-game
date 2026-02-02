@@ -7,13 +7,13 @@ export default function Home() {
 
       <div className="glass-card p-12 rounded-2xl text-center max-w-2xl relative z-10 border-t border-white/20">
         <h1 className="text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-brand-600 to-brand-400 dark:from-brand-300 dark:to-brand-100 mb-6 drop-shadow-sm">
-          SPACE GAME
+          スペースゲーム
         </h1>
         <p className="text-xl text-brand-700 dark:text-brand-200 mb-8 font-light">
-          Experience the void. Conquer the galaxy.
+          虚空を体験せよ。銀河を征服せよ。
         </p>
         <div className="text-sm font-mono text-brand-500 dark:text-brand-400 opacity-70">
-          [ LP Landing Page Placeholder ]
+          [ LP ランディングページ プレースホルダー ]
         </div>
       </div>
     </main>

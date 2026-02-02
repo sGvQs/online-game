@@ -8,14 +8,14 @@ import { redirect } from 'next/navigation'
 async function getAuthenticatedUser() {
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
-    if (!user) throw new Error('Not authenticated')
+    if (!user) throw new Error('認証されていません')
 
     const dbUser = await prisma.userIDP.findUnique({
         where: { supabaseUid: user.id },
         include: { user: true }
     })
 
-    if (!dbUser) throw new Error('User not found in DB')
+    if (!dbUser) throw new Error('ユーザーがデータベースに見つかりません')
     return dbUser.user
 }
 
@@ -71,8 +71,8 @@ export async function deleteRoom(roomId: string) {
         where: { id: roomId }
     })
 
-    if (!room) throw new Error('Room not found')
-    if (room.createdBy !== user.id) throw new Error('Not authorized to delete this room')
+    if (!room) throw new Error('ルームが見つかりません')
+    if (room.createdBy !== user.id) throw new Error('このルームを削除する権限がありません')
 
     await prisma.room.delete({
         where: { id: roomId }

@@ -73,13 +73,13 @@ export function RoomList({ initialRooms, userId }: { initialRooms: Room[], userI
                             {room.createdBy === userId && (
                                 <form action={deleteRoom.bind(null, room.id)}>
                                     <Button size="sm" variant="ghost" className="text-red-500 hover:bg-red-500/10 hover:text-red-400 px-3 py-1 h-8 text-xs rounded-full transition-colors">
-                                        Delete
+                                        削除
                                     </Button>
                                 </form>
                             )}
                             <form action={joinRoom.bind(null, room.id)}>
                                 <Button size="sm" className="bg-brand-600 dark:bg-brand-300 hover:bg-brand-400 text-white shadow-lg hover:shadow-brand-500/25 transition-all duration-300 rounded-full px-4 h-8 text-xs font-semibold tracking-wide uppercase">
-                                    Join Room
+                                    参加する
                                 </Button>
                             </form>
                         </div>
@@ -88,11 +88,11 @@ export function RoomList({ initialRooms, userId }: { initialRooms: Room[], userI
             ))}
 
             {rooms.length === 0 && (
-                <div className="col-span-full py-24 text-center border border-dashed border-brand-200 dark:border-brand-800/30 rounded-2xl bg-white/30 dark:bg-slate-900/30 backdrop-blur-sm">
+                <div className="col-span-full py-24 text-center border border-dashed border-brand-200 dark:border-brand-800/30 rounded-2xl backdrop-blur-sm">
                     <div className="text-6xl mb-6 opacity-80 animate-bounce">🎮</div>
-                    <h3 className="text-xl font-bold text-brand-900 dark:text-white mb-2">No Active Rooms</h3>
+                    <h3 className="text-xl font-bold text-brand-400 mb-2">現在アクティブなルームはありません</h3>
                     <p className="text-brand-600 dark:text-brand-300 max-w-md mx-auto">
-                        The galaxy is empty. Be the first to colonize this sector by creating a new game room!
+                        まだルームが作成されていません。新しいゲームルームを作成して、最初のプレイヤーになりましょう！
                     </p>
                 </div>
             )}

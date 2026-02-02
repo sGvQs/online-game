@@ -57,7 +57,7 @@ export function MemberList({ roomId, initialMembers }: { roomId: string, initial
     return (
         <div className="glass-card p-6 rounded-2xl h-full">
             <div className="flex items-center justify-between mb-6">
-                <h3 className="font-bold text-lg text-brand-900">Participants</h3>
+                <h3 className="font-bold text-lg text-brand-900">参加者</h3>
                 <span className="bg-brand-300 text-brand-700 text-xs font-bold px-3 py-1 rounded-full">
                     {members.length}
                 </span>
@@ -74,7 +74,7 @@ export function MemberList({ roomId, initialMembers }: { roomId: string, initial
                                 {member.user.name}
                             </p>
                             <p className="text-[10px] text-brand-900 font-medium">
-                                Active Player
+                                参加中
                             </p>
                         </div>
                         <div className="w-2 h-2 rounded-full bg-green-400 shadow-[0_0_8px_rgba(74,222,128,0.5)]" />

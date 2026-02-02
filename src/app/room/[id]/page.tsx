@@ -45,7 +45,7 @@ export default async function RoomPage({ params }: { params: { id: string } }) {
                     <div>
                         <div className="flex items-center gap-3">
                             <span className="bg-brand-300 text-brand-600 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide">
-                                Game Room
+                                ゲームルーム
                             </span>
                             <span className="text-sm text-brand900 font-mono">#{room.id.substring(0, 8)}</span>
                         </div>
@@ -55,7 +55,7 @@ export default async function RoomPage({ params }: { params: { id: string } }) {
                     </div>
                     <form action={leaveRoom.bind(null, room.id)}>
                         <Button variant="ghost" className="text-red-500 hover:bg-red-500/10 hover:text-red-400 font-medium transition-colors">
-                            Leave Room
+                            退出する
                         </Button>
                     </form>
                 </header>
@@ -71,9 +71,9 @@ export default async function RoomPage({ params }: { params: { id: string } }) {
 
                             <div className="text-center z-10 space-y-4 p-8">
                                 <span className="text-6xl mb-4 block" style={{ animation: 'float 6s ease-in-out infinite' }}>🎲</span>
-                                <h3 className="text-2xl font-bold text-brand-900">Waiting for Game to Start...</h3>
+                                <h3 className="text-2xl font-bold text-brand-900">ゲーム開始待ち...</h3>
                                 <p className="text-brand-600 max-w-md mx-auto leading-relaxed">
-                                    The game board will appear here once the session begins. Invite more players to get started!
+                                    ゲームが始まるとここにボードが表示されます。他のプレイヤーを招待して始めましょう！
                                 </p>
                             </div>
                         </div>
