@@ -63,7 +63,7 @@ export default async function DashboardPage() {
                     {/* Room List */}
                     <section className="lg:col-span-3">
                         <div className="flex items-center justify-between mb-6">
-                            <h2 className="text-2xl font-bold text-gray-800">Active Rooms</h2>
+                            <h2 className="text-2xl font-bold text-brand-800">Active Rooms</h2>
                             <span className="text-sm font-medium px-3 py-1 bg-brand-300 text-brand-700 rounded-full">
                                 {rooms.length} Online
                             </span>

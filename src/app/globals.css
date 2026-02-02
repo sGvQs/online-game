@@ -25,13 +25,27 @@
   --foreground: #e2e8f0;
   /* Slate 200 */
 
+  /* Space Theme Brand Colors */
   --brand-50: #1e293b;
+  /* Slate 800 */
   --brand-100: #334155;
+  /* Slate 700 */
   --brand-200: #475569;
+  /* Slate 600 */
+  --brand-300: #64748b;
+  /* Slate 500 - Mid Bridge */
+  --brand-400: #6366f1;
+  /* Indigo 500 - Primary Light */
+  --brand-500: #7172f5;
+  /* Balanced Indigo */
   --brand-600: #818cf8;
-  /* Lighter indigo for dark mode */
+  /* Lighter indigo (Your Spec) */
+  --brand-700: #93a5f9;
+  /* Soft Purple/Blue */
+  --brand-800: #a5b4fc;
+  /* Indigo 200 */
   --brand-900: #c7d2fe;
-  /* Very light indigo for text */
+  /* Very light indigo (Your Spec) */
 }
 
 @theme inline {
