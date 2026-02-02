@@ -49,6 +49,8 @@ npx supabase start
 #### 3. データベースのセットアップ（マイグレーション）
 テーブルを作成したり、トリガーを設定したりします。
 ```bash
+
+npx prisma migrate reset
 npx prisma migrate dev
 ```
 

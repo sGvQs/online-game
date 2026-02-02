@@ -41,20 +41,20 @@ export default async function RoomPage({ params }: { params: { id: string } }) {
         <div className="min-h-screen p-8 bg-transparent text-foreground">
             <div className="max-w-6xl mx-auto space-y-6">
                 {/* Header */}
-                <header className="flex justify-between items-center bg-white/50 backdrop-blur-sm p-6 rounded-2xl border border-white/60 shadow-sm">
+                <header className="flex justify-between items-center bg-white/10 backdrop-blur-sm p-6 rounded-2xl border border-white/60 shadow-sm">
                     <div>
                         <div className="flex items-center gap-3">
                             <span className="bg-brand-100 text-brand-600 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide">
                                 Game Room
                             </span>
-                            <span className="text-sm text-gray-500 font-mono">#{room.id.substring(0, 8)}</span>
+                            <span className="text-sm text-brand900 font-mono">#{room.id.substring(0, 8)}</span>
                         </div>
                         <h1 className="text-3xl font-black mt-2 text-brand-900">
                             {room.name}
                         </h1>
                     </div>
                     <form action={leaveRoom.bind(null, room.id)}>
-                        <Button variant="outline" className="border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700 hover:border-red-300 font-medium transition-colors">
+                        <Button variant="outline" className="border-red-200 text-red-600 hover:bg-red-100 hover:text-red-700 hover:border-red-300 font-medium transition-colors">
                             Leave Room
                         </Button>
                     </form>

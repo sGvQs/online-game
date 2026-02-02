@@ -54,11 +54,11 @@ export function RoomList({ initialRooms, userId }: { initialRooms: Room[], userI
                 <div key={room.id} className="glass-card rounded-xl p-5 flex flex-col justify-between group h-full relative overflow-hidden border-t-4 border-t-brand-500">
 
                     <div className="mb-4">
-                        <h3 className="text-xl font-bold mb-2 text-gray-900 group-hover:text-brand-700 transition-colors">
+                        <h3 className="text-xl font-bold mb-2 text-brand-900 transition-colors">
                             {room.name}
                         </h3>
-                        <div className="flex items-center text-xs text-gray-500 space-x-2">
-                            <span className="bg-brand-50 text-brand-600 px-2 py-0.5 rounded-md border border-brand-100">
+                        <div className="flex items-center text-xs text-brand-900 space-x-2">
+                            <span className="bg-brand-50 px-2 py-0.5 rounded-md border border-brand-100">
                                 {new Date(room.createdAt).toLocaleDateString('ja-JP')}
                             </span>
                             <span>•</span>
@@ -75,13 +75,13 @@ export function RoomList({ initialRooms, userId }: { initialRooms: Room[], userI
                         <div className="flex gap-2">
                             {room.createdBy === userId && (
                                 <form action={deleteRoom.bind(null, room.id)}>
-                                    <Button size="sm" variant="ghost" className="text-red-500 hover:bg-red-50 hover:text-red-600 px-2 py-1 h-auto text-xs">
+                                    <Button size="sm" variant="ghost" className="text-red-500 hover:bg-red-100 hover:text-red-600 px-2 py-1 h-auto text-xs">
                                         Delete
                                     </Button>
                                 </form>
                             )}
                             <form action={joinRoom.bind(null, room.id)}>
-                                <Button size="sm" className="bg-brand-100 text-brand-700 hover:bg-brand-600 hover:text-white transition-all shadow-none hover:shadow-md h-8 text-sm font-medium">
+                                <Button size="sm" className="bg-brand-100 text-brand-700 bg-brand-600 text-white transition-all shadow-none hover:shadow-md h-8 text-sm font-medium">
                                     Join Room →
                                 </Button>
                             </form>
@@ -91,10 +91,10 @@ export function RoomList({ initialRooms, userId }: { initialRooms: Room[], userI
             ))}
 
             {rooms.length === 0 && (
-                <div className="col-span-full py-16 text-center border-2 border-dashed border-brand-200 rounded-2xl bg-white/30">
+                <div className="col-span-full py-16 text-center border-2 border-dashed border-brand-200 rounded-2xl bg-white/10">
                     <div className="text-4xl mb-4 opacity-50">🎮</div>
                     <h3 className="text-lg font-semibold text-brand-900">No Active Rooms</h3>
-                    <p className="text-sm text-brand-500 mt-1 max-w-md mx-auto">
+                    <p className="text-sm text-brand-900 mt-1 max-w-md mx-auto">
                         There are no active game rooms at the moment. Be the first to create one!
                     </p>
                 </div>
