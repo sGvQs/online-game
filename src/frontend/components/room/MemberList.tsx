@@ -58,15 +58,15 @@ export function MemberList({ roomId, initialMembers }: { roomId: string, initial
         <div className="glass-card p-6 rounded-2xl h-full">
             <div className="flex items-center justify-between mb-6">
                 <h3 className="font-bold text-lg text-brand-900">Participants</h3>
-                <span className="bg-brand-800 text-brand-900 text-xs font-bold px-2 py-1 rounded-full">
+                <span className="bg-brand-300 text-brand-700 text-xs font-bold px-3 py-1 rounded-full">
                     {members.length}
                 </span>
             </div>
 
             <ul className="space-y-3">
                 {members.map(member => (
-                    <li key={member.id} className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/20 transition-colors border border-transparent hover:border-brand-500">
-                        <div className="w-10 h-10 rounded-full bg-brand-500 flex items-center justify-center text-sm font-bold text-brand-900 shadow-inner ring-2 ring-white">
+                    <li key={member.id} className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/10 transition-colors border border-transparent hover:border-brand-500">
+                        <div className="w-10 h-10 rounded-full bg-brand-300 flex items-center justify-center text-sm font-bold text-brand-700 shadow-inner">
                             {member.user.name.substring(0, 2).toUpperCase()}
                         </div>
                         <div className="flex-1 min-w-0">

@@ -13,7 +13,7 @@ export function CreateRoomForm() {
         return (
             <Button
                 onClick={() => setOpen(true)}
-                className="w-full bg-brand-600 hover:bg-brand-700 text-white shadow-md hover:shadow-lg transition-all duration-300"
+                className="w-full bg-brand-300 hover:bg-brand-400 text-white shadow-md hover:shadow-lg transition-all duration-300"
             >
                 + Create New Room
             </Button>

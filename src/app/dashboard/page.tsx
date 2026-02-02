@@ -28,7 +28,7 @@ export default async function DashboardPage() {
         <div className="min-h-screen p-8 bg-transparent text-foreground">
             <div className="max-w-6xl mx-auto space-y-8">
                 {/* Header Section */}
-                <header className="flex justify-between items-center bg-white/10 backdrop-blur-sm p-6 rounded-2xl border border-white/60 shadow-sm">
+                <header className="glass-card flex justify-between items-center p-6 rounded-2xl shadow-sm">
                     <div>
                         <h1 className="text-4xl font-black tracking-tight text-brand-900">
                             Dashboard
@@ -38,7 +38,7 @@ export default async function DashboardPage() {
                         </p>
                     </div>
                     <div className="flex gap-4 items-center">
-                        <div className="bg-white/30 px-4 py-2 rounded-full text-sm font-medium text-brand-900 shadow-sm border border-brand-100">
+                        <div className="bg-white/10 px-4 py-2 rounded-full text-sm font-medium text-brand-900 shadow-sm border border-brand-100">
                             {user.email}
                         </div>
                         {/* UserProfile could be a dropdown or avatar later */}

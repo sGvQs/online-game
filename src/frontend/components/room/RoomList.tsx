@@ -57,23 +57,17 @@ export function RoomList({ initialRooms, userId }: { initialRooms: Room[], userI
                     <div className="absolute inset-0 bg-brand-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
 
                     <div className="mb-4 relative z-10">
-                        <h3 className="text-xl font-bold mb-2 text-brand-900 dark:text-brand-100 transition-colors group-hover:text-glow">
+                        <h3 className="text-xl font-bold mb-2 text-brand-900 dark:text-brand-800 transition-colors group-hover:text-glow">
                             {room.name}
                         </h3>
-                        <div className="flex items-center text-xs text-brand-700 dark:text-brand-300 space-x-2">
+                        <div className="flex items-center text-xs text-brand-700 dark:text-brand-600 space-x-2">
                             <span className="bg-brand-50/50 dark:bg-brand-900/10 px-2 py-0.5 rounded-md border border-brand-100 dark:border-brand-700/30">
                                 {new Date(room.createdAt).toLocaleDateString('ja-JP')}
                             </span>
-                            <span className="text-brand-300 dark:text-brand-600">•</span>
-                            <span className="font-mono opacity-70">ID: {room.id.substring(0, 8)}...</span>
                         </div>
                     </div>
 
                     <div className="flex justify-between items-center mt-4 pt-4 border-t border-brand-100/50 dark:border-brand-700/20 relative z-10">
-                        <div className="flex -space-x-2 overflow-hidden">
-                            {/* Placeholder for member avatars */}
-                            <div className="w-8 h-8 rounded-full bg-brand-100 dark:bg-brand-800 border-2 border-white dark:border-slate-800 flex items-center justify-center text-[10px] font-bold text-brand-600 dark:text-brand-900 shadow-sm">?</div>
-                        </div>
 
                         <div className="flex gap-2">
                             {room.createdBy === userId && (
@@ -84,7 +78,7 @@ export function RoomList({ initialRooms, userId }: { initialRooms: Room[], userI
                                 </form>
                             )}
                             <form action={joinRoom.bind(null, room.id)}>
-                                <Button size="sm" className="bg-brand-600 dark:bg-brand-600 hover:bg-brand-500 text-white shadow-lg hover:shadow-brand-500/25 transition-all duration-300 rounded-full px-4 h-8 text-xs font-semibold tracking-wide uppercase">
+                                <Button size="sm" className="bg-brand-600 dark:bg-brand-300 hover:bg-brand-400 text-white shadow-lg hover:shadow-brand-500/25 transition-all duration-300 rounded-full px-4 h-8 text-xs font-semibold tracking-wide uppercase">
                                     Join Room
                                 </Button>
                             </form>
