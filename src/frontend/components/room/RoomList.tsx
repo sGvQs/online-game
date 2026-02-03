@@ -4,7 +4,7 @@ import { createClient } from '@/frontend/lib/supabase/client'
 import { useEffect, useState } from 'react'
 import { Card } from '@/frontend/components/ui/Card'
 import { Button } from '@/frontend/components/ui/Button'
-import { joinRoom, deleteRoom } from '@/backend/actions/room'
+import { joinRoom, deleteRoom, getRooms } from '@/backend/actions/room'
 
 type Room = {
     id: string
@@ -17,6 +17,18 @@ export function RoomList({ initialRooms, userId }: { initialRooms: Room[], userI
     const [rooms, setRooms] = useState<Room[]>(initialRooms)
     const supabase = createClient()
 
+    const fetchMessageData = async () => {
+        try {
+            const data = await getRooms();
+            console.log(data);
+            if (data) {
+                setRooms(data);
+            }
+        } catch (e) {
+            console.error(e);
+        }
+    }
+
     useEffect(() => {
         setRooms(initialRooms)
     }, [initialRooms])
@@ -28,18 +40,20 @@ export function RoomList({ initialRooms, userId }: { initialRooms: Room[], userI
                 event: '*',
                 schema: 'public',
                 table: 'rooms'
-            }, (payload) => {
-                if (payload.eventType === 'INSERT') {
-                    const newRoom = payload.new
-                    setRooms(prev => [{
-                        id: newRoom.id,
-                        name: newRoom.name,
-                        createdAt: new Date(newRoom.created_at),
-                        createdBy: newRoom.created_by
-                    }, ...prev])
-                } else if (payload.eventType === 'DELETE') {
-                    setRooms(prev => prev.filter(r => r.id !== payload.old.id))
-                }
+            }, async (payload) => {
+                console.log(payload);
+                fetchMessageData();
+                // if (payload.eventType === 'INSERT') {
+                //     const newRoom = payload.new
+                //     setRooms(prev => [{
+                //         id: newRoom.id,
+                //         name: newRoom.name,
+                //         createdAt: new Date(newRoom.created_at),
+                //         createdBy: newRoom.created_by
+                //     }, ...prev])
+                // } else if (payload.eventType === 'DELETE') {
+                //     setRooms(prev => prev.filter(r => r.id !== payload.old.id))
+                // }
             })
             .subscribe()
 

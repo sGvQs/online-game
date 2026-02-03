@@ -41,6 +41,11 @@ export async function createRoom(formData: FormData) {
     return room
 }
 
+export async function getRooms() {
+    const rooms = await prisma.room.findMany()
+    return rooms
+}
+
 export async function joinRoom(roomId: string) {
     const user = await getAuthenticatedUser()
 
