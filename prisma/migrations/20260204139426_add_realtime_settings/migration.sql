@@ -14,8 +14,6 @@ BEGIN
     END;
 END $$;
 
-ALTER TABLE "room_users" REPLICA IDENTITY FULL;
-
 -- 1. RLS有効化
 ALTER TABLE "room_users" ENABLE ROW LEVEL SECURITY;
 

@@ -16,52 +16,29 @@ export function MemberList({ roomId, initialMembers }: { roomId: string, initial
     const [members, setMembers] = useState<any[]>(initialMembers)
     const supabase = createClient()
 
-    const [isUpdating, setIsUpdating] = useState(false);
-
     const handlePayload = async () => {
-
-        if (isUpdating) return;
-
-        setIsUpdating(true);
-
         try {
             const roomUsers = await getRoomUsers(roomId);
             setMembers(roomUsers);
         } catch (error) {
             console.error("更新に失敗:", error);
-        } finally {
-            setIsUpdating(false);
         }
     };
 
     useEffect(() => {
-        const roomChannel = supabase
+        const channel = supabase
             .channel(`room_${roomId}`)
             .on('postgres_changes', {
                 event: '*',
                 schema: 'public',
                 table: 'room_users',
-                filter: `room=eq.${roomId}`
             }, () => {
                 handlePayload();
             })
             .subscribe();
 
-        const roomIdChannel = supabase
-            .channel(`room_${roomId}`)
-            .on('postgres_changes', {
-                event: '*',
-                schema: 'public',
-                table: 'room_users',
-                filter: `room_id=eq.${roomId}`
-            }, () => {
-                handlePayload();
-            })
-            .subscribe()
-
         return () => {
-            supabase.removeChannel(roomChannel)
-            supabase.removeChannel(roomIdChannel)
+            supabase.removeChannel(channel)
         }
     }, [supabase, roomId])
 
