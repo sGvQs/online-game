@@ -2,7 +2,7 @@
 
 import { createClient } from '@/frontend/lib/supabase/client'
 import { useEffect, useState } from 'react'
-import { Card } from '@/frontend/components/ui/Card'
+import { getRoomUsers } from '@/backend/actions/room'
 
 type Member = {
     id: string
@@ -16,41 +16,52 @@ export function MemberList({ roomId, initialMembers }: { roomId: string, initial
     const [members, setMembers] = useState<any[]>(initialMembers)
     const supabase = createClient()
 
+    const [isUpdating, setIsUpdating] = useState(false);
+
+    const handlePayload = async () => {
+
+        if (isUpdating) return;
+
+        setIsUpdating(true);
+
+        try {
+            const roomUsers = await getRoomUsers(roomId);
+            setMembers(roomUsers);
+        } catch (error) {
+            console.error("更新に失敗:", error);
+        } finally {
+            setIsUpdating(false);
+        }
+    };
+
     useEffect(() => {
-        const channel = supabase
+        const roomChannel = supabase
+            .channel(`room_${roomId}`)
+            .on('postgres_changes', {
+                event: '*',
+                schema: 'public',
+                table: 'room_users',
+                filter: `room=eq.${roomId}`
+            }, () => {
+                handlePayload();
+            })
+            .subscribe();
+
+        const roomIdChannel = supabase
             .channel(`room_${roomId}`)
             .on('postgres_changes', {
                 event: '*',
                 schema: 'public',
                 table: 'room_users',
                 filter: `room_id=eq.${roomId}`
-            }, async (payload) => {
-                if (payload.eventType === 'INSERT') {
-                    // Need to fetch User name since room_users only has user_id
-                    // For now, simpler to reload page or trigger server action to re-fetch
-                    // Or, fetch single user profile from Supabase/API?
-                    // Let's rely on full refresh or implement a simple fetch for now?
-                    // Actually, Realtime payload only includes the columns of the table (userId, roomId).
-                    // We need the User's name.
-                    // Option 1: Subscribe to Users table too (but that's global)
-                    // Option 2: Fetch user info on Insert.
-                    const { data } = await supabase.from('users').select('*').eq('id', payload.new.user_id).single()
-                    if (data) {
-                        setMembers(prev => [...prev, {
-                            id: payload.new.id,
-                            createdAt: new Date(payload.new.created_at),
-                            user: data
-                        }])
-                    }
-
-                } else if (payload.eventType === 'DELETE') {
-                    setMembers(prev => prev.filter(m => m.id !== payload.old.id))
-                }
+            }, () => {
+                handlePayload();
             })
             .subscribe()
 
         return () => {
-            supabase.removeChannel(channel)
+            supabase.removeChannel(roomChannel)
+            supabase.removeChannel(roomIdChannel)
         }
     }, [supabase, roomId])
 

@@ -46,6 +46,14 @@ export async function getRooms() {
     return rooms
 }
 
+export async function getRoomUsers(id: string) {
+    const roomUsers = await prisma.roomUser.findMany({
+        where: { roomId: id },
+        include: { user: true }
+    })
+    return roomUsers
+}
+
 export async function joinRoom(roomId: string) {
     const user = await getAuthenticatedUser()
 

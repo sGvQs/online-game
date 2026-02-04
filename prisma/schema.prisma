@@ -37,14 +37,19 @@ model Room {
 
 model RoomUser {
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  roomId    String   @map("room_id") @db.Uuid
-  userId    String   @map("user_id") @db.Uuid
+  
+  // @mapを外し、フィールド名自体をDBのカラム名(room_id)に合わせる
+  room_id   String   @db.Uuid
+  user_id   String   @db.Uuid
+  
   createdAt DateTime @default(now()) @map("created_at")
 
-  room      Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  // リレーションの定義を修正（fieldsの名前を上記に合わせる）
+  // ここの名前を 'room' ではなく 'rooms' などに変えると、Realtimeとの混同をさらに防げます
+  room      Room     @relation(fields: [room_id], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
-  @@unique([roomId, userId])
+  @@unique([room_id, user_id])
   @@map("room_users")
 }
 
