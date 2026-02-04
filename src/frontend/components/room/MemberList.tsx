@@ -4,16 +4,21 @@ import { createClient } from '@/frontend/lib/supabase/client'
 import { useEffect, useState } from 'react'
 import { getRoomUsers } from '@/backend/actions/room'
 
-type Member = {
-    id: string
-    name: string
-    user_id: string
-    // join date
-    created_at: string
-}
+type RoomMember = {
+    id: string;
+    roomId: string;
+    userId: string;
+    createdAt: Date;
+    user: {
+        id: string;
+        name: string;
+        email: string;
+        createdAt: Date;
+    };
+};
 
-export function MemberList({ roomId, initialMembers }: { roomId: string, initialMembers: any[] }) {
-    const [members, setMembers] = useState<any[]>(initialMembers)
+export function MemberList({ roomId, initialMembers }: { roomId: string, initialMembers: RoomMember[] }) {
+    const [members, setMembers] = useState<RoomMember[]>(initialMembers)
     const supabase = createClient()
 
     const handlePayload = async () => {
