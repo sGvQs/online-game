@@ -4,6 +4,7 @@ import { prisma } from '@/backend/lib/prisma'
 import UserProfile from '@/frontend/components/UserProfile'
 import { RoomList } from '@/frontend/components/room/RoomList'
 import { CreateRoomForm } from '@/frontend/components/room/CreateRoomForm'
+import { LogoutButton } from '@/frontend/components/auth/LogoutButton'
 
 export default async function DashboardPage() {
     const supabase = await createClient()
@@ -38,10 +39,10 @@ export default async function DashboardPage() {
                         </p>
                     </div>
                     <div className="flex gap-4 items-center">
-                        <div className="bg-white/10 px-4 py-2 rounded-full text-sm font-medium text-brand-900 shadow-sm border border-brand-100">
+                        <div className="bg-white/10 px-4 py-2 rounded-full text-sm font-medium text-foreground shadow-sm border border-brand-200/30">
                             {user.email}
                         </div>
-                        {/* UserProfile could be a dropdown or avatar later */}
+                        <LogoutButton />
                     </div>
                 </header>
 

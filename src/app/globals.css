@@ -1,25 +1,7 @@
 @import "tailwindcss";
 
 :root {
-  --background: #fdfcf8;
-  /* Stone-50-ish, warm white */
-  --foreground: #1c1917;
-  /* Stone-900 */
-
-  /* Primary Brand Colors (Deep Violet/Indigo base but muted) */
-  --brand-50: #f5f3ff;
-  --brand-100: #ede9fe;
-  --brand-200: #ddd6fe;
-  --brand-300: #c4b5fd;
-  --brand-400: #a78bfa;
-  --brand-500: #8b5cf6;
-  --brand-600: #7c3aed;
-  --brand-700: #6d28d9;
-  --brand-800: #5b21b6;
-  --brand-900: #4c1d95;
-}
-
-[data-theme='space'] {
+  /* Space Theme - Default */
   --background: #020617;
   /* Slate 950 - Void Black/Blue */
   --foreground: #f8fafc;
@@ -46,6 +28,22 @@
   /* Indigo 100 */
   --brand-900: #ffffff;
   /* White */
+}
+
+/* Keep data-theme='space' for compatibility, but it's now the same as :root */
+[data-theme='space'] {
+  --background: #020617;
+  --foreground: #f8fafc;
+  --brand-50: #0f172a;
+  --brand-100: #1e293b;
+  --brand-200: #312e81;
+  --brand-300: #4338ca;
+  --brand-400: #6366f1;
+  --brand-500: #818cf8;
+  --brand-600: #a5b4fc;
+  --brand-700: #c7d2fe;
+  --brand-800: #e0e7ff;
+  --brand-900: #ffffff;
 }
 
 @theme inline {
@@ -108,20 +106,14 @@
 }
 
 body {
-  background: var(--background);
+  background: radial-gradient(circle at 50% 0%, #1e1b4b 0%, #020617 60%);
   color: var(--foreground);
-  font-family: var(--font-yusei-magic);
+  font-family: var(--font-dot-gothic-16);
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
   transition: background-color 0.5s ease, color 0.5s ease;
   overflow-x: hidden;
   position: relative;
-}
-
-/* Premium Space Background Effect */
-[data-theme='space'] body {
-  background: radial-gradient(circle at 50% 0%, #1e1b4b 0%, #020617 60%);
-  font-family: var(--font-dot-gothic-16);
 }
 
 [data-theme='space'] body::before {

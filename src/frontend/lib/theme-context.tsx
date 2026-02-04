@@ -1,8 +1,8 @@
 'use client'
 
-import React, { createContext, useContext, useEffect, useState } from 'react'
+import React, { createContext, useContext, useEffect } from 'react'
 
-type Theme = 'light' | 'space'
+type Theme = 'space'
 
 type ThemeContextType = {
     theme: Theme
@@ -12,23 +12,15 @@ type ThemeContextType = {
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-    const [theme, setTheme] = useState<Theme>('light')
+    const theme: Theme = 'space'
 
     useEffect(() => {
-        const savedTheme = localStorage.getItem('theme') as Theme
-        if (savedTheme) {
-            setTheme(savedTheme)
-        }
+        // Always set Space theme
+        document.documentElement.setAttribute('data-theme', 'space')
     }, [])
 
-    useEffect(() => {
-        document.documentElement.setAttribute('data-theme', theme)
-        localStorage.setItem('theme', theme)
-    }, [theme])
-
-    const toggleTheme = () => {
-        setTheme(prev => prev === 'light' ? 'space' : 'light')
-    }
+    // No-op since theme is fixed
+    const toggleTheme = () => { }
 
     return (
         <ThemeContext.Provider value={{ theme, toggleTheme }}>

@@ -28,9 +28,9 @@ export default function AuthForm() {
     }
 
     return (
-        <Card className="max-w-md mx-auto bg-brand-400 text-brand-900 border-none shadow-lg" padding="lg">
-            <h2 className="text-2xl mb-6 text-brand-900 font-bold text-center">Login</h2>
-            {error && <div className="p-3 mb-4 bg-red-100 text-red-900 border border-red-700 rounded text-sm whitespace-pre-wrap">{error}</div>}
+        <Card className="max-w-md mx-auto glass-card text-foreground" padding="lg">
+            <h2 className="text-2xl mb-6 text-foreground font-bold text-center">ログイン</h2>
+            {error && <div className="p-3 mb-4 bg-red-900/50 text-red-200 border border-red-700 rounded text-sm whitespace-pre-wrap">{error}</div>}
 
             <Button
                 onClick={handleGoogleLogin}
@@ -51,7 +51,7 @@ export default function AuthForm() {
                     </>
                 )}
             </Button>
-            <p className="mt-4 text-xs text-center text-brand-900 opacity-70">
+            <p className="mt-4 text-xs text-center text-foreground opacity-70">
                 By continuing, you agree to our Terms of Service and Privacy Policy.
             </p>
         </Card>
