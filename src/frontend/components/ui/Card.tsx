@@ -3,7 +3,7 @@ import { HTMLAttributes, forwardRef } from 'react'
 import { cn } from '@/frontend/lib/utils'
 
 const card = tv({
-    base: 'rounded-xl border border-brand-200 bg-white text-brand-950 shadow-sm',
+    base: 'rounded-xl border border-brand-200/20 text-brand-950 shadow-sm',
     variants: {
         padding: {
             none: 'p-0',
