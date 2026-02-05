@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation'
 import { getRoom, selectGame } from '@/backend/actions/room'
 import { Gamepad2 } from 'lucide-react'
 import { Button } from '@/frontend/components/ui/Button'
-import { Room } from '@/generated/client'
+import { Room } from '@/types'
 
 interface RoomPageClientProps {
     room: Room

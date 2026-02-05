@@ -4,7 +4,7 @@ import { prisma } from '@/backend/lib/prisma'
 import { createClient } from '@/backend/lib/supabase/server'
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
-import { RoomStatus } from '@/generated/client'
+import { RoomStatus } from '@/types'
 
 async function getAuthenticatedUser() {
     const supabase = await createClient()
