@@ -1,11 +1,10 @@
 import { createClient } from '@/backend/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { prisma } from '@/backend/lib/prisma'
-import UserProfile from '@/frontend/components/UserProfile'
 import { RoomList } from '@/frontend/components/room/RoomList'
 import { CreateRoomForm } from '@/frontend/components/room/CreateRoomForm'
 import { LogoutButton } from '@/frontend/components/auth/LogoutButton'
-import { Boxes } from 'lucide-react'
+import { Boxes, PackagePlus } from 'lucide-react'
 
 export default async function DashboardPage() {
     const supabase = await createClient()
@@ -33,7 +32,7 @@ export default async function DashboardPage() {
                 <header className="glass-card flex justify-between items-center p-6 rounded-2xl shadow-sm">
                     <div>
                         <h1 className="text-4xl font-black tracking-tight text-brand-900">
-                            ダッシュボード
+                            ONLINE GAME STATION
                         </h1>
                         <p className="text-brand-900 font-medium mt-1 opacity-80">
                             おかえりなさい、{idp.user.name}さん
@@ -52,7 +51,10 @@ export default async function DashboardPage() {
                     {/* Sidebar / Actions */}
                     <aside className="lg:col-span-1 space-y-6">
                         <div className="glass-card p-6 rounded-2xl">
-                            <h2 className="text-xl font-bold mb-4 text-brand-900">アクション</h2>
+                            <h2 className="text-xl font-bold mb-4 text-brand-900 flex items-center gap-2">
+                                <PackagePlus className="w-4 h-4" />
+                                ルームを作成
+                            </h2>
                             <CreateRoomForm />
                             <div className="mt-6 pt-6 border-t border-brand-100">
                                 <p className="text-xs text-brand-900 leading-relaxed">
