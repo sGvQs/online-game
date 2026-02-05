@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
   output   = "../src/generated/client"
@@ -11,26 +8,42 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name      String
-  email     String   @unique
-  createdAt DateTime @default(now()) @map("created_at")
-
-  userIDPs    UserIDP[]
-  createdRooms Room[]     @relation("CreatedRooms")
+  id           String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name         String
+  email        String         @unique
+  createdAt    DateTime       @default(now()) @map("created_at")
+  error_events error_events[]
+  matches      matches[]
   joinedRooms  RoomUser[]
+  createdRooms Room[]         @relation("CreatedRooms")
+  userIDPs     UserIDP[]
 
   @@map("users")
 }
 
-model Room {
-  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name      String
-  createdAt DateTime @default(now()) @map("created_at")
-  createdBy String   @map("created_by") @db.Uuid
+// ゲームの進行状況
+enum RoomStatus {
+  LOBBY    // ルーム待機中
+  PLAYING  // ゲームプレイ中
+  FINISHED // ゲーム終了
+}
 
-  users     RoomUser[]
-  creator   User       @relation("CreatedRooms", fields: [createdBy], references: [id])
+model Room {
+  id               String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name             String
+  createdAt        DateTime   @default(now()) @map("created_at")
+  createdBy        String     @map("created_by") @db.Uuid
+  current_match_id String?    @db.Uuid
+
+  // 現在選択されているゲームタイプ (null=ルーム待機中)
+  activeGameType   String?    @map("active_game_type")
+
+  // ゲームの進行状況
+  status           RoomStatus @default(LOBBY)
+
+  matches          matches[]
+  users            RoomUser[]
+  creator          User       @relation("CreatedRooms", fields: [createdBy], references: [id])
 
   @@map("rooms")
 }
@@ -40,7 +53,6 @@ model RoomUser {
   roomId    String   @map("room_id") @db.Uuid
   userId    String   @map("user_id") @db.Uuid
   createdAt DateTime @default(now()) @map("created_at")
-
   room      Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -52,8 +64,31 @@ model UserIDP {
   id          String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   supabaseUid String @unique @map("supabase_uid") @db.Uuid
   userId      String @map("user_id") @db.Uuid
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user        User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("user_idp")
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model error_events {
+  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  match_id      String    @db.Uuid
+  appearance_at DateTime
+  closed_at     DateTime?
+  closed_by     String?   @db.Uuid
+  users         User?     @relation(fields: [closed_by], references: [id])
+  matches       matches   @relation(fields: [match_id], references: [id], onDelete: Cascade)
+}
+
+/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+model matches {
+  id           String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  room_id      String         @db.Uuid
+  game_type    String
+  status       String         @default("WAITING")
+  winner_id    String?        @db.Uuid
+  created_at   DateTime       @default(now())
+  error_events error_events[]
+  rooms        Room           @relation(fields: [room_id], references: [id], onDelete: Cascade)
+  users        User?          @relation(fields: [winner_id], references: [id])
 }

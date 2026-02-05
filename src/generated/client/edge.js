@@ -103,7 +103,10 @@ exports.Prisma.RoomScalarFieldEnum = {
   id: 'id',
   name: 'name',
   createdAt: 'createdAt',
-  createdBy: 'createdBy'
+  createdBy: 'createdBy',
+  current_match_id: 'current_match_id',
+  activeGameType: 'activeGameType',
+  status: 'status'
 };
 
 exports.Prisma.RoomUserScalarFieldEnum = {
@@ -119,6 +122,23 @@ exports.Prisma.UserIDPScalarFieldEnum = {
   userId: 'userId'
 };
 
+exports.Prisma.Error_eventsScalarFieldEnum = {
+  id: 'id',
+  match_id: 'match_id',
+  appearance_at: 'appearance_at',
+  closed_at: 'closed_at',
+  closed_by: 'closed_by'
+};
+
+exports.Prisma.MatchesScalarFieldEnum = {
+  id: 'id',
+  room_id: 'room_id',
+  game_type: 'game_type',
+  status: 'status',
+  winner_id: 'winner_id',
+  created_at: 'created_at'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -129,12 +149,23 @@ exports.Prisma.QueryMode = {
   insensitive: 'insensitive'
 };
 
+exports.Prisma.NullsOrder = {
+  first: 'first',
+  last: 'last'
+};
+exports.RoomStatus = exports.$Enums.RoomStatus = {
+  LOBBY: 'LOBBY',
+  PLAYING: 'PLAYING',
+  FINISHED: 'FINISHED'
+};
 
 exports.Prisma.ModelName = {
   User: 'User',
   Room: 'Room',
   RoomUser: 'RoomUser',
-  UserIDP: 'UserIDP'
+  UserIDP: 'UserIDP',
+  error_events: 'error_events',
+  matches: 'matches'
 };
 /**
  * Create the Client
@@ -144,10 +175,10 @@ const config = {
   "clientVersion": "7.3.0",
   "engineVersion": "9d6ad21cbbceab97458517b147a6a09ff43aa735",
   "activeProvider": "postgresql",
-  "inlineSchema": "// This is your Prisma schema file,\n// learn more about it in the docs: https://pris.ly/d/prisma-schema\n\ngenerator client {\n  provider = \"prisma-client-js\"\n  output   = \"../src/generated/client\"\n}\n\ndatasource db {\n  provider = \"postgresql\"\n}\n\nmodel User {\n  id        String   @id @default(dbgenerated(\"gen_random_uuid()\")) @db.Uuid\n  name      String\n  email     String   @unique\n  createdAt DateTime @default(now()) @map(\"created_at\")\n\n  userIDPs     UserIDP[]\n  createdRooms Room[]     @relation(\"CreatedRooms\")\n  joinedRooms  RoomUser[]\n\n  @@map(\"users\")\n}\n\nmodel Room {\n  id        String   @id @default(dbgenerated(\"gen_random_uuid()\")) @db.Uuid\n  name      String\n  createdAt DateTime @default(now()) @map(\"created_at\")\n  createdBy String   @map(\"created_by\") @db.Uuid\n\n  users   RoomUser[]\n  creator User       @relation(\"CreatedRooms\", fields: [createdBy], references: [id])\n\n  @@map(\"rooms\")\n}\n\nmodel RoomUser {\n  id        String   @id @default(dbgenerated(\"gen_random_uuid()\")) @db.Uuid\n  roomId    String   @map(\"room_id\") @db.Uuid\n  userId    String   @map(\"user_id\") @db.Uuid\n  createdAt DateTime @default(now()) @map(\"created_at\")\n\n  room Room @relation(fields: [roomId], references: [id], onDelete: Cascade)\n  user User @relation(fields: [userId], references: [id], onDelete: Cascade)\n\n  @@unique([roomId, userId])\n  @@map(\"room_users\")\n}\n\nmodel UserIDP {\n  id          String @id @default(dbgenerated(\"gen_random_uuid()\")) @db.Uuid\n  supabaseUid String @unique @map(\"supabase_uid\") @db.Uuid\n  userId      String @map(\"user_id\") @db.Uuid\n\n  user User @relation(fields: [userId], references: [id], onDelete: Cascade)\n\n  @@map(\"user_idp\")\n}\n"
+  "inlineSchema": "generator client {\n  provider = \"prisma-client-js\"\n  output   = \"../src/generated/client\"\n}\n\ndatasource db {\n  provider = \"postgresql\"\n}\n\nmodel User {\n  id           String         @id @default(dbgenerated(\"gen_random_uuid()\")) @db.Uuid\n  name         String\n  email        String         @unique\n  createdAt    DateTime       @default(now()) @map(\"created_at\")\n  error_events error_events[]\n  matches      matches[]\n  joinedRooms  RoomUser[]\n  createdRooms Room[]         @relation(\"CreatedRooms\")\n  userIDPs     UserIDP[]\n\n  @@map(\"users\")\n}\n\n// ゲームの進行状況\nenum RoomStatus {\n  LOBBY // ルーム待機中\n  PLAYING // ゲームプレイ中\n  FINISHED // ゲーム終了\n}\n\nmodel Room {\n  id               String   @id @default(dbgenerated(\"gen_random_uuid()\")) @db.Uuid\n  name             String\n  createdAt        DateTime @default(now()) @map(\"created_at\")\n  createdBy        String   @map(\"created_by\") @db.Uuid\n  current_match_id String?  @db.Uuid\n\n  // 現在選択されているゲームタイプ (null=ルーム待機中)\n  activeGameType String? @map(\"active_game_type\")\n\n  // ゲームの進行状況\n  status RoomStatus @default(LOBBY)\n\n  matches matches[]\n  users   RoomUser[]\n  creator User       @relation(\"CreatedRooms\", fields: [createdBy], references: [id])\n\n  @@map(\"rooms\")\n}\n\nmodel RoomUser {\n  id        String   @id @default(dbgenerated(\"gen_random_uuid()\")) @db.Uuid\n  roomId    String   @map(\"room_id\") @db.Uuid\n  userId    String   @map(\"user_id\") @db.Uuid\n  createdAt DateTime @default(now()) @map(\"created_at\")\n  room      Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)\n  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)\n\n  @@unique([roomId, userId])\n  @@map(\"room_users\")\n}\n\nmodel UserIDP {\n  id          String @id @default(dbgenerated(\"gen_random_uuid()\")) @db.Uuid\n  supabaseUid String @unique @map(\"supabase_uid\") @db.Uuid\n  userId      String @map(\"user_id\") @db.Uuid\n  user        User   @relation(fields: [userId], references: [id], onDelete: Cascade)\n\n  @@map(\"user_idp\")\n}\n\n/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.\nmodel error_events {\n  id            String    @id @default(dbgenerated(\"gen_random_uuid()\")) @db.Uuid\n  match_id      String    @db.Uuid\n  appearance_at DateTime\n  closed_at     DateTime?\n  closed_by     String?   @db.Uuid\n  users         User?     @relation(fields: [closed_by], references: [id])\n  matches       matches   @relation(fields: [match_id], references: [id], onDelete: Cascade)\n}\n\n/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.\nmodel matches {\n  id           String         @id @default(dbgenerated(\"gen_random_uuid()\")) @db.Uuid\n  room_id      String         @db.Uuid\n  game_type    String\n  status       String         @default(\"WAITING\")\n  winner_id    String?        @db.Uuid\n  created_at   DateTime       @default(now())\n  error_events error_events[]\n  rooms        Room           @relation(fields: [room_id], references: [id], onDelete: Cascade)\n  users        User?          @relation(fields: [winner_id], references: [id])\n}\n"
 }
 
-config.runtimeDataModel = JSON.parse("{\"models\":{\"User\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"name\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"email\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"created_at\"},{\"name\":\"userIDPs\",\"kind\":\"object\",\"type\":\"UserIDP\",\"relationName\":\"UserToUserIDP\"},{\"name\":\"createdRooms\",\"kind\":\"object\",\"type\":\"Room\",\"relationName\":\"CreatedRooms\"},{\"name\":\"joinedRooms\",\"kind\":\"object\",\"type\":\"RoomUser\",\"relationName\":\"RoomUserToUser\"}],\"dbName\":\"users\"},\"Room\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"name\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"created_at\"},{\"name\":\"createdBy\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"created_by\"},{\"name\":\"users\",\"kind\":\"object\",\"type\":\"RoomUser\",\"relationName\":\"RoomToRoomUser\"},{\"name\":\"creator\",\"kind\":\"object\",\"type\":\"User\",\"relationName\":\"CreatedRooms\"}],\"dbName\":\"rooms\"},\"RoomUser\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"roomId\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"room_id\"},{\"name\":\"userId\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"user_id\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"created_at\"},{\"name\":\"room\",\"kind\":\"object\",\"type\":\"Room\",\"relationName\":\"RoomToRoomUser\"},{\"name\":\"user\",\"kind\":\"object\",\"type\":\"User\",\"relationName\":\"RoomUserToUser\"}],\"dbName\":\"room_users\"},\"UserIDP\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"supabaseUid\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"supabase_uid\"},{\"name\":\"userId\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"user_id\"},{\"name\":\"user\",\"kind\":\"object\",\"type\":\"User\",\"relationName\":\"UserToUserIDP\"}],\"dbName\":\"user_idp\"}},\"enums\":{},\"types\":{}}")
+config.runtimeDataModel = JSON.parse("{\"models\":{\"User\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"name\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"email\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"created_at\"},{\"name\":\"error_events\",\"kind\":\"object\",\"type\":\"error_events\",\"relationName\":\"UserToerror_events\"},{\"name\":\"matches\",\"kind\":\"object\",\"type\":\"matches\",\"relationName\":\"UserTomatches\"},{\"name\":\"joinedRooms\",\"kind\":\"object\",\"type\":\"RoomUser\",\"relationName\":\"RoomUserToUser\"},{\"name\":\"createdRooms\",\"kind\":\"object\",\"type\":\"Room\",\"relationName\":\"CreatedRooms\"},{\"name\":\"userIDPs\",\"kind\":\"object\",\"type\":\"UserIDP\",\"relationName\":\"UserToUserIDP\"}],\"dbName\":\"users\"},\"Room\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"name\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"created_at\"},{\"name\":\"createdBy\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"created_by\"},{\"name\":\"current_match_id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"activeGameType\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"active_game_type\"},{\"name\":\"status\",\"kind\":\"enum\",\"type\":\"RoomStatus\"},{\"name\":\"matches\",\"kind\":\"object\",\"type\":\"matches\",\"relationName\":\"RoomTomatches\"},{\"name\":\"users\",\"kind\":\"object\",\"type\":\"RoomUser\",\"relationName\":\"RoomToRoomUser\"},{\"name\":\"creator\",\"kind\":\"object\",\"type\":\"User\",\"relationName\":\"CreatedRooms\"}],\"dbName\":\"rooms\"},\"RoomUser\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"roomId\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"room_id\"},{\"name\":\"userId\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"user_id\"},{\"name\":\"createdAt\",\"kind\":\"scalar\",\"type\":\"DateTime\",\"dbName\":\"created_at\"},{\"name\":\"room\",\"kind\":\"object\",\"type\":\"Room\",\"relationName\":\"RoomToRoomUser\"},{\"name\":\"user\",\"kind\":\"object\",\"type\":\"User\",\"relationName\":\"RoomUserToUser\"}],\"dbName\":\"room_users\"},\"UserIDP\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"supabaseUid\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"supabase_uid\"},{\"name\":\"userId\",\"kind\":\"scalar\",\"type\":\"String\",\"dbName\":\"user_id\"},{\"name\":\"user\",\"kind\":\"object\",\"type\":\"User\",\"relationName\":\"UserToUserIDP\"}],\"dbName\":\"user_idp\"},\"error_events\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"match_id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"appearance_at\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"closed_at\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"closed_by\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"users\",\"kind\":\"object\",\"type\":\"User\",\"relationName\":\"UserToerror_events\"},{\"name\":\"matches\",\"kind\":\"object\",\"type\":\"matches\",\"relationName\":\"error_eventsTomatches\"}],\"dbName\":null},\"matches\":{\"fields\":[{\"name\":\"id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"room_id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"game_type\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"status\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"winner_id\",\"kind\":\"scalar\",\"type\":\"String\"},{\"name\":\"created_at\",\"kind\":\"scalar\",\"type\":\"DateTime\"},{\"name\":\"error_events\",\"kind\":\"object\",\"type\":\"error_events\",\"relationName\":\"error_eventsTomatches\"},{\"name\":\"rooms\",\"kind\":\"object\",\"type\":\"Room\",\"relationName\":\"RoomTomatches\"},{\"name\":\"users\",\"kind\":\"object\",\"type\":\"User\",\"relationName\":\"UserTomatches\"}],\"dbName\":null}},\"enums\":{},\"types\":{}}")
 defineDmmfProperty(exports.Prisma, config.runtimeDataModel)
 config.compilerWasm = {
   getRuntime: async () => require('./query_compiler_fast_bg.js'),

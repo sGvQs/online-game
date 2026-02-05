@@ -33,6 +33,34 @@ export type RoomUser = $Result.DefaultSelection<Prisma.$RoomUserPayload>
  * 
  */
 export type UserIDP = $Result.DefaultSelection<Prisma.$UserIDPPayload>
+/**
+ * Model error_events
+ * This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+ */
+export type error_events = $Result.DefaultSelection<Prisma.$error_eventsPayload>
+/**
+ * Model matches
+ * This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
+ */
+export type matches = $Result.DefaultSelection<Prisma.$matchesPayload>
+
+/**
+ * Enums
+ */
+export namespace $Enums {
+  export const RoomStatus: {
+  LOBBY: 'LOBBY',
+  PLAYING: 'PLAYING',
+  FINISHED: 'FINISHED'
+};
+
+export type RoomStatus = (typeof RoomStatus)[keyof typeof RoomStatus]
+
+}
+
+export type RoomStatus = $Enums.RoomStatus
+
+export const RoomStatus: typeof $Enums.RoomStatus
 
 /**
  * ##  Prisma Client ʲˢ
@@ -190,6 +218,26 @@ export class PrismaClient<
     * ```
     */
   get userIDP(): Prisma.UserIDPDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.error_events`: Exposes CRUD operations for the **error_events** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more Error_events
+    * const error_events = await prisma.error_events.findMany()
+    * ```
+    */
+  get error_events(): Prisma.error_eventsDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.matches`: Exposes CRUD operations for the **matches** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more Matches
+    * const matches = await prisma.matches.findMany()
+    * ```
+    */
+  get matches(): Prisma.matchesDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -627,7 +675,9 @@ export namespace Prisma {
     User: 'User',
     Room: 'Room',
     RoomUser: 'RoomUser',
-    UserIDP: 'UserIDP'
+    UserIDP: 'UserIDP',
+    error_events: 'error_events',
+    matches: 'matches'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -643,7 +693,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "user" | "room" | "roomUser" | "userIDP"
+      modelProps: "user" | "room" | "roomUser" | "userIDP" | "error_events" | "matches"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -943,6 +993,154 @@ export namespace Prisma {
           }
         }
       }
+      error_events: {
+        payload: Prisma.$error_eventsPayload<ExtArgs>
+        fields: Prisma.error_eventsFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.error_eventsFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$error_eventsPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.error_eventsFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$error_eventsPayload>
+          }
+          findFirst: {
+            args: Prisma.error_eventsFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$error_eventsPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.error_eventsFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$error_eventsPayload>
+          }
+          findMany: {
+            args: Prisma.error_eventsFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$error_eventsPayload>[]
+          }
+          create: {
+            args: Prisma.error_eventsCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$error_eventsPayload>
+          }
+          createMany: {
+            args: Prisma.error_eventsCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.error_eventsCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$error_eventsPayload>[]
+          }
+          delete: {
+            args: Prisma.error_eventsDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$error_eventsPayload>
+          }
+          update: {
+            args: Prisma.error_eventsUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$error_eventsPayload>
+          }
+          deleteMany: {
+            args: Prisma.error_eventsDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.error_eventsUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.error_eventsUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$error_eventsPayload>[]
+          }
+          upsert: {
+            args: Prisma.error_eventsUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$error_eventsPayload>
+          }
+          aggregate: {
+            args: Prisma.Error_eventsAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateError_events>
+          }
+          groupBy: {
+            args: Prisma.error_eventsGroupByArgs<ExtArgs>
+            result: $Utils.Optional<Error_eventsGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.error_eventsCountArgs<ExtArgs>
+            result: $Utils.Optional<Error_eventsCountAggregateOutputType> | number
+          }
+        }
+      }
+      matches: {
+        payload: Prisma.$matchesPayload<ExtArgs>
+        fields: Prisma.matchesFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.matchesFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$matchesPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.matchesFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$matchesPayload>
+          }
+          findFirst: {
+            args: Prisma.matchesFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$matchesPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.matchesFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$matchesPayload>
+          }
+          findMany: {
+            args: Prisma.matchesFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$matchesPayload>[]
+          }
+          create: {
+            args: Prisma.matchesCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$matchesPayload>
+          }
+          createMany: {
+            args: Prisma.matchesCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.matchesCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$matchesPayload>[]
+          }
+          delete: {
+            args: Prisma.matchesDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$matchesPayload>
+          }
+          update: {
+            args: Prisma.matchesUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$matchesPayload>
+          }
+          deleteMany: {
+            args: Prisma.matchesDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.matchesUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.matchesUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$matchesPayload>[]
+          }
+          upsert: {
+            args: Prisma.matchesUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$matchesPayload>
+          }
+          aggregate: {
+            args: Prisma.MatchesAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateMatches>
+          }
+          groupBy: {
+            args: Prisma.matchesGroupByArgs<ExtArgs>
+            result: $Utils.Optional<MatchesGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.matchesCountArgs<ExtArgs>
+            result: $Utils.Optional<MatchesCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -1055,6 +1253,8 @@ export namespace Prisma {
     room?: RoomOmit
     roomUser?: RoomUserOmit
     userIDP?: UserIDPOmit
+    error_events?: error_eventsOmit
+    matches?: matchesOmit
   }
 
   /* Types for Logging */
@@ -1135,15 +1335,19 @@ export namespace Prisma {
    */
 
   export type UserCountOutputType = {
-    userIDPs: number
-    createdRooms: number
+    error_events: number
+    matches: number
     joinedRooms: number
+    createdRooms: number
+    userIDPs: number
   }
 
   export type UserCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    userIDPs?: boolean | UserCountOutputTypeCountUserIDPsArgs
-    createdRooms?: boolean | UserCountOutputTypeCountCreatedRoomsArgs
+    error_events?: boolean | UserCountOutputTypeCountError_eventsArgs
+    matches?: boolean | UserCountOutputTypeCountMatchesArgs
     joinedRooms?: boolean | UserCountOutputTypeCountJoinedRoomsArgs
+    createdRooms?: boolean | UserCountOutputTypeCountCreatedRoomsArgs
+    userIDPs?: boolean | UserCountOutputTypeCountUserIDPsArgs
   }
 
   // Custom InputTypes
@@ -1160,8 +1364,22 @@ export namespace Prisma {
   /**
    * UserCountOutputType without action
    */
-  export type UserCountOutputTypeCountUserIDPsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: UserIDPWhereInput
+  export type UserCountOutputTypeCountError_eventsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: error_eventsWhereInput
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountMatchesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: matchesWhereInput
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountJoinedRoomsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: RoomUserWhereInput
   }
 
   /**
@@ -1174,8 +1392,8 @@ export namespace Prisma {
   /**
    * UserCountOutputType without action
    */
-  export type UserCountOutputTypeCountJoinedRoomsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: RoomUserWhereInput
+  export type UserCountOutputTypeCountUserIDPsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: UserIDPWhereInput
   }
 
 
@@ -1184,10 +1402,12 @@ export namespace Prisma {
    */
 
   export type RoomCountOutputType = {
+    matches: number
     users: number
   }
 
   export type RoomCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    matches?: boolean | RoomCountOutputTypeCountMatchesArgs
     users?: boolean | RoomCountOutputTypeCountUsersArgs
   }
 
@@ -1205,8 +1425,46 @@ export namespace Prisma {
   /**
    * RoomCountOutputType without action
    */
+  export type RoomCountOutputTypeCountMatchesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: matchesWhereInput
+  }
+
+  /**
+   * RoomCountOutputType without action
+   */
   export type RoomCountOutputTypeCountUsersArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: RoomUserWhereInput
+  }
+
+
+  /**
+   * Count Type MatchesCountOutputType
+   */
+
+  export type MatchesCountOutputType = {
+    error_events: number
+  }
+
+  export type MatchesCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    error_events?: boolean | MatchesCountOutputTypeCountError_eventsArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * MatchesCountOutputType without action
+   */
+  export type MatchesCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the MatchesCountOutputType
+     */
+    select?: MatchesCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * MatchesCountOutputType without action
+   */
+  export type MatchesCountOutputTypeCountError_eventsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: error_eventsWhereInput
   }
 
 
@@ -1370,9 +1628,11 @@ export namespace Prisma {
     name?: boolean
     email?: boolean
     createdAt?: boolean
-    userIDPs?: boolean | User$userIDPsArgs<ExtArgs>
-    createdRooms?: boolean | User$createdRoomsArgs<ExtArgs>
+    error_events?: boolean | User$error_eventsArgs<ExtArgs>
+    matches?: boolean | User$matchesArgs<ExtArgs>
     joinedRooms?: boolean | User$joinedRoomsArgs<ExtArgs>
+    createdRooms?: boolean | User$createdRoomsArgs<ExtArgs>
+    userIDPs?: boolean | User$userIDPsArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["user"]>
 
@@ -1399,9 +1659,11 @@ export namespace Prisma {
 
   export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "email" | "createdAt", ExtArgs["result"]["user"]>
   export type UserInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    userIDPs?: boolean | User$userIDPsArgs<ExtArgs>
-    createdRooms?: boolean | User$createdRoomsArgs<ExtArgs>
+    error_events?: boolean | User$error_eventsArgs<ExtArgs>
+    matches?: boolean | User$matchesArgs<ExtArgs>
     joinedRooms?: boolean | User$joinedRoomsArgs<ExtArgs>
+    createdRooms?: boolean | User$createdRoomsArgs<ExtArgs>
+    userIDPs?: boolean | User$userIDPsArgs<ExtArgs>
     _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type UserIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
@@ -1410,9 +1672,11 @@ export namespace Prisma {
   export type $UserPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "User"
     objects: {
-      userIDPs: Prisma.$UserIDPPayload<ExtArgs>[]
-      createdRooms: Prisma.$RoomPayload<ExtArgs>[]
+      error_events: Prisma.$error_eventsPayload<ExtArgs>[]
+      matches: Prisma.$matchesPayload<ExtArgs>[]
       joinedRooms: Prisma.$RoomUserPayload<ExtArgs>[]
+      createdRooms: Prisma.$RoomPayload<ExtArgs>[]
+      userIDPs: Prisma.$UserIDPPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -1813,9 +2077,11 @@ export namespace Prisma {
    */
   export interface Prisma__UserClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
-    userIDPs<T extends User$userIDPsArgs<ExtArgs> = {}>(args?: Subset<T, User$userIDPsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserIDPPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    createdRooms<T extends User$createdRoomsArgs<ExtArgs> = {}>(args?: Subset<T, User$createdRoomsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RoomPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    error_events<T extends User$error_eventsArgs<ExtArgs> = {}>(args?: Subset<T, User$error_eventsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$error_eventsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    matches<T extends User$matchesArgs<ExtArgs> = {}>(args?: Subset<T, User$matchesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$matchesPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     joinedRooms<T extends User$joinedRoomsArgs<ExtArgs> = {}>(args?: Subset<T, User$joinedRoomsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RoomUserPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    createdRooms<T extends User$createdRoomsArgs<ExtArgs> = {}>(args?: Subset<T, User$createdRoomsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RoomPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    userIDPs<T extends User$userIDPsArgs<ExtArgs> = {}>(args?: Subset<T, User$userIDPsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$UserIDPPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2237,27 +2503,75 @@ export namespace Prisma {
   }
 
   /**
-   * User.userIDPs
+   * User.error_events
    */
-  export type User$userIDPsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type User$error_eventsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the UserIDP
+     * Select specific fields to fetch from the error_events
      */
-    select?: UserIDPSelect<ExtArgs> | null
+    select?: error_eventsSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the UserIDP
+     * Omit specific fields from the error_events
      */
-    omit?: UserIDPOmit<ExtArgs> | null
+    omit?: error_eventsOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: UserIDPInclude<ExtArgs> | null
-    where?: UserIDPWhereInput
-    orderBy?: UserIDPOrderByWithRelationInput | UserIDPOrderByWithRelationInput[]
-    cursor?: UserIDPWhereUniqueInput
+    include?: error_eventsInclude<ExtArgs> | null
+    where?: error_eventsWhereInput
+    orderBy?: error_eventsOrderByWithRelationInput | error_eventsOrderByWithRelationInput[]
+    cursor?: error_eventsWhereUniqueInput
     take?: number
     skip?: number
-    distinct?: UserIDPScalarFieldEnum | UserIDPScalarFieldEnum[]
+    distinct?: Error_eventsScalarFieldEnum | Error_eventsScalarFieldEnum[]
+  }
+
+  /**
+   * User.matches
+   */
+  export type User$matchesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the matches
+     */
+    select?: matchesSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the matches
+     */
+    omit?: matchesOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: matchesInclude<ExtArgs> | null
+    where?: matchesWhereInput
+    orderBy?: matchesOrderByWithRelationInput | matchesOrderByWithRelationInput[]
+    cursor?: matchesWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: MatchesScalarFieldEnum | MatchesScalarFieldEnum[]
+  }
+
+  /**
+   * User.joinedRooms
+   */
+  export type User$joinedRoomsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the RoomUser
+     */
+    select?: RoomUserSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the RoomUser
+     */
+    omit?: RoomUserOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: RoomUserInclude<ExtArgs> | null
+    where?: RoomUserWhereInput
+    orderBy?: RoomUserOrderByWithRelationInput | RoomUserOrderByWithRelationInput[]
+    cursor?: RoomUserWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: RoomUserScalarFieldEnum | RoomUserScalarFieldEnum[]
   }
 
   /**
@@ -2285,27 +2599,27 @@ export namespace Prisma {
   }
 
   /**
-   * User.joinedRooms
+   * User.userIDPs
    */
-  export type User$joinedRoomsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type User$userIDPsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the RoomUser
+     * Select specific fields to fetch from the UserIDP
      */
-    select?: RoomUserSelect<ExtArgs> | null
+    select?: UserIDPSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the RoomUser
+     * Omit specific fields from the UserIDP
      */
-    omit?: RoomUserOmit<ExtArgs> | null
+    omit?: UserIDPOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: RoomUserInclude<ExtArgs> | null
-    where?: RoomUserWhereInput
-    orderBy?: RoomUserOrderByWithRelationInput | RoomUserOrderByWithRelationInput[]
-    cursor?: RoomUserWhereUniqueInput
+    include?: UserIDPInclude<ExtArgs> | null
+    where?: UserIDPWhereInput
+    orderBy?: UserIDPOrderByWithRelationInput | UserIDPOrderByWithRelationInput[]
+    cursor?: UserIDPWhereUniqueInput
     take?: number
     skip?: number
-    distinct?: RoomUserScalarFieldEnum | RoomUserScalarFieldEnum[]
+    distinct?: UserIDPScalarFieldEnum | UserIDPScalarFieldEnum[]
   }
 
   /**
@@ -2342,6 +2656,9 @@ export namespace Prisma {
     name: string | null
     createdAt: Date | null
     createdBy: string | null
+    current_match_id: string | null
+    activeGameType: string | null
+    status: $Enums.RoomStatus | null
   }
 
   export type RoomMaxAggregateOutputType = {
@@ -2349,6 +2666,9 @@ export namespace Prisma {
     name: string | null
     createdAt: Date | null
     createdBy: string | null
+    current_match_id: string | null
+    activeGameType: string | null
+    status: $Enums.RoomStatus | null
   }
 
   export type RoomCountAggregateOutputType = {
@@ -2356,6 +2676,9 @@ export namespace Prisma {
     name: number
     createdAt: number
     createdBy: number
+    current_match_id: number
+    activeGameType: number
+    status: number
     _all: number
   }
 
@@ -2365,6 +2688,9 @@ export namespace Prisma {
     name?: true
     createdAt?: true
     createdBy?: true
+    current_match_id?: true
+    activeGameType?: true
+    status?: true
   }
 
   export type RoomMaxAggregateInputType = {
@@ -2372,6 +2698,9 @@ export namespace Prisma {
     name?: true
     createdAt?: true
     createdBy?: true
+    current_match_id?: true
+    activeGameType?: true
+    status?: true
   }
 
   export type RoomCountAggregateInputType = {
@@ -2379,6 +2708,9 @@ export namespace Prisma {
     name?: true
     createdAt?: true
     createdBy?: true
+    current_match_id?: true
+    activeGameType?: true
+    status?: true
     _all?: true
   }
 
@@ -2459,6 +2791,9 @@ export namespace Prisma {
     name: string
     createdAt: Date
     createdBy: string
+    current_match_id: string | null
+    activeGameType: string | null
+    status: $Enums.RoomStatus
     _count: RoomCountAggregateOutputType | null
     _min: RoomMinAggregateOutputType | null
     _max: RoomMaxAggregateOutputType | null
@@ -2483,6 +2818,10 @@ export namespace Prisma {
     name?: boolean
     createdAt?: boolean
     createdBy?: boolean
+    current_match_id?: boolean
+    activeGameType?: boolean
+    status?: boolean
+    matches?: boolean | Room$matchesArgs<ExtArgs>
     users?: boolean | Room$usersArgs<ExtArgs>
     creator?: boolean | UserDefaultArgs<ExtArgs>
     _count?: boolean | RoomCountOutputTypeDefaultArgs<ExtArgs>
@@ -2493,6 +2832,9 @@ export namespace Prisma {
     name?: boolean
     createdAt?: boolean
     createdBy?: boolean
+    current_match_id?: boolean
+    activeGameType?: boolean
+    status?: boolean
     creator?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["room"]>
 
@@ -2501,6 +2843,9 @@ export namespace Prisma {
     name?: boolean
     createdAt?: boolean
     createdBy?: boolean
+    current_match_id?: boolean
+    activeGameType?: boolean
+    status?: boolean
     creator?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["room"]>
 
@@ -2509,10 +2854,14 @@ export namespace Prisma {
     name?: boolean
     createdAt?: boolean
     createdBy?: boolean
+    current_match_id?: boolean
+    activeGameType?: boolean
+    status?: boolean
   }
 
-  export type RoomOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "createdAt" | "createdBy", ExtArgs["result"]["room"]>
+  export type RoomOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "createdAt" | "createdBy" | "current_match_id" | "activeGameType" | "status", ExtArgs["result"]["room"]>
   export type RoomInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    matches?: boolean | Room$matchesArgs<ExtArgs>
     users?: boolean | Room$usersArgs<ExtArgs>
     creator?: boolean | UserDefaultArgs<ExtArgs>
     _count?: boolean | RoomCountOutputTypeDefaultArgs<ExtArgs>
@@ -2527,6 +2876,7 @@ export namespace Prisma {
   export type $RoomPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Room"
     objects: {
+      matches: Prisma.$matchesPayload<ExtArgs>[]
       users: Prisma.$RoomUserPayload<ExtArgs>[]
       creator: Prisma.$UserPayload<ExtArgs>
     }
@@ -2535,6 +2885,9 @@ export namespace Prisma {
       name: string
       createdAt: Date
       createdBy: string
+      current_match_id: string | null
+      activeGameType: string | null
+      status: $Enums.RoomStatus
     }, ExtArgs["result"]["room"]>
     composites: {}
   }
@@ -2929,6 +3282,7 @@ export namespace Prisma {
    */
   export interface Prisma__RoomClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
+    matches<T extends Room$matchesArgs<ExtArgs> = {}>(args?: Subset<T, Room$matchesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$matchesPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     users<T extends Room$usersArgs<ExtArgs> = {}>(args?: Subset<T, Room$usersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$RoomUserPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     creator<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     /**
@@ -2964,6 +3318,9 @@ export namespace Prisma {
     readonly name: FieldRef<"Room", 'String'>
     readonly createdAt: FieldRef<"Room", 'DateTime'>
     readonly createdBy: FieldRef<"Room", 'String'>
+    readonly current_match_id: FieldRef<"Room", 'String'>
+    readonly activeGameType: FieldRef<"Room", 'String'>
+    readonly status: FieldRef<"Room", 'RoomStatus'>
   }
     
 
@@ -3357,6 +3714,30 @@ export namespace Prisma {
      * Limit how many Rooms to delete.
      */
     limit?: number
+  }
+
+  /**
+   * Room.matches
+   */
+  export type Room$matchesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the matches
+     */
+    select?: matchesSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the matches
+     */
+    omit?: matchesOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: matchesInclude<ExtArgs> | null
+    where?: matchesWhereInput
+    orderBy?: matchesOrderByWithRelationInput | matchesOrderByWithRelationInput[]
+    cursor?: matchesWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: MatchesScalarFieldEnum | MatchesScalarFieldEnum[]
   }
 
   /**
@@ -5488,6 +5869,2219 @@ export namespace Prisma {
 
 
   /**
+   * Model error_events
+   */
+
+  export type AggregateError_events = {
+    _count: Error_eventsCountAggregateOutputType | null
+    _min: Error_eventsMinAggregateOutputType | null
+    _max: Error_eventsMaxAggregateOutputType | null
+  }
+
+  export type Error_eventsMinAggregateOutputType = {
+    id: string | null
+    match_id: string | null
+    appearance_at: Date | null
+    closed_at: Date | null
+    closed_by: string | null
+  }
+
+  export type Error_eventsMaxAggregateOutputType = {
+    id: string | null
+    match_id: string | null
+    appearance_at: Date | null
+    closed_at: Date | null
+    closed_by: string | null
+  }
+
+  export type Error_eventsCountAggregateOutputType = {
+    id: number
+    match_id: number
+    appearance_at: number
+    closed_at: number
+    closed_by: number
+    _all: number
+  }
+
+
+  export type Error_eventsMinAggregateInputType = {
+    id?: true
+    match_id?: true
+    appearance_at?: true
+    closed_at?: true
+    closed_by?: true
+  }
+
+  export type Error_eventsMaxAggregateInputType = {
+    id?: true
+    match_id?: true
+    appearance_at?: true
+    closed_at?: true
+    closed_by?: true
+  }
+
+  export type Error_eventsCountAggregateInputType = {
+    id?: true
+    match_id?: true
+    appearance_at?: true
+    closed_at?: true
+    closed_by?: true
+    _all?: true
+  }
+
+  export type Error_eventsAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which error_events to aggregate.
+     */
+    where?: error_eventsWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of error_events to fetch.
+     */
+    orderBy?: error_eventsOrderByWithRelationInput | error_eventsOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: error_eventsWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` error_events from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` error_events.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned error_events
+    **/
+    _count?: true | Error_eventsCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: Error_eventsMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: Error_eventsMaxAggregateInputType
+  }
+
+  export type GetError_eventsAggregateType<T extends Error_eventsAggregateArgs> = {
+        [P in keyof T & keyof AggregateError_events]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateError_events[P]>
+      : GetScalarType<T[P], AggregateError_events[P]>
+  }
+
+
+
+
+  export type error_eventsGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: error_eventsWhereInput
+    orderBy?: error_eventsOrderByWithAggregationInput | error_eventsOrderByWithAggregationInput[]
+    by: Error_eventsScalarFieldEnum[] | Error_eventsScalarFieldEnum
+    having?: error_eventsScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: Error_eventsCountAggregateInputType | true
+    _min?: Error_eventsMinAggregateInputType
+    _max?: Error_eventsMaxAggregateInputType
+  }
+
+  export type Error_eventsGroupByOutputType = {
+    id: string
+    match_id: string
+    appearance_at: Date
+    closed_at: Date | null
+    closed_by: string | null
+    _count: Error_eventsCountAggregateOutputType | null
+    _min: Error_eventsMinAggregateOutputType | null
+    _max: Error_eventsMaxAggregateOutputType | null
+  }
+
+  type GetError_eventsGroupByPayload<T extends error_eventsGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<Error_eventsGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof Error_eventsGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], Error_eventsGroupByOutputType[P]>
+            : GetScalarType<T[P], Error_eventsGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type error_eventsSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    match_id?: boolean
+    appearance_at?: boolean
+    closed_at?: boolean
+    closed_by?: boolean
+    users?: boolean | error_events$usersArgs<ExtArgs>
+    matches?: boolean | matchesDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["error_events"]>
+
+  export type error_eventsSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    match_id?: boolean
+    appearance_at?: boolean
+    closed_at?: boolean
+    closed_by?: boolean
+    users?: boolean | error_events$usersArgs<ExtArgs>
+    matches?: boolean | matchesDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["error_events"]>
+
+  export type error_eventsSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    match_id?: boolean
+    appearance_at?: boolean
+    closed_at?: boolean
+    closed_by?: boolean
+    users?: boolean | error_events$usersArgs<ExtArgs>
+    matches?: boolean | matchesDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["error_events"]>
+
+  export type error_eventsSelectScalar = {
+    id?: boolean
+    match_id?: boolean
+    appearance_at?: boolean
+    closed_at?: boolean
+    closed_by?: boolean
+  }
+
+  export type error_eventsOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "match_id" | "appearance_at" | "closed_at" | "closed_by", ExtArgs["result"]["error_events"]>
+  export type error_eventsInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    users?: boolean | error_events$usersArgs<ExtArgs>
+    matches?: boolean | matchesDefaultArgs<ExtArgs>
+  }
+  export type error_eventsIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    users?: boolean | error_events$usersArgs<ExtArgs>
+    matches?: boolean | matchesDefaultArgs<ExtArgs>
+  }
+  export type error_eventsIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    users?: boolean | error_events$usersArgs<ExtArgs>
+    matches?: boolean | matchesDefaultArgs<ExtArgs>
+  }
+
+  export type $error_eventsPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "error_events"
+    objects: {
+      users: Prisma.$UserPayload<ExtArgs> | null
+      matches: Prisma.$matchesPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      match_id: string
+      appearance_at: Date
+      closed_at: Date | null
+      closed_by: string | null
+    }, ExtArgs["result"]["error_events"]>
+    composites: {}
+  }
+
+  type error_eventsGetPayload<S extends boolean | null | undefined | error_eventsDefaultArgs> = $Result.GetResult<Prisma.$error_eventsPayload, S>
+
+  type error_eventsCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<error_eventsFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: Error_eventsCountAggregateInputType | true
+    }
+
+  export interface error_eventsDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['error_events'], meta: { name: 'error_events' } }
+    /**
+     * Find zero or one Error_events that matches the filter.
+     * @param {error_eventsFindUniqueArgs} args - Arguments to find a Error_events
+     * @example
+     * // Get one Error_events
+     * const error_events = await prisma.error_events.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends error_eventsFindUniqueArgs>(args: SelectSubset<T, error_eventsFindUniqueArgs<ExtArgs>>): Prisma__error_eventsClient<$Result.GetResult<Prisma.$error_eventsPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one Error_events that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {error_eventsFindUniqueOrThrowArgs} args - Arguments to find a Error_events
+     * @example
+     * // Get one Error_events
+     * const error_events = await prisma.error_events.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends error_eventsFindUniqueOrThrowArgs>(args: SelectSubset<T, error_eventsFindUniqueOrThrowArgs<ExtArgs>>): Prisma__error_eventsClient<$Result.GetResult<Prisma.$error_eventsPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Error_events that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {error_eventsFindFirstArgs} args - Arguments to find a Error_events
+     * @example
+     * // Get one Error_events
+     * const error_events = await prisma.error_events.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends error_eventsFindFirstArgs>(args?: SelectSubset<T, error_eventsFindFirstArgs<ExtArgs>>): Prisma__error_eventsClient<$Result.GetResult<Prisma.$error_eventsPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Error_events that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {error_eventsFindFirstOrThrowArgs} args - Arguments to find a Error_events
+     * @example
+     * // Get one Error_events
+     * const error_events = await prisma.error_events.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends error_eventsFindFirstOrThrowArgs>(args?: SelectSubset<T, error_eventsFindFirstOrThrowArgs<ExtArgs>>): Prisma__error_eventsClient<$Result.GetResult<Prisma.$error_eventsPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more Error_events that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {error_eventsFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all Error_events
+     * const error_events = await prisma.error_events.findMany()
+     * 
+     * // Get first 10 Error_events
+     * const error_events = await prisma.error_events.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const error_eventsWithIdOnly = await prisma.error_events.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends error_eventsFindManyArgs>(args?: SelectSubset<T, error_eventsFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$error_eventsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a Error_events.
+     * @param {error_eventsCreateArgs} args - Arguments to create a Error_events.
+     * @example
+     * // Create one Error_events
+     * const Error_events = await prisma.error_events.create({
+     *   data: {
+     *     // ... data to create a Error_events
+     *   }
+     * })
+     * 
+     */
+    create<T extends error_eventsCreateArgs>(args: SelectSubset<T, error_eventsCreateArgs<ExtArgs>>): Prisma__error_eventsClient<$Result.GetResult<Prisma.$error_eventsPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many Error_events.
+     * @param {error_eventsCreateManyArgs} args - Arguments to create many Error_events.
+     * @example
+     * // Create many Error_events
+     * const error_events = await prisma.error_events.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends error_eventsCreateManyArgs>(args?: SelectSubset<T, error_eventsCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many Error_events and returns the data saved in the database.
+     * @param {error_eventsCreateManyAndReturnArgs} args - Arguments to create many Error_events.
+     * @example
+     * // Create many Error_events
+     * const error_events = await prisma.error_events.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many Error_events and only return the `id`
+     * const error_eventsWithIdOnly = await prisma.error_events.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends error_eventsCreateManyAndReturnArgs>(args?: SelectSubset<T, error_eventsCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$error_eventsPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a Error_events.
+     * @param {error_eventsDeleteArgs} args - Arguments to delete one Error_events.
+     * @example
+     * // Delete one Error_events
+     * const Error_events = await prisma.error_events.delete({
+     *   where: {
+     *     // ... filter to delete one Error_events
+     *   }
+     * })
+     * 
+     */
+    delete<T extends error_eventsDeleteArgs>(args: SelectSubset<T, error_eventsDeleteArgs<ExtArgs>>): Prisma__error_eventsClient<$Result.GetResult<Prisma.$error_eventsPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one Error_events.
+     * @param {error_eventsUpdateArgs} args - Arguments to update one Error_events.
+     * @example
+     * // Update one Error_events
+     * const error_events = await prisma.error_events.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends error_eventsUpdateArgs>(args: SelectSubset<T, error_eventsUpdateArgs<ExtArgs>>): Prisma__error_eventsClient<$Result.GetResult<Prisma.$error_eventsPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more Error_events.
+     * @param {error_eventsDeleteManyArgs} args - Arguments to filter Error_events to delete.
+     * @example
+     * // Delete a few Error_events
+     * const { count } = await prisma.error_events.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends error_eventsDeleteManyArgs>(args?: SelectSubset<T, error_eventsDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Error_events.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {error_eventsUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many Error_events
+     * const error_events = await prisma.error_events.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends error_eventsUpdateManyArgs>(args: SelectSubset<T, error_eventsUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Error_events and returns the data updated in the database.
+     * @param {error_eventsUpdateManyAndReturnArgs} args - Arguments to update many Error_events.
+     * @example
+     * // Update many Error_events
+     * const error_events = await prisma.error_events.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more Error_events and only return the `id`
+     * const error_eventsWithIdOnly = await prisma.error_events.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends error_eventsUpdateManyAndReturnArgs>(args: SelectSubset<T, error_eventsUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$error_eventsPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one Error_events.
+     * @param {error_eventsUpsertArgs} args - Arguments to update or create a Error_events.
+     * @example
+     * // Update or create a Error_events
+     * const error_events = await prisma.error_events.upsert({
+     *   create: {
+     *     // ... data to create a Error_events
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the Error_events we want to update
+     *   }
+     * })
+     */
+    upsert<T extends error_eventsUpsertArgs>(args: SelectSubset<T, error_eventsUpsertArgs<ExtArgs>>): Prisma__error_eventsClient<$Result.GetResult<Prisma.$error_eventsPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of Error_events.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {error_eventsCountArgs} args - Arguments to filter Error_events to count.
+     * @example
+     * // Count the number of Error_events
+     * const count = await prisma.error_events.count({
+     *   where: {
+     *     // ... the filter for the Error_events we want to count
+     *   }
+     * })
+    **/
+    count<T extends error_eventsCountArgs>(
+      args?: Subset<T, error_eventsCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], Error_eventsCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a Error_events.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {Error_eventsAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends Error_eventsAggregateArgs>(args: Subset<T, Error_eventsAggregateArgs>): Prisma.PrismaPromise<GetError_eventsAggregateType<T>>
+
+    /**
+     * Group by Error_events.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {error_eventsGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends error_eventsGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: error_eventsGroupByArgs['orderBy'] }
+        : { orderBy?: error_eventsGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, error_eventsGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetError_eventsGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the error_events model
+   */
+  readonly fields: error_eventsFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for error_events.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__error_eventsClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    users<T extends error_events$usersArgs<ExtArgs> = {}>(args?: Subset<T, error_events$usersArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    matches<T extends matchesDefaultArgs<ExtArgs> = {}>(args?: Subset<T, matchesDefaultArgs<ExtArgs>>): Prisma__matchesClient<$Result.GetResult<Prisma.$matchesPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the error_events model
+   */
+  interface error_eventsFieldRefs {
+    readonly id: FieldRef<"error_events", 'String'>
+    readonly match_id: FieldRef<"error_events", 'String'>
+    readonly appearance_at: FieldRef<"error_events", 'DateTime'>
+    readonly closed_at: FieldRef<"error_events", 'DateTime'>
+    readonly closed_by: FieldRef<"error_events", 'String'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * error_events findUnique
+   */
+  export type error_eventsFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the error_events
+     */
+    select?: error_eventsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the error_events
+     */
+    omit?: error_eventsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: error_eventsInclude<ExtArgs> | null
+    /**
+     * Filter, which error_events to fetch.
+     */
+    where: error_eventsWhereUniqueInput
+  }
+
+  /**
+   * error_events findUniqueOrThrow
+   */
+  export type error_eventsFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the error_events
+     */
+    select?: error_eventsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the error_events
+     */
+    omit?: error_eventsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: error_eventsInclude<ExtArgs> | null
+    /**
+     * Filter, which error_events to fetch.
+     */
+    where: error_eventsWhereUniqueInput
+  }
+
+  /**
+   * error_events findFirst
+   */
+  export type error_eventsFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the error_events
+     */
+    select?: error_eventsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the error_events
+     */
+    omit?: error_eventsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: error_eventsInclude<ExtArgs> | null
+    /**
+     * Filter, which error_events to fetch.
+     */
+    where?: error_eventsWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of error_events to fetch.
+     */
+    orderBy?: error_eventsOrderByWithRelationInput | error_eventsOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for error_events.
+     */
+    cursor?: error_eventsWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` error_events from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` error_events.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of error_events.
+     */
+    distinct?: Error_eventsScalarFieldEnum | Error_eventsScalarFieldEnum[]
+  }
+
+  /**
+   * error_events findFirstOrThrow
+   */
+  export type error_eventsFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the error_events
+     */
+    select?: error_eventsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the error_events
+     */
+    omit?: error_eventsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: error_eventsInclude<ExtArgs> | null
+    /**
+     * Filter, which error_events to fetch.
+     */
+    where?: error_eventsWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of error_events to fetch.
+     */
+    orderBy?: error_eventsOrderByWithRelationInput | error_eventsOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for error_events.
+     */
+    cursor?: error_eventsWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` error_events from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` error_events.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of error_events.
+     */
+    distinct?: Error_eventsScalarFieldEnum | Error_eventsScalarFieldEnum[]
+  }
+
+  /**
+   * error_events findMany
+   */
+  export type error_eventsFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the error_events
+     */
+    select?: error_eventsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the error_events
+     */
+    omit?: error_eventsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: error_eventsInclude<ExtArgs> | null
+    /**
+     * Filter, which error_events to fetch.
+     */
+    where?: error_eventsWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of error_events to fetch.
+     */
+    orderBy?: error_eventsOrderByWithRelationInput | error_eventsOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing error_events.
+     */
+    cursor?: error_eventsWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` error_events from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` error_events.
+     */
+    skip?: number
+    distinct?: Error_eventsScalarFieldEnum | Error_eventsScalarFieldEnum[]
+  }
+
+  /**
+   * error_events create
+   */
+  export type error_eventsCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the error_events
+     */
+    select?: error_eventsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the error_events
+     */
+    omit?: error_eventsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: error_eventsInclude<ExtArgs> | null
+    /**
+     * The data needed to create a error_events.
+     */
+    data: XOR<error_eventsCreateInput, error_eventsUncheckedCreateInput>
+  }
+
+  /**
+   * error_events createMany
+   */
+  export type error_eventsCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many error_events.
+     */
+    data: error_eventsCreateManyInput | error_eventsCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * error_events createManyAndReturn
+   */
+  export type error_eventsCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the error_events
+     */
+    select?: error_eventsSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the error_events
+     */
+    omit?: error_eventsOmit<ExtArgs> | null
+    /**
+     * The data used to create many error_events.
+     */
+    data: error_eventsCreateManyInput | error_eventsCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: error_eventsIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * error_events update
+   */
+  export type error_eventsUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the error_events
+     */
+    select?: error_eventsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the error_events
+     */
+    omit?: error_eventsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: error_eventsInclude<ExtArgs> | null
+    /**
+     * The data needed to update a error_events.
+     */
+    data: XOR<error_eventsUpdateInput, error_eventsUncheckedUpdateInput>
+    /**
+     * Choose, which error_events to update.
+     */
+    where: error_eventsWhereUniqueInput
+  }
+
+  /**
+   * error_events updateMany
+   */
+  export type error_eventsUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update error_events.
+     */
+    data: XOR<error_eventsUpdateManyMutationInput, error_eventsUncheckedUpdateManyInput>
+    /**
+     * Filter which error_events to update
+     */
+    where?: error_eventsWhereInput
+    /**
+     * Limit how many error_events to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * error_events updateManyAndReturn
+   */
+  export type error_eventsUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the error_events
+     */
+    select?: error_eventsSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the error_events
+     */
+    omit?: error_eventsOmit<ExtArgs> | null
+    /**
+     * The data used to update error_events.
+     */
+    data: XOR<error_eventsUpdateManyMutationInput, error_eventsUncheckedUpdateManyInput>
+    /**
+     * Filter which error_events to update
+     */
+    where?: error_eventsWhereInput
+    /**
+     * Limit how many error_events to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: error_eventsIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * error_events upsert
+   */
+  export type error_eventsUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the error_events
+     */
+    select?: error_eventsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the error_events
+     */
+    omit?: error_eventsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: error_eventsInclude<ExtArgs> | null
+    /**
+     * The filter to search for the error_events to update in case it exists.
+     */
+    where: error_eventsWhereUniqueInput
+    /**
+     * In case the error_events found by the `where` argument doesn't exist, create a new error_events with this data.
+     */
+    create: XOR<error_eventsCreateInput, error_eventsUncheckedCreateInput>
+    /**
+     * In case the error_events was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<error_eventsUpdateInput, error_eventsUncheckedUpdateInput>
+  }
+
+  /**
+   * error_events delete
+   */
+  export type error_eventsDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the error_events
+     */
+    select?: error_eventsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the error_events
+     */
+    omit?: error_eventsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: error_eventsInclude<ExtArgs> | null
+    /**
+     * Filter which error_events to delete.
+     */
+    where: error_eventsWhereUniqueInput
+  }
+
+  /**
+   * error_events deleteMany
+   */
+  export type error_eventsDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which error_events to delete
+     */
+    where?: error_eventsWhereInput
+    /**
+     * Limit how many error_events to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * error_events.users
+   */
+  export type error_events$usersArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the User
+     */
+    select?: UserSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the User
+     */
+    omit?: UserOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
+    where?: UserWhereInput
+  }
+
+  /**
+   * error_events without action
+   */
+  export type error_eventsDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the error_events
+     */
+    select?: error_eventsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the error_events
+     */
+    omit?: error_eventsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: error_eventsInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model matches
+   */
+
+  export type AggregateMatches = {
+    _count: MatchesCountAggregateOutputType | null
+    _min: MatchesMinAggregateOutputType | null
+    _max: MatchesMaxAggregateOutputType | null
+  }
+
+  export type MatchesMinAggregateOutputType = {
+    id: string | null
+    room_id: string | null
+    game_type: string | null
+    status: string | null
+    winner_id: string | null
+    created_at: Date | null
+  }
+
+  export type MatchesMaxAggregateOutputType = {
+    id: string | null
+    room_id: string | null
+    game_type: string | null
+    status: string | null
+    winner_id: string | null
+    created_at: Date | null
+  }
+
+  export type MatchesCountAggregateOutputType = {
+    id: number
+    room_id: number
+    game_type: number
+    status: number
+    winner_id: number
+    created_at: number
+    _all: number
+  }
+
+
+  export type MatchesMinAggregateInputType = {
+    id?: true
+    room_id?: true
+    game_type?: true
+    status?: true
+    winner_id?: true
+    created_at?: true
+  }
+
+  export type MatchesMaxAggregateInputType = {
+    id?: true
+    room_id?: true
+    game_type?: true
+    status?: true
+    winner_id?: true
+    created_at?: true
+  }
+
+  export type MatchesCountAggregateInputType = {
+    id?: true
+    room_id?: true
+    game_type?: true
+    status?: true
+    winner_id?: true
+    created_at?: true
+    _all?: true
+  }
+
+  export type MatchesAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which matches to aggregate.
+     */
+    where?: matchesWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of matches to fetch.
+     */
+    orderBy?: matchesOrderByWithRelationInput | matchesOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: matchesWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` matches from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` matches.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned matches
+    **/
+    _count?: true | MatchesCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: MatchesMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: MatchesMaxAggregateInputType
+  }
+
+  export type GetMatchesAggregateType<T extends MatchesAggregateArgs> = {
+        [P in keyof T & keyof AggregateMatches]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateMatches[P]>
+      : GetScalarType<T[P], AggregateMatches[P]>
+  }
+
+
+
+
+  export type matchesGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: matchesWhereInput
+    orderBy?: matchesOrderByWithAggregationInput | matchesOrderByWithAggregationInput[]
+    by: MatchesScalarFieldEnum[] | MatchesScalarFieldEnum
+    having?: matchesScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: MatchesCountAggregateInputType | true
+    _min?: MatchesMinAggregateInputType
+    _max?: MatchesMaxAggregateInputType
+  }
+
+  export type MatchesGroupByOutputType = {
+    id: string
+    room_id: string
+    game_type: string
+    status: string
+    winner_id: string | null
+    created_at: Date
+    _count: MatchesCountAggregateOutputType | null
+    _min: MatchesMinAggregateOutputType | null
+    _max: MatchesMaxAggregateOutputType | null
+  }
+
+  type GetMatchesGroupByPayload<T extends matchesGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<MatchesGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof MatchesGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], MatchesGroupByOutputType[P]>
+            : GetScalarType<T[P], MatchesGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type matchesSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    room_id?: boolean
+    game_type?: boolean
+    status?: boolean
+    winner_id?: boolean
+    created_at?: boolean
+    error_events?: boolean | matches$error_eventsArgs<ExtArgs>
+    rooms?: boolean | RoomDefaultArgs<ExtArgs>
+    users?: boolean | matches$usersArgs<ExtArgs>
+    _count?: boolean | MatchesCountOutputTypeDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["matches"]>
+
+  export type matchesSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    room_id?: boolean
+    game_type?: boolean
+    status?: boolean
+    winner_id?: boolean
+    created_at?: boolean
+    rooms?: boolean | RoomDefaultArgs<ExtArgs>
+    users?: boolean | matches$usersArgs<ExtArgs>
+  }, ExtArgs["result"]["matches"]>
+
+  export type matchesSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    room_id?: boolean
+    game_type?: boolean
+    status?: boolean
+    winner_id?: boolean
+    created_at?: boolean
+    rooms?: boolean | RoomDefaultArgs<ExtArgs>
+    users?: boolean | matches$usersArgs<ExtArgs>
+  }, ExtArgs["result"]["matches"]>
+
+  export type matchesSelectScalar = {
+    id?: boolean
+    room_id?: boolean
+    game_type?: boolean
+    status?: boolean
+    winner_id?: boolean
+    created_at?: boolean
+  }
+
+  export type matchesOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "room_id" | "game_type" | "status" | "winner_id" | "created_at", ExtArgs["result"]["matches"]>
+  export type matchesInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    error_events?: boolean | matches$error_eventsArgs<ExtArgs>
+    rooms?: boolean | RoomDefaultArgs<ExtArgs>
+    users?: boolean | matches$usersArgs<ExtArgs>
+    _count?: boolean | MatchesCountOutputTypeDefaultArgs<ExtArgs>
+  }
+  export type matchesIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    rooms?: boolean | RoomDefaultArgs<ExtArgs>
+    users?: boolean | matches$usersArgs<ExtArgs>
+  }
+  export type matchesIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    rooms?: boolean | RoomDefaultArgs<ExtArgs>
+    users?: boolean | matches$usersArgs<ExtArgs>
+  }
+
+  export type $matchesPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "matches"
+    objects: {
+      error_events: Prisma.$error_eventsPayload<ExtArgs>[]
+      rooms: Prisma.$RoomPayload<ExtArgs>
+      users: Prisma.$UserPayload<ExtArgs> | null
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      room_id: string
+      game_type: string
+      status: string
+      winner_id: string | null
+      created_at: Date
+    }, ExtArgs["result"]["matches"]>
+    composites: {}
+  }
+
+  type matchesGetPayload<S extends boolean | null | undefined | matchesDefaultArgs> = $Result.GetResult<Prisma.$matchesPayload, S>
+
+  type matchesCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<matchesFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: MatchesCountAggregateInputType | true
+    }
+
+  export interface matchesDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['matches'], meta: { name: 'matches' } }
+    /**
+     * Find zero or one Matches that matches the filter.
+     * @param {matchesFindUniqueArgs} args - Arguments to find a Matches
+     * @example
+     * // Get one Matches
+     * const matches = await prisma.matches.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends matchesFindUniqueArgs>(args: SelectSubset<T, matchesFindUniqueArgs<ExtArgs>>): Prisma__matchesClient<$Result.GetResult<Prisma.$matchesPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one Matches that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {matchesFindUniqueOrThrowArgs} args - Arguments to find a Matches
+     * @example
+     * // Get one Matches
+     * const matches = await prisma.matches.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends matchesFindUniqueOrThrowArgs>(args: SelectSubset<T, matchesFindUniqueOrThrowArgs<ExtArgs>>): Prisma__matchesClient<$Result.GetResult<Prisma.$matchesPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Matches that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {matchesFindFirstArgs} args - Arguments to find a Matches
+     * @example
+     * // Get one Matches
+     * const matches = await prisma.matches.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends matchesFindFirstArgs>(args?: SelectSubset<T, matchesFindFirstArgs<ExtArgs>>): Prisma__matchesClient<$Result.GetResult<Prisma.$matchesPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Matches that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {matchesFindFirstOrThrowArgs} args - Arguments to find a Matches
+     * @example
+     * // Get one Matches
+     * const matches = await prisma.matches.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends matchesFindFirstOrThrowArgs>(args?: SelectSubset<T, matchesFindFirstOrThrowArgs<ExtArgs>>): Prisma__matchesClient<$Result.GetResult<Prisma.$matchesPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more Matches that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {matchesFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all Matches
+     * const matches = await prisma.matches.findMany()
+     * 
+     * // Get first 10 Matches
+     * const matches = await prisma.matches.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const matchesWithIdOnly = await prisma.matches.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends matchesFindManyArgs>(args?: SelectSubset<T, matchesFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$matchesPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a Matches.
+     * @param {matchesCreateArgs} args - Arguments to create a Matches.
+     * @example
+     * // Create one Matches
+     * const Matches = await prisma.matches.create({
+     *   data: {
+     *     // ... data to create a Matches
+     *   }
+     * })
+     * 
+     */
+    create<T extends matchesCreateArgs>(args: SelectSubset<T, matchesCreateArgs<ExtArgs>>): Prisma__matchesClient<$Result.GetResult<Prisma.$matchesPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many Matches.
+     * @param {matchesCreateManyArgs} args - Arguments to create many Matches.
+     * @example
+     * // Create many Matches
+     * const matches = await prisma.matches.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends matchesCreateManyArgs>(args?: SelectSubset<T, matchesCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many Matches and returns the data saved in the database.
+     * @param {matchesCreateManyAndReturnArgs} args - Arguments to create many Matches.
+     * @example
+     * // Create many Matches
+     * const matches = await prisma.matches.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many Matches and only return the `id`
+     * const matchesWithIdOnly = await prisma.matches.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends matchesCreateManyAndReturnArgs>(args?: SelectSubset<T, matchesCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$matchesPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a Matches.
+     * @param {matchesDeleteArgs} args - Arguments to delete one Matches.
+     * @example
+     * // Delete one Matches
+     * const Matches = await prisma.matches.delete({
+     *   where: {
+     *     // ... filter to delete one Matches
+     *   }
+     * })
+     * 
+     */
+    delete<T extends matchesDeleteArgs>(args: SelectSubset<T, matchesDeleteArgs<ExtArgs>>): Prisma__matchesClient<$Result.GetResult<Prisma.$matchesPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one Matches.
+     * @param {matchesUpdateArgs} args - Arguments to update one Matches.
+     * @example
+     * // Update one Matches
+     * const matches = await prisma.matches.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends matchesUpdateArgs>(args: SelectSubset<T, matchesUpdateArgs<ExtArgs>>): Prisma__matchesClient<$Result.GetResult<Prisma.$matchesPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more Matches.
+     * @param {matchesDeleteManyArgs} args - Arguments to filter Matches to delete.
+     * @example
+     * // Delete a few Matches
+     * const { count } = await prisma.matches.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends matchesDeleteManyArgs>(args?: SelectSubset<T, matchesDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Matches.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {matchesUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many Matches
+     * const matches = await prisma.matches.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends matchesUpdateManyArgs>(args: SelectSubset<T, matchesUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Matches and returns the data updated in the database.
+     * @param {matchesUpdateManyAndReturnArgs} args - Arguments to update many Matches.
+     * @example
+     * // Update many Matches
+     * const matches = await prisma.matches.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more Matches and only return the `id`
+     * const matchesWithIdOnly = await prisma.matches.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends matchesUpdateManyAndReturnArgs>(args: SelectSubset<T, matchesUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$matchesPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one Matches.
+     * @param {matchesUpsertArgs} args - Arguments to update or create a Matches.
+     * @example
+     * // Update or create a Matches
+     * const matches = await prisma.matches.upsert({
+     *   create: {
+     *     // ... data to create a Matches
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the Matches we want to update
+     *   }
+     * })
+     */
+    upsert<T extends matchesUpsertArgs>(args: SelectSubset<T, matchesUpsertArgs<ExtArgs>>): Prisma__matchesClient<$Result.GetResult<Prisma.$matchesPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of Matches.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {matchesCountArgs} args - Arguments to filter Matches to count.
+     * @example
+     * // Count the number of Matches
+     * const count = await prisma.matches.count({
+     *   where: {
+     *     // ... the filter for the Matches we want to count
+     *   }
+     * })
+    **/
+    count<T extends matchesCountArgs>(
+      args?: Subset<T, matchesCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], MatchesCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a Matches.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {MatchesAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends MatchesAggregateArgs>(args: Subset<T, MatchesAggregateArgs>): Prisma.PrismaPromise<GetMatchesAggregateType<T>>
+
+    /**
+     * Group by Matches.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {matchesGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends matchesGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: matchesGroupByArgs['orderBy'] }
+        : { orderBy?: matchesGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, matchesGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetMatchesGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the matches model
+   */
+  readonly fields: matchesFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for matches.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__matchesClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    error_events<T extends matches$error_eventsArgs<ExtArgs> = {}>(args?: Subset<T, matches$error_eventsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$error_eventsPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    rooms<T extends RoomDefaultArgs<ExtArgs> = {}>(args?: Subset<T, RoomDefaultArgs<ExtArgs>>): Prisma__RoomClient<$Result.GetResult<Prisma.$RoomPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    users<T extends matches$usersArgs<ExtArgs> = {}>(args?: Subset<T, matches$usersArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the matches model
+   */
+  interface matchesFieldRefs {
+    readonly id: FieldRef<"matches", 'String'>
+    readonly room_id: FieldRef<"matches", 'String'>
+    readonly game_type: FieldRef<"matches", 'String'>
+    readonly status: FieldRef<"matches", 'String'>
+    readonly winner_id: FieldRef<"matches", 'String'>
+    readonly created_at: FieldRef<"matches", 'DateTime'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * matches findUnique
+   */
+  export type matchesFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the matches
+     */
+    select?: matchesSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the matches
+     */
+    omit?: matchesOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: matchesInclude<ExtArgs> | null
+    /**
+     * Filter, which matches to fetch.
+     */
+    where: matchesWhereUniqueInput
+  }
+
+  /**
+   * matches findUniqueOrThrow
+   */
+  export type matchesFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the matches
+     */
+    select?: matchesSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the matches
+     */
+    omit?: matchesOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: matchesInclude<ExtArgs> | null
+    /**
+     * Filter, which matches to fetch.
+     */
+    where: matchesWhereUniqueInput
+  }
+
+  /**
+   * matches findFirst
+   */
+  export type matchesFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the matches
+     */
+    select?: matchesSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the matches
+     */
+    omit?: matchesOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: matchesInclude<ExtArgs> | null
+    /**
+     * Filter, which matches to fetch.
+     */
+    where?: matchesWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of matches to fetch.
+     */
+    orderBy?: matchesOrderByWithRelationInput | matchesOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for matches.
+     */
+    cursor?: matchesWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` matches from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` matches.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of matches.
+     */
+    distinct?: MatchesScalarFieldEnum | MatchesScalarFieldEnum[]
+  }
+
+  /**
+   * matches findFirstOrThrow
+   */
+  export type matchesFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the matches
+     */
+    select?: matchesSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the matches
+     */
+    omit?: matchesOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: matchesInclude<ExtArgs> | null
+    /**
+     * Filter, which matches to fetch.
+     */
+    where?: matchesWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of matches to fetch.
+     */
+    orderBy?: matchesOrderByWithRelationInput | matchesOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for matches.
+     */
+    cursor?: matchesWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` matches from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` matches.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of matches.
+     */
+    distinct?: MatchesScalarFieldEnum | MatchesScalarFieldEnum[]
+  }
+
+  /**
+   * matches findMany
+   */
+  export type matchesFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the matches
+     */
+    select?: matchesSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the matches
+     */
+    omit?: matchesOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: matchesInclude<ExtArgs> | null
+    /**
+     * Filter, which matches to fetch.
+     */
+    where?: matchesWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of matches to fetch.
+     */
+    orderBy?: matchesOrderByWithRelationInput | matchesOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing matches.
+     */
+    cursor?: matchesWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` matches from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` matches.
+     */
+    skip?: number
+    distinct?: MatchesScalarFieldEnum | MatchesScalarFieldEnum[]
+  }
+
+  /**
+   * matches create
+   */
+  export type matchesCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the matches
+     */
+    select?: matchesSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the matches
+     */
+    omit?: matchesOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: matchesInclude<ExtArgs> | null
+    /**
+     * The data needed to create a matches.
+     */
+    data: XOR<matchesCreateInput, matchesUncheckedCreateInput>
+  }
+
+  /**
+   * matches createMany
+   */
+  export type matchesCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many matches.
+     */
+    data: matchesCreateManyInput | matchesCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * matches createManyAndReturn
+   */
+  export type matchesCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the matches
+     */
+    select?: matchesSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the matches
+     */
+    omit?: matchesOmit<ExtArgs> | null
+    /**
+     * The data used to create many matches.
+     */
+    data: matchesCreateManyInput | matchesCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: matchesIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * matches update
+   */
+  export type matchesUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the matches
+     */
+    select?: matchesSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the matches
+     */
+    omit?: matchesOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: matchesInclude<ExtArgs> | null
+    /**
+     * The data needed to update a matches.
+     */
+    data: XOR<matchesUpdateInput, matchesUncheckedUpdateInput>
+    /**
+     * Choose, which matches to update.
+     */
+    where: matchesWhereUniqueInput
+  }
+
+  /**
+   * matches updateMany
+   */
+  export type matchesUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update matches.
+     */
+    data: XOR<matchesUpdateManyMutationInput, matchesUncheckedUpdateManyInput>
+    /**
+     * Filter which matches to update
+     */
+    where?: matchesWhereInput
+    /**
+     * Limit how many matches to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * matches updateManyAndReturn
+   */
+  export type matchesUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the matches
+     */
+    select?: matchesSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the matches
+     */
+    omit?: matchesOmit<ExtArgs> | null
+    /**
+     * The data used to update matches.
+     */
+    data: XOR<matchesUpdateManyMutationInput, matchesUncheckedUpdateManyInput>
+    /**
+     * Filter which matches to update
+     */
+    where?: matchesWhereInput
+    /**
+     * Limit how many matches to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: matchesIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * matches upsert
+   */
+  export type matchesUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the matches
+     */
+    select?: matchesSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the matches
+     */
+    omit?: matchesOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: matchesInclude<ExtArgs> | null
+    /**
+     * The filter to search for the matches to update in case it exists.
+     */
+    where: matchesWhereUniqueInput
+    /**
+     * In case the matches found by the `where` argument doesn't exist, create a new matches with this data.
+     */
+    create: XOR<matchesCreateInput, matchesUncheckedCreateInput>
+    /**
+     * In case the matches was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<matchesUpdateInput, matchesUncheckedUpdateInput>
+  }
+
+  /**
+   * matches delete
+   */
+  export type matchesDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the matches
+     */
+    select?: matchesSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the matches
+     */
+    omit?: matchesOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: matchesInclude<ExtArgs> | null
+    /**
+     * Filter which matches to delete.
+     */
+    where: matchesWhereUniqueInput
+  }
+
+  /**
+   * matches deleteMany
+   */
+  export type matchesDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which matches to delete
+     */
+    where?: matchesWhereInput
+    /**
+     * Limit how many matches to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * matches.error_events
+   */
+  export type matches$error_eventsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the error_events
+     */
+    select?: error_eventsSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the error_events
+     */
+    omit?: error_eventsOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: error_eventsInclude<ExtArgs> | null
+    where?: error_eventsWhereInput
+    orderBy?: error_eventsOrderByWithRelationInput | error_eventsOrderByWithRelationInput[]
+    cursor?: error_eventsWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: Error_eventsScalarFieldEnum | Error_eventsScalarFieldEnum[]
+  }
+
+  /**
+   * matches.users
+   */
+  export type matches$usersArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the User
+     */
+    select?: UserSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the User
+     */
+    omit?: UserOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: UserInclude<ExtArgs> | null
+    where?: UserWhereInput
+  }
+
+  /**
+   * matches without action
+   */
+  export type matchesDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the matches
+     */
+    select?: matchesSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the matches
+     */
+    omit?: matchesOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: matchesInclude<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -5515,7 +8109,10 @@ export namespace Prisma {
     id: 'id',
     name: 'name',
     createdAt: 'createdAt',
-    createdBy: 'createdBy'
+    createdBy: 'createdBy',
+    current_match_id: 'current_match_id',
+    activeGameType: 'activeGameType',
+    status: 'status'
   };
 
   export type RoomScalarFieldEnum = (typeof RoomScalarFieldEnum)[keyof typeof RoomScalarFieldEnum]
@@ -5540,6 +8137,29 @@ export namespace Prisma {
   export type UserIDPScalarFieldEnum = (typeof UserIDPScalarFieldEnum)[keyof typeof UserIDPScalarFieldEnum]
 
 
+  export const Error_eventsScalarFieldEnum: {
+    id: 'id',
+    match_id: 'match_id',
+    appearance_at: 'appearance_at',
+    closed_at: 'closed_at',
+    closed_by: 'closed_by'
+  };
+
+  export type Error_eventsScalarFieldEnum = (typeof Error_eventsScalarFieldEnum)[keyof typeof Error_eventsScalarFieldEnum]
+
+
+  export const MatchesScalarFieldEnum: {
+    id: 'id',
+    room_id: 'room_id',
+    game_type: 'game_type',
+    status: 'status',
+    winner_id: 'winner_id',
+    created_at: 'created_at'
+  };
+
+  export type MatchesScalarFieldEnum = (typeof MatchesScalarFieldEnum)[keyof typeof MatchesScalarFieldEnum]
+
+
   export const SortOrder: {
     asc: 'asc',
     desc: 'desc'
@@ -5554,6 +8174,14 @@ export namespace Prisma {
   };
 
   export type QueryMode = (typeof QueryMode)[keyof typeof QueryMode]
+
+
+  export const NullsOrder: {
+    first: 'first',
+    last: 'last'
+  };
+
+  export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
 
 
   /**
@@ -5590,6 +8218,20 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'RoomStatus'
+   */
+  export type EnumRoomStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'RoomStatus'>
+    
+
+
+  /**
+   * Reference to a field of type 'RoomStatus[]'
+   */
+  export type ListEnumRoomStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'RoomStatus[]'>
+    
+
+
+  /**
    * Reference to a field of type 'Int'
    */
   export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int'>
@@ -5614,9 +8256,11 @@ export namespace Prisma {
     name?: StringFilter<"User"> | string
     email?: StringFilter<"User"> | string
     createdAt?: DateTimeFilter<"User"> | Date | string
-    userIDPs?: UserIDPListRelationFilter
-    createdRooms?: RoomListRelationFilter
+    error_events?: Error_eventsListRelationFilter
+    matches?: MatchesListRelationFilter
     joinedRooms?: RoomUserListRelationFilter
+    createdRooms?: RoomListRelationFilter
+    userIDPs?: UserIDPListRelationFilter
   }
 
   export type UserOrderByWithRelationInput = {
@@ -5624,9 +8268,11 @@ export namespace Prisma {
     name?: SortOrder
     email?: SortOrder
     createdAt?: SortOrder
-    userIDPs?: UserIDPOrderByRelationAggregateInput
-    createdRooms?: RoomOrderByRelationAggregateInput
+    error_events?: error_eventsOrderByRelationAggregateInput
+    matches?: matchesOrderByRelationAggregateInput
     joinedRooms?: RoomUserOrderByRelationAggregateInput
+    createdRooms?: RoomOrderByRelationAggregateInput
+    userIDPs?: UserIDPOrderByRelationAggregateInput
   }
 
   export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -5637,9 +8283,11 @@ export namespace Prisma {
     NOT?: UserWhereInput | UserWhereInput[]
     name?: StringFilter<"User"> | string
     createdAt?: DateTimeFilter<"User"> | Date | string
-    userIDPs?: UserIDPListRelationFilter
-    createdRooms?: RoomListRelationFilter
+    error_events?: Error_eventsListRelationFilter
+    matches?: MatchesListRelationFilter
     joinedRooms?: RoomUserListRelationFilter
+    createdRooms?: RoomListRelationFilter
+    userIDPs?: UserIDPListRelationFilter
   }, "id" | "email">
 
   export type UserOrderByWithAggregationInput = {
@@ -5670,6 +8318,10 @@ export namespace Prisma {
     name?: StringFilter<"Room"> | string
     createdAt?: DateTimeFilter<"Room"> | Date | string
     createdBy?: UuidFilter<"Room"> | string
+    current_match_id?: UuidNullableFilter<"Room"> | string | null
+    activeGameType?: StringNullableFilter<"Room"> | string | null
+    status?: EnumRoomStatusFilter<"Room"> | $Enums.RoomStatus
+    matches?: MatchesListRelationFilter
     users?: RoomUserListRelationFilter
     creator?: XOR<UserScalarRelationFilter, UserWhereInput>
   }
@@ -5679,6 +8331,10 @@ export namespace Prisma {
     name?: SortOrder
     createdAt?: SortOrder
     createdBy?: SortOrder
+    current_match_id?: SortOrderInput | SortOrder
+    activeGameType?: SortOrderInput | SortOrder
+    status?: SortOrder
+    matches?: matchesOrderByRelationAggregateInput
     users?: RoomUserOrderByRelationAggregateInput
     creator?: UserOrderByWithRelationInput
   }
@@ -5691,6 +8347,10 @@ export namespace Prisma {
     name?: StringFilter<"Room"> | string
     createdAt?: DateTimeFilter<"Room"> | Date | string
     createdBy?: UuidFilter<"Room"> | string
+    current_match_id?: UuidNullableFilter<"Room"> | string | null
+    activeGameType?: StringNullableFilter<"Room"> | string | null
+    status?: EnumRoomStatusFilter<"Room"> | $Enums.RoomStatus
+    matches?: MatchesListRelationFilter
     users?: RoomUserListRelationFilter
     creator?: XOR<UserScalarRelationFilter, UserWhereInput>
   }, "id">
@@ -5700,6 +8360,9 @@ export namespace Prisma {
     name?: SortOrder
     createdAt?: SortOrder
     createdBy?: SortOrder
+    current_match_id?: SortOrderInput | SortOrder
+    activeGameType?: SortOrderInput | SortOrder
+    status?: SortOrder
     _count?: RoomCountOrderByAggregateInput
     _max?: RoomMaxOrderByAggregateInput
     _min?: RoomMinOrderByAggregateInput
@@ -5713,6 +8376,9 @@ export namespace Prisma {
     name?: StringWithAggregatesFilter<"Room"> | string
     createdAt?: DateTimeWithAggregatesFilter<"Room"> | Date | string
     createdBy?: UuidWithAggregatesFilter<"Room"> | string
+    current_match_id?: UuidNullableWithAggregatesFilter<"Room"> | string | null
+    activeGameType?: StringNullableWithAggregatesFilter<"Room"> | string | null
+    status?: EnumRoomStatusWithAggregatesFilter<"Room"> | $Enums.RoomStatus
   }
 
   export type RoomUserWhereInput = {
@@ -5814,14 +8480,140 @@ export namespace Prisma {
     userId?: UuidWithAggregatesFilter<"UserIDP"> | string
   }
 
+  export type error_eventsWhereInput = {
+    AND?: error_eventsWhereInput | error_eventsWhereInput[]
+    OR?: error_eventsWhereInput[]
+    NOT?: error_eventsWhereInput | error_eventsWhereInput[]
+    id?: UuidFilter<"error_events"> | string
+    match_id?: UuidFilter<"error_events"> | string
+    appearance_at?: DateTimeFilter<"error_events"> | Date | string
+    closed_at?: DateTimeNullableFilter<"error_events"> | Date | string | null
+    closed_by?: UuidNullableFilter<"error_events"> | string | null
+    users?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
+    matches?: XOR<MatchesScalarRelationFilter, matchesWhereInput>
+  }
+
+  export type error_eventsOrderByWithRelationInput = {
+    id?: SortOrder
+    match_id?: SortOrder
+    appearance_at?: SortOrder
+    closed_at?: SortOrderInput | SortOrder
+    closed_by?: SortOrderInput | SortOrder
+    users?: UserOrderByWithRelationInput
+    matches?: matchesOrderByWithRelationInput
+  }
+
+  export type error_eventsWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: error_eventsWhereInput | error_eventsWhereInput[]
+    OR?: error_eventsWhereInput[]
+    NOT?: error_eventsWhereInput | error_eventsWhereInput[]
+    match_id?: UuidFilter<"error_events"> | string
+    appearance_at?: DateTimeFilter<"error_events"> | Date | string
+    closed_at?: DateTimeNullableFilter<"error_events"> | Date | string | null
+    closed_by?: UuidNullableFilter<"error_events"> | string | null
+    users?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
+    matches?: XOR<MatchesScalarRelationFilter, matchesWhereInput>
+  }, "id">
+
+  export type error_eventsOrderByWithAggregationInput = {
+    id?: SortOrder
+    match_id?: SortOrder
+    appearance_at?: SortOrder
+    closed_at?: SortOrderInput | SortOrder
+    closed_by?: SortOrderInput | SortOrder
+    _count?: error_eventsCountOrderByAggregateInput
+    _max?: error_eventsMaxOrderByAggregateInput
+    _min?: error_eventsMinOrderByAggregateInput
+  }
+
+  export type error_eventsScalarWhereWithAggregatesInput = {
+    AND?: error_eventsScalarWhereWithAggregatesInput | error_eventsScalarWhereWithAggregatesInput[]
+    OR?: error_eventsScalarWhereWithAggregatesInput[]
+    NOT?: error_eventsScalarWhereWithAggregatesInput | error_eventsScalarWhereWithAggregatesInput[]
+    id?: UuidWithAggregatesFilter<"error_events"> | string
+    match_id?: UuidWithAggregatesFilter<"error_events"> | string
+    appearance_at?: DateTimeWithAggregatesFilter<"error_events"> | Date | string
+    closed_at?: DateTimeNullableWithAggregatesFilter<"error_events"> | Date | string | null
+    closed_by?: UuidNullableWithAggregatesFilter<"error_events"> | string | null
+  }
+
+  export type matchesWhereInput = {
+    AND?: matchesWhereInput | matchesWhereInput[]
+    OR?: matchesWhereInput[]
+    NOT?: matchesWhereInput | matchesWhereInput[]
+    id?: UuidFilter<"matches"> | string
+    room_id?: UuidFilter<"matches"> | string
+    game_type?: StringFilter<"matches"> | string
+    status?: StringFilter<"matches"> | string
+    winner_id?: UuidNullableFilter<"matches"> | string | null
+    created_at?: DateTimeFilter<"matches"> | Date | string
+    error_events?: Error_eventsListRelationFilter
+    rooms?: XOR<RoomScalarRelationFilter, RoomWhereInput>
+    users?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
+  }
+
+  export type matchesOrderByWithRelationInput = {
+    id?: SortOrder
+    room_id?: SortOrder
+    game_type?: SortOrder
+    status?: SortOrder
+    winner_id?: SortOrderInput | SortOrder
+    created_at?: SortOrder
+    error_events?: error_eventsOrderByRelationAggregateInput
+    rooms?: RoomOrderByWithRelationInput
+    users?: UserOrderByWithRelationInput
+  }
+
+  export type matchesWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    AND?: matchesWhereInput | matchesWhereInput[]
+    OR?: matchesWhereInput[]
+    NOT?: matchesWhereInput | matchesWhereInput[]
+    room_id?: UuidFilter<"matches"> | string
+    game_type?: StringFilter<"matches"> | string
+    status?: StringFilter<"matches"> | string
+    winner_id?: UuidNullableFilter<"matches"> | string | null
+    created_at?: DateTimeFilter<"matches"> | Date | string
+    error_events?: Error_eventsListRelationFilter
+    rooms?: XOR<RoomScalarRelationFilter, RoomWhereInput>
+    users?: XOR<UserNullableScalarRelationFilter, UserWhereInput> | null
+  }, "id">
+
+  export type matchesOrderByWithAggregationInput = {
+    id?: SortOrder
+    room_id?: SortOrder
+    game_type?: SortOrder
+    status?: SortOrder
+    winner_id?: SortOrderInput | SortOrder
+    created_at?: SortOrder
+    _count?: matchesCountOrderByAggregateInput
+    _max?: matchesMaxOrderByAggregateInput
+    _min?: matchesMinOrderByAggregateInput
+  }
+
+  export type matchesScalarWhereWithAggregatesInput = {
+    AND?: matchesScalarWhereWithAggregatesInput | matchesScalarWhereWithAggregatesInput[]
+    OR?: matchesScalarWhereWithAggregatesInput[]
+    NOT?: matchesScalarWhereWithAggregatesInput | matchesScalarWhereWithAggregatesInput[]
+    id?: UuidWithAggregatesFilter<"matches"> | string
+    room_id?: UuidWithAggregatesFilter<"matches"> | string
+    game_type?: StringWithAggregatesFilter<"matches"> | string
+    status?: StringWithAggregatesFilter<"matches"> | string
+    winner_id?: UuidNullableWithAggregatesFilter<"matches"> | string | null
+    created_at?: DateTimeWithAggregatesFilter<"matches"> | Date | string
+  }
+
   export type UserCreateInput = {
     id?: string
     name: string
     email: string
     createdAt?: Date | string
-    userIDPs?: UserIDPCreateNestedManyWithoutUserInput
-    createdRooms?: RoomCreateNestedManyWithoutCreatorInput
+    error_events?: error_eventsCreateNestedManyWithoutUsersInput
+    matches?: matchesCreateNestedManyWithoutUsersInput
     joinedRooms?: RoomUserCreateNestedManyWithoutUserInput
+    createdRooms?: RoomCreateNestedManyWithoutCreatorInput
+    userIDPs?: UserIDPCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateInput = {
@@ -5829,9 +8621,11 @@ export namespace Prisma {
     name: string
     email: string
     createdAt?: Date | string
-    userIDPs?: UserIDPUncheckedCreateNestedManyWithoutUserInput
-    createdRooms?: RoomUncheckedCreateNestedManyWithoutCreatorInput
+    error_events?: error_eventsUncheckedCreateNestedManyWithoutUsersInput
+    matches?: matchesUncheckedCreateNestedManyWithoutUsersInput
     joinedRooms?: RoomUserUncheckedCreateNestedManyWithoutUserInput
+    createdRooms?: RoomUncheckedCreateNestedManyWithoutCreatorInput
+    userIDPs?: UserIDPUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserUpdateInput = {
@@ -5839,9 +8633,11 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    userIDPs?: UserIDPUpdateManyWithoutUserNestedInput
-    createdRooms?: RoomUpdateManyWithoutCreatorNestedInput
+    error_events?: error_eventsUpdateManyWithoutUsersNestedInput
+    matches?: matchesUpdateManyWithoutUsersNestedInput
     joinedRooms?: RoomUserUpdateManyWithoutUserNestedInput
+    createdRooms?: RoomUpdateManyWithoutCreatorNestedInput
+    userIDPs?: UserIDPUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateInput = {
@@ -5849,9 +8645,11 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    userIDPs?: UserIDPUncheckedUpdateManyWithoutUserNestedInput
-    createdRooms?: RoomUncheckedUpdateManyWithoutCreatorNestedInput
+    error_events?: error_eventsUncheckedUpdateManyWithoutUsersNestedInput
+    matches?: matchesUncheckedUpdateManyWithoutUsersNestedInput
     joinedRooms?: RoomUserUncheckedUpdateManyWithoutUserNestedInput
+    createdRooms?: RoomUncheckedUpdateManyWithoutCreatorNestedInput
+    userIDPs?: UserIDPUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserCreateManyInput = {
@@ -5879,6 +8677,10 @@ export namespace Prisma {
     id?: string
     name: string
     createdAt?: Date | string
+    current_match_id?: string | null
+    activeGameType?: string | null
+    status?: $Enums.RoomStatus
+    matches?: matchesCreateNestedManyWithoutRoomsInput
     users?: RoomUserCreateNestedManyWithoutRoomInput
     creator: UserCreateNestedOneWithoutCreatedRoomsInput
   }
@@ -5888,6 +8690,10 @@ export namespace Prisma {
     name: string
     createdAt?: Date | string
     createdBy: string
+    current_match_id?: string | null
+    activeGameType?: string | null
+    status?: $Enums.RoomStatus
+    matches?: matchesUncheckedCreateNestedManyWithoutRoomsInput
     users?: RoomUserUncheckedCreateNestedManyWithoutRoomInput
   }
 
@@ -5895,6 +8701,10 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    current_match_id?: NullableStringFieldUpdateOperationsInput | string | null
+    activeGameType?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumRoomStatusFieldUpdateOperationsInput | $Enums.RoomStatus
+    matches?: matchesUpdateManyWithoutRoomsNestedInput
     users?: RoomUserUpdateManyWithoutRoomNestedInput
     creator?: UserUpdateOneRequiredWithoutCreatedRoomsNestedInput
   }
@@ -5904,6 +8714,10 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdBy?: StringFieldUpdateOperationsInput | string
+    current_match_id?: NullableStringFieldUpdateOperationsInput | string | null
+    activeGameType?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumRoomStatusFieldUpdateOperationsInput | $Enums.RoomStatus
+    matches?: matchesUncheckedUpdateManyWithoutRoomsNestedInput
     users?: RoomUserUncheckedUpdateManyWithoutRoomNestedInput
   }
 
@@ -5912,12 +8726,18 @@ export namespace Prisma {
     name: string
     createdAt?: Date | string
     createdBy: string
+    current_match_id?: string | null
+    activeGameType?: string | null
+    status?: $Enums.RoomStatus
   }
 
   export type RoomUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    current_match_id?: NullableStringFieldUpdateOperationsInput | string | null
+    activeGameType?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumRoomStatusFieldUpdateOperationsInput | $Enums.RoomStatus
   }
 
   export type RoomUncheckedUpdateManyInput = {
@@ -5925,6 +8745,9 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdBy?: StringFieldUpdateOperationsInput | string
+    current_match_id?: NullableStringFieldUpdateOperationsInput | string | null
+    activeGameType?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumRoomStatusFieldUpdateOperationsInput | $Enums.RoomStatus
   }
 
   export type RoomUserCreateInput = {
@@ -6015,6 +8838,125 @@ export namespace Prisma {
     userId?: StringFieldUpdateOperationsInput | string
   }
 
+  export type error_eventsCreateInput = {
+    id?: string
+    appearance_at: Date | string
+    closed_at?: Date | string | null
+    users?: UserCreateNestedOneWithoutError_eventsInput
+    matches: matchesCreateNestedOneWithoutError_eventsInput
+  }
+
+  export type error_eventsUncheckedCreateInput = {
+    id?: string
+    match_id: string
+    appearance_at: Date | string
+    closed_at?: Date | string | null
+    closed_by?: string | null
+  }
+
+  export type error_eventsUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    appearance_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    closed_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    users?: UserUpdateOneWithoutError_eventsNestedInput
+    matches?: matchesUpdateOneRequiredWithoutError_eventsNestedInput
+  }
+
+  export type error_eventsUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    match_id?: StringFieldUpdateOperationsInput | string
+    appearance_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    closed_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closed_by?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type error_eventsCreateManyInput = {
+    id?: string
+    match_id: string
+    appearance_at: Date | string
+    closed_at?: Date | string | null
+    closed_by?: string | null
+  }
+
+  export type error_eventsUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    appearance_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    closed_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type error_eventsUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    match_id?: StringFieldUpdateOperationsInput | string
+    appearance_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    closed_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closed_by?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type matchesCreateInput = {
+    id?: string
+    game_type: string
+    status?: string
+    created_at?: Date | string
+    error_events?: error_eventsCreateNestedManyWithoutMatchesInput
+    rooms: RoomCreateNestedOneWithoutMatchesInput
+    users?: UserCreateNestedOneWithoutMatchesInput
+  }
+
+  export type matchesUncheckedCreateInput = {
+    id?: string
+    room_id: string
+    game_type: string
+    status?: string
+    winner_id?: string | null
+    created_at?: Date | string
+    error_events?: error_eventsUncheckedCreateNestedManyWithoutMatchesInput
+  }
+
+  export type matchesUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    game_type?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    error_events?: error_eventsUpdateManyWithoutMatchesNestedInput
+    rooms?: RoomUpdateOneRequiredWithoutMatchesNestedInput
+    users?: UserUpdateOneWithoutMatchesNestedInput
+  }
+
+  export type matchesUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    room_id?: StringFieldUpdateOperationsInput | string
+    game_type?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    winner_id?: NullableStringFieldUpdateOperationsInput | string | null
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    error_events?: error_eventsUncheckedUpdateManyWithoutMatchesNestedInput
+  }
+
+  export type matchesCreateManyInput = {
+    id?: string
+    room_id: string
+    game_type: string
+    status?: string
+    winner_id?: string | null
+    created_at?: Date | string
+  }
+
+  export type matchesUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    game_type?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type matchesUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    room_id?: StringFieldUpdateOperationsInput | string
+    game_type?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    winner_id?: NullableStringFieldUpdateOperationsInput | string | null
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
   export type UuidFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel>
     in?: string[] | ListStringFieldRefInput<$PrismaModel>
@@ -6053,16 +8995,16 @@ export namespace Prisma {
     not?: NestedDateTimeFilter<$PrismaModel> | Date | string
   }
 
-  export type UserIDPListRelationFilter = {
-    every?: UserIDPWhereInput
-    some?: UserIDPWhereInput
-    none?: UserIDPWhereInput
+  export type Error_eventsListRelationFilter = {
+    every?: error_eventsWhereInput
+    some?: error_eventsWhereInput
+    none?: error_eventsWhereInput
   }
 
-  export type RoomListRelationFilter = {
-    every?: RoomWhereInput
-    some?: RoomWhereInput
-    none?: RoomWhereInput
+  export type MatchesListRelationFilter = {
+    every?: matchesWhereInput
+    some?: matchesWhereInput
+    none?: matchesWhereInput
   }
 
   export type RoomUserListRelationFilter = {
@@ -6071,7 +9013,27 @@ export namespace Prisma {
     none?: RoomUserWhereInput
   }
 
-  export type UserIDPOrderByRelationAggregateInput = {
+  export type RoomListRelationFilter = {
+    every?: RoomWhereInput
+    some?: RoomWhereInput
+    none?: RoomWhereInput
+  }
+
+  export type UserIDPListRelationFilter = {
+    every?: UserIDPWhereInput
+    some?: UserIDPWhereInput
+    none?: UserIDPWhereInput
+  }
+
+  export type error_eventsOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type matchesOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type RoomUserOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -6079,7 +9041,7 @@ export namespace Prisma {
     _count?: SortOrder
   }
 
-  export type RoomUserOrderByRelationAggregateInput = {
+  export type UserIDPOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -6151,9 +9113,48 @@ export namespace Prisma {
     _max?: NestedDateTimeFilter<$PrismaModel>
   }
 
+  export type UuidNullableFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel> | null
+    in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    lt?: string | StringFieldRefInput<$PrismaModel>
+    lte?: string | StringFieldRefInput<$PrismaModel>
+    gt?: string | StringFieldRefInput<$PrismaModel>
+    gte?: string | StringFieldRefInput<$PrismaModel>
+    mode?: QueryMode
+    not?: NestedUuidNullableFilter<$PrismaModel> | string | null
+  }
+
+  export type StringNullableFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel> | null
+    in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    lt?: string | StringFieldRefInput<$PrismaModel>
+    lte?: string | StringFieldRefInput<$PrismaModel>
+    gt?: string | StringFieldRefInput<$PrismaModel>
+    gte?: string | StringFieldRefInput<$PrismaModel>
+    contains?: string | StringFieldRefInput<$PrismaModel>
+    startsWith?: string | StringFieldRefInput<$PrismaModel>
+    endsWith?: string | StringFieldRefInput<$PrismaModel>
+    mode?: QueryMode
+    not?: NestedStringNullableFilter<$PrismaModel> | string | null
+  }
+
+  export type EnumRoomStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.RoomStatus | EnumRoomStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.RoomStatus[] | ListEnumRoomStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.RoomStatus[] | ListEnumRoomStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumRoomStatusFilter<$PrismaModel> | $Enums.RoomStatus
+  }
+
   export type UserScalarRelationFilter = {
     is?: UserWhereInput
     isNot?: UserWhereInput
+  }
+
+  export type SortOrderInput = {
+    sort: SortOrder
+    nulls?: NullsOrder
   }
 
   export type RoomCountOrderByAggregateInput = {
@@ -6161,6 +9162,9 @@ export namespace Prisma {
     name?: SortOrder
     createdAt?: SortOrder
     createdBy?: SortOrder
+    current_match_id?: SortOrder
+    activeGameType?: SortOrder
+    status?: SortOrder
   }
 
   export type RoomMaxOrderByAggregateInput = {
@@ -6168,6 +9172,9 @@ export namespace Prisma {
     name?: SortOrder
     createdAt?: SortOrder
     createdBy?: SortOrder
+    current_match_id?: SortOrder
+    activeGameType?: SortOrder
+    status?: SortOrder
   }
 
   export type RoomMinOrderByAggregateInput = {
@@ -6175,6 +9182,52 @@ export namespace Prisma {
     name?: SortOrder
     createdAt?: SortOrder
     createdBy?: SortOrder
+    current_match_id?: SortOrder
+    activeGameType?: SortOrder
+    status?: SortOrder
+  }
+
+  export type UuidNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel> | null
+    in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    lt?: string | StringFieldRefInput<$PrismaModel>
+    lte?: string | StringFieldRefInput<$PrismaModel>
+    gt?: string | StringFieldRefInput<$PrismaModel>
+    gte?: string | StringFieldRefInput<$PrismaModel>
+    mode?: QueryMode
+    not?: NestedUuidNullableWithAggregatesFilter<$PrismaModel> | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedStringNullableFilter<$PrismaModel>
+    _max?: NestedStringNullableFilter<$PrismaModel>
+  }
+
+  export type StringNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel> | null
+    in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    lt?: string | StringFieldRefInput<$PrismaModel>
+    lte?: string | StringFieldRefInput<$PrismaModel>
+    gt?: string | StringFieldRefInput<$PrismaModel>
+    gte?: string | StringFieldRefInput<$PrismaModel>
+    contains?: string | StringFieldRefInput<$PrismaModel>
+    startsWith?: string | StringFieldRefInput<$PrismaModel>
+    endsWith?: string | StringFieldRefInput<$PrismaModel>
+    mode?: QueryMode
+    not?: NestedStringNullableWithAggregatesFilter<$PrismaModel> | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedStringNullableFilter<$PrismaModel>
+    _max?: NestedStringNullableFilter<$PrismaModel>
+  }
+
+  export type EnumRoomStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.RoomStatus | EnumRoomStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.RoomStatus[] | ListEnumRoomStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.RoomStatus[] | ListEnumRoomStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumRoomStatusWithAggregatesFilter<$PrismaModel> | $Enums.RoomStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumRoomStatusFilter<$PrismaModel>
+    _max?: NestedEnumRoomStatusFilter<$PrismaModel>
   }
 
   export type RoomScalarRelationFilter = {
@@ -6226,18 +9279,104 @@ export namespace Prisma {
     userId?: SortOrder
   }
 
-  export type UserIDPCreateNestedManyWithoutUserInput = {
-    create?: XOR<UserIDPCreateWithoutUserInput, UserIDPUncheckedCreateWithoutUserInput> | UserIDPCreateWithoutUserInput[] | UserIDPUncheckedCreateWithoutUserInput[]
-    connectOrCreate?: UserIDPCreateOrConnectWithoutUserInput | UserIDPCreateOrConnectWithoutUserInput[]
-    createMany?: UserIDPCreateManyUserInputEnvelope
-    connect?: UserIDPWhereUniqueInput | UserIDPWhereUniqueInput[]
+  export type DateTimeNullableFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
   }
 
-  export type RoomCreateNestedManyWithoutCreatorInput = {
-    create?: XOR<RoomCreateWithoutCreatorInput, RoomUncheckedCreateWithoutCreatorInput> | RoomCreateWithoutCreatorInput[] | RoomUncheckedCreateWithoutCreatorInput[]
-    connectOrCreate?: RoomCreateOrConnectWithoutCreatorInput | RoomCreateOrConnectWithoutCreatorInput[]
-    createMany?: RoomCreateManyCreatorInputEnvelope
-    connect?: RoomWhereUniqueInput | RoomWhereUniqueInput[]
+  export type UserNullableScalarRelationFilter = {
+    is?: UserWhereInput | null
+    isNot?: UserWhereInput | null
+  }
+
+  export type MatchesScalarRelationFilter = {
+    is?: matchesWhereInput
+    isNot?: matchesWhereInput
+  }
+
+  export type error_eventsCountOrderByAggregateInput = {
+    id?: SortOrder
+    match_id?: SortOrder
+    appearance_at?: SortOrder
+    closed_at?: SortOrder
+    closed_by?: SortOrder
+  }
+
+  export type error_eventsMaxOrderByAggregateInput = {
+    id?: SortOrder
+    match_id?: SortOrder
+    appearance_at?: SortOrder
+    closed_at?: SortOrder
+    closed_by?: SortOrder
+  }
+
+  export type error_eventsMinOrderByAggregateInput = {
+    id?: SortOrder
+    match_id?: SortOrder
+    appearance_at?: SortOrder
+    closed_at?: SortOrder
+    closed_by?: SortOrder
+  }
+
+  export type DateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableWithAggregatesFilter<$PrismaModel> | Date | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedDateTimeNullableFilter<$PrismaModel>
+    _max?: NestedDateTimeNullableFilter<$PrismaModel>
+  }
+
+  export type matchesCountOrderByAggregateInput = {
+    id?: SortOrder
+    room_id?: SortOrder
+    game_type?: SortOrder
+    status?: SortOrder
+    winner_id?: SortOrder
+    created_at?: SortOrder
+  }
+
+  export type matchesMaxOrderByAggregateInput = {
+    id?: SortOrder
+    room_id?: SortOrder
+    game_type?: SortOrder
+    status?: SortOrder
+    winner_id?: SortOrder
+    created_at?: SortOrder
+  }
+
+  export type matchesMinOrderByAggregateInput = {
+    id?: SortOrder
+    room_id?: SortOrder
+    game_type?: SortOrder
+    status?: SortOrder
+    winner_id?: SortOrder
+    created_at?: SortOrder
+  }
+
+  export type error_eventsCreateNestedManyWithoutUsersInput = {
+    create?: XOR<error_eventsCreateWithoutUsersInput, error_eventsUncheckedCreateWithoutUsersInput> | error_eventsCreateWithoutUsersInput[] | error_eventsUncheckedCreateWithoutUsersInput[]
+    connectOrCreate?: error_eventsCreateOrConnectWithoutUsersInput | error_eventsCreateOrConnectWithoutUsersInput[]
+    createMany?: error_eventsCreateManyUsersInputEnvelope
+    connect?: error_eventsWhereUniqueInput | error_eventsWhereUniqueInput[]
+  }
+
+  export type matchesCreateNestedManyWithoutUsersInput = {
+    create?: XOR<matchesCreateWithoutUsersInput, matchesUncheckedCreateWithoutUsersInput> | matchesCreateWithoutUsersInput[] | matchesUncheckedCreateWithoutUsersInput[]
+    connectOrCreate?: matchesCreateOrConnectWithoutUsersInput | matchesCreateOrConnectWithoutUsersInput[]
+    createMany?: matchesCreateManyUsersInputEnvelope
+    connect?: matchesWhereUniqueInput | matchesWhereUniqueInput[]
   }
 
   export type RoomUserCreateNestedManyWithoutUserInput = {
@@ -6247,11 +9386,39 @@ export namespace Prisma {
     connect?: RoomUserWhereUniqueInput | RoomUserWhereUniqueInput[]
   }
 
-  export type UserIDPUncheckedCreateNestedManyWithoutUserInput = {
+  export type RoomCreateNestedManyWithoutCreatorInput = {
+    create?: XOR<RoomCreateWithoutCreatorInput, RoomUncheckedCreateWithoutCreatorInput> | RoomCreateWithoutCreatorInput[] | RoomUncheckedCreateWithoutCreatorInput[]
+    connectOrCreate?: RoomCreateOrConnectWithoutCreatorInput | RoomCreateOrConnectWithoutCreatorInput[]
+    createMany?: RoomCreateManyCreatorInputEnvelope
+    connect?: RoomWhereUniqueInput | RoomWhereUniqueInput[]
+  }
+
+  export type UserIDPCreateNestedManyWithoutUserInput = {
     create?: XOR<UserIDPCreateWithoutUserInput, UserIDPUncheckedCreateWithoutUserInput> | UserIDPCreateWithoutUserInput[] | UserIDPUncheckedCreateWithoutUserInput[]
     connectOrCreate?: UserIDPCreateOrConnectWithoutUserInput | UserIDPCreateOrConnectWithoutUserInput[]
     createMany?: UserIDPCreateManyUserInputEnvelope
     connect?: UserIDPWhereUniqueInput | UserIDPWhereUniqueInput[]
+  }
+
+  export type error_eventsUncheckedCreateNestedManyWithoutUsersInput = {
+    create?: XOR<error_eventsCreateWithoutUsersInput, error_eventsUncheckedCreateWithoutUsersInput> | error_eventsCreateWithoutUsersInput[] | error_eventsUncheckedCreateWithoutUsersInput[]
+    connectOrCreate?: error_eventsCreateOrConnectWithoutUsersInput | error_eventsCreateOrConnectWithoutUsersInput[]
+    createMany?: error_eventsCreateManyUsersInputEnvelope
+    connect?: error_eventsWhereUniqueInput | error_eventsWhereUniqueInput[]
+  }
+
+  export type matchesUncheckedCreateNestedManyWithoutUsersInput = {
+    create?: XOR<matchesCreateWithoutUsersInput, matchesUncheckedCreateWithoutUsersInput> | matchesCreateWithoutUsersInput[] | matchesUncheckedCreateWithoutUsersInput[]
+    connectOrCreate?: matchesCreateOrConnectWithoutUsersInput | matchesCreateOrConnectWithoutUsersInput[]
+    createMany?: matchesCreateManyUsersInputEnvelope
+    connect?: matchesWhereUniqueInput | matchesWhereUniqueInput[]
+  }
+
+  export type RoomUserUncheckedCreateNestedManyWithoutUserInput = {
+    create?: XOR<RoomUserCreateWithoutUserInput, RoomUserUncheckedCreateWithoutUserInput> | RoomUserCreateWithoutUserInput[] | RoomUserUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: RoomUserCreateOrConnectWithoutUserInput | RoomUserCreateOrConnectWithoutUserInput[]
+    createMany?: RoomUserCreateManyUserInputEnvelope
+    connect?: RoomUserWhereUniqueInput | RoomUserWhereUniqueInput[]
   }
 
   export type RoomUncheckedCreateNestedManyWithoutCreatorInput = {
@@ -6261,11 +9428,11 @@ export namespace Prisma {
     connect?: RoomWhereUniqueInput | RoomWhereUniqueInput[]
   }
 
-  export type RoomUserUncheckedCreateNestedManyWithoutUserInput = {
-    create?: XOR<RoomUserCreateWithoutUserInput, RoomUserUncheckedCreateWithoutUserInput> | RoomUserCreateWithoutUserInput[] | RoomUserUncheckedCreateWithoutUserInput[]
-    connectOrCreate?: RoomUserCreateOrConnectWithoutUserInput | RoomUserCreateOrConnectWithoutUserInput[]
-    createMany?: RoomUserCreateManyUserInputEnvelope
-    connect?: RoomUserWhereUniqueInput | RoomUserWhereUniqueInput[]
+  export type UserIDPUncheckedCreateNestedManyWithoutUserInput = {
+    create?: XOR<UserIDPCreateWithoutUserInput, UserIDPUncheckedCreateWithoutUserInput> | UserIDPCreateWithoutUserInput[] | UserIDPUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: UserIDPCreateOrConnectWithoutUserInput | UserIDPCreateOrConnectWithoutUserInput[]
+    createMany?: UserIDPCreateManyUserInputEnvelope
+    connect?: UserIDPWhereUniqueInput | UserIDPWhereUniqueInput[]
   }
 
   export type StringFieldUpdateOperationsInput = {
@@ -6276,32 +9443,32 @@ export namespace Prisma {
     set?: Date | string
   }
 
-  export type UserIDPUpdateManyWithoutUserNestedInput = {
-    create?: XOR<UserIDPCreateWithoutUserInput, UserIDPUncheckedCreateWithoutUserInput> | UserIDPCreateWithoutUserInput[] | UserIDPUncheckedCreateWithoutUserInput[]
-    connectOrCreate?: UserIDPCreateOrConnectWithoutUserInput | UserIDPCreateOrConnectWithoutUserInput[]
-    upsert?: UserIDPUpsertWithWhereUniqueWithoutUserInput | UserIDPUpsertWithWhereUniqueWithoutUserInput[]
-    createMany?: UserIDPCreateManyUserInputEnvelope
-    set?: UserIDPWhereUniqueInput | UserIDPWhereUniqueInput[]
-    disconnect?: UserIDPWhereUniqueInput | UserIDPWhereUniqueInput[]
-    delete?: UserIDPWhereUniqueInput | UserIDPWhereUniqueInput[]
-    connect?: UserIDPWhereUniqueInput | UserIDPWhereUniqueInput[]
-    update?: UserIDPUpdateWithWhereUniqueWithoutUserInput | UserIDPUpdateWithWhereUniqueWithoutUserInput[]
-    updateMany?: UserIDPUpdateManyWithWhereWithoutUserInput | UserIDPUpdateManyWithWhereWithoutUserInput[]
-    deleteMany?: UserIDPScalarWhereInput | UserIDPScalarWhereInput[]
+  export type error_eventsUpdateManyWithoutUsersNestedInput = {
+    create?: XOR<error_eventsCreateWithoutUsersInput, error_eventsUncheckedCreateWithoutUsersInput> | error_eventsCreateWithoutUsersInput[] | error_eventsUncheckedCreateWithoutUsersInput[]
+    connectOrCreate?: error_eventsCreateOrConnectWithoutUsersInput | error_eventsCreateOrConnectWithoutUsersInput[]
+    upsert?: error_eventsUpsertWithWhereUniqueWithoutUsersInput | error_eventsUpsertWithWhereUniqueWithoutUsersInput[]
+    createMany?: error_eventsCreateManyUsersInputEnvelope
+    set?: error_eventsWhereUniqueInput | error_eventsWhereUniqueInput[]
+    disconnect?: error_eventsWhereUniqueInput | error_eventsWhereUniqueInput[]
+    delete?: error_eventsWhereUniqueInput | error_eventsWhereUniqueInput[]
+    connect?: error_eventsWhereUniqueInput | error_eventsWhereUniqueInput[]
+    update?: error_eventsUpdateWithWhereUniqueWithoutUsersInput | error_eventsUpdateWithWhereUniqueWithoutUsersInput[]
+    updateMany?: error_eventsUpdateManyWithWhereWithoutUsersInput | error_eventsUpdateManyWithWhereWithoutUsersInput[]
+    deleteMany?: error_eventsScalarWhereInput | error_eventsScalarWhereInput[]
   }
 
-  export type RoomUpdateManyWithoutCreatorNestedInput = {
-    create?: XOR<RoomCreateWithoutCreatorInput, RoomUncheckedCreateWithoutCreatorInput> | RoomCreateWithoutCreatorInput[] | RoomUncheckedCreateWithoutCreatorInput[]
-    connectOrCreate?: RoomCreateOrConnectWithoutCreatorInput | RoomCreateOrConnectWithoutCreatorInput[]
-    upsert?: RoomUpsertWithWhereUniqueWithoutCreatorInput | RoomUpsertWithWhereUniqueWithoutCreatorInput[]
-    createMany?: RoomCreateManyCreatorInputEnvelope
-    set?: RoomWhereUniqueInput | RoomWhereUniqueInput[]
-    disconnect?: RoomWhereUniqueInput | RoomWhereUniqueInput[]
-    delete?: RoomWhereUniqueInput | RoomWhereUniqueInput[]
-    connect?: RoomWhereUniqueInput | RoomWhereUniqueInput[]
-    update?: RoomUpdateWithWhereUniqueWithoutCreatorInput | RoomUpdateWithWhereUniqueWithoutCreatorInput[]
-    updateMany?: RoomUpdateManyWithWhereWithoutCreatorInput | RoomUpdateManyWithWhereWithoutCreatorInput[]
-    deleteMany?: RoomScalarWhereInput | RoomScalarWhereInput[]
+  export type matchesUpdateManyWithoutUsersNestedInput = {
+    create?: XOR<matchesCreateWithoutUsersInput, matchesUncheckedCreateWithoutUsersInput> | matchesCreateWithoutUsersInput[] | matchesUncheckedCreateWithoutUsersInput[]
+    connectOrCreate?: matchesCreateOrConnectWithoutUsersInput | matchesCreateOrConnectWithoutUsersInput[]
+    upsert?: matchesUpsertWithWhereUniqueWithoutUsersInput | matchesUpsertWithWhereUniqueWithoutUsersInput[]
+    createMany?: matchesCreateManyUsersInputEnvelope
+    set?: matchesWhereUniqueInput | matchesWhereUniqueInput[]
+    disconnect?: matchesWhereUniqueInput | matchesWhereUniqueInput[]
+    delete?: matchesWhereUniqueInput | matchesWhereUniqueInput[]
+    connect?: matchesWhereUniqueInput | matchesWhereUniqueInput[]
+    update?: matchesUpdateWithWhereUniqueWithoutUsersInput | matchesUpdateWithWhereUniqueWithoutUsersInput[]
+    updateMany?: matchesUpdateManyWithWhereWithoutUsersInput | matchesUpdateManyWithWhereWithoutUsersInput[]
+    deleteMany?: matchesScalarWhereInput | matchesScalarWhereInput[]
   }
 
   export type RoomUserUpdateManyWithoutUserNestedInput = {
@@ -6318,7 +9485,21 @@ export namespace Prisma {
     deleteMany?: RoomUserScalarWhereInput | RoomUserScalarWhereInput[]
   }
 
-  export type UserIDPUncheckedUpdateManyWithoutUserNestedInput = {
+  export type RoomUpdateManyWithoutCreatorNestedInput = {
+    create?: XOR<RoomCreateWithoutCreatorInput, RoomUncheckedCreateWithoutCreatorInput> | RoomCreateWithoutCreatorInput[] | RoomUncheckedCreateWithoutCreatorInput[]
+    connectOrCreate?: RoomCreateOrConnectWithoutCreatorInput | RoomCreateOrConnectWithoutCreatorInput[]
+    upsert?: RoomUpsertWithWhereUniqueWithoutCreatorInput | RoomUpsertWithWhereUniqueWithoutCreatorInput[]
+    createMany?: RoomCreateManyCreatorInputEnvelope
+    set?: RoomWhereUniqueInput | RoomWhereUniqueInput[]
+    disconnect?: RoomWhereUniqueInput | RoomWhereUniqueInput[]
+    delete?: RoomWhereUniqueInput | RoomWhereUniqueInput[]
+    connect?: RoomWhereUniqueInput | RoomWhereUniqueInput[]
+    update?: RoomUpdateWithWhereUniqueWithoutCreatorInput | RoomUpdateWithWhereUniqueWithoutCreatorInput[]
+    updateMany?: RoomUpdateManyWithWhereWithoutCreatorInput | RoomUpdateManyWithWhereWithoutCreatorInput[]
+    deleteMany?: RoomScalarWhereInput | RoomScalarWhereInput[]
+  }
+
+  export type UserIDPUpdateManyWithoutUserNestedInput = {
     create?: XOR<UserIDPCreateWithoutUserInput, UserIDPUncheckedCreateWithoutUserInput> | UserIDPCreateWithoutUserInput[] | UserIDPUncheckedCreateWithoutUserInput[]
     connectOrCreate?: UserIDPCreateOrConnectWithoutUserInput | UserIDPCreateOrConnectWithoutUserInput[]
     upsert?: UserIDPUpsertWithWhereUniqueWithoutUserInput | UserIDPUpsertWithWhereUniqueWithoutUserInput[]
@@ -6332,18 +9513,32 @@ export namespace Prisma {
     deleteMany?: UserIDPScalarWhereInput | UserIDPScalarWhereInput[]
   }
 
-  export type RoomUncheckedUpdateManyWithoutCreatorNestedInput = {
-    create?: XOR<RoomCreateWithoutCreatorInput, RoomUncheckedCreateWithoutCreatorInput> | RoomCreateWithoutCreatorInput[] | RoomUncheckedCreateWithoutCreatorInput[]
-    connectOrCreate?: RoomCreateOrConnectWithoutCreatorInput | RoomCreateOrConnectWithoutCreatorInput[]
-    upsert?: RoomUpsertWithWhereUniqueWithoutCreatorInput | RoomUpsertWithWhereUniqueWithoutCreatorInput[]
-    createMany?: RoomCreateManyCreatorInputEnvelope
-    set?: RoomWhereUniqueInput | RoomWhereUniqueInput[]
-    disconnect?: RoomWhereUniqueInput | RoomWhereUniqueInput[]
-    delete?: RoomWhereUniqueInput | RoomWhereUniqueInput[]
-    connect?: RoomWhereUniqueInput | RoomWhereUniqueInput[]
-    update?: RoomUpdateWithWhereUniqueWithoutCreatorInput | RoomUpdateWithWhereUniqueWithoutCreatorInput[]
-    updateMany?: RoomUpdateManyWithWhereWithoutCreatorInput | RoomUpdateManyWithWhereWithoutCreatorInput[]
-    deleteMany?: RoomScalarWhereInput | RoomScalarWhereInput[]
+  export type error_eventsUncheckedUpdateManyWithoutUsersNestedInput = {
+    create?: XOR<error_eventsCreateWithoutUsersInput, error_eventsUncheckedCreateWithoutUsersInput> | error_eventsCreateWithoutUsersInput[] | error_eventsUncheckedCreateWithoutUsersInput[]
+    connectOrCreate?: error_eventsCreateOrConnectWithoutUsersInput | error_eventsCreateOrConnectWithoutUsersInput[]
+    upsert?: error_eventsUpsertWithWhereUniqueWithoutUsersInput | error_eventsUpsertWithWhereUniqueWithoutUsersInput[]
+    createMany?: error_eventsCreateManyUsersInputEnvelope
+    set?: error_eventsWhereUniqueInput | error_eventsWhereUniqueInput[]
+    disconnect?: error_eventsWhereUniqueInput | error_eventsWhereUniqueInput[]
+    delete?: error_eventsWhereUniqueInput | error_eventsWhereUniqueInput[]
+    connect?: error_eventsWhereUniqueInput | error_eventsWhereUniqueInput[]
+    update?: error_eventsUpdateWithWhereUniqueWithoutUsersInput | error_eventsUpdateWithWhereUniqueWithoutUsersInput[]
+    updateMany?: error_eventsUpdateManyWithWhereWithoutUsersInput | error_eventsUpdateManyWithWhereWithoutUsersInput[]
+    deleteMany?: error_eventsScalarWhereInput | error_eventsScalarWhereInput[]
+  }
+
+  export type matchesUncheckedUpdateManyWithoutUsersNestedInput = {
+    create?: XOR<matchesCreateWithoutUsersInput, matchesUncheckedCreateWithoutUsersInput> | matchesCreateWithoutUsersInput[] | matchesUncheckedCreateWithoutUsersInput[]
+    connectOrCreate?: matchesCreateOrConnectWithoutUsersInput | matchesCreateOrConnectWithoutUsersInput[]
+    upsert?: matchesUpsertWithWhereUniqueWithoutUsersInput | matchesUpsertWithWhereUniqueWithoutUsersInput[]
+    createMany?: matchesCreateManyUsersInputEnvelope
+    set?: matchesWhereUniqueInput | matchesWhereUniqueInput[]
+    disconnect?: matchesWhereUniqueInput | matchesWhereUniqueInput[]
+    delete?: matchesWhereUniqueInput | matchesWhereUniqueInput[]
+    connect?: matchesWhereUniqueInput | matchesWhereUniqueInput[]
+    update?: matchesUpdateWithWhereUniqueWithoutUsersInput | matchesUpdateWithWhereUniqueWithoutUsersInput[]
+    updateMany?: matchesUpdateManyWithWhereWithoutUsersInput | matchesUpdateManyWithWhereWithoutUsersInput[]
+    deleteMany?: matchesScalarWhereInput | matchesScalarWhereInput[]
   }
 
   export type RoomUserUncheckedUpdateManyWithoutUserNestedInput = {
@@ -6360,6 +9555,41 @@ export namespace Prisma {
     deleteMany?: RoomUserScalarWhereInput | RoomUserScalarWhereInput[]
   }
 
+  export type RoomUncheckedUpdateManyWithoutCreatorNestedInput = {
+    create?: XOR<RoomCreateWithoutCreatorInput, RoomUncheckedCreateWithoutCreatorInput> | RoomCreateWithoutCreatorInput[] | RoomUncheckedCreateWithoutCreatorInput[]
+    connectOrCreate?: RoomCreateOrConnectWithoutCreatorInput | RoomCreateOrConnectWithoutCreatorInput[]
+    upsert?: RoomUpsertWithWhereUniqueWithoutCreatorInput | RoomUpsertWithWhereUniqueWithoutCreatorInput[]
+    createMany?: RoomCreateManyCreatorInputEnvelope
+    set?: RoomWhereUniqueInput | RoomWhereUniqueInput[]
+    disconnect?: RoomWhereUniqueInput | RoomWhereUniqueInput[]
+    delete?: RoomWhereUniqueInput | RoomWhereUniqueInput[]
+    connect?: RoomWhereUniqueInput | RoomWhereUniqueInput[]
+    update?: RoomUpdateWithWhereUniqueWithoutCreatorInput | RoomUpdateWithWhereUniqueWithoutCreatorInput[]
+    updateMany?: RoomUpdateManyWithWhereWithoutCreatorInput | RoomUpdateManyWithWhereWithoutCreatorInput[]
+    deleteMany?: RoomScalarWhereInput | RoomScalarWhereInput[]
+  }
+
+  export type UserIDPUncheckedUpdateManyWithoutUserNestedInput = {
+    create?: XOR<UserIDPCreateWithoutUserInput, UserIDPUncheckedCreateWithoutUserInput> | UserIDPCreateWithoutUserInput[] | UserIDPUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: UserIDPCreateOrConnectWithoutUserInput | UserIDPCreateOrConnectWithoutUserInput[]
+    upsert?: UserIDPUpsertWithWhereUniqueWithoutUserInput | UserIDPUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: UserIDPCreateManyUserInputEnvelope
+    set?: UserIDPWhereUniqueInput | UserIDPWhereUniqueInput[]
+    disconnect?: UserIDPWhereUniqueInput | UserIDPWhereUniqueInput[]
+    delete?: UserIDPWhereUniqueInput | UserIDPWhereUniqueInput[]
+    connect?: UserIDPWhereUniqueInput | UserIDPWhereUniqueInput[]
+    update?: UserIDPUpdateWithWhereUniqueWithoutUserInput | UserIDPUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: UserIDPUpdateManyWithWhereWithoutUserInput | UserIDPUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: UserIDPScalarWhereInput | UserIDPScalarWhereInput[]
+  }
+
+  export type matchesCreateNestedManyWithoutRoomsInput = {
+    create?: XOR<matchesCreateWithoutRoomsInput, matchesUncheckedCreateWithoutRoomsInput> | matchesCreateWithoutRoomsInput[] | matchesUncheckedCreateWithoutRoomsInput[]
+    connectOrCreate?: matchesCreateOrConnectWithoutRoomsInput | matchesCreateOrConnectWithoutRoomsInput[]
+    createMany?: matchesCreateManyRoomsInputEnvelope
+    connect?: matchesWhereUniqueInput | matchesWhereUniqueInput[]
+  }
+
   export type RoomUserCreateNestedManyWithoutRoomInput = {
     create?: XOR<RoomUserCreateWithoutRoomInput, RoomUserUncheckedCreateWithoutRoomInput> | RoomUserCreateWithoutRoomInput[] | RoomUserUncheckedCreateWithoutRoomInput[]
     connectOrCreate?: RoomUserCreateOrConnectWithoutRoomInput | RoomUserCreateOrConnectWithoutRoomInput[]
@@ -6373,11 +9603,40 @@ export namespace Prisma {
     connect?: UserWhereUniqueInput
   }
 
+  export type matchesUncheckedCreateNestedManyWithoutRoomsInput = {
+    create?: XOR<matchesCreateWithoutRoomsInput, matchesUncheckedCreateWithoutRoomsInput> | matchesCreateWithoutRoomsInput[] | matchesUncheckedCreateWithoutRoomsInput[]
+    connectOrCreate?: matchesCreateOrConnectWithoutRoomsInput | matchesCreateOrConnectWithoutRoomsInput[]
+    createMany?: matchesCreateManyRoomsInputEnvelope
+    connect?: matchesWhereUniqueInput | matchesWhereUniqueInput[]
+  }
+
   export type RoomUserUncheckedCreateNestedManyWithoutRoomInput = {
     create?: XOR<RoomUserCreateWithoutRoomInput, RoomUserUncheckedCreateWithoutRoomInput> | RoomUserCreateWithoutRoomInput[] | RoomUserUncheckedCreateWithoutRoomInput[]
     connectOrCreate?: RoomUserCreateOrConnectWithoutRoomInput | RoomUserCreateOrConnectWithoutRoomInput[]
     createMany?: RoomUserCreateManyRoomInputEnvelope
     connect?: RoomUserWhereUniqueInput | RoomUserWhereUniqueInput[]
+  }
+
+  export type NullableStringFieldUpdateOperationsInput = {
+    set?: string | null
+  }
+
+  export type EnumRoomStatusFieldUpdateOperationsInput = {
+    set?: $Enums.RoomStatus
+  }
+
+  export type matchesUpdateManyWithoutRoomsNestedInput = {
+    create?: XOR<matchesCreateWithoutRoomsInput, matchesUncheckedCreateWithoutRoomsInput> | matchesCreateWithoutRoomsInput[] | matchesUncheckedCreateWithoutRoomsInput[]
+    connectOrCreate?: matchesCreateOrConnectWithoutRoomsInput | matchesCreateOrConnectWithoutRoomsInput[]
+    upsert?: matchesUpsertWithWhereUniqueWithoutRoomsInput | matchesUpsertWithWhereUniqueWithoutRoomsInput[]
+    createMany?: matchesCreateManyRoomsInputEnvelope
+    set?: matchesWhereUniqueInput | matchesWhereUniqueInput[]
+    disconnect?: matchesWhereUniqueInput | matchesWhereUniqueInput[]
+    delete?: matchesWhereUniqueInput | matchesWhereUniqueInput[]
+    connect?: matchesWhereUniqueInput | matchesWhereUniqueInput[]
+    update?: matchesUpdateWithWhereUniqueWithoutRoomsInput | matchesUpdateWithWhereUniqueWithoutRoomsInput[]
+    updateMany?: matchesUpdateManyWithWhereWithoutRoomsInput | matchesUpdateManyWithWhereWithoutRoomsInput[]
+    deleteMany?: matchesScalarWhereInput | matchesScalarWhereInput[]
   }
 
   export type RoomUserUpdateManyWithoutRoomNestedInput = {
@@ -6400,6 +9659,20 @@ export namespace Prisma {
     upsert?: UserUpsertWithoutCreatedRoomsInput
     connect?: UserWhereUniqueInput
     update?: XOR<XOR<UserUpdateToOneWithWhereWithoutCreatedRoomsInput, UserUpdateWithoutCreatedRoomsInput>, UserUncheckedUpdateWithoutCreatedRoomsInput>
+  }
+
+  export type matchesUncheckedUpdateManyWithoutRoomsNestedInput = {
+    create?: XOR<matchesCreateWithoutRoomsInput, matchesUncheckedCreateWithoutRoomsInput> | matchesCreateWithoutRoomsInput[] | matchesUncheckedCreateWithoutRoomsInput[]
+    connectOrCreate?: matchesCreateOrConnectWithoutRoomsInput | matchesCreateOrConnectWithoutRoomsInput[]
+    upsert?: matchesUpsertWithWhereUniqueWithoutRoomsInput | matchesUpsertWithWhereUniqueWithoutRoomsInput[]
+    createMany?: matchesCreateManyRoomsInputEnvelope
+    set?: matchesWhereUniqueInput | matchesWhereUniqueInput[]
+    disconnect?: matchesWhereUniqueInput | matchesWhereUniqueInput[]
+    delete?: matchesWhereUniqueInput | matchesWhereUniqueInput[]
+    connect?: matchesWhereUniqueInput | matchesWhereUniqueInput[]
+    update?: matchesUpdateWithWhereUniqueWithoutRoomsInput | matchesUpdateWithWhereUniqueWithoutRoomsInput[]
+    updateMany?: matchesUpdateManyWithWhereWithoutRoomsInput | matchesUpdateManyWithWhereWithoutRoomsInput[]
+    deleteMany?: matchesScalarWhereInput | matchesScalarWhereInput[]
   }
 
   export type RoomUserUncheckedUpdateManyWithoutRoomNestedInput = {
@@ -6456,6 +9729,112 @@ export namespace Prisma {
     upsert?: UserUpsertWithoutUserIDPsInput
     connect?: UserWhereUniqueInput
     update?: XOR<XOR<UserUpdateToOneWithWhereWithoutUserIDPsInput, UserUpdateWithoutUserIDPsInput>, UserUncheckedUpdateWithoutUserIDPsInput>
+  }
+
+  export type UserCreateNestedOneWithoutError_eventsInput = {
+    create?: XOR<UserCreateWithoutError_eventsInput, UserUncheckedCreateWithoutError_eventsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutError_eventsInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type matchesCreateNestedOneWithoutError_eventsInput = {
+    create?: XOR<matchesCreateWithoutError_eventsInput, matchesUncheckedCreateWithoutError_eventsInput>
+    connectOrCreate?: matchesCreateOrConnectWithoutError_eventsInput
+    connect?: matchesWhereUniqueInput
+  }
+
+  export type NullableDateTimeFieldUpdateOperationsInput = {
+    set?: Date | string | null
+  }
+
+  export type UserUpdateOneWithoutError_eventsNestedInput = {
+    create?: XOR<UserCreateWithoutError_eventsInput, UserUncheckedCreateWithoutError_eventsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutError_eventsInput
+    upsert?: UserUpsertWithoutError_eventsInput
+    disconnect?: UserWhereInput | boolean
+    delete?: UserWhereInput | boolean
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutError_eventsInput, UserUpdateWithoutError_eventsInput>, UserUncheckedUpdateWithoutError_eventsInput>
+  }
+
+  export type matchesUpdateOneRequiredWithoutError_eventsNestedInput = {
+    create?: XOR<matchesCreateWithoutError_eventsInput, matchesUncheckedCreateWithoutError_eventsInput>
+    connectOrCreate?: matchesCreateOrConnectWithoutError_eventsInput
+    upsert?: matchesUpsertWithoutError_eventsInput
+    connect?: matchesWhereUniqueInput
+    update?: XOR<XOR<matchesUpdateToOneWithWhereWithoutError_eventsInput, matchesUpdateWithoutError_eventsInput>, matchesUncheckedUpdateWithoutError_eventsInput>
+  }
+
+  export type error_eventsCreateNestedManyWithoutMatchesInput = {
+    create?: XOR<error_eventsCreateWithoutMatchesInput, error_eventsUncheckedCreateWithoutMatchesInput> | error_eventsCreateWithoutMatchesInput[] | error_eventsUncheckedCreateWithoutMatchesInput[]
+    connectOrCreate?: error_eventsCreateOrConnectWithoutMatchesInput | error_eventsCreateOrConnectWithoutMatchesInput[]
+    createMany?: error_eventsCreateManyMatchesInputEnvelope
+    connect?: error_eventsWhereUniqueInput | error_eventsWhereUniqueInput[]
+  }
+
+  export type RoomCreateNestedOneWithoutMatchesInput = {
+    create?: XOR<RoomCreateWithoutMatchesInput, RoomUncheckedCreateWithoutMatchesInput>
+    connectOrCreate?: RoomCreateOrConnectWithoutMatchesInput
+    connect?: RoomWhereUniqueInput
+  }
+
+  export type UserCreateNestedOneWithoutMatchesInput = {
+    create?: XOR<UserCreateWithoutMatchesInput, UserUncheckedCreateWithoutMatchesInput>
+    connectOrCreate?: UserCreateOrConnectWithoutMatchesInput
+    connect?: UserWhereUniqueInput
+  }
+
+  export type error_eventsUncheckedCreateNestedManyWithoutMatchesInput = {
+    create?: XOR<error_eventsCreateWithoutMatchesInput, error_eventsUncheckedCreateWithoutMatchesInput> | error_eventsCreateWithoutMatchesInput[] | error_eventsUncheckedCreateWithoutMatchesInput[]
+    connectOrCreate?: error_eventsCreateOrConnectWithoutMatchesInput | error_eventsCreateOrConnectWithoutMatchesInput[]
+    createMany?: error_eventsCreateManyMatchesInputEnvelope
+    connect?: error_eventsWhereUniqueInput | error_eventsWhereUniqueInput[]
+  }
+
+  export type error_eventsUpdateManyWithoutMatchesNestedInput = {
+    create?: XOR<error_eventsCreateWithoutMatchesInput, error_eventsUncheckedCreateWithoutMatchesInput> | error_eventsCreateWithoutMatchesInput[] | error_eventsUncheckedCreateWithoutMatchesInput[]
+    connectOrCreate?: error_eventsCreateOrConnectWithoutMatchesInput | error_eventsCreateOrConnectWithoutMatchesInput[]
+    upsert?: error_eventsUpsertWithWhereUniqueWithoutMatchesInput | error_eventsUpsertWithWhereUniqueWithoutMatchesInput[]
+    createMany?: error_eventsCreateManyMatchesInputEnvelope
+    set?: error_eventsWhereUniqueInput | error_eventsWhereUniqueInput[]
+    disconnect?: error_eventsWhereUniqueInput | error_eventsWhereUniqueInput[]
+    delete?: error_eventsWhereUniqueInput | error_eventsWhereUniqueInput[]
+    connect?: error_eventsWhereUniqueInput | error_eventsWhereUniqueInput[]
+    update?: error_eventsUpdateWithWhereUniqueWithoutMatchesInput | error_eventsUpdateWithWhereUniqueWithoutMatchesInput[]
+    updateMany?: error_eventsUpdateManyWithWhereWithoutMatchesInput | error_eventsUpdateManyWithWhereWithoutMatchesInput[]
+    deleteMany?: error_eventsScalarWhereInput | error_eventsScalarWhereInput[]
+  }
+
+  export type RoomUpdateOneRequiredWithoutMatchesNestedInput = {
+    create?: XOR<RoomCreateWithoutMatchesInput, RoomUncheckedCreateWithoutMatchesInput>
+    connectOrCreate?: RoomCreateOrConnectWithoutMatchesInput
+    upsert?: RoomUpsertWithoutMatchesInput
+    connect?: RoomWhereUniqueInput
+    update?: XOR<XOR<RoomUpdateToOneWithWhereWithoutMatchesInput, RoomUpdateWithoutMatchesInput>, RoomUncheckedUpdateWithoutMatchesInput>
+  }
+
+  export type UserUpdateOneWithoutMatchesNestedInput = {
+    create?: XOR<UserCreateWithoutMatchesInput, UserUncheckedCreateWithoutMatchesInput>
+    connectOrCreate?: UserCreateOrConnectWithoutMatchesInput
+    upsert?: UserUpsertWithoutMatchesInput
+    disconnect?: UserWhereInput | boolean
+    delete?: UserWhereInput | boolean
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutMatchesInput, UserUpdateWithoutMatchesInput>, UserUncheckedUpdateWithoutMatchesInput>
+  }
+
+  export type error_eventsUncheckedUpdateManyWithoutMatchesNestedInput = {
+    create?: XOR<error_eventsCreateWithoutMatchesInput, error_eventsUncheckedCreateWithoutMatchesInput> | error_eventsCreateWithoutMatchesInput[] | error_eventsUncheckedCreateWithoutMatchesInput[]
+    connectOrCreate?: error_eventsCreateOrConnectWithoutMatchesInput | error_eventsCreateOrConnectWithoutMatchesInput[]
+    upsert?: error_eventsUpsertWithWhereUniqueWithoutMatchesInput | error_eventsUpsertWithWhereUniqueWithoutMatchesInput[]
+    createMany?: error_eventsCreateManyMatchesInputEnvelope
+    set?: error_eventsWhereUniqueInput | error_eventsWhereUniqueInput[]
+    disconnect?: error_eventsWhereUniqueInput | error_eventsWhereUniqueInput[]
+    delete?: error_eventsWhereUniqueInput | error_eventsWhereUniqueInput[]
+    connect?: error_eventsWhereUniqueInput | error_eventsWhereUniqueInput[]
+    update?: error_eventsUpdateWithWhereUniqueWithoutMatchesInput | error_eventsUpdateWithWhereUniqueWithoutMatchesInput[]
+    updateMany?: error_eventsUpdateManyWithWhereWithoutMatchesInput | error_eventsUpdateManyWithWhereWithoutMatchesInput[]
+    deleteMany?: error_eventsScalarWhereInput | error_eventsScalarWhereInput[]
   }
 
   export type NestedUuidFilter<$PrismaModel = never> = {
@@ -6550,47 +9929,164 @@ export namespace Prisma {
     _max?: NestedDateTimeFilter<$PrismaModel>
   }
 
-  export type UserIDPCreateWithoutUserInput = {
+  export type NestedUuidNullableFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel> | null
+    in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    lt?: string | StringFieldRefInput<$PrismaModel>
+    lte?: string | StringFieldRefInput<$PrismaModel>
+    gt?: string | StringFieldRefInput<$PrismaModel>
+    gte?: string | StringFieldRefInput<$PrismaModel>
+    not?: NestedUuidNullableFilter<$PrismaModel> | string | null
+  }
+
+  export type NestedStringNullableFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel> | null
+    in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    lt?: string | StringFieldRefInput<$PrismaModel>
+    lte?: string | StringFieldRefInput<$PrismaModel>
+    gt?: string | StringFieldRefInput<$PrismaModel>
+    gte?: string | StringFieldRefInput<$PrismaModel>
+    contains?: string | StringFieldRefInput<$PrismaModel>
+    startsWith?: string | StringFieldRefInput<$PrismaModel>
+    endsWith?: string | StringFieldRefInput<$PrismaModel>
+    not?: NestedStringNullableFilter<$PrismaModel> | string | null
+  }
+
+  export type NestedEnumRoomStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.RoomStatus | EnumRoomStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.RoomStatus[] | ListEnumRoomStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.RoomStatus[] | ListEnumRoomStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumRoomStatusFilter<$PrismaModel> | $Enums.RoomStatus
+  }
+
+  export type NestedUuidNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel> | null
+    in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    lt?: string | StringFieldRefInput<$PrismaModel>
+    lte?: string | StringFieldRefInput<$PrismaModel>
+    gt?: string | StringFieldRefInput<$PrismaModel>
+    gte?: string | StringFieldRefInput<$PrismaModel>
+    not?: NestedUuidNullableWithAggregatesFilter<$PrismaModel> | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedStringNullableFilter<$PrismaModel>
+    _max?: NestedStringNullableFilter<$PrismaModel>
+  }
+
+  export type NestedIntNullableFilter<$PrismaModel = never> = {
+    equals?: number | IntFieldRefInput<$PrismaModel> | null
+    in?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    notIn?: number[] | ListIntFieldRefInput<$PrismaModel> | null
+    lt?: number | IntFieldRefInput<$PrismaModel>
+    lte?: number | IntFieldRefInput<$PrismaModel>
+    gt?: number | IntFieldRefInput<$PrismaModel>
+    gte?: number | IntFieldRefInput<$PrismaModel>
+    not?: NestedIntNullableFilter<$PrismaModel> | number | null
+  }
+
+  export type NestedStringNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: string | StringFieldRefInput<$PrismaModel> | null
+    in?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    notIn?: string[] | ListStringFieldRefInput<$PrismaModel> | null
+    lt?: string | StringFieldRefInput<$PrismaModel>
+    lte?: string | StringFieldRefInput<$PrismaModel>
+    gt?: string | StringFieldRefInput<$PrismaModel>
+    gte?: string | StringFieldRefInput<$PrismaModel>
+    contains?: string | StringFieldRefInput<$PrismaModel>
+    startsWith?: string | StringFieldRefInput<$PrismaModel>
+    endsWith?: string | StringFieldRefInput<$PrismaModel>
+    not?: NestedStringNullableWithAggregatesFilter<$PrismaModel> | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedStringNullableFilter<$PrismaModel>
+    _max?: NestedStringNullableFilter<$PrismaModel>
+  }
+
+  export type NestedEnumRoomStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.RoomStatus | EnumRoomStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.RoomStatus[] | ListEnumRoomStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.RoomStatus[] | ListEnumRoomStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumRoomStatusWithAggregatesFilter<$PrismaModel> | $Enums.RoomStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumRoomStatusFilter<$PrismaModel>
+    _max?: NestedEnumRoomStatusFilter<$PrismaModel>
+  }
+
+  export type NestedDateTimeNullableFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableFilter<$PrismaModel> | Date | string | null
+  }
+
+  export type NestedDateTimeNullableWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: Date | string | DateTimeFieldRefInput<$PrismaModel> | null
+    in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    notIn?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel> | null
+    lt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    lte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gt?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    gte?: Date | string | DateTimeFieldRefInput<$PrismaModel>
+    not?: NestedDateTimeNullableWithAggregatesFilter<$PrismaModel> | Date | string | null
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedDateTimeNullableFilter<$PrismaModel>
+    _max?: NestedDateTimeNullableFilter<$PrismaModel>
+  }
+
+  export type error_eventsCreateWithoutUsersInput = {
     id?: string
-    supabaseUid: string
+    appearance_at: Date | string
+    closed_at?: Date | string | null
+    matches: matchesCreateNestedOneWithoutError_eventsInput
   }
 
-  export type UserIDPUncheckedCreateWithoutUserInput = {
+  export type error_eventsUncheckedCreateWithoutUsersInput = {
     id?: string
-    supabaseUid: string
+    match_id: string
+    appearance_at: Date | string
+    closed_at?: Date | string | null
   }
 
-  export type UserIDPCreateOrConnectWithoutUserInput = {
-    where: UserIDPWhereUniqueInput
-    create: XOR<UserIDPCreateWithoutUserInput, UserIDPUncheckedCreateWithoutUserInput>
+  export type error_eventsCreateOrConnectWithoutUsersInput = {
+    where: error_eventsWhereUniqueInput
+    create: XOR<error_eventsCreateWithoutUsersInput, error_eventsUncheckedCreateWithoutUsersInput>
   }
 
-  export type UserIDPCreateManyUserInputEnvelope = {
-    data: UserIDPCreateManyUserInput | UserIDPCreateManyUserInput[]
+  export type error_eventsCreateManyUsersInputEnvelope = {
+    data: error_eventsCreateManyUsersInput | error_eventsCreateManyUsersInput[]
     skipDuplicates?: boolean
   }
 
-  export type RoomCreateWithoutCreatorInput = {
+  export type matchesCreateWithoutUsersInput = {
     id?: string
-    name: string
-    createdAt?: Date | string
-    users?: RoomUserCreateNestedManyWithoutRoomInput
+    game_type: string
+    status?: string
+    created_at?: Date | string
+    error_events?: error_eventsCreateNestedManyWithoutMatchesInput
+    rooms: RoomCreateNestedOneWithoutMatchesInput
   }
 
-  export type RoomUncheckedCreateWithoutCreatorInput = {
+  export type matchesUncheckedCreateWithoutUsersInput = {
     id?: string
-    name: string
-    createdAt?: Date | string
-    users?: RoomUserUncheckedCreateNestedManyWithoutRoomInput
+    room_id: string
+    game_type: string
+    status?: string
+    created_at?: Date | string
+    error_events?: error_eventsUncheckedCreateNestedManyWithoutMatchesInput
   }
 
-  export type RoomCreateOrConnectWithoutCreatorInput = {
-    where: RoomWhereUniqueInput
-    create: XOR<RoomCreateWithoutCreatorInput, RoomUncheckedCreateWithoutCreatorInput>
+  export type matchesCreateOrConnectWithoutUsersInput = {
+    where: matchesWhereUniqueInput
+    create: XOR<matchesCreateWithoutUsersInput, matchesUncheckedCreateWithoutUsersInput>
   }
 
-  export type RoomCreateManyCreatorInputEnvelope = {
-    data: RoomCreateManyCreatorInput | RoomCreateManyCreatorInput[]
+  export type matchesCreateManyUsersInputEnvelope = {
+    data: matchesCreateManyUsersInput | matchesCreateManyUsersInput[]
     skipDuplicates?: boolean
   }
 
@@ -6614,6 +10110,168 @@ export namespace Prisma {
   export type RoomUserCreateManyUserInputEnvelope = {
     data: RoomUserCreateManyUserInput | RoomUserCreateManyUserInput[]
     skipDuplicates?: boolean
+  }
+
+  export type RoomCreateWithoutCreatorInput = {
+    id?: string
+    name: string
+    createdAt?: Date | string
+    current_match_id?: string | null
+    activeGameType?: string | null
+    status?: $Enums.RoomStatus
+    matches?: matchesCreateNestedManyWithoutRoomsInput
+    users?: RoomUserCreateNestedManyWithoutRoomInput
+  }
+
+  export type RoomUncheckedCreateWithoutCreatorInput = {
+    id?: string
+    name: string
+    createdAt?: Date | string
+    current_match_id?: string | null
+    activeGameType?: string | null
+    status?: $Enums.RoomStatus
+    matches?: matchesUncheckedCreateNestedManyWithoutRoomsInput
+    users?: RoomUserUncheckedCreateNestedManyWithoutRoomInput
+  }
+
+  export type RoomCreateOrConnectWithoutCreatorInput = {
+    where: RoomWhereUniqueInput
+    create: XOR<RoomCreateWithoutCreatorInput, RoomUncheckedCreateWithoutCreatorInput>
+  }
+
+  export type RoomCreateManyCreatorInputEnvelope = {
+    data: RoomCreateManyCreatorInput | RoomCreateManyCreatorInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type UserIDPCreateWithoutUserInput = {
+    id?: string
+    supabaseUid: string
+  }
+
+  export type UserIDPUncheckedCreateWithoutUserInput = {
+    id?: string
+    supabaseUid: string
+  }
+
+  export type UserIDPCreateOrConnectWithoutUserInput = {
+    where: UserIDPWhereUniqueInput
+    create: XOR<UserIDPCreateWithoutUserInput, UserIDPUncheckedCreateWithoutUserInput>
+  }
+
+  export type UserIDPCreateManyUserInputEnvelope = {
+    data: UserIDPCreateManyUserInput | UserIDPCreateManyUserInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type error_eventsUpsertWithWhereUniqueWithoutUsersInput = {
+    where: error_eventsWhereUniqueInput
+    update: XOR<error_eventsUpdateWithoutUsersInput, error_eventsUncheckedUpdateWithoutUsersInput>
+    create: XOR<error_eventsCreateWithoutUsersInput, error_eventsUncheckedCreateWithoutUsersInput>
+  }
+
+  export type error_eventsUpdateWithWhereUniqueWithoutUsersInput = {
+    where: error_eventsWhereUniqueInput
+    data: XOR<error_eventsUpdateWithoutUsersInput, error_eventsUncheckedUpdateWithoutUsersInput>
+  }
+
+  export type error_eventsUpdateManyWithWhereWithoutUsersInput = {
+    where: error_eventsScalarWhereInput
+    data: XOR<error_eventsUpdateManyMutationInput, error_eventsUncheckedUpdateManyWithoutUsersInput>
+  }
+
+  export type error_eventsScalarWhereInput = {
+    AND?: error_eventsScalarWhereInput | error_eventsScalarWhereInput[]
+    OR?: error_eventsScalarWhereInput[]
+    NOT?: error_eventsScalarWhereInput | error_eventsScalarWhereInput[]
+    id?: UuidFilter<"error_events"> | string
+    match_id?: UuidFilter<"error_events"> | string
+    appearance_at?: DateTimeFilter<"error_events"> | Date | string
+    closed_at?: DateTimeNullableFilter<"error_events"> | Date | string | null
+    closed_by?: UuidNullableFilter<"error_events"> | string | null
+  }
+
+  export type matchesUpsertWithWhereUniqueWithoutUsersInput = {
+    where: matchesWhereUniqueInput
+    update: XOR<matchesUpdateWithoutUsersInput, matchesUncheckedUpdateWithoutUsersInput>
+    create: XOR<matchesCreateWithoutUsersInput, matchesUncheckedCreateWithoutUsersInput>
+  }
+
+  export type matchesUpdateWithWhereUniqueWithoutUsersInput = {
+    where: matchesWhereUniqueInput
+    data: XOR<matchesUpdateWithoutUsersInput, matchesUncheckedUpdateWithoutUsersInput>
+  }
+
+  export type matchesUpdateManyWithWhereWithoutUsersInput = {
+    where: matchesScalarWhereInput
+    data: XOR<matchesUpdateManyMutationInput, matchesUncheckedUpdateManyWithoutUsersInput>
+  }
+
+  export type matchesScalarWhereInput = {
+    AND?: matchesScalarWhereInput | matchesScalarWhereInput[]
+    OR?: matchesScalarWhereInput[]
+    NOT?: matchesScalarWhereInput | matchesScalarWhereInput[]
+    id?: UuidFilter<"matches"> | string
+    room_id?: UuidFilter<"matches"> | string
+    game_type?: StringFilter<"matches"> | string
+    status?: StringFilter<"matches"> | string
+    winner_id?: UuidNullableFilter<"matches"> | string | null
+    created_at?: DateTimeFilter<"matches"> | Date | string
+  }
+
+  export type RoomUserUpsertWithWhereUniqueWithoutUserInput = {
+    where: RoomUserWhereUniqueInput
+    update: XOR<RoomUserUpdateWithoutUserInput, RoomUserUncheckedUpdateWithoutUserInput>
+    create: XOR<RoomUserCreateWithoutUserInput, RoomUserUncheckedCreateWithoutUserInput>
+  }
+
+  export type RoomUserUpdateWithWhereUniqueWithoutUserInput = {
+    where: RoomUserWhereUniqueInput
+    data: XOR<RoomUserUpdateWithoutUserInput, RoomUserUncheckedUpdateWithoutUserInput>
+  }
+
+  export type RoomUserUpdateManyWithWhereWithoutUserInput = {
+    where: RoomUserScalarWhereInput
+    data: XOR<RoomUserUpdateManyMutationInput, RoomUserUncheckedUpdateManyWithoutUserInput>
+  }
+
+  export type RoomUserScalarWhereInput = {
+    AND?: RoomUserScalarWhereInput | RoomUserScalarWhereInput[]
+    OR?: RoomUserScalarWhereInput[]
+    NOT?: RoomUserScalarWhereInput | RoomUserScalarWhereInput[]
+    id?: UuidFilter<"RoomUser"> | string
+    roomId?: UuidFilter<"RoomUser"> | string
+    userId?: UuidFilter<"RoomUser"> | string
+    createdAt?: DateTimeFilter<"RoomUser"> | Date | string
+  }
+
+  export type RoomUpsertWithWhereUniqueWithoutCreatorInput = {
+    where: RoomWhereUniqueInput
+    update: XOR<RoomUpdateWithoutCreatorInput, RoomUncheckedUpdateWithoutCreatorInput>
+    create: XOR<RoomCreateWithoutCreatorInput, RoomUncheckedCreateWithoutCreatorInput>
+  }
+
+  export type RoomUpdateWithWhereUniqueWithoutCreatorInput = {
+    where: RoomWhereUniqueInput
+    data: XOR<RoomUpdateWithoutCreatorInput, RoomUncheckedUpdateWithoutCreatorInput>
+  }
+
+  export type RoomUpdateManyWithWhereWithoutCreatorInput = {
+    where: RoomScalarWhereInput
+    data: XOR<RoomUpdateManyMutationInput, RoomUncheckedUpdateManyWithoutCreatorInput>
+  }
+
+  export type RoomScalarWhereInput = {
+    AND?: RoomScalarWhereInput | RoomScalarWhereInput[]
+    OR?: RoomScalarWhereInput[]
+    NOT?: RoomScalarWhereInput | RoomScalarWhereInput[]
+    id?: UuidFilter<"Room"> | string
+    name?: StringFilter<"Room"> | string
+    createdAt?: DateTimeFilter<"Room"> | Date | string
+    createdBy?: UuidFilter<"Room"> | string
+    current_match_id?: UuidNullableFilter<"Room"> | string | null
+    activeGameType?: StringNullableFilter<"Room"> | string | null
+    status?: EnumRoomStatusFilter<"Room"> | $Enums.RoomStatus
   }
 
   export type UserIDPUpsertWithWhereUniqueWithoutUserInput = {
@@ -6641,56 +10299,32 @@ export namespace Prisma {
     userId?: UuidFilter<"UserIDP"> | string
   }
 
-  export type RoomUpsertWithWhereUniqueWithoutCreatorInput = {
-    where: RoomWhereUniqueInput
-    update: XOR<RoomUpdateWithoutCreatorInput, RoomUncheckedUpdateWithoutCreatorInput>
-    create: XOR<RoomCreateWithoutCreatorInput, RoomUncheckedCreateWithoutCreatorInput>
+  export type matchesCreateWithoutRoomsInput = {
+    id?: string
+    game_type: string
+    status?: string
+    created_at?: Date | string
+    error_events?: error_eventsCreateNestedManyWithoutMatchesInput
+    users?: UserCreateNestedOneWithoutMatchesInput
   }
 
-  export type RoomUpdateWithWhereUniqueWithoutCreatorInput = {
-    where: RoomWhereUniqueInput
-    data: XOR<RoomUpdateWithoutCreatorInput, RoomUncheckedUpdateWithoutCreatorInput>
+  export type matchesUncheckedCreateWithoutRoomsInput = {
+    id?: string
+    game_type: string
+    status?: string
+    winner_id?: string | null
+    created_at?: Date | string
+    error_events?: error_eventsUncheckedCreateNestedManyWithoutMatchesInput
   }
 
-  export type RoomUpdateManyWithWhereWithoutCreatorInput = {
-    where: RoomScalarWhereInput
-    data: XOR<RoomUpdateManyMutationInput, RoomUncheckedUpdateManyWithoutCreatorInput>
+  export type matchesCreateOrConnectWithoutRoomsInput = {
+    where: matchesWhereUniqueInput
+    create: XOR<matchesCreateWithoutRoomsInput, matchesUncheckedCreateWithoutRoomsInput>
   }
 
-  export type RoomScalarWhereInput = {
-    AND?: RoomScalarWhereInput | RoomScalarWhereInput[]
-    OR?: RoomScalarWhereInput[]
-    NOT?: RoomScalarWhereInput | RoomScalarWhereInput[]
-    id?: UuidFilter<"Room"> | string
-    name?: StringFilter<"Room"> | string
-    createdAt?: DateTimeFilter<"Room"> | Date | string
-    createdBy?: UuidFilter<"Room"> | string
-  }
-
-  export type RoomUserUpsertWithWhereUniqueWithoutUserInput = {
-    where: RoomUserWhereUniqueInput
-    update: XOR<RoomUserUpdateWithoutUserInput, RoomUserUncheckedUpdateWithoutUserInput>
-    create: XOR<RoomUserCreateWithoutUserInput, RoomUserUncheckedCreateWithoutUserInput>
-  }
-
-  export type RoomUserUpdateWithWhereUniqueWithoutUserInput = {
-    where: RoomUserWhereUniqueInput
-    data: XOR<RoomUserUpdateWithoutUserInput, RoomUserUncheckedUpdateWithoutUserInput>
-  }
-
-  export type RoomUserUpdateManyWithWhereWithoutUserInput = {
-    where: RoomUserScalarWhereInput
-    data: XOR<RoomUserUpdateManyMutationInput, RoomUserUncheckedUpdateManyWithoutUserInput>
-  }
-
-  export type RoomUserScalarWhereInput = {
-    AND?: RoomUserScalarWhereInput | RoomUserScalarWhereInput[]
-    OR?: RoomUserScalarWhereInput[]
-    NOT?: RoomUserScalarWhereInput | RoomUserScalarWhereInput[]
-    id?: UuidFilter<"RoomUser"> | string
-    roomId?: UuidFilter<"RoomUser"> | string
-    userId?: UuidFilter<"RoomUser"> | string
-    createdAt?: DateTimeFilter<"RoomUser"> | Date | string
+  export type matchesCreateManyRoomsInputEnvelope = {
+    data: matchesCreateManyRoomsInput | matchesCreateManyRoomsInput[]
+    skipDuplicates?: boolean
   }
 
   export type RoomUserCreateWithoutRoomInput = {
@@ -6720,8 +10354,10 @@ export namespace Prisma {
     name: string
     email: string
     createdAt?: Date | string
-    userIDPs?: UserIDPCreateNestedManyWithoutUserInput
+    error_events?: error_eventsCreateNestedManyWithoutUsersInput
+    matches?: matchesCreateNestedManyWithoutUsersInput
     joinedRooms?: RoomUserCreateNestedManyWithoutUserInput
+    userIDPs?: UserIDPCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutCreatedRoomsInput = {
@@ -6729,13 +10365,31 @@ export namespace Prisma {
     name: string
     email: string
     createdAt?: Date | string
-    userIDPs?: UserIDPUncheckedCreateNestedManyWithoutUserInput
+    error_events?: error_eventsUncheckedCreateNestedManyWithoutUsersInput
+    matches?: matchesUncheckedCreateNestedManyWithoutUsersInput
     joinedRooms?: RoomUserUncheckedCreateNestedManyWithoutUserInput
+    userIDPs?: UserIDPUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutCreatedRoomsInput = {
     where: UserWhereUniqueInput
     create: XOR<UserCreateWithoutCreatedRoomsInput, UserUncheckedCreateWithoutCreatedRoomsInput>
+  }
+
+  export type matchesUpsertWithWhereUniqueWithoutRoomsInput = {
+    where: matchesWhereUniqueInput
+    update: XOR<matchesUpdateWithoutRoomsInput, matchesUncheckedUpdateWithoutRoomsInput>
+    create: XOR<matchesCreateWithoutRoomsInput, matchesUncheckedCreateWithoutRoomsInput>
+  }
+
+  export type matchesUpdateWithWhereUniqueWithoutRoomsInput = {
+    where: matchesWhereUniqueInput
+    data: XOR<matchesUpdateWithoutRoomsInput, matchesUncheckedUpdateWithoutRoomsInput>
+  }
+
+  export type matchesUpdateManyWithWhereWithoutRoomsInput = {
+    where: matchesScalarWhereInput
+    data: XOR<matchesUpdateManyMutationInput, matchesUncheckedUpdateManyWithoutRoomsInput>
   }
 
   export type RoomUserUpsertWithWhereUniqueWithoutRoomInput = {
@@ -6770,8 +10424,10 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    userIDPs?: UserIDPUpdateManyWithoutUserNestedInput
+    error_events?: error_eventsUpdateManyWithoutUsersNestedInput
+    matches?: matchesUpdateManyWithoutUsersNestedInput
     joinedRooms?: RoomUserUpdateManyWithoutUserNestedInput
+    userIDPs?: UserIDPUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutCreatedRoomsInput = {
@@ -6779,14 +10435,20 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    userIDPs?: UserIDPUncheckedUpdateManyWithoutUserNestedInput
+    error_events?: error_eventsUncheckedUpdateManyWithoutUsersNestedInput
+    matches?: matchesUncheckedUpdateManyWithoutUsersNestedInput
     joinedRooms?: RoomUserUncheckedUpdateManyWithoutUserNestedInput
+    userIDPs?: UserIDPUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type RoomCreateWithoutUsersInput = {
     id?: string
     name: string
     createdAt?: Date | string
+    current_match_id?: string | null
+    activeGameType?: string | null
+    status?: $Enums.RoomStatus
+    matches?: matchesCreateNestedManyWithoutRoomsInput
     creator: UserCreateNestedOneWithoutCreatedRoomsInput
   }
 
@@ -6795,6 +10457,10 @@ export namespace Prisma {
     name: string
     createdAt?: Date | string
     createdBy: string
+    current_match_id?: string | null
+    activeGameType?: string | null
+    status?: $Enums.RoomStatus
+    matches?: matchesUncheckedCreateNestedManyWithoutRoomsInput
   }
 
   export type RoomCreateOrConnectWithoutUsersInput = {
@@ -6807,8 +10473,10 @@ export namespace Prisma {
     name: string
     email: string
     createdAt?: Date | string
-    userIDPs?: UserIDPCreateNestedManyWithoutUserInput
+    error_events?: error_eventsCreateNestedManyWithoutUsersInput
+    matches?: matchesCreateNestedManyWithoutUsersInput
     createdRooms?: RoomCreateNestedManyWithoutCreatorInput
+    userIDPs?: UserIDPCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateWithoutJoinedRoomsInput = {
@@ -6816,8 +10484,10 @@ export namespace Prisma {
     name: string
     email: string
     createdAt?: Date | string
-    userIDPs?: UserIDPUncheckedCreateNestedManyWithoutUserInput
+    error_events?: error_eventsUncheckedCreateNestedManyWithoutUsersInput
+    matches?: matchesUncheckedCreateNestedManyWithoutUsersInput
     createdRooms?: RoomUncheckedCreateNestedManyWithoutCreatorInput
+    userIDPs?: UserIDPUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserCreateOrConnectWithoutJoinedRoomsInput = {
@@ -6840,6 +10510,10 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     name?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    current_match_id?: NullableStringFieldUpdateOperationsInput | string | null
+    activeGameType?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumRoomStatusFieldUpdateOperationsInput | $Enums.RoomStatus
+    matches?: matchesUpdateManyWithoutRoomsNestedInput
     creator?: UserUpdateOneRequiredWithoutCreatedRoomsNestedInput
   }
 
@@ -6848,6 +10522,10 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     createdBy?: StringFieldUpdateOperationsInput | string
+    current_match_id?: NullableStringFieldUpdateOperationsInput | string | null
+    activeGameType?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumRoomStatusFieldUpdateOperationsInput | $Enums.RoomStatus
+    matches?: matchesUncheckedUpdateManyWithoutRoomsNestedInput
   }
 
   export type UserUpsertWithoutJoinedRoomsInput = {
@@ -6866,8 +10544,10 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    userIDPs?: UserIDPUpdateManyWithoutUserNestedInput
+    error_events?: error_eventsUpdateManyWithoutUsersNestedInput
+    matches?: matchesUpdateManyWithoutUsersNestedInput
     createdRooms?: RoomUpdateManyWithoutCreatorNestedInput
+    userIDPs?: UserIDPUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateWithoutJoinedRoomsInput = {
@@ -6875,8 +10555,10 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    userIDPs?: UserIDPUncheckedUpdateManyWithoutUserNestedInput
+    error_events?: error_eventsUncheckedUpdateManyWithoutUsersNestedInput
+    matches?: matchesUncheckedUpdateManyWithoutUsersNestedInput
     createdRooms?: RoomUncheckedUpdateManyWithoutCreatorNestedInput
+    userIDPs?: UserIDPUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserCreateWithoutUserIDPsInput = {
@@ -6884,8 +10566,10 @@ export namespace Prisma {
     name: string
     email: string
     createdAt?: Date | string
-    createdRooms?: RoomCreateNestedManyWithoutCreatorInput
+    error_events?: error_eventsCreateNestedManyWithoutUsersInput
+    matches?: matchesCreateNestedManyWithoutUsersInput
     joinedRooms?: RoomUserCreateNestedManyWithoutUserInput
+    createdRooms?: RoomCreateNestedManyWithoutCreatorInput
   }
 
   export type UserUncheckedCreateWithoutUserIDPsInput = {
@@ -6893,8 +10577,10 @@ export namespace Prisma {
     name: string
     email: string
     createdAt?: Date | string
-    createdRooms?: RoomUncheckedCreateNestedManyWithoutCreatorInput
+    error_events?: error_eventsUncheckedCreateNestedManyWithoutUsersInput
+    matches?: matchesUncheckedCreateNestedManyWithoutUsersInput
     joinedRooms?: RoomUserUncheckedCreateNestedManyWithoutUserInput
+    createdRooms?: RoomUncheckedCreateNestedManyWithoutCreatorInput
   }
 
   export type UserCreateOrConnectWithoutUserIDPsInput = {
@@ -6918,8 +10604,10 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    createdRooms?: RoomUpdateManyWithoutCreatorNestedInput
+    error_events?: error_eventsUpdateManyWithoutUsersNestedInput
+    matches?: matchesUpdateManyWithoutUsersNestedInput
     joinedRooms?: RoomUserUpdateManyWithoutUserNestedInput
+    createdRooms?: RoomUpdateManyWithoutCreatorNestedInput
   }
 
   export type UserUncheckedUpdateWithoutUserIDPsInput = {
@@ -6927,19 +10615,297 @@ export namespace Prisma {
     name?: StringFieldUpdateOperationsInput | string
     email?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    createdRooms?: RoomUncheckedUpdateManyWithoutCreatorNestedInput
+    error_events?: error_eventsUncheckedUpdateManyWithoutUsersNestedInput
+    matches?: matchesUncheckedUpdateManyWithoutUsersNestedInput
     joinedRooms?: RoomUserUncheckedUpdateManyWithoutUserNestedInput
+    createdRooms?: RoomUncheckedUpdateManyWithoutCreatorNestedInput
   }
 
-  export type UserIDPCreateManyUserInput = {
+  export type UserCreateWithoutError_eventsInput = {
     id?: string
-    supabaseUid: string
+    name: string
+    email: string
+    createdAt?: Date | string
+    matches?: matchesCreateNestedManyWithoutUsersInput
+    joinedRooms?: RoomUserCreateNestedManyWithoutUserInput
+    createdRooms?: RoomCreateNestedManyWithoutCreatorInput
+    userIDPs?: UserIDPCreateNestedManyWithoutUserInput
   }
 
-  export type RoomCreateManyCreatorInput = {
+  export type UserUncheckedCreateWithoutError_eventsInput = {
+    id?: string
+    name: string
+    email: string
+    createdAt?: Date | string
+    matches?: matchesUncheckedCreateNestedManyWithoutUsersInput
+    joinedRooms?: RoomUserUncheckedCreateNestedManyWithoutUserInput
+    createdRooms?: RoomUncheckedCreateNestedManyWithoutCreatorInput
+    userIDPs?: UserIDPUncheckedCreateNestedManyWithoutUserInput
+  }
+
+  export type UserCreateOrConnectWithoutError_eventsInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutError_eventsInput, UserUncheckedCreateWithoutError_eventsInput>
+  }
+
+  export type matchesCreateWithoutError_eventsInput = {
+    id?: string
+    game_type: string
+    status?: string
+    created_at?: Date | string
+    rooms: RoomCreateNestedOneWithoutMatchesInput
+    users?: UserCreateNestedOneWithoutMatchesInput
+  }
+
+  export type matchesUncheckedCreateWithoutError_eventsInput = {
+    id?: string
+    room_id: string
+    game_type: string
+    status?: string
+    winner_id?: string | null
+    created_at?: Date | string
+  }
+
+  export type matchesCreateOrConnectWithoutError_eventsInput = {
+    where: matchesWhereUniqueInput
+    create: XOR<matchesCreateWithoutError_eventsInput, matchesUncheckedCreateWithoutError_eventsInput>
+  }
+
+  export type UserUpsertWithoutError_eventsInput = {
+    update: XOR<UserUpdateWithoutError_eventsInput, UserUncheckedUpdateWithoutError_eventsInput>
+    create: XOR<UserCreateWithoutError_eventsInput, UserUncheckedCreateWithoutError_eventsInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutError_eventsInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutError_eventsInput, UserUncheckedUpdateWithoutError_eventsInput>
+  }
+
+  export type UserUpdateWithoutError_eventsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    matches?: matchesUpdateManyWithoutUsersNestedInput
+    joinedRooms?: RoomUserUpdateManyWithoutUserNestedInput
+    createdRooms?: RoomUpdateManyWithoutCreatorNestedInput
+    userIDPs?: UserIDPUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutError_eventsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    matches?: matchesUncheckedUpdateManyWithoutUsersNestedInput
+    joinedRooms?: RoomUserUncheckedUpdateManyWithoutUserNestedInput
+    createdRooms?: RoomUncheckedUpdateManyWithoutCreatorNestedInput
+    userIDPs?: UserIDPUncheckedUpdateManyWithoutUserNestedInput
+  }
+
+  export type matchesUpsertWithoutError_eventsInput = {
+    update: XOR<matchesUpdateWithoutError_eventsInput, matchesUncheckedUpdateWithoutError_eventsInput>
+    create: XOR<matchesCreateWithoutError_eventsInput, matchesUncheckedCreateWithoutError_eventsInput>
+    where?: matchesWhereInput
+  }
+
+  export type matchesUpdateToOneWithWhereWithoutError_eventsInput = {
+    where?: matchesWhereInput
+    data: XOR<matchesUpdateWithoutError_eventsInput, matchesUncheckedUpdateWithoutError_eventsInput>
+  }
+
+  export type matchesUpdateWithoutError_eventsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    game_type?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    rooms?: RoomUpdateOneRequiredWithoutMatchesNestedInput
+    users?: UserUpdateOneWithoutMatchesNestedInput
+  }
+
+  export type matchesUncheckedUpdateWithoutError_eventsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    room_id?: StringFieldUpdateOperationsInput | string
+    game_type?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    winner_id?: NullableStringFieldUpdateOperationsInput | string | null
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type error_eventsCreateWithoutMatchesInput = {
+    id?: string
+    appearance_at: Date | string
+    closed_at?: Date | string | null
+    users?: UserCreateNestedOneWithoutError_eventsInput
+  }
+
+  export type error_eventsUncheckedCreateWithoutMatchesInput = {
+    id?: string
+    appearance_at: Date | string
+    closed_at?: Date | string | null
+    closed_by?: string | null
+  }
+
+  export type error_eventsCreateOrConnectWithoutMatchesInput = {
+    where: error_eventsWhereUniqueInput
+    create: XOR<error_eventsCreateWithoutMatchesInput, error_eventsUncheckedCreateWithoutMatchesInput>
+  }
+
+  export type error_eventsCreateManyMatchesInputEnvelope = {
+    data: error_eventsCreateManyMatchesInput | error_eventsCreateManyMatchesInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type RoomCreateWithoutMatchesInput = {
     id?: string
     name: string
     createdAt?: Date | string
+    current_match_id?: string | null
+    activeGameType?: string | null
+    status?: $Enums.RoomStatus
+    users?: RoomUserCreateNestedManyWithoutRoomInput
+    creator: UserCreateNestedOneWithoutCreatedRoomsInput
+  }
+
+  export type RoomUncheckedCreateWithoutMatchesInput = {
+    id?: string
+    name: string
+    createdAt?: Date | string
+    createdBy: string
+    current_match_id?: string | null
+    activeGameType?: string | null
+    status?: $Enums.RoomStatus
+    users?: RoomUserUncheckedCreateNestedManyWithoutRoomInput
+  }
+
+  export type RoomCreateOrConnectWithoutMatchesInput = {
+    where: RoomWhereUniqueInput
+    create: XOR<RoomCreateWithoutMatchesInput, RoomUncheckedCreateWithoutMatchesInput>
+  }
+
+  export type UserCreateWithoutMatchesInput = {
+    id?: string
+    name: string
+    email: string
+    createdAt?: Date | string
+    error_events?: error_eventsCreateNestedManyWithoutUsersInput
+    joinedRooms?: RoomUserCreateNestedManyWithoutUserInput
+    createdRooms?: RoomCreateNestedManyWithoutCreatorInput
+    userIDPs?: UserIDPCreateNestedManyWithoutUserInput
+  }
+
+  export type UserUncheckedCreateWithoutMatchesInput = {
+    id?: string
+    name: string
+    email: string
+    createdAt?: Date | string
+    error_events?: error_eventsUncheckedCreateNestedManyWithoutUsersInput
+    joinedRooms?: RoomUserUncheckedCreateNestedManyWithoutUserInput
+    createdRooms?: RoomUncheckedCreateNestedManyWithoutCreatorInput
+    userIDPs?: UserIDPUncheckedCreateNestedManyWithoutUserInput
+  }
+
+  export type UserCreateOrConnectWithoutMatchesInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutMatchesInput, UserUncheckedCreateWithoutMatchesInput>
+  }
+
+  export type error_eventsUpsertWithWhereUniqueWithoutMatchesInput = {
+    where: error_eventsWhereUniqueInput
+    update: XOR<error_eventsUpdateWithoutMatchesInput, error_eventsUncheckedUpdateWithoutMatchesInput>
+    create: XOR<error_eventsCreateWithoutMatchesInput, error_eventsUncheckedCreateWithoutMatchesInput>
+  }
+
+  export type error_eventsUpdateWithWhereUniqueWithoutMatchesInput = {
+    where: error_eventsWhereUniqueInput
+    data: XOR<error_eventsUpdateWithoutMatchesInput, error_eventsUncheckedUpdateWithoutMatchesInput>
+  }
+
+  export type error_eventsUpdateManyWithWhereWithoutMatchesInput = {
+    where: error_eventsScalarWhereInput
+    data: XOR<error_eventsUpdateManyMutationInput, error_eventsUncheckedUpdateManyWithoutMatchesInput>
+  }
+
+  export type RoomUpsertWithoutMatchesInput = {
+    update: XOR<RoomUpdateWithoutMatchesInput, RoomUncheckedUpdateWithoutMatchesInput>
+    create: XOR<RoomCreateWithoutMatchesInput, RoomUncheckedCreateWithoutMatchesInput>
+    where?: RoomWhereInput
+  }
+
+  export type RoomUpdateToOneWithWhereWithoutMatchesInput = {
+    where?: RoomWhereInput
+    data: XOR<RoomUpdateWithoutMatchesInput, RoomUncheckedUpdateWithoutMatchesInput>
+  }
+
+  export type RoomUpdateWithoutMatchesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    current_match_id?: NullableStringFieldUpdateOperationsInput | string | null
+    activeGameType?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumRoomStatusFieldUpdateOperationsInput | $Enums.RoomStatus
+    users?: RoomUserUpdateManyWithoutRoomNestedInput
+    creator?: UserUpdateOneRequiredWithoutCreatedRoomsNestedInput
+  }
+
+  export type RoomUncheckedUpdateWithoutMatchesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    createdBy?: StringFieldUpdateOperationsInput | string
+    current_match_id?: NullableStringFieldUpdateOperationsInput | string | null
+    activeGameType?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumRoomStatusFieldUpdateOperationsInput | $Enums.RoomStatus
+    users?: RoomUserUncheckedUpdateManyWithoutRoomNestedInput
+  }
+
+  export type UserUpsertWithoutMatchesInput = {
+    update: XOR<UserUpdateWithoutMatchesInput, UserUncheckedUpdateWithoutMatchesInput>
+    create: XOR<UserCreateWithoutMatchesInput, UserUncheckedCreateWithoutMatchesInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutMatchesInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutMatchesInput, UserUncheckedUpdateWithoutMatchesInput>
+  }
+
+  export type UserUpdateWithoutMatchesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    error_events?: error_eventsUpdateManyWithoutUsersNestedInput
+    joinedRooms?: RoomUserUpdateManyWithoutUserNestedInput
+    createdRooms?: RoomUpdateManyWithoutCreatorNestedInput
+    userIDPs?: UserIDPUpdateManyWithoutUserNestedInput
+  }
+
+  export type UserUncheckedUpdateWithoutMatchesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    error_events?: error_eventsUncheckedUpdateManyWithoutUsersNestedInput
+    joinedRooms?: RoomUserUncheckedUpdateManyWithoutUserNestedInput
+    createdRooms?: RoomUncheckedUpdateManyWithoutCreatorNestedInput
+    userIDPs?: UserIDPUncheckedUpdateManyWithoutUserNestedInput
+  }
+
+  export type error_eventsCreateManyUsersInput = {
+    id?: string
+    match_id: string
+    appearance_at: Date | string
+    closed_at?: Date | string | null
+  }
+
+  export type matchesCreateManyUsersInput = {
+    id?: string
+    room_id: string
+    game_type: string
+    status?: string
+    created_at?: Date | string
   }
 
   export type RoomUserCreateManyUserInput = {
@@ -6948,39 +10914,65 @@ export namespace Prisma {
     createdAt?: Date | string
   }
 
-  export type UserIDPUpdateWithoutUserInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    supabaseUid?: StringFieldUpdateOperationsInput | string
+  export type RoomCreateManyCreatorInput = {
+    id?: string
+    name: string
+    createdAt?: Date | string
+    current_match_id?: string | null
+    activeGameType?: string | null
+    status?: $Enums.RoomStatus
   }
 
-  export type UserIDPUncheckedUpdateWithoutUserInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    supabaseUid?: StringFieldUpdateOperationsInput | string
+  export type UserIDPCreateManyUserInput = {
+    id?: string
+    supabaseUid: string
   }
 
-  export type UserIDPUncheckedUpdateManyWithoutUserInput = {
+  export type error_eventsUpdateWithoutUsersInput = {
     id?: StringFieldUpdateOperationsInput | string
-    supabaseUid?: StringFieldUpdateOperationsInput | string
+    appearance_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    closed_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    matches?: matchesUpdateOneRequiredWithoutError_eventsNestedInput
   }
 
-  export type RoomUpdateWithoutCreatorInput = {
+  export type error_eventsUncheckedUpdateWithoutUsersInput = {
     id?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    users?: RoomUserUpdateManyWithoutRoomNestedInput
+    match_id?: StringFieldUpdateOperationsInput | string
+    appearance_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    closed_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
-  export type RoomUncheckedUpdateWithoutCreatorInput = {
+  export type error_eventsUncheckedUpdateManyWithoutUsersInput = {
     id?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    users?: RoomUserUncheckedUpdateManyWithoutRoomNestedInput
+    match_id?: StringFieldUpdateOperationsInput | string
+    appearance_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    closed_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
-  export type RoomUncheckedUpdateManyWithoutCreatorInput = {
+  export type matchesUpdateWithoutUsersInput = {
     id?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    game_type?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    error_events?: error_eventsUpdateManyWithoutMatchesNestedInput
+    rooms?: RoomUpdateOneRequiredWithoutMatchesNestedInput
+  }
+
+  export type matchesUncheckedUpdateWithoutUsersInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    room_id?: StringFieldUpdateOperationsInput | string
+    game_type?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    error_events?: error_eventsUncheckedUpdateManyWithoutMatchesNestedInput
+  }
+
+  export type matchesUncheckedUpdateManyWithoutUsersInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    room_id?: StringFieldUpdateOperationsInput | string
+    game_type?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type RoomUserUpdateWithoutUserInput = {
@@ -7001,10 +10993,90 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type RoomUpdateWithoutCreatorInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    current_match_id?: NullableStringFieldUpdateOperationsInput | string | null
+    activeGameType?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumRoomStatusFieldUpdateOperationsInput | $Enums.RoomStatus
+    matches?: matchesUpdateManyWithoutRoomsNestedInput
+    users?: RoomUserUpdateManyWithoutRoomNestedInput
+  }
+
+  export type RoomUncheckedUpdateWithoutCreatorInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    current_match_id?: NullableStringFieldUpdateOperationsInput | string | null
+    activeGameType?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumRoomStatusFieldUpdateOperationsInput | $Enums.RoomStatus
+    matches?: matchesUncheckedUpdateManyWithoutRoomsNestedInput
+    users?: RoomUserUncheckedUpdateManyWithoutRoomNestedInput
+  }
+
+  export type RoomUncheckedUpdateManyWithoutCreatorInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    current_match_id?: NullableStringFieldUpdateOperationsInput | string | null
+    activeGameType?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumRoomStatusFieldUpdateOperationsInput | $Enums.RoomStatus
+  }
+
+  export type UserIDPUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    supabaseUid?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type UserIDPUncheckedUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    supabaseUid?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type UserIDPUncheckedUpdateManyWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    supabaseUid?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type matchesCreateManyRoomsInput = {
+    id?: string
+    game_type: string
+    status?: string
+    winner_id?: string | null
+    created_at?: Date | string
+  }
+
   export type RoomUserCreateManyRoomInput = {
     id?: string
     userId: string
     createdAt?: Date | string
+  }
+
+  export type matchesUpdateWithoutRoomsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    game_type?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    error_events?: error_eventsUpdateManyWithoutMatchesNestedInput
+    users?: UserUpdateOneWithoutMatchesNestedInput
+  }
+
+  export type matchesUncheckedUpdateWithoutRoomsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    game_type?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    winner_id?: NullableStringFieldUpdateOperationsInput | string | null
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    error_events?: error_eventsUncheckedUpdateManyWithoutMatchesNestedInput
+  }
+
+  export type matchesUncheckedUpdateManyWithoutRoomsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    game_type?: StringFieldUpdateOperationsInput | string
+    status?: StringFieldUpdateOperationsInput | string
+    winner_id?: NullableStringFieldUpdateOperationsInput | string | null
+    created_at?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type RoomUserUpdateWithoutRoomInput = {
@@ -7023,6 +11095,34 @@ export namespace Prisma {
     id?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type error_eventsCreateManyMatchesInput = {
+    id?: string
+    appearance_at: Date | string
+    closed_at?: Date | string | null
+    closed_by?: string | null
+  }
+
+  export type error_eventsUpdateWithoutMatchesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    appearance_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    closed_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    users?: UserUpdateOneWithoutError_eventsNestedInput
+  }
+
+  export type error_eventsUncheckedUpdateWithoutMatchesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    appearance_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    closed_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closed_by?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type error_eventsUncheckedUpdateManyWithoutMatchesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    appearance_at?: DateTimeFieldUpdateOperationsInput | Date | string
+    closed_at?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    closed_by?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
 

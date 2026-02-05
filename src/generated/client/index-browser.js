@@ -131,7 +131,10 @@ exports.Prisma.RoomScalarFieldEnum = {
   id: 'id',
   name: 'name',
   createdAt: 'createdAt',
-  createdBy: 'createdBy'
+  createdBy: 'createdBy',
+  current_match_id: 'current_match_id',
+  activeGameType: 'activeGameType',
+  status: 'status'
 };
 
 exports.Prisma.RoomUserScalarFieldEnum = {
@@ -147,6 +150,23 @@ exports.Prisma.UserIDPScalarFieldEnum = {
   userId: 'userId'
 };
 
+exports.Prisma.Error_eventsScalarFieldEnum = {
+  id: 'id',
+  match_id: 'match_id',
+  appearance_at: 'appearance_at',
+  closed_at: 'closed_at',
+  closed_by: 'closed_by'
+};
+
+exports.Prisma.MatchesScalarFieldEnum = {
+  id: 'id',
+  room_id: 'room_id',
+  game_type: 'game_type',
+  status: 'status',
+  winner_id: 'winner_id',
+  created_at: 'created_at'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -157,12 +177,23 @@ exports.Prisma.QueryMode = {
   insensitive: 'insensitive'
 };
 
+exports.Prisma.NullsOrder = {
+  first: 'first',
+  last: 'last'
+};
+exports.RoomStatus = exports.$Enums.RoomStatus = {
+  LOBBY: 'LOBBY',
+  PLAYING: 'PLAYING',
+  FINISHED: 'FINISHED'
+};
 
 exports.Prisma.ModelName = {
   User: 'User',
   Room: 'Room',
   RoomUser: 'RoomUser',
-  UserIDP: 'UserIDP'
+  UserIDP: 'UserIDP',
+  error_events: 'error_events',
+  matches: 'matches'
 };
 
 /**

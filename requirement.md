@@ -1,110 +1,61 @@
-# 1. プロジェクト概要
-Next.js (App Router) をベースとし、Supabase Auth/Realtime と Prisma を組み合わせた「スケーラブルなマルチプレイヤー・ボードゲーム」の開発基盤を構築する。
+1. 実装のゴール (Phase 1)
+Next.js (App Router) + Supabase + Prisma を使用し、**「ホストがゲームを選ぶと、ルーム内の全員がそのゲーム画面へリアルタイムに遷移する」**機能を実装したいです。
 
-# 2. 技術スタック
-### Frontend: Next.js (App Router)
+2. ユーザーフロー
+ルーム待機画面 (/room/[roomId])
 
-### Database / Realtime: Supabase (PostgreSQL)
+ホストにだけ「ゲーム選択ボタン（例: ERROR HUNTER）」が表示されている。
 
-### ORM: Prisma
+ホストが選択すると、全員がそのゲームの待機画面（/game/[roomId]/error-hunter など）へ自動遷移する。
 
-### Authentication: Supabase Auth
+ゲーム待機画面
 
-### Infrastructure: Vercel (Frontend), Supabase (Backend/DB)
+「ゲーム開始」ボタン（ホストのみ）と「ルームに戻る」ボタンがある。
 
-### Local Development: Supabase CLI (Docker)
+ホストが「ルームに戻る」を押すと、全員が再び /room/[roomId] に戻る。
 
-# 3. データベース設計 (Prisma)
-ユーザー情報の整合性とセキュリティを担保するため、認証情報とアプリケーション情報を分離する。
+3. データベース設計の方針
+「どのゲームが選ばれているか」を管理するために、既存の Room モデルを拡張してください。 今の段階では Game モデルという別テーブルは作らず、Room テーブルのカラムで管理したいです。
 
-# 3.1. テーブル構成
-## UserIDP (User Identity Provider):
+コード スニペット
+model Room {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  // ...既存のカラム
+  
+  // 追加: 現在選択されているゲームタイプ
+  // nullなら「ルーム待機中」、値が入っていれば「そのゲーム画面へ遷移」とみなす
+  activeGameType String?  @map("active_game_type") 
+  
+  // 追加: ゲームの進行状況（待機中、プレイ中など）
+  status         String   @default("LOBBY") // LOBBY, PLAYING, FINISHED
+}
+4. 技術的な要件
+Server Actions:
 
-Supabase Auth の auth.users とアプリケーション側の User を紐付けるための中間テーブル。
+selectGame(roomId, gameType): activeGameType を更新する。
 
-カラム: id (UUID), supabase_uid (UUID / Unique), user_id (UUID / FK to User)
+returnToRoom(roomId): activeGameType を null に戻す。
 
-## User:
+Realtime Subscription (重要):
 
-ゲーム内での名前やアイコン、ステータスを管理するアプリケーション専用テーブル。
+クライアント側（useEffect）で rooms テーブルの変更を監視する。
 
-カラム: id (UUID), name (String), email (String), created_at (DateTime)
+activeGameType が変更された検知したら、Next.js の useRouter で適切なパスへ push する。
 
-# 3.2. 自動同期 (PostgreSQL Trigger)
-Supabase Auth でサインアップが完了した際、データベース側で自動的に User と UserIDP の両方にレコードを挿入するトリガー関数を実装する。
+これにより、誰かが操作した瞬間に全員の画面が切り替わる挙動を実現する。
 
-# 4. リアルタイム通信要件
-Supabase Realtime を使用し、DBの変更をフロントエンドへ即座にプッシュする。
+5. 成果物
+以下のコードを提示してください。
 
-## Local Testing:
+Prisma Schema: Room モデルの変更点。
 
-Supabase CLI を使用し、ローカルの Docker 環境で Realtime サーバーを実行する。
+Server Actions: ゲーム選択・ルーム復帰の関数。
 
-開発初期は RLS (Row Level Security) を無効化し、Socket.io のような自由な通信を可能にした状態で検証を行う。
+Client Component (RoomPage): リアルタイムリスナーを含み、ゲーム選択時に遷移するロジック。
 
-# 5. 認証・認可フロー
-## 書き込み:
+Client Component (GamePage): リアルタイムリスナーを含み、ルームに戻るボタンと、戻る遷移のロジック。
 
-クライアントから直接 DB を操作せず、Next.js の Server Actions を経由させる。
-
-Server Action 内で Prisma を用いてバリデーション後に DB を更新する。
-
-## 読み取り / 同期:
-
-初期データは Server Component で取得。
-
-更新データは Client Component の useEffect 内で Supabase Realtime を購読して受信する。
-
-# 6. 開発マイルストーン (Phase 1: 基盤構築)
-Supabase CLI の初期化とローカルコンテナの起動。
-
-schema.prisma の定義と DB マイグレーションの実施。
-
-Auth トリガーの SQL 実行。
-
-Next.js 上でのサインアップ・ログイン・ログアウト機能の実装。
-
-ブラウザを2枚開き、DB更新がリアルタイムに同期されることの確認。
-
-# 7. 開発マイルストーン (Phase 2: ルーム機能の実装)
-
-PrismaでRoomテーブルを実装する。
-
-## Room:
-
-ゲームの部屋を管理するテーブル。
-
-カラム: id (UUID), name (String), created_at (DateTime) 
-
-中間テーブルとしてRoomUserを実装する。
-
-## RoomUser:
-
-ゲームの部屋とユーザーを紐付けるテーブル。
-
-カラム: id (UUID), room_id (UUID / FK to Room), user_id (UUID / FK to User), created_at (DateTime)
-
-## 実装要件:
-
-ルームが作成された際に全てのユーザーのダッシュボードに表示される。（サブスクリプションで実装）
-
-ダッシュボードからルームを作成できる。
-
-ダッシュボードからルームに参加できる。
-
-ダッシュボードからルームを削除できる。
-   => ルームを作成したユーザーのみ削除できる。
-   => 削除した際に全てのユーザーのダッシュボードからルームが削除される。（サブスクリプションで実装）
-   => db上でもルームを削除する
-
-ルームは/room/[id]で表示する
-   => ルームに参加しているユーザーのみ表示できる。
-   => ルームに参加しているユーザーのみ書き込みできる。
-   => ルームに参加しているユーザーのみ削除できる。
-   => ルームに参加しているユーザーのみ退出できる。
-
-roomに入っている際に、他のユーザーが入室したり退出したらリアルタイムで表示される。
-   
-   
-
-
+6. 実装のルール
+- supabaseのmigrationは使わないこと（管理が大変）
+- prismaのmigrationは使うこと
+- prismaのmigrationの方で、リアルタイムの設定をすること（add_realtime_settingsを参考に）

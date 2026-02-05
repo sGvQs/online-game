@@ -2,6 +2,7 @@ import { createClient } from '@/backend/lib/supabase/server'
 import { prisma } from '@/backend/lib/prisma'
 import { redirect } from 'next/navigation'
 import { MemberList } from '@/frontend/components/room/MemberList'
+import { RoomPageClient } from '@/frontend/components/room/RoomPageClient'
 import { Button } from '@/frontend/components/ui/Button'
 import { leaveRoom } from '@/backend/actions/room'
 import { ChevronsRight, PersonStanding, House, Gamepad2 } from 'lucide-react'
@@ -38,6 +39,23 @@ export default async function RoomPage({ params }: { params: { id: string } }) {
         redirect('/dashboard')
     }
 
+    // Check if user is host
+    const isHost = room.createdBy === idp.user.id
+
+    // Redirect to game if already in progress
+    if (room.activeGameType) {
+        redirect(`/game/${room.id}/${room.activeGameType}`)
+    }
+
+    // Prepare room data for client component
+    const roomData = {
+        id: room.id,
+        name: room.name,
+        createdBy: room.createdBy,
+        activeGameType: room.activeGameType,
+        status: room.status
+    }
+
     return (
         <div className="min-h-screen p-8 bg-transparent text-foreground">
             <div className="max-w-6xl mx-auto space-y-6">
@@ -48,6 +66,11 @@ export default async function RoomPage({ params }: { params: { id: string } }) {
                             <span className="bg-brand-300 text-brand-600 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide">
                                 ゲームルーム
                             </span>
+                            {isHost && (
+                                <span className="bg-yellow-500 text-yellow-900 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide">
+                                    ホスト
+                                </span>
+                            )}
                         </div>
                         <h1 className="text-3xl font-black mt-2 text-brand-900 flex items-center gap-4">
                             <Gamepad2 className="w-12 h-12" />
@@ -76,10 +99,17 @@ export default async function RoomPage({ params }: { params: { id: string } }) {
                                 <span className="text-6xl mb-4 block" style={{ animation: 'float 6s ease-in-out infinite' }}>🎲</span>
                                 <h3 className="text-2xl font-bold text-brand-900">ゲーム開始待ち...</h3>
                                 <p className="text-brand-600 max-w-md mx-auto leading-relaxed">
-                                    ゲームが始まるとここにボードが表示されます。他のプレイヤーを招待して始めましょう！
+                                    {isHost
+                                        ? 'ゲームを選択してください。選択すると全員がゲーム画面に移動します。'
+                                        : 'ホストがゲームを選択するのを待っています...'}
                                 </p>
                             </div>
                         </div>
+
+                        {/* Game Selection - Client Component with Realtime */}
+                        <RoomPageClient room={roomData} isHost={isHost}>
+                            {/* Children rendered as part of SSR content */}
+                        </RoomPageClient>
                     </div>
 
                     {/* Sidebar / Members */}
