@@ -3,6 +3,8 @@
 import { createClient } from '@/frontend/lib/supabase/client'
 import { useEffect, useState } from 'react'
 import { getRoomUsers } from '@/backend/actions/room'
+import { Users } from 'lucide-react'
+
 
 type RoomMember = {
     id: string;
@@ -50,7 +52,10 @@ export function MemberList({ roomId, initialMembers }: { roomId: string, initial
     return (
         <div className="glass-card p-6 rounded-2xl h-full">
             <div className="flex items-center justify-between mb-6">
-                <h3 className="font-bold text-lg text-brand-900">参加者</h3>
+                <h3 className="font-bold text-lg text-brand-900 flex items-center gap-2">
+                    <Users className="w-4 h-4" />
+                    参加者
+                </h3>
                 <span className="bg-brand-300 text-brand-700 text-xs font-bold px-3 py-1 rounded-full">
                     {members.length}
                 </span>

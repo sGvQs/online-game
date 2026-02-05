@@ -1,17 +1,17 @@
 'use client'
 
 import { signOut } from '@/backend/actions/auth'
-import { Button } from '@/frontend/components/ui/Button'
+import { IconButton } from '@/frontend/components/ui/IconButton'
+import { LogOut } from 'lucide-react'
 
 export function LogoutButton() {
     return (
-        <Button
+        <IconButton
             onClick={() => signOut()}
-            variant="ghost"
+            variant="danger"
             size="sm"
-            className="text-red-400 hover:text-red-300 hover:bg-red-500/10"
-        >
-            ログアウト
-        </Button>
+            icon={<LogOut className="w-4 h-4" />}
+            tooltip="ログアウト"
+        />
     )
 }

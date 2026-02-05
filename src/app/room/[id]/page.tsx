@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation'
 import { MemberList } from '@/frontend/components/room/MemberList'
 import { Button } from '@/frontend/components/ui/Button'
 import { leaveRoom } from '@/backend/actions/room'
+import { ChevronsRight, PersonStanding, House, Gamepad2 } from 'lucide-react'
 
 export default async function RoomPage({ params }: { params: { id: string } }) {
     const supabase = await createClient()
@@ -47,15 +48,17 @@ export default async function RoomPage({ params }: { params: { id: string } }) {
                             <span className="bg-brand-300 text-brand-600 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide">
                                 ゲームルーム
                             </span>
-                            <span className="text-sm text-brand900 font-mono">#{room.id.substring(0, 8)}</span>
                         </div>
-                        <h1 className="text-3xl font-black mt-2 text-brand-900">
+                        <h1 className="text-3xl font-black mt-2 text-brand-900 flex items-center gap-4">
+                            <Gamepad2 className="w-12 h-12" />
                             {room.name}
                         </h1>
                     </div>
                     <form action={leaveRoom.bind(null, room.id)}>
-                        <Button variant="ghost" className="text-red-500 hover:bg-red-500/10 hover:text-red-400 font-medium transition-colors">
-                            退出する
+                        <Button variant="ghost" className="text-red-500 hover:bg-red-500/10 hover:text-red-400 font-medium transition-colors gap-1">
+                            <PersonStanding className="w-4 h-4" />
+                            <ChevronsRight className="w-4 h-4" />
+                            <House className="w-4 h-4" />
                         </Button>
                     </form>
                 </header>

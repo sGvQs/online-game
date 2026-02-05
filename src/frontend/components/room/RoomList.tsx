@@ -2,9 +2,10 @@
 
 import { createClient } from '@/frontend/lib/supabase/client'
 import { useEffect, useState } from 'react'
-import { Card } from '@/frontend/components/ui/Card'
 import { Button } from '@/frontend/components/ui/Button'
+import { IconButton } from '@/frontend/components/ui/IconButton'
 import { joinRoom, deleteRoom, getRooms } from '@/backend/actions/room'
+import { Trash2, Play } from 'lucide-react'
 
 type Room = {
     id: string
@@ -43,17 +44,6 @@ export function RoomList({ initialRooms, userId }: { initialRooms: Room[], userI
             }, async (payload) => {
                 console.log(payload);
                 fetchMessageData();
-                // if (payload.eventType === 'INSERT') {
-                //     const newRoom = payload.new
-                //     setRooms(prev => [{
-                //         id: newRoom.id,
-                //         name: newRoom.name,
-                //         createdAt: new Date(newRoom.created_at),
-                //         createdBy: newRoom.created_by
-                //     }, ...prev])
-                // } else if (payload.eventType === 'DELETE') {
-                //     setRooms(prev => prev.filter(r => r.id !== payload.old.id))
-                // }
             })
             .subscribe()
 
@@ -83,17 +73,22 @@ export function RoomList({ initialRooms, userId }: { initialRooms: Room[], userI
 
                     <div className="flex justify-between items-center mt-4 pt-4 border-t border-brand-100/50 dark:border-brand-700/20 relative z-10">
 
-                        <div className="flex gap-2">
+                        <div className="flex gap-2 items-center">
                             {room.createdBy === userId && (
                                 <form action={deleteRoom.bind(null, room.id)}>
-                                    <Button size="sm" variant="ghost" className="text-red-500 hover:bg-red-500/10 hover:text-red-400 px-3 py-1 h-8 text-xs rounded-full transition-colors">
-                                        削除
-                                    </Button>
+                                    <IconButton
+                                        type="submit"
+                                        variant="danger"
+                                        size="sm"
+                                        icon={<Trash2 className="w-4 h-4" />}
+                                        tooltip="削除"
+                                    />
                                 </form>
                             )}
                             <form action={joinRoom.bind(null, room.id)}>
-                                <Button size="sm" className="bg-brand-600 dark:bg-brand-300 hover:bg-brand-400 text-white shadow-lg hover:shadow-brand-500/25 transition-all duration-300 rounded-full px-4 h-8 text-xs font-semibold tracking-wide uppercase">
-                                    参加する
+                                <Button size="sm" className="bg-brand-600 dark:bg-brand-300 hover:bg-brand-400 text-white shadow-lg hover:shadow-brand-500/25 transition-all duration-300 rounded-full px-4 h-8 text-xs font-semibold tracking-wide uppercase gap-1.5">
+                                    <Play className="w-3.5 h-3.5 fill-current" />
+                                    参加
                                 </Button>
                             </form>
                         </div>

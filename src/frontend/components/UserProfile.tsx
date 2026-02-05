@@ -2,9 +2,10 @@
 import { createClient } from '@/frontend/lib/supabase/client'
 import { useEffect, useState } from 'react'
 import { updateName } from '@/backend/actions/user'
-import { Button } from '@/frontend/components/ui/Button'
+import { IconButton } from '@/frontend/components/ui/IconButton'
 import { Input } from '@/frontend/components/ui/Input'
 import { Card } from '@/frontend/components/ui/Card'
+import { Check } from 'lucide-react'
 
 export default function UserProfile({ initialData }: { initialData: any }) {
     const [data, setData] = useState(initialData)
@@ -15,10 +16,10 @@ export default function UserProfile({ initialData }: { initialData: any }) {
         const channel = supabase
             .channel('users')
             .on('postgres_changes', {
-                event: 'UPDATE', // INSERT, UPDATE, DELETE, *, の種類がある
+                event: 'UPDATE',
                 schema: 'public',
                 table: 'users',
-                filter: `id=eq.${initialData.id}` // eqは等しいという意味なので,id=initalData.idと同じ意味
+                filter: `id=eq.${initialData.id}`
             }, (payload) => {
                 setData(payload.new)
             })
@@ -41,18 +42,21 @@ export default function UserProfile({ initialData }: { initialData: any }) {
                 {JSON.stringify(data, null, 2)}
             </pre>
 
-            <div className="flex gap-2">
+            <div className="flex gap-2 items-center">
                 <Input
                     value={newName}
                     onChange={e => setNewName(e.target.value)}
-                    className="bg-brand-100 text-brand-900 placeholder:text-brand-700 border-brand-400 focus-visible:ring-brand-700"
+                    className="bg-brand-100 text-brand-900 placeholder:text-brand-700 border-brand-400 focus-visible:ring-brand-700 flex-1"
                     placeholder="新しい名前を入力..."
                 />
-                <Button onClick={handleUpdate} variant="solid" className="whitespace-nowrap">
-                    更新
-                </Button>
+                <IconButton
+                    onClick={handleUpdate}
+                    variant="success"
+                    size="md"
+                    icon={<Check className="w-5 h-5" />}
+                    tooltip="更新"
+                />
             </div>
         </Card>
     )
 }
-

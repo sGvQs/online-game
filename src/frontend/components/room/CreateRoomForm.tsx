@@ -2,9 +2,10 @@
 
 import { createRoom } from '@/backend/actions/room'
 import { Button } from '@/frontend/components/ui/Button'
-import { Card } from '@/frontend/components/ui/Card'
+import { IconButton } from '@/frontend/components/ui/IconButton'
 import { Input } from '@/frontend/components/ui/Input'
 import { useState } from 'react'
+import { Plus, X, Check } from 'lucide-react'
 
 export function CreateRoomForm() {
     const [open, setOpen] = useState(false)
@@ -13,9 +14,10 @@ export function CreateRoomForm() {
         return (
             <Button
                 onClick={() => setOpen(true)}
-                className="w-full bg-brand-300 hover:bg-brand-400 text-white shadow-md hover:shadow-lg transition-all duration-300"
+                className="w-full bg-brand-300 hover:bg-brand-400 text-white shadow-md hover:shadow-lg transition-all duration-300 gap-2"
             >
-                + 新しいルームを作成
+                <Plus className="w-5 h-5" />
+                新規ルーム
             </Button>
         )
     }
@@ -38,12 +40,18 @@ export function CreateRoomForm() {
                     autoFocus
                 />
                 <div className="flex gap-2 mt-1">
-                    <Button type="submit" className="flex-1 bg-brand-300 hover:bg-brand-500 text-white pace-nowrap shadow-[0_0_15px_rgba(99,102,241,0.5)] hover:shadow-[0_0_25px_rgba(99,102,241,0.6)] transition-all duration-300">
-                        ルームを作成
+                    <Button type="submit" className="flex-1 bg-brand-300 hover:bg-brand-500 text-white shadow-[0_0_15px_rgba(99,102,241,0.5)] hover:shadow-[0_0_25px_rgba(99,102,241,0.6)] transition-all duration-300 gap-2">
+                        <Check className="w-4 h-4" />
+                        作成
                     </Button>
-                    <Button type="button" variant="ghost" onClick={() => setOpen(false)} className="text-brand-500 hover:text-brand-100 hover:bg-brand-900/20">
-                        キャンセル
-                    </Button>
+                    <IconButton
+                        type="button"
+                        onClick={() => setOpen(false)}
+                        variant="ghost"
+                        size="md"
+                        icon={<X className="w-5 h-5" />}
+                        tooltip="キャンセル"
+                    />
                 </div>
             </form>
         </div>
