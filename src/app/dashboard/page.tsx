@@ -5,6 +5,7 @@ import UserProfile from '@/frontend/components/UserProfile'
 import { RoomList } from '@/frontend/components/room/RoomList'
 import { CreateRoomForm } from '@/frontend/components/room/CreateRoomForm'
 import { LogoutButton } from '@/frontend/components/auth/LogoutButton'
+import { Boxes } from 'lucide-react'
 
 export default async function DashboardPage() {
     const supabase = await createClient()
@@ -63,8 +64,11 @@ export default async function DashboardPage() {
 
                     {/* Room List */}
                     <section className="lg:col-span-3">
-                        <div className="flex items-center justify-between mb-6">
-                            <h2 className="text-2xl font-bold text-brand-800">アクティブなルーム</h2>
+                        <div className="flex items-center justify-between mb-3">
+                            <h2 className="text-1xl font-bold text-brand-800 flex items-center gap-2">
+                                <Boxes className="w-4 h-4" />
+                                アクティブなルーム
+                            </h2>
                             <span className="text-sm font-medium px-3 py-1 bg-brand-300 text-brand-700 rounded-full">
                                 {rooms.length}件
                             </span>
