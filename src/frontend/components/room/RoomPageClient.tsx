@@ -3,20 +3,13 @@
 import { createClient } from '@/frontend/lib/supabase/client'
 import { useEffect, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { selectGame } from '@/backend/actions/room'
+import { getRoom, selectGame } from '@/backend/actions/room'
 import { Gamepad2 } from 'lucide-react'
 import { Button } from '@/frontend/components/ui/Button'
-
-type RoomData = {
-    id: string
-    name: string
-    createdBy: string
-    activeGameType: string | null
-    status: string
-}
+import { Room } from '@/generated/client'
 
 interface RoomPageClientProps {
-    room: RoomData
+    room: Room
     isHost: boolean
     children?: React.ReactNode
 }
@@ -25,7 +18,19 @@ export function RoomPageClient({ room, isHost, children }: RoomPageClientProps) 
     const router = useRouter()
     const supabase = createClient()
     const [isPending, startTransition] = useTransition()
-    const [currentRoom, setCurrentRoom] = useState<RoomData>(room)
+    const [currentRoom, setCurrentRoom] = useState<Room | null>(room)
+
+    const handlePayload = async () => {
+        try {
+            const newRoom = await getRoom(room.id);
+            setCurrentRoom(newRoom);
+            if (newRoom?.activeGameType && newRoom.activeGameType !== currentRoom?.activeGameType) {
+                router.push(`/game/${room.id}/${newRoom.activeGameType}`)
+            }
+        } catch (error) {
+            console.error("更新に失敗:", error);
+        }
+    };
 
     // Subscribe to room changes for realtime navigation
     useEffect(() => {
@@ -35,29 +40,22 @@ export function RoomPageClient({ room, isHost, children }: RoomPageClientProps) 
                 event: '*',
                 schema: 'public',
                 table: 'rooms',
-            }, (payload) => {
-                console.log(payload)
-                const newRoom = payload.new as RoomData
-                setCurrentRoom(newRoom)
-
-                // Navigate to game page if game is selected
-                if (newRoom.activeGameType && newRoom.activeGameType !== currentRoom.activeGameType) {
-                    router.push(`/game/${room.id}/${newRoom.activeGameType}`)
-                }
+            }, () => {
+                handlePayload();
             })
             .subscribe()
 
         return () => {
             supabase.removeChannel(channel)
         }
-    }, [supabase, room.id, router, currentRoom.activeGameType])
+    }, [supabase, room.id, router, currentRoom?.activeGameType])
 
     // Check on mount if we should redirect
     useEffect(() => {
-        if (currentRoom.activeGameType) {
+        if (currentRoom?.activeGameType) {
             router.push(`/game/${room.id}/${currentRoom.activeGameType}`)
         }
-    }, [currentRoom.activeGameType, room.id, router])
+    }, [currentRoom?.activeGameType, room.id, router])
 
     const handleSelectGame = (gameType: string) => {
         startTransition(async () => {
@@ -98,7 +96,7 @@ export function RoomPageClient({ room, isHost, children }: RoomPageClientProps) 
             )}
 
             {/* Waiting message for non-hosts */}
-            {!isHost && !currentRoom.activeGameType && (
+            {!isHost && !currentRoom?.activeGameType && (
                 <div className="glass-card p-6 rounded-2xl text-center">
                     <div className="text-brand-600">
                         ホストがゲームを選択するのを待っています...

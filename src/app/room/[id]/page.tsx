@@ -53,7 +53,9 @@ export default async function RoomPage({ params }: { params: { id: string } }) {
         name: room.name,
         createdBy: room.createdBy,
         activeGameType: room.activeGameType,
-        status: room.status
+        status: room.status,
+        createdAt: room.createdAt,
+        current_match_id: room.current_match_id
     }
 
     return (

@@ -47,6 +47,13 @@ export async function getRooms() {
     return rooms
 }
 
+export async function getRoom(id: string) {
+    const room = await prisma.room.findFirst({
+        where: { id },
+    })
+    return room
+}
+
 export async function getRoomUsers(id: string) {
     const roomUsers = await prisma.roomUser.findMany({
         where: { roomId: id },
