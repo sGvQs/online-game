@@ -7,17 +7,18 @@ const styles = gameSelection()
 interface GameSelectionCardProps {
     onSelectGame: (gameType: string) => void
     isPending: boolean
+    isHost: boolean
 }
 
 /**
  * GameSelectionCard - ゲーム選択UIのPresentational Component
  */
-export function GameSelectionCard({ onSelectGame, isPending }: GameSelectionCardProps) {
+export function GameSelectionCard({ onSelectGame, isPending, isHost }: GameSelectionCardProps) {
     return (
         <div className={styles.wrapper()}>
             <h3 className={styles.header()}>
                 <Gamepad2 className={styles.headerIcon()} />
-                ゲームを選択
+                {isHost ? 'ゲームを選択' : 'ゲーム一覧'}
             </h3>
             <div className={styles.grid()}>
                 <Button
@@ -28,7 +29,9 @@ export function GameSelectionCard({ onSelectGame, isPending }: GameSelectionCard
                     <span className={styles.gameIcon()}>⚠️</span>
                     <div className={styles.gameInfo()}>
                         <div className={styles.gameTitle()}>ERROR HUNTER</div>
-                        <div className={styles.gameDescription()}>バグを見つけて潰せ！</div>
+                        <div className={styles.gameDescription()}>
+                            {isHost ? 'バグを見つけて潰せ！' : 'クリックでルールを表示'}
+                        </div>
                     </div>
                 </Button>
             </div>

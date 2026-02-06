@@ -7,6 +7,7 @@ import { getRoom, selectGame, getRoomUsers } from '@/server/actions/room'
 import { Room, RoomUserWithUser } from '@/shared/types'
 import { GameSelectionCard } from './GameSelectionCard'
 import { MemberListView } from './MemberList/MemberListView'
+import { GameDescriptionModal } from './GameDescriptionModal'
 
 interface RoomPageClientProps {
     room: Room
@@ -56,6 +57,8 @@ export function RoomPageClientWrapper({
     const [isPending, startTransition] = useTransition()
     const [currentRoom, setCurrentRoom] = useState<Room | null>(room)
     const [members, setMembers] = useState<RoomUserWithUser[]>(initialMembers)
+    const [showGameDescription, setShowGameDescription] = useState(false)
+    const [selectedGameType, setSelectedGameType] = useState<string>('')
 
     // ルーム変更ハンドラー
     const handleRoomChange = useCallback(async () => {
@@ -112,9 +115,16 @@ export function RoomPageClientWrapper({
     }, [currentRoom?.activeGameType, room.id, router])
 
     const handleSelectGame = (gameType: string) => {
-        startTransition(async () => {
-            await selectGame(room.id, gameType)
-        })
+        // ホストの場合: ゲームを開始
+        if (isHost) {
+            startTransition(async () => {
+                await selectGame(room.id, gameType)
+            })
+        } else {
+            // 非ホストの場合: ゲーム説明モーダルを表示
+            setSelectedGameType(gameType)
+            setShowGameDescription(true)
+        }
     }
 
     return (
@@ -125,12 +135,11 @@ export function RoomPageClientWrapper({
                     {children}
 
                     {/* Game Selection for Host */}
-                    {isHost && (
-                        <GameSelectionCard
-                            onSelectGame={handleSelectGame}
-                            isPending={isPending}
-                        />
-                    )}
+                    <GameSelectionCard
+                        onSelectGame={handleSelectGame}
+                        isPending={isPending}
+                        isHost={isHost}
+                    />
                 </div>
 
                 {/* Sidebar / Members */}
@@ -138,6 +147,13 @@ export function RoomPageClientWrapper({
                     <MemberListView members={members} />
                 </div>
             </div>
+
+            {/* ゲーム説明モーダル（非ホストユーザー向け） */}
+            <GameDescriptionModal
+                isOpen={showGameDescription}
+                onClose={() => setShowGameDescription(false)}
+                gameType={selectedGameType}
+            />
         </RoomRealtimeContext.Provider>
     )
 }
