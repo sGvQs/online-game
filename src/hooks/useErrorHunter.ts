@@ -129,33 +129,18 @@ export function useErrorHunter({
      *   （Realtime コールバックの stale closure 問題を回避）
      */
     const refreshMatchData = useCallback(async () => {
-        // #region agent log
-        console.log('[DEBUG] refreshMatchData: ENTRY', { matchIdRef: matchIdRef.current, roomId, isHost })
-        // #endregion
 
         // ---- Step 1: matchId を解決する ----
         let targetMatchId = matchIdRef.current
 
         // matchId が不明（クライアント側で初回）→ Room から取得
         if (!targetMatchId) {
-            // #region agent log
-            console.log('[DEBUG] refreshMatchData: matchIdRef is null, fetching room...')
-            // #endregion
-
             const room = await getMatchIdFromRoom(roomId)
-
-            // #region agent log
-            console.log('[DEBUG] refreshMatchData: room fetched', { roomId: room?.id, currentMatchId: room?.currentMatchId })
-            // #endregion
-
             targetMatchId = room?.currentMatchId ?? null
         }
 
         // まだゲームが開始されていない場合は何もしない
         if (!targetMatchId) {
-            // #region agent log
-            console.log('[DEBUG] refreshMatchData: no targetMatchId, aborting')
-            // #endregion
             return
         }
 
@@ -163,31 +148,24 @@ export function useErrorHunter({
         try {
             const latestMatch = await getMatchWithEvents(targetMatchId)
 
-            // #region agent log
-            console.log('[DEBUG] refreshMatchData: match fetched', { matchId: latestMatch?.id, eventCount: latestMatch?.error_events?.length, targetMatchId })
-            // #endregion
-
-            if (!latestMatch) return
+            if (!latestMatch) {
+                return
+            }
 
             // matchIdRef を更新（クライアントが初めて Match を発見した場合に重要）
             matchIdRef.current = latestMatch.id
             setMatch(latestMatch)
 
             const event = latestMatch.error_events[0]
-            if (!event) return
+            if (!event) {
+                return
+            }
 
             // ---- Step 3: フェーズ遷移判定 ----
             const currentPhase = phaseRef.current
 
-            // #region agent log
-            console.log('[DEBUG] refreshMatchData: phase decision', { currentPhase, closedBy: event.closed_by, appearanceAt: event.appearance_at })
-            // #endregion
-
             // 3a. 勝者が既に決定している → RESULT
             if (event.closed_by) {
-                // #region agent log
-                console.log('[DEBUG] refreshMatchData: winner found → RESULT')
-                // #endregion
                 setPhase('RESULT')
                 return
             }
@@ -196,9 +174,6 @@ export function useErrorHunter({
             //     = クライアントがゲーム開始を Realtime 経由で検知したケース
             //     → タイマーを起動して WAITING/APPEARING に遷移する
             if (currentPhase === 'TITLE') {
-                // #region agent log
-                console.log('[DEBUG] refreshMatchData: TITLE → setupAppearanceTimer', { appearanceAt: event.appearance_at })
-                // #endregion
                 setupAppearanceTimer(event.appearance_at)
             }
 
@@ -304,6 +279,26 @@ export function useErrorHunter({
         }
     }, [match, roomId, isHost, isProcessing])
 
+
+    // クライアント側が終了したい
+    const handleFinishNotifier = useCallback(async () => {
+        if (isHost) return;
+        const room = await getMatchIdFromRoom(roomId)
+        if (room?.currentMatchId || isProcessing) return
+
+        setIsProcessing(true)
+        try {
+            setMatch(null)
+            setClickResult(null)
+            setPhase('TITLE')
+            matchIdRef.current = null
+        } catch (error) {
+            console.error('ゲーム終了に失敗:', error)
+        } finally {
+            setIsProcessing(false)
+        }
+    }, [match, roomId, isHost, isProcessing])
+
     // ============================================
     // Effects
     // ============================================
@@ -370,6 +365,13 @@ export function useErrorHunter({
                 table: 'matches',
             }, () => {
                 refreshMatchData()
+            })
+            .on('postgres_changes', {
+                event: '*',
+                schema: 'public',
+                table: 'rooms',
+            }, () => {
+                handleFinishNotifier()
             })
             .subscribe()
 

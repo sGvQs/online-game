@@ -165,12 +165,7 @@ export function ErrorHunterGame({
                                 label: '終了',
                                 onClick: handleFinish,
                                 primary: true,
-                            }] : []),
-                            ...(!isHost ? [{
-                                label: 'タイトルに戻る',
-                                onClick: handleFinish,
-                                primary: true,
-                            }] : []),
+                            }] : [])
                         ]}
                     >
                         <div style={{ minWidth: '300px' }}>
