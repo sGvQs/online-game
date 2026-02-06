@@ -3,7 +3,6 @@ import { redirect } from 'next/navigation'
 import { getCurrentUser, getRoomWithUsers } from '@/server/actions'
 import { ErrorHunterGame } from '@/components/game/ErrorHunterGame'
 import '@/app/game/win95.css'
-import { Room } from '@/types'
 
 export default async function ErrorHunterPage({ params }: { params: { roomId: string } }) {
     const supabase = await createClient()
@@ -34,21 +33,10 @@ export default async function ErrorHunterPage({ params }: { params: { roomId: st
     // Check if user is host
     const isHost = room.createdBy === currentUser.user.id
 
-    // Prepare room data for client component
-    const roomData: Room = {
-        id: room.id,
-        createdAt: room.createdAt,
-        name: room.name,
-        createdBy: room.createdBy,
-        activeGameType: room.activeGameType,
-        currentMatchId: room.currentMatchId,
-        status: room.status
-    }
-
     return (
         <div className="win95-container win95-scanlines">
             <ErrorHunterGame
-                room={roomData}
+                room={room}
                 isHost={isHost}
                 roomId={roomId}
                 initialMatchId={room.currentMatchId}

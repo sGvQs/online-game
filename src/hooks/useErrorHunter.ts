@@ -8,8 +8,10 @@ import {
     getMatchWithEvents,
     finishGame,
     getMatchIdFromRoom,
+    getMatchProgress,
+    checkAutoFinish,
 } from '@/server/actions/game'
-import type { MatchWithErrorEventsAndUsers } from '@/shared/types'
+import type { MatchWithErrorEventsAndUsers, MatchProgress } from '@/shared/types'
 
 // ============================================
 // 型定義
@@ -23,9 +25,10 @@ export interface UseErrorHunterReturn {
     phase: GamePhase
     match: MatchWithErrorEventsAndUsers | null
     clickResult: 'win' | 'lose' | null
+    progress: MatchProgress | null
     isProcessing: boolean
     handleStartGame: () => Promise<void>
-    handleClickError: () => Promise<void>
+    handleClickError: (eventId: string) => Promise<void>
     handleFinish: () => Promise<void>
 }
 
@@ -50,6 +53,7 @@ export function useErrorHunter({
     const [phase, setPhase] = useState<GamePhase>('TITLE')
     const [match, setMatch] = useState<MatchWithErrorEventsAndUsers | null>(null)
     const [clickResult, setClickResult] = useState<'win' | 'lose' | null>(null)
+    const [progress, setProgress] = useState<MatchProgress | null>(null)
     const [isProcessing, setIsProcessing] = useState(false)
 
     // ---- Refs ----
@@ -156,6 +160,16 @@ export function useErrorHunter({
             matchIdRef.current = latestMatch.id
             setMatch(latestMatch)
 
+            // ---- Step 2.5: 進行状況を取得 ----
+            const progressData = await getMatchProgress(targetMatchId)
+            setProgress(progressData)
+
+            // 全エラーが閉じられた → RESULT フェーズへ
+            if (progressData.closedErrors === progressData.totalErrors && progressData.totalErrors > 0) {
+                setPhase('RESULT')
+                return
+            }
+
             const event = latestMatch.error_events[0]
             if (!event) {
                 return
@@ -164,8 +178,8 @@ export function useErrorHunter({
             // ---- Step 3: フェーズ遷移判定 ----
             const currentPhase = phaseRef.current
 
-            // 3a. 勝者が既に決定している → RESULT
-            if (event.closed_by) {
+            // 3a. 勝者が既に決定している（Match が終了） → RESULT
+            if (latestMatch.status === 'FINISHED') {
                 setPhase('RESULT')
                 return
             }
@@ -182,7 +196,7 @@ export function useErrorHunter({
         } catch (error) {
             console.error('Match データの取得に失敗:', error)
         }
-    }, [roomId, isHost, setupAppearanceTimer])
+    }, [roomId, setupAppearanceTimer])
 
     // ============================================
     // アクションハンドラ
@@ -226,31 +240,39 @@ export function useErrorHunter({
      * エラーモーダルのクリック（早い者勝ち）
      *
      * 1. Server Action で排他制御付き更新を実行
-     * 2. 結果（勝ち/負け）をローカル state に保存
-     * 3. RESULT フェーズに遷移
-     * 4. 最新データを再取得して勝者情報を反映
+     * 2. 結果（勝ち/負け）をローカル state に保存（個別のエラー用ではなく全体用）
+     * 3. 自動終了チェック（全エラーが閉じられたら RESULT フェーズに遷移）
+     * 4. 最新データを再取得して進行状況を反映
      */
-    const handleClickError = useCallback(async () => {
-        const event = match?.error_events[0]
-        if (!event || isProcessing) return
+    const handleClickError = useCallback(async (eventId: string) => {
+        if (!match || isProcessing) return
 
         setIsProcessing(true)
         try {
-            const result = await clickError(event.id)
-            setClickResult(result.success ? 'win' : 'lose')
+            const result = await clickError(eventId)
+            
+            // 自分がエラーを閉じられたかどうかを記録（最初の成功のみ）
+            if (result.success && !clickResult) {
+                setClickResult('win')
+            }
 
-            // 勝っても負けてもリザルト画面へ
-            // （他クライアントは Realtime 経由で RESULT に遷移する）
-            setPhase('RESULT')
+            // 自動終了チェック
+            if (match.id) {
+                const finished = await checkAutoFinish(match.id, roomId)
+                if (finished) {
+                    // 全エラーが閉じられた → RESULT フェーズへ
+                    setPhase('RESULT')
+                }
+            }
 
-            // 最新データを取得して勝者ユーザー情報を反映
+            // 最新データを取得して進行状況を反映
             await refreshMatchData()
         } catch (error) {
             console.error('クリック処理に失敗:', error)
         } finally {
             setIsProcessing(false)
         }
-    }, [match, isProcessing, refreshMatchData])
+    }, [match, roomId, isProcessing, clickResult, refreshMatchData])
 
     /**
      * ゲーム終了 → タイトルモーダルに戻る
@@ -270,6 +292,7 @@ export function useErrorHunter({
             // ローカル状態をリセット
             setMatch(null)
             setClickResult(null)
+            setProgress(null)
             setPhase('TITLE')
             matchIdRef.current = null
         } catch (error) {
@@ -290,6 +313,7 @@ export function useErrorHunter({
         try {
             setMatch(null)
             setClickResult(null)
+            setProgress(null)
             setPhase('TITLE')
             matchIdRef.current = null
         } catch (error) {
@@ -297,7 +321,7 @@ export function useErrorHunter({
         } finally {
             setIsProcessing(false)
         }
-    }, [match, roomId, isHost, isProcessing])
+    }, [roomId, isHost, isProcessing])
 
     // ============================================
     // Effects
@@ -399,6 +423,7 @@ export function useErrorHunter({
         phase,
         match,
         clickResult,
+        progress,
         isProcessing,
         handleStartGame,
         handleClickError,

@@ -9,4 +9,6 @@ export {
     getMatchWithEvents,
     getMatchIdFromRoom,
     finishGame,
+    getMatchProgress,
+    checkAutoFinish,
 } from './errorHunterActions'

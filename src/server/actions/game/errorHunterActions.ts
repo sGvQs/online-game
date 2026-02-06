@@ -35,13 +35,15 @@ export async function startGame(roomId: string) {
         }
     })
 
-    // ErrorEvent を作成
-    await prisma.error_events.create({
-        data: {
-            match_id: match.id,
-            appearance_at: appearanceAt,
-        }
-    })
+    // 20個の ErrorEvent を作成（各エラーにランダムな位置を設定）
+    const errorEvents = Array.from({ length: 20 }, () => ({
+        match_id: match.id,
+        appearance_at: appearanceAt,
+        position_x: Math.random() * 85 + 5,  // 5-90の範囲
+        position_y: Math.random() * 75 + 10, // 10-85の範囲
+    }))
+
+    await prisma.error_events.createMany({ data: errorEvents })
 
     // Room の currentMatchId を更新
     await prisma.room.update({
@@ -82,18 +84,7 @@ export async function clickError(eventId: string) {
     })
 
     if (result.count > 0) {
-        // 勝者: Match の winner_id も更新
-        const event = await prisma.error_events.findUnique({
-            where: { id: eventId }
-        })
-
-        if (event) {
-            await prisma.matches.update({
-                where: { id: event.match_id },
-                data: { winner_id: user.id }
-            })
-        }
-
+        // 勝者: 更新成功（winner_id は全エラー完了時に決定）
         return { success: true }
     }
 
@@ -150,23 +141,67 @@ export async function getMatchWithEvents(matchId: string) {
 }
 
 /**
- * ゲーム終了: Match ステータスを更新し、タイトルモーダルに戻る
- * ホストのみ実行可能
+ * マッチの進行状況を取得
+ * 各プレイヤーが閉じたエラーの数を集計する
  */
-export async function finishGame(matchId: string, roomId: string) {
-    const user = await getAuthenticatedUser()
-
-    const room = await prisma.room.findUnique({
-        where: { id: roomId }
+export async function getMatchProgress(matchId: string) {
+    const events = await prisma.error_events.findMany({
+        where: { match_id: matchId },
+        include: { users: true }
     })
 
-    if (!room) throw new Error('ルームが見つかりません')
-    if (room.createdBy !== user.id) throw new Error('ゲームを終了する権限がありません（ホストのみ）')
+    // プレイヤーごとのスコアを集計
+    const scores = events.reduce((acc, event) => {
+        if (event.closed_by) {
+            acc[event.closed_by] = (acc[event.closed_by] || 0) + 1
+        }
+        return acc
+    }, {} as Record<string, number>)
 
-    // Match ステータスを FINISHED に更新
+    return {
+        totalErrors: events.length,
+        closedErrors: events.filter(e => e.closed_by).length,
+        scores,
+        events
+    }
+}
+
+/**
+ * ゲーム終了: Match ステータスを更新し、最高スコアのプレイヤーを勝者に設定
+ * 自動終了時またはホストが手動終了時に呼び出される
+ */
+export async function finishGame(matchId: string, roomId: string) {
+    // 全エラーを取得してスコアを集計
+    const events = await prisma.error_events.findMany({
+        where: { match_id: matchId },
+        orderBy: { closed_at: 'asc' }
+    })
+
+    // スコア集計
+    const scores = new Map<string, number>()
+    events.forEach(event => {
+        if (event.closed_by) {
+            scores.set(event.closed_by, (scores.get(event.closed_by) || 0) + 1)
+        }
+    })
+
+    // 最高スコアのプレイヤーを見つける
+    let winnerId: string | null = null
+    let maxScore = 0
+    for (const [playerId, score] of scores.entries()) {
+        if (score > maxScore) {
+            maxScore = score
+            winnerId = playerId
+        }
+    }
+
+    // Match を終了
     await prisma.matches.update({
         where: { id: matchId },
-        data: { status: 'FINISHED' }
+        data: {
+            status: 'FINISHED',
+            winner_id: winnerId
+        }
     })
 
     // Room の currentMatchId をクリア
@@ -176,4 +211,28 @@ export async function finishGame(matchId: string, roomId: string) {
             currentMatchId: null,
         }
     })
+}
+
+/**
+ * 自動終了チェック: 全エラーが閉じられたら自動的にゲームを終了する
+ * 全エラーが閉じられた場合、最高スコアのプレイヤーを勝者として finishGame を呼び出す
+ */
+export async function checkAutoFinish(matchId: string, roomId: string) {
+    const user = await getAuthenticatedUser()
+
+    // 閉じられていないエラーの数をカウント
+    const unclosedCount = await prisma.error_events.count({
+        where: {
+            match_id: matchId,
+            closed_at: null
+        }
+    })
+
+    if (unclosedCount === 0) {
+        // 全て閉じられた → 自動終了
+        await finishGame(matchId, roomId)
+        return true
+    }
+
+    return false
 }

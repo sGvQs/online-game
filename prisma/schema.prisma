@@ -75,6 +75,8 @@ model error_events {
   appearance_at DateTime
   closed_at     DateTime?
   closed_by     String?   @db.Uuid
+  position_x    Float     // 画面上の位置（0-100の範囲、パーセンテージ）
+  position_y    Float     // 画面上の位置（0-100の範囲、パーセンテージ）
   users         User?     @relation(fields: [closed_by], references: [id])
   matches       matches   @relation(fields: [match_id], references: [id], onDelete: Cascade)
 }

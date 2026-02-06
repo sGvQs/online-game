@@ -33,4 +33,5 @@ export type {
     ErrorEventWithMatch,
     ErrorEventWithUser,
     MatchWithErrorEventsAndUsers,
+    MatchProgress,
 } from './game';

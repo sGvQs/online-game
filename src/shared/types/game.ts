@@ -48,3 +48,15 @@ export type MatchWithErrorEventsAndUsers = Prisma.matchesGetPayload<{
         error_events: { include: { users: true } }
     }
 }>;
+
+// ============================================
+// Progress types
+// ============================================
+
+/** Match progress information */
+export interface MatchProgress {
+    totalErrors: number
+    closedErrors: number
+    scores: Record<string, number>
+    events: ErrorEventWithUser[]
+}
