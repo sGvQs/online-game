@@ -1,8 +1,7 @@
 import { createClient } from '@/server/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { getCurrentUser, getRoomWithUsers } from '@/server/actions'
-import { MemberList } from '@/components/room/MemberList'
-import { RoomPageClient } from '@/components/room/RoomPageClient'
+import { RoomPageClientWrapper } from '@/components/room/RoomPageClient'
 import { Button } from '@/components/ui/Button'
 import { leaveRoom } from '@/server/actions'
 import { ChevronsRight, PersonStanding, House, Gamepad2 } from 'lucide-react'
@@ -77,37 +76,34 @@ export default async function RoomPage({ params }: { params: { id: string } }) {
                     </form>
                 </header>
 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                {/* 
+                  RoomPageClientWrapper: 
+                  - 1つの統合チャンネルでrooms + room_usersを監視
+                  - グリッドレイアウト（左: ゲームエリア、右: メンバーリスト）
+                */}
+                <RoomPageClientWrapper
+                    room={roomData}
+                    initialMembers={room.users}
+                    isHost={isHost}
+                >
                     {/* Game Board Area */}
-                    <div className="lg:col-span-2 space-y-4">
-                        <div className="glass-card h-[600px] rounded-3xl flex flex-col items-center justify-center text-brand-400 relative overflow-hidden group border-2 border-white/50 bg-white/40">
+                    <div className="glass-card h-[600px] rounded-3xl flex flex-col items-center justify-center text-brand-400 relative overflow-hidden group border-2 border-white/50 bg-white/40">
 
-                            {/* Decorative elements - using solid colors now */}
-                            <div className="w-32 h-32 rounded-full bg-brand-100/50 absolute top-1/4 left-1/4 animate-pulse duration-[3000ms]" />
-                            <div className="w-48 h-48 rounded-full bg-blue-100/30 absolute bottom-1/3 right-1/4 animate-pulse duration-[4000ms]" />
+                        {/* Decorative elements - using solid colors now */}
+                        <div className="w-32 h-32 rounded-full bg-brand-100/50 absolute top-1/4 left-1/4 animate-pulse duration-[3000ms]" />
+                        <div className="w-48 h-48 rounded-full bg-blue-100/30 absolute bottom-1/3 right-1/4 animate-pulse duration-[4000ms]" />
 
-                            <div className="text-center z-10 space-y-4 p-8">
-                                <span className="text-6xl mb-4 block" style={{ animation: 'float 6s ease-in-out infinite' }}>🎲</span>
-                                <h3 className="text-2xl font-bold text-brand-900">ゲーム開始待ち...</h3>
-                                <p className="text-brand-600 max-w-md mx-auto leading-relaxed">
-                                    {isHost
-                                        ? 'ゲームを選択してください。選択すると全員がゲーム画面に移動します。'
-                                        : 'ホストがゲームを選択するのを待っています...'}
-                                </p>
-                            </div>
+                        <div className="text-center z-10 space-y-4 p-8">
+                            <span className="text-6xl mb-4 block" style={{ animation: 'float 6s ease-in-out infinite' }}>🎲</span>
+                            <h3 className="text-2xl font-bold text-brand-900">ゲーム開始待ち...</h3>
+                            <p className="text-brand-600 max-w-md mx-auto leading-relaxed">
+                                {isHost
+                                    ? 'ゲームを選択してください。選択すると全員がゲーム画面に移動します。'
+                                    : 'ホストがゲームを選択するのを待っています...'}
+                            </p>
                         </div>
-
-                        {/* Game Selection - Client Component with Realtime */}
-                        <RoomPageClient room={roomData} isHost={isHost}>
-                            {/* Children rendered as part of SSR content */}
-                        </RoomPageClient>
                     </div>
-
-                    {/* Sidebar / Members */}
-                    <div className="lg:col-span-1">
-                        <MemberList roomId={room.id} initialMembers={room.users} />
-                    </div>
-                </div>
+                </RoomPageClientWrapper>
             </div>
         </div>
     )
