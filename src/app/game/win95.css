@@ -27,6 +27,14 @@
     background-color: #c0c0c0;
     border: 1px solid #808080;
     border-color: #808080 #dfdfdf #dfdfdf #808080;
+    
+}
+
+.win95-dialog-inner-error {
+    background-color: #c0c0c0;
+    border: 1px solid #808080;
+    border-color: #808080 #dfdfdf #dfdfdf #808080;
+    height: 100%;
 }
 
 /* Title Bar */

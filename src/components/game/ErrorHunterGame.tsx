@@ -93,14 +93,14 @@ export function ErrorHunterGame({
         >
             {/* 進行状況バー: WAITING と APPEARING フェーズで表示 */}
             {(phase === 'WAITING' || phase === 'APPEARING') && progress && (
-                <div className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50">
+                <div className="fixed bottom-4 left-4 z-50">
                     <Win95Dialog title="Progress">
                         <div style={{ minWidth: '320px' }}>
                             <p style={{ color: '#000', marginBottom: '8px', fontSize: '12px' }}>
                                 残りのエラー: {progress.totalErrors - progress.closedErrors} / {progress.totalErrors}
                             </p>
                             <Win95ProgressBar 
-                                progress={(progress.closedErrors / progress.totalErrors) * 100} 
+                                progress={(progress.closedErrors / progress.totalErrors) * 220} 
                             />
                             <div style={{ marginTop: '12px' }}>
                                 <p style={{ fontSize: '11px', fontWeight: 'bold', marginBottom: '4px', color: '#000' }}>
@@ -153,11 +153,11 @@ export function ErrorHunterGame({
                                     top: `${errorWithPosition.position_y}%`,
                                     transform: 'translate(-50%, -50%)',
                                     animation: 'win95-appear 0.15s ease-out',
-                                    minWidth: '280px',
-                                    maxWidth: '320px',
+                                    width: '400pxpx',
+                                    height: '120px',
                                 }}
                             >
-                                <div className="win95-dialog-inner">
+                                <div className="win95-dialog-inner-error">
                                     {/* Title Bar with Close Button */}
                                     <div className="win95-titlebar">
                                         <span className="win95-titlebar-text">Error</span>

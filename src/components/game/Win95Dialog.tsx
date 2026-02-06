@@ -72,11 +72,6 @@ export function Win95Dialog({
                 {/* Title Bar */}
                 <div className="win95-titlebar">
                     <span className="win95-titlebar-text">{title}</span>
-                    {/* <div className="win95-titlebar-buttons">
-                        <button className="win95-titlebar-btn" aria-label="Minimize">_</button>
-                        <button className="win95-titlebar-btn" aria-label="Maximize">□</button>
-                        <button className="win95-titlebar-btn" aria-label="Close">×</button>
-                    </div> */}
                 </div>
 
                 {/* Content */}

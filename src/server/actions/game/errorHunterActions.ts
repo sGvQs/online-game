@@ -39,7 +39,7 @@ export async function startGame(roomId: string) {
     const errorEvents = Array.from({ length: 20 }, () => ({
         match_id: match.id,
         appearance_at: appearanceAt,
-        position_x: Math.random() * 85 + 5,  // 5-90の範囲
+        position_x: Math.random() * 60 + 20,  // 20-80の範囲
         position_y: Math.random() * 75 + 10, // 10-85の範囲
     }))
 
