@@ -6,7 +6,6 @@ import { useRouter } from 'next/navigation'
 import { getRoom, returnToRoom } from '@/server/actions/room'
 import { Win95Dialog } from './Win95Dialog'
 import { Win95ProgressBar } from './Win95ProgressBar'
-import { HostControls } from './HostControls'
 import { Room } from '@/shared/types'
 import { ReactNode } from 'react'
 
@@ -45,10 +44,10 @@ export function GamePageClient({ room, isHost, roomId, children }: GamePageClien
         if (isInitializing) {
             const interval = setInterval(() => {
                 setInitProgress(prev => {
-                    if (prev >= 100) {
+                    if (prev >= 200) {
                         setIsInitializing(false)
                         setShowTitleModal(true)
-                        return 100
+                        return 200
                     }
                     return prev + 8
                 })

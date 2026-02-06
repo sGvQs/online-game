@@ -62,7 +62,7 @@ export function Win95Dialog({
     title,
     icon,
     children,
-    buttons = [{ label: 'OK' }],
+    buttons,
     className = '',
     style
 }: Win95DialogProps) {
@@ -72,11 +72,11 @@ export function Win95Dialog({
                 {/* Title Bar */}
                 <div className="win95-titlebar">
                     <span className="win95-titlebar-text">{title}</span>
-                    <div className="win95-titlebar-buttons">
+                    {/* <div className="win95-titlebar-buttons">
                         <button className="win95-titlebar-btn" aria-label="Minimize">_</button>
                         <button className="win95-titlebar-btn" aria-label="Maximize">□</button>
                         <button className="win95-titlebar-btn" aria-label="Close">×</button>
-                    </div>
+                    </div> */}
                 </div>
 
                 {/* Content */}
@@ -87,7 +87,7 @@ export function Win95Dialog({
 
                 {/* Buttons */}
                 <div className="win95-button-group">
-                    {buttons.map((btn, idx) => (
+                    {buttons?.map((btn, idx) => (
                         <button
                             key={idx}
                             className="win95-button"
