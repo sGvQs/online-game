@@ -67,7 +67,8 @@ export function GamePageClient({ room, isHost, roomId }: GamePageClientProps) {
         return () => {
             supabase.removeChannel(channel)
         }
-    }, [supabase, roomId, router])
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [roomId, router])
 
     const handleReturnToRoom = () => {
         startTransition(async () => {

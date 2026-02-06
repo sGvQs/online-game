@@ -33,8 +33,7 @@ export function RoomList({ initialRooms, userId }: { initialRooms: Room[], userI
                 event: '*',
                 schema: 'public',
                 table: 'rooms'
-            }, async (payload) => {
-                console.log(payload);
+            }, async () => {
                 fetchMessageData();
             })
             .subscribe()
@@ -42,7 +41,8 @@ export function RoomList({ initialRooms, userId }: { initialRooms: Room[], userI
         return () => {
             supabase.removeChannel(channel)
         }
-    }, [supabase])
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [])
 
     if (rooms.length === 0) {
         return (

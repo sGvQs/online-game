@@ -20,7 +20,7 @@ export default function UserProfile({ initialData }: { initialData: any }) {
                 schema: 'public',
                 table: 'users',
                 filter: `id=eq.${initialData.id}`
-            }, (payload) => {
+            }, (payload: { new: typeof initialData }) => {
                 setData(payload.new)
             })
             .subscribe()
@@ -28,7 +28,8 @@ export default function UserProfile({ initialData }: { initialData: any }) {
         return () => {
             supabase.removeChannel(channel)
         }
-    }, [supabase, initialData.id])
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [initialData.id])
 
     async function handleUpdate() {
         await updateName(newName)

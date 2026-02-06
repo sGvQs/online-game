@@ -40,7 +40,8 @@ export function MemberList({ roomId, initialMembers }: { roomId: string, initial
         return () => {
             supabase.removeChannel(channel)
         }
-    }, [supabase, roomId])
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [roomId])
 
     return (
         <div className={styles.wrapper()}>

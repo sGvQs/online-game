@@ -47,7 +47,8 @@ export function RoomPageClient({ room, isHost, children }: RoomPageClientProps) 
         return () => {
             supabase.removeChannel(channel)
         }
-    }, [supabase, room.id, router, currentRoom?.activeGameType])
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [room.id, router, currentRoom?.activeGameType])
 
     // Check on mount if we should redirect
     useEffect(() => {
