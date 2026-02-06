@@ -116,7 +116,7 @@ body {
   position: relative;
 }
 
-[data-theme='space'] body::before {
+/* [data-theme='space'] body::before {
   content: "";
   position: fixed;
   top: 0;
@@ -189,7 +189,7 @@ body {
   animation: stars-move 120s linear infinite;
   z-index: -2;
   pointer-events: none;
-}
+} */
 
 [data-theme='space'] body::after {
   content: "";

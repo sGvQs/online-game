@@ -52,5 +52,6 @@ export async function returnToRoom(roomId: string) {
         }
     })
 
-    revalidatePath(`/room/${roomId}`)
+    return;
+
 }
