@@ -3,4 +3,10 @@
  */
 
 // Error Hunter
-export { startGame, clickError, getMatchWithEvents, finishGame } from './errorHunterActions'
+export {
+    startGame,
+    clickError,
+    getMatchWithEvents,
+    getMatchIdFromRoom,
+    finishGame,
+} from './errorHunterActions'

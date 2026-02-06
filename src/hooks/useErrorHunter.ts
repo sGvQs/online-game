@@ -2,8 +2,18 @@
 
 import { useEffect, useState, useCallback, useRef } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { startGame, clickError, getMatchWithEvents, finishGame } from '@/server/actions/game'
+import {
+    startGame,
+    clickError,
+    getMatchWithEvents,
+    finishGame,
+    getMatchIdFromRoom,
+} from '@/server/actions/game'
 import type { MatchWithErrorEventsAndUsers } from '@/shared/types'
+
+// ============================================
+// 型定義
+// ============================================
 
 /** ゲームのフェーズ */
 export type GamePhase = 'TITLE' | 'WAITING' | 'APPEARING' | 'RESULT'
@@ -25,55 +35,50 @@ interface UseErrorHunterProps {
     initialMatchId: string | null
 }
 
-export function useErrorHunter({ roomId, isHost, initialMatchId }: UseErrorHunterProps): UseErrorHunterReturn {
+// ============================================
+// フック本体
+// ============================================
+
+export function useErrorHunter({
+    roomId,
+    isHost,
+    initialMatchId,
+}: UseErrorHunterProps): UseErrorHunterReturn {
     const supabase = createClient()
 
+    // ---- State ----
     const [phase, setPhase] = useState<GamePhase>('TITLE')
     const [match, setMatch] = useState<MatchWithErrorEventsAndUsers | null>(null)
     const [clickResult, setClickResult] = useState<'win' | 'lose' | null>(null)
     const [isProcessing, setIsProcessing] = useState(false)
 
-    // タイマーIDの参照（クリーンアップ用）
+    // ---- Refs ----
+    // Realtime コールバック内で最新値を参照するために ref を使用する。
+    // （useEffect の closure は初回レンダー時の値をキャプチャするため）
     const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
-    // 現在のmatchIdの参照（Realtimeコールバック内で最新値を参照するため）
     const matchIdRef = useRef<string | null>(initialMatchId)
+    const phaseRef = useRef<GamePhase>('TITLE')
 
-    // matchIdRef を同期
+    // state の最新値を ref に同期
+    useEffect(() => {
+        phaseRef.current = phase
+    }, [phase])
+
     useEffect(() => {
         matchIdRef.current = match?.id ?? initialMatchId
     }, [match?.id, initialMatchId])
 
-    /**
-     * 最新のMatchデータを取得し、stateを更新する
-     */
-    const refreshMatchData = useCallback(async () => {
-        const currentMatchId = matchIdRef.current
-        if (!currentMatchId) return
-
-        try {
-            const latestMatch = await getMatchWithEvents(currentMatchId)
-            if (!latestMatch) return
-
-            setMatch(latestMatch)
-
-            const event = latestMatch.error_events[0]
-            if (!event) return
-
-            // closedBy が設定されていればリザルト画面へ
-            if (event.closed_by) {
-                setPhase('RESULT')
-                return
-            }
-
-            // TITLE以外でまだ閉じられていなければ、タイマー管理に任せる
-            // (WAITING or APPEARING のまま維持)
-        } catch (error) {
-            console.error('Match データの取得に失敗:', error)
-        }
-    }, [])
+    // ============================================
+    // タイマー管理
+    // ============================================
 
     /**
-     * appearanceAt に基づいてタイマーをセットする
+     * appearanceAt の時刻に基づいてフェーズを切り替えるタイマーをセットする。
+     *
+     * - まだ出現時刻前 → WAITING にし、時刻到達で APPEARING に切り替え
+     * - 既に出現時刻を過ぎている → 即座に APPEARING に切り替え
+     *
+     * このコールバックは依存が空なので、インスタンスが変わらず安定している。
      */
     const setupAppearanceTimer = useCallback((appearanceAt: Date) => {
         // 既存タイマーをクリア
@@ -87,10 +92,10 @@ export function useErrorHunter({ roomId, isHost, initialMatchId }: UseErrorHunte
         const delay = targetTime - now
 
         if (delay <= 0) {
-            // 既に出現時刻を過ぎている
+            // 既に出現時刻を過ぎている → 即座にエラーモーダル表示
             setPhase('APPEARING')
         } else {
-            // 出現時刻まで待機
+            // 出現時刻まで WAITING → 時刻到達で APPEARING
             setPhase('WAITING')
             timerRef.current = setTimeout(() => {
                 setPhase('APPEARING')
@@ -98,14 +103,129 @@ export function useErrorHunter({ roomId, isHost, initialMatchId }: UseErrorHunte
         }
     }, [])
 
+    // ============================================
+    // データ取得: refreshMatchData
+    // ============================================
+
+    /**
+     * 最新の Match データを Server Action 経由で取得し、state を更新する。
+     *
+     * この関数はホストとクライアントの両方で使われる:
+     *
+     * 【ホスト】
+     *   handleStartGame で matchIdRef.current が設定済み
+     *   → そのまま getMatchWithEvents で取得
+     *
+     * 【クライアント（初回）】
+     *   matchIdRef.current が null
+     *   → Room の currentMatchId を Server Action で取得して解決
+     *
+     * 【フェーズ遷移ロジック】
+     *   - event.closed_by が設定済み → RESULT に遷移
+     *   - 現在 TITLE フェーズ → タイマーを起動して WAITING/APPEARING に遷移
+     *   - 現在 WAITING/APPEARING → タイマーは既に動いているので何もしない
+     *
+     * ※ phaseRef.current を使用して最新のフェーズを参照する。
+     *   （Realtime コールバックの stale closure 問題を回避）
+     */
+    const refreshMatchData = useCallback(async () => {
+        // #region agent log
+        console.log('[DEBUG] refreshMatchData: ENTRY', { matchIdRef: matchIdRef.current, roomId, isHost })
+        // #endregion
+
+        // ---- Step 1: matchId を解決する ----
+        let targetMatchId = matchIdRef.current
+
+        // matchId が不明（クライアント側で初回）→ Room から取得
+        if (!targetMatchId) {
+            // #region agent log
+            console.log('[DEBUG] refreshMatchData: matchIdRef is null, fetching room...')
+            // #endregion
+
+            const room = await getMatchIdFromRoom(roomId)
+
+            // #region agent log
+            console.log('[DEBUG] refreshMatchData: room fetched', { roomId: room?.id, currentMatchId: room?.currentMatchId })
+            // #endregion
+
+            targetMatchId = room?.currentMatchId ?? null
+        }
+
+        // まだゲームが開始されていない場合は何もしない
+        if (!targetMatchId) {
+            // #region agent log
+            console.log('[DEBUG] refreshMatchData: no targetMatchId, aborting')
+            // #endregion
+            return
+        }
+
+        // ---- Step 2: Match + ErrorEvents を取得 ----
+        try {
+            const latestMatch = await getMatchWithEvents(targetMatchId)
+
+            // #region agent log
+            console.log('[DEBUG] refreshMatchData: match fetched', { matchId: latestMatch?.id, eventCount: latestMatch?.error_events?.length, targetMatchId })
+            // #endregion
+
+            if (!latestMatch) return
+
+            // matchIdRef を更新（クライアントが初めて Match を発見した場合に重要）
+            matchIdRef.current = latestMatch.id
+            setMatch(latestMatch)
+
+            const event = latestMatch.error_events[0]
+            if (!event) return
+
+            // ---- Step 3: フェーズ遷移判定 ----
+            const currentPhase = phaseRef.current
+
+            // #region agent log
+            console.log('[DEBUG] refreshMatchData: phase decision', { currentPhase, closedBy: event.closed_by, appearanceAt: event.appearance_at })
+            // #endregion
+
+            // 3a. 勝者が既に決定している → RESULT
+            if (event.closed_by) {
+                // #region agent log
+                console.log('[DEBUG] refreshMatchData: winner found → RESULT')
+                // #endregion
+                setPhase('RESULT')
+                return
+            }
+
+            // 3b. TITLE フェーズ中に Match を発見した場合
+            //     = クライアントがゲーム開始を Realtime 経由で検知したケース
+            //     → タイマーを起動して WAITING/APPEARING に遷移する
+            if (currentPhase === 'TITLE') {
+                // #region agent log
+                console.log('[DEBUG] refreshMatchData: TITLE → setupAppearanceTimer', { appearanceAt: event.appearance_at })
+                // #endregion
+                setupAppearanceTimer(event.appearance_at)
+            }
+
+            // 3c. WAITING/APPEARING フェーズ → タイマーが既に動いているので何もしない
+
+        } catch (error) {
+            console.error('Match データの取得に失敗:', error)
+        }
+    }, [roomId, isHost, setupAppearanceTimer])
+
+    // ============================================
+    // アクションハンドラ
+    // ============================================
+
     /**
      * ゲーム開始（ホストのみ）
+     *
+     * 1. Server Action で Match + ErrorEvent を作成
+     * 2. matchIdRef に新しい Match ID を設定
+     * 3. 最新データを取得してタイマーを起動
      */
     const handleStartGame = useCallback(async () => {
         if (!isHost || isProcessing) return
 
         setIsProcessing(true)
         try {
+            // Server Action: Match + ErrorEvent を作成
             const newMatch = await startGame(roomId)
             matchIdRef.current = newMatch.id
 
@@ -128,7 +248,12 @@ export function useErrorHunter({ roomId, isHost, initialMatchId }: UseErrorHunte
     }, [roomId, isHost, isProcessing, setupAppearanceTimer])
 
     /**
-     * エラーモーダルをクリック（早い者勝ち）
+     * エラーモーダルのクリック（早い者勝ち）
+     *
+     * 1. Server Action で排他制御付き更新を実行
+     * 2. 結果（勝ち/負け）をローカル state に保存
+     * 3. RESULT フェーズに遷移
+     * 4. 最新データを再取得して勝者情報を反映
      */
     const handleClickError = useCallback(async () => {
         const event = match?.error_events[0]
@@ -139,10 +264,11 @@ export function useErrorHunter({ roomId, isHost, initialMatchId }: UseErrorHunte
             const result = await clickError(event.id)
             setClickResult(result.success ? 'win' : 'lose')
 
-            // 勝っても負けてもリザルト画面へ（他クライアントはRealtime経由で遷移する）
+            // 勝っても負けてもリザルト画面へ
+            // （他クライアントは Realtime 経由で RESULT に遷移する）
             setPhase('RESULT')
 
-            // 最新データを取得して勝者情報を反映
+            // 最新データを取得して勝者ユーザー情報を反映
             await refreshMatchData()
         } catch (error) {
             console.error('クリック処理に失敗:', error)
@@ -152,7 +278,10 @@ export function useErrorHunter({ roomId, isHost, initialMatchId }: UseErrorHunte
     }, [match, isProcessing, refreshMatchData])
 
     /**
-     * ゲーム終了（ホストのみ）→ タイトルモーダルに戻る
+     * ゲーム終了 → タイトルモーダルに戻る
+     *
+     * ホスト: Server Action で Match 終了 + Room の currentMatchId をクリア
+     * クライアント: ローカル状態のリセットのみ
      */
     const handleFinish = useCallback(async () => {
         if (!match || isProcessing) return
@@ -175,8 +304,16 @@ export function useErrorHunter({ roomId, isHost, initialMatchId }: UseErrorHunte
         }
     }, [match, roomId, isHost, isProcessing])
 
+    // ============================================
+    // Effects
+    // ============================================
+
     /**
-     * 初期データ取得: currentMatchId がある場合は既存 Match を読み込む
+     * 初期データ取得
+     *
+     * ページロード時に initialMatchId (= Room.currentMatchId) が存在する場合、
+     * 既存の Match データを読み込んでゲーム状態を復元する。
+     * （例: ページリロード時、途中参加時）
      */
     useEffect(() => {
         if (!initialMatchId) return
@@ -187,6 +324,7 @@ export function useErrorHunter({ roomId, isHost, initialMatchId }: UseErrorHunte
                 if (!existingMatch) return
 
                 setMatch(existingMatch)
+                matchIdRef.current = existingMatch.id
 
                 const event = existingMatch.error_events[0]
                 if (!event) return
@@ -195,7 +333,7 @@ export function useErrorHunter({ roomId, isHost, initialMatchId }: UseErrorHunte
                     // 既に勝者が決定済み
                     setPhase('RESULT')
                 } else {
-                    // まだゲーム中: タイマーをセット
+                    // まだゲーム中 → タイマーをセット
                     setupAppearanceTimer(event.appearance_at)
                 }
             } catch (error) {
@@ -208,8 +346,13 @@ export function useErrorHunter({ roomId, isHost, initialMatchId }: UseErrorHunte
 
     /**
      * Supabase Realtime サブスクリプション
-     * error_events と matches テーブルの変更を監視
-     * ペイロードは使用せず、シグナルとしてのみ利用する
+     *
+     * error_events と matches テーブルの変更を監視する。
+     * ペイロード（payload.new, payload.old）は一切使用しない。
+     * 変更を検知したら refreshMatchData() で最新データを Server Action 経由で再取得する。
+     *
+     * refreshMatchData は useCallback で安定化されているため、
+     * このサブスクリプションは roomId が変わらない限り再登録されない。
      */
     useEffect(() => {
         const channel = supabase
@@ -219,7 +362,6 @@ export function useErrorHunter({ roomId, isHost, initialMatchId }: UseErrorHunte
                 schema: 'public',
                 table: 'error_events',
             }, () => {
-                // シグナル駆動: 変更を検知したら最新データを再取得
                 refreshMatchData()
             })
             .on('postgres_changes', {
@@ -234,36 +376,10 @@ export function useErrorHunter({ roomId, isHost, initialMatchId }: UseErrorHunte
         return () => {
             supabase.removeChannel(channel)
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [roomId])
+    }, [supabase, roomId, refreshMatchData])
 
     /**
-     * match データ更新時にタイマーを再設定する
-     */
-    useEffect(() => {
-        if (!match) return
-
-        const event = match.error_events[0]
-        if (!event) return
-
-        // 既に閉じられている場合はタイマー不要
-        if (event.closed_by) return
-
-        // TITLE フェーズの場合はまだタイマーを設定しない
-        // (handleStartGame がセットする)
-        if (phase === 'TITLE') return
-
-        // WAITING/APPEARING フェーズでタイマーが未設定の場合のみ再設定
-        if (phase === 'WAITING' || phase === 'APPEARING') {
-            // APPEARING 中はタイマー不要
-            if (phase === 'APPEARING') return
-
-            setupAppearanceTimer(event.appearance_at)
-        }
-    }, [match, phase, setupAppearanceTimer])
-
-    /**
-     * クリーンアップ: タイマーを解除
+     * クリーンアップ: アンマウント時にタイマーを解除
      */
     useEffect(() => {
         return () => {
@@ -272,6 +388,10 @@ export function useErrorHunter({ roomId, isHost, initialMatchId }: UseErrorHunte
             }
         }
     }, [])
+
+    // ============================================
+    // 戻り値
+    // ============================================
 
     return {
         phase,
