@@ -3,21 +3,15 @@
 import { createClient } from '@/frontend/lib/supabase/client'
 import { useEffect, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { returnToRoom } from '@/backend/actions/room'
+import { getRoom, returnToRoom } from '@/backend/actions/room'
 import { ArrowLeft, Play } from 'lucide-react'
 import { Win95Dialog } from './Win95Dialog'
 import { Win95ProgressBar } from './Win95ProgressBar'
+import { Room } from '@prisma/client'
 
-type RoomData = {
-    id: string
-    name: string
-    createdBy: string
-    activeGameType: string | null
-    status: string
-}
 
 interface GamePageClientProps {
-    room: RoomData
+    room: Room
     isHost: boolean
     roomId: string
 }
@@ -26,7 +20,7 @@ export function GamePageClient({ room, isHost, roomId }: GamePageClientProps) {
     const router = useRouter()
     const supabase = createClient()
     const [isPending, startTransition] = useTransition()
-    const [currentRoom, setCurrentRoom] = useState<RoomData>(room)
+    const [currentRoom, setCurrentRoom] = useState<Room | null>(room)
     const [initProgress, setInitProgress] = useState(0)
     const [isInitializing, setIsInitializing] = useState(true)
 
@@ -46,6 +40,18 @@ export function GamePageClient({ room, isHost, roomId }: GamePageClientProps) {
         }
     }, [isInitializing])
 
+
+    const handlePayload = async () => {
+        try {
+            const newRoom = await getRoom(room.id);
+            setCurrentRoom(newRoom);
+            if (newRoom && newRoom.activeGameType === null) {
+                router.push(`/room/${newRoom.id}`);
+            }
+        } catch (error) {
+            console.error("更新に失敗:", error);
+        }
+    };
     // Subscribe to room changes for realtime navigation
     useEffect(() => {
         const channel = supabase
@@ -54,15 +60,8 @@ export function GamePageClient({ room, isHost, roomId }: GamePageClientProps) {
                 event: 'UPDATE',
                 schema: 'public',
                 table: 'rooms',
-                filter: `id=eq.${roomId}`
-            }, (payload) => {
-                const newRoom = payload.new as RoomData
-                setCurrentRoom(newRoom)
-
-                // Navigate back to room if game is ended
-                if (!newRoom.activeGameType) {
-                    router.push(`/room/${roomId}`)
-                }
+            }, () => {
+                handlePayload();
             })
             .subscribe()
 

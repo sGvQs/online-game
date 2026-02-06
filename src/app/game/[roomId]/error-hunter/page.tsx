@@ -3,6 +3,7 @@ import { prisma } from '@/backend/lib/prisma'
 import { redirect } from 'next/navigation'
 import { GamePageClient } from '@/frontend/components/game/GamePageClient'
 import '@/app/game/win95.css'
+import { Room } from '@/types'
 
 export default async function ErrorHunterPage({ params }: { params: { roomId: string } }) {
     const supabase = await createClient()
@@ -45,11 +46,13 @@ export default async function ErrorHunterPage({ params }: { params: { roomId: st
     const isHost = room.createdBy === idp.user.id
 
     // Prepare room data for client component
-    const roomData = {
+    const roomData: Room = {
         id: room.id,
+        createdAt: room.createdAt,
         name: room.name,
         createdBy: room.createdBy,
         activeGameType: room.activeGameType,
+        currentMatchId: room.currentMatchId,
         status: room.status
     }
 
