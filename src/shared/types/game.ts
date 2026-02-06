@@ -36,3 +36,15 @@ export type MatchWithRoom = Prisma.matchesGetPayload<{
 export type ErrorEventWithMatch = Prisma.error_eventsGetPayload<{
     include: { matches: true }
 }>;
+
+/** ErrorEvent with User (winner info) */
+export type ErrorEventWithUser = Prisma.error_eventsGetPayload<{
+    include: { users: true }
+}>;
+
+/** Match with ErrorEvents including User */
+export type MatchWithErrorEventsAndUsers = Prisma.matchesGetPayload<{
+    include: {
+        error_events: { include: { users: true } }
+    }
+}>;

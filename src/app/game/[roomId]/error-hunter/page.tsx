@@ -1,7 +1,7 @@
 import { createClient } from '@/server/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { getCurrentUser, getRoomWithUsers } from '@/server/actions'
-import { GamePageClient } from '@/components/game/GamePageClient'
+import { ErrorHunterGame } from '@/components/game/ErrorHunterGame'
 import '@/app/game/win95.css'
 import { Room } from '@/types'
 
@@ -47,7 +47,13 @@ export default async function ErrorHunterPage({ params }: { params: { roomId: st
 
     return (
         <div className="win95-container win95-scanlines">
-            <GamePageClient room={roomData} isHost={isHost} roomId={roomId} />
-        </div >
+            <ErrorHunterGame
+                room={roomData}
+                isHost={isHost}
+                roomId={roomId}
+                initialMatchId={room.currentMatchId}
+                currentUserId={currentUser.user.id}
+            />
+        </div>
     )
 }

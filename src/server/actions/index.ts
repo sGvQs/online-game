@@ -29,3 +29,11 @@ export {
 
 // Auth関連
 export { syncUser } from './auth'
+
+// Game関連
+export {
+    startGame,
+    clickError,
+    getMatchWithEvents,
+    finishGame,
+} from './game'

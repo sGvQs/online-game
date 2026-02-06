@@ -13,6 +13,12 @@ interface GamePageClientProps {
     room: Room
     isHost: boolean
     roomId: string
+    /** タイトルモーダルの表示を外部から制御する */
+    showTitle?: boolean
+    /** ゲーム開始ボタンのコールバック */
+    onStartGame?: () => void
+    /** ゲーム開始ボタンの無効化フラグ */
+    isStartDisabled?: boolean
     children?: ReactNode
 }
 
@@ -31,13 +37,24 @@ const ASCII_ART =
 ██║  ██║╚██████╔╝██║ ╚████║   ██║   ███████╗██║  ██║
 ╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═══╝   ╚═╝   ╚══════╝╚═╝  ╚═╝`
 
-export function GamePageClient({ room, isHost, roomId, children }: GamePageClientProps) {
+export function GamePageClient({
+    room,
+    isHost,
+    roomId,
+    showTitle,
+    onStartGame,
+    isStartDisabled,
+    children,
+}: GamePageClientProps) {
     const router = useRouter()
     const supabase = createClient()
     const [isPending, startTransition] = useTransition()
     const [initProgress, setInitProgress] = useState(0)
     const [isInitializing, setIsInitializing] = useState(true)
-    const [showTitleModal, setShowTitleModal] = useState(false)
+    const [internalShowTitle, setInternalShowTitle] = useState(false)
+
+    // 外部制御がある場合はそちらを使い、なければ内部stateを使う
+    const isTitleVisible = showTitle !== undefined ? showTitle : internalShowTitle
 
     // Simulate initialization progress
     useEffect(() => {
@@ -46,7 +63,7 @@ export function GamePageClient({ room, isHost, roomId, children }: GamePageClien
                 setInitProgress(prev => {
                     if (prev >= 200) {
                         setIsInitializing(false)
-                        setShowTitleModal(true)
+                        setInternalShowTitle(true)
                         return 200
                     }
                     return prev + 8
@@ -93,8 +110,14 @@ export function GamePageClient({ room, isHost, roomId, children }: GamePageClien
     }
 
     const handleCloseModal = () => {
-        setShowTitleModal(false);
+        setInternalShowTitle(false);
         handleReturnToRoom();
+    }
+
+    const handleStartGameClick = () => {
+        if (onStartGame) {
+            onStartGame()
+        }
     }
 
     return (
@@ -112,7 +135,7 @@ export function GamePageClient({ room, isHost, roomId, children }: GamePageClien
             )}
 
             {/* Title Modal */}
-            {showTitleModal && (
+            {!isInitializing && isTitleVisible && (
                 <div className="win95-title-modal-overlay">
                     <div className="win95-title-modal">
                         <div className="win95-title-modal-inner">
@@ -136,13 +159,11 @@ export function GamePageClient({ room, isHost, roomId, children }: GamePageClien
                                     <div>
                                         <button
                                             className="win95-start-button"
-                                            disabled
+                                            onClick={handleStartGameClick}
+                                            disabled={isStartDisabled || isPending}
                                         >
                                             ゲーム開始
                                         </button>
-                                        <p style={{ marginTop: '12px', fontSize: '11px', color: '#808080' }}>
-                                            ※まだ何もできません
-                                        </p>
                                     </div>
                                 )}
 
@@ -157,8 +178,8 @@ export function GamePageClient({ room, isHost, roomId, children }: GamePageClien
                 </div>
             )}
 
-            {/* Game Area - Hidden when title modal is shown */}
-            {!showTitleModal && children}
+            {/* Game Area - Hidden when title modal or initialization is shown */}
+            {!isInitializing && !isTitleVisible && children}
         </>
     )
 }
