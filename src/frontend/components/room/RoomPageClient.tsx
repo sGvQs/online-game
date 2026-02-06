@@ -4,9 +4,9 @@ import { createClient } from '@/frontend/lib/supabase/client'
 import { useEffect, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { getRoom, selectGame } from '@/backend/actions/room'
-import { Gamepad2 } from 'lucide-react'
-import { Button } from '@/frontend/components/ui/Button'
 import { Room } from '@/types'
+import { GameSelectionCard } from './GameSelectionCard'
+import { WaitingCard } from './WaitingCard'
 
 interface RoomPageClientProps {
     room: Room
@@ -69,39 +69,15 @@ export function RoomPageClient({ room, isHost, children }: RoomPageClientProps) 
 
             {/* Game Selection for Host */}
             {isHost && (
-                <div className="glass-card p-6 rounded-2xl">
-                    <h3 className="font-bold text-lg text-brand-900 flex items-center gap-2 mb-4">
-                        <Gamepad2 className="w-5 h-5" />
-                        ゲームを選択
-                    </h3>
-                    <div className="grid grid-cols-1 gap-3">
-                        <Button
-                            onClick={() => handleSelectGame('error-hunter')}
-                            disabled={isPending}
-                            className="w-full justify-start gap-3 h-16 text-left bg-gradient-to-r from-red-600 to-orange-500 hover:from-red-500 hover:to-orange-400 text-white border-0"
-                        >
-                            <span className="text-2xl">🐛</span>
-                            <div>
-                                <div className="font-bold">ERROR HUNTER</div>
-                                <div className="text-xs opacity-80">バグを見つけて潰せ！</div>
-                            </div>
-                        </Button>
-                    </div>
-                    {isPending && (
-                        <div className="mt-4 text-center text-brand-600 text-sm">
-                            ゲームを開始中...
-                        </div>
-                    )}
-                </div>
+                <GameSelectionCard
+                    onSelectGame={handleSelectGame}
+                    isPending={isPending}
+                />
             )}
 
             {/* Waiting message for non-hosts */}
             {!isHost && !currentRoom?.activeGameType && (
-                <div className="glass-card p-6 rounded-2xl text-center">
-                    <div className="text-brand-600">
-                        ホストがゲームを選択するのを待っています...
-                    </div>
-                </div>
+                <WaitingCard />
             )}
         </>
     )

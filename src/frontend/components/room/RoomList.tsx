@@ -2,17 +2,9 @@
 
 import { createClient } from '@/frontend/lib/supabase/client'
 import { useEffect, useState } from 'react'
-import { Button } from '@/frontend/components/ui/Button'
-import { IconButton } from '@/frontend/components/ui/IconButton'
 import { joinRoom, deleteRoom, getRooms } from '@/backend/actions/room'
-import { Trash2, Play } from 'lucide-react'
-
-type Room = {
-    id: string
-    name: string
-    createdAt: Date
-    createdBy: string
-}
+import { RoomCard, RoomListEmptyState } from './RoomCard'
+import { Room } from '@/types'
 
 export function RoomList({ initialRooms, userId }: { initialRooms: Room[], userId: string }) {
     const [rooms, setRooms] = useState<Room[]>(initialRooms)
@@ -52,59 +44,25 @@ export function RoomList({ initialRooms, userId }: { initialRooms: Room[], userI
         }
     }, [supabase])
 
+    if (rooms.length === 0) {
+        return (
+            <div className="grid gap-6 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
+                <RoomListEmptyState />
+            </div>
+        )
+    }
+
     return (
         <div className="grid gap-6 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
             {rooms.map(room => (
-                <div key={room.id} className="glass-card rounded-xl p-5 flex flex-col justify-between group h-full relative overflow-hidden border-t-2 border-t-brand-500/50 hover:border-t-brand-400 transition-all duration-500">
-
-                    {/* Glow effect on hover */}
-                    <div className="absolute inset-0 bg-brand-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
-
-                    <div className="mb-4 relative z-10">
-                        <h3 className="text-xl font-bold mb-2 text-brand-900 dark:text-brand-800 transition-colors group-hover:text-glow">
-                            {room.name}
-                        </h3>
-                        <div className="flex items-center text-xs text-brand-700 dark:text-brand-600 space-x-2">
-                            <span className="bg-brand-50/50 dark:bg-brand-900/10 px-2 py-0.5 rounded-md border border-brand-100 dark:border-brand-700/30">
-                                {new Date(room.createdAt).toLocaleDateString('ja-JP')}
-                            </span>
-                        </div>
-                    </div>
-
-                    <div className="flex justify-between items-center mt-4 pt-4 border-t border-brand-100/50 dark:border-brand-700/20 relative z-10">
-
-                        <div className="flex gap-2 items-center">
-                            {room.createdBy === userId && (
-                                <form action={deleteRoom.bind(null, room.id)}>
-                                    <IconButton
-                                        type="submit"
-                                        variant="danger"
-                                        size="sm"
-                                        icon={<Trash2 className="w-4 h-4" />}
-                                        tooltip="削除"
-                                    />
-                                </form>
-                            )}
-                            <form action={joinRoom.bind(null, room.id)}>
-                                <Button size="sm" className="bg-brand-600 dark:bg-brand-300 hover:bg-brand-400 text-white shadow-lg hover:shadow-brand-500/25 transition-all duration-300 rounded-full px-4 h-8 text-xs font-semibold tracking-wide uppercase gap-1.5">
-                                    <Play className="w-3.5 h-3.5 fill-current" />
-                                    参加
-                                </Button>
-                            </form>
-                        </div>
-                    </div>
-                </div>
+                <RoomCard
+                    key={room.id}
+                    room={room}
+                    isOwner={room.createdBy === userId}
+                    onJoin={joinRoom.bind(null, room.id)}
+                    onDelete={deleteRoom.bind(null, room.id)}
+                />
             ))}
-
-            {rooms.length === 0 && (
-                <div className="col-span-full py-24 text-center border border-dashed border-brand-200 dark:border-brand-800/30 rounded-2xl backdrop-blur-sm">
-                    <div className="text-6xl mb-6 opacity-80 animate-bounce">🎮</div>
-                    <h3 className="text-xl font-bold text-brand-400 mb-2">現在アクティブなルームはありません</h3>
-                    <p className="text-brand-600 dark:text-brand-300 max-w-md mx-auto">
-                        まだルームが作成されていません。新しいゲームルームを作成して、最初のプレイヤーになりましょう！
-                    </p>
-                </div>
-            )}
         </div>
     )
 }

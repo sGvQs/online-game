@@ -4,23 +4,14 @@ import { createClient } from '@/frontend/lib/supabase/client'
 import { useEffect, useState } from 'react'
 import { getRoomUsers } from '@/backend/actions/room'
 import { Users } from 'lucide-react'
+import { RoomUserWithUser } from '@/types'
+import { MemberItem } from './MemberItem'
+import { memberListCard } from './member-item.styles'
 
+const styles = memberListCard()
 
-type RoomMember = {
-    id: string;
-    roomId: string;
-    userId: string;
-    createdAt: Date;
-    user: {
-        id: string;
-        name: string;
-        email: string;
-        createdAt: Date;
-    };
-};
-
-export function MemberList({ roomId, initialMembers }: { roomId: string, initialMembers: RoomMember[] }) {
-    const [members, setMembers] = useState<RoomMember[]>(initialMembers)
+export function MemberList({ roomId, initialMembers }: { roomId: string, initialMembers: RoomUserWithUser[] }) {
+    const [members, setMembers] = useState<RoomUserWithUser[]>(initialMembers)
     const supabase = createClient()
 
     const handlePayload = async () => {
@@ -50,33 +41,20 @@ export function MemberList({ roomId, initialMembers }: { roomId: string, initial
     }, [supabase, roomId])
 
     return (
-        <div className="glass-card p-6 rounded-2xl h-full">
-            <div className="flex items-center justify-between mb-6">
-                <h3 className="font-bold text-lg text-brand-900 flex items-center gap-2">
+        <div className={styles.wrapper()}>
+            <div className={styles.header()}>
+                <h3 className={styles.title()}>
                     <Users className="w-4 h-4" />
                     参加者
                 </h3>
-                <span className="bg-brand-300 text-brand-700 text-xs font-bold px-3 py-1 rounded-full">
+                <span className={styles.count()}>
                     {members.length}
                 </span>
             </div>
 
-            <ul className="space-y-3">
+            <ul className={styles.list()}>
                 {members.map(member => (
-                    <li key={member.id} className="flex items-center gap-3 p-3 rounded-xl hover:bg-white/10 transition-colors border border-transparent hover:border-brand-500">
-                        <div className="w-10 h-10 rounded-full bg-brand-300 flex items-center justify-center text-sm font-bold text-brand-700 shadow-inner">
-                            {member.user.name.substring(0, 2).toUpperCase()}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                            <p className="text-sm font-semibold text-brand-900 truncate">
-                                {member.user.name}
-                            </p>
-                            <p className="text-[10px] text-brand-900 font-medium">
-                                参加中
-                            </p>
-                        </div>
-                        <div className="w-2 h-2 rounded-full bg-green-400 shadow-[0_0_8px_rgba(74,222,128,0.5)]" />
-                    </li>
+                    <MemberItem key={member.id} member={member} />
                 ))}
             </ul>
         </div>

@@ -4,11 +4,10 @@ import { createClient } from '@/frontend/lib/supabase/client'
 import { useEffect, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { getRoom, returnToRoom } from '@/backend/actions/room'
-import { ArrowLeft, Play } from 'lucide-react'
 import { Win95Dialog } from './Win95Dialog'
 import { Win95ProgressBar } from './Win95ProgressBar'
-import { Room } from '@prisma/client'
-
+import { HostControls } from './HostControls'
+import { Room } from '@/types'
 
 interface GamePageClientProps {
     room: Room
@@ -92,24 +91,10 @@ export function GamePageClient({ room, isHost, roomId }: GamePageClientProps) {
 
             {/* Host Controls */}
             {isHost && !isInitializing && (
-                <div className="flex gap-4 mb-4">
-                    <button
-                        onClick={handleReturnToRoom}
-                        disabled={isPending}
-                        className="win95-button flex items-center gap-2"
-                        style={{ minWidth: 120 }}
-                    >
-                        <ArrowLeft className="w-4 h-4" />
-                        {isPending ? '戻っています...' : 'ルームに戻る'}
-                    </button>
-                    <button
-                        className="win95-button flex items-center gap-2"
-                        style={{ minWidth: 120 }}
-                    >
-                        <Play className="w-4 h-4" />
-                        ゲーム開始
-                    </button>
-                </div>
+                <HostControls
+                    onReturnToRoom={handleReturnToRoom}
+                    isPending={isPending}
+                />
             )}
 
             {/* Waiting message for non-hosts */}
