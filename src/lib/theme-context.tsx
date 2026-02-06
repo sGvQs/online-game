@@ -1,6 +1,7 @@
 'use client'
 
 import React, { createContext, useContext, useEffect } from 'react'
+import { StarfieldBackground } from '@/components/StarfieldBackground'
 
 type Theme = 'space'
 
@@ -24,6 +25,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
     return (
         <ThemeContext.Provider value={{ theme, toggleTheme }}>
+            <StarfieldBackground />
             {children}
         </ThemeContext.Provider>
     )
