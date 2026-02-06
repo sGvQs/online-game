@@ -1,5 +1,5 @@
 import { ArrowLeft, Play } from 'lucide-react'
-import { hostControls } from './host-controls.styles'
+import { hostControls } from './styles'
 
 const styles = hostControls()
 

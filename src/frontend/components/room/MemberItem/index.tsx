@@ -1,5 +1,5 @@
-import { RoomUserWithUser } from '@/types'
-import { memberItem } from './member-item.styles'
+import { RoomUserWithUser } from '@/shared/types'
+import { memberItem } from './styles'
 
 const styles = memberItem()
 

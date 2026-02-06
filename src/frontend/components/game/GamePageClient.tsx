@@ -7,7 +7,7 @@ import { getRoom, returnToRoom } from '@/backend/actions/room'
 import { Win95Dialog } from './Win95Dialog'
 import { Win95ProgressBar } from './Win95ProgressBar'
 import { HostControls } from './HostControls'
-import { Room } from '@/types'
+import { Room } from '@/shared/types'
 
 interface GamePageClientProps {
     room: Room

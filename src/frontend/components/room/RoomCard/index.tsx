@@ -1,8 +1,8 @@
-import { Room } from '@/types'
+import { Room } from '@/shared/types'
 import { Button } from '@/frontend/components/ui/Button'
 import { IconButton } from '@/frontend/components/ui/IconButton'
 import { Trash2, Play } from 'lucide-react'
-import { roomCard, emptyState } from './room-card.styles'
+import { roomCard, emptyState } from './styles'
 
 interface RoomCardProps {
     room: Room

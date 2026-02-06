@@ -4,9 +4,8 @@ import { createClient } from '@/frontend/lib/supabase/client'
 import { useEffect, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { getRoom, selectGame } from '@/backend/actions/room'
-import { Room } from '@/types'
+import { Room } from '@/shared/types'
 import { GameSelectionCard } from './GameSelectionCard'
-import { WaitingCard } from './WaitingCard'
 
 interface RoomPageClientProps {
     room: Room
@@ -73,11 +72,6 @@ export function RoomPageClient({ room, isHost, children }: RoomPageClientProps) 
                     onSelectGame={handleSelectGame}
                     isPending={isPending}
                 />
-            )}
-
-            {/* Waiting message for non-hosts */}
-            {!isHost && !currentRoom?.activeGameType && (
-                <WaitingCard />
             )}
         </>
     )

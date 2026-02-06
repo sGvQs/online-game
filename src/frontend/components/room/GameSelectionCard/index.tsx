@@ -1,6 +1,6 @@
 import { Gamepad2 } from 'lucide-react'
 import { Button } from '@/frontend/components/ui/Button'
-import { gameSelection } from './game-selection.styles'
+import { gameSelection, waitingCard } from './styles'
 
 const styles = gameSelection()
 
@@ -37,6 +37,21 @@ export function GameSelectionCard({ onSelectGame, isPending }: GameSelectionCard
                     ゲームを開始中...
                 </div>
             )}
+        </div>
+    )
+}
+
+const waitingStyles = waitingCard()
+
+/**
+ * WaitingCard - 待機中メッセージのPresentational Component
+ */
+export function WaitingCard() {
+    return (
+        <div className={waitingStyles.wrapper()}>
+            <div className={waitingStyles.text()}>
+                ホストがゲームを選択するのを待っています...
+            </div>
         </div>
     )
 }
