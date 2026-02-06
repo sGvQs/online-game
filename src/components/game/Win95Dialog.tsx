@@ -1,8 +1,9 @@
 'use client'
 
 import React from 'react'
+import Image from 'next/image'
 
-export type Win95IconType = 'error' | 'warning' | 'info' | 'question'
+export type Win95IconType = 'error' | 'warning' | 'info' | 'question' | "lose"
 
 interface Win95DialogProps {
     title: string
@@ -53,6 +54,17 @@ function Win95Icon({ type }: { type: Win95IconType }) {
                         <circle cx="16" cy="16" r="14" fill="#0066cc" stroke="#003366" strokeWidth="2" />
                         <text x="16" y="22" textAnchor="middle" fill="white" fontWeight="bold" fontSize="16">?</text>
                     </svg>
+                </div>
+            )
+        case 'lose':
+            return (
+                <div className="win95-dialog-icon-lose">
+                    <Image 
+                        src="/images/telling-you-lose.svg" 
+                        alt="Lose" 
+                        width={48} 
+                        height={48}
+                    />
                 </div>
             )
     }

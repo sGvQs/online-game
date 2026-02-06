@@ -17,12 +17,12 @@ interface ErrorHunterGameProps {
 
 /** ランダムなエラーメッセージ */
 const ERROR_MESSAGES = [
-    'A fatal exception 0E has occurred at 0028:C0034B03.\nThe current application will be terminated.',
-    'An error has occurred in your application.\nIf you choose Close, your work will be lost.',
-    'KERNEL32.DLL caused a General Protection Fault\nin module UNKNOWN at 0000:00000000.',
-    'This program has performed an illegal operation\nand will be shut down.',
-    'Windows Protection Error.\nYou need to restart your computer.',
-    'A device attached to the system is not functioning.\nError code: 0x0000001F',
+    // 'A fatal exception 0E has occurred at 0028:C0034B03.\nThe current application will be terminated.',
+    // 'An error has occurred in your application.\nIf you choose Close, your work will be lost.',
+    // 'KERNEL32.DLL caused a General Protection Fault\nin module UNKNOWN at 0000:00000000.',
+    // 'This program has performed an illegal operation\nand will be shut down.',
+     'Windows Protection Error.\nYou need to restart your computer.',
+    // 'A device attached to the system is not functioning.\nError code: 0x0000001F',
 ]
 
 function getRandomErrorMessage(): string {
@@ -92,10 +92,10 @@ export function ErrorHunterGame({
             isStartDisabled={isProcessing}
         >
             {/* 進行状況バー: WAITING と APPEARING フェーズで表示 */}
-            {(phase === 'WAITING' || phase === 'APPEARING') && progress && (
+            {(phase === 'WAITING' || phase === 'APPEARING' || phase === 'RESULT') && progress && (
                 <div className="fixed bottom-4 left-4 z-50">
                     <Win95Dialog title="Progress">
-                        <div style={{ minWidth: '320px' }}>
+                        <div style={{ minWidth: '380px' }}>
                             <p style={{ color: '#000', marginBottom: '8px', fontSize: '12px' }}>
                                 残りのエラー: {progress.totalErrors - progress.closedErrors} / {progress.totalErrors}
                             </p>
@@ -108,9 +108,9 @@ export function ErrorHunterGame({
                                 </p>
                                 {Object.entries(progress.scores)
                                     .sort(([, a], [, b]) => (b as number) - (a as number))
-                                    .map(([userId, score]) => (
+                                    .map(([userId, score], index) => (
                                         <p key={userId} style={{ fontSize: '11px', color: '#000', marginBottom: '2px' }}>
-                                            {userNameMap.get(userId) || 'Unknown'}: {score as number}個
+                                            {userNameMap.get(userId) || 'Unknown'}: {score as number}個 {index === 0 && phase === 'RESULT' && <span style={{ color: 'blue', fontWeight: 'bold', marginLeft: '4px' }}>👈 勝者</span>}
                                         </p>
                                     ))}
                             </div>
@@ -200,7 +200,7 @@ export function ErrorHunterGame({
                 >
                     <Win95Dialog
                         title="Result"
-                        icon="info"
+                        icon="lose"
                         buttons={[
                             ...(isHost ? [{
                                 label: '終了',
@@ -210,38 +210,41 @@ export function ErrorHunterGame({
                         ]}
                     >
                         <div style={{ minWidth: '350px' }}>
-                            <p style={{ fontSize: '16px', fontWeight: 'bold', marginBottom: '12px', color: '#000080', textAlign: 'center' }}>
-                                GAME OVER!
+                            <div style={{ marginBottom: '12px', marginLeft: "24px" }}>
+                            <p 
+                                style={{ 
+                                    fontSize : '12px',
+                                    fontWeight : 'normal',
+                                    color:  '#000',
+                                    marginBottom: '4px',
+                                    padding: '4px',
+                                    backgroundColor: 'transparent',
+                                    borderRadius: '2px'
+                                }}
+                            >
+                                {match?.winner_id === currentUserId ? "あなたから全員へのコメント" : "勝者からのコメント"}
                             </p>
-                            <div style={{ marginBottom: '12px' }}>
-                                <p style={{ fontSize: '12px', fontWeight: 'bold', marginBottom: '8px', color: '#000' }}>
-                                    最終スコア:
-                                </p>
-                                {Object.entries(progress.scores)
-                                    .sort(([, a], [, b]) => (b as number) - (a as number))
-                                    .map(([userId, score], index) => (
-                                        <p 
-                                            key={userId} 
-                                            style={{ 
-                                                fontSize: index === 0 ? '14px' : '12px',
-                                                fontWeight: index === 0 ? 'bold' : 'normal',
-                                                color: index === 0 ? '#000080' : '#000',
-                                                marginBottom: '4px',
-                                                padding: '4px',
-                                                backgroundColor: userId === currentUserId ? '#e0e0e0' : 'transparent',
-                                                borderRadius: '2px'
-                                            }}
-                                        >
-                                            {index === 0 && '🏆 '}
-                                            {userNameMap.get(userId) || 'Unknown'}: {score as number}個
-                                            {userId === currentUserId && ' (あなた)'}
-                                        </p>
-                                    ))}
+                            <p style={{ 
+                                fontSize:  '14px',
+                                fontWeight:  'bold',
+                                color:  '#000080' ,
+                                marginBottom: '4px',
+                                padding: '4px',
+                                backgroundColor:  '#e0e0e0' ,
+                                borderRadius: '2px'
+                            }}
+                            >
+                                ちゃんと野菜食べてますかー？（ここはuserが持つ煽りコメントに変えたい）
+                            </p>
                             </div>
-                            {match?.winner_id === currentUserId && (
-                                <p style={{ fontSize: '14px', color: '#000080', textAlign: 'center', marginTop: '12px', fontWeight: 'bold' }}>
-                                    🎉 おめでとうございます！ 🎉
+                            {match?.winner_id === currentUserId ? (
+                                <p style={{ fontSize: '12px', color: '#000080',marginLeft: "24px", marginTop: '12px' }}>
+                                    あなたの勝ちです
                                 </p>
+                            ): (
+                                <p style={{ fontSize: '12px', color: '#000080',marginLeft: "24px", marginTop: '12px' }}>
+                                    あなたの負けです
+                                </p> 
                             )}
                         </div>
                     </Win95Dialog>
