@@ -1,33 +1,23 @@
-import { createClient } from '@/backend/lib/supabase/server'
-import { prisma } from '@/backend/lib/prisma'
+import { getMe } from '@/server/actions'
 import { NextResponse } from 'next/server'
 
 export async function GET() {
-    const supabase = await createClient()
-    const { data: { user: authUser }, error } = await supabase.auth.getUser()
+    const result = await getMe()
 
-    if (error || !authUser) {
+    if (result.error === 'unauthorized') {
         return NextResponse.json({ user: null, auth: null }, { status: 401 })
     }
 
-    try {
-        const idp = await prisma.userIDP.findUnique({
-            where: { supabaseUid: authUser.id },
-            include: { user: true }
-        })
+    if (result.error === 'not_found') {
+        return NextResponse.json({ user: null, auth: result.auth }, { status: 404 })
+    }
 
-        if (!idp) {
-            // AuthUser exists but DB record missing (should verify via callback logic, but just in case)
-            return NextResponse.json({ user: null, auth: authUser }, { status: 404 })
-        }
-
-        return NextResponse.json({
-            user: idp.user,
-            auth: authUser
-        })
-
-    } catch (err) {
-        console.error('Error fetching current user:', err)
+    if (result.error === 'internal') {
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
     }
+
+    return NextResponse.json({
+        user: result.user,
+        auth: result.auth
+    })
 }

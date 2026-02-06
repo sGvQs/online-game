@@ -1,9 +1,9 @@
-import { createClient } from '@/backend/lib/supabase/server'
+import { createClient } from '@/server/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { prisma } from '@/backend/lib/prisma'
-import { RoomList } from '@/frontend/components/room/RoomList'
-import { CreateRoomForm } from '@/frontend/components/room/CreateRoomForm'
-import { LogoutButton } from '@/frontend/components/auth/LogoutButton'
+import { getDashboardUser, getRooms } from '@/server/actions'
+import { RoomList } from '@/components/room/RoomList'
+import { CreateRoomForm } from '@/components/room/CreateRoomForm'
+import { LogoutButton } from '@/components/auth/LogoutButton'
 import { Boxes, PackagePlus } from 'lucide-react'
 
 export default async function DashboardPage() {
@@ -12,18 +12,11 @@ export default async function DashboardPage() {
 
     if (!user) redirect('/')
 
-    // Fetch from DB
-    const idp = await prisma.userIDP.findUnique({
-        where: { supabaseUid: user.id },
-        include: { user: true }
-    })
+    // Server Action経由でDB取得
+    const dashboardUser = await getDashboardUser()
+    if (!dashboardUser) return <div>User not found in DB</div>
 
-    if (!idp) return <div>User not found in DB</div>
-
-    // Fetch initial rooms
-    const rooms = await prisma.room.findMany({
-        orderBy: { createdAt: 'desc' }
-    })
+    const rooms = await getRooms()
 
     return (
         <div className="min-h-screen p-8 bg-transparent text-foreground">
@@ -35,12 +28,12 @@ export default async function DashboardPage() {
                             ONLINE GAME STATION
                         </h1>
                         <p className="text-brand-900 font-medium mt-1 opacity-80">
-                            おかえりなさい、{idp.user.name}さん
+                            おかえりなさい、{dashboardUser.user.name}さん
                         </p>
                     </div>
                     <div className="flex gap-4 items-center">
                         <div className="bg-white/10 px-4 py-2 rounded-full text-sm font-medium text-foreground shadow-sm border border-brand-200/30">
-                            {user.email}
+                            {dashboardUser.email}
                         </div>
                         <LogoutButton />
                     </div>
@@ -75,7 +68,7 @@ export default async function DashboardPage() {
                                 {rooms.length}件
                             </span>
                         </div>
-                        <RoomList initialRooms={rooms} userId={idp.user.id} />
+                        <RoomList initialRooms={rooms} userId={dashboardUser.user.id} />
                     </section>
                 </main>
             </div>

@@ -1,10 +1,10 @@
-import { createClient } from '@/backend/lib/supabase/server'
-import { prisma } from '@/backend/lib/prisma'
+import { createClient } from '@/server/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { MemberList } from '@/frontend/components/room/MemberList'
-import { RoomPageClient } from '@/frontend/components/room/RoomPageClient'
-import { Button } from '@/frontend/components/ui/Button'
-import { leaveRoom } from '@/backend/actions/room'
+import { getCurrentUser, getRoomWithUsers } from '@/server/actions'
+import { MemberList } from '@/components/room/MemberList'
+import { RoomPageClient } from '@/components/room/RoomPageClient'
+import { Button } from '@/components/ui/Button'
+import { leaveRoom } from '@/server/actions'
 import { ChevronsRight, PersonStanding, House, Gamepad2 } from 'lucide-react'
 
 export default async function RoomPage({ params }: { params: { id: string } }) {
@@ -13,34 +13,23 @@ export default async function RoomPage({ params }: { params: { id: string } }) {
 
     if (!user) redirect('/')
 
-    const idp = await prisma.userIDP.findUnique({
-        where: { supabaseUid: user.id },
-        include: { user: true }
-    })
-
-    if (!idp) redirect('/')
+    // Server Action経由でDB取得
+    const currentUser = await getCurrentUser()
+    if (!currentUser) redirect('/')
 
     const { id } = await params
 
-    const room = await prisma.room.findUnique({
-        where: { id },
-        include: {
-            users: {
-                include: { user: true }
-            }
-        }
-    })
-
+    const room = await getRoomWithUsers(id)
     if (!room) return <div>Room not found</div>
 
     // Check if user is member
-    const isMember = room.users.some(u => u.userId === idp.user.id)
+    const isMember = room.users.some(u => u.userId === currentUser.user.id)
     if (!isMember) {
         redirect('/dashboard')
     }
 
     // Check if user is host
-    const isHost = room.createdBy === idp.user.id
+    const isHost = room.createdBy === currentUser.user.id
 
     // Redirect to game if already in progress
     if (room.activeGameType) {

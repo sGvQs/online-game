@@ -1,7 +1,7 @@
-import { createClient } from '@/backend/lib/supabase/server'
-import { prisma } from '@/backend/lib/prisma'
+import { createClient } from '@/server/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { GamePageClient } from '@/frontend/components/game/GamePageClient'
+import { getCurrentUser, getRoomWithUsers } from '@/server/actions'
+import { GamePageClient } from '@/components/game/GamePageClient'
 import '@/app/game/win95.css'
 import { Room } from '@/types'
 
@@ -11,28 +11,17 @@ export default async function ErrorHunterPage({ params }: { params: { roomId: st
 
     if (!user) redirect('/')
 
-    const idp = await prisma.userIDP.findUnique({
-        where: { supabaseUid: user.id },
-        include: { user: true }
-    })
-
-    if (!idp) redirect('/')
+    // Server Action経由でDB取得
+    const currentUser = await getCurrentUser()
+    if (!currentUser) redirect('/')
 
     const { roomId } = await params
 
-    const room = await prisma.room.findUnique({
-        where: { id: roomId },
-        include: {
-            users: {
-                include: { user: true }
-            }
-        }
-    })
-
+    const room = await getRoomWithUsers(roomId)
     if (!room) return <div>Room not found</div>
 
     // Check if user is member
-    const isMember = room.users.some(u => u.userId === idp.user.id)
+    const isMember = room.users.some(u => u.userId === currentUser.user.id)
     if (!isMember) {
         redirect('/dashboard')
     }
@@ -43,7 +32,7 @@ export default async function ErrorHunterPage({ params }: { params: { roomId: st
     }
 
     // Check if user is host
-    const isHost = room.createdBy === idp.user.id
+    const isHost = room.createdBy === currentUser.user.id
 
     // Prepare room data for client component
     const roomData: Room = {

@@ -10,8 +10,8 @@
 ```
 src/
 ├── app/                  # Next.js App Router
-├── backend/              # サーバーサイドロジック
-├── frontend/             # クライアントサイド
+├── server/              # サーバーサイドロジック
+├── components/           # UIコンポーネント
 ├── shared/               # 共有モジュール
 ├── proxy.ts              # Next.js ミドルウェア
 └── types.ts              # 後方互換性のための再エクスポート（非推奨）
@@ -41,48 +41,69 @@ app/
 
 ### ルール
 - 各ページは `page.tsx` で実装
-- Client Components は `components/` から import
-- Server Actions は `backend/actions/` を使用
+- **Prismaの直接呼び出し禁止** - 必ずServer Actions経由
+- Client Components は `@/components/` から import
+- Server Actions は `@/server/actions/` を使用
 
 ---
 
-## `/src/backend` - サーバーサイドロジック
+## `/src/server` - サーバーサイドロジック
 
 ### 構造
 ```
-backend/
-├── actions/              # Server Actions
-│   ├── auth.ts           # 認証系アクション
-│   ├── room.ts           # ルーム管理アクション
-│   └── user.ts           # ユーザー管理アクション
+server/
+├── actions/              # Server Actions (機能別ディレクトリ)
+│   ├── index.ts          # 一括エクスポート
+│   ├── _helpers/         # 内部ヘルパー（外部非公開）
+│   │   └── getAuthenticatedUser.ts
+│   ├── user/             # ユーザー関連
+│   │   ├── index.ts
+│   │   ├── getCurrentUser.ts
+│   │   └── getMe.ts
+│   ├── room/             # ルーム関連
+│   │   ├── index.ts
+│   │   ├── getRooms.ts
+│   │   ├── getRoom.ts
+│   │   ├── createRoom.ts
+│   │   ├── deleteRoom.ts
+│   │   ├── joinLeaveRoom.ts
+│   │   └── gameActions.ts
+│   └── auth/             # 認証関連
+│       ├── index.ts
+│       ├── syncUser.ts
+│       └── signOut.ts
 └── lib/                  # バックエンド専用ライブラリ
     ├── prisma.ts         # Prismaクライアント
     └── supabase/         # Supabase Admin クライアント
 ```
 
-### ルール
-- Server Actions は `'use server'` ディレクティブ必須
-- Prisma クライアントは必ずここから使用
-- クライアントからの直接import禁止
+### Server Actions ルール
+- 必ず `'use server'` ディレクティブを使用
+- Prisma操作は必ずここに集約
+- 認証済みユーザー取得は `_helpers/getAuthenticatedUser` を使用
+- クライアントからは `@/server/actions` を import
+
+### インポート例
+```typescript
+// 推奨: index.ts からの一括インポート
+import { createRoom, getRooms, getCurrentUser } from '@/server/actions'
+
+// 特定のアクションのみ
+import { getRoomWithUsers } from '@/server/actions/room'
+```
 
 ---
 
-## `/src/frontend` - クライアントサイド
+## `/src/components` - UIコンポーネント
 
 ### 構造
 ```
-frontend/
-├── components/           # UIコンポーネント
-│   ├── auth/             # 認証コンポーネント
-│   ├── game/             # ゲーム関連コンポーネント
-│   ├── room/             # ルーム関連コンポーネント
-│   ├── ui/               # 汎用UIコンポーネント
-│   └── user/             # ユーザー関連コンポーネント
-├── hooks/                # カスタムフック
-└── lib/                  # フロントエンド専用ライブラリ
-    ├── supabase/         # Supabaseクライアント
-    ├── theme-context.tsx # テーマ管理
-    └── utils.ts          # ユーティリティ
+components/
+├── auth/             # 認証コンポーネント
+├── game/             # ゲーム関連コンポーネント
+├── room/             # ルーム関連コンポーネント
+├── ui/               # 汎用UIコンポーネント
+└── user/             # ユーザー関連コンポーネント
 ```
 
 ### コンポーネント構造パターン
@@ -100,16 +121,6 @@ ComponentName/
 ```
 SimpleComponent.tsx
 ```
-
-### 各フォルダの責務
-
-| フォルダ | 責務 |
-|---------|-----|
-| `auth/` | ログイン、ログアウト、認証フォーム |
-| `game/` | ゲームUI、ホストコントロール、Win95スタイル |
-| `room/` | ルームリスト、メンバー管理、ゲーム選択 |
-| `ui/` | Button, Card, Input 等の汎用コンポーネント |
-| `user/` | ユーザープロフィール |
 
 ---
 
@@ -145,29 +156,6 @@ import { Room } from '@/types'
 - スタイルは `styles.ts` に集約
 - コンポーネントからは `import { xxx } from './styles'`
 
-### 例
-```typescript
-// styles.ts
-import { tv } from 'tailwind-variants'
-
-export const component = tv({
-    slots: {
-        wrapper: 'flex gap-4',
-        title: 'text-xl font-bold',
-    },
-})
-
-// index.tsx
-import { component } from './styles'
-const styles = component()
-
-return (
-    <div className={styles.wrapper()}>
-        <h1 className={styles.title()}>タイトル</h1>
-    </div>
-)
-```
-
 ---
 
 ## 命名規則
@@ -176,6 +164,6 @@ return (
 |-----|-----|-----|
 | コンポーネント | PascalCase | `RoomCard.tsx` |
 | スタイルファイル | `styles.ts` | `styles.ts` |
-| フック | camelCase + use | `useAuth.ts` |
-| 型定義ファイル | camelCase | `room.ts` |
 | Server Actions | camelCase | `createRoom` |
+| 型定義ファイル | camelCase | `room.ts` |
+| ヘルパー | camelCase | `getAuthenticatedUser.ts` |
