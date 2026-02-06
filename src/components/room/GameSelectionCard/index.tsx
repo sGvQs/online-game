@@ -25,7 +25,7 @@ export function GameSelectionCard({ onSelectGame, isPending }: GameSelectionCard
                     disabled={isPending}
                     className={styles.gameButton()}
                 >
-                    <span className={styles.gameIcon()}>🐛</span>
+                    <span className={styles.gameIcon()}>⚠️</span>
                     <div className={styles.gameInfo()}>
                         <div className={styles.gameTitle()}>ERROR HUNTER</div>
                         <div className={styles.gameDescription()}>バグを見つけて潰せ！</div>

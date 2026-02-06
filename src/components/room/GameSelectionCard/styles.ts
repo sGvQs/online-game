@@ -12,8 +12,8 @@ export const gameSelection = tv({
         grid: 'grid grid-cols-1 gap-3',
         gameButton: [
             'w-full justify-start gap-3 h-16 text-left border-0',
-            'bg-gradient-to-r from-red-600 to-orange-500',
-            'hover:from-red-500 hover:to-orange-400 text-white',
+            // Win95風の単色ティールグリーン
+            'bg-teal-700 hover:bg-teal-600 text-white',
         ],
         gameIcon: 'text-2xl',
         gameInfo: '',
