@@ -18,7 +18,7 @@ export async function startGame(roomId: string) {
     if (room.createdBy !== user.id) throw new Error('ゲームを開始する権限がありません（ホストのみ）')
 
     // ランダムな待ち時間 (3〜10秒)
-    const delayMs = Math.floor(Math.random() * 7000) + 3000
+    const delayMs = Math.floor(Math.random() * 11000) + 10000;
     const appearanceAt = new Date(Date.now() + delayMs)
 
     // Match を作成
@@ -30,8 +30,8 @@ export async function startGame(roomId: string) {
         }
     })
 
-    // 20個の ErrorEvent を作成（各エラーにランダムな位置を設定）
-    const errorEvents = Array.from({ length: 20 }, () => ({
+    // 47個の ErrorEvent を作成（各エラーにランダムな位置を設定）
+    const errorEvents = Array.from({ length: 47 }, () => ({
         match_id: match.id,
         appearance_at: appearanceAt,
         position_x: Math.random() * 60 + 20,  // 20-80の範囲

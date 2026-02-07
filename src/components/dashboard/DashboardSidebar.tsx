@@ -74,14 +74,13 @@ export function DashboardSidebar({ initialComment }: DashboardSidebarProps) {
           <div className="space-y-3">
             {currentComment ? (
               <div className="p-3 bg-white/10 rounded-lg border border-brand-200/30">
-                <p className="text-sm text-brand-900 font-medium mb-1">現在のコメント:</p>
-                <p className="text-sm text-brand-900 opacity-90 break-words">
+                <p className="text-xs text-brand-900 opacity-90">
                   {currentComment}
                 </p>
               </div>
             ) : (
               <div className="p-3 bg-white/10 rounded-lg border border-brand-200/30">
-                <p className="text-sm text-brand-900 opacity-70">
+                <p className="text-xs text-brand-900 opacity-70">
                   コメントが設定されていません
                 </p>
               </div>
@@ -91,7 +90,7 @@ export function DashboardSidebar({ initialComment }: DashboardSidebarProps) {
               className="w-full bg-brand-300 hover:bg-brand-400 text-white shadow-md hover:shadow-lg transition-all duration-300 gap-2"
             >
               <Edit2 className="w-5 h-5" />
-              コメントを追加・変更
+              追加・変更
             </Button>
           </div>
         ) : (

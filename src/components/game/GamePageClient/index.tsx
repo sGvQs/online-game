@@ -231,10 +231,10 @@ export function GamePageClient({
                                                     />
                                                 </div>
                                                 <div className={styles.descriptionText()}>
-                                                    ERROR HUNTERは、画面に出現する20個のエラーモーダルを素早く閉じる反射神経ゲームです。<br />
+                                                    ERROR HUNTERは、画面に出現する47個のエラーモーダルを素早く閉じる反射神経ゲームです。<br />
                                                     <br />
                                                     <strong>ルール:</strong><br />
-                                                    ・全20個のエラーが一斉に画面上に出現します<br />
+                                                    ・全47個のエラーが一斉に画面上に出現します<br />
                                                     ・各プレイヤーは素早くエラーの×ボタンをクリック<br />
                                                     ・最も多くのエラーを閉じたプレイヤーが勝利<br />
                                                     ・全員で協力して全てのエラーを閉じましょう！<br />

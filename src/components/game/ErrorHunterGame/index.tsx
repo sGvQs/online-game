@@ -207,7 +207,7 @@ export function ErrorHunterGame({
                 </div>
             )}
 
-            {/* APPEARING フェーズ: 20個のエラーモーダル出現 — 早い者勝ちで閉じる */}
+            {/* APPEARING フェーズ: 47個のエラーモーダル出現 — 早い者勝ちで閉じる */}
             {phase === 'APPEARING' && (
                 <div className="fixed inset-0 z-50">
                     {match?.error_events

@@ -328,7 +328,7 @@ export function useErrorHunter({
                 const event = existingMatch.error_events[0]
                 if (!event) return
 
-                // Match が FINISHED の場合は RESULT フェーズへ（20個すべて閉じられた状態）
+                // Match が FINISHED の場合は RESULT フェーズへ（47個すべて閉じられた状態）
                 if (existingMatch.status === 'FINISHED') {
                     setPhase('RESULT')
                 } else if (event.closed_by) {
