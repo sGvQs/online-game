@@ -58,6 +58,7 @@ export function GamePageClient({
     const [isInitializing, setIsInitializing] = useState(true)
     const [internalShowTitle, setInternalShowTitle] = useState(false)
     const [isTogglingReady, setIsTogglingReady] = useState(false)
+    const [showDescription, setShowDescription] = useState(false)
 
     // 外部制御がある場合はそちらを使い、なければ内部stateを使う
     const isTitleVisible = showTitle !== undefined ? showTitle : internalShowTitle
@@ -177,47 +178,78 @@ export function GamePageClient({
                                     </div>
                                 )}
                             </div>
-                            <div className="win95-title-modal-content">
-                                <pre className="win95-ascii-art">{ASCII_ART}</pre>
-
-                                {/* 準備状況表示 */}
-                                <div style={{ marginTop: '24px', marginBottom: '16px' }}>
-                                    <p style={{ fontSize: '14px', fontWeight: 'bold', marginBottom: '8px', color: '#000' }}>
-                                        プレイヤー準備状況: {readyCount} / {totalUsers}
-                                    </p>
-                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                                        {room.users.map((roomUser) => (
-                                            <div 
-                                                key={roomUser.id}
-                                                style={{ 
-                                                    display: 'flex', 
-                                                    alignItems: 'center',
-                                                    padding: '4px 8px',
-                                                    backgroundColor: roomUser.userId === currentUserId ? '#e0e0e0' : 'transparent',
-                                                    borderRadius: '2px'
-                                                }}
-                                            >
-                                                <span style={{ 
-                                                    fontSize: '12px',
-                                                    color: roomUser.isReady ? '#008000' : '#808080',
-                                                    marginRight: '8px'
-                                                }}>
-                                                    {roomUser.isReady ? '✓' : '○'}
-                                                </span>
-                                                <span style={{ fontSize: '12px', color: '#000' }}>
-                                                    {roomUser.user?.name || 'Unknown'}
-                                                    {roomUser.userId === currentUserId && ' (あなた)'}
-                                                </span>
+                            
+                            {/* 2カラムレイアウト */}
+                            <div className="win95-title-modal-two-column">
+                                {/* 左パネル */}
+                                <div className="win95-title-modal-left-panel">
+                                    {!showDescription ? (
+                                        // 通常モード: ASCIIアート + プレイヤーリスト
+                                        <>
+                                            <pre className="win95-ascii-art">{ASCII_ART}</pre>
+                                            
+                                            <div className="win95-player-status-section">
+                                                <p className="win95-status-title">
+                                                    プレイヤー準備状況: {readyCount} / {totalUsers}
+                                                </p>
+                                                <div className="win95-player-listbox">
+                                                    {room.users.map((roomUser) => (
+                                                        <div
+                                                            key={roomUser.id}
+                                                            className={`win95-player-item ${roomUser.userId === currentUserId ? 'selected' : ''}`}
+                                                        >
+                                                            <div className={`win95-player-radio ${roomUser.isReady ? 'ready' : ''}`} />
+                                                            <span>
+                                                                {roomUser.user?.name || 'Unknown'}
+                                                                {roomUser.userId === currentUserId && ' (あなた)'}
+                                                            </span>
+                                                        </div>
+                                                    ))}
+                                                </div>
                                             </div>
-                                        ))}
-                                    </div>
+                                        </>
+                                    ) : (
+                                        // 説明モード
+                                        <div className="win95-description-content">
+                                            <div className="win95-info-header">
+                                                <span className="win95-info-icon">💡</span>
+                                                <span>Did you know...</span>
+                                            </div>
+                                            <div className="win95-description-text">
+                                                ERROR HUNTERは、画面に出現する20個のエラーモーダルを<br />
+                                                素早く閉じる反射神経ゲームです。<br />
+                                                <br />
+                                                <strong>ルール:</strong><br />
+                                                ・全20個のエラーが一斉に画面上に出現します<br />
+                                                ・各プレイヤーは素早くエラーの×ボタンをクリック<br />
+                                                ・最も多くのエラーを閉じたプレイヤーが勝利<br />
+                                                ・全員で協力して全てのエラーを閉じましょう！<br />
+                                                <br />
+                                                準備ができたら「準備完了」ボタンを押してください。
+                                            </div>
+                                            <div className="win95-description-image">
+                                                <div style={{ color: '#808080', fontSize: '11px' }}>
+                                                    [ゲーム画面イメージ]
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
-
-                                {/* 準備完了ボタン（全ユーザー） */}
-                                {onToggleReady && (
-                                    <div style={{ marginBottom: '16px' }}>
+                                
+                                {/* 右パネル */}
+                                <div className="win95-title-modal-right-panel">
+                                    <button
+                                        className={`win95-button win95-panel-button ${showDescription ? 'win95-button-pressed' : ''}`}
+                                        onClick={() => setShowDescription(!showDescription)}
+                                    >
+                                        What's ERROR HUNTER
+                                    </button>
+                                    
+                                    <div style={{ flex: 1 }} />
+                                    
+                                    {onToggleReady && (
                                         <button
-                                            className="win95-start-button"
+                                            className="win95-button win95-panel-button"
                                             onClick={handleToggleReadyClick}
                                             disabled={isTogglingReady}
                                             style={{
@@ -225,35 +257,31 @@ export function GamePageClient({
                                                 color: currentUserReady ? '#fff' : undefined,
                                             }}
                                         >
-                                            {currentUserReady ? '準備完了 (クリックで解除)' : '準備完了'}
+                                            準備完了
                                         </button>
-                                    </div>
-                                )}
-
-                                {/* スタートボタン（ホストのみ） */}
-                                {isHost && (
-                                    <div>
+                                    )}
+                                    
+                                    {isHost && (
                                         <button
-                                            className="win95-start-button"
+                                            className="win95-button win95-panel-button"
                                             onClick={handleStartGameClick}
                                             disabled={isStartDisabled || isPending || !allUsersReady}
-                                            title={!allUsersReady ? '全員が準備完了するまで開始できません' : ''}
                                         >
                                             ゲーム開始
                                         </button>
-                                        {!allUsersReady && (
-                                            <p style={{ fontSize: '11px', marginTop: '8px', color: '#808080' }}>
-                                                全員が準備完了するのを待っています...
-                                            </p>
-                                        )}
-                                    </div>
-                                )}
-
-                                {!isHost && (
-                                    <p style={{ fontSize: '12px', marginTop: '16px' }}>
-                                        ホストがゲームを開始するのを待っています...
-                                    </p>
-                                )}
+                                    )}
+                                    
+                                    <div style={{ height: '16px' }} />
+                                    
+                                    {isHost && (
+                                        <button
+                                            className="win95-button win95-panel-button"
+                                            onClick={handleCloseModal}
+                                        >
+                                            Close
+                                        </button>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     </div>

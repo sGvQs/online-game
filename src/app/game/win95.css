@@ -335,9 +335,9 @@
 }
 
 .win95-title-modal {
-    width: 60vw;
+    width: 65vw;
     max-width: 800px;
-    min-width: 500px;
+    min-width: 600px;
     background-color: #c0c0c0;
     border: 2px solid;
     border-color: #ffffff #808080 #808080 #ffffff;
@@ -416,6 +416,13 @@
 
 .win95-start-button:disabled {
     color: #808080;
+    text-shadow: 1px 1px 0 #ffffff;
+    cursor: not-allowed;
+}
+
+.win95-button:disabled {
+    color: #808080;
+    text-shadow: 1px 1px 0 #ffffff;
     cursor: not-allowed;
 }
 
@@ -424,4 +431,160 @@
     position: absolute;
     top: 8px;
     right: 8px;
+}
+
+/* ===== 2カラムレイアウト (Windows 95風) ===== */
+
+/* 2カラムレイアウトコンテナ */
+.win95-title-modal-two-column {
+    display: grid;
+    grid-template-columns: 1fr 200px;
+    min-height: 450px;
+}
+
+/* 左パネル（黄色ベージュ） */
+.win95-title-modal-left-panel {
+    background-color: #ffffc0;
+    border-right: 2px solid #808080;
+    padding: 32px 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+}
+
+/* 右パネル（ボタン群） */
+.win95-title-modal-right-panel {
+    background-color: #c0c0c0;
+    padding: 16px 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.win95-panel-button {
+    width: 100%;
+    min-height: 32px;
+    padding: 6px 12px;
+    font-size: 11px;
+    line-height: 1.2;
+    white-space: normal;
+    text-align: center;
+}
+
+.win95-panel-button:disabled {
+    color: #808080;
+    text-shadow: 1px 1px 0 #ffffff;
+    cursor: not-allowed;
+}
+
+/* プレイヤー準備状況セクション */
+.win95-player-status-section {
+    width: 100%;
+    margin-top: 32px;
+}
+
+.win95-status-title {
+    font-size: 12px;
+    font-weight: bold;
+    color: #000000;
+    margin-bottom: 8px;
+    text-align: left;
+}
+
+/* プレイヤーリストボックス */
+.win95-player-listbox {
+    background: #ffffff;
+    border: 2px solid;
+    border-color: #808080 #ffffff #ffffff #808080;
+    padding: 8px;
+    min-height: 100px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.win95-player-item {
+    display: flex;
+    align-items: center;
+    padding: 4px 8px;
+    font-size: 11px;
+    color: #000000;
+}
+
+.win95-player-item.selected {
+    background-color: #000080;
+    color: #ffffff;
+}
+
+.win95-player-radio {
+    width: 12px;
+    height: 12px;
+    border: 1px solid #000000;
+    border-radius: 50%;
+    margin-right: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.win95-player-radio.ready::after {
+    content: '';
+    width: 6px;
+    height: 6px;
+    background-color: #008000;
+    border-radius: 50%;
+}
+
+/* 説明モードコンテンツ */
+.win95-description-content {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.win95-info-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: bold;
+    font-size: 13px;
+    color: #000080;
+    padding: 8px;
+}
+
+.win95-info-icon {
+    font-size: 20px;
+}
+
+.win95-description-text {
+    background: #ffffff;
+    border: 2px solid;
+    border-color: #808080 #ffffff #ffffff #808080;
+    padding: 16px;
+    font-size: 11px;
+    line-height: 1.6;
+    color: #000000;
+    flex: 1;
+}
+
+.win95-description-image {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 16px;
+    border: 1px solid #808080;
+    background: #ffffff;
+    min-height: 120px;
+}
+
+/* 押しっぱなしボタン（トグル状態） */
+.win95-button-pressed {
+    border-color: #808080 #ffffff #ffffff #808080 !important;
+    background-color: #a0a0a0 !important;
+    padding: 7px 11px 5px 13px !important;
+    box-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.2);
 }
