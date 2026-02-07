@@ -18,7 +18,9 @@ export type {
     Room,
     RoomUser,
     RoomUserWithUser,
+    RoomUserWithReadyStatus,
     RoomWithUsers,
+    RoomWithUsersAndReadyStatus,
     RoomWithMatches,
 } from './room';
 export { RoomStatus } from './room';

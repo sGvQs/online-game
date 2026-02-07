@@ -51,6 +51,7 @@ model RoomUser {
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   roomId    String   @map("room_id") @db.Uuid
   userId    String   @map("user_id") @db.Uuid
+  isReady   Boolean  @default(false) @map("is_ready")
   createdAt DateTime @default(now()) @map("created_at")
   room      Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)

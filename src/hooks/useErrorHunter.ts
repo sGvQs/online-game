@@ -6,11 +6,11 @@ import {
     startGame,
     clickError,
     getMatchWithEvents,
-    finishGame,
     getMatchIdFromRoom,
     getMatchProgress,
     checkAutoFinish,
 } from '@/server/actions/game'
+import { resetAllReady } from '@/server/actions/room'
 import type { MatchWithErrorEventsAndUsers, MatchProgress } from '@/shared/types'
 
 // ============================================
@@ -167,7 +167,6 @@ export function useErrorHunter({
             // 全エラーが閉じられた → RESULT フェーズへ
             if (progressData.closedErrors === progressData.totalErrors && progressData.totalErrors > 0) {
                 setPhase('RESULT')
-                console.log("犯人C")
                 return
             }
 
@@ -177,18 +176,17 @@ export function useErrorHunter({
             }
 
             // ---- Step 3: フェーズ遷移判定 ----
-            const currentPhase = phaseRef.current
 
             // 3a. 勝者が既に決定している（Match が終了） → RESULT
             if (latestMatch.status === 'FINISHED') {
                 setPhase('RESULT')
-                console.log("犯人D")
                 return
             }
 
             // 3b. TITLE フェーズ中に Match を発見した場合
             //     = クライアントがゲーム開始を Realtime 経由で検知したケース
             //     → タイマーを起動して WAITING/APPEARING に遷移する
+            const currentPhase = phaseRef.current
             if (currentPhase === 'TITLE') {
                 setupAppearanceTimer(event.appearance_at)
             }
@@ -207,15 +205,19 @@ export function useErrorHunter({
     /**
      * ゲーム開始（ホストのみ）
      *
-     * 1. Server Action で Match + ErrorEvent を作成
-     * 2. matchIdRef に新しい Match ID を設定
-     * 3. 最新データを取得してタイマーを起動
+     * 1. 全員の準備状態をリセット
+     * 2. Server Action で Match + ErrorEvent を作成
+     * 3. matchIdRef に新しい Match ID を設定
+     * 4. 最新データを取得してタイマーを起動
      */
     const handleStartGame = useCallback(async () => {
         if (!isHost || isProcessing) return
 
         setIsProcessing(true)
         try {
+            // 全員の準備状態をリセット
+            await resetAllReady(roomId)
+
             // Server Action: Match + ErrorEvent を作成
             const newMatch = await startGame(roomId)
             matchIdRef.current = newMatch.id
@@ -279,18 +281,14 @@ export function useErrorHunter({
     /**
      * ゲーム終了 → タイトルモーダルに戻る
      *
-     * ホスト: Server Action で Match 終了 + Room の currentMatchId をクリア
-     * クライアント: ローカル状態のリセットのみ
+     * 全ユーザー: ローカル状態のリセットのみ
+     * （Match のステータスは checkAutoFinish で既に FINISHED に設定済み）
      */
     const handleFinish = useCallback(async () => {
         if (!match || isProcessing) return
 
         setIsProcessing(true)
         try {
-            if (isHost) {
-                await finishGame(match.id, roomId)
-            }
-
             // ローカル状態をリセット
             setMatch(null)
             setClickResult(null)
@@ -302,30 +300,8 @@ export function useErrorHunter({
         } finally {
             setIsProcessing(false)
         }
-    }, [match, roomId, isHost, isProcessing])
+    }, [match, isProcessing])
 
-
-    // クライアントはここの処理でホームに帰れるため消さないで
-    const handleFinishClinet = useCallback(async () => {
-
-        // クライアントの場合はisHostはfalseかつisProcessingがfalseなことはわかるはず
-        if (isHost || isProcessing) return
-
-        setIsProcessing(true)
-        try {
-            // ローカル状態をリセット
-            setMatch(null)
-            setClickResult(null)
-            setProgress(null)
-            matchIdRef.current = null
-            setPhase('TITLE')
-            console.log("ここまで走っているはず");
-        } catch (error) {
-            console.error('ゲーム終了に失敗:', error)
-        } finally {
-            setIsProcessing(false)
-        }
-    }, [match, roomId, isHost, isProcessing])
 
     // ============================================
     // Effects
@@ -354,13 +330,10 @@ export function useErrorHunter({
 
                 // Match が FINISHED の場合は RESULT フェーズへ（20個すべて閉じられた状態）
                 if (existingMatch.status === 'FINISHED') {
-                    console.log("犯人A")
                     setPhase('RESULT')
                 } else if (event.closed_by) {
                     // 1個でも閉じられている（古いロジック）
                     setPhase('RESULT')
-                    console.log("犯人B")
-
                 } else {
                     // まだゲーム中 → タイマーをセット
                     setupAppearanceTimer(event.appearance_at)
@@ -399,13 +372,6 @@ export function useErrorHunter({
                 table: 'matches',
             }, () => {
                 refreshMatchData()
-            })
-            .on('postgres_changes', {
-                event: '*',
-                schema: 'public',
-                table: 'rooms',
-            }, () => {
-                handleFinishClinet(); // ここの処理を消すとクライアントは受け取る手段がない
             })
             .subscribe()
 

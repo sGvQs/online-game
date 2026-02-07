@@ -1,6 +1,7 @@
 import { createClient } from '@/server/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { getCurrentUser, getRoomWithUsers } from '@/server/actions'
+import { getCurrentUser } from '@/server/actions'
+import { getRoomWithReadyStatus } from '@/server/actions/room'
 import { ErrorHunterGame } from '@/components/game/ErrorHunterGame'
 import '@/app/game/win95.css'
 
@@ -16,7 +17,7 @@ export default async function ErrorHunterPage({ params }: { params: { roomId: st
 
     const { roomId } = await params
 
-    const room = await getRoomWithUsers(roomId)
+    const room = await getRoomWithReadyStatus(roomId)
     if (!room) return <div>Room not found</div>
 
     // Check if user is member

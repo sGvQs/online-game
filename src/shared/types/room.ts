@@ -37,12 +37,25 @@ export type RoomUserWithUser = Prisma.RoomUserGetPayload<{
     include: { user: true }
 }>;
 
+/** RoomUser with ready status (includes isReady field from Prisma) */
+export type RoomUserWithReadyStatus = RoomUserWithUser;
+
 // ============================================
 // Room types with relations
 // ============================================
 
 /** Room with Users and Creator */
 export type RoomWithUsers = Prisma.RoomGetPayload<{
+    include: {
+        users: {
+            include: { user: true }
+        }
+        creator: true
+    }
+}>;
+
+/** Room with Users including ready status */
+export type RoomWithUsersAndReadyStatus = Prisma.RoomGetPayload<{
     include: {
         users: {
             include: { user: true }
