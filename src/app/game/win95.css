@@ -335,9 +335,8 @@
 }
 
 .win95-title-modal {
-    width: 65vw;
-    max-width: 800px;
-    min-width: 600px;
+    width: 700px;
+    height: 500px;
     background-color: #c0c0c0;
     border: 2px solid;
     border-color: #ffffff #808080 #808080 #ffffff;
@@ -346,6 +345,8 @@
         inset 1px 1px 0 #0a0a0a,
         4px 4px 8px rgba(0, 0, 0, 0.5);
     animation: win95-modal-appear 0.2s ease-out;
+    display: flex;
+    flex-direction: column;
 }
 
 @keyframes win95-modal-appear {
@@ -364,6 +365,10 @@
     background-color: #c0c0c0;
     border: 1px solid #808080;
     border-color: #808080 #dfdfdf #dfdfdf #808080;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
 }
 
 .win95-title-modal-content {
@@ -439,18 +444,31 @@
 .win95-title-modal-two-column {
     display: grid;
     grid-template-columns: 1fr 200px;
-    min-height: 450px;
+    flex: 1;
+    overflow: hidden;
 }
 
-/* 左パネル（黄色ベージュ） */
+/* 左パネル（グレー背景） */
 .win95-title-modal-left-panel {
-    background-color: #ffffc0;
-    border-right: 2px solid #808080;
+    background-color: #c0c0c0;
     padding: 32px 24px;
     display: flex;
     flex-direction: column;
+    overflow: hidden;
+}
+
+/* 左パネル内側のベージュボックス */
+.win95-info-box {
+    background-color: #fffef0;
+    border: 2px solid;
+    border-color: #808080 #ffffff #ffffff #808080;
+    padding: 24px 16px;
+    flex: 1;
+    overflow-y: auto;
+    overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
     align-items: center;
-    justify-content: flex-start;
 }
 
 /* 右パネル（ボタン群） */

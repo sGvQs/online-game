@@ -183,57 +183,59 @@ export function GamePageClient({
                             <div className="win95-title-modal-two-column">
                                 {/* 左パネル */}
                                 <div className="win95-title-modal-left-panel">
-                                    {!showDescription ? (
-                                        // 通常モード: ASCIIアート + プレイヤーリスト
-                                        <>
-                                            <pre className="win95-ascii-art">{ASCII_ART}</pre>
-                                            
-                                            <div className="win95-player-status-section">
-                                                <p className="win95-status-title">
-                                                    プレイヤー準備状況: {readyCount} / {totalUsers}
-                                                </p>
-                                                <div className="win95-player-listbox">
-                                                    {room.users.map((roomUser) => (
-                                                        <div
-                                                            key={roomUser.id}
-                                                            className={`win95-player-item ${roomUser.userId === currentUserId ? 'selected' : ''}`}
-                                                        >
-                                                            <div className={`win95-player-radio ${roomUser.isReady ? 'ready' : ''}`} />
-                                                            <span>
-                                                                {roomUser.user?.name || 'Unknown'}
-                                                                {roomUser.userId === currentUserId && ' (あなた)'}
-                                                            </span>
-                                                        </div>
-                                                    ))}
+                                    <div className="win95-info-box">
+                                        {!showDescription ? (
+                                            // 通常モード: ASCIIアート + プレイヤーリスト
+                                            <>
+                                                <pre className="win95-ascii-art">{ASCII_ART}</pre>
+                                                
+                                                <div className="win95-player-status-section">
+                                                    <p className="win95-status-title">
+                                                        プレイヤー準備状況: {readyCount} / {totalUsers}
+                                                    </p>
+                                                    <div className="win95-player-listbox">
+                                                        {room.users.map((roomUser) => (
+                                                            <div
+                                                                key={roomUser.id}
+                                                                className={`win95-player-item ${roomUser.userId === currentUserId ? 'selected' : ''}`}
+                                                            >
+                                                                <div className={`win95-player-radio ${roomUser.isReady ? 'ready' : ''}`} />
+                                                                <span>
+                                                                    {roomUser.user?.name || 'Unknown'}
+                                                                    {roomUser.userId === currentUserId && ' (あなた)'}
+                                                                </span>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            </>
+                                        ) : (
+                                            // 説明モード
+                                            <div className="win95-description-content">
+                                                <div className="win95-info-header">
+                                                    <span className="win95-info-icon">💡</span>
+                                                    <span>Did you know...</span>
+                                                </div>
+                                                <div className="win95-description-text">
+                                                    ERROR HUNTERは、画面に出現する20個のエラーモーダルを<br />
+                                                    素早く閉じる反射神経ゲームです。<br />
+                                                    <br />
+                                                    <strong>ルール:</strong><br />
+                                                    ・全20個のエラーが一斉に画面上に出現します<br />
+                                                    ・各プレイヤーは素早くエラーの×ボタンをクリック<br />
+                                                    ・最も多くのエラーを閉じたプレイヤーが勝利<br />
+                                                    ・全員で協力して全てのエラーを閉じましょう！<br />
+                                                    <br />
+                                                    準備ができたら「準備完了」ボタンを押してください。
+                                                </div>
+                                                <div className="win95-description-image">
+                                                    <div style={{ color: '#808080', fontSize: '11px' }}>
+                                                        [ゲーム画面イメージ]
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </>
-                                    ) : (
-                                        // 説明モード
-                                        <div className="win95-description-content">
-                                            <div className="win95-info-header">
-                                                <span className="win95-info-icon">💡</span>
-                                                <span>Did you know...</span>
-                                            </div>
-                                            <div className="win95-description-text">
-                                                ERROR HUNTERは、画面に出現する20個のエラーモーダルを<br />
-                                                素早く閉じる反射神経ゲームです。<br />
-                                                <br />
-                                                <strong>ルール:</strong><br />
-                                                ・全20個のエラーが一斉に画面上に出現します<br />
-                                                ・各プレイヤーは素早くエラーの×ボタンをクリック<br />
-                                                ・最も多くのエラーを閉じたプレイヤーが勝利<br />
-                                                ・全員で協力して全てのエラーを閉じましょう！<br />
-                                                <br />
-                                                準備ができたら「準備完了」ボタンを押してください。
-                                            </div>
-                                            <div className="win95-description-image">
-                                                <div style={{ color: '#808080', fontSize: '11px' }}>
-                                                    [ゲーム画面イメージ]
-                                                </div>
-                                            </div>
-                                        </div>
-                                    )}
+                                        )}
+                                    </div>
                                 </div>
                                 
                                 {/* 右パネル */}
