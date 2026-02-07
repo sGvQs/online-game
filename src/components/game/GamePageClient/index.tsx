@@ -221,6 +221,15 @@ export function GamePageClient({
                                                     <span className={styles.infoIcon()}>💡</span>
                                                     <span>ゲーム説明</span>
                                                 </div>
+                                                <div className={styles.descriptionImage()}>
+                                                    <Image
+                                                        src="/images/what-is-error-hunter.png"
+                                                        alt="ERROR HUNTER"
+                                                        fill
+                                                        className="object-contain"
+                                                        priority
+                                                    />
+                                                </div>
                                                 <div className={styles.descriptionText()}>
                                                     ERROR HUNTERは、画面に出現する20個のエラーモーダルを素早く閉じる反射神経ゲームです。<br />
                                                     <br />
@@ -231,15 +240,6 @@ export function GamePageClient({
                                                     ・全員で協力して全てのエラーを閉じましょう！<br />
                                                     <br />
                                                     準備ができたら「準備完了」ボタンを押してください。
-                                                </div>
-                                                <div className={styles.descriptionImage()}>
-                                                    <Image
-                                                        src="/images/what-is-error-hunter.png"
-                                                        alt="ERROR HUNTER"
-                                                        fill
-                                                        className="object-contain"
-                                                        priority
-                                                    />
                                                 </div>
                                             </div>
                                         )}

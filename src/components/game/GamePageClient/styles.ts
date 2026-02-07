@@ -104,8 +104,6 @@ export const gamePageClient = tv({
       'border-t-[#808080] border-l-[#808080]',
       'border-r-white border-b-white',
       'p-2',
-      // 'min-h-[100px]',
-      // 'flex flex-col gap-1',
     ],
     playerItem: 'flex items-center px-2 py-1 text-[11px] text-black',
     playerItemSelected: 'flex items-center px-2 py-1 text-[11px] bg-[#000080] text-white',
@@ -128,8 +126,8 @@ export const gamePageClient = tv({
     ],
     
     // 説明モード
-    descriptionContent: 'w-full flex flex-col gap-6',
-    infoHeader: 'flex items-center gap-2 font-bold text-[13px] text-[#000080] p-2',
+    descriptionContent: 'w-full flex flex-col gap-4',
+    infoHeader: 'flex items-center gap-2 font-bold text-[13px] text-[#000080]',
     infoIcon: 'text-xl',
     descriptionText: [
       'bg-white',
@@ -148,7 +146,6 @@ export const gamePageClient = tv({
       'border border-solid border-[#808080]',
       'bg-white',
       'min-h-[200px]',
-      'mb-20',
     ],
     
     // 右パネル

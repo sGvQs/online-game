@@ -286,7 +286,7 @@ export function ErrorHunterGame({
                                 borderRadius: '2px'
                             }}
                             >
-                                {winnerComment || 'コメントが設定されていません'}
+                                {winnerComment || '私の勝ちです'}
                             </p>
                             </div>
                             {match?.winner_id === currentUserId ? (
