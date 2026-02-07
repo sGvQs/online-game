@@ -302,27 +302,6 @@ export function useErrorHunter({
         }
     }, [match, roomId, isHost, isProcessing])
 
-
-    // クライアント側が終了したい
-    const handleFinishNotifier = useCallback(async () => {
-        if (isHost) return;
-        const room = await getMatchIdFromRoom(roomId)
-        if (room?.currentMatchId || isProcessing) return
-
-        setIsProcessing(true)
-        try {
-            setMatch(null)
-            setClickResult(null)
-            setProgress(null)
-            setPhase('TITLE')
-            matchIdRef.current = null
-        } catch (error) {
-            console.error('ゲーム終了に失敗:', error)
-        } finally {
-            setIsProcessing(false)
-        }
-    }, [roomId, isHost, isProcessing])
-
     // ============================================
     // Effects
     // ============================================
@@ -348,8 +327,11 @@ export function useErrorHunter({
                 const event = existingMatch.error_events[0]
                 if (!event) return
 
-                if (event.closed_by) {
-                    // 既に勝者が決定済み
+                // Match が FINISHED の場合は RESULT フェーズへ（20個すべて閉じられた状態）
+                if (existingMatch.status === 'FINISHED') {
+                    setPhase('RESULT')
+                } else if (event.closed_by) {
+                    // 1個でも閉じられている（古いロジック）
                     setPhase('RESULT')
                 } else {
                     // まだゲーム中 → タイマーをセット
@@ -389,13 +371,6 @@ export function useErrorHunter({
                 table: 'matches',
             }, () => {
                 refreshMatchData()
-            })
-            .on('postgres_changes', {
-                event: '*',
-                schema: 'public',
-                table: 'rooms',
-            }, () => {
-                handleFinishNotifier()
             })
             .subscribe()
 

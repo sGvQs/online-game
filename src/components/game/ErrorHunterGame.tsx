@@ -82,6 +82,10 @@ export function ErrorHunterGame({
         }
     })
 
+    console.log("currentUserId",currentUserId);
+    console.log("match", match?.winner_id);
+
+
     return (
         <GamePageClient
             room={room}
