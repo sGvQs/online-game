@@ -10,6 +10,7 @@ model User {
   id           String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name         String
   email        String         @unique
+  comment      String?
   createdAt    DateTime       @default(now()) @map("created_at")
   error_events error_events[]
   matches      matches[]
@@ -20,7 +21,6 @@ model User {
   @@map("users")
 }
 
-// ゲームの進行状況
 enum RoomStatus {
   LOBBY    // ルーム待機中
   PLAYING  // ゲームプレイ中
@@ -33,13 +33,8 @@ model Room {
   createdAt        DateTime   @default(now()) @map("created_at")
   createdBy        String     @map("created_by") @db.Uuid
   currentMatchId   String?    @map("current_match_id") @db.Uuid
-
-  // 現在選択されているゲームタイプ (null=ルーム待機中)
   activeGameType   String?    @map("active_game_type")
-
-  // ゲームの進行状況
   status           RoomStatus @default(LOBBY)
-
   matches          matches[]
   users            RoomUser[]
   creator          User       @relation("CreatedRooms", fields: [createdBy], references: [id])
@@ -69,7 +64,6 @@ model UserIDP {
   @@map("user_idp")
 }
 
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model error_events {
   id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   match_id      String    @db.Uuid
@@ -82,7 +76,6 @@ model error_events {
   matches       matches   @relation(fields: [match_id], references: [id], onDelete: Cascade)
 }
 
-/// This model contains row level security and requires additional setup for migrations. Visit https://pris.ly/d/row-level-security for more info.
 model matches {
   id           String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   room_id      String         @db.Uuid

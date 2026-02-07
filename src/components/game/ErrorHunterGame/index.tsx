@@ -12,6 +12,7 @@ import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 import { cn } from '@/lib/utils'
 import { errorHunterGame } from './styles'
+import { getUserComment } from '@/server/actions/user/getUserComment'
 
 interface ErrorHunterGameProps {
     room: RoomWithUsersAndReadyStatus
@@ -119,6 +120,35 @@ export function ErrorHunterGame({
             userNameMap.set(roomUser.user.id, roomUser.user.name)
         }
     })
+
+    // 勝者のコメントを取得
+    const [winnerComment, setWinnerComment] = useState<string | null>(null)
+    useEffect(() => {
+        // #region agent log
+        fetch('http://127.0.0.1:7243/ingest/51a86e01-5e84-4d64-b43c-4026ff9aa48c',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ErrorHunterGame/index.tsx:126',message:'useEffect for winner comment',data:{phase,matchExists:!!match,winnerId:match?.winner_id,shouldFetch:phase === 'RESULT' && !!match?.winner_id},timestamp:Date.now(),runId:'run1',hypothesisId:'D'})}).catch(()=>{});
+        // #endregion
+
+        if (phase === 'RESULT' && match?.winner_id) {
+            // #region agent log
+            fetch('http://127.0.0.1:7243/ingest/51a86e01-5e84-4d64-b43c-4026ff9aa48c',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ErrorHunterGame/index.tsx:129',message:'Calling getUserComment',data:{winnerId:match.winner_id,getUserCommentType:typeof getUserComment},timestamp:Date.now(),runId:'run1',hypothesisId:'D,E'})}).catch(()=>{});
+            // #endregion
+
+            getUserComment(match.winner_id).then(comment => {
+                // #region agent log
+                fetch('http://127.0.0.1:7243/ingest/51a86e01-5e84-4d64-b43c-4026ff9aa48c',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ErrorHunterGame/index.tsx:132',message:'getUserComment success',data:{comment},timestamp:Date.now(),runId:'run1',hypothesisId:'D'})}).catch(()=>{});
+                // #endregion
+                setWinnerComment(comment)
+            }).catch(error => {
+                // #region agent log
+                fetch('http://127.0.0.1:7243/ingest/51a86e01-5e84-4d64-b43c-4026ff9aa48c',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ErrorHunterGame/index.tsx:135',message:'getUserComment error',data:{errorMessage:error instanceof Error?error.message:String(error),errorStack:error instanceof Error?error.stack:undefined},timestamp:Date.now(),runId:'run1',hypothesisId:'D,E'})}).catch(()=>{});
+                // #endregion
+                console.error('コメントの取得に失敗しました:', error)
+                setWinnerComment(null)
+            })
+        } else {
+            setWinnerComment(null)
+        }
+    }, [phase, match?.winner_id])
 
 
     return (
@@ -256,7 +286,7 @@ export function ErrorHunterGame({
                                 borderRadius: '2px'
                             }}
                             >
-                                ちゃんと野菜食べてますかー？（ここはuserが持つ煽りコメントに変えたい）
+                                {winnerComment || 'コメントが設定されていません'}
                             </p>
                             </div>
                             {match?.winner_id === currentUserId ? (

@@ -2,9 +2,9 @@ import { createClient } from '@/server/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { getDashboardUser, getRooms } from '@/server/actions'
 import { RoomList } from '@/components/room/RoomList'
-import { CreateRoomForm } from '@/components/room/CreateRoomForm'
+import { DashboardSidebar } from '@/components/dashboard/DashboardSidebar'
 import { LogoutButton } from '@/components/auth/LogoutButton'
-import { Boxes, PackagePlus } from 'lucide-react'
+import { Boxes } from 'lucide-react'
 
 export default async function DashboardPage() {
     const supabase = await createClient()
@@ -42,20 +42,7 @@ export default async function DashboardPage() {
                 {/* Main Content Area */}
                 <main className="grid grid-cols-1 lg:grid-cols-4 gap-8">
                     {/* Sidebar / Actions */}
-                    <aside className="lg:col-span-1 space-y-6">
-                        <div className="glass-card p-6 rounded-2xl">
-                            <h2 className="text-xl font-bold mb-4 text-brand-900 flex items-center gap-2">
-                                <PackagePlus className="w-4 h-4" />
-                                ルームを作成
-                            </h2>
-                            <CreateRoomForm />
-                            <div className="mt-6 pt-6 border-t border-brand-100">
-                                <p className="text-xs text-brand-900 leading-relaxed">
-                                    新しいルームを作成して、友達とゲームを始めましょう。
-                                </p>
-                            </div>
-                        </div>
-                    </aside>
+                    <DashboardSidebar initialComment={dashboardUser.user.comment} />
 
                     {/* Room List */}
                     <section className="lg:col-span-3">
