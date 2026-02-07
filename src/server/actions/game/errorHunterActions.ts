@@ -2,11 +2,6 @@
 
 import { prisma } from '@/server/lib/prisma'
 import { getAuthenticatedUser } from '../_helpers/getAuthenticatedUser'
-// #region agent log
-function debugLog(location: string, message: string, data: Record<string, unknown>) {
-    console.error(`[DEBUG-SA] ${location}: ${message}`, JSON.stringify(data))
-}
-// #endregion
 
 /**
  * ゲーム開始: Match + ErrorEvent を作成し、ランダムな出現時刻を設定する
@@ -102,14 +97,6 @@ export async function getMatchIdFromRoom(roomId: string) {
         where: { id: roomId }
     })
 
-    // #region agent log
-    debugLog('getMatchIdFromRoom', 'Room fetched for matchId resolution', {
-        roomId,
-        roomFound: !!room,
-        currentMatchId: room?.currentMatchId ?? null,
-    })
-    // #endregion
-
     return room
 }
 
@@ -127,15 +114,6 @@ export async function getMatchWithEvents(matchId: string) {
             }
         }
     })
-
-    // #region agent log
-    debugLog('getMatchWithEvents', 'Match fetched', {
-        requestedMatchId: matchId,
-        matchFound: !!match,
-        eventCount: match?.error_events?.length ?? 0,
-        closedBy: match?.error_events?.[0]?.closed_by ?? null,
-    })
-    // #endregion
 
     return match
 }
