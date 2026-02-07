@@ -14,7 +14,7 @@ export const gamePageClient = tv({
       'z-[100]',
     ],
     modal: [
-      'w-[700px] h-[500px]',
+      'w-[800px] h-[500px]',
       'bg-[#c0c0c0]',
       'border-2 border-solid',
       'border-t-white border-l-white',
@@ -66,7 +66,7 @@ export const gamePageClient = tv({
     // 左パネル
     leftPanel: [
       'bg-[#c0c0c0]',
-      'py-8 pl-6 pr-0',
+      'py-10 pl-10 pr-0',
       'flex flex-col',
       'overflow-hidden',
     ],
@@ -75,7 +75,7 @@ export const gamePageClient = tv({
       'border-2 border-solid',
       'border-t-[#808080] border-l-[#808080]',
       'border-r-white border-b-white',
-      'px-4 py-6',
+      'px-28 py-10',
       'flex-1',
       'overflow-y-auto overflow-x-hidden',
       'flex flex-col items-center',
@@ -104,8 +104,8 @@ export const gamePageClient = tv({
       'border-t-[#808080] border-l-[#808080]',
       'border-r-white border-b-white',
       'p-2',
-      'min-h-[100px]',
-      'flex flex-col gap-1',
+      // 'min-h-[100px]',
+      // 'flex flex-col gap-1',
     ],
     playerItem: 'flex items-center px-2 py-1 text-[11px] text-black',
     playerItemSelected: 'flex items-center px-2 py-1 text-[11px] bg-[#000080] text-white',
@@ -128,7 +128,7 @@ export const gamePageClient = tv({
     ],
     
     // 説明モード
-    descriptionContent: 'w-full h-full flex flex-col gap-4',
+    descriptionContent: 'w-full flex flex-col gap-6',
     infoHeader: 'flex items-center gap-2 font-bold text-[13px] text-[#000080] p-2',
     infoIcon: 'text-xl',
     descriptionText: [
@@ -147,13 +147,17 @@ export const gamePageClient = tv({
       'p-4',
       'border border-solid border-[#808080]',
       'bg-white',
-      'min-h-[266px]',
+      'min-h-[200px]',
+      'mb-20',
     ],
     
     // 右パネル
     rightPanel: [
       'bg-[#c0c0c0]',
-      'p-6',
+      'pt-10',
+      "pl-4",
+      "pr-4",
+      "pb-10",
       'flex flex-col',
       'gap-2',
     ],

@@ -202,7 +202,7 @@ export function GamePageClient({
                                                         {room.users.map((roomUser) => (
                                                             <div
                                                                 key={roomUser.id}
-                                                                className={roomUser.userId === currentUserId ? styles.playerItemSelected() : styles.playerItem()}
+                                                                className={styles.playerItem()}
                                                             >
                                                                 <div className={roomUser.isReady ? styles.playerRadioReady() : styles.playerRadio()} />
                                                                 <span>
@@ -219,11 +219,10 @@ export function GamePageClient({
                                             <div className={styles.descriptionContent()}>
                                                 <div className={styles.infoHeader()}>
                                                     <span className={styles.infoIcon()}>💡</span>
-                                                    <span>Did you know...</span>
+                                                    <span>ゲーム説明</span>
                                                 </div>
                                                 <div className={styles.descriptionText()}>
-                                                    ERROR HUNTERは、画面に出現する20個のエラーモーダルを<br />
-                                                    素早く閉じる反射神経ゲームです。<br />
+                                                    ERROR HUNTERは、画面に出現する20個のエラーモーダルを素早く閉じる反射神経ゲームです。<br />
                                                     <br />
                                                     <strong>ルール:</strong><br />
                                                     ・全20個のエラーが一斉に画面上に出現します<br />
