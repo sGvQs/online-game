@@ -8,6 +8,7 @@ import { Win95Dialog } from './Win95Dialog'
 import { Win95ProgressBar } from './Win95ProgressBar'
 import { RoomWithUsersAndReadyStatus } from '@/shared/types'
 import { ReactNode } from 'react'
+import Image from 'next/image'
 
 interface GamePageClientProps {
     room: RoomWithUsersAndReadyStatus
@@ -229,9 +230,13 @@ export function GamePageClient({
                                                     準備ができたら「準備完了」ボタンを押してください。
                                                 </div>
                                                 <div className="win95-description-image">
-                                                    <div style={{ color: '#808080', fontSize: '11px' }}>
-                                                        [ゲーム画面イメージ]
-                                                    </div>
+                                                        <Image
+                                                            src="/images/what-is-error-hunter.png"
+                                                            alt="ERROR HUNTER"
+                                                            fill
+                                                            className="object-contain" // 画像の比率を維持して収めるなら contain がおすすめ
+                                                            priority
+                                                        />
                                                 </div>
                                             </div>
                                         )}
@@ -273,9 +278,8 @@ export function GamePageClient({
                                         </button>
                                     )}
                                     
-                                    <div style={{ height: '16px' }} />
-                                    
                                     {isHost && (
+                                    
                                         <button
                                             className="win95-button win95-panel-button"
                                             onClick={handleCloseModal}

@@ -451,7 +451,7 @@
 /* 左パネル（グレー背景） */
 .win95-title-modal-left-panel {
     background-color: #c0c0c0;
-    padding: 32px 24px;
+    padding: 32px 0px 32px 24px;
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -474,7 +474,7 @@
 /* 右パネル（ボタン群） */
 .win95-title-modal-right-panel {
     background-color: #c0c0c0;
-    padding: 16px 8px;
+    padding: 32px 24px;
     display: flex;
     flex-direction: column;
     gap: 8px;
@@ -494,6 +494,9 @@
     color: #808080;
     text-shadow: 1px 1px 0 #ffffff;
     cursor: not-allowed;
+    border-color: #808080 #ffffff #ffffff #808080 !important;
+    background-color: #a0a0a0 !important;
+    box-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 /* プレイヤー準備状況セクション */
@@ -531,8 +534,7 @@
 }
 
 .win95-player-item.selected {
-    background-color: #000080;
-    color: #ffffff;
+    color: #000;
 }
 
 .win95-player-radio {
@@ -590,13 +592,11 @@
 }
 
 .win95-description-image {
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    position: relative;
     padding: 16px;
     border: 1px solid #808080;
     background: #ffffff;
-    min-height: 120px;
+    min-height: 266px;
 }
 
 /* 押しっぱなしボタン（トグル状態） */
