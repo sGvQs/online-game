@@ -93,10 +93,10 @@ export function ErrorHunterGame({
         const interval = setInterval(() => {
             setWaitProgress(prev => {
                 // 0〜100をループするアニメーション
-                const next = prev + 4
-                return next > 100 ? 0 : next
+                const next = prev + 20
+                return next > 200 ? 0 : next
             })
-        }, 150)
+        }, 200)
 
         return () => clearInterval(interval)
     }, [phase])
