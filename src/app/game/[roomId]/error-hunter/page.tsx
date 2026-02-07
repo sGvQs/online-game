@@ -3,7 +3,8 @@ import { redirect } from 'next/navigation'
 import { getCurrentUser } from '@/server/actions'
 import { getRoomWithReadyStatus } from '@/server/actions/room'
 import { ErrorHunterGame } from '@/components/game/ErrorHunterGame'
-import '@/app/game/win95.css'
+import { cn } from '@/lib/utils'
+import { errorHunterGame } from '@/components/game/ErrorHunterGame/styles'
 
 export default async function ErrorHunterPage({ params }: { params: { roomId: string } }) {
     const supabase = await createClient()
@@ -34,8 +35,13 @@ export default async function ErrorHunterPage({ params }: { params: { roomId: st
     // Check if user is host
     const isHost = room.createdBy === currentUser.user.id
 
+    const styles = errorHunterGame()
+    
     return (
-        <div className="win95-container win95-scanlines">
+        <div className={cn(
+            styles.container(),
+            "relative"
+        )}>
             <ErrorHunterGame
                 room={room}
                 isHost={isHost}

@@ -4,11 +4,15 @@ import { createClient } from '@/lib/supabase/client'
 import { useEffect, useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { getRoom, returnToRoom } from '@/server/actions/room'
-import { Win95Dialog } from './Win95Dialog'
-import { Win95ProgressBar } from './Win95ProgressBar'
+import { Win95Dialog } from '../Win95Dialog'
+import { Win95ProgressBar } from '../Win95ProgressBar'
+import { Win95Button } from '../Win95Button'
+import { Win95TitleBarButton } from '../Win95TitleBarButton'
 import { RoomWithUsersAndReadyStatus } from '@/shared/types'
 import { ReactNode } from 'react'
 import Image from 'next/image'
+import { cn } from '@/lib/utils'
+import { gamePageClient } from './styles'
 
 interface GamePageClientProps {
     room: RoomWithUsersAndReadyStatus
@@ -60,6 +64,7 @@ export function GamePageClient({
     const [internalShowTitle, setInternalShowTitle] = useState(false)
     const [isTogglingReady, setIsTogglingReady] = useState(false)
     const [showDescription, setShowDescription] = useState(false)
+    const styles = gamePageClient()
 
     // 外部制御がある場合はそちらを使い、なければ内部stateを使う
     const isTitleVisible = showTitle !== undefined ? showTitle : internalShowTitle
@@ -163,44 +168,43 @@ export function GamePageClient({
 
             {/* Title Modal */}
             {!isInitializing && isTitleVisible && (
-                <div className="win95-title-modal-overlay">
-                    <div className="win95-title-modal">
-                        <div className="win95-title-modal-inner">
-                            <div className="win95-titlebar">
-                                <span className="win95-titlebar-text">ERROR HUNTER</span>
+                <div className={styles.modalOverlay()}>
+                    <div className={styles.modal()}>
+                        <div className={styles.modalInner()}>
+                            <div className={styles.titlebar()}>
+                                <span className={styles.titlebarText()}>ERROR HUNTER</span>
                                 {isHost && (
-                                    <div className="win95-titlebar-buttons">
-                                        <button
-                                            className="win95-titlebar-btn"
+                                    <div className={styles.titlebarButtons()}>
+                                        <Win95TitleBarButton
                                             onClick={handleCloseModal}
                                         >
                                             ×
-                                        </button>
+                                        </Win95TitleBarButton>
                                     </div>
                                 )}
                             </div>
                             
                             {/* 2カラムレイアウト */}
-                            <div className="win95-title-modal-two-column">
+                            <div className={styles.twoColumn()}>
                                 {/* 左パネル */}
-                                <div className="win95-title-modal-left-panel">
-                                    <div className="win95-info-box">
+                                <div className={styles.leftPanel()}>
+                                    <div className={styles.infoBox()}>
                                         {!showDescription ? (
                                             // 通常モード: ASCIIアート + プレイヤーリスト
                                             <>
-                                                <pre className="win95-ascii-art">{ASCII_ART}</pre>
+                                                <pre className={styles.asciiArt()}>{ASCII_ART}</pre>
                                                 
-                                                <div className="win95-player-status-section">
-                                                    <p className="win95-status-title">
+                                                <div className={styles.playerStatusSection()}>
+                                                    <p className={styles.statusTitle()}>
                                                         プレイヤー準備状況: {readyCount} / {totalUsers}
                                                     </p>
-                                                    <div className="win95-player-listbox">
+                                                    <div className={styles.playerListbox()}>
                                                         {room.users.map((roomUser) => (
                                                             <div
                                                                 key={roomUser.id}
-                                                                className={`win95-player-item ${roomUser.userId === currentUserId ? 'selected' : ''}`}
+                                                                className={roomUser.userId === currentUserId ? styles.playerItemSelected() : styles.playerItem()}
                                                             >
-                                                                <div className={`win95-player-radio ${roomUser.isReady ? 'ready' : ''}`} />
+                                                                <div className={roomUser.isReady ? styles.playerRadioReady() : styles.playerRadio()} />
                                                                 <span>
                                                                     {roomUser.user?.name || 'Unknown'}
                                                                     {roomUser.userId === currentUserId && ' (あなた)'}
@@ -212,12 +216,12 @@ export function GamePageClient({
                                             </>
                                         ) : (
                                             // 説明モード
-                                            <div className="win95-description-content">
-                                                <div className="win95-info-header">
-                                                    <span className="win95-info-icon">💡</span>
+                                            <div className={styles.descriptionContent()}>
+                                                <div className={styles.infoHeader()}>
+                                                    <span className={styles.infoIcon()}>💡</span>
                                                     <span>Did you know...</span>
                                                 </div>
-                                                <div className="win95-description-text">
+                                                <div className={styles.descriptionText()}>
                                                     ERROR HUNTERは、画面に出現する20個のエラーモーダルを<br />
                                                     素早く閉じる反射神経ゲームです。<br />
                                                     <br />
@@ -229,14 +233,14 @@ export function GamePageClient({
                                                     <br />
                                                     準備ができたら「準備完了」ボタンを押してください。
                                                 </div>
-                                                <div className="win95-description-image">
-                                                        <Image
-                                                            src="/images/what-is-error-hunter.png"
-                                                            alt="ERROR HUNTER"
-                                                            fill
-                                                            className="object-contain" // 画像の比率を維持して収めるなら contain がおすすめ
-                                                            priority
-                                                        />
+                                                <div className={styles.descriptionImage()}>
+                                                    <Image
+                                                        src="/images/what-is-error-hunter.png"
+                                                        alt="ERROR HUNTER"
+                                                        fill
+                                                        className="object-contain"
+                                                        priority
+                                                    />
                                                 </div>
                                             </div>
                                         )}
@@ -244,19 +248,20 @@ export function GamePageClient({
                                 </div>
                                 
                                 {/* 右パネル */}
-                                <div className="win95-title-modal-right-panel">
-                                    <button
-                                        className={`win95-button win95-panel-button ${showDescription ? 'win95-button-pressed' : ''}`}
+                                <div className={styles.rightPanel()}>
+                                    <Win95Button
+                                        className={cn(styles.panelButton(), showDescription && styles.buttonPressed())}
                                         onClick={() => setShowDescription(!showDescription)}
+                                        pressed={showDescription}
                                     >
                                         What's ERROR HUNTER
-                                    </button>
+                                    </Win95Button>
                                     
-                                    <div style={{ flex: 1 }} />
+                                    <div className={styles.buttonSpacer()} />
                                     
                                     {onToggleReady && (
-                                        <button
-                                            className="win95-button win95-panel-button"
+                                        <Win95Button
+                                            className={styles.panelButton()}
                                             onClick={handleToggleReadyClick}
                                             disabled={isTogglingReady}
                                             style={{
@@ -265,27 +270,26 @@ export function GamePageClient({
                                             }}
                                         >
                                             準備完了
-                                        </button>
+                                        </Win95Button>
                                     )}
                                     
                                     {isHost && (
-                                        <button
-                                            className="win95-button win95-panel-button"
+                                        <Win95Button
+                                            className={styles.panelButton()}
                                             onClick={handleStartGameClick}
                                             disabled={isStartDisabled || isPending || !allUsersReady}
                                         >
                                             ゲーム開始
-                                        </button>
+                                        </Win95Button>
                                     )}
                                     
                                     {isHost && (
-                                    
-                                        <button
-                                            className="win95-button win95-panel-button"
+                                        <Win95Button
+                                            className={styles.panelButton()}
                                             onClick={handleCloseModal}
                                         >
                                             Close
-                                        </button>
+                                        </Win95Button>
                                     )}
                                 </div>
                             </div>

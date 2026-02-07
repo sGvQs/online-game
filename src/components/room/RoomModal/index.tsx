@@ -1,7 +1,7 @@
 'use client'
 
 import React, { useEffect } from 'react'
-import styles from './RoomModal.module.css'
+import { roomModal } from './styles'
 
 interface RoomModalProps {
     isOpen: boolean
@@ -24,6 +24,8 @@ export function RoomModal({
     children,
     showCloseButton = true,
 }: RoomModalProps) {
+    const styles = roomModal()
+
     // ESCキーでモーダルを閉じる
     useEffect(() => {
         if (!isOpen) return
@@ -54,17 +56,17 @@ export function RoomModal({
     if (!isOpen) return null
 
     return (
-        <div className={styles.modalOverlay} onClick={onClose}>
+        <div className={styles.overlay()} onClick={onClose}>
             <div 
-                className={styles.modalContent} 
+                className={styles.content()} 
                 onClick={(e) => e.stopPropagation()}
             >
                 {/* ヘッダー */}
-                <div className={styles.modalHeader}>
-                    <h2 className={styles.modalTitle}>{title}</h2>
+                <div className={styles.header()}>
+                    <h2 className={styles.title()}>{title}</h2>
                     {showCloseButton && (
                         <button
-                            className={styles.closeButton}
+                            className={styles.closeButton()}
                             onClick={onClose}
                             aria-label="閉じる"
                         >
@@ -74,7 +76,7 @@ export function RoomModal({
                 </div>
 
                 {/* コンテンツ */}
-                <div className={styles.modalBody}>
+                <div className={styles.body()}>
                     {children}
                 </div>
             </div>

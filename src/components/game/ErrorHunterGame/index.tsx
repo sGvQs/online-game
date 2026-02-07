@@ -1,14 +1,17 @@
 'use client'
 
 import { useErrorHunter } from '@/hooks/useErrorHunter'
-import { GamePageClient } from './GamePageClient'
-import { Win95Dialog } from './Win95Dialog'
-import { Win95ProgressBar } from './Win95ProgressBar'
+import { GamePageClient } from '../GamePageClient'
+import { Win95Dialog } from '../Win95Dialog'
+import { Win95ProgressBar } from '../Win95ProgressBar'
+import { Win95TitleBarButton } from '../Win95TitleBarButton'
 import { RoomWithUsersAndReadyStatus } from '@/shared/types'
 import { useEffect, useState } from 'react'
 import { toggleReady, getRoomWithReadyStatus } from '@/server/actions/room'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
+import { cn } from '@/lib/utils'
+import { errorHunterGame } from './styles'
 
 interface ErrorHunterGameProps {
     room: RoomWithUsersAndReadyStatus
@@ -42,6 +45,7 @@ export function ErrorHunterGame({
     const router = useRouter()
     const supabase = createClient()
     const [room, setRoom] = useState(initialRoom)
+    const styles = errorHunterGame()
     
     const {
         phase,
@@ -183,48 +187,31 @@ export function ErrorHunterGame({
                             return (
                             <div
                                 key={event.id}
-                                className="win95-dialog"
+                                className={cn(styles.floatingDialog(), 'translate-x-[-50%] translate-y-[-50%]')}
                                 style={{
-                                    position: 'absolute',
                                     left: `${errorWithPosition.position_x}%`,
                                     top: `${errorWithPosition.position_y}%`,
-                                    transform: 'translate(-50%, -50%)',
-                                    animation: 'win95-appear 0.15s ease-out',
-                                    width: '400pxpx',
-                                    height: '120px',
+                                    width: '400px',
                                 }}
                             >
-                                <div className="win95-dialog-inner-error">
-                                    {/* Title Bar with Close Button */}
-                                    <div className="win95-titlebar">
-                                        <span className="win95-titlebar-text">Error</span>
-                                        <div className="win95-titlebar-buttons">
-                                            <button
-                                                className="win95-titlebar-btn"
-                                                onClick={() => handleClickError(event.id)}
-                                                disabled={isProcessing}
-                                                aria-label="Close"
-                                            >
-                                                ×
-                                            </button>
-                                        </div>
-                                    </div>
-
-                                    {/* Error Content */}
-                                    <div className="win95-dialog-content">
-                                        <div className="win95-dialog-icon">
-                                            <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                <circle cx="16" cy="16" r="14" fill="#ff0000" stroke="#800000" strokeWidth="2" />
-                                                <path d="M10 10L22 22M22 10L10 22" stroke="white" strokeWidth="3" strokeLinecap="round" />
-                                            </svg>
-                                        </div>
-                                        <div className="win95-dialog-message">
-                                            <p style={{ whiteSpace: 'pre-line', fontSize: '12px' }}>
-                                                {getRandomErrorMessage()}
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
+                                <Win95Dialog
+                                    title="Error"
+                                    icon="error"
+                                    innerClassName="error"
+                                    titlebarButtons={
+                                        <Win95TitleBarButton
+                                            onClick={() => handleClickError(event.id)}
+                                            disabled={isProcessing}
+                                            aria-label="Close"
+                                        >
+                                            ×
+                                        </Win95TitleBarButton>
+                                    }
+                                >
+                                    <p style={{ whiteSpace: 'pre-line', fontSize: '12px' }}>
+                                        {getRandomErrorMessage()}
+                                    </p>
+                                </Win95Dialog>
                             </div>
                         )})}
                 </div>
