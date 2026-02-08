@@ -212,7 +212,7 @@ export function ErrorHunterGame({
                 <div className="fixed inset-0 z-50">
                     {match?.error_events
                         .filter((event: ErrorEventWithUser) => !event.closed_at)
-                        .map((event) => {
+                        .map((event: ErrorEventWithUser) => {
                             const errorWithPosition = event as typeof event & { position_x: number; position_y: number }
                             return (
                             <div
