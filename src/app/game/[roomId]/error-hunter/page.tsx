@@ -5,6 +5,7 @@ import { getRoomWithReadyStatus } from '@/server/actions/room'
 import { ErrorHunterGame } from '@/components/game/ErrorHunterGame'
 import { cn } from '@/lib/utils'
 import { errorHunterGame } from '@/components/game/ErrorHunterGame/styles'
+import { RoomUserWithReadyStatus } from '@/shared/types'
 
 export default async function ErrorHunterPage({ params }: { params: { roomId: string } }) {
     const supabase = await createClient()
@@ -22,7 +23,7 @@ export default async function ErrorHunterPage({ params }: { params: { roomId: st
     if (!room) return <div>Room not found</div>
 
     // Check if user is member
-    const isMember = room.users.some(u => u.userId === currentUser.user.id)
+    const isMember = room.users.some((u: RoomUserWithReadyStatus) => u.userId === currentUser.user.id)
     if (!isMember) {
         redirect('/dashboard')
     }
