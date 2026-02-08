@@ -8,7 +8,7 @@ const nextConfig: NextConfig = {
     optimizePackageImports: ['next/font/google'],
   },
   // Turbopackの設定（空の設定でエラーを回避）
-  turbopack: {},
+  // turbopack: {},
 };
 
 export default nextConfig;

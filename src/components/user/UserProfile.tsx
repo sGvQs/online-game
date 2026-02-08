@@ -1,5 +1,5 @@
 'use client'
-import { createClient } from '@/lib/supabase/client'
+import { createClient } from '@/utils/supabase/client'
 import { useEffect, useState } from 'react'
 import { updateName } from '@/server/actions/user'
 import { IconButton } from '@/components/ui/IconButton'

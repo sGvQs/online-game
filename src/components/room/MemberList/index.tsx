@@ -1,6 +1,6 @@
 'use client'
 
-import { createClient } from '@/lib/supabase/client'
+import { createClient } from '@/utils/supabase/client'
 import { useEffect, useState } from 'react'
 import { getRoomUsers } from '@/server/actions/room'
 import { Users } from 'lucide-react'

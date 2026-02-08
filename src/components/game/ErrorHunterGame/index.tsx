@@ -5,11 +5,11 @@ import { GamePageClient } from '../GamePageClient'
 import { Win95Dialog } from '../Win95Dialog'
 import { Win95ProgressBar } from '../Win95ProgressBar'
 import { Win95TitleBarButton } from '../Win95TitleBarButton'
-import { RoomWithUsersAndReadyStatus, RoomUserWithReadyStatus, ErrorEventWithUser } from '@/shared/types'
+import { RoomWithUsersAndReadyStatus, RoomUserWithReadyStatus, ErrorEventWithUser, RoomUser } from '@/shared/types'
 import { useEffect, useState } from 'react'
 import { toggleReady, getRoomWithReadyStatus } from '@/server/actions/room'
 import { useRouter } from 'next/navigation'
-import { createClient } from '@/lib/supabase/client'
+import { createClient } from '@/utils/supabase/client'
 import { cn } from '@/lib/utils'
 import { errorHunterGame } from './styles'
 import { getUserComment } from '@/server/actions/user/getUserComment'
@@ -67,7 +67,8 @@ export function ErrorHunterGame({
                 event: '*',
                 schema: 'public',
                 table: 'room_users',
-            }, async () => {
+            }, async (payload: any) => {
+                console.log("RoomUser", payload);
                 // 準備状態が変更されたら Room データを再取得
                 const updatedRoom = await getRoomWithReadyStatus(roomId)
                 setRoom(updatedRoom)
@@ -77,7 +78,7 @@ export function ErrorHunterGame({
         return () => {
             supabase.removeChannel(channel)
         }
-    }, [supabase, roomId, router])
+    }, [roomId, router])
 
     // 準備完了トグル
     const handleToggleReady = async () => {
