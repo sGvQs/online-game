@@ -5,7 +5,7 @@ import { GamePageClient } from '../GamePageClient'
 import { Win95Dialog } from '../Win95Dialog'
 import { Win95ProgressBar } from '../Win95ProgressBar'
 import { Win95TitleBarButton } from '../Win95TitleBarButton'
-import { RoomWithUsersAndReadyStatus } from '@/shared/types'
+import { RoomWithUsersAndReadyStatus, RoomUserWithReadyStatus } from '@/shared/types'
 import { useEffect, useState } from 'react'
 import { toggleReady, getRoomWithReadyStatus } from '@/server/actions/room'
 import { useRouter } from 'next/navigation'
@@ -115,7 +115,7 @@ export function ErrorHunterGame({
 
     // ユーザー名のマップを作成（進行状況表示用）
     const userNameMap = new Map<string, string>()
-    room.users.forEach(roomUser => {
+    room.users.forEach((roomUser: RoomUserWithReadyStatus) => {
         if (roomUser.user) {
             userNameMap.set(roomUser.user.id, roomUser.user.name)
         }
