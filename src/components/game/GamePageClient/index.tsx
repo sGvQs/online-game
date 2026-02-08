@@ -199,7 +199,7 @@ export function GamePageClient({
                                                         プレイヤー準備状況: {readyCount} / {totalUsers}
                                                     </p>
                                                     <div className={styles.playerListbox()}>
-                                                        {room.users.map((roomUser) => (
+                                                        {room.users.map((roomUser: RoomUserWithReadyStatus) => (
                                                             <div
                                                                 key={roomUser.id}
                                                                 className={styles.playerItem()}
