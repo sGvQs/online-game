@@ -5,7 +5,7 @@ import { GamePageClient } from '../GamePageClient'
 import { Win95Dialog } from '../Win95Dialog'
 import { Win95ProgressBar } from '../Win95ProgressBar'
 import { Win95TitleBarButton } from '../Win95TitleBarButton'
-import { RoomWithUsersAndReadyStatus, RoomUserWithReadyStatus } from '@/shared/types'
+import { RoomWithUsersAndReadyStatus, RoomUserWithReadyStatus, ErrorEventWithUser } from '@/shared/types'
 import { useEffect, useState } from 'react'
 import { toggleReady, getRoomWithReadyStatus } from '@/server/actions/room'
 import { useRouter } from 'next/navigation'
@@ -211,7 +211,7 @@ export function ErrorHunterGame({
             {phase === 'APPEARING' && (
                 <div className="fixed inset-0 z-50">
                     {match?.error_events
-                        .filter(event => !event.closed_at)
+                        .filter((event: ErrorEventWithUser) => !event.closed_at)
                         .map((event) => {
                             const errorWithPosition = event as typeof event & { position_x: number; position_y: number }
                             return (
