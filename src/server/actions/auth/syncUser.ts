@@ -1,6 +1,7 @@
 'use server'
 
 import { prisma } from '@/server/lib/prisma'
+import { Prisma } from '@prisma/client'
 
 interface SyncUserParams {
     supabaseUid: string
@@ -26,7 +27,7 @@ export async function syncUser({ supabaseUid, email, name }: SyncUserParams) {
         }
 
         // 新規ユーザー作成（トランザクション）
-        const result = await prisma.$transaction(async (tx) => {
+        const result = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
             // メールアドレスで既存ユーザーを検索（念のため）
             let userId: string
 

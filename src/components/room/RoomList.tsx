@@ -54,7 +54,7 @@ export function RoomList({ initialRooms, userId }: { initialRooms: Room[], userI
 
     return (
         <div className="grid gap-6 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
-            {rooms.map(room => (
+            {rooms.map((room: Room) => (
                 <RoomCard
                     key={room.id}
                     room={room}

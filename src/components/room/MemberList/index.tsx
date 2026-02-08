@@ -56,7 +56,7 @@ export function MemberList({ roomId, initialMembers }: { roomId: string, initial
             </div>
 
             <ul className={styles.list()}>
-                {members.map(member => (
+                {members.map((member: RoomUserWithUser) => (
                     <MemberItem key={member.id} member={member} />
                 ))}
             </ul>

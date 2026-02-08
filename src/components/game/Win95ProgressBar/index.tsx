@@ -20,7 +20,7 @@ export function Win95ProgressBar({ progress, label, className = '' }: Win95Progr
             {label && <div className={styles.label()}>{label}</div>}
             <div className={styles.container()}>
                 <div className={styles.bar()}>
-                    {Array.from({ length: blockCount }).map((_, i) => (
+                    {Array.from({ length: blockCount }).map((_: unknown, i: number) => (
                         <div key={i} className={styles.block()} />
                     ))}
                 </div>

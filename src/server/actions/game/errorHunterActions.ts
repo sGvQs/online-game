@@ -2,6 +2,7 @@
 
 import { prisma } from '@/server/lib/prisma'
 import { getAuthenticatedUser } from '../_helpers/getAuthenticatedUser'
+import { ErrorEventWithUser, ErrorEvent } from '@/shared/types'
 
 /**
  * ゲーム開始: Match + ErrorEvent を作成し、ランダムな出現時刻を設定する
@@ -129,7 +130,7 @@ export async function getMatchProgress(matchId: string) {
     })
 
     // プレイヤーごとのスコアを集計
-    const scores = events.reduce((acc, event) => {
+    const scores = events.reduce((acc: Record<string, number>, event: ErrorEventWithUser) => {
         if (event.closed_by) {
             acc[event.closed_by] = (acc[event.closed_by] || 0) + 1
         }
@@ -138,7 +139,7 @@ export async function getMatchProgress(matchId: string) {
 
     return {
         totalErrors: events.length,
-        closedErrors: events.filter(e => e.closed_by).length,
+        closedErrors: events.filter((e: ErrorEventWithUser) => e.closed_by).length,
         scores,
         events
     }
@@ -157,7 +158,7 @@ export async function finishGame(matchId: string, roomId: string) {
 
     // スコア集計
     const scores = new Map<string, number>()
-    events.forEach(event => {
+    events.forEach((event: ErrorEvent) => {
         if (event.closed_by) {
             scores.set(event.closed_by, (scores.get(event.closed_by) || 0) + 1)
         }

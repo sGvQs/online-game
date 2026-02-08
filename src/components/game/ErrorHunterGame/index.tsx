@@ -178,8 +178,8 @@ export function ErrorHunterGame({
                                     スコア:
                                 </p>
                                 {Object.entries(progress.scores)
-                                    .sort(([, a], [, b]) => (b as number) - (a as number))
-                                    .map(([userId, score], index) => (
+                                    .sort(([, a]: [string, number], [, b]: [string, number]) => b - a)
+                                    .map(([userId, score]: [string, number], index: number) => (
                                         <p key={userId} style={{ fontSize: '11px', color: '#000', marginBottom: '2px' }}>
                                             {userNameMap.get(userId) || 'Unknown'}: {score as number}個 {index === 0 && phase === 'RESULT' && <span style={{ color: 'blue', fontWeight: 'bold', marginLeft: '4px' }}>👈 勝者</span>}
                                         </p>

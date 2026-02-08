@@ -30,7 +30,7 @@ export function MemberListView({ members }: MemberListViewProps) {
             </div>
 
             <ul className={styles.list()}>
-                {members.map(member => (
+                {members.map((member: RoomUserWithUser) => (
                     <MemberItem key={member.id} member={member} />
                 ))}
             </ul>

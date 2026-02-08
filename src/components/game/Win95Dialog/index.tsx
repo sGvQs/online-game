@@ -113,7 +113,7 @@ export function Win95Dialog({
                 {/* Buttons */}
                 {buttons && buttons.length > 0 && (
                     <div className={styles.buttonGroup()}>
-                        {buttons.map((btn, idx) => (
+                        {buttons.map((btn: { label: string; onClick?: () => void; primary?: boolean }, idx: number) => (
                             <Win95Button
                                 key={idx}
                                 onClick={btn.onClick}
