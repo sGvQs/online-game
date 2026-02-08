@@ -5,6 +5,7 @@ import { RoomPageClientWrapper } from '@/components/room/RoomPageClient'
 import { Button } from '@/components/ui/Button'
 import { leaveRoom } from '@/server/actions'
 import { ChevronsRight, PersonStanding, House, Gamepad2 } from 'lucide-react'
+import { RoomUserWithReadyStatus } from '@/shared/types'
 
 export default async function RoomPage({ params }: { params: { id: string } }) {
     const supabase = await createClient()
@@ -22,7 +23,7 @@ export default async function RoomPage({ params }: { params: { id: string } }) {
     if (!room) return <div>Room not found</div>
 
     // Check if user is member
-    const isMember = room.users.some(u => u.userId === currentUser.user.id)
+    const isMember = room.users.some((u: RoomUserWithReadyStatus) => u.userId === currentUser.user.id)
     if (!isMember) {
         redirect('/dashboard')
     }
