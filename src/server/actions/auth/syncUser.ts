@@ -26,7 +26,8 @@ export async function syncUser({ supabaseUid, email, name }: SyncUserParams) {
         }
 
         // 新規ユーザー作成（トランザクション）
-        const result = await prisma.$transaction(async (tx) => {
+        type TransactionClient = Parameters<Parameters<typeof prisma.$transaction>[0]>[0]
+        const result = await prisma.$transaction(async (tx: TransactionClient) => {
             // メールアドレスで既存ユーザーを検索（念のため）
             let userId: string
 
