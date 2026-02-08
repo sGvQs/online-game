@@ -8,7 +8,7 @@ import { Win95Dialog } from '../Win95Dialog'
 import { Win95ProgressBar } from '../Win95ProgressBar'
 import { Win95Button } from '../Win95Button'
 import { Win95TitleBarButton } from '../Win95TitleBarButton'
-import { RoomWithUsersAndReadyStatus } from '@/shared/types'
+import { RoomWithUsersAndReadyStatus, RoomUserWithReadyStatus } from '@/shared/types'
 import { ReactNode } from 'react'
 import Image from 'next/image'
 import { cn } from '@/lib/utils'
@@ -70,9 +70,9 @@ export function GamePageClient({
     const isTitleVisible = showTitle !== undefined ? showTitle : internalShowTitle
 
     // 準備完了状態を計算
-    const currentUserReady = room.users.find(u => u.userId === currentUserId)?.isReady ?? false
-    const allUsersReady = room.users.every(u => u.isReady)
-    const readyCount = room.users.filter(u => u.isReady).length
+    const currentUserReady = room.users.find((u: RoomUserWithReadyStatus) => u.userId === currentUserId)?.isReady ?? false
+    const allUsersReady = room.users.every((u: RoomUserWithReadyStatus) => u.isReady)
+    const readyCount = room.users.filter((u: RoomUserWithReadyStatus) => u.isReady).length
     const totalUsers = room.users.length
 
     // Simulate initialization progress
