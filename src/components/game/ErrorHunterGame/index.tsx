@@ -69,7 +69,9 @@ export function ErrorHunterGame({
                 table: 'room_users',
                 filter: `room_id=eq.${roomId}`,
             }, async (payload: any) => {
-                console.log("RoomUser", payload);
+                console.log("=== RoomUser ===");
+                console.log(payload);
+                console.log(roomId);
                 // 準備状態が変更されたら Room データを再取得
                 const updatedRoom = await getRoomWithReadyStatus(roomId)
                 setRoom(updatedRoom)
@@ -109,11 +111,11 @@ export function ErrorHunterGame({
     }, [phase])
 
     // 勝者情報を取得
-    const errorEvent = match?.error_events[0]
-    const winnerName = errorEvent?.users?.name ?? null
+    const errorEvent = match?.errorEvents[0]
+    const winnerName = errorEvent?.user?.name ?? null
 
     // 自分が勝ったかどうか（Realtime経由で更新された場合の判定）
-    const isMyWin = errorEvent?.closed_by === currentUserId
+    const isMyWin = errorEvent?.closedBy === currentUserId
 
     // ユーザー名のマップを作成（進行状況表示用）
     const userNameMap = new Map<string, string>()
@@ -126,31 +128,17 @@ export function ErrorHunterGame({
     // 勝者のコメントを取得
     const [winnerComment, setWinnerComment] = useState<string | null>(null)
     useEffect(() => {
-        // #region agent log
-        fetch('http://127.0.0.1:7243/ingest/51a86e01-5e84-4d64-b43c-4026ff9aa48c', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'ErrorHunterGame/index.tsx:126', message: 'useEffect for winner comment', data: { phase, matchExists: !!match, winnerId: match?.winner_id, shouldFetch: phase === 'RESULT' && !!match?.winner_id }, timestamp: Date.now(), runId: 'run1', hypothesisId: 'D' }) }).catch(() => { });
-        // #endregion
-
-        if (phase === 'RESULT' && match?.winner_id) {
-            // #region agent log
-            fetch('http://127.0.0.1:7243/ingest/51a86e01-5e84-4d64-b43c-4026ff9aa48c', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'ErrorHunterGame/index.tsx:129', message: 'Calling getUserComment', data: { winnerId: match.winner_id, getUserCommentType: typeof getUserComment }, timestamp: Date.now(), runId: 'run1', hypothesisId: 'D,E' }) }).catch(() => { });
-            // #endregion
-
-            getUserComment(match.winner_id).then(comment => {
-                // #region agent log
-                fetch('http://127.0.0.1:7243/ingest/51a86e01-5e84-4d64-b43c-4026ff9aa48c', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'ErrorHunterGame/index.tsx:132', message: 'getUserComment success', data: { comment }, timestamp: Date.now(), runId: 'run1', hypothesisId: 'D' }) }).catch(() => { });
-                // #endregion
+        if (phase === 'RESULT' && match?.winnerId) {
+            getUserComment(match.winnerId).then(comment => {
                 setWinnerComment(comment)
             }).catch(error => {
-                // #region agent log
-                fetch('http://127.0.0.1:7243/ingest/51a86e01-5e84-4d64-b43c-4026ff9aa48c', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'ErrorHunterGame/index.tsx:135', message: 'getUserComment error', data: { errorMessage: error instanceof Error ? error.message : String(error), errorStack: error instanceof Error ? error.stack : undefined }, timestamp: Date.now(), runId: 'run1', hypothesisId: 'D,E' }) }).catch(() => { });
-                // #endregion
                 console.error('コメントの取得に失敗しました:', error)
                 setWinnerComment(null)
             })
         } else {
             setWinnerComment(null)
         }
-    }, [phase, match?.winner_id])
+    }, [phase, match?.winnerId])
 
 
     return (
@@ -212,17 +200,17 @@ export function ErrorHunterGame({
             {/* APPEARING フェーズ: 47個のエラーモーダル出現 — 早い者勝ちで閉じる */}
             {phase === 'APPEARING' && (
                 <div className="fixed inset-0 z-50">
-                    {match?.error_events
-                        .filter((event: ErrorEventWithUser) => !event.closed_at)
+                    {match?.errorEvents
+                        .filter((event: ErrorEventWithUser) => !event.closedAt)
                         .map((event: ErrorEventWithUser) => {
-                            const errorWithPosition = event as typeof event & { position_x: number; position_y: number }
+                            const errorWithPosition = event as typeof event & { positionX: number; positionY: number }
                             return (
                                 <div
                                     key={event.id}
                                     className={cn(styles.floatingDialog(), 'translate-x-[-50%] translate-y-[-50%]')}
                                     style={{
-                                        left: `${errorWithPosition.position_x}%`,
-                                        top: `${errorWithPosition.position_y}%`,
+                                        left: `${errorWithPosition.positionX}%`,
+                                        top: `${errorWithPosition.positionY}%`,
                                         width: '400px',
                                     }}
                                 >
@@ -277,7 +265,7 @@ export function ErrorHunterGame({
                                         borderRadius: '2px'
                                     }}
                                 >
-                                    {match?.winner_id === currentUserId ? "あなたから全員へのコメント" : "勝者からのコメント"}
+                                    {match?.winnerId === currentUserId ? "あなたから全員へのコメント" : "勝者からのコメント"}
                                 </p>
                                 <p style={{
                                     fontSize: '14px',
@@ -292,7 +280,7 @@ export function ErrorHunterGame({
                                     {winnerComment || '私の勝ちです'}
                                 </p>
                             </div>
-                            {match?.winner_id === currentUserId ? (
+                            {match?.winnerId === currentUserId ? (
                                 <p style={{ fontSize: '12px', color: '#000080', marginLeft: "24px", marginTop: '12px' }}>
                                     あなたの勝ちです
                                 </p>

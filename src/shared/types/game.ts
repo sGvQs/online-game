@@ -9,23 +9,23 @@ import { Prisma } from '@prisma/client';
 // ============================================
 
 /** ErrorEvent model type */
-export type ErrorEvent = Prisma.error_eventsGetPayload<{}>;
+export type ErrorEvent = Prisma.ErrorEventGetPayload<{}>;
 
 /** Match model type */
-export type Match = Prisma.matchesGetPayload<{}>;
+export type Match = Prisma.MatchGetPayload<{}>;
 
 // ============================================
 // Match types with relations
 // ============================================
 
 /** Match with ErrorEvents */
-export type MatchWithErrorEvents = Prisma.matchesGetPayload<{
-    include: { error_events: true }
+export type MatchWithErrorEvents = Prisma.MatchGetPayload<{
+    include: { errorEvents: true }
 }>;
 
 /** Match with Room */
-export type MatchWithRoom = Prisma.matchesGetPayload<{
-    include: { rooms: true }
+export type MatchWithRoom = Prisma.MatchGetPayload<{
+    include: { room: true }
 }>;
 
 // ============================================
@@ -33,19 +33,19 @@ export type MatchWithRoom = Prisma.matchesGetPayload<{
 // ============================================
 
 /** ErrorEvent with Match */
-export type ErrorEventWithMatch = Prisma.error_eventsGetPayload<{
-    include: { matches: true }
+export type ErrorEventWithMatch = Prisma.ErrorEventGetPayload<{
+    include: { match: true }
 }>;
 
 /** ErrorEvent with User (winner info) */
-export type ErrorEventWithUser = Prisma.error_eventsGetPayload<{
-    include: { users: true }
+export type ErrorEventWithUser = Prisma.ErrorEventGetPayload<{
+    include: { user: true }
 }>;
 
 /** Match with ErrorEvents including User */
-export type MatchWithErrorEventsAndUsers = Prisma.matchesGetPayload<{
+export type MatchWithErrorEventsAndUsers = Prisma.MatchGetPayload<{
     include: {
-        error_events: { include: { users: true } }
+        errorEvents: { include: { user: true } }
     }
 }>;
 
