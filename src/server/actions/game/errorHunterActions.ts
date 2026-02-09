@@ -32,7 +32,7 @@ export async function startGame(roomId: string) {
     })
 
     // 47個の ErrorEvent を作成（各エラーにランダムな位置を設定）
-    const errorEvents = Array.from({ length: 47 }, () => ({
+    const errorEvents = Array.from({ length: 7 }, () => ({
         match_id: match.id,
         appearance_at: appearanceAt,
         position_x: Math.random() * 60 + 20,  // 20-80の範囲
