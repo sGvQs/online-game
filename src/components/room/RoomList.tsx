@@ -32,7 +32,8 @@ export function RoomList({ initialRooms, userId }: { initialRooms: Room[], userI
             .on('postgres_changes', {
                 event: '*',
                 schema: 'public',
-                table: 'rooms'
+                table: 'rooms',
+                filter: 'status=neq.FINISHED',
             }, async () => {
                 fetchMessageData();
             })
