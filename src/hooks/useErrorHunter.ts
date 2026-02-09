@@ -63,6 +63,9 @@ export function useErrorHunter({
     const matchIdRef = useRef<string | null>(initialMatchId)
     const phaseRef = useRef<GamePhase>('TITLE')
 
+    // 既に閉じられたエラーIDを保持するSet (クライアントサイドフィルタリング用)
+    const closedEventIds = useRef<Set<string>>(new Set())
+
     // state の最新値を ref に同期
     useEffect(() => {
         phaseRef.current = phase
@@ -70,7 +73,20 @@ export function useErrorHunter({
 
     useEffect(() => {
         matchIdRef.current = match?.id ?? initialMatchId
-    }, [match?.id, initialMatchId])
+
+        // Matchデータが更新されたら、閉じられたエラーIDをSetにも同期する
+        if (match?.error_events) {
+            match.error_events.forEach(e => {
+                if (e.closed_by) {
+                    closedEventIds.current.add(e.id)
+                }
+            })
+        }
+        // Matchがnull（リセット時など）ならSetもクリア
+        if (!match) {
+            closedEventIds.current.clear()
+        }
+    }, [match, initialMatchId])
 
     // ============================================
     // タイマー管理
@@ -251,6 +267,12 @@ export function useErrorHunter({
     const handleClickError = useCallback(async (eventId: string) => {
         if (!match || isProcessing) return
 
+        // ★ クライアントサイドフィルタリング: 既に閉じられたと分かっているならスキップ
+        if (closedEventIds.current.has(eventId)) {
+            console.log('Already closed (cache hit), skipping server action')
+            return
+        }
+
         setIsProcessing(true)
         try {
             const result = await clickError(eventId)
@@ -360,19 +382,68 @@ export function useErrorHunter({
         const channel = supabase
             .channel(`error_hunter_${roomId}`)
             .on('postgres_changes', {
-                event: '*',
+                event: '*', // INSERT, UPDATE等全て
                 schema: 'public',
                 table: 'error_events',
-                filter: `match_id=eq.${match?.id}`
-            }, () => {
-                refreshMatchData()
+                // filter: `match_id=eq.${match?.id}`
+            }, (payload: any) => {
+
+                console.log("=== error event ===")
+                console.log('match', match);
+                console.log('payload', payload);
+
+
+                // payloadを受け取り、閉じられたエラーを配列(Set)に保存
+                const newEvent = payload.new
+                if (newEvent && newEvent.closed_at && payload.event_type === 'UPDATE') {
+                    closedEventIds.current.add(newEvent.id)
+
+                    // ★ UIも更新しておかないと、画面上で閉じたことにならない
+                    setMatch(prev => {
+                        if (!prev) return null
+                        const newEvents = prev.error_events.map(e =>
+                            e.id === newEvent.id ? { ...e, ...newEvent } : e
+                        )
+                        return { ...prev, error_events: newEvents }
+                    })
+
+                    // Progress State 更新 (スコア計算など)
+                    setProgress(prev => {
+                        if (!prev) return null
+                        // 既にカウント済みならスキップ
+                        const existingEvent = prev.events.find(e => e.id === newEvent.id)
+                        if (existingEvent?.closed_by) return prev
+
+                        const newScores = { ...prev.scores }
+                        if (newEvent.closed_by) {
+                            newScores[newEvent.closed_by] = (newScores[newEvent.closed_by] || 0) + 1
+                        }
+
+                        const newEvents = prev.events.map(e =>
+                            e.id === newEvent.id ? { ...e, ...newEvent } : e
+                        )
+
+                        return {
+                            ...prev,
+                            closedErrors: prev.closedErrors + 1,
+                            scores: newScores,
+                            events: newEvents
+                        }
+                    })
+                }
+                if (payload.event_type === 'INSERT') {
+                    refreshMatchData()
+                }
             })
             .on('postgres_changes', {
                 event: '*',
                 schema: 'public',
                 table: 'matches',
-                filter: `id=eq.${match?.id}`
-            }, () => {
+                filter: `room_id=eq.${roomId}`
+            }, (payload: any) => {
+                console.log("=== match event ===")
+                console.log('match', match);
+                console.log('payload', payload);
                 refreshMatchData()
             })
             .subscribe()
@@ -380,7 +451,7 @@ export function useErrorHunter({
         return () => {
             supabase.removeChannel(channel)
         }
-    }, [supabase, roomId, refreshMatchData])
+    }, [])
 
     /**
      * クリーンアップ: アンマウント時にタイマーを解除

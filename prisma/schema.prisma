@@ -7,37 +7,41 @@ datasource db {
 }
 
 model User {
-  id           String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id           String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name         String
-  email        String         @unique
+  email        String       @unique
   comment      String?
-  createdAt    DateTime       @default(now()) @map("created_at")
-  error_events error_events[]
-  matches      matches[]
+  createdAt    DateTime     @default(now()) @map("created_at")
+  
+  // リレーション名をキャメルケースに統一
+  errorEvents  ErrorEvent[] 
+  matches      Match[]
   joinedRooms  RoomUser[]
-  createdRooms Room[]         @relation("CreatedRooms")
+  createdRooms Room[]       @relation("CreatedRooms")
   userIDPs     UserIDP[]
 
   @@map("users")
 }
 
 enum RoomStatus {
-  LOBBY    // ルーム待機中
-  PLAYING  // ゲームプレイ中
-  FINISHED // ゲーム終了
+  LOBBY
+  PLAYING
+  FINISHED
 }
 
 model Room {
-  id               String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name             String
-  createdAt        DateTime   @default(now()) @map("created_at")
-  createdBy        String     @map("created_by") @db.Uuid
-  currentMatchId   String?    @map("current_match_id") @db.Uuid
-  activeGameType   String?    @map("active_game_type")
-  status           RoomStatus @default(LOBBY)
-  matches          matches[]
-  users            RoomUser[]
-  creator          User       @relation("CreatedRooms", fields: [createdBy], references: [id])
+  id             String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name           String
+  createdAt      DateTime   @default(now()) @map("created_at")
+  createdBy      String     @map("created_by") @db.Uuid
+  currentMatchId String?    @map("current_match_id") @db.Uuid
+  activeGameType String?    @map("active_game_type")
+  status         RoomStatus @default(LOBBY)
+  
+  matches        Match[]
+  users          RoomUser[]
+  
+  creator        User       @relation("CreatedRooms", fields: [createdBy], references: [id])
 
   @@map("rooms")
 }
@@ -48,6 +52,7 @@ model RoomUser {
   userId    String   @map("user_id") @db.Uuid
   isReady   Boolean  @default(false) @map("is_ready")
   createdAt DateTime @default(now()) @map("created_at")
+  
   room      Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -59,31 +64,40 @@ model UserIDP {
   id          String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   supabaseUid String @unique @map("supabase_uid") @db.Uuid
   userId      String @map("user_id") @db.Uuid
+  
   user        User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("user_idp")
 }
 
-model error_events {
-  id            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  match_id      String    @db.Uuid
-  appearance_at DateTime
-  closed_at     DateTime?
-  closed_by     String?   @db.Uuid
-  position_x    Float     // 画面上の位置（0-100の範囲、パーセンテージ）
-  position_y    Float     // 画面上の位置（0-100の範囲、パーセンテージ）
-  users         User?     @relation(fields: [closed_by], references: [id])
-  matches       matches   @relation(fields: [match_id], references: [id], onDelete: Cascade)
+// モデル名をPascalCaseに変更し、@@mapで元のテーブル名を指定
+model ErrorEvent {
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  matchId      String    @map("match_id") @db.Uuid
+  appearanceAt DateTime  @map("appearance_at")
+  closedAt     DateTime? @map("closed_at")
+  closedBy     String?   @map("closed_by") @db.Uuid
+  positionX    Float     @map("position_x") // 画面上の位置
+  positionY    Float     @map("position_y") // 画面上の位置
+  
+  user         User?     @relation(fields: [closedBy], references: [id])
+  match        Match     @relation(fields: [matchId], references: [id], onDelete: Cascade)
+
+  @@map("error_events")
 }
 
-model matches {
-  id           String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  room_id      String         @db.Uuid
-  game_type    String
-  status       String         @default("WAITING")
-  winner_id    String?        @db.Uuid
-  created_at   DateTime       @default(now())
-  error_events error_events[]
-  rooms        Room           @relation(fields: [room_id], references: [id], onDelete: Cascade)
-  users        User?          @relation(fields: [winner_id], references: [id])
+// モデル名をPascalCaseに変更し、@@mapで元のテーブル名を指定
+model Match {
+  id          String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  roomId      String       @map("room_id") @db.Uuid
+  gameType    String       @map("game_type")
+  status      String       @default("WAITING")
+  winnerId    String?      @map("winner_id") @db.Uuid
+  createdAt   DateTime     @default(now()) @map("created_at")
+  
+  errorEvents ErrorEvent[]
+  room        Room         @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  winner      User?        @relation(fields: [winnerId], references: [id])
+
+  @@map("matches")
 }
