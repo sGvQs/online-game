@@ -11,7 +11,7 @@ import {
     checkAutoFinish,
 } from '@/server/actions/game'
 import { resetAllReady } from '@/server/actions/room'
-import type { MatchWithErrorEventsAndUsers, MatchProgress } from '@/shared/types'
+import type { MatchWithErrorEventsAndUsers, MatchProgress, ErrorEventWithUser } from '@/shared/types'
 
 // ============================================
 // 型定義
@@ -76,7 +76,7 @@ export function useErrorHunter({
 
         // Matchデータが更新されたら、閉じられたエラーIDをSetにも同期する
         if (match?.errorEvents) {
-            match.errorEvents.forEach(e => {
+            match.errorEvents.forEach((e: ErrorEventWithUser) => {
                 if (e.closedBy) {
                     closedEventIds.current.add(e.id)
                 }
