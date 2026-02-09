@@ -75,9 +75,9 @@ export function useErrorHunter({
         matchIdRef.current = match?.id ?? initialMatchId
 
         // Matchデータが更新されたら、閉じられたエラーIDをSetにも同期する
-        if (match?.error_events) {
-            match.error_events.forEach(e => {
-                if (e.closed_by) {
+        if (match?.errorEvents) {
+            match.errorEvents.forEach(e => {
+                if (e.closedBy) {
                     closedEventIds.current.add(e.id)
                 }
             })
@@ -186,7 +186,7 @@ export function useErrorHunter({
                 return
             }
 
-            const event = latestMatch.error_events[0]
+            const event = latestMatch.errorEvents[0]
             if (!event) {
                 return
             }
@@ -204,7 +204,7 @@ export function useErrorHunter({
             //     → タイマーを起動して WAITING/APPEARING に遷移する
             const currentPhase = phaseRef.current
             if (currentPhase === 'TITLE') {
-                setupAppearanceTimer(event.appearance_at)
+                setupAppearanceTimer(event.appearanceAt)
             }
 
             // 3c. WAITING/APPEARING フェーズ → タイマーが既に動いているので何もしない
@@ -244,9 +244,9 @@ export function useErrorHunter({
                 setMatch(fullMatch)
                 setClickResult(null)
 
-                const event = fullMatch.error_events[0]
+                const event = fullMatch.errorEvents[0]
                 if (event) {
-                    setupAppearanceTimer(event.appearance_at)
+                    setupAppearanceTimer(event.appearanceAt)
                 }
             }
         } catch (error) {
@@ -347,18 +347,18 @@ export function useErrorHunter({
                 setMatch(existingMatch)
                 matchIdRef.current = existingMatch.id
 
-                const event = existingMatch.error_events[0]
+                const event = existingMatch.errorEvents[0]
                 if (!event) return
 
                 // Match が FINISHED の場合は RESULT フェーズへ（47個すべて閉じられた状態）
                 if (existingMatch.status === 'FINISHED') {
                     setPhase('RESULT')
-                } else if (event.closed_by) {
+                } else if (event.closedBy) {
                     // 1個でも閉じられている（古いロジック）
                     setPhase('RESULT')
                 } else {
                     // まだゲーム中 → タイマーをセット
-                    setupAppearanceTimer(event.appearance_at)
+                    setupAppearanceTimer(event.appearanceAt)
                 }
             } catch (error) {
                 console.error('初期データの取得に失敗:', error)
@@ -385,6 +385,7 @@ export function useErrorHunter({
                 event: '*', // INSERT, UPDATE等全て
                 schema: 'public',
                 table: 'error_events',
+                filter: `room_id=eq.${roomId}`,
                 // filter: `match_id=eq.${match?.id}` // matchがnullの時はフィルタできないためフィルタなしで受信し、JS側でチェックする手もあるが、今回はroom単位のイベントではないためmatchIdがないと他卓のイベントも拾う可能性がある。
                 // ただし ErrorEvent には roomId がないため、厳密には matchId でフィルタすべき。
                 // ここでは user の変更に合わせて `filter: undefined` (全イベント) になっているが、
@@ -398,16 +399,16 @@ export function useErrorHunter({
                 // payloadを受け取り、閉じられたエラーを配列(Set)に保存
                 const newEvent = payload.new
                 // Note: Supabase JS Client のプロパティは camelCase (eventType)
-                if (newEvent && newEvent.closed_at && payload.eventType === 'UPDATE') {
+                if (newEvent && newEvent.closedAt && payload.eventType === 'UPDATE') {
                     closedEventIds.current.add(newEvent.id)
 
                     // ★ UIも更新しておかないと、画面上で閉じたことにならない
                     setMatch(prev => {
                         if (!prev) return null
                         // 別の試合のイベントなら無視
-                        if (prev.id !== newEvent.match_id) return prev
+                        if (prev.id !== newEvent.matchId) return prev
 
-                        const newEvents = prev.error_events.map(e =>
+                        const newEvents = prev.errorEvents.map((e) =>
                             e.id === newEvent.id ? { ...e, ...newEvent } : e
                         )
                         return { ...prev, error_events: newEvents }
@@ -418,11 +419,11 @@ export function useErrorHunter({
                         if (!prev) return null
                         // 既にカウント済みならスキップ
                         const existingEvent = prev.events.find(e => e.id === newEvent.id)
-                        if (existingEvent?.closed_by) return prev
+                        if (existingEvent?.closedBy) return prev
 
                         const newScores = { ...prev.scores }
-                        if (newEvent.closed_by) {
-                            newScores[newEvent.closed_by] = (newScores[newEvent.closed_by] || 0) + 1
+                        if (newEvent.closedBy) {
+                            newScores[newEvent.closedBy] = (newScores[newEvent.closedBy] || 0) + 1
                         }
 
                         const newEvents = prev.events.map(e =>

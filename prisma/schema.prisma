@@ -79,7 +79,7 @@ model ErrorEvent {
   closedBy     String?   @map("closed_by") @db.Uuid
   positionX    Float     @map("position_x") // 画面上の位置
   positionY    Float     @map("position_y") // 画面上の位置
-  
+  roomId       String    @map("room_id") @db.Uuid
   user         User?     @relation(fields: [closedBy], references: [id])
   match        Match     @relation(fields: [matchId], references: [id], onDelete: Cascade)
 

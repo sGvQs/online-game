@@ -23,23 +23,24 @@ export async function startGame(roomId: string) {
     const appearanceAt = new Date(Date.now() + delayMs)
 
     // Match を作成
-    const match = await prisma.matches.create({
+    const match = await prisma.match.create({
         data: {
-            room_id: roomId,
-            game_type: 'error-hunter',
+            roomId: roomId,
+            gameType: 'error-hunter',
             status: 'PLAYING',
         }
     })
 
     // 47個の ErrorEvent を作成（各エラーにランダムな位置を設定）
     const errorEvents = Array.from({ length: 7 }, () => ({
-        match_id: match.id,
-        appearance_at: appearanceAt,
-        position_x: Math.random() * 60 + 20,  // 20-80の範囲
-        position_y: Math.random() * 75 + 10, // 10-85の範囲
+        matchId: match.id,
+        appearanceAt: appearanceAt,
+        positionX: Math.random() * 60 + 20,  // 20-80の範囲
+        positionY: Math.random() * 75 + 10, // 10-85の範囲
+        roomId: roomId
     }))
 
-    await prisma.error_events.createMany({ data: errorEvents })
+    await prisma.errorEvent.createMany({ data: errorEvents })
 
     // Room の currentMatchId を更新
     await prisma.room.update({
@@ -67,15 +68,15 @@ export async function clickError(eventId: string) {
     const now = new Date()
 
     // 排他制御: closedAt が null かつ appearanceAt を過ぎている場合のみ更新
-    const result = await prisma.error_events.updateMany({
+    const result = await prisma.errorEvent.updateMany({
         where: {
             id: eventId,
-            closed_at: null,
-            appearance_at: { lte: now },
+            closedAt: null,
+            appearanceAt: { lte: now },
         },
         data: {
-            closed_at: now,
-            closed_by: user.id,
+            closedAt: now,
+            closedBy: user.id,
         }
     })
 
@@ -105,12 +106,12 @@ export async function getMatchIdFromRoom(roomId: string) {
  * Match + ErrorEvents（勝者ユーザー情報付き）を取得する
  */
 export async function getMatchWithEvents(matchId: string) {
-    const match = await prisma.matches.findUnique({
+    const match = await prisma.match.findUnique({
         where: { id: matchId },
         include: {
-            error_events: {
+            errorEvents: {
                 include: {
-                    users: true, // closedBy の User 情報
+                    user: true, // closedBy の User 情報
                 }
             }
         }
@@ -124,22 +125,22 @@ export async function getMatchWithEvents(matchId: string) {
  * 各プレイヤーが閉じたエラーの数を集計する
  */
 export async function getMatchProgress(matchId: string) {
-    const events = await prisma.error_events.findMany({
-        where: { match_id: matchId },
-        include: { users: true }
+    const events = await prisma.errorEvent.findMany({
+        where: { matchId: matchId },
+        include: { user: true }
     })
 
     // プレイヤーごとのスコアを集計
     const scores = events.reduce((acc: Record<string, number>, event: ErrorEventWithUser) => {
-        if (event.closed_by) {
-            acc[event.closed_by] = (acc[event.closed_by] || 0) + 1
+        if (event.closedBy) {
+            acc[event.closedBy] = (acc[event.closedBy] || 0) + 1
         }
         return acc
     }, {} as Record<string, number>)
 
     return {
         totalErrors: events.length,
-        closedErrors: events.filter((e: ErrorEventWithUser) => e.closed_by).length,
+        closedErrors: events.filter((e: ErrorEventWithUser) => e.closedBy).length,
         scores,
         events
     }
@@ -151,16 +152,16 @@ export async function getMatchProgress(matchId: string) {
  */
 export async function finishGame(matchId: string, roomId: string) {
     // 全エラーを取得してスコアを集計
-    const events = await prisma.error_events.findMany({
-        where: { match_id: matchId },
-        orderBy: { closed_at: 'asc' }
+    const events = await prisma.errorEvent.findMany({
+        where: { matchId: matchId },
+        orderBy: { closedAt: 'asc' }
     })
 
     // スコア集計
     const scores = new Map<string, number>()
     events.forEach((event: ErrorEvent) => {
-        if (event.closed_by) {
-            scores.set(event.closed_by, (scores.get(event.closed_by) || 0) + 1)
+        if (event.closedBy) {
+            scores.set(event.closedBy, (scores.get(event.closedBy) || 0) + 1)
         }
     })
 
@@ -175,11 +176,11 @@ export async function finishGame(matchId: string, roomId: string) {
     }
 
     // Match を終了
-    await prisma.matches.update({
+    await prisma.match.update({
         where: { id: matchId },
         data: {
             status: 'FINISHED',
-            winner_id: winnerId
+            winnerId: winnerId
         }
     })
 
@@ -200,10 +201,10 @@ export async function checkAutoFinish(matchId: string, roomId: string) {
     const user = await getAuthenticatedUser()
 
     // 閉じられていないエラーの数をカウント
-    const unclosedCount = await prisma.error_events.count({
+    const unclosedCount = await prisma.errorEvent.count({
         where: {
-            match_id: matchId,
-            closed_at: null
+            matchId: matchId,
+            closedAt: null
         }
     })
 
