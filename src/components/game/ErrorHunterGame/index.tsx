@@ -110,13 +110,6 @@ export function ErrorHunterGame({
         return () => clearInterval(interval)
     }, [phase])
 
-    // 勝者情報を取得
-    const errorEvent = match?.errorEvents[0]
-    const winnerName = errorEvent?.user?.name ?? null
-
-    // 自分が勝ったかどうか（Realtime経由で更新された場合の判定）
-    const isMyWin = errorEvent?.closedBy === currentUserId
-
     // ユーザー名のマップを作成（進行状況表示用）
     const userNameMap = new Map<string, string>()
     room.users.forEach((roomUser: RoomUserWithReadyStatus) => {
@@ -127,13 +120,17 @@ export function ErrorHunterGame({
 
     // 勝者のコメントを取得
     const [winnerComment, setWinnerComment] = useState<string | null>(null)
+    const [isWinnerCommentLoading, setIsWinnerCommentLoading] = useState(false)
     useEffect(() => {
         if (phase === 'RESULT' && match?.winnerId) {
+            setIsWinnerCommentLoading(true)
             getUserComment(match.winnerId).then(comment => {
                 setWinnerComment(comment)
             }).catch(error => {
                 console.error('コメントの取得に失敗しました:', error)
                 setWinnerComment(null)
+            }).finally(() => {
+                setIsWinnerCommentLoading(false)
             })
         } else {
             setWinnerComment(null)
@@ -181,7 +178,7 @@ export function ErrorHunterGame({
             )}
 
             {/* WAITING フェーズ: エラー出現を待機中 */}
-            {phase === 'WAITING' && (
+            {phase === 'WAITING' || isWinnerCommentLoading && (
                 <div className="fixed inset-0 flex items-center justify-center z-50">
                     <Win95Dialog title="System Monitor">
                         <div style={{ minWidth: '350px' }}>
@@ -239,7 +236,7 @@ export function ErrorHunterGame({
             )}
 
             {/* RESULT フェーズ: スコアボード表示 */}
-            {phase === 'RESULT' && progress && (
+            {phase === 'RESULT' && progress && !isWinnerCommentLoading && (
                 <div className="fixed inset-0 flex items-center justify-center z-50"
                     style={{ backgroundColor: 'rgba(0, 0, 0, 0.3)' }}
                 >
