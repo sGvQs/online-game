@@ -385,22 +385,28 @@ export function useErrorHunter({
                 event: '*', // INSERT, UPDATE等全て
                 schema: 'public',
                 table: 'error_events',
-                // filter: `match_id=eq.${match?.id}`
+                // filter: `match_id=eq.${match?.id}` // matchがnullの時はフィルタできないためフィルタなしで受信し、JS側でチェックする手もあるが、今回はroom単位のイベントではないためmatchIdがないと他卓のイベントも拾う可能性がある。
+                // ただし ErrorEvent には roomId がないため、厳密には matchId でフィルタすべき。
+                // ここでは user の変更に合わせて `filter: undefined` (全イベント) になっているが、
+                // 本来は `match?.id` があるときだけサブスクライブするか、サーバー側でRLS等で制御されている前提。
             }, (payload: any) => {
 
                 console.log("=== error event ===")
-                console.log('match', match);
+                console.log('match (in closure)', match);
                 console.log('payload', payload);
-
 
                 // payloadを受け取り、閉じられたエラーを配列(Set)に保存
                 const newEvent = payload.new
-                if (newEvent && newEvent.closed_at && payload.event_type === 'UPDATE') {
+                // Note: Supabase JS Client のプロパティは camelCase (eventType)
+                if (newEvent && newEvent.closed_at && payload.eventType === 'UPDATE') {
                     closedEventIds.current.add(newEvent.id)
 
                     // ★ UIも更新しておかないと、画面上で閉じたことにならない
                     setMatch(prev => {
                         if (!prev) return null
+                        // 別の試合のイベントなら無視
+                        if (prev.id !== newEvent.match_id) return prev
+
                         const newEvents = prev.error_events.map(e =>
                             e.id === newEvent.id ? { ...e, ...newEvent } : e
                         )
@@ -431,7 +437,12 @@ export function useErrorHunter({
                         }
                     })
                 }
-                if (payload.event_type === 'INSERT') {
+
+                // Note: Supabase JS Client のプロパティは camelCase (eventType)
+                if (payload.eventType === 'INSERT') {
+                    // 自分のマッチのイベントか確認（簡易チェック）
+                    if (newEvent && match?.id && newEvent.match_id !== match.id) return
+
                     refreshMatchData()
                 }
             })
@@ -451,7 +462,7 @@ export function useErrorHunter({
         return () => {
             supabase.removeChannel(channel)
         }
-    }, [])
+    }, [supabase, roomId, refreshMatchData, match?.id]) // match.idが変わったら再購読して filter を適用するのが正しいが、filterをコメントアウトしているため、match.idが変わってもチャネルは変わらない（名前はroomId依存）。ただし `match` の値をクロージャで最新にしたいなら依存に入れるべきだが、頻繁な再購読を避けるなら ref を使うのが定石。ここではあえて依存に戻して意図を明確化するか、あるいは [] のままなら matchIdRef を使うべき。簡単のため依存を戻します。
 
     /**
      * クリーンアップ: アンマウント時にタイマーを解除
