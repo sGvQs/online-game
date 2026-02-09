@@ -398,20 +398,34 @@ export function useErrorHunter({
 
                 // payloadを受け取り、閉じられたエラーを配列(Set)に保存
                 const newEvent = payload.new
+
+                // Supabase Realtime returns raw DB column names (snake_case)
+                // We need to map them to camelCase to match our application types
+                const closedAt = newEvent?.closed_at
+                const closedBy = newEvent?.closed_by
+                const matchId = newEvent?.match_id
+
                 // Note: Supabase JS Client のプロパティは camelCase (eventType)
-                if (newEvent && newEvent.closedAt && payload.eventType === 'UPDATE') {
+                if (newEvent && closedAt && payload.eventType === 'UPDATE') {
                     closedEventIds.current.add(newEvent.id)
 
                     // ★ UIも更新しておかないと、画面上で閉じたことにならない
                     setMatch(prev => {
                         if (!prev) return null
                         // 別の試合のイベントなら無視
-                        if (prev.id !== newEvent.matchId) return prev
+                        if (matchId && prev.id !== matchId) return prev
 
                         const newEvents = prev.errorEvents.map((e) =>
-                            e.id === newEvent.id ? { ...e, ...newEvent } : e
+                            e.id === newEvent.id ? {
+                                ...e,
+                                closedAt: closedAt,
+                                closedBy: closedBy,
+                                // Map other potential updates if needed
+                                positionX: newEvent.position_x ?? e.positionX,
+                                positionY: newEvent.position_y ?? e.positionY,
+                            } : e
                         )
-                        return { ...prev, error_events: newEvents }
+                        return { ...prev, errorEvents: newEvents }
                     })
 
                     // Progress State 更新 (スコア計算など)
@@ -422,12 +436,16 @@ export function useErrorHunter({
                         if (existingEvent?.closedBy) return prev
 
                         const newScores = { ...prev.scores }
-                        if (newEvent.closedBy) {
-                            newScores[newEvent.closedBy] = (newScores[newEvent.closedBy] || 0) + 1
+                        if (closedBy) {
+                            newScores[closedBy] = (newScores[closedBy] || 0) + 1
                         }
 
                         const newEvents = prev.events.map(e =>
-                            e.id === newEvent.id ? { ...e, ...newEvent } : e
+                            e.id === newEvent.id ? {
+                                ...e,
+                                closedAt: closedAt,
+                                closedBy: closedBy
+                            } : e
                         )
 
                         return {
@@ -442,7 +460,8 @@ export function useErrorHunter({
                 // Note: Supabase JS Client のプロパティは camelCase (eventType)
                 if (payload.eventType === 'INSERT') {
                     // 自分のマッチのイベントか確認（簡易チェック）
-                    if (newEvent && match?.id && newEvent.match_id !== match.id) return
+                    const matchId = newEvent?.match_id
+                    if (newEvent && match?.id && matchId !== match.id) return
 
                     refreshMatchData()
                 }
