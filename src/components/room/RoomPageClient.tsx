@@ -91,6 +91,7 @@ export function RoomPageClientWrapper({
                 event: '*',
                 schema: 'public',
                 table: 'rooms',
+                filter: `id=eq.${room.id}`,
             }, () => {
                 handleRoomChange()
             })
@@ -98,6 +99,7 @@ export function RoomPageClientWrapper({
                 event: '*',
                 schema: 'public',
                 table: 'room_users',
+                filter: `room_id=eq.${room.id}`,
             }, () => {
                 handleMemberChange()
             })

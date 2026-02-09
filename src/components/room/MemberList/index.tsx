@@ -31,6 +31,7 @@ export function MemberList({ roomId, initialMembers }: { roomId: string, initial
                 event: '*',
                 schema: 'public',
                 table: 'room_users',
+                filter: `room_id=eq.${roomId}`,
             }, () => {
                 console.log('room_usersが変更されました');
                 handlePayload();

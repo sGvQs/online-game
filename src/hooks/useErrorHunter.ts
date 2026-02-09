@@ -254,7 +254,7 @@ export function useErrorHunter({
         setIsProcessing(true)
         try {
             const result = await clickError(eventId)
-            
+
             // 自分がエラーを閉じられたかどうかを記録（最初の成功のみ）
             if (result.success && !clickResult) {
                 setClickResult('win')
@@ -363,6 +363,7 @@ export function useErrorHunter({
                 event: '*',
                 schema: 'public',
                 table: 'error_events',
+                filter: `match_id=eq.${match?.id}`
             }, () => {
                 refreshMatchData()
             })
@@ -370,6 +371,7 @@ export function useErrorHunter({
                 event: '*',
                 schema: 'public',
                 table: 'matches',
+                filter: `id=eq.${match?.id}`
             }, () => {
                 refreshMatchData()
             })

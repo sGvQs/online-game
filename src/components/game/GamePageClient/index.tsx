@@ -111,6 +111,7 @@ export function GamePageClient({
                 event: 'UPDATE',
                 schema: 'public',
                 table: 'rooms',
+                filter: `id=eq.${roomId}`,
             }, () => {
                 handlePayload();
             })
@@ -141,7 +142,7 @@ export function GamePageClient({
 
     const handleToggleReadyClick = async () => {
         if (!onToggleReady || isTogglingReady) return
-        
+
         setIsTogglingReady(true)
         try {
             await onToggleReady()
@@ -183,7 +184,7 @@ export function GamePageClient({
                                     </div>
                                 )}
                             </div>
-                            
+
                             {/* 2カラムレイアウト */}
                             <div className={styles.twoColumn()}>
                                 {/* 左パネル */}
@@ -193,7 +194,7 @@ export function GamePageClient({
                                             // 通常モード: ASCIIアート + プレイヤーリスト
                                             <>
                                                 <pre className={styles.asciiArt()}>{ASCII_ART}</pre>
-                                                
+
                                                 <div className={styles.playerStatusSection()}>
                                                     <p className={styles.statusTitle()}>
                                                         プレイヤー準備状況: {readyCount} / {totalUsers}
@@ -245,7 +246,7 @@ export function GamePageClient({
                                         )}
                                     </div>
                                 </div>
-                                
+
                                 {/* 右パネル */}
                                 <div className={styles.rightPanel()}>
                                     <Win95Button
@@ -255,9 +256,9 @@ export function GamePageClient({
                                     >
                                         What's ERROR HUNTER
                                     </Win95Button>
-                                    
+
                                     <div className={styles.buttonSpacer()} />
-                                    
+
                                     {onToggleReady && (
                                         <Win95Button
                                             className={styles.panelButton()}
@@ -271,7 +272,7 @@ export function GamePageClient({
                                             準備完了
                                         </Win95Button>
                                     )}
-                                    
+
                                     {isHost && (
                                         <Win95Button
                                             className={styles.panelButton()}
@@ -281,7 +282,7 @@ export function GamePageClient({
                                             ゲーム開始
                                         </Win95Button>
                                     )}
-                                    
+
                                     {isHost && (
                                         <Win95Button
                                             className={styles.panelButton()}

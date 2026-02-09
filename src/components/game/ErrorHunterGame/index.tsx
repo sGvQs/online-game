@@ -28,7 +28,7 @@ const ERROR_MESSAGES = [
     // 'An error has occurred in your application.\nIf you choose Close, your work will be lost.',
     // 'KERNEL32.DLL caused a General Protection Fault\nin module UNKNOWN at 0000:00000000.',
     // 'This program has performed an illegal operation\nand will be shut down.',
-     'Windows Protection Error.\nYou need to restart your computer.',
+    'Windows Protection Error.\nYou need to restart your computer.',
     // 'A device attached to the system is not functioning.\nError code: 0x0000001F',
 ]
 
@@ -47,7 +47,7 @@ export function ErrorHunterGame({
     const supabase = createClient()
     const [room, setRoom] = useState(initialRoom)
     const styles = errorHunterGame()
-    
+
     const {
         phase,
         match,
@@ -67,7 +67,9 @@ export function ErrorHunterGame({
                 event: '*',
                 schema: 'public',
                 table: 'room_users',
-            }, async () => {
+                filter: `room_id=eq.${roomId}`,
+            }, async (payload: any) => {
+                console.log("RoomUser", payload);
                 // 準備状態が変更されたら Room データを再取得
                 const updatedRoom = await getRoomWithReadyStatus(roomId)
                 setRoom(updatedRoom)
@@ -125,22 +127,22 @@ export function ErrorHunterGame({
     const [winnerComment, setWinnerComment] = useState<string | null>(null)
     useEffect(() => {
         // #region agent log
-        fetch('http://127.0.0.1:7243/ingest/51a86e01-5e84-4d64-b43c-4026ff9aa48c',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ErrorHunterGame/index.tsx:126',message:'useEffect for winner comment',data:{phase,matchExists:!!match,winnerId:match?.winner_id,shouldFetch:phase === 'RESULT' && !!match?.winner_id},timestamp:Date.now(),runId:'run1',hypothesisId:'D'})}).catch(()=>{});
+        fetch('http://127.0.0.1:7243/ingest/51a86e01-5e84-4d64-b43c-4026ff9aa48c', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'ErrorHunterGame/index.tsx:126', message: 'useEffect for winner comment', data: { phase, matchExists: !!match, winnerId: match?.winner_id, shouldFetch: phase === 'RESULT' && !!match?.winner_id }, timestamp: Date.now(), runId: 'run1', hypothesisId: 'D' }) }).catch(() => { });
         // #endregion
 
         if (phase === 'RESULT' && match?.winner_id) {
             // #region agent log
-            fetch('http://127.0.0.1:7243/ingest/51a86e01-5e84-4d64-b43c-4026ff9aa48c',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ErrorHunterGame/index.tsx:129',message:'Calling getUserComment',data:{winnerId:match.winner_id,getUserCommentType:typeof getUserComment},timestamp:Date.now(),runId:'run1',hypothesisId:'D,E'})}).catch(()=>{});
+            fetch('http://127.0.0.1:7243/ingest/51a86e01-5e84-4d64-b43c-4026ff9aa48c', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'ErrorHunterGame/index.tsx:129', message: 'Calling getUserComment', data: { winnerId: match.winner_id, getUserCommentType: typeof getUserComment }, timestamp: Date.now(), runId: 'run1', hypothesisId: 'D,E' }) }).catch(() => { });
             // #endregion
 
             getUserComment(match.winner_id).then(comment => {
                 // #region agent log
-                fetch('http://127.0.0.1:7243/ingest/51a86e01-5e84-4d64-b43c-4026ff9aa48c',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ErrorHunterGame/index.tsx:132',message:'getUserComment success',data:{comment},timestamp:Date.now(),runId:'run1',hypothesisId:'D'})}).catch(()=>{});
+                fetch('http://127.0.0.1:7243/ingest/51a86e01-5e84-4d64-b43c-4026ff9aa48c', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'ErrorHunterGame/index.tsx:132', message: 'getUserComment success', data: { comment }, timestamp: Date.now(), runId: 'run1', hypothesisId: 'D' }) }).catch(() => { });
                 // #endregion
                 setWinnerComment(comment)
             }).catch(error => {
                 // #region agent log
-                fetch('http://127.0.0.1:7243/ingest/51a86e01-5e84-4d64-b43c-4026ff9aa48c',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({location:'ErrorHunterGame/index.tsx:135',message:'getUserComment error',data:{errorMessage:error instanceof Error?error.message:String(error),errorStack:error instanceof Error?error.stack:undefined},timestamp:Date.now(),runId:'run1',hypothesisId:'D,E'})}).catch(()=>{});
+                fetch('http://127.0.0.1:7243/ingest/51a86e01-5e84-4d64-b43c-4026ff9aa48c', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ location: 'ErrorHunterGame/index.tsx:135', message: 'getUserComment error', data: { errorMessage: error instanceof Error ? error.message : String(error), errorStack: error instanceof Error ? error.stack : undefined }, timestamp: Date.now(), runId: 'run1', hypothesisId: 'D,E' }) }).catch(() => { });
                 // #endregion
                 console.error('コメントの取得に失敗しました:', error)
                 setWinnerComment(null)
@@ -170,8 +172,8 @@ export function ErrorHunterGame({
                             <p style={{ color: '#000', marginBottom: '8px', fontSize: '12px' }}>
                                 残りのエラー: {progress.totalErrors - progress.closedErrors} / {progress.totalErrors}
                             </p>
-                            <Win95ProgressBar 
-                                progress={(progress.closedErrors / progress.totalErrors) * 220} 
+                            <Win95ProgressBar
+                                progress={(progress.closedErrors / progress.totalErrors) * 220}
                             />
                             <div style={{ marginTop: '12px' }}>
                                 <p style={{ fontSize: '11px', fontWeight: 'bold', marginBottom: '4px', color: '#000' }}>
@@ -215,35 +217,36 @@ export function ErrorHunterGame({
                         .map((event: ErrorEventWithUser) => {
                             const errorWithPosition = event as typeof event & { position_x: number; position_y: number }
                             return (
-                            <div
-                                key={event.id}
-                                className={cn(styles.floatingDialog(), 'translate-x-[-50%] translate-y-[-50%]')}
-                                style={{
-                                    left: `${errorWithPosition.position_x}%`,
-                                    top: `${errorWithPosition.position_y}%`,
-                                    width: '400px',
-                                }}
-                            >
-                                <Win95Dialog
-                                    title="Error"
-                                    icon="error"
-                                    innerClassName="error"
-                                    titlebarButtons={
-                                        <Win95TitleBarButton
-                                            onClick={() => handleClickError(event.id)}
-                                            disabled={isProcessing}
-                                            aria-label="Close"
-                                        >
-                                            ×
-                                        </Win95TitleBarButton>
-                                    }
+                                <div
+                                    key={event.id}
+                                    className={cn(styles.floatingDialog(), 'translate-x-[-50%] translate-y-[-50%]')}
+                                    style={{
+                                        left: `${errorWithPosition.position_x}%`,
+                                        top: `${errorWithPosition.position_y}%`,
+                                        width: '400px',
+                                    }}
                                 >
-                                    <p style={{ whiteSpace: 'pre-line', fontSize: '12px' }}>
-                                        {getRandomErrorMessage()}
-                                    </p>
-                                </Win95Dialog>
-                            </div>
-                        )})}
+                                    <Win95Dialog
+                                        title="Error"
+                                        icon="error"
+                                        innerClassName="error"
+                                        titlebarButtons={
+                                            <Win95TitleBarButton
+                                                onClick={() => handleClickError(event.id)}
+                                                disabled={isProcessing}
+                                                aria-label="Close"
+                                            >
+                                                ×
+                                            </Win95TitleBarButton>
+                                        }
+                                    >
+                                        <p style={{ whiteSpace: 'pre-line', fontSize: '12px' }}>
+                                            {getRandomErrorMessage()}
+                                        </p>
+                                    </Win95Dialog>
+                                </div>
+                            )
+                        })}
                 </div>
             )}
 
@@ -263,40 +266,40 @@ export function ErrorHunterGame({
                     >
                         <div style={{ minWidth: '350px' }}>
                             <div style={{ marginBottom: '12px', marginLeft: "24px" }}>
-                            <p 
-                                style={{ 
-                                    fontSize : '12px',
-                                    fontWeight : 'normal',
-                                    color:  '#000',
+                                <p
+                                    style={{
+                                        fontSize: '12px',
+                                        fontWeight: 'normal',
+                                        color: '#000',
+                                        marginBottom: '4px',
+                                        padding: '4px',
+                                        backgroundColor: 'transparent',
+                                        borderRadius: '2px'
+                                    }}
+                                >
+                                    {match?.winner_id === currentUserId ? "あなたから全員へのコメント" : "勝者からのコメント"}
+                                </p>
+                                <p style={{
+                                    fontSize: '14px',
+                                    fontWeight: 'bold',
+                                    color: '#000080',
                                     marginBottom: '4px',
                                     padding: '4px',
-                                    backgroundColor: 'transparent',
+                                    backgroundColor: '#e0e0e0',
                                     borderRadius: '2px'
                                 }}
-                            >
-                                {match?.winner_id === currentUserId ? "あなたから全員へのコメント" : "勝者からのコメント"}
-                            </p>
-                            <p style={{ 
-                                fontSize:  '14px',
-                                fontWeight:  'bold',
-                                color:  '#000080' ,
-                                marginBottom: '4px',
-                                padding: '4px',
-                                backgroundColor:  '#e0e0e0' ,
-                                borderRadius: '2px'
-                            }}
-                            >
-                                {winnerComment || '私の勝ちです'}
-                            </p>
+                                >
+                                    {winnerComment || '私の勝ちです'}
+                                </p>
                             </div>
                             {match?.winner_id === currentUserId ? (
-                                <p style={{ fontSize: '12px', color: '#000080',marginLeft: "24px", marginTop: '12px' }}>
+                                <p style={{ fontSize: '12px', color: '#000080', marginLeft: "24px", marginTop: '12px' }}>
                                     あなたの勝ちです
                                 </p>
-                            ): (
-                                <p style={{ fontSize: '12px', color: '#000080',marginLeft: "24px", marginTop: '12px' }}>
+                            ) : (
+                                <p style={{ fontSize: '12px', color: '#000080', marginLeft: "24px", marginTop: '12px' }}>
                                     あなたの負けです
-                                </p> 
+                                </p>
                             )}
                         </div>
                     </Win95Dialog>
