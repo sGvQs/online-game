@@ -13,7 +13,7 @@ const pool = new Pool({
     connectionString,
     // 重要: サーバーレス関数1つにつき接続は1本に制限する
     // これにより、Lambdaが100個起動してもDB接続は最大100本に抑えられる
-    max: 1,
+    max: 3,
     // アイドル状態の接続を閉じるまでの時間（ミリ秒）
     // Vercelの関数タイムアウトより短く設定し、早めに解放する
     idleTimeoutMillis: 20000,
