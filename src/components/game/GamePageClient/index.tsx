@@ -13,6 +13,7 @@ import { ReactNode } from 'react'
 import Image from 'next/image'
 import { cn } from '@/lib/utils'
 import { gamePageClient } from './styles'
+import { useSE } from '@/hooks/useSE'
 
 interface GamePageClientProps {
     room: RoomWithUsersAndReadyStatus
@@ -83,6 +84,7 @@ export function GamePageClient({
                     if (prev >= 200) {
                         setIsInitializing(false)
                         setInternalShowTitle(true)
+                        useSE().play('chime')
                         return 200
                     }
                     return prev + 8
