@@ -13,6 +13,7 @@ import { createClient } from '@/utils/supabase/client'
 import { cn } from '@/lib/utils'
 import { errorHunterGame } from './styles'
 import { getUserComment } from '@/server/actions/user/getUserComment'
+import { useSE } from '@/hooks/useSE'
 
 interface ErrorHunterGameProps {
     room: RoomWithUsersAndReadyStatus
@@ -131,6 +132,7 @@ export function ErrorHunterGame({
                 setWinnerComment(null)
             }).finally(() => {
                 setIsWinnerCommentLoading(false)
+                useSE().play('tada');
             })
         } else {
             setWinnerComment(null)
