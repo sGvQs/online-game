@@ -12,6 +12,7 @@ import {
 } from '@/server/actions/game'
 import { resetAllReady } from '@/server/actions/room'
 import type { MatchWithErrorEventsAndUsers, MatchProgress, ErrorEventWithUser } from '@/shared/types'
+import { useSE } from './useSE'
 
 // ============================================
 // 型定義
@@ -113,12 +114,14 @@ export function useErrorHunter({
 
         if (delay <= 0) {
             // 既に出現時刻を過ぎている → 即座にエラーモーダル表示
-            setPhase('APPEARING')
+            setPhase('APPEARING');
+            useSE().play('error');
         } else {
             // 出現時刻まで WAITING → 時刻到達で APPEARING
             setPhase('WAITING')
             timerRef.current = setTimeout(() => {
                 setPhase('APPEARING')
+                useSE().play('error');
             }, delay)
         }
     }, [])
@@ -463,6 +466,9 @@ export function useErrorHunter({
                     const matchId = newEvent?.match_id
                     if (newEvent && match?.id && matchId !== match.id) return
 
+                    console.log("=== insert event ===")
+                    console.log('match', match);
+                    console.log('payload', payload);
                     refreshMatchData()
                 }
             })

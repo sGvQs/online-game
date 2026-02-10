@@ -178,7 +178,7 @@ export function ErrorHunterGame({
             )}
 
             {/* WAITING フェーズ: エラー出現を待機中 */}
-            {phase === 'WAITING' || isWinnerCommentLoading && (
+            {phase === 'WAITING' && (
                 <div className="fixed inset-0 flex items-center justify-center z-50">
                     <Win95Dialog title="System Monitor">
                         <div style={{ minWidth: '350px' }}>
@@ -236,14 +236,14 @@ export function ErrorHunterGame({
             )}
 
             {/* RESULT フェーズ: スコアボード表示 */}
-            {phase === 'RESULT' && progress && !isWinnerCommentLoading && (
+            {phase === 'RESULT' && progress && (
                 <div className="fixed inset-0 flex items-center justify-center z-50"
                     style={{ backgroundColor: 'rgba(0, 0, 0, 0.3)' }}
                 >
                     <Win95Dialog
                         title="Result"
                         icon="lose"
-                        buttons={[{
+                        buttons={isWinnerCommentLoading ? [] : [{
                             label: '終了',
                             onClick: handleFinish,
                             primary: true,
