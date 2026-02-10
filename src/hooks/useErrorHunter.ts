@@ -272,7 +272,6 @@ export function useErrorHunter({
 
         // ★ クライアントサイドフィルタリング: 既に閉じられたと分かっているならスキップ
         if (closedEventIds.current.has(eventId)) {
-            console.log('Already closed (cache hit), skipping server action')
             return
         }
 
@@ -395,10 +394,6 @@ export function useErrorHunter({
                 // 本来は `match?.id` があるときだけサブスクライブするか、サーバー側でRLS等で制御されている前提。
             }, (payload: any) => {
 
-                console.log("=== error event ===")
-                console.log('match (in closure)', match);
-                console.log('payload', payload);
-
                 // payloadを受け取り、閉じられたエラーを配列(Set)に保存
                 const newEvent = payload.new
 
@@ -466,9 +461,6 @@ export function useErrorHunter({
                     const matchId = newEvent?.match_id
                     if (newEvent && match?.id && matchId !== match.id) return
 
-                    console.log("=== insert event ===")
-                    console.log('match', match);
-                    console.log('payload', payload);
                     refreshMatchData()
                 }
             })
@@ -478,9 +470,6 @@ export function useErrorHunter({
                 table: 'matches',
                 filter: `room_id=eq.${roomId}`
             }, (payload: any) => {
-                console.log("=== match event ===")
-                console.log('match', match);
-                console.log('payload', payload);
                 refreshMatchData()
             })
             .subscribe()

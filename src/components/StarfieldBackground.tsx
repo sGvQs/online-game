@@ -16,10 +16,6 @@ export function StarfieldBackground() {
         })
     }, [])
 
-    const particlesLoaded = useCallback(async (container?: Container) => {
-        // console.log('Particles loaded', container)
-    }, [])
-
     if (!init) {
         return null
     }
@@ -27,7 +23,6 @@ export function StarfieldBackground() {
     return (
         <Particles
             id="tsparticles"
-            particlesLoaded={particlesLoaded}
             options={{
                 background: {
                     color: {

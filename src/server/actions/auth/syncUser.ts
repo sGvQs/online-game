@@ -56,7 +56,6 @@ export async function syncUser({ supabaseUid, email, name }: SyncUserParams) {
             return idp
         })
 
-        console.log(`User synced: ${email}`)
         return { success: true, isNew: true, user: result.user }
 
     } catch (err) {

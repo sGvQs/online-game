@@ -43,18 +43,3 @@ export function GameSelectionCard({ onSelectGame, isPending, isHost }: GameSelec
         </div>
     )
 }
-
-const waitingStyles = waitingCard()
-
-/**
- * WaitingCard - 待機中メッセージのPresentational Component
- */
-export function WaitingCard() {
-    return (
-        <div className={waitingStyles.wrapper()}>
-            <div className={waitingStyles.text()}>
-                ホストがゲームを選択するのを待っています...
-            </div>
-        </div>
-    )
-}

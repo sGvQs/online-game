@@ -36,17 +36,6 @@ export default async function RoomPage({ params }: { params: { id: string } }) {
         redirect(`/game/${room.id}/${room.activeGameType}`)
     }
 
-    // Prepare room data for client component
-    const roomData = {
-        id: room.id,
-        name: room.name,
-        createdBy: room.createdBy,
-        activeGameType: room.activeGameType,
-        status: room.status,
-        createdAt: room.createdAt,
-        currentMatchId: room.currentMatchId
-    }
-
     return (
         <div className="min-h-screen p-8 bg-transparent text-foreground">
             <div className="max-w-6xl mx-auto space-y-6">
@@ -83,7 +72,7 @@ export default async function RoomPage({ params }: { params: { id: string } }) {
                   - グリッドレイアウト（左: ゲームエリア、右: メンバーリスト）
                 */}
                 <RoomPageClientWrapper
-                    room={roomData}
+                    room={room}
                     initialMembers={room.users}
                     isHost={isHost}
                 />

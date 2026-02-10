@@ -69,10 +69,7 @@ export function ErrorHunterGame({
                 schema: 'public',
                 table: 'room_users',
                 filter: `room_id=eq.${roomId}`,
-            }, async (payload: any) => {
-                console.log("=== RoomUser ===");
-                console.log(payload);
-                console.log(roomId);
+            }, async () => {
                 // 準備状態が変更されたら Room データを再取得
                 const updatedRoom = await getRoomWithReadyStatus(roomId)
                 setRoom(updatedRoom)

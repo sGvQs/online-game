@@ -13,7 +13,6 @@ export function RoomList({ initialRooms, userId }: { initialRooms: Room[], userI
     const fetchMessageData = async () => {
         try {
             const data = await getRooms();
-            console.log(data);
             if (data) {
                 setRooms(data);
             }

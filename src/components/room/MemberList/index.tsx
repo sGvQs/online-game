@@ -17,7 +17,6 @@ export function MemberList({ roomId, initialMembers }: { roomId: string, initial
     const handlePayload = async () => {
         try {
             const roomUsers = await getRoomUsers(roomId);
-            console.log('roomUsersはこれだ', roomUsers);
             setMembers(roomUsers);
         } catch (error) {
             console.error("更新に失敗:", error);
@@ -33,7 +32,6 @@ export function MemberList({ roomId, initialMembers }: { roomId: string, initial
                 table: 'room_users',
                 filter: `room_id=eq.${roomId}`,
             }, () => {
-                console.log('room_usersが変更されました');
                 handlePayload();
             })
             .subscribe();
