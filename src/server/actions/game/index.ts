@@ -7,7 +7,6 @@ export {
     startGame,
     clickError,
     getMatchWithEvents,
-    getMatchIdFromRoom,
     finishGame,
     getMatchProgress,
     checkAutoFinish,

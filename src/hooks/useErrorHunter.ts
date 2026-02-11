@@ -6,7 +6,6 @@ import {
     startGame,
     clickError,
     getMatchWithEvents,
-    getMatchIdFromRoom,
     getMatchProgress,
     checkAutoFinish,
 } from '@/server/actions/game'
@@ -61,7 +60,6 @@ export function useErrorHunter({
     const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
     const matchIdRef = useRef<string | null>(initialMatchId)
     const phaseRef = useRef<GamePhase>('TITLE')
-    const insertEventCountRef = useRef<number>(0);
 
     // 既に閉じられたエラーIDを保持するSet (クライアントサイドフィルタリング用)
     const closedEventIds = useRef<Set<string>>(new Set())
@@ -157,19 +155,9 @@ export function useErrorHunter({
             await resetAllReady(roomId)
 
             // Server Action: Match + ErrorEvent を作成
-            const newMatch = await startGame(roomId)
-            matchIdRef.current = newMatch.id
+            await startGame(roomId)
 
-            // 作成直後に最新データを取得
-            const fullMatch = await getMatchWithEvents(newMatch.id)
-            if (fullMatch) {
-                setMatch(fullMatch)
 
-                const event = fullMatch.errorEvents[0]
-                if (event) {
-                    setupAppearanceTimer(event.appearanceAt)
-                }
-            }
         } catch (error) {
             console.error('ゲーム開始に失敗:', error)
         } finally {
@@ -195,7 +183,7 @@ export function useErrorHunter({
 
         setIsProcessing(true)
         try {
-            const result = await clickError(eventId)
+            await clickError(eventId)
 
             // 自動終了チェック
             if (match.id) {
@@ -254,6 +242,7 @@ export function useErrorHunter({
         const loadInitialMatch = async () => {
             try {
                 const existingMatch = await getMatchWithEvents(initialMatchId)
+                console.log('existingMatch', existingMatch)
                 if (!existingMatch) return
 
                 setMatch(existingMatch)
@@ -261,6 +250,8 @@ export function useErrorHunter({
 
                 const event = existingMatch.errorEvents[0]
                 if (!event) return
+
+                console.log('event', event)
 
                 // Match が FINISHED の場合は RESULT フェーズへ（47個すべて閉じられた状態）
                 if (existingMatch.status === 'FINISHED') {
@@ -302,13 +293,13 @@ export function useErrorHunter({
                 // NOTE ゲーム開始時にUIが更新する
                 console.log('error_events INSERT', payload)
 
-                insertEventCountRef.current += 1;
                 const matchId = payload.new.match_id;
                 const appearanceAt = payload.new.appearance_at;
 
-                if (insertEventCountRef.current < 46) return;
                 if (!matchId) return;
                 if (!appearanceAt) return;
+
+                console.log('ここまで届いてない')
 
                 matchIdRef.current = matchId;
                 const progressData = await getMatchProgress(matchId)
@@ -316,7 +307,6 @@ export function useErrorHunter({
                 const matchesAndEvents = await getMatchWithEvents(matchId)
                 setMatch(matchesAndEvents)
                 setupAppearanceTimer(appearanceAt)
-                insertEventCountRef.current = 0;
             })
             .on('postgres_changes', {
                 event: 'UPDATE',

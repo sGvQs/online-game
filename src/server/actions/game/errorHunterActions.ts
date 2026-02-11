@@ -32,7 +32,7 @@ export async function startGame(roomId: string) {
     })
 
     // 47個の ErrorEvent を作成（各エラーにランダムな位置を設定）
-    const errorEvents = Array.from({ length: 47 }, () => ({
+    const errorEvents = Array.from({ length: 2 }, () => ({
         matchId: match.id,
         appearanceAt: appearanceAt,
         positionX: Math.random() * 60 + 20,  // 20-80の範囲
@@ -89,18 +89,6 @@ export async function clickError(eventId: string) {
     return { success: false }
 }
 
-/**
- * Room から currentMatchId を取得する
- * クライアント側が Realtime 経由でゲーム開始を検知した際に、
- * Match ID を解決するために使用する
- */
-export async function getMatchIdFromRoom(roomId: string) {
-    const room = await prisma.room.findUnique({
-        where: { id: roomId }
-    })
-
-    return room
-}
 
 /**
  * Match + ErrorEvents（勝者ユーザー情報付き）を取得する

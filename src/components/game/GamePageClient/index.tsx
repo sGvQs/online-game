@@ -1,9 +1,6 @@
 'use client'
 
-import { createClient } from '@/utils/supabase/client'
-import { useEffect, useState, useTransition } from 'react'
-import { useRouter } from 'next/navigation'
-import { getRoom, returnToRoom } from '@/server/actions/room'
+import { useState, useTransition, useEffect } from 'react'
 import { Win95Dialog } from '../Win95Dialog'
 import { Win95ProgressBar } from '../Win95ProgressBar'
 import { Win95Button } from '../Win95Button'
@@ -28,6 +25,8 @@ interface GamePageClientProps {
     isStartDisabled?: boolean
     /** 準備完了ボタンのコールバック */
     onToggleReady?: () => Promise<void>
+    /** ゲーム終了/戻るボタンのコールバック */
+    onClose?: () => Promise<void>
     children?: ReactNode
 }
 
@@ -55,10 +54,10 @@ export function GamePageClient({
     onStartGame,
     isStartDisabled,
     onToggleReady,
+    onClose,
     children,
 }: GamePageClientProps) {
-    const router = useRouter()
-    const supabase = createClient()
+
     const [isPending, startTransition] = useTransition()
     const [initProgress, setInitProgress] = useState(0)
     const [isInitializing, setIsInitializing] = useState(true)
@@ -85,6 +84,7 @@ export function GamePageClient({
                         setIsInitializing(false)
                         setInternalShowTitle(true)
                         useSE().play('chime')
+                        console.log('initProgress', prev)
                         return 200
                     }
                     return prev + 8
@@ -95,40 +95,12 @@ export function GamePageClient({
     }, [isInitializing])
 
 
-    const handlePayload = async () => {
-        try {
-            const newRoom = await getRoom(room.id);
-            if (newRoom && newRoom.activeGameType === null) {
-                router.push(`/room/${newRoom.id}`);
-            }
-        } catch (error) {
-            console.error("更新に失敗:", error);
-        }
-    };
-    // Subscribe to room changes for realtime navigation
-    useEffect(() => {
-        const channel = supabase
-            .channel(`game_room_${roomId}`)
-            .on('postgres_changes', {
-                event: 'UPDATE',
-                schema: 'public',
-                table: 'rooms',
-                filter: `id=eq.${roomId}`,
-            }, () => {
-                handlePayload();
-            })
-            .subscribe()
 
-        return () => {
-            supabase.removeChannel(channel)
-        }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [roomId, router])
 
     const handleCloseModal = () => {
         setInternalShowTitle(false);
         startTransition(async () => {
-            await returnToRoom(roomId)
+            if (onClose) await onClose()
         })
     }
 

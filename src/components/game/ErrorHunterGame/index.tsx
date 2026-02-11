@@ -1,15 +1,14 @@
 'use client'
 
 import { useErrorHunter } from '@/hooks/useErrorHunter'
+import { useGameRoom } from '@/hooks/useGameRoom'
+import { returnToRoom } from '@/server/actions/room'
 import { GamePageClient } from '../GamePageClient'
 import { Win95Dialog } from '../Win95Dialog'
 import { Win95ProgressBar } from '../Win95ProgressBar'
 import { Win95TitleBarButton } from '../Win95TitleBarButton'
 import { RoomWithUsersAndReadyStatus, RoomUserWithReadyStatus, ErrorEventWithUser, RoomUser } from '@/shared/types'
 import { useEffect, useState } from 'react'
-import { toggleReady, getRoomWithReadyStatus } from '@/server/actions/room'
-import { useRouter } from 'next/navigation'
-import { createClient } from '@/utils/supabase/client'
 import { cn } from '@/lib/utils'
 import { errorHunterGame } from './styles'
 import { getUserComment } from '@/server/actions/user/getUserComment'
@@ -44,10 +43,21 @@ export function ErrorHunterGame({
     initialMatchId, // roomに紐ずくmatchID => 全員nullの可能性ある
     currentUserId, // 現在のユーザーID
 }: ErrorHunterGameProps) {
-    const router = useRouter()
-    const supabase = createClient()
-    const [room, setRoom] = useState(initialRoom)
     const styles = errorHunterGame()
+    const {
+        room,
+        isReady,
+        toggleReady,
+        userNameMap
+    } = useGameRoom({
+        roomId,
+        initialRoom,
+        currentUserId
+    })
+
+    const handleClose = async () => {
+        await returnToRoom(roomId)
+    }
 
     const {
         phase,
@@ -58,34 +68,6 @@ export function ErrorHunterGame({
         handleClickError,
         handleFinish,
     } = useErrorHunter({ roomId, isHost, initialMatchId })
-
-    // 準備完了状態の変更を監視
-    useEffect(() => {
-        const channel = supabase
-            .channel(`ready_status_${roomId}`)
-            .on('postgres_changes', {
-                event: '*',
-                schema: 'public',
-                table: 'room_users',
-                filter: `room_id=eq.${roomId}`,
-            }, async () => {
-                // 準備状態が変更されたら Room データを再取得
-                const updatedRoom = await getRoomWithReadyStatus(roomId)
-                setRoom(updatedRoom)
-            })
-            .subscribe()
-
-        return () => {
-            supabase.removeChannel(channel)
-        }
-    }, [roomId, router])
-
-    // 準備完了トグル
-    const handleToggleReady = async () => {
-        await toggleReady(roomId)
-        const updatedRoom = await getRoomWithReadyStatus(roomId)
-        setRoom(updatedRoom)
-    }
 
     // WAITING フェーズ用のプログレスバー (不確定プログレス風アニメーション)
     const [waitProgress, setWaitProgress] = useState(0)
@@ -106,14 +88,6 @@ export function ErrorHunterGame({
 
         return () => clearInterval(interval)
     }, [phase])
-
-    // ユーザー名のマップを作成（進行状況表示用）
-    const userNameMap = new Map<string, string>()
-    room.users.forEach((roomUser: RoomUserWithReadyStatus) => {
-        if (roomUser.user) {
-            userNameMap.set(roomUser.user.id, roomUser.user.name)
-        }
-    })
 
     // 勝者のコメントを取得
     const [winnerComment, setWinnerComment] = useState<string | null>(null)
@@ -144,7 +118,8 @@ export function ErrorHunterGame({
             currentUserId={currentUserId}
             showTitle={phase === 'TITLE'}
             onStartGame={handleStartGame}
-            onToggleReady={handleToggleReady}
+            onToggleReady={toggleReady}
+            onClose={handleClose}
             isStartDisabled={isProcessing}
         >
             {/* 進行状況バー: WAITING と APPEARING フェーズで表示 */}
