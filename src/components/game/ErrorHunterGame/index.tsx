@@ -38,11 +38,11 @@ function getRandomErrorMessage(): string {
 }
 
 export function ErrorHunterGame({
-    room: initialRoom,
-    isHost,
-    roomId,
-    initialMatchId,
-    currentUserId,
+    room: initialRoom, // データーベースからのroom情報
+    isHost, // ホストかどうか
+    roomId, // クエリパラメーターからのroomID
+    initialMatchId, // roomに紐ずくmatchID => 全員nullの可能性ある
+    currentUserId, // 現在のユーザーID
 }: ErrorHunterGameProps) {
     const router = useRouter()
     const supabase = createClient()
@@ -52,7 +52,6 @@ export function ErrorHunterGame({
     const {
         phase,
         match,
-        clickResult,
         progress,
         isProcessing,
         handleStartGame,

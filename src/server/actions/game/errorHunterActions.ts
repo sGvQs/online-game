@@ -18,9 +18,9 @@ export async function startGame(roomId: string) {
     if (!room) throw new Error('ルームが見つかりません')
     if (room.createdBy !== user.id) throw new Error('ゲームを開始する権限がありません（ホストのみ）')
 
-    // ランダムな待ち時間 (3〜10秒)
-    const delayMs = Math.floor(Math.random() * 11000) + 10000;
-    const appearanceAt = new Date(Date.now() + delayMs)
+    // ランダムな待ち時間 (10〜11秒)
+    const delayMs = Math.floor(Math.random() * 1000) + 10000;
+    const appearanceAt = new Date(Date.now() + delayMs);
 
     // Match を作成
     const match = await prisma.match.create({

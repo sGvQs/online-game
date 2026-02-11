@@ -8,12 +8,6 @@ import { errorHunterGame } from '@/components/game/ErrorHunterGame/styles'
 import { RoomUserWithReadyStatus } from '@/shared/types'
 
 export default async function ErrorHunterPage({ params }: { params: { roomId: string } }) {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-
-    if (!user) redirect('/')
-
-    // Server Action経由でDB取得
     const currentUser = await getCurrentUser()
     if (!currentUser) redirect('/')
 
@@ -22,22 +16,22 @@ export default async function ErrorHunterPage({ params }: { params: { roomId: st
     const room = await getRoomWithReadyStatus(roomId)
     if (!room) return <div>Room not found</div>
 
-    // Check if user is member
+    // ユーザーがメンバーかチェック
     const isMember = room.users.some((u: RoomUserWithReadyStatus) => u.userId === currentUser.user.id)
     if (!isMember) {
         redirect('/dashboard')
     }
 
-    // Redirect back to room if no game is active
+    // ゲームが何もしていなかったらroomに戻る
     if (!room.activeGameType) {
         redirect(`/room/${roomId}`)
     }
 
-    // Check if user is host
+    // ユーザーがホストかチェック
     const isHost = room.createdBy === currentUser.user.id
 
     const styles = errorHunterGame()
-    
+
     return (
         <div className={cn(
             styles.container(),

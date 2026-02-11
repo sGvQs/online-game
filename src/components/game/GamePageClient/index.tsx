@@ -125,15 +125,11 @@ export function GamePageClient({
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [roomId, router])
 
-    const handleReturnToRoom = () => {
+    const handleCloseModal = () => {
+        setInternalShowTitle(false);
         startTransition(async () => {
             await returnToRoom(roomId)
         })
-    }
-
-    const handleCloseModal = () => {
-        setInternalShowTitle(false);
-        handleReturnToRoom();
     }
 
     const handleStartGameClick = () => {

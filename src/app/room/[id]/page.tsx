@@ -8,12 +8,6 @@ import { ChevronsRight, PersonStanding, House, Gamepad2 } from 'lucide-react'
 import { RoomUserWithReadyStatus } from '@/shared/types'
 
 export default async function RoomPage({ params }: { params: { id: string } }) {
-    const supabase = await createClient()
-    const { data: { user } } = await supabase.auth.getUser()
-
-    if (!user) redirect('/')
-
-    // Server Action経由でDB取得
     const currentUser = await getCurrentUser()
     if (!currentUser) redirect('/')
 
@@ -22,16 +16,16 @@ export default async function RoomPage({ params }: { params: { id: string } }) {
     const room = await getRoomWithUsers(id)
     if (!room) return <div>Room not found</div>
 
-    // Check if user is member
+    // ユーザーがメンバーかチェック
     const isMember = room.users.some((u: RoomUserWithReadyStatus) => u.userId === currentUser.user.id)
     if (!isMember) {
         redirect('/dashboard')
     }
 
-    // Check if user is host
+    // ユーザーがホストかチェック
     const isHost = room.createdBy === currentUser.user.id
 
-    // Redirect to game if already in progress
+    // ゲームが進行中ならゲームページにリダイレクト
     if (room.activeGameType) {
         redirect(`/game/${room.id}/${room.activeGameType}`)
     }
