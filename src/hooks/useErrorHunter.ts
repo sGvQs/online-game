@@ -11,6 +11,7 @@ import {
 } from '@/server/actions/game'
 import { resetAllReady } from '@/server/actions/room'
 import type { MatchWithErrorEventsAndUsers, MatchProgress, ErrorEventWithUser } from '@/shared/types'
+import { getUserComment } from '@/server/actions/user/getUserComment'
 import { useSE } from './useSE'
 
 // ============================================
@@ -29,6 +30,9 @@ export interface UseErrorHunterReturn {
     handleStartGame: () => Promise<void>
     handleClickError: (eventId: string) => Promise<void>
     handleFinish: () => Promise<void>
+    waitProgress: number
+    winnerComment: string | null
+    isWinnerCommentLoading: boolean
 }
 
 interface UseErrorHunterProps {
@@ -64,10 +68,50 @@ export function useErrorHunter({
     // 既に閉じられたエラーIDを保持するSet (クライアントサイドフィルタリング用)
     const closedEventIds = useRef<Set<string>>(new Set())
 
+    const [waitProgress, setWaitProgress] = useState(0)
+    const [winnerComment, setWinnerComment] = useState<string | null>(null)
+    const [isWinnerCommentLoading, setIsWinnerCommentLoading] = useState(false)
+
     // state の最新値を ref に同期
     useEffect(() => {
         phaseRef.current = phase
     }, [phase])
+
+    // WAITING フェーズ用のプログレスバー (不確定プログレス風アニメーション)
+    useEffect(() => {
+        if (phase !== 'WAITING') {
+            setWaitProgress(0)
+            return
+        }
+
+        const interval = setInterval(() => {
+            setWaitProgress(prev => {
+                // 0〜100をループするアニメーション
+                const next = prev + 20
+                return next > 200 ? 0 : next
+            })
+        }, 200)
+
+        return () => clearInterval(interval)
+    }, [phase])
+
+    // 勝者のコメントを取得
+    useEffect(() => {
+        if (phase === 'RESULT' && match?.winnerId) {
+            setIsWinnerCommentLoading(true)
+            getUserComment(match.winnerId).then(comment => {
+                setWinnerComment(comment)
+            }).catch(error => {
+                console.error('コメントの取得に失敗しました:', error)
+                setWinnerComment(null)
+            }).finally(() => {
+                setIsWinnerCommentLoading(false)
+                useSE().play('tada');
+            })
+        } else {
+            setWinnerComment(null)
+        }
+    }, [phase, match?.winnerId])
 
     useEffect(() => {
         matchIdRef.current = match?.id ?? initialMatchId
@@ -299,8 +343,6 @@ export function useErrorHunter({
                 if (!matchId) return;
                 if (!appearanceAt) return;
 
-                console.log('ここまで届いてない')
-
                 matchIdRef.current = matchId;
                 const progressData = await getMatchProgress(matchId)
                 setProgress(progressData)
@@ -413,5 +455,8 @@ export function useErrorHunter({
         handleStartGame,
         handleClickError,
         handleFinish,
+        waitProgress,
+        winnerComment,
+        isWinnerCommentLoading,
     }
 }

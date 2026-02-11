@@ -3,16 +3,15 @@
 import { useErrorHunter } from '@/hooks/useErrorHunter'
 import { useGameRoom } from '@/hooks/useGameRoom'
 import { returnToRoom } from '@/server/actions/room'
-import { GamePageClient } from '../GamePageClient'
 import { Win95Dialog } from '../Win95Dialog'
 import { Win95ProgressBar } from '../Win95ProgressBar'
+import { Win95Button } from '../Win95Button'
 import { Win95TitleBarButton } from '../Win95TitleBarButton'
+import { useSE } from '@/hooks/useSE'
 import { RoomWithUsersAndReadyStatus, RoomUserWithReadyStatus, ErrorEventWithUser, RoomUser } from '@/shared/types'
 import { useEffect, useState } from 'react'
 import { cn } from '@/lib/utils'
 import { errorHunterGame } from './styles'
-import { getUserComment } from '@/server/actions/user/getUserComment'
-import { useSE } from '@/hooks/useSE'
 
 interface ErrorHunterGameProps {
     room: RoomWithUsersAndReadyStatus
@@ -44,11 +43,14 @@ export function ErrorHunterGame({
     currentUserId, // 現在のユーザーID
 }: ErrorHunterGameProps) {
     const styles = errorHunterGame()
+
+    // ゲームルームの情報を統治するHooks
     const {
         room,
         isReady,
         toggleReady,
-        userNameMap
+        userNameMap,
+        isTogglingReady
     } = useGameRoom({
         roomId,
         initialRoom,
@@ -59,6 +61,7 @@ export function ErrorHunterGame({
         await returnToRoom(roomId)
     }
 
+    // エラーハンターゲームのロジックを統治するHooks
     const {
         phase,
         match,
@@ -67,61 +70,189 @@ export function ErrorHunterGame({
         handleStartGame,
         handleClickError,
         handleFinish,
+        waitProgress,
+        winnerComment,
+        isWinnerCommentLoading,
     } = useErrorHunter({ roomId, isHost, initialMatchId })
 
-    // WAITING フェーズ用のプログレスバー (不確定プログレス風アニメーション)
-    const [waitProgress, setWaitProgress] = useState(0)
 
+    // GamePageClient logic merged here
+    const [initProgress, setInitProgress] = useState(0)
+    const [isInitializing, setIsInitializing] = useState(true)
+    const [showDescription, setShowDescription] = useState(false)
+
+    // Simulate initialization progress
     useEffect(() => {
-        if (phase !== 'WAITING') {
-            setWaitProgress(0)
-            return
+        if (isInitializing) {
+            const interval = setInterval(() => {
+                setInitProgress(prev => {
+                    if (prev >= 200) {
+                        setIsInitializing(false)
+                        useSE().play('chime')
+                        return 200
+                    }
+                    return prev + 8
+                })
+            }, 200)
+            return () => clearInterval(interval)
         }
+    }, [isInitializing])
 
-        const interval = setInterval(() => {
-            setWaitProgress(prev => {
-                // 0〜100をループするアニメーション
-                const next = prev + 20
-                return next > 200 ? 0 : next
-            })
-        }, 200)
+    const ASCII_ART =
+        `███████╗██████╗ ██████╗  ██████╗ ██████╗ 
+██╔════╝██╔══██╗██╔══██╗██╔═══██╗██╔══██╗
+█████╗  ██████╔╝██████╔╝██║   ██║██████╔╝
+██╔══╝  ██╔══██╗██╔══██╗██║   ██║██╔══██╗
+███████╗██║  ██║██║  ██║╚██████╔╝██║  ██║
+╚══════╝╚═╝  ╚═╝╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═╝
 
-        return () => clearInterval(interval)
-    }, [phase])
+██╗  ██╗██╗   ██╗███╗   ██╗████████╗███████╗██████╗ 
+██║  ██║██║   ██║████╗  ██║╚══██╔══╝██╔═══╝██╔══██╗
+███████║██║   ██║██╔██╗ ██║   ██║   █████╗  ██████╔╝
+██╔══██║██║   ██║██║╚██╗██║   ██║   ██╔══╝  ██╔══██╗
+██║  ██║╚██████╔╝██║ ╚████║   ██║   ███████╗██║  ██║
+╚═╝  ╚═╝ ╚═════╝ ╚═╝  ╚═══╝   ╚═╝   ╚══════╝╚═╝  ╚═╝`
 
-    // 勝者のコメントを取得
-    const [winnerComment, setWinnerComment] = useState<string | null>(null)
-    const [isWinnerCommentLoading, setIsWinnerCommentLoading] = useState(false)
-    useEffect(() => {
-        if (phase === 'RESULT' && match?.winnerId) {
-            setIsWinnerCommentLoading(true)
-            getUserComment(match.winnerId).then(comment => {
-                setWinnerComment(comment)
-            }).catch(error => {
-                console.error('コメントの取得に失敗しました:', error)
-                setWinnerComment(null)
-            }).finally(() => {
-                setIsWinnerCommentLoading(false)
-                useSE().play('tada');
-            })
-        } else {
-            setWinnerComment(null)
-        }
-    }, [phase, match?.winnerId])
-
+    const readyCount = room.users.filter((u: RoomUserWithReadyStatus) => u.isReady).length
+    const totalUsers = room.users.length
+    const allUsersReady = room.users.every((u: RoomUserWithReadyStatus) => u.isReady)
 
     return (
-        <GamePageClient
-            room={room}
-            isHost={isHost}
-            roomId={roomId}
-            currentUserId={currentUserId}
-            showTitle={phase === 'TITLE'}
-            onStartGame={handleStartGame}
-            onToggleReady={toggleReady}
-            onClose={handleClose}
-            isStartDisabled={isProcessing}
-        >
+        <div className={styles.container()}>
+            {/* Initialization Dialog */}
+            {isInitializing && (
+                <div className="fixed inset-0 flex items-center justify-center z-50">
+                    <Win95Dialog title="STARTING GAME...">
+                        <div className="space-y-4">
+                            <p>Initializing...</p>
+                            <Win95ProgressBar progress={initProgress} />
+                        </div>
+                    </Win95Dialog>
+                </div>
+            )}
+
+            {/* Title Modal (Lobby) */}
+            {!isInitializing && phase === 'TITLE' && (
+                <div className={styles.modalOverlay()}>
+                    <div className={styles.modal()}>
+                        <div className={styles.modalInner()}>
+                            <div className={styles.titlebar()}>
+                                <span className={styles.titlebarText()}>ERROR HUNTER</span>
+                                {isHost && (
+                                    <div className={styles.titlebarButtons()}>
+                                        <Win95TitleBarButton
+                                            onClick={handleClose}
+                                        >
+                                            ×
+                                        </Win95TitleBarButton>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* 2カラムレイアウト */}
+                            <div className={styles.twoColumn()}>
+                                {/* 左パネル */}
+                                <div className={styles.leftPanel()}>
+                                    <div className={styles.infoBox()}>
+                                        {!showDescription ? (
+                                            // 通常モード: ASCIIアート + プレイヤーリスト
+                                            <>
+                                                <pre className={styles.asciiArt()}>{ASCII_ART}</pre>
+
+                                                <div className={styles.playerStatusSection()}>
+                                                    <p className={styles.statusTitle()}>
+                                                        プレイヤー準備状況: {readyCount} / {totalUsers}
+                                                    </p>
+                                                    <div className={styles.playerListbox()}>
+                                                        {room.users.map((roomUser: RoomUserWithReadyStatus) => (
+                                                            <div
+                                                                key={roomUser.id}
+                                                                className={styles.playerItem()}
+                                                            >
+                                                                <div className={roomUser.isReady ? styles.playerRadioReady() : styles.playerRadio()} />
+                                                                <span>
+                                                                    {roomUser.user?.name || 'Unknown'}
+                                                                    {roomUser.userId === currentUserId && ' (あなた)'}
+                                                                </span>
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            </>
+                                        ) : (
+                                            // 説明モード
+                                            <div className={styles.descriptionContent()}>
+                                                <div className={styles.infoHeader()}>
+                                                    <span className={styles.infoIcon()}>💡</span>
+                                                    <span>ゲーム説明</span>
+                                                </div>
+                                                {/* Image removed for simplicity or needs import */}
+                                                <div className={styles.descriptionText()}>
+                                                    ERROR HUNTERは、画面に出現する47個のエラーモーダルを素早く閉じる反射神経ゲームです。<br />
+                                                    <br />
+                                                    <strong>ルール:</strong><br />
+                                                    ・全47個のエラーが一斉に画面上に出現します<br />
+                                                    ・各プレイヤーは素早くエラーの×ボタンをクリック<br />
+                                                    ・最も多くのエラーを閉じたプレイヤーが勝利<br />
+                                                    ・全員で協力して全てのエラーを閉じましょう！<br />
+                                                    ・何回か押さないと閉じないものもあるよ<br />
+                                                    ・↑はprismaの限界だから許してね<br />
+                                                    <br />
+                                                    準備ができたら「準備完了」ボタンを押してください。
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {/* 右パネル */}
+                                <div className={styles.rightPanel()}>
+                                    <Win95Button
+                                        className={cn(styles.panelButton(), showDescription && styles.buttonPressed())}
+                                        onClick={() => setShowDescription(!showDescription)}
+                                        pressed={showDescription}
+                                    >
+                                        What's ERROR HUNTER
+                                    </Win95Button>
+
+                                    <div className={styles.buttonSpacer()} />
+
+                                    <Win95Button
+                                        className={styles.panelButton()}
+                                        onClick={toggleReady}
+                                        disabled={isTogglingReady}
+                                        style={{
+                                            backgroundColor: isReady ? '#008000' : undefined,
+                                            color: isReady ? '#fff' : undefined,
+                                        }}
+                                    >
+                                        準備完了
+                                    </Win95Button>
+
+                                    {isHost && (
+                                        <Win95Button
+                                            className={styles.panelButton()}
+                                            onClick={handleStartGame}
+                                            disabled={isProcessing || !allUsersReady}
+                                        >
+                                            ゲーム開始
+                                        </Win95Button>
+                                    )}
+
+                                    {isHost && (
+                                        <Win95Button
+                                            className={styles.panelButton()}
+                                            onClick={handleClose}
+                                        >
+                                            Close
+                                        </Win95Button>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
             {/* 進行状況バー: WAITING と APPEARING フェーズで表示 */}
             {(phase === 'WAITING' || phase === 'APPEARING' || phase === 'RESULT') && progress && (
                 <div className="fixed bottom-4 left-4 z-50">
@@ -263,6 +394,6 @@ export function ErrorHunterGame({
                     </Win95Dialog>
                 </div>
             )}
-        </GamePageClient>
+        </div>
     )
 }
