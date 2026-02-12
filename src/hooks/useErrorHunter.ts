@@ -210,6 +210,7 @@ export function useErrorHunter({
                 createdAt: new Date()
             }
 
+            // Broadcast to other clients
             if (broadcastChannelRef.current) {
                 broadcastChannelRef.current.send({
                     type: 'broadcast',
@@ -217,6 +218,51 @@ export function useErrorHunter({
                     payload: event
                 })
             }
+
+            // Update local state immediately for instant feedback
+            const closedAt = event.createdAt
+            const closedBy = event.userId
+
+            setMatch(prev => {
+                if (!prev) return null
+                const newEvents = prev.errorEvents.map((e) =>
+                    e.id === eventId ? {
+                        ...e,
+                        closedAt: closedAt,
+                        closedBy: closedBy,
+                    } : e
+                )
+                return { ...prev, errorEvents: newEvents }
+            })
+
+            setProgress(prev => {
+                if (!prev) return null
+                // 既にカウント済みならスキップ
+                const existingEvent = prev.events.find(e => e.id === eventId)
+                if (existingEvent?.closedBy) return prev
+
+                const newScores = { ...prev.scores }
+                if (closedBy) {
+                    newScores[closedBy] = (newScores[closedBy] || 0) + 1
+                }
+
+                const newEvents = prev.events.map(e =>
+                    e.id === eventId ? {
+                        ...e,
+                        closedAt: closedAt,
+                        closedBy: closedBy,
+                        positionX: e.positionX,
+                        positionY: e.positionY,
+                    } : e
+                )
+
+                return {
+                    ...prev,
+                    closedErrors: prev.closedErrors + 1,
+                    scores: newScores,
+                    events: newEvents,
+                }
+            })
 
             // 自動終了チェック
             if (!match.id) return
@@ -229,7 +275,7 @@ export function useErrorHunter({
         } finally {
             setIsProcessing(false)
         }
-    }, [match, roomId, isProcessing])
+    }, [match, roomId, isProcessing, currentUserId])
 
     /**
      * ゲーム終了 → タイトルモーダルに戻る
