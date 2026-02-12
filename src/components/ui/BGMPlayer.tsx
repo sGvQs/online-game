@@ -76,7 +76,7 @@ export default function BGMPlayer() {
                 }}
                 className="w-12 h-12 bg-indigo-600 rounded-full shadow-lg text-white"
             >
-                {isPlaying ? '🔇' : '🔊'}
+                {!isPlaying ? '🔇' : '🔊'}
             </button>
         </div>
     );

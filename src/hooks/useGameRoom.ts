@@ -22,25 +22,33 @@ export function useGameRoom({
     const [room, setRoom] = useState<RoomWithUsersAndReadyStatus>(initialRoom)
     const [isTogglingReady, setIsTogglingReady] = useState(false)
 
-    // ルームデータの更新ハンドラ
     const refreshRoom = useCallback(async () => {
         try {
-            const updatedRoom = await getRoomWithReadyStatus(roomId)
-            if (updatedRoom) {
-                // ゲーム変更の検知とリダイレクト
-                if (updatedRoom.activeGameType !== room.activeGameType) {
-                    if (updatedRoom.activeGameType) {
-                        router.push(`/game/${roomId}/${updatedRoom.activeGameType}`)
-                    } else {
-                        router.push(`/room/${roomId}`)
-                    }
-                }
-                setRoom(updatedRoom)
+            const updatedRoom = await getRoomWithReadyStatus(roomId);
+
+            // 1. データが取得できなかった場合は即終了
+            if (!updatedRoom) return;
+
+            // 2. ゲームタイプに変更がない場合は、State更新だけして終了
+            if (updatedRoom.activeGameType === room.activeGameType) {
+                setRoom(updatedRoom);
+                return;
             }
+
+            // 3. ゲーム変更の検知とリダイレクト処理
+            if (updatedRoom.activeGameType) {
+                router.push(`/game/${roomId}/${updatedRoom.activeGameType}`);
+            } else {
+                router.push(`/room/${roomId}`);
+            }
+
+            // 最後にStateを更新
+            setRoom(updatedRoom);
+
         } catch (error) {
-            console.error("ルーム更新に失敗:", error)
+            console.error("ルーム更新に失敗:", error);
         }
-    }, [roomId, room.activeGameType, router])
+    }, [roomId, room.activeGameType, router]);
 
     // Realtime Subscriptions
     useEffect(() => {

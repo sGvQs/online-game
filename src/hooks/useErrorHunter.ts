@@ -185,18 +185,17 @@ export function useErrorHunter({
         if (!match || isProcessing) return
 
         // ★ クライアントサイドフィルタリング: 既に閉じられたと分かっているならスキップ
-        if (closedEventIds.current.has(eventId)) {
-            return
-        }
+        if (closedEventIds.current.has(eventId)) return
 
         setIsProcessing(true)
         try {
             await clickError(eventId)
 
             // 自動終了チェック
-            if (match.id) {
-                await checkAutoFinish(match.id, roomId)
-            }
+            if (!match.id) return
+
+            await checkAutoFinish(match.id, roomId)
+
 
         } catch (error) {
             console.error('クリック処理に失敗:', error)
