@@ -293,6 +293,11 @@ export function useErrorHunter({
             setProgress(null)
             setPhase('TITLE')
             matchIdRef.current = null
+
+            // 次のゲームのためにリセット
+            isSetupGameStatusRef.current = false
+            closedEventIds.current.clear()
+            setWinnerComment(null)
         } catch (error) {
             console.error('ゲーム終了に失敗:', error)
         } finally {
