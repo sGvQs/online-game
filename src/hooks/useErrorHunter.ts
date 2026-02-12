@@ -146,6 +146,70 @@ export function useErrorHunter({
     }, []);
 
     // ============================================
+    // ヘルパー関数
+    // ============================================
+
+    /**
+     * エラーイベントがクローズされたことをローカル状態に反映する
+     * （broadcastとhandleClickErrorの両方で使用）
+     */
+    const updateLocalStateForClosedError = useCallback((
+        eventId: string,
+        closedBy: string | null,
+        closedAt: Date
+    ) => {
+        setMatch(prev => {
+            if (!prev) return null
+
+            const newEvents = prev.errorEvents.map((e) =>
+                e.id === eventId
+                    ? { ...e, closedAt, closedBy }
+                    : e
+            )
+            return { ...prev, errorEvents: newEvents }
+        })
+
+        setProgress(prev => {
+            if (!prev) return null
+
+            // 既にカウント済みならスキップ
+            const existingEvent = prev.events.find(e => e.id === eventId)
+            if (existingEvent?.closedBy) return prev
+
+            const newScores = { ...prev.scores }
+            if (closedBy) {
+                newScores[closedBy] = (newScores[closedBy] || 0) + 1
+            }
+
+            const newEvents = prev.events.map(e =>
+                e.id === eventId
+                    ? { ...e, closedAt, closedBy, positionX: e.positionX, positionY: e.positionY }
+                    : e
+            )
+
+            return {
+                ...prev,
+                closedErrors: prev.closedErrors + 1,
+                scores: newScores,
+                events: newEvents,
+            }
+        })
+    }, [])
+
+    /**
+     * ゲーム状態を完全にリセット（次のゲーム準備）
+     */
+    const resetGameState = useCallback(() => {
+        setMatch(null)
+        setProgress(null)
+        setPhase('TITLE')
+        setWinnerComment(null)
+        matchIdRef.current = null
+        isSetupGameStatusRef.current = false
+        closedEventIds.current.clear()
+    }, [])
+
+    // ============================================
     // アクションハンドラ
     // ============================================
 
@@ -178,104 +242,51 @@ export function useErrorHunter({
 
     /**
      * エラーモーダルのクリック（早い者勝ち）
-     *
-     * 1. Server Action で排他制御付き更新を実行
-     * 2. 結果（勝ち/負け）をローカル state に保存（個別のエラー用ではなく全体用）
-     * 3. 自動終了チェック（全エラーが閉じられたら RESULT フェーズに遷移）
-     * 4. 最新データを再取得して進行状況を反映
      */
     const handleClickError = useCallback(async (eventId: string) => {
+        // ガード句: 基本条件チェック
         if (!match || isProcessing) return
-
-        // ★ クライアントサイドフィルタリング: 既に閉じられたと分かっているならスキップ
         if (closedEventIds.current.has(eventId)) return
 
-        // 第一関門：ローカルの状態では、一番早い
-        closedEventIds.current.add(eventId);
+        // 第一関門: 楽観的UI更新（ローカル状態で即座に閉じた扱いにする）
+        closedEventIds.current.add(eventId)
 
         setIsProcessing(true)
         try {
-
-            // 第二関門：ほんとに一番かDBでチェック
+            // 第二関門: DBでの排他制御チェック
             const isSuccess = await clickError(eventId)
 
             if (!isSuccess) {
-                closedEventIds.current.delete(eventId);
-                return;
-            };
+                closedEventIds.current.delete(eventId)
+                return
+            }
 
             const event = {
-                eventId: eventId,
+                eventId,
                 userId: currentUserId,
                 createdAt: new Date()
             }
 
-            // Broadcast to other clients
-            if (broadcastChannelRef.current) {
-                broadcastChannelRef.current.send({
-                    type: 'broadcast',
-                    event: 'click-error',
-                    payload: event
-                })
+            // 他のクライアントへブロードキャスト
+            broadcastChannelRef.current?.send({
+                type: 'broadcast',
+                event: 'click-error',
+                payload: event
+            })
+
+            // ローカル状態を即座に更新（即時フィードバック）
+            updateLocalStateForClosedError(eventId, event.userId, event.createdAt)
+
+            // 全エラー終了チェック
+            if (match.id) {
+                await checkAutoFinish(match.id, roomId)
             }
-
-            // Update local state immediately for instant feedback
-            const closedAt = event.createdAt
-            const closedBy = event.userId
-
-            setMatch(prev => {
-                if (!prev) return null
-                const newEvents = prev.errorEvents.map((e) =>
-                    e.id === eventId ? {
-                        ...e,
-                        closedAt: closedAt,
-                        closedBy: closedBy,
-                    } : e
-                )
-                return { ...prev, errorEvents: newEvents }
-            })
-
-            setProgress(prev => {
-                if (!prev) return null
-                // 既にカウント済みならスキップ
-                const existingEvent = prev.events.find(e => e.id === eventId)
-                if (existingEvent?.closedBy) return prev
-
-                const newScores = { ...prev.scores }
-                if (closedBy) {
-                    newScores[closedBy] = (newScores[closedBy] || 0) + 1
-                }
-
-                const newEvents = prev.events.map(e =>
-                    e.id === eventId ? {
-                        ...e,
-                        closedAt: closedAt,
-                        closedBy: closedBy,
-                        positionX: e.positionX,
-                        positionY: e.positionY,
-                    } : e
-                )
-
-                return {
-                    ...prev,
-                    closedErrors: prev.closedErrors + 1,
-                    scores: newScores,
-                    events: newEvents,
-                }
-            })
-
-            // 自動終了チェック
-            if (!match.id) return
-
-            await checkAutoFinish(match.id, roomId)
-
-
         } catch (error) {
             console.error('クリック処理に失敗:', error)
         } finally {
             setIsProcessing(false)
         }
-    }, [match, roomId, isProcessing, currentUserId])
+    }, [match, roomId, isProcessing, currentUserId, updateLocalStateForClosedError])
 
     /**
      * ゲーム終了 → タイトルモーダルに戻る
@@ -288,22 +299,13 @@ export function useErrorHunter({
 
         setIsProcessing(true)
         try {
-            // ローカル状態をリセット
-            setMatch(null)
-            setProgress(null)
-            setPhase('TITLE')
-            matchIdRef.current = null
-
-            // 次のゲームのためにリセット
-            isSetupGameStatusRef.current = false
-            closedEventIds.current.clear()
-            setWinnerComment(null)
+            resetGameState()
         } catch (error) {
             console.error('ゲーム終了に失敗:', error)
         } finally {
             setIsProcessing(false)
         }
-    }, [match, isProcessing])
+    }, [match, isProcessing, resetGameState])
 
 
     // ============================================
@@ -328,19 +330,22 @@ export function useErrorHunter({
                 setMatch(existingMatch)
                 matchIdRef.current = existingMatch.id
 
-                const event = existingMatch.errorEvents[0]
-                if (!event) return
+                const firstEvent = existingMatch.errorEvents[0]
+                if (!firstEvent) return
 
-                // Match が FINISHED の場合は RESULT フェーズへ（47個すべて閉じられた状態）
+                // ゲーム状態の判定と適切なフェーズへ遷移
                 if (existingMatch.status === 'FINISHED') {
                     setPhase('RESULT')
-                } else if (event.closedBy) {
-                    // 1個でも閉じられている（古いロジック）
-                    setPhase('RESULT')
-                } else {
-                    // まだゲーム中 → タイマーをセット
-                    setupAppearanceTimer(event.appearanceAt)
+                    return
                 }
+
+                if (firstEvent.closedBy) {
+                    setPhase('RESULT')
+                    return
+                }
+
+                // ゲーム進行中 → タイマーセット
+                setupAppearanceTimer(firstEvent.appearanceAt)
             } catch (error) {
                 console.error('初期データの取得に失敗:', error)
             }
@@ -371,50 +376,11 @@ export function useErrorHunter({
                 if (closedEventIds.current.has(eventData.eventId)) return
 
                 closedEventIds.current.add(eventData.eventId)
-
-                const closedAt = eventData.createdAt
-                const closedBy = eventData.userId
-
-                setMatch(prev => {
-                    if (!prev) return null
-                    const newEvents = prev.errorEvents.map((e) =>
-                        e.id === eventData.eventId ? {
-                            ...e,
-                            closedAt: closedAt,
-                            closedBy: closedBy,
-                        } : e
-                    )
-                    return { ...prev, errorEvents: newEvents }
-                })
-
-                setProgress(prev => {
-                    if (!prev) return null
-                    // 既にカウント済みならスキップ
-                    const existingEvent = prev.events.find(e => e.id === eventData.eventId)
-                    if (existingEvent?.closedBy) return prev
-
-                    const newScores = { ...prev.scores }
-                    if (closedBy) {
-                        newScores[closedBy] = (newScores[closedBy] || 0) + 1
-                    }
-
-                    const newEvents = prev.events.map(e =>
-                        e.id === eventData.eventId ? {
-                            ...e,
-                            closedAt: closedAt,
-                            closedBy: closedBy,
-                            positionX: e.positionX,
-                            positionY: e.positionY,
-                        } : e
-                    )
-
-                    return {
-                        ...prev,
-                        closedErrors: prev.closedErrors + 1,
-                        scores: newScores,
-                        events: newEvents,
-                    }
-                })
+                updateLocalStateForClosedError(
+                    eventData.eventId,
+                    eventData.userId,
+                    eventData.createdAt
+                )
             })
 
         // Postgres changes channel for game state
@@ -426,18 +392,20 @@ export function useErrorHunter({
                 table: 'error_events',
                 filter: `room_id=eq.${roomId}`,
             }, async (payload: any) => {
-                const matchId = payload.new.match_id;
-                const appearanceAt = payload.new.appearance_at;
+                // ゲーム開始検知: 新しいエラーイベントが作成されたらゲームをセットアップ
+                const matchId = payload.new.match_id
+                const appearanceAt = payload.new.appearance_at
 
-                if (!matchId) return;
-                if (!appearanceAt) return;
-                if (isSetupGameStatusRef.current) return;
+                if (!matchId) return
+                if (!appearanceAt) return
+                if (isSetupGameStatusRef.current) return
 
-                matchIdRef.current = matchId;
+                // ゲーム状態の初期化
+                matchIdRef.current = matchId
                 const progressData = await getMatchProgress(matchId)
                 setProgress(progressData)
-                const matchesAndEvents = await getMatchWithEvents(matchId)
-                setMatch(matchesAndEvents)
+                const matchData = await getMatchWithEvents(matchId)
+                setMatch(matchData)
                 setupAppearanceTimer(appearanceAt)
                 isSetupGameStatusRef.current = true
             })
@@ -447,15 +415,14 @@ export function useErrorHunter({
                 table: 'matches',
                 filter: `room_id=eq.${roomId}`
             }, async (payload: any) => {
-                if (!payload.new.winner_id) return;
-                if (payload.new.status !== "FINISHED") return;
+                // ゲーム終了検知: 勝者が決定したらRESULTフェーズへ
+                if (!payload.new.winner_id) return
+                if (payload.new.status !== 'FINISHED') return
 
-                const comment = await getUserComment(payload.new.winner_id);
-
-                setWinnerComment(comment);
-                useSE().play('tada');
-
-                setPhase('RESULT');
+                const comment = await getUserComment(payload.new.winner_id)
+                setWinnerComment(comment)
+                useSE().play('tada')
+                setPhase('RESULT')
             })
             .subscribe()
 
