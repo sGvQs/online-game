@@ -72,7 +72,6 @@ export function ErrorHunterGame({
         handleFinish,
         waitProgress,
         winnerComment,
-        isWinnerCommentLoading,
     } = useErrorHunter({ roomId, isHost, initialMatchId })
 
 
@@ -347,7 +346,7 @@ export function ErrorHunterGame({
                     <Win95Dialog
                         title="Result"
                         icon="lose"
-                        buttons={isWinnerCommentLoading ? [] : [{
+                        buttons={[{
                             label: '終了',
                             onClick: handleFinish,
                             primary: true,

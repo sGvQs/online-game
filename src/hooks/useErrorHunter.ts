@@ -32,7 +32,6 @@ export interface UseErrorHunterReturn {
     handleFinish: () => Promise<void>
     waitProgress: number
     winnerComment: string | null
-    isWinnerCommentLoading: boolean
 }
 
 interface UseErrorHunterProps {
@@ -67,17 +66,17 @@ export function useErrorHunter({
 
     // 既に閉じられたエラーIDを保持するSet (クライアントサイドフィルタリング用)
     const closedEventIds = useRef<Set<string>>(new Set())
+    const isSetupGameStatusRef = useRef<boolean>(false)
 
     const [waitProgress, setWaitProgress] = useState(0)
     const [winnerComment, setWinnerComment] = useState<string | null>(null)
-    const [isWinnerCommentLoading, setIsWinnerCommentLoading] = useState(false)
 
     // state の最新値を ref に同期
     useEffect(() => {
         phaseRef.current = phase
     }, [phase])
 
-    // WAITING フェーズ用のプログレスバー (不確定プログレス風アニメーション)
+    // WAITING フェーズ用のプログレスバー
     useEffect(() => {
         if (phase !== 'WAITING') {
             setWaitProgress(0)
@@ -94,41 +93,6 @@ export function useErrorHunter({
 
         return () => clearInterval(interval)
     }, [phase])
-
-    // 勝者のコメントを取得
-    useEffect(() => {
-        if (phase === 'RESULT' && match?.winnerId) {
-            setIsWinnerCommentLoading(true)
-            getUserComment(match.winnerId).then(comment => {
-                setWinnerComment(comment)
-            }).catch(error => {
-                console.error('コメントの取得に失敗しました:', error)
-                setWinnerComment(null)
-            }).finally(() => {
-                setIsWinnerCommentLoading(false)
-                useSE().play('tada');
-            })
-        } else {
-            setWinnerComment(null)
-        }
-    }, [phase, match?.winnerId])
-
-    useEffect(() => {
-        matchIdRef.current = match?.id ?? initialMatchId
-
-        // Matchデータが更新されたら、閉じられたエラーIDをSetにも同期する
-        if (match?.errorEvents) {
-            match.errorEvents.forEach((e: ErrorEventWithUser) => {
-                if (e.closedBy) {
-                    closedEventIds.current.add(e.id)
-                }
-            })
-        }
-        // Matchがnull（リセット時など）ならSetもクリア
-        if (!match) {
-            closedEventIds.current.clear()
-        }
-    }, [match, initialMatchId])
 
     // ============================================
     // タイマー管理
@@ -207,7 +171,7 @@ export function useErrorHunter({
         } finally {
             setIsProcessing(false)
         }
-    }, [roomId, isHost, isProcessing, setupAppearanceTimer])
+    }, [roomId, isHost, isProcessing])
 
     /**
      * エラーモーダルのクリック（早い者勝ち）
@@ -231,11 +195,7 @@ export function useErrorHunter({
 
             // 自動終了チェック
             if (match.id) {
-                const finished = await checkAutoFinish(match.id, roomId)
-                if (finished) {
-                    // 全エラーが閉じられた → RESULT フェーズへ
-                    setPhase('RESULT')
-                }
+                await checkAutoFinish(match.id, roomId)
             }
 
         } catch (error) {
@@ -342,6 +302,7 @@ export function useErrorHunter({
 
                 if (!matchId) return;
                 if (!appearanceAt) return;
+                if (isSetupGameStatusRef.current) return;
 
                 matchIdRef.current = matchId;
                 const progressData = await getMatchProgress(matchId)
@@ -349,6 +310,7 @@ export function useErrorHunter({
                 const matchesAndEvents = await getMatchWithEvents(matchId)
                 setMatch(matchesAndEvents)
                 setupAppearanceTimer(appearanceAt)
+                isSetupGameStatusRef.current = true
             })
             .on('postgres_changes', {
                 event: 'UPDATE',
@@ -422,8 +384,16 @@ export function useErrorHunter({
                 schema: 'public',
                 table: 'matches',
                 filter: `room_id=eq.${roomId}`
-            }, () => {
-                setPhase('RESULT')
+            }, async (payload: any) => {
+                if (!payload.new.winner_id) return;
+                if (payload.new.status !== "FINISHED") return;
+
+                const comment = await getUserComment(payload.new.winner_id);
+
+                setWinnerComment(comment);
+                useSE().play('tada');
+
+                setPhase('RESULT');
             })
             .subscribe()
 
@@ -457,6 +427,5 @@ export function useErrorHunter({
         handleFinish,
         waitProgress,
         winnerComment,
-        isWinnerCommentLoading,
     }
 }
