@@ -72,7 +72,7 @@ export function ErrorHunterGame({
         handleFinish,
         waitProgress,
         winnerComment,
-    } = useErrorHunter({ roomId, isHost, initialMatchId })
+    } = useErrorHunter({ roomId, isHost, initialMatchId, currentUserId })
 
 
     // GamePageClient logic merged here

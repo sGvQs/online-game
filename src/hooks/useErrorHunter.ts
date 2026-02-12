@@ -38,6 +38,7 @@ interface UseErrorHunterProps {
     roomId: string
     isHost: boolean
     initialMatchId: string | null
+    currentUserId: string | null
 }
 
 // ============================================
@@ -48,6 +49,7 @@ export function useErrorHunter({
     roomId,
     isHost,
     initialMatchId, // 通常時はnullだが、ページリロード時にゲームが始まっていた時に渡される
+    currentUserId,
 }: UseErrorHunterProps): UseErrorHunterReturn {
     const supabase = createClient()
 
@@ -67,6 +69,7 @@ export function useErrorHunter({
     // 既に閉じられたエラーIDを保持するSet (クライアントサイドフィルタリング用)
     const closedEventIds = useRef<Set<string>>(new Set())
     const isSetupGameStatusRef = useRef<boolean>(false)
+    const broadcastChannelRef = useRef<ReturnType<typeof supabase.channel> | null>(null)
 
     const [waitProgress, setWaitProgress] = useState(0)
     const [winnerComment, setWinnerComment] = useState<string | null>(null)
@@ -165,13 +168,13 @@ export function useErrorHunter({
             // Server Action: Match + ErrorEvent を作成
             await startGame(roomId)
 
-
         } catch (error) {
             console.error('ゲーム開始に失敗:', error)
         } finally {
             setIsProcessing(false)
         }
     }, [roomId, isHost, isProcessing])
+
 
     /**
      * エラーモーダルのクリック（早い者勝ち）
@@ -187,9 +190,33 @@ export function useErrorHunter({
         // ★ クライアントサイドフィルタリング: 既に閉じられたと分かっているならスキップ
         if (closedEventIds.current.has(eventId)) return
 
+        // 第一関門：ローカルの状態では、一番早い
+        closedEventIds.current.add(eventId);
+
         setIsProcessing(true)
         try {
-            await clickError(eventId)
+
+            // 第二関門：ほんとに一番かDBでチェック
+            const isSuccess = await clickError(eventId)
+
+            if (!isSuccess) {
+                closedEventIds.current.delete(eventId);
+                return;
+            };
+
+            const event = {
+                eventId: eventId,
+                userId: currentUserId,
+                createdAt: new Date()
+            }
+
+            if (broadcastChannelRef.current) {
+                broadcastChannelRef.current.send({
+                    type: 'broadcast',
+                    event: 'click-error',
+                    payload: event
+                })
+            }
 
             // 自動終了チェック
             if (!match.id) return
@@ -245,7 +272,6 @@ export function useErrorHunter({
         const loadInitialMatch = async () => {
             try {
                 const existingMatch = await getMatchWithEvents(initialMatchId)
-                console.log('existingMatch', existingMatch)
                 if (!existingMatch) return
 
                 setMatch(existingMatch)
@@ -253,8 +279,6 @@ export function useErrorHunter({
 
                 const event = existingMatch.errorEvents[0]
                 if (!event) return
-
-                console.log('event', event)
 
                 // Match が FINISHED の場合は RESULT フェーズへ（47個すべて閉じられた状態）
                 if (existingMatch.status === 'FINISHED') {
@@ -285,6 +309,64 @@ export function useErrorHunter({
      * このサブスクリプションは roomId が変わらない限り再登録されない。
      */
     useEffect(() => {
+        // Broadcast channel for real-time game events
+        const broadcastChannel = supabase.channel(`error-hunter-broadcast-${roomId}`)
+        broadcastChannelRef.current = broadcastChannel
+
+        broadcastChannel
+            .on('broadcast', { event: 'click-error' }, (payload: any) => {
+                const eventData = payload.payload
+                if (!eventData) return
+                if (closedEventIds.current.has(eventData.eventId)) return
+
+                closedEventIds.current.add(eventData.eventId)
+
+                const closedAt = eventData.createdAt
+                const closedBy = eventData.userId
+
+                setMatch(prev => {
+                    if (!prev) return null
+                    const newEvents = prev.errorEvents.map((e) =>
+                        e.id === eventData.eventId ? {
+                            ...e,
+                            closedAt: closedAt,
+                            closedBy: closedBy,
+                        } : e
+                    )
+                    return { ...prev, errorEvents: newEvents }
+                })
+
+                setProgress(prev => {
+                    if (!prev) return null
+                    // 既にカウント済みならスキップ
+                    const existingEvent = prev.events.find(e => e.id === eventData.eventId)
+                    if (existingEvent?.closedBy) return prev
+
+                    const newScores = { ...prev.scores }
+                    if (closedBy) {
+                        newScores[closedBy] = (newScores[closedBy] || 0) + 1
+                    }
+
+                    const newEvents = prev.events.map(e =>
+                        e.id === eventData.eventId ? {
+                            ...e,
+                            closedAt: closedAt,
+                            closedBy: closedBy,
+                            positionX: e.positionX,
+                            positionY: e.positionY,
+                        } : e
+                    )
+
+                    return {
+                        ...prev,
+                        closedErrors: prev.closedErrors + 1,
+                        scores: newScores,
+                        events: newEvents,
+                    }
+                })
+            })
+
+        // Postgres changes channel for game state
         const channel = supabase
             .channel(`error_hunter_${roomId}`)
             .on('postgres_changes', {
@@ -293,9 +375,6 @@ export function useErrorHunter({
                 table: 'error_events',
                 filter: `room_id=eq.${roomId}`,
             }, async (payload: any) => {
-                // NOTE ゲーム開始時にUIが更新する
-                console.log('error_events INSERT', payload)
-
                 const matchId = payload.new.match_id;
                 const appearanceAt = payload.new.appearance_at;
 
@@ -310,73 +389,6 @@ export function useErrorHunter({
                 setMatch(matchesAndEvents)
                 setupAppearanceTimer(appearanceAt)
                 isSetupGameStatusRef.current = true
-            })
-            .on('postgres_changes', {
-                event: 'UPDATE',
-                schema: 'public',
-                table: 'error_events',
-                filter: `room_id=eq.${roomId}`,
-            }, (payload: any) => {
-                // payloadを受け取り、閉じられたエラーを配列(Set)に保存
-                const newEvent = payload.new
-
-                // Supabase Realtime returns raw DB column names (snake_case)
-                // We need to map them to camelCase to match our application types
-                const closedAt = newEvent?.closed_at
-                const closedBy = newEvent?.closed_by
-                const matchId = newEvent?.match_id
-
-                // Note: Supabase JS Client のプロパティは camelCase (eventType)
-                if (!newEvent || !closedAt) return
-
-                closedEventIds.current.add(newEvent.id)
-
-                // ★ UIも更新しておかないと、画面上で閉じたことにならない
-                setMatch(prev => {
-                    if (!prev) return null
-                    // 別の試合のイベントなら無視
-                    if (matchId && prev.id !== matchId) return prev
-
-                    const newEvents = prev.errorEvents.map((e) =>
-                        e.id === newEvent.id ? {
-                            ...e,
-                            closedAt: closedAt,
-                            closedBy: closedBy,
-                            // Map other potential updates if needed
-                            positionX: newEvent.position_x ?? e.positionX,
-                            positionY: newEvent.position_y ?? e.positionY,
-                        } : e
-                    )
-                    return { ...prev, errorEvents: newEvents }
-                })
-
-                // Progress State 更新 (スコア計算など)
-                setProgress(prev => {
-                    if (!prev) return null
-                    // 既にカウント済みならスキップ
-                    const existingEvent = prev.events.find(e => e.id === newEvent.id)
-                    if (existingEvent?.closedBy) return prev
-
-                    const newScores = { ...prev.scores }
-                    if (closedBy) {
-                        newScores[closedBy] = (newScores[closedBy] || 0) + 1
-                    }
-
-                    const newEvents = prev.events.map(e =>
-                        e.id === newEvent.id ? {
-                            ...e,
-                            closedAt: closedAt,
-                            closedBy: closedBy
-                        } : e
-                    )
-
-                    return {
-                        ...prev,
-                        closedErrors: prev.closedErrors + 1,
-                        scores: newScores,
-                        events: newEvents
-                    }
-                })
             })
             .on('postgres_changes', {
                 event: 'UPDATE',
@@ -396,10 +408,15 @@ export function useErrorHunter({
             })
             .subscribe()
 
+        // Subscribe broadcast channel
+        broadcastChannel.subscribe()
+
         return () => {
             supabase.removeChannel(channel)
+            supabase.removeChannel(broadcastChannel)
+            broadcastChannelRef.current = null
         }
-    }, [supabase, roomId, match?.id]) // match.idが変わったら再購読して filter を適用するのが正しいが、filterをコメントアウトしているため、match.idが変わってもチャネルは変わらない（名前はroomId依存）。ただし `match` の値をクロージャで最新にしたいなら依存に入れるべきだが、頻繁な再購読を避けるなら ref を使うのが定石。ここではあえて依存に戻して意図を明確化するか、あるいは [] のままなら matchIdRef を使うべき。簡単のため依存を戻します。
+    }, [supabase, roomId])
 
     /**
      * クリーンアップ: アンマウント時にタイマーを解除
