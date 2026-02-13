@@ -256,6 +256,7 @@ export function useErrorHunter({
      * ゲーム状態を完全にリセット（次のゲーム準備）
      */
     const resetGameState = useCallback(() => {
+        useSE().play('chime');
         setMatch(null)
         setProgress(null)
         setPhase('TITLE')
