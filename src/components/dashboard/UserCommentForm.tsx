@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { setUserComment } from '@/server/actions/user/getUserComment'
+import { setUserComment } from '@/server/actions/user/setUserComment'
 import { Input } from '@/components/ui/Input'
 import { Button } from '@/components/ui/Button'
 
@@ -16,7 +16,7 @@ export function UserCommentForm({ initialComment }: UserCommentFormProps) {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    
+
     startTransition(async () => {
       try {
         await setUserComment(comment)
@@ -49,7 +49,7 @@ export function UserCommentForm({ initialComment }: UserCommentFormProps) {
           {comment.length} / 100文字
         </p>
       </div>
-      
+
       <Button
         type="submit"
         disabled={isPending || comment === initialComment}
@@ -57,7 +57,7 @@ export function UserCommentForm({ initialComment }: UserCommentFormProps) {
       >
         {isPending ? '保存中...' : success ? '保存しました！' : 'コメントを保存'}
       </Button>
-      
+
       {success && (
         <p className="text-sm text-green-600 text-center">
           コメントが保存されました

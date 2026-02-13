@@ -6,7 +6,7 @@ import { PackagePlus, MessageSquare, Edit2, X, Check, Plus } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { IconButton } from '@/components/ui/IconButton'
 import { Input } from '@/components/ui/Input'
-import { setUserComment } from '@/server/actions/user/getUserComment'
+import { setUserComment } from '@/server/actions/user/setUserComment'
 import { createRoom } from '@/server/actions/room'
 
 interface DashboardSidebarProps {
@@ -152,11 +152,11 @@ function CreateRoomFormContent({ onClose }: { onClose: () => void }) {
 }
 
 // コメントフォームのコンテンツ
-function UserCommentFormContent({ 
-  initialComment, 
+function UserCommentFormContent({
+  initialComment,
   onClose,
   onSave
-}: { 
+}: {
   initialComment: string | null
   onClose: () => void
   onSave: (newComment: string) => void
@@ -167,7 +167,7 @@ function UserCommentFormContent({
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
-    
+
     startTransition(async () => {
       try {
         await setUserComment(comment)
@@ -205,8 +205,8 @@ function UserCommentFormContent({
           {comment.length} / 100文字
         </p>
         <div className="flex gap-2 mt-1">
-          <Button 
-            type="submit" 
+          <Button
+            type="submit"
             disabled={isPending || comment === initialComment}
             className="flex-1 bg-brand-300 hover:bg-brand-500 text-white shadow-[0_0_15px_rgba(99,102,241,0.5)] hover:shadow-[0_0_25px_rgba(99,102,241,0.6)] transition-all duration-300 gap-2"
           >

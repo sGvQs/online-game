@@ -72,6 +72,7 @@ export function ErrorHunterGame({
         handleFinish,
         waitProgress,
         winnerComment,
+        winnerName
     } = useErrorHunter({ roomId, isHost, initialMatchId, currentUserId })
 
 
@@ -365,7 +366,7 @@ export function ErrorHunterGame({
                                         borderRadius: '2px'
                                     }}
                                 >
-                                    {match?.winnerId === currentUserId ? "あなたから全員へのコメント" : "勝者からのコメント"}
+                                    {match?.winnerId === currentUserId ? `${winnerName}さんから皆さんへのコメント` : `${winnerName}さんからのコメント`}
                                 </p>
                                 <p style={{
                                     fontSize: '14px',
