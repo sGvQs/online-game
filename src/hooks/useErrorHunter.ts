@@ -495,7 +495,10 @@ export function useErrorHunter({
 
                 if (!matchId) return
                 if (!appearanceAt) return
+
+                // レースコンディション対策: 最初の1つだけを処理（アトミックチェック&セット）
                 if (isSetupGameStatusRef.current) return
+                isSetupGameStatusRef.current = true
 
                 // ゲーム状態の初期化
                 matchIdRef.current = matchId
@@ -504,7 +507,6 @@ export function useErrorHunter({
                 const matchData = await getMatchWithEvents(matchId)
                 setMatch(matchData)
                 setupAppearanceTimer(appearanceAt)
-                isSetupGameStatusRef.current = true
             })
             .on('postgres_changes', {
                 event: 'UPDATE',
