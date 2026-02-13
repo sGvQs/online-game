@@ -298,40 +298,79 @@ export function useErrorHunter({
 
     /**
      * エラーモーダルのクリック（早い者勝ち）
+     * 
+     * 楽観的UI更新を採用:
+     * 1. クリックした瞬間にUIを更新（即座にエラーモーダルを閉じる）
+     * 2. DBでの排他制御チェックをバックグラウンドで実行
+     * 3. DBチェックが失敗した場合はUIをロールバック
      */
     const handleClickError = useCallback(async (eventId: string) => {
         // ガード句: 基本条件チェック
         if (!match || isProcessing) return
         if (closedEventIds.current.has(eventId)) return
 
-        // 第一関門: 楽観的UI更新（ローカル状態で即座に閉じた扱いにする）
+        // 第一関門: 楽観的UI更新（クリックした瞬間にUIを閉じる）
         closedEventIds.current.add(eventId)
+
+        const optimisticEvent = {
+            eventId,
+            userId: currentUserId,
+            createdAt: new Date()
+        }
+
+        // 即座にローカル状態を更新（スピード感のある反応）
+        updateLocalStateForClosedError(eventId, optimisticEvent.userId, optimisticEvent.createdAt)
 
         setIsProcessing(true)
         try {
-            // 第二関門: DBでの排他制御チェック
+            // 第二関門: DBでの排他制御チェック（バックグラウンドで実行）
             const isSuccess = await clickError(eventId)
 
             if (!isSuccess) {
+                // DBチェック失敗 → UIをロールバック
                 closedEventIds.current.delete(eventId)
+
+                // 状態を元に戻す（エラーを未クローズ状態に）
+                setMatch(prev => {
+                    if (!prev) return null
+                    const newEvents = prev.errorEvents.map((e) =>
+                        e.id === eventId
+                            ? { ...e, closedAt: null, closedBy: null }
+                            : e
+                    )
+                    return { ...prev, errorEvents: newEvents }
+                })
+
+                setProgress(prev => {
+                    if (!prev) return null
+
+                    const newScores = { ...prev.scores }
+                    if (optimisticEvent.userId && newScores[optimisticEvent.userId]) {
+                        newScores[optimisticEvent.userId] = Math.max(0, newScores[optimisticEvent.userId] - 1)
+                    }
+
+                    const newEvents = prev.events.map(e =>
+                        e.id === eventId
+                            ? { ...e, closedAt: null, closedBy: null }
+                            : e
+                    )
+
+                    return {
+                        ...prev,
+                        closedErrors: Math.max(0, prev.closedErrors - 1),
+                        scores: newScores,
+                        events: newEvents,
+                    }
+                })
                 return
             }
 
-            const event = {
-                eventId,
-                userId: currentUserId,
-                createdAt: new Date()
-            }
-
-            // 他のクライアントへブロードキャスト
+            // DBチェック成功 → 他のクライアントへブロードキャスト
             broadcastChannelRef.current?.send({
                 type: 'broadcast',
                 event: 'click-error',
-                payload: event
+                payload: optimisticEvent
             })
-
-            // ローカル状態を即座に更新（即時フィードバック）
-            updateLocalStateForClosedError(eventId, event.userId, event.createdAt)
 
             // 全エラー終了チェック
             if (match.id) {
@@ -339,6 +378,8 @@ export function useErrorHunter({
             }
         } catch (error) {
             console.error('クリック処理に失敗:', error)
+            // エラー時もロールバック
+            closedEventIds.current.delete(eventId)
         } finally {
             setIsProcessing(false)
         }
