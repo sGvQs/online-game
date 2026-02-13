@@ -299,17 +299,18 @@ export function useErrorHunter({
     /**
      * エラーモーダルのクリック（早い者勝ち）
      * 
-     * 楽観的UI更新を採用:
-     * 1. クリックした瞬間にUIを更新（即座にエラーモーダルを閉じる）
-     * 2. DBでの排他制御チェックをバックグラウンドで実行
-     * 3. DBチェックが失敗した場合はUIをロールバック
+     * ハイブリッド設計（ブロードキャスト優先）:
+     * 1. クリックした瞬間にブロードキャスト送信 + 自身のUI更新
+     * 2. すべてのクライアントが即座にUI更新（超高速レスポンス）
+     * 3. バックグラウンドでDBに保存（永続化 + 最終勝者確定）
+     * 4. DB結果が異なる場合のみログ出力（ほぼ発生しない想定）
      */
     const handleClickError = useCallback(async (eventId: string) => {
         // ガード句: 基本条件チェック
         if (!match || isProcessing) return
         if (closedEventIds.current.has(eventId)) return
 
-        // 第一関門: 楽観的UI更新（クリックした瞬間にUIを閉じる）
+        // 第一関門: クライアントサイドフィルタリング
         closedEventIds.current.add(eventId)
 
         const optimisticEvent = {
@@ -318,68 +319,35 @@ export function useErrorHunter({
             createdAt: new Date()
         }
 
-        // 即座にローカル状態を更新（スピード感のある反応）
+        // 即座にブロードキャスト送信（全クライアントへ通知）
+        broadcastChannelRef.current?.send({
+            type: 'broadcast',
+            event: 'click-error',
+            payload: optimisticEvent
+        })
+
+        // 自分自身のUIも即座に更新
         updateLocalStateForClosedError(eventId, optimisticEvent.userId, optimisticEvent.createdAt)
 
+        // バックグラウンドでDB保存 + 勝者確定（非ブロッキング）
         setIsProcessing(true)
         try {
-            // 第二関門: DBでの排他制御チェック（バックグラウンドで実行）
             const isSuccess = await clickError(eventId)
 
             if (!isSuccess) {
-                // DBチェック失敗 → UIをロールバック
-                closedEventIds.current.delete(eventId)
-
-                // 状態を元に戻す（エラーを未クローズ状態に）
-                setMatch(prev => {
-                    if (!prev) return null
-                    const newEvents = prev.errorEvents.map((e) =>
-                        e.id === eventId
-                            ? { ...e, closedAt: null, closedBy: null }
-                            : e
-                    )
-                    return { ...prev, errorEvents: newEvents }
-                })
-
-                setProgress(prev => {
-                    if (!prev) return null
-
-                    const newScores = { ...prev.scores }
-                    if (optimisticEvent.userId && newScores[optimisticEvent.userId]) {
-                        newScores[optimisticEvent.userId] = Math.max(0, newScores[optimisticEvent.userId] - 1)
-                    }
-
-                    const newEvents = prev.events.map(e =>
-                        e.id === eventId
-                            ? { ...e, closedAt: null, closedBy: null }
-                            : e
-                    )
-
-                    return {
-                        ...prev,
-                        closedErrors: Math.max(0, prev.closedErrors - 1),
-                        scores: newScores,
-                        events: newEvents,
-                    }
-                })
-                return
+                // DBでは他のユーザーが勝った
+                // しかしブロードキャストで既に全員のUIは更新済み
+                // 真の勝者はDBに記録されているので、ゲーム終了時に正しい結果が反映される
+                console.log(`[handleClickError] DB check failed for event ${eventId}, but UI already updated via broadcast`)
             }
 
-            // DBチェック成功 → 他のクライアントへブロードキャスト
-            broadcastChannelRef.current?.send({
-                type: 'broadcast',
-                event: 'click-error',
-                payload: optimisticEvent
-            })
-
-            // 全エラー終了チェック
+            // 全エラー終了チェック（DB上の状態を確認）
             if (match.id) {
                 await checkAutoFinish(match.id, roomId)
             }
         } catch (error) {
-            console.error('クリック処理に失敗:', error)
-            // エラー時もロールバック
-            closedEventIds.current.delete(eventId)
+            console.error('DB保存に失敗:', error)
+            // UIは既に更新済みなので、エラーログのみ
         } finally {
             setIsProcessing(false)
         }
