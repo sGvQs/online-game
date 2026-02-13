@@ -14,7 +14,9 @@ export default async function ErrorHunterPage({ params }: { params: { roomId: st
     const { roomId } = await params
 
     const room = await getRoomWithReadyStatus(roomId)
-    if (!room) return <div>Room not found</div>
+    if (!room) {
+        redirect('/dashboard')
+    }
 
     // ユーザーがメンバーかチェック
     const isMember = room.users.some((u: RoomUserWithReadyStatus) => u.userId === currentUser.user.id)

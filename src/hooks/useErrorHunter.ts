@@ -15,6 +15,62 @@ import { getUserComment } from '@/server/actions/user/getUserComment'
 import { useSE } from './useSE'
 
 // ============================================
+// Supabase Realtime ペイロード型定義
+// ============================================
+
+/**
+ * Supabaseから受け取るデータはデータベースのカラム名（snake_case）
+ * Prismaの型（camelCase）とは異なるため、別途定義が必要
+ */
+
+/** error_events テーブルの型（snake_case） */
+interface ErrorEventRow {
+    id: string
+    match_id: string
+    appearance_at: string
+    closed_at: string | null
+    closed_by: string | null
+    position_x: number
+    position_y: number
+    room_id: string
+}
+
+/** matches テーブルの型（snake_case） */
+interface MatchRow {
+    id: string
+    room_id: string
+    game_type: string
+    status: string
+    winner_id: string | null
+    created_at: string
+}
+
+/** Supabase Realtime の postgres_changes イベントペイロード */
+interface RealtimePostgresChangesPayload<T> {
+    commit_timestamp: string
+    errors: null | string
+    eventType: 'INSERT' | 'UPDATE' | 'DELETE'
+    new: T
+    old: Partial<T>
+    schema: string
+    table: string
+}
+
+/** Broadcast イベントのペイロード */
+interface BroadcastPayload<T> {
+    type: 'broadcast'
+    event: string
+    payload: T
+}
+
+/** エラークリック時のブロードキャストペイロード */
+interface ErrorClickPayload {
+    eventId: string
+    userId: string | null
+    createdAt: Date
+}
+
+// ============================================
 // 型定義
 // ============================================
 
@@ -370,7 +426,7 @@ export function useErrorHunter({
         broadcastChannelRef.current = broadcastChannel
 
         broadcastChannel
-            .on('broadcast', { event: 'click-error' }, (payload: any) => {
+            .on('broadcast', { event: 'click-error' }, (payload: BroadcastPayload<ErrorClickPayload>) => {
                 const eventData = payload.payload
                 if (!eventData) return
                 if (closedEventIds.current.has(eventData.eventId)) return
@@ -391,7 +447,7 @@ export function useErrorHunter({
                 schema: 'public',
                 table: 'error_events',
                 filter: `room_id=eq.${roomId}`,
-            }, async (payload: any) => {
+            }, async (payload: RealtimePostgresChangesPayload<ErrorEventRow>) => {
                 // ゲーム開始検知: 新しいエラーイベントが作成されたらゲームをセットアップ
                 const matchId = payload.new.match_id
                 const appearanceAt = payload.new.appearance_at
@@ -414,7 +470,7 @@ export function useErrorHunter({
                 schema: 'public',
                 table: 'matches',
                 filter: `room_id=eq.${roomId}`
-            }, async (payload: any) => {
+            }, async (payload: RealtimePostgresChangesPayload<MatchRow>) => {
                 // ゲーム終了検知: 勝者が決定したらRESULTフェーズへ
                 if (!payload.new.winner_id) return
                 if (payload.new.status !== 'FINISHED') return

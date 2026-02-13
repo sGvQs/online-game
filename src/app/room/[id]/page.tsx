@@ -14,7 +14,9 @@ export default async function RoomPage({ params }: { params: { id: string } }) {
     const { id } = await params
 
     const room = await getRoomWithUsers(id)
-    if (!room) return <div>Room not found</div>
+    if (!room) {
+        redirect('/dashboard')
+    }
 
     // ユーザーがメンバーかチェック
     const isMember = room.users.some((u: RoomUserWithReadyStatus) => u.userId === currentUser.user.id)
