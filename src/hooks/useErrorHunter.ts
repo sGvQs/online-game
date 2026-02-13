@@ -300,17 +300,45 @@ export function useErrorHunter({
 
 
     /**
+     * DB保存処理（非同期・非ブロッキング）
+     * 
+     * UI更新とは独立して実行され、複数のエラーを高速クリックしても並列処理される
+     */
+    const saveErrorClickToDb = useCallback(async (eventId: string, matchId: string) => {
+        try {
+            const isSuccess = await clickError(eventId)
+
+            if (!isSuccess) {
+                // DBでは他のユーザーが勝った
+                // しかしブロードキャストで既に全員のUIは更新済み
+                // 真の勝者はDBに記録されているので、ゲーム終了時に正しい結果が反映される
+                console.log(`[saveErrorClickToDb] DB check failed for event ${eventId}, but UI already updated via broadcast`)
+            }
+
+            // 全エラー終了チェック（DB上の状態を確認）
+            await checkAutoFinish(matchId, roomId)
+        } catch (error) {
+            console.error('DB保存に失敗:', error)
+            // UIは既に更新済みなので、エラーログのみ
+        }
+    }, [roomId])
+
+    /**
      * エラーモーダルのクリック（早い者勝ち）
      * 
      * ハイブリッド設計（ブロードキャスト優先）:
-     * 1. クリックした瞬間にブロードキャスト送信 + 自身のUI更新
+     * 1. クリックした瞬間にブロードキャスト送信 + 自身のUI更新（同期的・即座）
      * 2. すべてのクライアントが即座にUI更新（超高速レスポンス）
-     * 3. バックグラウンドでDBに保存（永続化 + 最終勝者確定）
+     * 3. バックグラウンドでDBに保存（非同期・非ブロッキング・並列実行可能）
      * 4. DB結果が異なる場合のみログ出力（ほぼ発生しない想定）
+     * 
+     * 💡 複数のエラーを高速クリック可能:
+     * - closedEventIds のみでガード（エラーごとに独立）
+     * - isProcessing は使用しない（グローバルロックを回避）
      */
     const handleClickError = useCallback(async (eventId: string) => {
-        // ガード句: 基本条件チェック
-        if (!match || isProcessing) return
+        // ガード句: 重複クリック防止（エラーごとに独立してチェック）
+        if (!match) return
         if (closedEventIds.current.has(eventId)) return
 
         // 第一関門: クライアントサイドフィルタリング
@@ -332,29 +360,10 @@ export function useErrorHunter({
         // 自分自身のUIも即座に更新
         updateLocalStateForClosedError(eventId, optimisticEvent.userId, optimisticEvent.createdAt)
 
-        // バックグラウンドでDB保存 + 勝者確定（非ブロッキング）
-        setIsProcessing(true)
-        try {
-            const isSuccess = await clickError(eventId)
-
-            if (!isSuccess) {
-                // DBでは他のユーザーが勝った
-                // しかしブロードキャストで既に全員のUIは更新済み
-                // 真の勝者はDBに記録されているので、ゲーム終了時に正しい結果が反映される
-                console.log(`[handleClickError] DB check failed for event ${eventId}, but UI already updated via broadcast`)
-            }
-
-            // 全エラー終了チェック（DB上の状態を確認）
-            if (match.id) {
-                await checkAutoFinish(match.id, roomId)
-            }
-        } catch (error) {
-            console.error('DB保存に失敗:', error)
-            // UIは既に更新済みなので、エラーログのみ
-        } finally {
-            setIsProcessing(false)
-        }
-    }, [match, roomId, isProcessing, currentUserId, updateLocalStateForClosedError])
+        // 🚀 DB保存は非同期で別処理として実行（ノンブロッキング）
+        // await しないことで、複数のエラーを高速クリックしても並列処理される
+        saveErrorClickToDb(eventId, match.id)
+    }, [match, currentUserId, updateLocalStateForClosedError, saveErrorClickToDb])
 
     /**
      * ゲーム終了 → タイトルモーダルに戻る
