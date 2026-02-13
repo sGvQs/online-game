@@ -2,7 +2,7 @@
 
 import { useErrorHunter } from '@/hooks/useErrorHunter'
 import { useGameRoom } from '@/hooks/useGameRoom'
-import { returnToRoom } from '@/server/actions/room'
+import { returnToRoom, leaveRoom } from '@/server/actions/room'
 import { Win95Dialog } from '../Win95Dialog'
 import { Win95ProgressBar } from '../Win95ProgressBar'
 import { Win95Button } from '../Win95Button'
@@ -59,6 +59,10 @@ export function ErrorHunterGame({
 
     const handleClose = async () => {
         await returnToRoom(roomId)
+    }
+
+    const handleLeave = async () => {
+        await leaveRoom(roomId)
     }
 
     // エラーハンターゲームのロジックを統治するHooks
@@ -245,6 +249,15 @@ export function ErrorHunterGame({
                                             onClick={handleClose}
                                         >
                                             Close
+                                        </Win95Button>
+                                    )}
+
+                                    {!isHost && (
+                                        <Win95Button
+                                            className={styles.panelButton()}
+                                            onClick={handleLeave}
+                                        >
+                                            LEAVE
                                         </Win95Button>
                                     )}
                                 </div>
