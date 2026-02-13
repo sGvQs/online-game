@@ -57,11 +57,6 @@ export function DashboardSidebar({ initialComment }: DashboardSidebarProps) {
         ) : (
           <CreateRoomFormContent onClose={handleRoomFormClose} />
         )}
-        <div className="mt-6 pt-6 border-t border-brand-100">
-          <p className="text-xs text-brand-900 leading-relaxed">
-            新しいルームを作成して、友達とゲームを始めましょう。
-          </p>
-        </div>
       </div>
 
       {/* 煽りコメント設定セクション */}
@@ -72,16 +67,10 @@ export function DashboardSidebar({ initialComment }: DashboardSidebarProps) {
         </h2>
         {!commentFormOpen ? (
           <div className="space-y-3">
-            {currentComment ? (
+            {currentComment && (
               <div className="p-3 bg-white/10 rounded-lg border border-brand-200/30">
                 <p className="text-xs text-brand-900 opacity-90">
                   {currentComment}
-                </p>
-              </div>
-            ) : (
-              <div className="p-3 bg-white/10 rounded-lg border border-brand-200/30">
-                <p className="text-xs text-brand-900 opacity-70">
-                  コメントが設定されていません
                 </p>
               </div>
             )}
@@ -103,11 +92,6 @@ export function DashboardSidebar({ initialComment }: DashboardSidebarProps) {
             }}
           />
         )}
-        <div className="mt-6 pt-6 border-t border-brand-100">
-          <p className="text-xs text-brand-900 leading-relaxed">
-            ゲームで勝利した際に、他のプレイヤーに表示されるコメントを設定できます。
-          </p>
-        </div>
       </div>
     </aside>
   )
@@ -147,6 +131,11 @@ function CreateRoomFormContent({ onClose }: { onClose: () => void }) {
           />
         </div>
       </form>
+      <div className="mt-6 pt-6 border-t border-brand-100">
+        <p className="text-xs text-brand-900 leading-relaxed">
+          新しいルームを作成して、友達とゲームを始めましょう。
+        </p>
+      </div>
     </div>
   )
 }
@@ -228,6 +217,11 @@ function UserCommentFormContent({
           </p>
         )}
       </form>
+      <div className="mt-6 pt-6 border-t border-brand-100">
+        <p className="text-xs text-brand-900 leading-relaxed">
+          ゲームで勝利した際に、他のプレイヤーに表示されるコメントを設定できます。
+        </p>
+      </div>
     </div>
   )
 }
