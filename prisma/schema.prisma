@@ -21,6 +21,7 @@ model User {
   userIDPs     UserIDP[]
   guestHands   GuestHand[]
   jankenLogs   JankenLog[]
+  matchScores  MatchScore[]
 
   @@map("users")
 }
@@ -88,16 +89,19 @@ model ErrorEvent {
 }
 
 model Match {
-  id          String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  roomId      String       @map("room_id") @db.Uuid
-  gameType    String       @map("game_type")
-  status      String       @default("WAITING")
-  winnerId    String?      @map("winner_id") @db.Uuid
-  createdAt   DateTime     @default(now()) @map("created_at")
+  id               String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  roomId           String       @map("room_id") @db.Uuid
+  gameType         String       @map("game_type")
+  status           String       @default("WAITING")
+  winnerId         String?      @map("winner_id") @db.Uuid
+  createdAt        DateTime     @default(now()) @map("created_at")
+  currentTurnIndex Int          @default(1) @map("current_turn_index")
+  totalTurns       Int          @default(1) @map("total_turns")
   
   errorEvents  ErrorEvent[]
   jankenEvents JankenEvent[]
   jankenLogs   JankenLog[]
+  matchScores  MatchScore[]
   room         Room         @relation(fields: [roomId], references: [id], onDelete: Cascade)
   winner       User?        @relation(fields: [winnerId], references: [id])
 
@@ -108,15 +112,18 @@ model Match {
 
 // 1ターンの状態管理
 model JankenEvent {
-  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  matchId       String   @map("match_id") @db.Uuid
-  currentHostId String   @map("current_host_id") @db.Uuid
-  turnNumber    Int      @default(1) @map("turn_number")
-  phase         String   @default("SETUP")
-  phaseEndsAt   DateTime @map("phase_ends_at")
-  initialHand   String?  @map("initial_hand")
-  finalHostHand String?  @map("final_host_hand")
-  fakeTarget    String   @default("NONE") @map("fake_target")
+  id                     String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  matchId                String   @map("match_id") @db.Uuid
+  currentHostId          String   @map("current_host_id") @db.Uuid
+  turnNumber             Int      @default(1) @map("turn_number")
+  phase                  String   @default("SETUP")
+  phaseEndsAt            DateTime @map("phase_ends_at")
+  initialHand            String?  @map("initial_hand")
+  finalHostHand          String?  @map("final_host_hand")
+  fakeTarget             String   @default("NONE") @map("fake_target")
+  fakeHandValue          String?  @map("fake_hand_value")
+  fakeChangeRateValue    Int?     @map("fake_change_rate_value")
+  fakeFavoriteHandValue  String?  @map("fake_favorite_hand_value")
   
   match         Match      @relation(fields: [matchId], references: [id], onDelete: Cascade)
   guestHands    GuestHand[]
@@ -153,4 +160,19 @@ model JankenLog {
   
   @@index([userId, initialHand])
   @@map("janken_logs")
+}
+
+// ポイント管理（ターン制ゲーム用）
+model MatchScore {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  matchId   String   @map("match_id") @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  points    Int      @default(0)
+  createdAt DateTime @default(now()) @map("created_at")
+  
+  match     Match    @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id])
+  
+  @@unique([matchId, userId])
+  @@map("match_scores")
 }

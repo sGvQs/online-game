@@ -39,10 +39,16 @@ export type {
     JankenEvent,
     GuestHand,
     JankenLog,
+    MatchScore,
     JankenEventWithGuests,
     MatchWithJankenEvents,
+    MatchWithScores,
+    MatchScoreWithUser,
     HostStats,
+    FakeDetails,
+    RoundResult,
     JankenPhase,
     HandType,
     FakeTarget,
 } from './game';
+

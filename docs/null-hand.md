@@ -1,105 +1,54 @@
-# 【新規開発要件】リアルタイム心理戦ゲーム「NULL HAND」の実装
+# 【追加改修要件】DECEPTION QUBEのシステムおよびUIの修正
 
-## 1. プロジェクト概要と世界観
-Next.js (App Router) + Supabase + Prisma を使用したマルチプレイゲームプラットフォームに、新しいミニゲームを追加します。
+前回のコード出力ありがとうございます。基本的な通信はできていますが、ゲームの根幹となる「ループ処理」「ポイント制」「UIの世界観」にいくつか重要な抜け漏れがあるため、以下の要件に従って大規模なリファクタリング・機能追加をお願いします。
 
-* **ゲーム名**: NULL HAND (じゃんけんをベースにした心理戦ゲーム)
-* **世界観・UI**: 初代PlayStationのパズルゲーム『I.Q (Intelligent Qube)』のような、暗闇、冷徹、無機質、幾何学的なデザイン。
-* **3D要素**: `@react-three/fiber` を用いて 手（✊、✌️、✋）を表現し、暗闇に浮かび上がるように描画します。
+## 1. UI/UXデザインの徹底的な修正（ネオン禁止）
+現在のUIがサイバーパンクのような「ネオン風」になっていますが、これを完全に排除してください。
+* **カラースキーム**: **純粋な黒（`#000000`）と白（`#FFFFFF`）のみ**を使用してください。白はグレーまでカラーを使用していいです。
+* **デザイン言語**: PlayStationの『I.Q』のような、冷徹で無機質なデザイン。影や光彩（glow効果）、グラデーションは一切不要です。
+* **フォント**: 等幅フォント（Monospace）を使用し、システムログやデバッグ画面のような冷たいテキスト配置にしてください。
+* **3Dオブジェクト (R3F)**: まず絵文字ではなくて、react-three-fiberを使用して、じゃんけんの手を表現してください。マテリアルは発光させず、純白のワイヤーフレームか、陰影の強いソリッドなマットホワイト（白黒のコントラストのみ）で表現してください。
 
-## 2. ルーティングと基本システム
-以前作成した「Error Hunter」というゲームと同じ基盤・ルーティングを踏襲します。
 
-* **待機画面**: `/room/[roomId]` (ここにゲーム選択一覧があり、ホストが選ぶと全員が遷移する)
-* **ゲーム画面**: `/game/[roomId]/null-hand`
-* **通信仕様**: Supabase Realtime を使用しますが、**ペイロードは一切信用せず、変更の「シグナル」としてのみ使用**します。シグナルを受信したら必ず Server Action を経由して Prisma から最新データを取得（再検証）してください。
+## 2. ゲームフローとターン制（人数分のループ）の導入
+「ゲームが1回で終わってしまう」という致命的なバグを修正します。参加ユーザー全員が1回ずつホストを経験するまでが「1つのゲーム（Match）」です。
 
-## 3. ゲームフローとタイムリミット（ターン制）
-参加人数分ターンを回し、各ターンで1人が「ホスト」、残りが「ゲスト」となります。
-各フェーズには**制限時間（`phaseEndsAt`）**を設け、時間切れの場合は自動的にデフォルトの手が選ばれるか、次のフェーズへ強制移行します。
+**【正しいゲームフロー】**
+1. **準備完了〜ゲーム開始**: 全員が揃ったら開始。
+2. **ホストのターン開始 (1人目)**: `currentHostId` を設定。
+3. **SETUP (ホストの設定)**: ホストが自分の手と嘘を決める（詳細後述）。
+4. **SHOWCASE (ユーザー確認)**: ゲスト全員がホストの提示した情報（嘘含む）を確認。
+5. **FINAL_DECISION (ホスト最終決定)**: ホストは自分の手を変えるか、そのままにするか選ぶ。
+6. **BATTLE (ゲストの手選択)**: ゲストが自分の手を選ぶ。
+7. **RESULT (ターンごとの結果とポイント集計)**: 誰が勝ち、誰が負けたのかを白黒のUIで明確に表示。ポイントを加算。
+8. **次のホストへ**: ホストを次のユーザー（2人目）に交代し、Step 3〜7 を繰り返す。
+9. **最終ポイント集計**: 全員がホストをやり終えたら、最終的な総合ポイントと順位を表示し、終了。
 
-### フェーズ進行（1ターン内）
-1. **SETUP (ホストの策略フェーズ)**
-   * **ホストのみ**: 自分の過去の対戦統計（よく出す手、手を変える確率）を確認する。
-   * 「仮置きの手（✊、✌️、✋）」を選択する。
-   * ユーザーを騙すための「嘘（Fake）」の対象を1つ選ぶ。（例：仮置きの手を偽装する、確率の数字を偽装する、よく出す手を偽装する）。
-   * 完了すると SHOWCASE へ。
-2. **SHOWCASE (情報の開示と確認フェーズ)**
-   * **全員**: ゲストの画面に、ホストの「仮置きの手」と「統計データ（嘘が混じっている可能性がある）」が3D表現と無機質なテキストで表示される。
-   * ゲストは情報を確認し「CONFIRM（確認）」ボタンを押す。全員押すか時間切れで次へ。
-3. **FINAL_DECISION (ホストの最終決定フェーズ)**
-   * **ホストのみ**: ゲストの心理を読み、自分の手を「変える」か「そのまま」か最終決定する（裏側で確定させるためゲストには見せない）。
-4. **BATTLE (ゲストの手入力〜リザルトフェーズ)**
-   * **ゲスト**: 最終的な自分の手を決定する。
-   * 全員が決定するか時間切れになった瞬間、ホストの本当の手が公開され、勝敗判定が行われる。
+## 3. ポイント集計システムの実装
+以下のルールでポイント（Score）を計算・蓄積するロジックと、DBへの保存（`Match` に紐づくスコアテーブル等）を追加してください。
+* **ゲストの勝利**: ホストに勝ったゲストは **+1ポイント**。
+* **ホストの完全勝利**: ゲスト全員に勝利した場合のみ、ホストに **+3ポイント**（誰もホストに勝てなかった場合）。
 
-## 4. データベース設計 (Prisma)
-既存の `Room`, `Match` テーブルを拡張・連携し、以下の構造で実装してください。
+## 4. ホストの SETUP フェーズ画面の修正
+現在、ホストが「自分の今までの統計を見る機能」と「具体的な偽の手を入力するUI」が欠如しています。以下の要素をホストの画面に必ず実装してください。
 
-```prisma
-// 既存のMatchテーブル（ゲームの全体進行を管理）
-model Match {
-  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  roomId      String   @map("room_id") @db.Uuid
-  gameType    String   @map("game_type") // 今回は "DECEPTION_QUBE"
-  status      String   @default("WAITING") // WAITING, PLAYING, FINISHED
-  
-  jankenEvents JankenEvent[]
-  // ...他リレーション
-}
+* **リアルデータの表示**: 画面上部に、サーバーから取得した「あなたの本当の変更確率 (Real Change Rate)」と「あなたの本当によく出す手 (Real Fav Hand)」をテキストで表示する。
+* **入力フォーム（3ステップ）**:
+  1. **本命の選択**: 今回、最初に仮置きする手（▲■●）を選択。
+  2. **嘘（Fake）の対象選択**: 「嘘をつかない」「仮置きの手を偽る」「確率を偽る」「よく出す手を偽る」から選択。
+  3. **偽装内容の具体指定**: 
+     - 「仮置きの手を偽る」を選んだ場合、**「ユーザーに表示する偽の手（▲■●）」を選択するラジオボタン**を出現させる。
+     - 「確率を偽る」を選んだ場合、表示させる偽の％を入力または選択させる。
 
-// 1ターンの状態を管理するテーブル
-model JankenEvent {
-  id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  matchId          String   @map("match_id") @db.Uuid
-  currentHostId    String   @map("current_host_id") @db.Uuid
-  turnNumber       Int      @default(1) @map("turn_number")
-  
-  // 状態管理（SETUP -> SHOWCASE -> FINAL_DECISION -> BATTLE -> RESULT）
-  phase            String   @default("SETUP")
-  phaseEndsAt      DateTime @map("phase_ends_at") // フェーズの制限時間
-  
-  // 手の情報
-  initialHand      String?  @map("initial_hand")  // ホストが最初に選んだ手
-  finalHostHand    String?  @map("final_host_hand")// ホストが最終的に決めた手
-  
-  // 嘘（デセプション）の設定
-  // NONE, INITIAL_HAND, CHANGE_RATE, FAVORITE_HAND
-  fakeTarget       String   @default("NONE") @map("fake_target") 
-  
-  match            Match    @relation(fields: [matchId], references: [id], onDelete: Cascade)
-  @@map("janken_events")
-}
+## 5. RESULT画面の明瞭化
+リザルト画面で「誰が勝ったのか」がひと目で分かるように修正してください。
+* **ターン終了時**: 「HOST: ▲ vs GUEST: ■」のように両者の最終的な手を並べ、「WINNER: UserA, UserB」と白黒のハイコントラストで大きく表示する。
+* 各ユーザーの現在の累計ポイントも合わせて表示する。
 
-// 統計データを蓄積するテーブル（ホストの傾向分析用）
-model JankenLog {
-  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  userId       String   @map("user_id") @db.Uuid
-  initialHand  String   @map("initial_hand")
-  finalHand    String   @map("final_hand")
-  matchId      String   @map("match_id") @db.Uuid
-  createdAt    DateTime @default(now()) @map("created_at")
+## 6. 依頼内容（コード修正）
+上記を満たすために、以下のコードを修正・出力してください。
 
-  @@index([userId, initialHand]) // 高速な集計のための複合インデックス
-  @@map("janken_logs")
-}
-```
-
-## 5. 依頼内容（実装ステップ）
-まずは基盤となる以下の部分のコードを提示してください。
-
-Prisma スキーマの更新と、DB型定義。
-
-Server Actions (actions/janken.ts):
-
-startJankenMatch(roomId): マッチと最初のターンの JankenEvent を生成し、phaseEndsAt を設定する処理。
-
-getHostStats(userId): JankenLog を集計し、「手を変える確率」と「よく出す手」を計算して返す処理。
-
-UI/UXの基盤 (React Three Fiber):
-
-@react-three/fiber を用いて、（✊、✌️、✋）を暗闇に描画し、I.Q風の無機質なテキスト(tailwind-variants を使用)をオーバーレイ表示する基本コンポーネント構成。
-
-リアルタイム進行のフック (useJankenMatch.ts):
-
-Supabaseのシグナルを受信し、フェーズが切り替わった際に最新の JankenEvent データを取得・同期する処理。
+1. **Prisma スキーマ**: ポイントを管理する `MatchScore` または `RoomUser` へのカラム追加、および `Match` に `currentTurnIndex` (現在のターン数) などを追加したスキーマ。
+2. **サーバーアクション (`actions/janken.ts`)**: ターンを進める処理、ポイントを計算してDBに保存する処理、次のホストを選出する処理。
+3. **ホスト用 SETUP コンポーネント**: 自分の統計表示と、具体的な嘘の内容（偽の手など）を選べるUIの実装。
+4. **全体状態管理 (`useJankenMatch.ts` または同等のHooks)**: 人数分のターンが完了したら「最終ポイント集計画面」へ遷移する制御ロジック。

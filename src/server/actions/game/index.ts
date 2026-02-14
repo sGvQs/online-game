@@ -22,6 +22,8 @@ export {
     setGuestHand,
     getJankenEvent,
     getLatestJankenEvent,
+    getMatchScores,
     startNextTurn,
     finishJanken,
 } from './nullHandActions'
+

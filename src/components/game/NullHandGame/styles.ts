@@ -2,7 +2,8 @@ import { tv } from 'tailwind-variants'
 
 /**
  * NullHandGame コンポーネントのスタイル定義
- * I.Q (Intelligent Qube) 風の暗黒・無機質・幾何学的なデザイン
+ * I.Q風の白黒、無機質、幾何学的デザイン
+ * ネオン効果、グロー、グラデーションは一切使用しない
  */
 export const nullHandGame = tv({
     slots: {
@@ -15,11 +16,11 @@ export const nullHandGame = tv({
             'relative',
             'overflow-hidden',
             'flex items-center justify-center',
-            // I.Q風グリッド床（緑の線）
+            // シンプルなグリッド線
             "after:content-['']",
             'after:absolute',
             'after:inset-0',
-            'after:bg-[repeating-linear-gradient(0deg,rgba(0,255,0,0.05)_0px,transparent_1px,transparent_50px),repeating-linear-gradient(90deg,rgba(0,255,0,0.05)_0px,transparent_1px,transparent_50px)]',
+            'after:bg-[repeating-linear-gradient(0deg,rgba(255,255,255,0.03)_0px,transparent_1px,transparent_50px),repeating-linear-gradient(90deg,rgba(255,255,255,0.03)_0px,transparent_1px,transparent_50px)]',
             'after:pointer-events-none',
             'after:z-0',
         ],
@@ -38,65 +39,60 @@ export const nullHandGame = tv({
             'text-8xl',
             'font-bold',
             'mb-4',
-            'text-green-400',
-            '[text-shadow:0_0_20px_rgba(0,255,0,0.5),0_0_40px_rgba(0,255,0,0.3)]',
+            'text-white',
             'tracking-widest',
         ],
 
         subtitle: [
             'text-xl',
-            'text-green-300',
+            'text-gray-400',
             'mb-8',
             'tracking-[0.3em]',
-            '[text-shadow:0_0_10px_rgba(0,255,0,0.5)]',
         ],
 
         // プレイヤーリスト
         playerList: [
-            'bg-black/80',
-            'border border-green-400/30',
+            'bg-black',
+            'border border-white',
             'p-6',
             'mb-6',
-            '[box-shadow:0_0_20px_rgba(0,255,0,0.2)]',
         ],
 
         playerItem: [
-            'text-green-300',
+            'text-gray-300',
             'mb-2',
             'flex items-center justify-between',
             'px-4 py-2',
-            'border-l-2 border-green-400/50',
+            'border-l-2 border-gray-500',
         ],
 
         playerReady: [
-            'text-green-400',
+            'text-white',
             'font-bold',
-            '[text-shadow:0_0_10px_rgba(0,255,0,0.8)]',
         ],
 
         // ボタン
         button: [
             'px-8 py-3',
-            'bg-green-900/50',
-            'border border-green-400',
-            'text-green-300',
+            'bg-black',
+            'border border-white',
+            'text-white',
             'font-bold',
             'tracking-widest',
             'cursor-pointer',
-            'transition-all',
-            'hover:bg-green-800/50',
-            'hover:text-green-100',
-            'hover:[box-shadow:0_0_20px_rgba(0,255,0,0.5)]',
+            'transition-colors',
+            'hover:bg-white',
+            'hover:text-black',
             'disabled:opacity-30',
             'disabled:cursor-not-allowed',
-            'disabled:hover:bg-green-900/50',
-            'disabled:hover:[box-shadow:none]',
+            'disabled:hover:bg-black',
+            'disabled:hover:text-white',
         ],
 
         buttonPrimary: [
-            'bg-green-600/70',
-            'hover:bg-green-500/70',
-            '[box-shadow:0_0_15px_rgba(0,255,0,0.4)]',
+            'bg-white',
+            'text-black',
+            'hover:bg-gray-300',
         ],
 
         // ゲーム画面
@@ -114,10 +110,8 @@ export const nullHandGame = tv({
             'mb-8',
             'text-3xl',
             'font-bold',
-            'text-green-400',
+            'text-white',
             'tracking-[0.5em]',
-            '[text-shadow:0_0_20px_rgba(0,255,0,0.8)]',
-            'animate-pulse',
         ],
 
         // タイマーバー
@@ -125,15 +119,14 @@ export const nullHandGame = tv({
             'w-full',
             'h-4',
             'bg-black',
-            'border border-green-400/50',
+            'border border-white',
             'mb-8',
             'overflow-hidden',
         ],
 
         timerBar: [
             'h-full',
-            'bg-gradient-to-r from-green-400 to-yellow-400',
-            '[box-shadow:0_0_20px_rgba(0,255,0,0.8)]',
+            'bg-white',
             'transition-all duration-300',
         ],
 
@@ -148,8 +141,6 @@ export const nullHandGame = tv({
             'inline-block',
             'transform',
             'transition-transform duration-700',
-            'perspective-1000',
-            '[text-shadow:0_0_40px_rgba(0,255,0,0.5)]',
         ],
 
         handRevealed: [
@@ -163,33 +154,61 @@ export const nullHandGame = tv({
 
         // 統計パネル
         statsPanel: [
-            'bg-black/80',
-            'border border-green-400/30',
+            'bg-black',
+            'border border-white',
             'p-6',
             'mb-6',
-            '[box-shadow:0_0_20px_rgba(0,255,0,0.2)]',
         ],
 
         statItem: [
             'flex justify-between',
-            'text-green-300',
+            'text-gray-300',
             'mb-3',
             'pb-2',
-            'border-b border-green-400/20',
+            'border-b border-gray-800',
         ],
 
         statLabel: [
-            'text-green-400/70',
+            'text-gray-400',
             'uppercase',
             'text-sm',
             'tracking-wider',
         ],
 
         statValue: [
-            'text-green-300',
+            'text-white',
             'font-bold',
             'text-lg',
-            '[text-shadow:0_0_10px_rgba(0,255,0,0.5)]',
+        ],
+
+        // リアル統計パネル（ホストSETUPフェーズ用）
+        realStatsPanel: [
+            'bg-white',
+            'text-black',
+            'border border-white',
+            'p-6',
+            'mb-6',
+        ],
+
+        realStatItem: [
+            'flex justify-between',
+            'text-black',
+            'mb-3',
+            'pb-2',
+            'border-b border-gray-300',
+        ],
+
+        realStatLabel: [
+            'text-gray-600',
+            'uppercase',
+            'text-sm',
+            'tracking-wider',
+        ],
+
+        realStatValue: [
+            'text-black',
+            'font-bold',
+            'text-lg',
         ],
 
         // 手選択グリッド
@@ -203,21 +222,29 @@ export const nullHandGame = tv({
         handOption: [
             'aspect-square',
             'flex items-center justify-center',
-            'bg-black/50',
-            'border-2 border-green-400/30',
+            'bg-black',
+            'border-2 border-gray-600',
             'cursor-pointer',
             'transition-all',
-            'hover:border-green-400',
-            'hover:bg-green-900/30',
-            'hover:[box-shadow:0_0_30px_rgba(0,255,0,0.3)]',
+            'hover:border-white',
+            'hover:bg-gray-900',
             'text-9xl',
         ],
 
         handOptionSelected: [
-            'border-green-400',
-            'bg-green-900/50',
-            '[box-shadow:0_0_40px_rgba(0,255,0,0.6)]',
-            'scale-105',
+            'border-white',
+            'bg-gray-900',
+        ],
+
+        // 3D手表示用コンテナ
+        hand3DContainer: [
+            'aspect-square',
+            'border-2 border-gray-600',
+            'overflow-hidden',
+        ],
+
+        hand3DContainerSelected: [
+            'border-white',
         ],
 
         // 嘘選択（Fake Target）
@@ -230,22 +257,58 @@ export const nullHandGame = tv({
 
         fakeOption: [
             'px-6 py-4',
-            'bg-black/50',
-            'border border-red-400/30',
-            'text-red-300',
+            'bg-black',
+            'border border-gray-600',
+            'text-gray-300',
             'cursor-pointer',
             'transition-all',
-            'hover:border-red-400',
-            'hover:bg-red-900/30',
-            'hover:[box-shadow:0_0_20px_rgba(255,0,0,0.3)]',
+            'hover:border-white',
+            'hover:bg-gray-900',
             'flex items-center justify-between',
         ],
 
         fakeOptionSelected: [
-            'border-red-400',
-            'bg-red-900/50',
-            '[box-shadow:0_0_30px_rgba(255,0,0,0.5)]',
-            'text-red-100',
+            'border-white',
+            'bg-gray-900',
+            'text-white',
+        ],
+
+        // 偽装詳細入力
+        fakeDetailsSection: [
+            'mt-6',
+            'p-6',
+            'border border-white',
+            'bg-gray-900',
+        ],
+
+        inputLabel: [
+            'text-gray-300',
+            'mb-2',
+            'text-sm',
+            'uppercase',
+            'tracking-wider',
+        ],
+
+        select: [
+            'w-full',
+            'p-3',
+            'bg-black',
+            'border border-white',
+            'text-white',
+            'font-mono',
+            'cursor-pointer',
+        ],
+
+        numberInput: [
+            'w-full',
+            'p-3',
+            'bg-black',
+            'border border-white',
+            'text-white',
+            'font-mono',
+            '[appearance:textfield]',
+            '[&::-webkit-outer-spin-button]:appearance-none',
+            '[&::-webkit-inner-spin-button]:appearance-none',
         ],
 
         // リザルト画面
@@ -258,20 +321,105 @@ export const nullHandGame = tv({
             'text-6xl',
             'font-bold',
             'mb-8',
-            'text-green-400',
-            '[text-shadow:0_0_30px_rgba(0,255,0,0.8)]',
+            'text-white',
         ],
 
         resultMessage: [
             'text-2xl',
             'mb-12',
-            'text-green-300',
+            'text-gray-300',
+        ],
+
+        // 勝者表示
+        winnersSection: [
+            'my-8',
+            'p-6',
+            'border-2 border-white',
+            'bg-black',
+        ],
+
+        winnerTitle: [
+            'text-3xl',
+            'font-bold',
+            'mb-4',
+            'text-white',
+            'tracking-widest',
+        ],
+
+        winnerList: [
+            'text-xl',
+            'text-gray-300',
+        ],
+
+        // スコア表示
+        scoresSection: [
+            'my-8',
+            'p-6',
+            'border border-white',
+        ],
+
+        scoreItem: [
+            'flex justify-between',
+            'py-3',
+            'border-b border-gray-800',
+            'last:border-b-0',
+        ],
+
+        scoreRank: [
+            'text-gray-500',
+            'font-mono',
+            'w-12',
+        ],
+
+        scoreName: [
+            'text-white',
+            'flex-1',
+        ],
+
+        scorePoints: [
+            'text-white',
+            'font-bold',
+            'tabular-nums',
+        ],
+
+        // 最終スコア（GAME_OVER）
+        finalScoreItem: [
+            'flex justify-between items-center',
+            'py-4',
+            'px-6',
+            'border-b border-gray-800',
+            'last:border-b-0',
+        ],
+
+        finalScoreRank: [
+            'text-2xl',
+            'font-mono',
+            'w-16',
+            'text-gray-500',
+        ],
+
+        finalScoreName: [
+            'text-2xl',
+            'flex-1',
+            'text-white',
+        ],
+
+        finalScorePoints: [
+            'text-3xl',
+            'font-bold',
+            'tabular-nums',
+            'text-white',
+        ],
+
+        finalScoreWinner: [
+            'bg-white',
+            'text-black',
         ],
 
         // メッセージテキスト
         messageText: [
             'text-center',
-            'text-green-300',
+            'text-gray-300',
             'text-lg',
             'mb-6',
         ],
@@ -279,10 +427,34 @@ export const nullHandGame = tv({
         // 警告メッセージ
         warningText: [
             'text-center',
-            'text-yellow-400',
+            'text-white',
             'text-sm',
-            'italic',
-            '[text-shadow:0_0_10px_rgba(255,255,0,0.5)]',
+            'font-mono',
+            'tracking-widest',
+        ],
+
+        // vs表示
+        vsContainer: [
+            'flex items-center justify-center gap-8',
+            'my-12',
+        ],
+
+        vsLabel: [
+            'text-4xl',
+            'font-bold',
+            'text-gray-600',
+        ],
+
+        handLabel: [
+            'text-center',
+            'mb-4',
+        ],
+
+        handLabelText: [
+            'text-gray-400',
+            'text-sm',
+            'uppercase',
+            'tracking-wider',
         ],
     },
 })
