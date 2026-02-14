@@ -11,6 +11,7 @@ import {
     setGuestHand,
     getJankenEvent,
     getLatestJankenEvent,
+    getMatchScores,
     startNextTurn,
     finishJanken,
 } from '@/server/actions/game'
@@ -21,6 +22,8 @@ import type {
     JankenPhase,
     HandType,
     FakeTarget,
+    FakeDetails,
+    MatchScoreWithUser,
 } from '@/shared/types'
 import { useSE } from './useSE'
 
@@ -50,11 +53,13 @@ export interface UseNullHandReturn {
     hostStats: HostStats | null
     isProcessing: boolean
     timerProgress: number
+    currentScores: MatchScoreWithUser[]
     handleStartGame: () => Promise<void>
-    handleSetInitialHand: (hand: HandType, fakeTarget: FakeTarget) => Promise<void>
+    handleSetInitialHand: (hand: HandType, fakeTarget: FakeTarget, fakeDetails?: FakeDetails) => Promise<void>
     handleConfirmShowcase: () => Promise<void>
     handleSetFinalHostHand: (hand: HandType) => Promise<void>
     handleSetGuestHand: (hand: HandType) => Promise<void>
+    handleNextRound: () => Promise<void>
     handleFinish: () => Promise<void>
     isCurrentHost: boolean
 }
@@ -77,11 +82,13 @@ export function useNullHand({
     currentUserId,
 }: UseNullHandProps): UseNullHandReturn {
     const supabase = createClient()
+    const { play } = useSE()
 
     // ---- State ----
     const [phase, setPhase] = useState<JankenPhase>('TITLE')
     const [jankenEvent, setJankenEvent] = useState<JankenEventWithGuests | null>(null)
     const [hostStats, setHostStats] = useState<HostStats | null>(null)
+    const [currentScores, setCurrentScores] = useState<MatchScoreWithUser[]>([])
     const [isProcessing, setIsProcessing] = useState(false)
     const [timerProgress, setTimerProgress] = useState(0)
 
@@ -201,12 +208,12 @@ export function useNullHand({
     /**
      * ホストの初期手と嘘を設定
      */
-    const handleSetInitialHand = useCallback(async (hand: HandType, fakeTarget: FakeTarget) => {
+    const handleSetInitialHand = useCallback(async (hand: HandType, fakeTarget: FakeTarget, fakeDetails?: FakeDetails) => {
         if (!jankenEvent || isProcessing) return
 
         setIsProcessing(true)
         try {
-            await setInitialHand(jankenEvent.id, hand, fakeTarget)
+            await setInitialHand(jankenEvent.id, hand, fakeTarget, fakeDetails)
         } catch (error) {
             console.error('初期手設定に失敗:', error)
         } finally {
@@ -263,6 +270,22 @@ export function useNullHand({
     }, [jankenEvent, currentUserId, isProcessing])
 
     /**
+     * 次のラウンドへ遷移
+     */
+    const handleNextRound = useCallback(async () => {
+        if (!jankenEvent || isProcessing) return
+
+        setIsProcessing(true)
+        try {
+            await startNextTurn(jankenEvent.id)
+        } catch (error) {
+            console.error('次のラウンドへの遷移に失敗:', error)
+        } finally {
+            setIsProcessing(false)
+        }
+    }, [jankenEvent, isProcessing])
+
+    /**
      * ゲーム終了 → タイトルに戻る
      */
     const handleFinish = useCallback(async () => {
@@ -274,17 +297,36 @@ export function useNullHand({
             setJankenEvent(null)
             setHostStats(null)
             matchIdRef.current = null
-            useSE().play('chime')
+            play('chime')
         } catch (error) {
             console.error('ゲーム終了に失敗:', error)
         } finally {
             setIsProcessing(false)
         }
-    }, [isProcessing])
+    }, [isProcessing, play])
 
     // ============================================
     // Effects
     // ============================================
+
+    /**
+     * スコア取得
+     */
+    useEffect(() => {
+        if (!matchIdRef.current) return
+        if (phase !== 'RESULT' && phase !== 'GAME_OVER') return
+
+        const fetchScores = async () => {
+            try {
+                const scores = await getMatchScores(matchIdRef.current!)
+                setCurrentScores(scores)
+            } catch (error) {
+                console.error('スコア取得に失敗:', error)
+            }
+        }
+
+        fetchScores()
+    }, [matchIdRef, phase])
 
     /**
      * 初期データ取得
@@ -349,11 +391,13 @@ export function useNullHand({
         hostStats,
         isProcessing,
         timerProgress,
+        currentScores,
         handleStartGame,
         handleSetInitialHand,
         handleConfirmShowcase,
         handleSetFinalHostHand,
         handleSetGuestHand,
+        handleNextRound,
         handleFinish,
         isCurrentHost,
     }

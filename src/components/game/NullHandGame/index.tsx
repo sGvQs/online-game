@@ -4,7 +4,8 @@ import { useNullHand } from '@/hooks/useNullHand'
 import { useGameRoom } from '@/hooks/useGameRoom'
 import { returnToRoom } from '@/server/actions/room'
 import { nullHandGame } from './styles'
-import { RoomWithUsersAndReadyStatus, HandType, FakeTarget, RoomUserWithReadyStatus } from '@/shared/types'
+import { Hand3D } from './Hand3D'
+import { RoomWithUsersAndReadyStatus, HandType, FakeTarget, RoomUserWithReadyStatus, FakeDetails } from '@/shared/types'
 import { useState } from 'react'
 import { cn } from '@/lib/utils'
 
@@ -37,17 +38,20 @@ export function NullHandGame({
         hostStats,
         isProcessing,
         timerProgress,
+        currentScores,
         handleStartGame,
         handleSetInitialHand,
         handleConfirmShowcase,
         handleSetFinalHostHand,
         handleSetGuestHand,
+        handleNextRound,
         handleFinish,
         isCurrentHost,
     } = useNullHand({ roomId, isHost, initialMatchId, currentUserId })
 
     const [selectedHand, setSelectedHand] = useState<HandType | null>(null)
     const [selectedFake, setSelectedFake] = useState<FakeTarget>('NONE')
+    const [fakeDetails, setFakeDetails] = useState<FakeDetails>({})
 
     const handleClose = async () => {
         await returnToRoom(roomId)
@@ -142,9 +146,29 @@ export function NullHandGame({
                     <div>
                         <p className={styles.messageText()}>あなたはこのターンのホストです。手を選択してください。</p>
 
-                        {/* 統計表示 */}
+                        {/* リアル統計表示（ホストのみが見る） */}
+                        {hostStats && hostStats.realFavoriteHand && (
+                            <div className={styles.realStatsPanel()}>
+                                <h3 className="text-xl font-bold mb-4">YOUR REAL STATS (Private)</h3>
+                                <div className={styles.realStatItem()}>
+                                    <span className={styles.realStatLabel()}>Real Favorite Hand</span>
+                                    <span className={styles.realStatValue()}>
+                                        {hostStats.realFavoriteHand === 'ROCK' && '✊ ROCK'}
+                                        {hostStats.realFavoriteHand === 'SCISSORS' && '✌️ SCISSORS'}
+                                        {hostStats.realFavoriteHand === 'PAPER' && '✋ PAPER'}
+                                    </span>
+                                </div>
+                                <div className={styles.realStatItem()}>
+                                    <span className={styles.realStatLabel()}>Real Change Rate</span>
+                                    <span className={styles.realStatValue()}>{hostStats.realChangeRate}%</span>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* ゲストに見せる統計（偽装後） */}
                         {hostStats && (
                             <div className={styles.statsPanel()}>
+                                <h3 className="text-lg text-gray-300 mb-3">GUESTS WILL SEE:</h3>
                                 <div className={styles.statItem()}>
                                     <span className={styles.statLabel()}>Total Games</span>
                                     <span className={styles.statValue()}>{hostStats.totalGames}</span>
@@ -164,35 +188,20 @@ export function NullHandGame({
                             </div>
                         )}
 
-                        {/* 手選択 */}
+                        {/* 手選択（3D） */}
                         <div className={styles.handGrid()}>
-                            <div
-                                className={cn(
-                                    styles.handOption(),
-                                    selectedHand === 'ROCK' && styles.handOptionSelected()
-                                )}
-                                onClick={() => setSelectedHand('ROCK')}
-                            >
-                                ✊
-                            </div>
-                            <div
-                                className={cn(
-                                    styles.handOption(),
-                                    selectedHand === 'SCISSORS' && styles.handOptionSelected()
-                                )}
-                                onClick={() => setSelectedHand('SCISSORS')}
-                            >
-                                ✌️
-                            </div>
-                            <div
-                                className={cn(
-                                    styles.handOption(),
-                                    selectedHand === 'PAPER' && styles.handOptionSelected()
-                                )}
-                                onClick={() => setSelectedHand('PAPER')}
-                            >
-                                ✋
-                            </div>
+                            {(['ROCK', 'SCISSORS', 'PAPER'] as const).map((hand) => (
+                                <div
+                                    key={hand}
+                                    className={cn(
+                                        styles.hand3DContainer(),
+                                        selectedHand === hand && styles.hand3DContainerSelected()
+                                    )}
+                                    onClick={() => setSelectedHand(hand)}
+                                >
+                                    <Hand3D handType={hand} revealed={true} size="medium" />
+                                </div>
+                            ))}
                         </div>
 
                         {/* 嘘選択 */}
@@ -217,11 +226,59 @@ export function NullHandGame({
                             ))}
                         </div>
 
+                        {/* 偽装詳細入力 */}
+                        {selectedFake === 'INITIAL_HAND' && (
+                            <div className={styles.fakeDetailsSection()}>
+                                <div className={styles.inputLabel()}>Select fake initial hand</div>
+                                <select
+                                    className={styles.select()}
+                                    value={fakeDetails.fakeHandValue || ''}
+                                    onChange={(e) => setFakeDetails({ ...fakeDetails, fakeHandValue: e.target.value as HandType })}
+                                >
+                                    <option value="">-- Select --</option>
+                                    <option value="ROCK">✊ ROCK</option>
+                                    <option value="SCISSORS">✌️ SCISSORS</option>
+                                    <option value="PAPER">✋ PAPER</option>
+                                </select>
+                            </div>
+                        )}
+
+                        {selectedFake === 'CHANGE_RATE' && (
+                            <div className={styles.fakeDetailsSection()}>
+                                <div className={styles.inputLabel()}>Input fake change rate (%)</div>
+                                <input
+                                    type="number"
+                                    min="0"
+                                    max="100"
+                                    className={styles.numberInput()}
+                                    value={fakeDetails.fakeChangeRateValue ?? ''}
+                                    onChange={(e) => setFakeDetails({ ...fakeDetails, fakeChangeRateValue: parseInt(e.target.value) || 0 })}
+                                    placeholder="0-100"
+                                />
+                            </div>
+                        )}
+
+                        {selectedFake === 'FAVORITE_HAND' && (
+                            <div className={styles.fakeDetailsSection()}>
+                                <div className={styles.inputLabel()}>Select fake favorite hand</div>
+                                <select
+                                    className={styles.select()}
+                                    value={fakeDetails.fakeFavoriteHandValue || ''}
+                                    onChange={(e) => setFakeDetails({ ...fakeDetails, fakeFavoriteHandValue: e.target.value as HandType })}
+                                >
+                                    <option value="">-- Select --</option>
+                                    <option value="ROCK">✊ ROCK</option>
+                                    <option value="SCISSORS">✌️ SCISSORS</option>
+                                    <option value="PAPER">✋ PAPER</option>
+                                </select>
+                            </div>
+                        )}
+
                         <div className="text-center mt-8">
                             <button
                                 className={cn(styles.button(), styles.buttonPrimary())}
                                 disabled={!selectedHand || isProcessing}
-                                onClick={() => selectedHand && handleSetInitialHand(selectedHand, selectedFake)}
+                                onClick={() => selectedHand && handleSetInitialHand(selectedHand, selectedFake, fakeDetails)}
                             >
                                 CONFIRM
                             </button>
@@ -401,21 +458,78 @@ export function NullHandGame({
                     <div className={styles.resultScreen()}>
                         <h2 className={styles.resultTitle()}>RESULT</h2>
 
-                        <div className="mb-8">
-                            <p className="text-green-300 mb-2">ホストの手:</p>
-                            <div className="text-9xl">
-                                {jankenEvent.finalHostHand === 'ROCK' && '✊'}
-                                {jankenEvent.finalHostHand === 'SCISSORS' && '✌️'}
-                                {jankenEvent.finalHostHand === 'PAPER' && '✋'}
+                        {/* 手の表示（3D） */}
+                        <div className={styles.vsContainer()}>
+                            <div>
+                                <div className={styles.handLabel()}>
+                                    <span className={styles.handLabelText()}>HOST</span>
+                                </div>
+                                <div className="w-64">
+                                    <Hand3D
+                                        handType={jankenEvent.finalHostHand as HandType}
+                                        revealed={true}
+                                        size="large"
+                                    />
+                                </div>
                             </div>
                         </div>
 
-                        <div className="text-center">
+                        {/* スコア表示 */}
+                        {currentScores.length > 0 && (
+                            <div className={styles.scoresSection()}>
+                                <h3 className="text-2xl font-bold mb-4 text-white">CURRENT SCORES</h3>
+                                {currentScores.map((score, index) => (
+                                    <div key={score.userId} className={styles.scoreItem()}>
+                                        <span className={styles.scoreRank()}>#{index + 1}</span>
+                                        <span className={styles.scoreName()}>{score.user.name}</span>
+                                        <span className={styles.scorePoints()}>{score.points} pts</span>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+
+                        <div className="text-center mt-8">
                             <button
                                 className={cn(styles.button(), styles.buttonPrimary())}
-                                onClick={handleFinish}
+                                onClick={handleNextRound}
+                                disabled={isProcessing}
                             >
-                                CONTINUE
+                                NEXT ROUND
+                            </button>
+                        </div>
+                    </div>
+                )}
+
+                {/* GAME_OVER: 最終結果表示 */}
+                {phase === 'GAME_OVER' && (
+                    <div className={styles.resultScreen()}>
+                        <h1 className={styles.resultTitle()}>GAME OVER</h1>
+                        <p className="text-2xl text-gray-300 mb-8">FINAL RESULTS</p>
+
+                        {currentScores.length > 0 && (
+                            <div className={styles.scoresSection()}>
+                                {currentScores.map((score, index) => (
+                                    <div
+                                        key={score.userId}
+                                        className={cn(
+                                            styles.finalScoreItem(),
+                                            index === 0 && styles.finalScoreWinner()
+                                        )}
+                                    >
+                                        <span className={styles.finalScoreRank()}>#{index + 1}</span>
+                                        <span className={styles.finalScoreName()}>{score.user.name}</span>
+                                        <span className={styles.finalScorePoints()}>{score.points} pts</span>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+
+                        <div className="text-center mt-12">
+                            <button
+                                className={cn(styles.button(), styles.buttonPrimary())}
+                                onClick={handleClose}
+                            >
+                                RETURN TO LOBBY
                             </button>
                         </div>
                     </div>
