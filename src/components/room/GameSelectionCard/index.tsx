@@ -34,6 +34,19 @@ export function GameSelectionCard({ onSelectGame, isPending, isHost }: GameSelec
                         </div>
                     </div>
                 </Button>
+                <Button
+                    onClick={() => onSelectGame('null-hand')}
+                    disabled={isPending}
+                    className={styles.gameButton()}
+                >
+                    <span className={styles.gameIcon()}>⚠️</span>
+                    <div className={styles.gameInfo()}>
+                        <div className={styles.gameTitle()}>ERROR HUNTER</div>
+                        <div className={styles.gameDescription()}>
+                            {isHost ? 'バグを見つけて潰せ！' : 'クリックでルールを表示'}
+                        </div>
+                    </div>
+                </Button>
             </div>
             {isPending && (
                 <div className={styles.loadingText()}>

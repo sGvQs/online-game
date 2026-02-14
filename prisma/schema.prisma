@@ -19,6 +19,8 @@ model User {
   joinedRooms  RoomUser[]
   createdRooms Room[]       @relation("CreatedRooms")
   userIDPs     UserIDP[]
+  guestHands   GuestHand[]
+  jankenLogs   JankenLog[]
 
   @@map("users")
 }
@@ -70,7 +72,6 @@ model UserIDP {
   @@map("user_idp")
 }
 
-// モデル名をPascalCaseに変更し、@@mapで元のテーブル名を指定
 model ErrorEvent {
   id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   matchId      String    @map("match_id") @db.Uuid
@@ -86,7 +87,6 @@ model ErrorEvent {
   @@map("error_events")
 }
 
-// モデル名をPascalCaseに変更し、@@mapで元のテーブル名を指定
 model Match {
   id          String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   roomId      String       @map("room_id") @db.Uuid
@@ -95,9 +95,62 @@ model Match {
   winnerId    String?      @map("winner_id") @db.Uuid
   createdAt   DateTime     @default(now()) @map("created_at")
   
-  errorEvents ErrorEvent[]
-  room        Room         @relation(fields: [roomId], references: [id], onDelete: Cascade)
-  winner      User?        @relation(fields: [winnerId], references: [id])
+  errorEvents  ErrorEvent[]
+  jankenEvents JankenEvent[]
+  jankenLogs   JankenLog[]
+  room         Room         @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  winner       User?        @relation(fields: [winnerId], references: [id])
 
   @@map("matches")
+}
+
+// NULL HAND ゲーム用モデル
+
+// 1ターンの状態管理
+model JankenEvent {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  matchId       String   @map("match_id") @db.Uuid
+  currentHostId String   @map("current_host_id") @db.Uuid
+  turnNumber    Int      @default(1) @map("turn_number")
+  phase         String   @default("SETUP")
+  phaseEndsAt   DateTime @map("phase_ends_at")
+  initialHand   String?  @map("initial_hand")
+  finalHostHand String?  @map("final_host_hand")
+  fakeTarget    String   @default("NONE") @map("fake_target")
+  
+  match         Match      @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  guestHands    GuestHand[]
+  
+  @@map("janken_events")
+}
+
+// ゲスト各人の手を記録
+model GuestHand {
+  id            String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  jankenEventId String      @map("janken_event_id") @db.Uuid
+  userId        String      @map("user_id") @db.Uuid
+  hand          String
+  isConfirmed   Boolean     @default(false) @map("is_confirmed")
+  
+  jankenEvent   JankenEvent @relation(fields: [jankenEventId], references: [id], onDelete: Cascade)
+  user          User        @relation(fields: [userId], references: [id])
+  
+  @@unique([jankenEventId, userId])
+  @@map("guest_hands")
+}
+
+// 統計データ蓄積
+model JankenLog {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId      String   @map("user_id") @db.Uuid
+  initialHand String   @map("initial_hand")
+  finalHand   String   @map("final_hand")
+  matchId     String   @map("match_id") @db.Uuid
+  createdAt   DateTime @default(now()) @map("created_at")
+  
+  match       Match    @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  user        User     @relation(fields: [userId], references: [id])
+  
+  @@index([userId, initialHand])
+  @@map("janken_logs")
 }

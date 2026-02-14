@@ -1,0 +1,44 @@
+import { createClient } from '@/server/lib/supabase/server'
+import { redirect } from 'next/navigation'
+import { getCurrentUser } from '@/server/actions'
+import { getRoomWithReadyStatus } from '@/server/actions/room'
+import { NullHandGame } from '@/components/game/NullHandGame'
+import { RoomUserWithReadyStatus } from '@/shared/types'
+
+export default async function NullHandPage({ params }: { params: { roomId: string } }) {
+    const currentUser = await getCurrentUser()
+    if (!currentUser) redirect('/')
+
+    const { roomId } = await params
+
+    const room = await getRoomWithReadyStatus(roomId)
+    if (!room) {
+        redirect('/dashboard')
+    }
+
+    // ユーザーがメンバーかチェック
+    const isMember = room.users.some((u: RoomUserWithReadyStatus) => u.userId === currentUser.user.id)
+    if (!isMember) {
+        redirect('/dashboard')
+    }
+
+    // ゲームが何もしていなかったらroomに戻る
+    if (!room.activeGameType) {
+        redirect(`/room/${roomId}`)
+    }
+
+    // ユーザーがホストかチェック
+    const isHost = room.createdBy === currentUser.user.id
+
+    return (
+        <div className="relative min-h-screen bg-black">
+            <NullHandGame
+                room={room}
+                isHost={isHost}
+                roomId={roomId}
+                initialMatchId={room.currentMatchId}
+                currentUserId={currentUser.user.id}
+            />
+        </div>
+    )
+}

@@ -60,3 +60,48 @@ export interface MatchProgress {
     scores: Record<string, number>
     events: ErrorEventWithUser[]
 }
+
+// ============================================
+// NULL HAND (じゃんけん) types
+// ============================================
+
+/** JankenEvent model type */
+export type JankenEvent = Prisma.JankenEventGetPayload<{}>;
+
+/** GuestHand model type */
+export type GuestHand = Prisma.GuestHandGetPayload<{}>;
+
+/** JankenLog model type */
+export type JankenLog = Prisma.JankenLogGetPayload<{}>;
+
+/** JankenEvent with GuestHands including User */
+export type JankenEventWithGuests = Prisma.JankenEventGetPayload<{
+    include: {
+        guestHands: {
+            include: {
+                user: true
+            }
+        }
+    }
+}>;
+
+/** Match with JankenEvents */
+export type MatchWithJankenEvents = Prisma.MatchGetPayload<{
+    include: { jankenEvents: true }
+}>;
+
+/** ホストの統計データ */
+export interface HostStats {
+    favoriteHand: 'ROCK' | 'SCISSORS' | 'PAPER'
+    changeRate: number  // 手を変える確率 (0-100)
+    totalGames: number
+}
+
+/** じゃんけんのフェーズ */
+export type JankenPhase = 'TITLE' | 'SETUP' | 'SHOWCASE' | 'FINAL_DECISION' | 'BATTLE' | 'RESULT';
+
+/** 手の種類 */
+export type HandType = 'ROCK' | 'SCISSORS' | 'PAPER';
+
+/** 嘘の対象 */
+export type FakeTarget = 'NONE' | 'INITIAL_HAND' | 'CHANGE_RATE' | 'FAVORITE_HAND';
