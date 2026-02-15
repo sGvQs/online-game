@@ -1,202 +1,207 @@
 'use client'
 
-import { Canvas } from '@react-three/fiber'
-import { OrbitControls, PerspectiveCamera } from '@react-three/drei'
-import type { HandType } from '@/shared/types'
-// import { useRef } from 'react' // 今回は未使用のためコメントアウト
+import React, { useRef } from 'react'
+import { Canvas, useFrame } from '@react-three/fiber'
+import { OrbitControls, PerspectiveCamera, RoundedBox } from '@react-three/drei'
 import * as THREE from 'three'
+
+type HandType = 'ROCK' | 'SCISSORS' | 'PAPER'
 
 interface Hand3DProps {
     handType: HandType | null
     revealed?: boolean
     size?: 'small' | 'medium' | 'large'
-}
-
-// 共通のマテリアル（I.Q風の無機質な質感）
-const materialProps = {
-    color: "#ffffff",
-    metalness: 0.2,
-    roughness: 0.7,
-    flatShading: true,
+    isRotating?: boolean
 }
 
 /**
- * 3Dの手を表示するコンポーネント
+ * メインコンポーネント
  */
-export function Hand3D({ handType, revealed = true, size = 'medium' }: Hand3DProps) {
+export function Hand3D({
+    handType,
+    revealed = true,
+    size = 'medium',
+    isRotating = true,
+}: Hand3DProps) {
     const canvasHeight = size === 'small' ? '150px' : size === 'large' ? '400px' : '250px'
 
     return (
         <div style={{ width: '100%', height: canvasHeight, background: '#000000' }}>
             <Canvas>
-                <PerspectiveCamera makeDefault position={[0, 0, 6]} />
+                <PerspectiveCamera makeDefault position={[0, 0, 6]} fov={40} />
 
-                {/* 環境光を少し落として影を濃くする */}
+                {/* ライティング：面を際立たせる強い光 */}
                 <ambientLight intensity={0.4} />
-                {/* メインのライト（右上から強めに） */}
-                <directionalLight position={[5, 5, 5]} intensity={1.2} color="#ffffff" />
-                {/* サブのライト（左下から青白い光を当ててサイバー感を出す） */}
-                <directionalLight position={[-5, -5, 2]} intensity={0.3} color="#aaccff" />
+                <directionalLight position={[5, 5, 5]} intensity={1.2} />
+                <directionalLight position={[-5, -5, 2]} intensity={0.4} color="#aaccff" />
 
-                {/* 全体を少し斜めに傾けて立体感を出す */}
-                <group rotation={[0.2, -0.5, 0]}>
-                    {revealed && handType && <Hand hand={handType} />}
-                    {!revealed && <QuestionMark />}
+                <group>
+                    {revealed && handType && (
+                        <HandContainer handType={handType} isRotating={isRotating} />
+                    )}
+                    {!revealed && <QuestionMark isRotating={isRotating} />}
                 </group>
 
-                {/* ユーザーが少しだけ回せるように制限をかけると3D感が伝わります */}
-                <OrbitControls
-                    enableZoom={false}
-                    enablePan={false}
-                    minPolarAngle={Math.PI / 3}
-                    maxPolarAngle={Math.PI / 1.5}
-                    minAzimuthAngle={-Math.PI / 4}
-                    maxAzimuthAngle={Math.PI / 4}
-                />
+                <OrbitControls enableZoom={false} enablePan={false} />
             </Canvas>
         </div>
     )
 }
 
 /**
- * グー（岩）の3Dモデル
+ * 手のコンテナ（ゆっくり反復アニメーション制御）
+ */
+function HandContainer({ handType, isRotating }: { handType: HandType; isRotating: boolean }) {
+    const groupRef = useRef<THREE.Group>(null!)
+
+    useFrame((state) => {
+        if (isRotating && groupRef.current) {
+            // 速度調整：elapsedTimeにかける数字を小さくしてゆっくりに (2.5 -> 0.8)
+            const speed = 0.8
+            const angle = Math.sin(state.clock.elapsedTime * speed) * (Math.PI / 4) // 左右45度
+            groupRef.current.rotation.y = angle
+
+            // 浮遊もゆっくりに
+            groupRef.current.position.y = Math.sin(state.clock.elapsedTime * speed * 0.8) * 0.1
+        } else if (groupRef.current) {
+            // 停止時はゆっくり正面に戻る
+            groupRef.current.rotation.y = THREE.MathUtils.lerp(groupRef.current.rotation.y, 0, 0.05)
+            groupRef.current.position.y = THREE.MathUtils.lerp(groupRef.current.position.y, 0, 0.05)
+        }
+    })
+
+    return (
+        <group ref={groupRef}>
+            {handType === 'ROCK' && <Rock />}
+            {handType === 'SCISSORS' && <Scissors />}
+            {handType === 'PAPER' && <Paper />}
+        </group>
+    )
+}
+
+/**
+ * 共通マテリアル
+ * flatShading: true でポリゴン感を強調
+ */
+const PolygonMaterial = () => (
+    <meshStandardMaterial
+        color="#ffffff"
+        roughness={0.6}
+        metalness={0.2}
+        flatShading={true}
+    />
+)
+
+// 面取りの設定：半径を小さく、滑らかさを最低にして「角を削った」感を出す
+const bevelProps = {
+    radius: 0.08, // 角の削り幅
+    smoothness: 1 // 分割数。1だとカクっとした斜めの面になる
+}
+
+/**
+ * ROCK（グー）
  */
 function Rock() {
     return (
         <group>
-            {/* 手のひら・甲（ベースとなる大きな塊） */}
-            <mesh position={[0, 0, 0]}>
-                <boxGeometry args={[1.4, 1.4, 0.8]} />
-                <meshStandardMaterial {...materialProps} />
-            </mesh>
-
-            {/* 握りこんだ指（手前に出っ張らせる） */}
-            <mesh position={[0.1, -0.2, 0.6]}>
-                <boxGeometry args={[1.2, 0.8, 0.5]} />
-                <meshStandardMaterial {...materialProps} />
-            </mesh>
-
-            {/* 親指（折りたたんで手前に） */}
-            <mesh position={[-0.7, 0.1, 0.7]} rotation={[0, 0, -Math.PI / 6]}>
-                <boxGeometry args={[0.4, 0.9, 0.4]} />
-                <meshStandardMaterial {...materialProps} />
-            </mesh>
+            {/* 手の甲 */}
+            <RoundedBox args={[1.4, 1.2, 0.9]} {...bevelProps} position={[0, -0.1, 0]}>
+                <PolygonMaterial />
+            </RoundedBox>
+            {/* 握った指 */}
+            {[
+                { x: -0.45, h: 0.8, z: 0.5 },
+                { x: -0.15, h: 0.9, z: 0.55 },
+                { x: 0.15, h: 0.85, z: 0.5 },
+                { x: 0.45, h: 0.7, z: 0.45 },
+            ].map((f, i) => (
+                <RoundedBox key={i} args={[0.28, f.h, 0.5]} {...bevelProps} position={[f.x, 0.2, f.z]}>
+                    <PolygonMaterial />
+                </RoundedBox>
+            ))}
+            {/* 親指 */}
+            <RoundedBox args={[0.4, 0.8, 0.5]} {...bevelProps} position={[-0.4, -0.1, 0.75]} rotation={[0, 0, -Math.PI / 2.2]}>
+                <PolygonMaterial />
+            </RoundedBox>
         </group>
     )
 }
 
 /**
- * チョキ（ハサミ）の3Dモデル
+ * SCISSORS（チョキ）
  */
 function Scissors() {
     return (
         <group>
-            {/* 手のひら（下半分） */}
-            <mesh position={[0, -0.4, 0]}>
-                <boxGeometry args={[1.4, 1.0, 0.6]} />
-                <meshStandardMaterial {...materialProps} />
-            </mesh>
-
-            {/* 握りこんだ薬指・小指（手前に配置） */}
-            <mesh position={[0.3, -0.4, 0.4]}>
-                <boxGeometry args={[0.8, 0.8, 0.4]} />
-                <meshStandardMaterial {...materialProps} />
-            </mesh>
-
+            {/* 手のひらベース */}
+            <RoundedBox args={[1.2, 1.0, 0.6]} {...bevelProps} position={[0, -0.3, 0]}>
+                <PolygonMaterial />
+            </RoundedBox>
             {/* 人差し指 */}
-            <mesh position={[-0.3, 0.8, 0]} rotation={[0, 0, Math.PI / 12]}>
-                <boxGeometry args={[0.3, 1.4, 0.3]} />
-                <meshStandardMaterial {...materialProps} />
-            </mesh>
-
-            {/* 中指（人差し指より少し奥に配置して立体感を） */}
-            <mesh position={[0.2, 0.9, -0.1]} rotation={[0, 0, -Math.PI / 12]}>
-                <boxGeometry args={[0.3, 1.5, 0.3]} />
-                <meshStandardMaterial {...materialProps} />
-            </mesh>
-
-            {/* 親指（握りこんだ指を抑えるように） */}
-            <mesh position={[-0.6, -0.2, 0.5]} rotation={[0, 0, -Math.PI / 4]}>
-                <boxGeometry args={[0.3, 0.8, 0.4]} />
-                <meshStandardMaterial {...materialProps} />
-            </mesh>
+            <RoundedBox args={[0.3, 1.8, 0.3]} {...bevelProps} position={[-0.35, 0.8, 0]} rotation={[0, 0, 0.25]}>
+                <PolygonMaterial />
+            </RoundedBox>
+            {/* 中指 */}
+            <RoundedBox args={[0.3, 1.9, 0.3]} {...bevelProps} position={[0.35, 0.85, 0]} rotation={[0, 0, -0.25]}>
+                <PolygonMaterial />
+            </RoundedBox>
+            {/* 握り込んだ指 */}
+            <RoundedBox args={[0.7, 0.7, 0.45]} {...bevelProps} position={[0.2, -0.2, 0.4]}>
+                <PolygonMaterial />
+            </RoundedBox>
+            {/* 親指 */}
+            <RoundedBox args={[0.35, 0.8, 0.4]} {...bevelProps} position={[-0.5, -0.2, 0.5]} rotation={[0, 0, -Math.PI / 4]}>
+                <PolygonMaterial />
+            </RoundedBox>
         </group>
     )
 }
 
 /**
- * パー（紙）の3Dモデル
+ * PAPER（パー）
  */
 function Paper() {
-    // 指にわずかな前後のバラつき（z）を持たせる
     const fingers = [
-        { x: -0.6, y: 0.8, z: 0.1, rotation: Math.PI / 12, length: 1.2 }, // 人差し指
-        { x: -0.2, y: 0.9, z: 0.0, rotation: Math.PI / 24, length: 1.4 }, // 中指
-        { x: 0.2, y: 0.8, z: -0.1, rotation: -Math.PI / 24, length: 1.3 }, // 薬指
-        { x: 0.6, y: 0.6, z: -0.2, rotation: -Math.PI / 12, length: 1.0 }, // 小指
+        { x: -0.6, y: 0.7, r: 0.3, h: 1.3 },
+        { x: -0.2, y: 0.9, r: 0.1, h: 1.5 },
+        { x: 0.2, y: 0.8, r: -0.1, h: 1.4 },
+        { x: 0.6, y: 0.6, r: -0.3, h: 1.1 },
     ]
-
     return (
         <group>
             {/* 手のひら */}
-            <mesh position={[0, -0.4, 0]}>
-                <boxGeometry args={[1.6, 1.2, 0.4]} />
-                <meshStandardMaterial {...materialProps} />
-            </mesh>
-
-            {/* 4本の指 */}
-            {fingers.map((finger, index) => (
-                <mesh
-                    key={index}
-                    position={[finger.x, finger.y, finger.z]}
-                    rotation={[0, 0, finger.rotation]}
-                >
-                    <boxGeometry args={[0.3, finger.length, 0.3]} />
-                    <meshStandardMaterial {...materialProps} />
-                </mesh>
+            <RoundedBox args={[1.5, 1.2, 0.3]} {...bevelProps} position={[0, -0.4, 0]}>
+                <PolygonMaterial />
+            </RoundedBox>
+            {fingers.map((f, i) => (
+                <RoundedBox key={i} args={[0.3, f.h, 0.25]} {...bevelProps} position={[f.x, f.y, 0]} rotation={[0, 0, f.r]}>
+                    <PolygonMaterial />
+                </RoundedBox>
             ))}
-
-            {/* 親指（大きく横・手前に張り出す） */}
-            <mesh position={[-1.0, -0.2, 0.2]} rotation={[0, 0, Math.PI / 4]} >
-                <boxGeometry args={[0.35, 1.0, 0.35]} />
-                <meshStandardMaterial {...materialProps} />
-            </mesh>
+            {/* 親指 */}
+            <RoundedBox args={[0.3, 1.0, 0.25]} {...bevelProps} position={[-1.0, -0.2, 0.1]} rotation={[0, 0, Math.PI / 2.5]}>
+                <PolygonMaterial />
+            </RoundedBox>
         </group>
     )
 }
 
 /**
- * クエスチョンマーク（未公開状態）
+ * クエスチョンマーク
  */
-function QuestionMark() {
+function QuestionMark({ isRotating }: { isRotating: boolean }) {
+    const ref = useRef<THREE.Mesh>(null!)
+    useFrame((state) => {
+        if (isRotating && ref.current) {
+            // こちらもゆっくりに
+            ref.current.rotation.y = Math.sin(state.clock.elapsedTime * 0.8) * (Math.PI / 4)
+        }
+    })
     return (
-        <group>
-            <mesh>
-                {/* I.Q風なら球体より正八面体（Octahedron）などのカクカクした形が似合うかもしれません */}
-                <octahedronGeometry args={[1.0, 0]} />
-                <meshStandardMaterial
-                    color="#404040"
-                    metalness={0.5}
-                    roughness={0.5}
-                    wireframe
-                />
-            </mesh>
-        </group>
+        <mesh ref={ref}>
+            {/* Icosahedron（正二十面体）で少し複雑な多面体感を出す */}
+            <icosahedronGeometry args={[1.0, 0]} />
+            <meshStandardMaterial color="#444444" wireframe />
+        </mesh>
     )
-}
-
-/**
- * 手の種類に応じて適切なコンポーネントを返す
- */
-function Hand({ hand }: { hand: HandType }) {
-    switch (hand) {
-        case 'ROCK':
-            return <Rock />
-        case 'SCISSORS':
-            return <Scissors />
-        case 'PAPER':
-            return <Paper />
-        default:
-            return null
-    }
 }
