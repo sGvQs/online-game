@@ -37,7 +37,6 @@ export function NullHandGame({
         jankenEvent,
         hostStats,
         isProcessing,
-        timerProgress,
         currentScores,
         handleStartGame,
         handleSetInitialHand,
@@ -117,7 +116,6 @@ export function NullHandGame({
     // ============================================
     // ゲーム中の共通UI
     // ============================================
-    const showTimer = phase !== 'RESULT'
 
     return (
         <div className={styles.container()}>
@@ -130,16 +128,6 @@ export function NullHandGame({
                     {phase === 'BATTLE' && 'BATTLE'}
                     {phase === 'RESULT' && 'RESULT'}
                 </div>
-
-                {/* タイマーバー */}
-                {showTimer && (
-                    <div className={styles.timerContainer()}>
-                        <div
-                            className={styles.timerBar()}
-                            style={{ width: `${timerProgress}%` }}
-                        />
-                    </div>
-                )}
 
                 {/* SETUP: ホストのみ */}
                 {phase === 'SETUP' && isCurrentHost && (
@@ -301,11 +289,12 @@ export function NullHandGame({
 
                         {/* ホストの仮置き手表示 */}
                         <div className={styles.handDisplay()}>
-                            <div className={cn(styles.handEmoji(), styles.handRevealed())}>
-                                {jankenEvent.initialHand === 'ROCK' && '✊'}
-                                {jankenEvent.initialHand === 'SCISSORS' && '✌️'}
-                                {jankenEvent.initialHand === 'PAPER' && '✋'}
-                                {!jankenEvent.initialHand && '?'}
+                            <div className="w-64 mx-auto">
+                                <Hand3D
+                                    handType={jankenEvent.initialHand as HandType}
+                                    revealed={!!jankenEvent.initialHand}
+                                    size="large"
+                                />
                             </div>
                         </div>
 
@@ -351,33 +340,18 @@ export function NullHandGame({
                         <p className={styles.messageText()}>最終決定: 手を変えますか?</p>
 
                         <div className={styles.handGrid()}>
-                            <div
-                                className={cn(
-                                    styles.handOption(),
-                                    selectedHand === 'ROCK' && styles.handOptionSelected()
-                                )}
-                                onClick={() => setSelectedHand('ROCK')}
-                            >
-                                ✊
-                            </div>
-                            <div
-                                className={cn(
-                                    styles.handOption(),
-                                    selectedHand === 'SCISSORS' && styles.handOptionSelected()
-                                )}
-                                onClick={() => setSelectedHand('SCISSORS')}
-                            >
-                                ✌️
-                            </div>
-                            <div
-                                className={cn(
-                                    styles.handOption(),
-                                    selectedHand === 'PAPER' && styles.handOptionSelected()
-                                )}
-                                onClick={() => setSelectedHand('PAPER')}
-                            >
-                                ✋
-                            </div>
+                            {(['ROCK', 'SCISSORS', 'PAPER'] as const).map((hand) => (
+                                <div
+                                    key={hand}
+                                    className={cn(
+                                        styles.hand3DContainer(),
+                                        selectedHand === hand && styles.hand3DContainerSelected()
+                                    )}
+                                    onClick={() => setSelectedHand(hand)}
+                                >
+                                    <Hand3D handType={hand} revealed={true} size="medium" />
+                                </div>
+                            ))}
                         </div>
 
                         <div className="text-center mt-8">
@@ -405,33 +379,18 @@ export function NullHandGame({
                         <p className={styles.messageText()}>あなたの手を選んでください!</p>
 
                         <div className={styles.handGrid()}>
-                            <div
-                                className={cn(
-                                    styles.handOption(),
-                                    selectedHand === 'ROCK' && styles.handOptionSelected()
-                                )}
-                                onClick={() => setSelectedHand('ROCK')}
-                            >
-                                ✊
-                            </div>
-                            <div
-                                className={cn(
-                                    styles.handOption(),
-                                    selectedHand === 'SCISSORS' && styles.handOptionSelected()
-                                )}
-                                onClick={() => setSelectedHand('SCISSORS')}
-                            >
-                                ✌️
-                            </div>
-                            <div
-                                className={cn(
-                                    styles.handOption(),
-                                    selectedHand === 'PAPER' && styles.handOptionSelected()
-                                )}
-                                onClick={() => setSelectedHand('PAPER')}
-                            >
-                                ✋
-                            </div>
+                            {(['ROCK', 'SCISSORS', 'PAPER'] as const).map((hand) => (
+                                <div
+                                    key={hand}
+                                    className={cn(
+                                        styles.hand3DContainer(),
+                                        selectedHand === hand && styles.hand3DContainerSelected()
+                                    )}
+                                    onClick={() => setSelectedHand(hand)}
+                                >
+                                    <Hand3D handType={hand} revealed={true} size="medium" />
+                                </div>
+                            ))}
                         </div>
 
                         <div className="text-center mt-8">

@@ -136,21 +136,7 @@ export const nullHandGame = tv({
             'py-16',
         ],
 
-        handEmoji: [
-            'text-[200px]',
-            'inline-block',
-            'transform',
-            'transition-transform duration-700',
-        ],
 
-        handRevealed: [
-            '[transform:rotateY(0deg)]',
-        ],
-
-        handHidden: [
-            '[transform:rotateY(180deg)]',
-            'opacity-30',
-        ],
 
         // 統計パネル
         statsPanel: [
@@ -219,22 +205,7 @@ export const nullHandGame = tv({
             'my-8',
         ],
 
-        handOption: [
-            'aspect-square',
-            'flex items-center justify-center',
-            'bg-black',
-            'border-2 border-gray-600',
-            'cursor-pointer',
-            'transition-all',
-            'hover:border-white',
-            'hover:bg-gray-900',
-            'text-9xl',
-        ],
 
-        handOptionSelected: [
-            'border-white',
-            'bg-gray-900',
-        ],
 
         // 3D手表示用コンテナ
         hand3DContainer: [
@@ -439,11 +410,7 @@ export const nullHandGame = tv({
             'my-12',
         ],
 
-        vsLabel: [
-            'text-4xl',
-            'font-bold',
-            'text-gray-600',
-        ],
+
 
         handLabel: [
             'text-center',
