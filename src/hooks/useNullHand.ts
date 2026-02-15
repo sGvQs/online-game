@@ -91,6 +91,7 @@ export function useNullHand({
     const [currentScores, setCurrentScores] = useState<MatchScoreWithUser[]>([])
     const [isProcessing, setIsProcessing] = useState(false)
     const [error, setError] = useState<string | null>(null)
+    const [matchId, setMatchId] = useState<string | null>(initialMatchId)
 
     // ---- Refs ----
     const matchIdRef = useRef<string | null>(initialMatchId)
@@ -152,6 +153,7 @@ export function useNullHand({
             await resetAllReady(roomId)
             const match = await startJankenMatch(roomId)
             matchIdRef.current = match.id
+            setMatchId(match.id)
         } catch (error) {
             console.error('ゲーム開始に失敗:', error)
             setError('ゲームの開始に失敗しました')
@@ -309,41 +311,53 @@ export function useNullHand({
 
     /**
      * Supabase Realtime サブスクリプション
+     * 
+     * matchId が設定されたら janken_events のサブスクリプションを作成
      */
     useEffect(() => {
+        if (!matchId) return
+
         const channel = supabase
-            .channel(`null_hand_${roomId}`)
+            .channel(`null_hand_events_${matchId}`)
             .on('postgres_changes', {
                 event: '*',
                 schema: 'public',
                 table: 'janken_events',
-                filter: `match_id=eq.${matchIdRef.current}`,
-            }, async (payload: any) => {
-                // シグナル受信 → 最新データを再取得
-
-                console.log('janken_events matchIdRef.current', matchIdRef.current)
-
-                console.log('janken_events', payload)
+                filter: `match_id=eq.${matchId}`,
+            }, async () => {
                 await fetchJankenEvent()
-            }).on('postgres_changes', {
-                event: 'INSERT',
-                schema: 'public',
-                table: 'matches',
-                filter: `room_id=eq.${roomId}`,
-            }, async (payload: any) => {
-                console.log('matches', payload)
-
-                if (payload.new.winner_id !== null) return
-                matchIdRef.current = payload.new.id
-                fetchJankenEvent()
-
             })
             .subscribe()
 
         return () => {
             supabase.removeChannel(channel)
         }
-    }, [])
+    }, [matchId, supabase, fetchJankenEvent])
+
+    /**
+     * matches テーブルのサブスクリプション（ゲーム開始検知用）
+     */
+    useEffect(() => {
+        const channel = supabase
+            .channel(`null_hand_matches_${roomId}`)
+            .on('postgres_changes', {
+                event: 'INSERT',
+                schema: 'public',
+                table: 'matches',
+                filter: `room_id=eq.${roomId}`,
+            }, async (payload: any) => {
+                if (payload.new.winner_id !== null) return
+                const newMatchId = payload.new.id
+                matchIdRef.current = newMatchId
+                setMatchId(newMatchId)
+                fetchJankenEvent()
+            })
+            .subscribe()
+
+        return () => {
+            supabase.removeChannel(channel)
+        }
+    }, [roomId, supabase, fetchJankenEvent])
 
     // ============================================
     // 戻り値
