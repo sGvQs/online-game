@@ -171,13 +171,14 @@ export function useNullHand({
         setIsProcessing(true)
         try {
             await setInitialHand(jankenEvent.id, hand, fakeTarget, fakeDetails)
+            await fetchJankenEvent()
         } catch (error) {
             console.error('初期手設定に失敗:', error)
             setError('手の設定に失敗しました')
         } finally {
             setIsProcessing(false)
         }
-    }, [jankenEvent, isProcessing])
+    }, [jankenEvent, isProcessing, fetchJankenEvent])
 
     /**
      * ゲストの確認完了
@@ -188,13 +189,14 @@ export function useNullHand({
         setIsProcessing(true)
         try {
             await confirmShowcase(jankenEvent.id, currentUserId)
+            await fetchJankenEvent()
         } catch (error) {
             console.error('確認完了に失敗:', error)
             setError('確認処理に失敗しました')
         } finally {
             setIsProcessing(false)
         }
-    }, [jankenEvent, currentUserId, isProcessing])
+    }, [jankenEvent, currentUserId, isProcessing, fetchJankenEvent])
 
     /**
      * ホストの最終決定
@@ -205,13 +207,14 @@ export function useNullHand({
         setIsProcessing(true)
         try {
             await setFinalHostHand(jankenEvent.id, hand)
+            await fetchJankenEvent()
         } catch (error) {
             console.error('最終決定に失敗:', error)
             setError('決定処理に失敗しました')
         } finally {
             setIsProcessing(false)
         }
-    }, [jankenEvent, isProcessing])
+    }, [jankenEvent, isProcessing, fetchJankenEvent])
 
     /**
      * ゲストの手を設定
@@ -222,13 +225,14 @@ export function useNullHand({
         setIsProcessing(true)
         try {
             await setGuestHand(jankenEvent.id, currentUserId, hand)
+            await fetchJankenEvent()
         } catch (error) {
             console.error('手の設定に失敗:', error)
             setError('手の送信に失敗しました')
         } finally {
             setIsProcessing(false)
         }
-    }, [jankenEvent, currentUserId, isProcessing])
+    }, [jankenEvent, currentUserId, isProcessing, fetchJankenEvent])
 
     /**
      * 次のラウンドへ遷移
@@ -239,13 +243,14 @@ export function useNullHand({
         setIsProcessing(true)
         try {
             await startNextTurn(jankenEvent.id)
+            await fetchJankenEvent()
         } catch (error) {
             console.error('次のラウンドへの遷移に失敗:', error)
             setError('次ラウンドへの遷移に失敗しました')
         } finally {
             setIsProcessing(false)
         }
-    }, [jankenEvent, isProcessing])
+    }, [jankenEvent, isProcessing, fetchJankenEvent])
 
     /**
      * ゲーム終了 → タイトルに戻る
@@ -324,7 +329,8 @@ export function useNullHand({
                 schema: 'public',
                 table: 'janken_events',
                 filter: `match_id=eq.${matchId}`,
-            }, async () => {
+            }, async (payload: any) => {
+                console.log('Janken Event Inserted:', payload)
                 await fetchJankenEvent()
             })
             .subscribe()
@@ -346,6 +352,7 @@ export function useNullHand({
                 table: 'matches',
                 filter: `room_id=eq.${roomId}`,
             }, async (payload: any) => {
+                console.log('Match Inserted:', payload)
                 if (payload.new.winner_id !== null) return
                 const newMatchId = payload.new.id
                 matchIdRef.current = newMatchId
@@ -358,6 +365,34 @@ export function useNullHand({
             supabase.removeChannel(channel)
         }
     }, [roomId, supabase, fetchJankenEvent])
+
+    /**
+     * ウインドウフォーカス時/可視化時のデータ再取得
+     * 長時間放置後の復帰対策
+     */
+    useEffect(() => {
+        const handleVisibilityChange = () => {
+            if (document.visibilityState === 'visible' && matchIdRef.current) {
+                console.log('Window Visible: Fetching latest data...')
+                fetchJankenEvent()
+            }
+        }
+
+        const handleFocus = () => {
+            if (matchIdRef.current) {
+                console.log('Window Focused: Fetching latest data...')
+                fetchJankenEvent()
+            }
+        }
+
+        document.addEventListener('visibilitychange', handleVisibilityChange)
+        window.addEventListener('focus', handleFocus)
+
+        return () => {
+            document.removeEventListener('visibilitychange', handleVisibilityChange)
+            window.removeEventListener('focus', handleFocus)
+        }
+    }, [fetchJankenEvent])
 
     // ============================================
     // 戻り値

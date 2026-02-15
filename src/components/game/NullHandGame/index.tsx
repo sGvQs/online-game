@@ -161,10 +161,10 @@ export function NullHandGame({
             <div className={styles.gameGrid()}>
                 {/* フェーズ表示 */}
                 <div className={styles.phaseBox()}>
-                    {phase === 'SETUP' && 'ホストの公開する手を設定'}
+                    {phase === 'SETUP' && 'ホストの手を設定（未確定）'}
                     {phase === 'SHOWCASE' && 'ホストの手を公開（未確定）'}
-                    {phase === 'FINAL_DECISION' && 'ホストが手を確定'}
-                    {phase === 'BATTLE' && 'ゲストの最終決断'}
+                    {phase === 'FINAL_DECISION' && 'ホストの手を設定（確定）'}
+                    {phase === 'BATTLE' && 'ゲストの手を設定（確定）'}
                     {phase === 'RESULT' && '結果発表'}
                 </div>
 
@@ -733,7 +733,7 @@ export function NullHandGame({
                                         <Hand3D
                                             handType={jankenEvent.finalHostHand as HandType}
                                             revealed={true}
-                                            size="large"
+                                            size="medium"
                                         />
                                     </div>
                                     <div className="text-center text-xl font-bold mt-2">
