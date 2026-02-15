@@ -318,16 +318,32 @@ export function useNullHand({
                 schema: 'public',
                 table: 'janken_events',
                 filter: `match_id=eq.${matchIdRef.current}`,
-            }, async () => {
+            }, async (payload: any) => {
                 // シグナル受信 → 最新データを再取得
+
+                console.log('janken_events matchIdRef.current', matchIdRef.current)
+
+                console.log('janken_events', payload)
                 await fetchJankenEvent()
+            }).on('postgres_changes', {
+                event: 'INSERT',
+                schema: 'public',
+                table: 'matches',
+                filter: `room_id=eq.${roomId}`,
+            }, async (payload: any) => {
+                console.log('matches', payload)
+
+                if (payload.new.winner_id !== null) return
+                matchIdRef.current = payload.new.id
+                fetchJankenEvent()
+
             })
             .subscribe()
 
         return () => {
             supabase.removeChannel(channel)
         }
-    }, [supabase, roomId, fetchJankenEvent])
+    }, [])
 
     // ============================================
     // 戻り値
