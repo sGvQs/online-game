@@ -127,6 +127,14 @@ export const nullHandGame = tv({
             'text-[#FF4444]',
         ],
 
+        // 無効状態（グレーアウト、ホバー効果なし）
+        menuItemDisabled: [
+            'text-gray-600',
+            'cursor-not-allowed',
+            'border-transparent', // ボーダーを常に透明に
+            'hover:border-transparent', // ホバー時もボーダーなし
+        ],
+
         // 選択されたメニュー項目（赤背景・白文字）
         menuItemSelected: [
             'bg-[#FF4444]',

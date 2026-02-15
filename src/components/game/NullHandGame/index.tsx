@@ -77,23 +77,23 @@ export function NullHandGame({
                             )}
                             onClick={toggleReady}
                         >
-                            {isReady ? '準備完了をキャンセル' : '準備完了'}
+                            READY
                         </div>
 
                         {isHost && (
                             <div
                                 className={cn(
                                     styles.menuItem(),
-                                    allUsersReady ? styles.menuItemSelected() : styles.menuItemNormal()
+                                    allUsersReady ? styles.menuItemSelected() : styles.menuItemDisabled()
                                 )}
                                 onClick={() => allUsersReady && handleStartGame()}
                             >
-                                ゲーム開始
+                                START
                             </div>
                         )}
 
                         <div className={styles.menuItem()} onClick={handleClose}>
-                            退出
+                            EXIT
                         </div>
                     </div>
 
@@ -120,12 +120,12 @@ export function NullHandGame({
                                             {u.user?.name || '不明'}
                                         </span>
                                         <span className={u.isReady ? 'text-[#FF4444]' : 'text-gray-700'}>
-                                            {u.isReady ? '準備完了' : '待機中'}
+                                            {u.isReady ? 'READY' : 'WAITING'}
                                         </span>
                                     </div>
                                 ))}
                                 <div className="mt-4 text-right text-gray-400">
-                                    {readyCount} / {totalUsers} 準備完了
+                                    {readyCount} / {totalUsers} READY
                                 </div>
                             </div>
                         </div>
