@@ -71,7 +71,10 @@ export function NullHandGame({
                     {/* 左上: メニュー */}
                     <div className={styles.menuBox()}>
                         <div
-                            className={styles.menuItem()}
+                            className={cn(
+                                styles.menuItem(),
+                                isReady && styles.menuItemReady()
+                            )}
                             onClick={toggleReady}
                         >
                             {isReady ? '準備完了をキャンセル' : '準備完了'}

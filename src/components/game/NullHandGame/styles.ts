@@ -52,10 +52,10 @@ export const nullHandGame = tv({
             'border-[6px]',
             'border-[#FF4444]',
             'bg-black',
-            'p-8',
+            'p-6', // よりコンパクトに
             'flex',
             'flex-col',
-            'justify-center',
+            'justify-start', // 上寄せ
             'min-h-[300px]',
         ],
 
@@ -104,23 +104,34 @@ export const nullHandGame = tv({
             'tracking-[0.5em]',
         ],
 
-        // メニュー項目
+        // メニュー項目（デフォルト）
         menuItem: [
-            'text-3xl',
+            'text-2xl', // 少し小さく
             'font-bold',
             'py-2',
-            'px-4',
-            'mb-2',
+            'px-2',
+            'mb-1', // 間隔をより詰める
             'cursor-pointer',
-            'transition-colors',
+            'transition-all',
+            'duration-200',
             'uppercase',
-            'tracking-widest',
+            'tracking-[0.3em]', // 字間を広げる
+            'text-white',
+            'border-2',
+            'border-transparent', // デフォルトは透明
+            'hover:border-[#FF4444]', // ホバー時に赤枠
+        ],
+
+        // 準備完了状態（赤文字）
+        menuItemReady: [
+            'text-[#FF4444]',
         ],
 
         // 選択されたメニュー項目（赤背景・白文字）
         menuItemSelected: [
             'bg-[#FF4444]',
             'text-white',
+            'border-[#FF4444]',
         ],
 
         // 通常メニュー項目（黒背景・白文字）
