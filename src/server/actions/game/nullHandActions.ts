@@ -58,50 +58,57 @@ export async function startJankenMatch(roomId: string) {
     const participants = room.users.map(ru => ru.userId)
     if (participants.length < 2) throw new Error('最低2人のプレイヤーが必要です')
 
-    // Matchを作成
-    const match = await prisma.match.create({
-        data: {
-            roomId: roomId,
-            gameType: 'null-hand',
-            status: 'PLAYING',
-            currentTurnIndex: 1,
-            totalTurns: participants.length,
-        }
-    })
+    // トランザクションで一括実行して、不整合（MatchはあるがEventがない等）を防ぐ
+    const match = await prisma.$transaction(async (tx) => {
+        // Matchを作成
+        const newMatch = await tx.match.create({
+            data: {
+                roomId: roomId,
+                gameType: 'null-hand',
+                status: 'PLAYING',
+                currentTurnIndex: 1,
+                totalTurns: participants.length,
+            }
+        })
 
-    // 全参加者のMatchScoreを初期化
-    await Promise.all(
-        participants.map(userId =>
-            prisma.matchScore.create({
-                data: {
-                    matchId: match.id,
-                    userId: userId,
-                    points: 0,
-                }
-            })
+        // 全参加者のMatchScoreを初期化
+        await Promise.all(
+            participants.map(userId =>
+                tx.matchScore.create({
+                    data: {
+                        matchId: newMatch.id,
+                        userId: userId,
+                        points: 0,
+                    }
+                })
+            )
         )
-    )
 
-    // 最初のターンを作成
-    await prisma.jankenEvent.create({
-        data: {
-            matchId: match.id,
-            currentHostId: participants[0], // 最初のプレイヤーがホスト
-            turnNumber: 1,
-            phase: 'SETUP',
-        }
-    })
+        // 最初のターンを作成
+        await tx.jankenEvent.create({
+            data: {
+                matchId: newMatch.id,
+                currentHostId: participants[0], // 最初のプレイヤーがホスト
+                turnNumber: 1,
+                phase: 'SETUP',
+            }
+        })
 
-    // Roomを更新
-    await prisma.room.update({
-        where: { id: roomId },
-        data: {
-            currentMatchId: match.id,
-        }
+        // Roomを更新
+        await tx.room.update({
+            where: { id: roomId },
+            data: {
+                currentMatchId: newMatch.id,
+            }
+        })
+
+        return newMatch
     })
 
     return match
 }
+
+
 
 // ============================================
 // 統計データ取得

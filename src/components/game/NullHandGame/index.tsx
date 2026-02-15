@@ -345,7 +345,7 @@ export function NullHandGame({
                                                 : jankenEvent.initialHand) as HandType
                                         }
                                         revealed={!!jankenEvent.initialHand}
-                                        size="large"
+                                        size="medium"
                                     />
                                 </div>
                             </div>
