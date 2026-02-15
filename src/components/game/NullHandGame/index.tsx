@@ -157,189 +157,162 @@ export function NullHandGame({
                 </div>
 
                 {/* メインエリア（左/中央） */}
-                <div className={styles.mainArea()}>
-                    {/* SETUP: ホストのみ */}
-                    {phase === 'SETUP' && isCurrentHost && (
-                        <div className="w-full h-full flex flex-col">
-                            <h2 className={styles.messageText()}>SELECT YOUR HAND</h2>
+                {phase === 'SETUP' && (
+                    <>
+                        <div className={styles.mainArea()}>
+                            {/* SETUP: ホストのみ */}
+                            {isCurrentHost && (
+                                <div className="w-full h-full flex flex-col">
+                                    <h2 className={styles.messageText()}>SELECT YOUR HAND</h2>
 
-                            {/* 手選択（3D） */}
-                            <div className={styles.handGrid()}>
-                                {(['ROCK', 'SCISSORS', 'PAPER'] as const).map((hand) => (
-                                    <div
-                                        key={hand}
-                                        className={cn(
-                                            styles.hand3DWrapper(),
-                                            selectedHand === hand && styles.hand3DWrapperSelected()
-                                        )}
-                                        onClick={() => setSelectedHand(hand)}
-                                    >
-                                        <Hand3D handType={hand} revealed={true} size="medium" />
+                                    {/* 手選択（3D） */}
+                                    <div className={styles.handGrid()}>
+                                        {(['ROCK', 'SCISSORS', 'PAPER'] as const).map((hand) => (
+                                            <div
+                                                key={hand}
+                                                className={cn(
+                                                    styles.hand3DWrapper(),
+                                                    selectedHand === hand && styles.hand3DWrapperSelected()
+                                                )}
+                                                onClick={() => setSelectedHand(hand)}
+                                            >
+                                                <Hand3D handType={hand} revealed={true} size="medium" />
+                                            </div>
+                                        ))}
                                     </div>
-                                ))}
-                            </div>
 
-                            <div className="border-t border-gray-700 my-4"></div>
+                                    <div className="border-t border-gray-700 my-4"></div>
 
-                            {/* 偽装選択 */}
-                            <h3 className="text-[#FF4444] font-bold mb-2 uppercase">DECEPTION: {selectedFake}</h3>
-                            <div className="grid grid-cols-2 gap-2 mb-4">
-                                {([
-                                    { value: 'NONE', label: 'NO LIE' },
-                                    { value: 'INITIAL_HAND', label: 'FAKE HAND' },
-                                    { value: 'CHANGE_RATE', label: 'FAKE RATE' },
-                                    { value: 'FAVORITE_HAND', label: 'FAKE FAV' },
-                                ] as const).map((option) => (
-                                    <div
-                                        key={option.value}
-                                        className={cn(
-                                            styles.fakeOption(),
-                                            selectedFake === option.value && styles.fakeOptionSelected()
-                                        )}
-                                        onClick={() => setSelectedFake(option.value)}
-                                    >
-                                        {option.label}
+                                    {/* 偽装選択 */}
+                                    <h3 className="text-[#FF4444] font-bold mb-2 uppercase">DECEPTION: {selectedFake}</h3>
+                                    <div className="grid grid-cols-2 gap-2 mb-4">
+                                        {([
+                                            { value: 'NONE', label: 'NO LIE' },
+                                            { value: 'INITIAL_HAND', label: 'FAKE HAND' },
+                                            { value: 'CHANGE_RATE', label: 'FAKE RATE' },
+                                            { value: 'FAVORITE_HAND', label: 'FAKE FAV' },
+                                        ] as const).map((option) => (
+                                            <div
+                                                key={option.value}
+                                                className={cn(
+                                                    styles.fakeOption(),
+                                                    selectedFake === option.value && styles.fakeOptionSelected()
+                                                )}
+                                                onClick={() => setSelectedFake(option.value)}
+                                            >
+                                                {option.label}
+                                            </div>
+                                        ))}
                                     </div>
-                                ))}
-                            </div>
 
-                            {/* 偽装詳細入力 */}
-                            {selectedFake !== 'NONE' && (
-                                <div className={styles.inputGroup()}>
-                                    {selectedFake === 'INITIAL_HAND' && (
-                                        <select
-                                            className={styles.select()}
-                                            value={fakeDetails.fakeHandValue || ''}
-                                            onChange={(e) => setFakeDetails({ ...fakeDetails, fakeHandValue: e.target.value as HandType })}
+                                    {/* 偽装詳細入力 */}
+                                    {selectedFake !== 'NONE' && (
+                                        <div className={styles.inputGroup()}>
+                                            {selectedFake === 'INITIAL_HAND' && (
+                                                <select
+                                                    className={styles.select()}
+                                                    value={fakeDetails.fakeHandValue || ''}
+                                                    onChange={(e) => setFakeDetails({ ...fakeDetails, fakeHandValue: e.target.value as HandType })}
+                                                >
+                                                    <option value="">SELECT FAKE HAND...</option>
+                                                    <option value="ROCK">ROCK</option>
+                                                    <option value="SCISSORS">SCISSORS</option>
+                                                    <option value="PAPER">PAPER</option>
+                                                </select>
+                                            )}
+                                            {selectedFake === 'CHANGE_RATE' && (
+                                                <input
+                                                    type="number"
+                                                    className={styles.numberInput()}
+                                                    value={fakeDetails.fakeChangeRateValue ?? ''}
+                                                    onChange={(e) => setFakeDetails({ ...fakeDetails, fakeChangeRateValue: parseInt(e.target.value) || 0 })}
+                                                    placeholder="FAKE RATE (0-100)"
+                                                />
+                                            )}
+                                            {selectedFake === 'FAVORITE_HAND' && (
+                                                <select
+                                                    className={styles.select()}
+                                                    value={fakeDetails.fakeFavoriteHandValue || ''}
+                                                    onChange={(e) => setFakeDetails({ ...fakeDetails, fakeFavoriteHandValue: e.target.value as HandType })}
+                                                >
+                                                    <option value="">SELECT FAKE FAVORITE...</option>
+                                                    <option value="ROCK">ROCK</option>
+                                                    <option value="SCISSORS">SCISSORS</option>
+                                                    <option value="PAPER">PAPER</option>
+                                                </select>
+                                            )}
+                                        </div>
+                                    )}
+
+                                    <div className="mt-auto pt-4 flex justify-end">
+                                        <button
+                                            className={styles.button()}
+                                            disabled={!selectedHand || isProcessing}
+                                            onClick={() => selectedHand && handleSetInitialHand(selectedHand, selectedFake, fakeDetails)}
                                         >
-                                            <option value="">SELECT FAKE HAND...</option>
-                                            <option value="ROCK">ROCK</option>
-                                            <option value="SCISSORS">SCISSORS</option>
-                                            <option value="PAPER">PAPER</option>
-                                        </select>
-                                    )}
-                                    {selectedFake === 'CHANGE_RATE' && (
-                                        <input
-                                            type="number"
-                                            className={styles.numberInput()}
-                                            value={fakeDetails.fakeChangeRateValue ?? ''}
-                                            onChange={(e) => setFakeDetails({ ...fakeDetails, fakeChangeRateValue: parseInt(e.target.value) || 0 })}
-                                            placeholder="FAKE RATE (0-100)"
-                                        />
-                                    )}
-                                    {selectedFake === 'FAVORITE_HAND' && (
-                                        <select
-                                            className={styles.select()}
-                                            value={fakeDetails.fakeFavoriteHandValue || ''}
-                                            onChange={(e) => setFakeDetails({ ...fakeDetails, fakeFavoriteHandValue: e.target.value as HandType })}
-                                        >
-                                            <option value="">SELECT FAKE FAVORITE...</option>
-                                            <option value="ROCK">ROCK</option>
-                                            <option value="SCISSORS">SCISSORS</option>
-                                            <option value="PAPER">PAPER</option>
-                                        </select>
-                                    )}
+                                            CONFIRM SELECTION
+                                        </button>
+                                    </div>
                                 </div>
                             )}
 
-                            <div className="mt-auto pt-4 flex justify-end">
-                                <button
-                                    className={styles.button()}
-                                    disabled={!selectedHand || isProcessing}
-                                    onClick={() => selectedHand && handleSetInitialHand(selectedHand, selectedFake, fakeDetails)}
-                                >
-                                    CONFIRM SELECTION
-                                </button>
-                            </div>
+                            {/* SETUP: ゲスト待機（統計表示） */}
+                            {!isCurrentHost && (
+                                <div className="flex flex-col items-center justify-center h-full">
+                                    <div className={styles.messageText()}>WAITING FOR HOST...</div>
+                                    <div className="w-48 h-48 mt-8">
+                                        <Hand3D handType={null} revealed={false} size="medium" isRotating={true} />
+                                    </div>
+                                </div>
+                            )}
                         </div>
-                    )}
 
-                    {/* SETUP: ゲスト待機（統計表示） */}
-                    {phase === 'SETUP' && !isCurrentHost && (
-                        <div className="flex flex-col items-center justify-center h-full">
-                            <div className={styles.messageText()}>ANALYZING HOST...</div>
+                        {/* 右サイドエリア（統計情報等） */}
+                        <div className={styles.sideArea()}>
+                            <div className="text-[#44FFFF] font-bold text-xl mb-4 border-b-2 border-[#44FFFF] pb-2">DATA ANALYSIS</div>
 
-                            {hostStats ? (
-                                <div className="mt-8 w-full max-w-md">
-                                    <div className={styles.iqBox()}>
-                                        <div className="text-[#44FFFF] font-bold text-center mb-4 border-b border-gray-700 pb-2">HOST TENDENCY DATA</div>
+                            {/* ホスト用リアル統計 */}
+                            {isCurrentHost && hostStats && (
+                                <div>
+                                    <div className="mb-6">
+                                        <div className="text-[#FF4444] font-bold mb-2">PRIVATE DATA</div>
                                         <div className={styles.statRow()}>
-                                            <span className={styles.statLabel()}>GAMES PLAYED</span>
+                                            <span className={styles.statLabel()}>REAL FAV</span>
+                                            <span className={styles.statValue()}>{hostStats.realFavoriteHand}</span>
+                                        </div>
+                                        <div className={styles.statRow()}>
+                                            <span className={styles.statLabel()}>REAL CHANGE</span>
+                                            <span className={styles.statValue()}>{hostStats.realChangeRate}%</span>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <div className="text-gray-400 font-bold mb-2">PUBLIC PREVIEW</div>
+                                        <div className={styles.statRow()}>
+                                            <span className={styles.statLabel()}>GAMES</span>
                                             <span className={styles.statValue()}>{hostStats.totalGames}</span>
                                         </div>
                                         <div className={styles.statRow()}>
                                             <span className={styles.statLabel()}>FAV HAND</span>
-                                            <span className={styles.statValue()}>
-                                                {hostStats.favoriteHand === 'ROCK' && '✊ ROCK'}
-                                                {hostStats.favoriteHand === 'SCISSORS' && '✌️ SCISSORS'}
-                                                {hostStats.favoriteHand === 'PAPER' && '✋ PAPER'}
-                                            </span>
+                                            <span className={styles.statValue()}>{hostStats.favoriteHand}</span>
                                         </div>
                                         <div className={styles.statRow()}>
-                                            <span className={styles.statLabel()}>CHANGE RATE</span>
+                                            <span className={styles.statLabel()}>CHANGE %</span>
                                             <span className={styles.statValue()}>{hostStats.changeRate}%</span>
                                         </div>
-                                        <div className="mt-4 text-xs text-center text-gray-500">
-                                            * DATA ACQUIRED FROM PUBLIC RECORDS via IQ NETWORK
-                                        </div>
-                                    </div>
-                                    <div className="mt-6 text-center text-gray-400 animate-pulse">
-                                        WAITING FOR HOST SELECTION...
                                     </div>
                                 </div>
-                            ) : (
-                                <div className="w-48 h-48">
-                                    <Hand3D handType={null} revealed={false} size="medium" isRotating={true} />
+                            )}
+
+                            {/* ゲスト用（今は待機中表示） */}
+                            {!isCurrentHost && (
+                                <div className="text-gray-500 italic">
+                                    WAITING FOR HOST...
                                 </div>
                             )}
                         </div>
-                    )}
-                </div>
-
-                {/* 右サイドエリア（統計情報等） */}
-                <div className={styles.sideArea()}>
-                    <div className="text-[#44FFFF] font-bold text-xl mb-4 border-b-2 border-[#44FFFF] pb-2">DATA ANALYSIS</div>
-
-                    {/* ホスト用リアル統計 */}
-                    {phase === 'SETUP' && isCurrentHost && hostStats && (
-                        <div>
-                            <div className="mb-6">
-                                <div className="text-[#FF4444] font-bold mb-2">PRIVATE DATA</div>
-                                <div className={styles.statRow()}>
-                                    <span className={styles.statLabel()}>REAL FAV</span>
-                                    <span className={styles.statValue()}>{hostStats.realFavoriteHand}</span>
-                                </div>
-                                <div className={styles.statRow()}>
-                                    <span className={styles.statLabel()}>REAL CHANGE</span>
-                                    <span className={styles.statValue()}>{hostStats.realChangeRate}%</span>
-                                </div>
-                            </div>
-
-                            <div>
-                                <div className="text-gray-400 font-bold mb-2">PUBLIC PREVIEW</div>
-                                <div className={styles.statRow()}>
-                                    <span className={styles.statLabel()}>GAMES</span>
-                                    <span className={styles.statValue()}>{hostStats.totalGames}</span>
-                                </div>
-                                <div className={styles.statRow()}>
-                                    <span className={styles.statLabel()}>FAV HAND</span>
-                                    <span className={styles.statValue()}>{hostStats.favoriteHand}</span>
-                                </div>
-                                <div className={styles.statRow()}>
-                                    <span className={styles.statLabel()}>CHANGE %</span>
-                                    <span className={styles.statValue()}>{hostStats.changeRate}%</span>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* ゲスト用（今は待機中表示） */}
-                    {phase === 'SETUP' && !isCurrentHost && (
-                        <div className="text-gray-500 italic">
-                            ANALYZING HOST PATTERNS...
-                        </div>
-                    )}
-                </div>
+                    </>
+                )}
                 {/* SHOWCASE: 全員 */}
                 {/* 
                  * 左 (mainArea): ホストの初回選択（仮置き）
@@ -435,10 +408,59 @@ export function NullHandGame({
                             </div>
                         </div>
                         <div className={styles.sideArea()}>
-                            <div className="text-[#44FFFF] font-bold text-xl mb-4 border-b-2 border-[#44FFFF] pb-2">STRATEGY</div>
-                            <p className="text-gray-300 text-sm">
-                                You can change your hand or keep it. The guests will try to predict your final move based on your initial hand and stats.
-                            </p>
+                            <div className="text-[#44FFFF] font-bold text-xl mb-4 border-b-2 border-[#44FFFF] pb-2">YOUR STATUS</div>
+
+                            {/* 初期手 */}
+                            <div className="mb-6">
+                                <div className="text-[#FF4444] font-bold mb-2 text-sm uppercase">INITIAL HAND (SHOWN)</div>
+                                <div className="flex items-center gap-2">
+                                    <span className="text-2xl">
+                                        {jankenEvent.initialHand === 'ROCK' && '✊'}
+                                        {jankenEvent.initialHand === 'SCISSORS' && '✌️'}
+                                        {jankenEvent.initialHand === 'PAPER' && '✋'}
+                                    </span>
+                                    <span className={styles.statValue()}>{jankenEvent.initialHand}</span>
+                                </div>
+                            </div>
+
+                            {/* 嘘の情報 */}
+                            <div className="mb-6">
+                                <div className="text-[#FF4444] font-bold mb-2 text-sm uppercase">DECEPTION</div>
+                                <div className={styles.statRow()}>
+                                    <span className={styles.statLabel()}>TARGET</span>
+                                    <span className={styles.statValue()}>
+                                        {jankenEvent.fakeTarget === 'NONE' && 'NONE'}
+                                        {jankenEvent.fakeTarget === 'INITIAL_HAND' && 'FAKE HAND'}
+                                        {jankenEvent.fakeTarget === 'CHANGE_RATE' && 'FAKE RATE'}
+                                        {jankenEvent.fakeTarget === 'FAVORITE_HAND' && 'FAKE FAV'}
+                                    </span>
+                                </div>
+                                {jankenEvent.fakeTarget !== 'NONE' && (
+                                    <div className={styles.statRow()}>
+                                        <span className={styles.statLabel()}>VALUE</span>
+                                        <span className="text-white font-bold">
+                                            {jankenEvent.fakeTarget === 'INITIAL_HAND' && jankenEvent.fakeHandValue}
+                                            {jankenEvent.fakeTarget === 'CHANGE_RATE' && `${jankenEvent.fakeChangeRateValue}%`}
+                                            {jankenEvent.fakeTarget === 'FAVORITE_HAND' && jankenEvent.fakeFavoriteHandValue}
+                                        </span>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* リアル統計 */}
+                            {hostStats && (
+                                <div>
+                                    <div className="text-[#FF4444] font-bold mb-2 text-sm uppercase">REAL STATS (HIDDEN)</div>
+                                    <div className={styles.statRow()}>
+                                        <span className={styles.statLabel()}>FAV HAND</span>
+                                        <span className={styles.statValue()}>{hostStats.realFavoriteHand}</span>
+                                    </div>
+                                    <div className={styles.statRow()}>
+                                        <span className={styles.statLabel()}>CHANGE %</span>
+                                        <span className={styles.statValue()}>{hostStats.realChangeRate}%</span>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </>
                 )}
@@ -455,9 +477,44 @@ export function NullHandGame({
                             </div>
                         </div>
                         <div className={styles.sideArea()}>
-                            <div className="text-gray-500 italic">
-                                ANTICIPATING MOVE...
-                            </div>
+                            <div className="text-[#44FFFF] font-bold text-xl mb-4 border-b-2 border-[#44FFFF] pb-2">HOST INFO</div>
+
+                            {/* ホストの初期手 */}
+                            {jankenEvent && (
+                                <div className="mb-6">
+                                    <div className="text-[#FF4444] font-bold mb-2 text-sm uppercase">INITIAL HAND</div>
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-2xl">
+                                            {jankenEvent.initialHand === 'ROCK' && '✊'}
+                                            {jankenEvent.initialHand === 'SCISSORS' && '✌️'}
+                                            {jankenEvent.initialHand === 'PAPER' && '✋'}
+                                        </span>
+                                        <span className={styles.statValue()}>{jankenEvent.initialHand}</span>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* ホストの統計（公開用） */}
+                            {hostStats && (
+                                <div>
+                                    <div className="text-[#FF4444] font-bold mb-2 text-sm uppercase">HOST TENDENCY</div>
+                                    <div className={styles.statRow()}>
+                                        <span className={styles.statLabel()}>FAV HAND</span>
+                                        <span className={styles.statValue()}>
+                                            {hostStats.favoriteHand === 'ROCK' && '✊ ROCK'}
+                                            {hostStats.favoriteHand === 'SCISSORS' && '✌️ SCISSORS'}
+                                            {hostStats.favoriteHand === 'PAPER' && '✋ PAPER'}
+                                        </span>
+                                    </div>
+                                    <div className={styles.statRow()}>
+                                        <span className={styles.statLabel()}>CHANGE %</span>
+                                        <span className={styles.statValue()}>{hostStats.changeRate}%</span>
+                                    </div>
+                                    <div className="mt-4 text-xs text-gray-500">
+                                        * DATA MAY BE DECEPTIVE
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </>
                 )}
@@ -496,10 +553,44 @@ export function NullHandGame({
                             </div>
                         </div>
                         <div className={styles.sideArea()}>
-                            <div className="text-[#44FFFF] font-bold text-xl mb-4 border-b-2 border-[#44FFFF] pb-2">CONFLICT</div>
-                            <p className="text-gray-300 text-sm">
-                                Predict the host's final hand. Win to gain points.
-                            </p>
+                            <div className="text-[#44FFFF] font-bold text-xl mb-4 border-b-2 border-[#44FFFF] pb-2">HOST INFO</div>
+
+                            {/* ホストの初期手 */}
+                            {jankenEvent && (
+                                <div className="mb-6">
+                                    <div className="text-[#FF4444] font-bold mb-2 text-sm uppercase">INITIAL HAND</div>
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-2xl">
+                                            {jankenEvent.initialHand === 'ROCK' && '✊'}
+                                            {jankenEvent.initialHand === 'SCISSORS' && '✌️'}
+                                            {jankenEvent.initialHand === 'PAPER' && '✋'}
+                                        </span>
+                                        <span className={styles.statValue()}>{jankenEvent.initialHand}</span>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* ホストの統計（公開用） */}
+                            {hostStats && (
+                                <div>
+                                    <div className="text-[#FF4444] font-bold mb-2 text-sm uppercase">HOST TENDENCY</div>
+                                    <div className={styles.statRow()}>
+                                        <span className={styles.statLabel()}>FAV HAND</span>
+                                        <span className={styles.statValue()}>
+                                            {hostStats.favoriteHand === 'ROCK' && '✊ ROCK'}
+                                            {hostStats.favoriteHand === 'SCISSORS' && '✌️ SCISSORS'}
+                                            {hostStats.favoriteHand === 'PAPER' && '✋ PAPER'}
+                                        </span>
+                                    </div>
+                                    <div className={styles.statRow()}>
+                                        <span className={styles.statLabel()}>CHANGE %</span>
+                                        <span className={styles.statValue()}>{hostStats.changeRate}%</span>
+                                    </div>
+                                    <div className="mt-4 text-xs text-gray-500">
+                                        * DATA MAY BE DECEPTIVE
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </>
                 )}
@@ -510,15 +601,87 @@ export function NullHandGame({
                         <div className={styles.mainArea()}>
                             <div className={styles.messageText()}>
                                 <p>GUESTS ARE CHOOSING...</p>
-                                <div className="w-48 h-48 mx-auto mt-8">
-                                    <Hand3D handType={null} revealed={false} size="medium" isRotating={true} />
-                                </div>
+                                {jankenEvent?.finalHostHand ? (
+                                    <div className="mt-8">
+                                        <div className="text-[#44FFFF] font-bold mb-6 text-xl tracking-widest border-b-2 border-[#44FFFF] pb-2 inline-block">YOUR FINAL DECISION</div>
+                                        <div className="w-48 h-48 mx-auto">
+                                            <Hand3D
+                                                handType={jankenEvent.finalHostHand as HandType}
+                                                revealed={true}
+                                                size="medium"
+                                            />
+                                        </div>
+                                        <div className="text-3xl font-bold mt-6 text-white tracking-widest">
+                                            {jankenEvent.finalHostHand === 'ROCK' && '✊ ROCK'}
+                                            {jankenEvent.finalHostHand === 'SCISSORS' && '✌️ SCISSORS'}
+                                            {jankenEvent.finalHostHand === 'PAPER' && '✋ PAPER'}
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="w-48 h-48 mx-auto mt-8">
+                                        <Hand3D handType={null} revealed={false} size="medium" isRotating={true} />
+                                    </div>
+                                )}
                             </div>
                         </div>
                         <div className={styles.sideArea()}>
-                            <div className="text-gray-500 italic">
-                                AWAITING CHALLENGERS...
-                            </div>
+                            <div className="text-[#44FFFF] font-bold text-xl mb-4 border-b-2 border-[#44FFFF] pb-2">YOUR STATUS</div>
+
+                            {jankenEvent && (
+                                <>
+                                    {/* 初期手 */}
+                                    <div className="mb-6">
+                                        <div className="text-[#FF4444] font-bold mb-2 text-sm uppercase">INITIAL HAND (SHOWN)</div>
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-2xl">
+                                                {jankenEvent.initialHand === 'ROCK' && '✊'}
+                                                {jankenEvent.initialHand === 'SCISSORS' && '✌️'}
+                                                {jankenEvent.initialHand === 'PAPER' && '✋'}
+                                            </span>
+                                            <span className={styles.statValue()}>{jankenEvent.initialHand}</span>
+                                        </div>
+                                    </div>
+
+                                    {/* 嘘の情報 */}
+                                    <div className="mb-6">
+                                        <div className="text-[#FF4444] font-bold mb-2 text-sm uppercase">DECEPTION</div>
+                                        <div className={styles.statRow()}>
+                                            <span className={styles.statLabel()}>TARGET</span>
+                                            <span className={styles.statValue()}>
+                                                {jankenEvent.fakeTarget === 'NONE' && 'NONE'}
+                                                {jankenEvent.fakeTarget === 'INITIAL_HAND' && 'FAKE HAND'}
+                                                {jankenEvent.fakeTarget === 'CHANGE_RATE' && 'FAKE RATE'}
+                                                {jankenEvent.fakeTarget === 'FAVORITE_HAND' && 'FAKE FAV'}
+                                            </span>
+                                        </div>
+                                        {jankenEvent.fakeTarget !== 'NONE' && (
+                                            <div className={styles.statRow()}>
+                                                <span className={styles.statLabel()}>VALUE</span>
+                                                <span className="text-white font-bold">
+                                                    {jankenEvent.fakeTarget === 'INITIAL_HAND' && jankenEvent.fakeHandValue}
+                                                    {jankenEvent.fakeTarget === 'CHANGE_RATE' && `${jankenEvent.fakeChangeRateValue}%`}
+                                                    {jankenEvent.fakeTarget === 'FAVORITE_HAND' && jankenEvent.fakeFavoriteHandValue}
+                                                </span>
+                                            </div>
+                                        )}
+                                    </div>
+                                </>
+                            )}
+
+                            {/* リアル統計 */}
+                            {hostStats && (
+                                <div>
+                                    <div className="text-[#FF4444] font-bold mb-2 text-sm uppercase">REAL STATS (HIDDEN)</div>
+                                    <div className={styles.statRow()}>
+                                        <span className={styles.statLabel()}>FAV HAND</span>
+                                        <span className={styles.statValue()}>{hostStats.realFavoriteHand}</span>
+                                    </div>
+                                    <div className={styles.statRow()}>
+                                        <span className={styles.statLabel()}>CHANGE %</span>
+                                        <span className={styles.statValue()}>{hostStats.realChangeRate}%</span>
+                                    </div>
+                                </div>
+                            )}
                         </div>
                     </>
                 )}
@@ -542,6 +705,9 @@ export function NullHandGame({
                                             size="large"
                                         />
                                     </div>
+                                    <div className="text-center text-xl font-bold mt-2">
+                                        {jankenEvent.finalHostHand}
+                                    </div>
                                 </div>
                             </div>
                             <div className="text-center mt-8">
@@ -557,19 +723,86 @@ export function NullHandGame({
 
                         <div className={styles.sideArea()}>
                             <div className="text-[#44FFFF] font-bold text-xl mb-4 border-b-2 border-[#44FFFF] pb-2">ROUND RESULTS</div>
-                            {currentScores.length > 0 && (
-                                <div className="space-y-4">
-                                    {currentScores.map((score, index) => (
-                                        <div key={score.userId} className="flex justify-between items-center bg-gray-900 border border-gray-700 p-3">
+                            <div className="space-y-4">
+                                {/* ホスト（自分/相手）の結果 */}
+                                {(() => {
+                                    const hostScore = currentScores.find(s => s.userId === jankenEvent.currentHostId)
+                                    // ホストが勝利（誰も勝たなかった）したか判定
+                                    const guestWins = jankenEvent.guestHands.some(gh => {
+                                        const h = jankenEvent.finalHostHand as HandType
+                                        const g = gh.hand as HandType
+                                        if (h === g) return false // Draw
+                                        if (h === 'ROCK' && g === 'PAPER') return true
+                                        if (h === 'SCISSORS' && g === 'ROCK') return true
+                                        if (h === 'PAPER' && g === 'SCISSORS') return true
+                                        return false
+                                    })
+                                    const hostGained = !guestWins ? 3 : 0
+
+                                    return (
+                                        <div className="flex justify-between items-center bg-[#FF4444]/20 border border-[#FF4444] p-3">
                                             <div className="flex items-center gap-3">
-                                                <span className={styles.rankBadge()}>#{index + 1}</span>
-                                                <span className="text-white font-mono">{score.user.name}</span>
+                                                <span className="bg-[#FF4444] text-black font-bold px-2 py-0.5 text-xs">HOST</span>
+                                                <span className="text-white font-bold">{hostScore?.user.name}</span>
                                             </div>
-                                            <span className="text-[#44FFFF] font-bold font-mono text-xl">{score.points}</span>
+                                            <div className="flex items-center gap-4">
+                                                <span className="text-2xl">
+                                                    {jankenEvent.finalHostHand === 'ROCK' && '✊'}
+                                                    {jankenEvent.finalHostHand === 'SCISSORS' && '✌️'}
+                                                    {jankenEvent.finalHostHand === 'PAPER' && '✋'}
+                                                </span>
+                                                <div className="text-right">
+                                                    <div className="text-[#FF4444] font-bold">+{hostGained} PT</div>
+                                                    <div className="text-xs text-gray-400">TOTAL: {hostScore?.points}</div>
+                                                </div>
+                                            </div>
                                         </div>
-                                    ))}
-                                </div>
-                            )}
+                                    )
+                                })()}
+
+                                {/* ゲスト一覧 */}
+                                {jankenEvent.guestHands.map(gh => {
+                                    const score = currentScores.find(s => s.userId === gh.userId)
+                                    // 勝敗判定
+                                    let result = 'LOSE'
+                                    let gained = 0
+                                    const h = jankenEvent.finalHostHand as HandType
+                                    const g = gh.hand as HandType
+
+                                    if (h === g) {
+                                        result = 'DRAW'
+                                    } else if (
+                                        (h === 'ROCK' && g === 'PAPER') ||
+                                        (h === 'SCISSORS' && g === 'ROCK') ||
+                                        (h === 'PAPER' && g === 'SCISSORS')
+                                    ) {
+                                        result = 'WIN'
+                                        gained = 1
+                                    }
+
+                                    return (
+                                        <div key={gh.userId} className="flex justify-between items-center bg-gray-900 border border-gray-700 p-3">
+                                            <div className="flex items-center gap-3">
+                                                <span className="bg-gray-700 text-white font-bold px-2 py-0.5 text-xs">GUEST</span>
+                                                <span className="text-white font-bold">{gh.user.name}</span>
+                                            </div>
+                                            <div className="flex items-center gap-4">
+                                                <span className="text-2xl">
+                                                    {gh.hand === 'ROCK' && '✊'}
+                                                    {gh.hand === 'SCISSORS' && '✌️'}
+                                                    {gh.hand === 'PAPER' && '✋'}
+                                                </span>
+                                                <div className="text-right">
+                                                    <div className={cn("font-bold", result === 'WIN' ? "text-[#44FFFF]" : "text-gray-500")}>
+                                                        +{gained} PT
+                                                    </div>
+                                                    <div className="text-xs text-gray-400">TOTAL: {score?.points}</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )
+                                })}
+                            </div>
                         </div>
                     </>
                 )}
