@@ -83,15 +83,12 @@ export async function startJankenMatch(roomId: string) {
     )
 
     // 最初のターンを作成
-    const phaseEndsAt = new Date(Date.now() + 30000) // 30秒後
-
     await prisma.jankenEvent.create({
         data: {
             matchId: match.id,
             currentHostId: participants[0], // 最初のプレイヤーがホスト
             turnNumber: 1,
             phase: 'SETUP',
-            phaseEndsAt: phaseEndsAt,
         }
     })
 
@@ -204,19 +201,16 @@ export async function setInitialHand(
     if (!event) throw new Error('イベントが見つかりません')
     if (event.currentHostId !== user.id) throw new Error('ホストではありません')
 
-    const phaseEndsAt = new Date(Date.now() + 20000) // 20秒後
-
     // 偽装の詳細を保存
     await prisma.jankenEvent.update({
         where: { id: eventId },
         data: {
             initialHand: hand,
             fakeTarget: fakeTarget,
-            fakeHandValue: fakeDetails?.fakeHandValue || null,
-            fakeChangeRateValue: fakeDetails?.fakeChangeRateValue || null,
-            fakeFavoriteHandValue: fakeDetails?.fakeFavoriteHandValue || null,
+            fakeHandValue: fakeDetails?.fakeHandValue,
+            fakeChangeRateValue: fakeDetails?.fakeChangeRateValue,
+            fakeFavoriteHandValue: fakeDetails?.fakeFavoriteHandValue,
             phase: 'SHOWCASE',
-            phaseEndsAt: phaseEndsAt,
         }
     })
 }
@@ -273,12 +267,10 @@ export async function confirmShowcase(eventId: string, userId: string) {
 
     if (confirmedGuests >= guests.length) {
         // 全員確認完了 → FINAL_DECISION へ
-        const phaseEndsAt = new Date(Date.now() + 15000) // 15秒後
         await prisma.jankenEvent.update({
             where: { id: eventId },
             data: {
                 phase: 'FINAL_DECISION',
-                phaseEndsAt: phaseEndsAt,
             }
         })
     }
@@ -295,14 +287,11 @@ export async function setFinalHostHand(eventId: string, hand: HandType) {
     if (!event) throw new Error('イベントが見つかりません')
     if (event.currentHostId !== user.id) throw new Error('ホストではありません')
 
-    const phaseEndsAt = new Date(Date.now() + 20000) // 20秒後
-
     await prisma.jankenEvent.update({
         where: { id: eventId },
         data: {
             finalHostHand: hand,
             phase: 'BATTLE',
-            phaseEndsAt: phaseEndsAt,
         }
     })
 }
@@ -392,35 +381,53 @@ async function judgeRound(eventId: string) {
     if (!event) throw new Error('イベントが見つかりません')
     if (!event.finalHostHand) throw new Error('ホストの手が設定されていません')
 
-    // ホストのログを記録
+    // ホストのログを記録（勝負は後で計算）
+    let hostWon = false // 全員に勝ったかどうか
     if (event.initialHand && event.finalHostHand) {
         await prisma.jankenLog.create({
             data: {
                 userId: event.currentHostId,
                 initialHand: event.initialHand,
                 finalHand: event.finalHostHand,
-                matchId: event.matchId
+                matchId: event.matchId,
+                isWinning: false, // 一旦false、後で更新
             }
         })
     }
 
-    // 勝敗判定
+    // 勝敗判定とゲストログ記録
     const hostHand = event.finalHostHand as HandType
     const winners: Array<{ userId: string; hand: HandType }> = []
+    const guestWinners: Set<string> = new Set() // 勝ったゲストのID
 
     for (const guestHand of event.guestHands) {
         const result = judgeHand(hostHand, guestHand.hand as HandType)
-        if (result === 'GUEST_WIN') {
+        const isWin = result === 'GUEST_WIN'
+
+        if (isWin) {
             winners.push({
                 userId: guestHand.userId,
                 hand: guestHand.hand as HandType
             })
+            guestWinners.add(guestHand.userId)
         }
+
+        // ゲストのログを記録
+        await prisma.jankenLog.create({
+            data: {
+                userId: guestHand.userId,
+                initialHand: guestHand.hand,
+                finalHand: guestHand.hand,
+                matchId: event.matchId,
+                isWinning: isWin,
+            }
+        })
     }
 
     // ポイントを更新
     if (winners.length === 0) {
         // ホストが全員に勝利 → +3ポイント
+        hostWon = true
         await prisma.matchScore.update({
             where: {
                 matchId_userId: {
@@ -455,12 +462,25 @@ async function judgeRound(eventId: string) {
         )
     }
 
+    // ホストのログのisWinningを更新
+    if (event.initialHand && event.finalHostHand) {
+        await prisma.jankenLog.updateMany({
+            where: {
+                userId: event.currentHostId,
+                matchId: event.matchId,
+                finalHand: event.finalHostHand,
+            },
+            data: {
+                isWinning: hostWon
+            }
+        })
+    }
+
     // RESULTフェーズへ遷移（10秒間表示）
     await prisma.jankenEvent.update({
         where: { id: eventId },
         data: {
             phase: 'RESULT',
-            phaseEndsAt: new Date(Date.now() + 10000) // 10秒後
         }
     })
 }
@@ -493,7 +513,6 @@ export async function startNextTurn(eventId: string) {
             where: { id: eventId },
             data: {
                 phase: 'GAME_OVER',
-                phaseEndsAt: new Date(Date.now() + 60000) // 60秒間表示
             }
         })
 
@@ -511,15 +530,12 @@ export async function startNextTurn(eventId: string) {
     const nextHostIndex = event.turnNumber // 0-indexed配列なので turnNumber がそのまま次のインデックス
     const nextHostId = participants[nextHostIndex]
 
-    const phaseEndsAt = new Date(Date.now() + 30000) // 30秒後
-
     await prisma.jankenEvent.create({
         data: {
             matchId: event.matchId,
             currentHostId: nextHostId,
             turnNumber: event.turnNumber + 1,
             phase: 'SETUP',
-            phaseEndsAt: phaseEndsAt,
         }
     })
 

@@ -52,7 +52,6 @@ export interface UseNullHandReturn {
     jankenEvent: JankenEventWithGuests | null
     hostStats: HostStats | null
     isProcessing: boolean
-    timerProgress: number
     currentScores: MatchScoreWithUser[]
     handleStartGame: () => Promise<void>
     handleSetInitialHand: (hand: HandType, fakeTarget: FakeTarget, fakeDetails?: FakeDetails) => Promise<void>
@@ -90,10 +89,8 @@ export function useNullHand({
     const [hostStats, setHostStats] = useState<HostStats | null>(null)
     const [currentScores, setCurrentScores] = useState<MatchScoreWithUser[]>([])
     const [isProcessing, setIsProcessing] = useState(false)
-    const [timerProgress, setTimerProgress] = useState(0)
 
     // ---- Refs ----
-    const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
     const matchIdRef = useRef<string | null>(initialMatchId)
     const phaseRef = useRef<JankenPhase>('TITLE')
 
@@ -103,50 +100,8 @@ export function useNullHand({
     }, [phase])
 
     // ============================================
-    // タイマー管理
+    // JankenEvent取得
     // ============================================
-
-    /**
-     * phaseEndsAt に基づいてタイマー進捗バーを更新
-     */
-    const setupPhaseTimer = useCallback((phaseEndsAt: Date | string) => {
-        if (timerRef.current) {
-            clearInterval(timerRef.current)
-            timerRef.current = null
-        }
-
-        let targetDate: Date
-        if (typeof phaseEndsAt === 'string') {
-            const dateString = phaseEndsAt.endsWith('Z') ? phaseEndsAt : `${phaseEndsAt}Z`
-            targetDate = new Date(dateString)
-        } else {
-            targetDate = phaseEndsAt
-        }
-
-        const startTime = Date.now()
-        const endTime = targetDate.getTime()
-        const totalDuration = endTime - startTime
-
-        if (totalDuration <= 0) {
-            setTimerProgress(0)
-            return
-        }
-
-        const interval = setInterval(() => {
-            const now = Date.now()
-            const elapsed = now - startTime
-            const progress = Math.max(0, 100 - (elapsed / totalDuration) * 100)
-
-            if (progress <= 0) {
-                clearInterval(interval)
-                setTimerProgress(0)
-            } else {
-                setTimerProgress(progress)
-            }
-        }, 100)
-
-        timerRef.current = interval as unknown as ReturnType<typeof setTimeout>
-    }, [])
 
     // ============================================
     // データ取得ヘルパー
@@ -155,22 +110,18 @@ export function useNullHand({
     /**
      * 最新のJankenEventを取得して状態を更新
      */
-    const refreshJankenEvent = useCallback(async () => {
+    const fetchJankenEvent = useCallback(async () => {
         if (!matchIdRef.current) return
 
         try {
             const latest = await getLatestJankenEvent(matchIdRef.current)
             if (!latest) return
 
-            setJankenEvent(latest)
-
-            // フェーズを判定
             const eventPhase = latest.phase as JankenPhase
-            setPhase(eventPhase)
 
-            // タイマーセット
-            if (latest.phaseEndsAt) {
-                setupPhaseTimer(latest.phaseEndsAt)
+            setJankenEvent(latest)
+            if (phaseRef.current !== eventPhase) {
+                setPhase(eventPhase)
             }
 
             // SETUP フェーズで自分がホストなら統計取得
@@ -181,7 +132,7 @@ export function useNullHand({
         } catch (error) {
             console.error('JankenEvent取得に失敗:', error)
         }
-    }, [currentUserId, setupPhaseTimer])
+    }, [currentUserId])
 
     // ============================================
     // アクションハンドラ
@@ -337,14 +288,14 @@ export function useNullHand({
         const loadInitialData = async () => {
             try {
                 matchIdRef.current = initialMatchId
-                await refreshJankenEvent()
+                await fetchJankenEvent()
             } catch (error) {
                 console.error('初期データ取得に失敗:', error)
             }
         }
 
         loadInitialData()
-    }, [initialMatchId, refreshJankenEvent])
+    }, [initialMatchId, fetchJankenEvent])
 
     /**
      * Supabase Realtime サブスクリプション
@@ -359,25 +310,14 @@ export function useNullHand({
                 filter: `match_id=eq.${matchIdRef.current}`,
             }, async () => {
                 // シグナル受信 → 最新データを再取得
-                await refreshJankenEvent()
+                await fetchJankenEvent()
             })
             .subscribe()
 
         return () => {
             supabase.removeChannel(channel)
         }
-    }, [supabase, roomId, refreshJankenEvent])
-
-    /**
-     * クリーンアップ
-     */
-    useEffect(() => {
-        return () => {
-            if (timerRef.current) {
-                clearInterval(timerRef.current as unknown as number)
-            }
-        }
-    }, [])
+    }, [supabase, roomId, fetchJankenEvent])
 
     // ============================================
     // 戻り値
@@ -390,7 +330,6 @@ export function useNullHand({
         jankenEvent,
         hostStats,
         isProcessing,
-        timerProgress,
         currentScores,
         handleStartGame,
         handleSetInitialHand,
