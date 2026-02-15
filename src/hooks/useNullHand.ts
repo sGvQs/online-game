@@ -61,6 +61,7 @@ export interface UseNullHandReturn {
     handleNextRound: () => Promise<void>
     handleFinish: () => Promise<void>
     isCurrentHost: boolean
+    error: string | null
 }
 
 interface UseNullHandProps {
@@ -89,6 +90,7 @@ export function useNullHand({
     const [hostStats, setHostStats] = useState<HostStats | null>(null)
     const [currentScores, setCurrentScores] = useState<MatchScoreWithUser[]>([])
     const [isProcessing, setIsProcessing] = useState(false)
+    const [error, setError] = useState<string | null>(null)
 
     // ---- Refs ----
     const matchIdRef = useRef<string | null>(initialMatchId)
@@ -124,13 +126,14 @@ export function useNullHand({
                 setPhase(eventPhase)
             }
 
-            // SETUP フェーズで自分がホストなら統計取得
-            if (eventPhase === 'SETUP' && latest.currentHostId === currentUserId) {
-                const stats = await getHostStats(currentUserId)
+            // SETUP フェーズなら統計取得（ゲストもホストのデータを見る）
+            if (eventPhase === 'SETUP') {
+                const stats = await getHostStats(latest.currentHostId, latest.id)
                 setHostStats(stats)
             }
         } catch (error) {
             console.error('JankenEvent取得に失敗:', error)
+            setError('データの取得に失敗しました')
         }
     }, [currentUserId])
 
@@ -151,6 +154,7 @@ export function useNullHand({
             matchIdRef.current = match.id
         } catch (error) {
             console.error('ゲーム開始に失敗:', error)
+            setError('ゲームの開始に失敗しました')
         } finally {
             setIsProcessing(false)
         }
@@ -167,6 +171,7 @@ export function useNullHand({
             await setInitialHand(jankenEvent.id, hand, fakeTarget, fakeDetails)
         } catch (error) {
             console.error('初期手設定に失敗:', error)
+            setError('手の設定に失敗しました')
         } finally {
             setIsProcessing(false)
         }
@@ -183,6 +188,7 @@ export function useNullHand({
             await confirmShowcase(jankenEvent.id, currentUserId)
         } catch (error) {
             console.error('確認完了に失敗:', error)
+            setError('確認処理に失敗しました')
         } finally {
             setIsProcessing(false)
         }
@@ -199,6 +205,7 @@ export function useNullHand({
             await setFinalHostHand(jankenEvent.id, hand)
         } catch (error) {
             console.error('最終決定に失敗:', error)
+            setError('決定処理に失敗しました')
         } finally {
             setIsProcessing(false)
         }
@@ -215,6 +222,7 @@ export function useNullHand({
             await setGuestHand(jankenEvent.id, currentUserId, hand)
         } catch (error) {
             console.error('手の設定に失敗:', error)
+            setError('手の送信に失敗しました')
         } finally {
             setIsProcessing(false)
         }
@@ -231,6 +239,7 @@ export function useNullHand({
             await startNextTurn(jankenEvent.id)
         } catch (error) {
             console.error('次のラウンドへの遷移に失敗:', error)
+            setError('次ラウンドへの遷移に失敗しました')
         } finally {
             setIsProcessing(false)
         }
@@ -251,6 +260,7 @@ export function useNullHand({
             play('chime')
         } catch (error) {
             console.error('ゲーム終了に失敗:', error)
+            setError('ゲーム終了処理に失敗しました')
         } finally {
             setIsProcessing(false)
         }
@@ -339,5 +349,6 @@ export function useNullHand({
         handleNextRound,
         handleFinish,
         isCurrentHost,
+        error,
     }
 }
