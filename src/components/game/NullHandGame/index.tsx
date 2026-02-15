@@ -74,7 +74,7 @@ export function NullHandGame({
                             className={isReady ? styles.menuItem() : styles.menuItemSelected()}
                             onClick={toggleReady}
                         >
-                            {isReady ? 'CANCEL READY' : 'READY'}
+                            {isReady ? '準備完了をキャンセル' : '準備完了'}
                         </div>
 
                         {isHost && (
@@ -85,12 +85,12 @@ export function NullHandGame({
                                 )}
                                 onClick={() => allUsersReady && handleStartGame()}
                             >
-                                START GAME
+                                ゲーム開始
                             </div>
                         )}
 
                         <div className={styles.menuItem()} onClick={handleClose}>
-                            EXIT
+                            退出
                         </div>
                     </div>
 
@@ -107,22 +107,22 @@ export function NullHandGame({
                     {/* 下部: インフォメーション */}
                     <div className={styles.infoBox()}>
                         <div className='w-full'>
-                            <p className={styles.subtitle()}>INTELLIGENT QUBE FINAL MODE</p>
+                            <p className={styles.subtitle()}>I.Q FINAL MODE</p>
 
                             <div className={styles.playerListWrapper()}>
-                                <div className="text-[#FF4444] font-bold mb-2">PLAYERS</div>
+                                <div className="text-[#FF4444] font-bold mb-2">参加者</div>
                                 {room.users.map((u: RoomUserWithReadyStatus) => (
                                     <div key={u.id} className={styles.playerItem()}>
                                         <span className={u.isReady ? 'text-[#44FFFF]' : 'text-gray-500'}>
-                                            {u.user?.name || 'Unknown'}
+                                            {u.user?.name || '不明'}
                                         </span>
                                         <span className={u.isReady ? 'text-[#FF4444]' : 'text-gray-700'}>
-                                            {u.isReady ? 'READY' : 'WAITING'}
+                                            {u.isReady ? '準備完了' : '待機中'}
                                         </span>
                                     </div>
                                 ))}
                                 <div className="mt-4 text-right text-gray-400">
-                                    {readyCount} / {totalUsers} READY
+                                    {readyCount} / {totalUsers} 準備完了
                                 </div>
                             </div>
                         </div>
@@ -149,11 +149,11 @@ export function NullHandGame({
             <div className={styles.gameGrid()}>
                 {/* フェーズ表示 */}
                 <div className={styles.phaseBox()}>
-                    {phase === 'SETUP' && 'PHASE: SETUP - DECISION'}
-                    {phase === 'SHOWCASE' && 'PHASE: SHOWCASE - OBSERVATION'}
-                    {phase === 'FINAL_DECISION' && 'PHASE: DECISION - FINAL'}
-                    {phase === 'BATTLE' && 'PHASE: BATTLE - CONFLICT'}
-                    {phase === 'RESULT' && 'PHASE: RESULT - EVALUATION'}
+                    {phase === 'SETUP' && 'フェーズ: セットアップ - 決断'}
+                    {phase === 'SHOWCASE' && 'フェーズ: ショーケース - 観察'}
+                    {phase === 'FINAL_DECISION' && 'フェーズ: 最終決断 - 確定'}
+                    {phase === 'BATTLE' && 'フェーズ: バトル - 衝突'}
+                    {phase === 'RESULT' && 'フェーズ: リザルト - 評価'}
                 </div>
 
                 {/* メインエリア（左/中央） */}
@@ -163,7 +163,7 @@ export function NullHandGame({
                             {/* SETUP: ホストのみ */}
                             {isCurrentHost && (
                                 <div className="w-full h-full flex flex-col">
-                                    <h2 className={styles.messageText()}>SELECT YOUR HAND</h2>
+                                    <h2 className={styles.messageText()}>あなたの手を選択</h2>
 
                                     {/* 手選択（3D） */}
                                     <div className={styles.handGrid()}>
@@ -184,13 +184,15 @@ export function NullHandGame({
                                     <div className="border-t border-gray-700 my-4"></div>
 
                                     {/* 偽装選択 */}
-                                    <h3 className="text-[#FF4444] font-bold mb-2 uppercase">DECEPTION: {selectedFake}</h3>
+                                    <h3 className="text-[#FF4444] font-bold mb-2 uppercase">偽装工作: {selectedFake === 'NONE' ? 'なし' :
+                                        selectedFake === 'INITIAL_HAND' ? '手' :
+                                            selectedFake === 'CHANGE_RATE' ? '確率' : '得意手'}</h3>
                                     <div className="grid grid-cols-2 gap-2 mb-4">
                                         {([
-                                            { value: 'NONE', label: 'NO LIE' },
-                                            { value: 'INITIAL_HAND', label: 'FAKE HAND' },
-                                            { value: 'CHANGE_RATE', label: 'FAKE RATE' },
-                                            { value: 'FAVORITE_HAND', label: 'FAKE FAV' },
+                                            { value: 'NONE', label: '偽装なし' },
+                                            { value: 'INITIAL_HAND', label: '手を偽装' },
+                                            { value: 'CHANGE_RATE', label: '変える確率を偽装' },
+                                            { value: 'FAVORITE_HAND', label: '得意手を偽装' },
                                         ] as const).map((option) => (
                                             <div
                                                 key={option.value}
@@ -214,7 +216,7 @@ export function NullHandGame({
                                                     value={fakeDetails.fakeHandValue || ''}
                                                     onChange={(e) => setFakeDetails({ ...fakeDetails, fakeHandValue: e.target.value as HandType })}
                                                 >
-                                                    <option value="">SELECT FAKE HAND...</option>
+                                                    <option value="">偽装する手を選択...</option>
                                                     <option value="ROCK">ROCK</option>
                                                     <option value="SCISSORS">SCISSORS</option>
                                                     <option value="PAPER">PAPER</option>
@@ -226,7 +228,7 @@ export function NullHandGame({
                                                     className={styles.numberInput()}
                                                     value={fakeDetails.fakeChangeRateValue ?? ''}
                                                     onChange={(e) => setFakeDetails({ ...fakeDetails, fakeChangeRateValue: parseInt(e.target.value) || 0 })}
-                                                    placeholder="FAKE RATE (0-100)"
+                                                    placeholder="偽装する確率 (0-100)"
                                                 />
                                             )}
                                             {selectedFake === 'FAVORITE_HAND' && (
@@ -235,7 +237,7 @@ export function NullHandGame({
                                                     value={fakeDetails.fakeFavoriteHandValue || ''}
                                                     onChange={(e) => setFakeDetails({ ...fakeDetails, fakeFavoriteHandValue: e.target.value as HandType })}
                                                 >
-                                                    <option value="">SELECT FAKE FAVORITE...</option>
+                                                    <option value="">偽装する得意手を選択...</option>
                                                     <option value="ROCK">ROCK</option>
                                                     <option value="SCISSORS">SCISSORS</option>
                                                     <option value="PAPER">PAPER</option>
@@ -250,7 +252,7 @@ export function NullHandGame({
                                             disabled={!selectedHand || isProcessing}
                                             onClick={() => selectedHand && handleSetInitialHand(selectedHand, selectedFake, fakeDetails)}
                                         >
-                                            CONFIRM SELECTION
+                                            選択を確定
                                         </button>
                                     </div>
                                 </div>
@@ -259,7 +261,7 @@ export function NullHandGame({
                             {/* SETUP: ゲスト待機（統計表示） */}
                             {!isCurrentHost && (
                                 <div className="flex flex-col items-center justify-center h-full">
-                                    <div className={styles.messageText()}>WAITING FOR HOST...</div>
+                                    <div className={styles.messageText()}>ホストの選択を待っています...</div>
                                     <div className="w-48 h-48 mt-8">
                                         <Hand3D handType={null} revealed={false} size="medium" isRotating={true} />
                                     </div>
@@ -275,29 +277,29 @@ export function NullHandGame({
                             {isCurrentHost && hostStats && (
                                 <div>
                                     <div className="mb-6">
-                                        <div className="text-[#FF4444] font-bold mb-2">PRIVATE DATA</div>
+                                        <div className="text-[#FF4444] font-bold mb-2">極秘データ</div>
                                         <div className={styles.statRow()}>
-                                            <span className={styles.statLabel()}>REAL FAV</span>
+                                            <span className={styles.statLabel()}>本当の得意手</span>
                                             <span className={styles.statValue()}>{hostStats.realFavoriteHand}</span>
                                         </div>
                                         <div className={styles.statRow()}>
-                                            <span className={styles.statLabel()}>REAL CHANGE</span>
+                                            <span className={styles.statLabel()}>本当の変える確率</span>
                                             <span className={styles.statValue()}>{hostStats.realChangeRate}%</span>
                                         </div>
                                     </div>
 
                                     <div>
-                                        <div className="text-gray-400 font-bold mb-2">PUBLIC PREVIEW</div>
+                                        <div className="text-gray-400 font-bold mb-2">公開データ (プレビュー)</div>
                                         <div className={styles.statRow()}>
-                                            <span className={styles.statLabel()}>GAMES</span>
+                                            <span className={styles.statLabel()}>試合数</span>
                                             <span className={styles.statValue()}>{hostStats.totalGames}</span>
                                         </div>
                                         <div className={styles.statRow()}>
-                                            <span className={styles.statLabel()}>FAV HAND</span>
+                                            <span className={styles.statLabel()}>得意手</span>
                                             <span className={styles.statValue()}>{hostStats.favoriteHand}</span>
                                         </div>
                                         <div className={styles.statRow()}>
-                                            <span className={styles.statLabel()}>CHANGE %</span>
+                                            <span className={styles.statLabel()}>変える確率</span>
                                             <span className={styles.statValue()}>{hostStats.changeRate}%</span>
                                         </div>
                                     </div>
@@ -321,7 +323,7 @@ export function NullHandGame({
                 {phase === 'SHOWCASE' && jankenEvent && (
                     <>
                         <div className={styles.mainArea()}>
-                            <h2 className={styles.messageText()}>OBSERVE HOST'S HAND</h2>
+                            <h2 className={styles.messageText()}>ホストの手を観察</h2>
                             <div className={styles.handDisplay()}>
                                 <div className="w-64 mx-auto">
                                     <Hand3D
@@ -339,26 +341,26 @@ export function NullHandGame({
                                         disabled={isProcessing}
                                         onClick={handleConfirmShowcase}
                                     >
-                                        CONFIRM & PROCEED
+                                        確認して次へ
                                     </button>
                                 </div>
                             )}
 
                             {isCurrentHost && (
-                                <p className={styles.messageText()}>WAITING FOR GUESTS...</p>
+                                <p className={styles.messageText()}>ゲストの確認を待っています...</p>
                             )}
                         </div>
 
                         <div className={styles.sideArea()}>
-                            <div className="text-[#44FFFF] font-bold text-xl mb-4 border-b-2 border-[#44FFFF] pb-2">HOST DATA (PUBLIC)</div>
+                            <div className="text-[#44FFFF] font-bold text-xl mb-4 border-b-2 border-[#44FFFF] pb-2">ホストデータ (公開)</div>
                             {hostStats && (
                                 <div>
                                     <div className={styles.statRow()}>
-                                        <span className={styles.statLabel()}>FAV HAND</span>
+                                        <span className={styles.statLabel()}>得意手</span>
                                         <span className={styles.statValue()}>
-                                            {hostStats.favoriteHand === 'ROCK' && '✊ ROCK'}
-                                            {hostStats.favoriteHand === 'SCISSORS' && '✌️ SCISSORS'}
-                                            {hostStats.favoriteHand === 'PAPER' && '✋ PAPER'}
+                                            {hostStats.favoriteHand === 'ROCK' && '✊ グー'}
+                                            {hostStats.favoriteHand === 'SCISSORS' && '✌️ チョキ'}
+                                            {hostStats.favoriteHand === 'PAPER' && '✋ パー'}
                                         </span>
                                     </div>
                                     <div className={styles.statRow()}>
@@ -382,7 +384,7 @@ export function NullHandGame({
                 {phase === 'FINAL_DECISION' && isCurrentHost && jankenEvent && (
                     <>
                         <div className={styles.mainArea()}>
-                            <h2 className={styles.messageText()}>FINAL DECISION: CHANGE OR KEEP?</h2>
+                            <h2 className={styles.messageText()}>最終決断: 変えるか、そのままか？</h2>
                             <div className={styles.handGrid()}>
                                 {(['ROCK', 'SCISSORS', 'PAPER'] as const).map((hand) => (
                                     <div
@@ -403,16 +405,16 @@ export function NullHandGame({
                                     disabled={!selectedHand || isProcessing}
                                     onClick={() => selectedHand && handleSetFinalHostHand(selectedHand)}
                                 >
-                                    LOCK FINAL HAND
+                                    最終手を決定
                                 </button>
                             </div>
                         </div>
                         <div className={styles.sideArea()}>
-                            <div className="text-[#44FFFF] font-bold text-xl mb-4 border-b-2 border-[#44FFFF] pb-2">YOUR STATUS</div>
+                            <div className="text-[#44FFFF] font-bold text-xl mb-4 border-b-2 border-[#44FFFF] pb-2">あなたの状況</div>
 
                             {/* 初期手 */}
                             <div className="mb-6">
-                                <div className="text-[#FF4444] font-bold mb-2 text-sm uppercase">INITIAL HAND (SHOWN)</div>
+                                <div className="text-[#FF4444] font-bold mb-2 text-sm uppercase">初期手 (公開済み)</div>
                                 <div className="flex items-center gap-2">
                                     <span className="text-2xl">
                                         {jankenEvent.initialHand === 'ROCK' && '✊'}
@@ -425,19 +427,19 @@ export function NullHandGame({
 
                             {/* 嘘の情報 */}
                             <div className="mb-6">
-                                <div className="text-[#FF4444] font-bold mb-2 text-sm uppercase">DECEPTION</div>
+                                <div className="text-[#FF4444] font-bold mb-2 text-sm uppercase">偽装工作</div>
                                 <div className={styles.statRow()}>
-                                    <span className={styles.statLabel()}>TARGET</span>
+                                    <span className={styles.statLabel()}>ターゲット</span>
                                     <span className={styles.statValue()}>
-                                        {jankenEvent.fakeTarget === 'NONE' && 'NONE'}
-                                        {jankenEvent.fakeTarget === 'INITIAL_HAND' && 'FAKE HAND'}
-                                        {jankenEvent.fakeTarget === 'CHANGE_RATE' && 'FAKE RATE'}
-                                        {jankenEvent.fakeTarget === 'FAVORITE_HAND' && 'FAKE FAV'}
+                                        {jankenEvent.fakeTarget === 'NONE' && 'なし'}
+                                        {jankenEvent.fakeTarget === 'INITIAL_HAND' && '手を偽装'}
+                                        {jankenEvent.fakeTarget === 'CHANGE_RATE' && '確率を偽装'}
+                                        {jankenEvent.fakeTarget === 'FAVORITE_HAND' && '得意手を偽装'}
                                     </span>
                                 </div>
                                 {jankenEvent.fakeTarget !== 'NONE' && (
                                     <div className={styles.statRow()}>
-                                        <span className={styles.statLabel()}>VALUE</span>
+                                        <span className={styles.statLabel()}>偽装値</span>
                                         <span className="text-white font-bold">
                                             {jankenEvent.fakeTarget === 'INITIAL_HAND' && jankenEvent.fakeHandValue}
                                             {jankenEvent.fakeTarget === 'CHANGE_RATE' && `${jankenEvent.fakeChangeRateValue}%`}
@@ -450,13 +452,13 @@ export function NullHandGame({
                             {/* リアル統計 */}
                             {hostStats && (
                                 <div>
-                                    <div className="text-[#FF4444] font-bold mb-2 text-sm uppercase">REAL STATS (HIDDEN)</div>
+                                    <div className="text-[#FF4444] font-bold mb-2 text-sm uppercase">極秘データ</div>
                                     <div className={styles.statRow()}>
-                                        <span className={styles.statLabel()}>FAV HAND</span>
+                                        <span className={styles.statLabel()}>本当の得意手</span>
                                         <span className={styles.statValue()}>{hostStats.realFavoriteHand}</span>
                                     </div>
                                     <div className={styles.statRow()}>
-                                        <span className={styles.statLabel()}>CHANGE %</span>
+                                        <span className={styles.statLabel()}>本当の変える確率</span>
                                         <span className={styles.statValue()}>{hostStats.realChangeRate}%</span>
                                     </div>
                                 </div>
@@ -470,7 +472,7 @@ export function NullHandGame({
                     <>
                         <div className={styles.mainArea()}>
                             <div className={styles.messageText()}>
-                                <p>HOST IS MAKING THE FINAL DECISION...</p>
+                                <p>ホストが最終決断を下しています...</p>
                                 <div className="w-48 h-48 mx-auto mt-8">
                                     <Hand3D handType={null} revealed={false} size="medium" isRotating={true} />
                                 </div>
@@ -507,7 +509,7 @@ export function NullHandGame({
                                         </span>
                                     </div>
                                     <div className={styles.statRow()}>
-                                        <span className={styles.statLabel()}>CHANGE %</span>
+                                        <span className={styles.statLabel()}>変える確率</span>
                                         <span className={styles.statValue()}>{hostStats.changeRate}%</span>
                                     </div>
                                     <div className="mt-4 text-xs text-gray-500">
@@ -527,7 +529,7 @@ export function NullHandGame({
                 {phase === 'BATTLE' && !isCurrentHost && (
                     <>
                         <div className={styles.mainArea()}>
-                            <h2 className={styles.messageText()}>SELECT YOUR HAND TO WIN!</h2>
+                            <h2 className={styles.messageText()}>勝つための手を選択せよ！</h2>
                             <div className={styles.handGrid()}>
                                 {(['ROCK', 'SCISSORS', 'PAPER'] as const).map((hand) => (
                                     <div
@@ -548,7 +550,7 @@ export function NullHandGame({
                                     disabled={!selectedHand || isProcessing}
                                     onClick={() => selectedHand && handleSetGuestHand(selectedHand)}
                                 >
-                                    BATTLE!
+                                    勝負！
                                 </button>
                             </div>
                         </div>
@@ -583,7 +585,7 @@ export function NullHandGame({
                                         </span>
                                     </div>
                                     <div className={styles.statRow()}>
-                                        <span className={styles.statLabel()}>CHANGE %</span>
+                                        <span className={styles.statLabel()}>変える確率</span>
                                         <span className={styles.statValue()}>{hostStats.changeRate}%</span>
                                     </div>
                                     <div className="mt-4 text-xs text-gray-500">
@@ -600,10 +602,10 @@ export function NullHandGame({
                     <>
                         <div className={styles.mainArea()}>
                             <div className={styles.messageText()}>
-                                <p>GUESTS ARE CHOOSING...</p>
+                                <p>ゲストが選択中です...</p>
                                 {jankenEvent?.finalHostHand ? (
                                     <div className="mt-8">
-                                        <div className="text-[#44FFFF] font-bold mb-6 text-xl tracking-widest border-b-2 border-[#44FFFF] pb-2 inline-block">YOUR FINAL DECISION</div>
+                                        <div className="text-[#44FFFF] font-bold mb-6 text-xl tracking-widest border-b-2 border-[#44FFFF] pb-2 inline-block">あなたの最終決断</div>
                                         <div className="w-48 h-48 mx-auto">
                                             <Hand3D
                                                 handType={jankenEvent.finalHostHand as HandType}
@@ -612,9 +614,9 @@ export function NullHandGame({
                                             />
                                         </div>
                                         <div className="text-3xl font-bold mt-6 text-white tracking-widest">
-                                            {jankenEvent.finalHostHand === 'ROCK' && '✊ ROCK'}
-                                            {jankenEvent.finalHostHand === 'SCISSORS' && '✌️ SCISSORS'}
-                                            {jankenEvent.finalHostHand === 'PAPER' && '✋ PAPER'}
+                                            {jankenEvent.finalHostHand === 'ROCK' && '✊ グー'}
+                                            {jankenEvent.finalHostHand === 'SCISSORS' && '✌️ チョキ'}
+                                            {jankenEvent.finalHostHand === 'PAPER' && '✋ パー'}
                                         </div>
                                     </div>
                                 ) : (
@@ -625,13 +627,13 @@ export function NullHandGame({
                             </div>
                         </div>
                         <div className={styles.sideArea()}>
-                            <div className="text-[#44FFFF] font-bold text-xl mb-4 border-b-2 border-[#44FFFF] pb-2">YOUR STATUS</div>
+                            <div className="text-[#44FFFF] font-bold text-xl mb-4 border-b-2 border-[#44FFFF] pb-2">あなたの状況</div>
 
                             {jankenEvent && (
                                 <>
                                     {/* 初期手 */}
                                     <div className="mb-6">
-                                        <div className="text-[#FF4444] font-bold mb-2 text-sm uppercase">INITIAL HAND (SHOWN)</div>
+                                        <div className="text-[#FF4444] font-bold mb-2 text-sm uppercase">初期手 (公開済み)</div>
                                         <div className="flex items-center gap-2">
                                             <span className="text-2xl">
                                                 {jankenEvent.initialHand === 'ROCK' && '✊'}
@@ -644,19 +646,19 @@ export function NullHandGame({
 
                                     {/* 嘘の情報 */}
                                     <div className="mb-6">
-                                        <div className="text-[#FF4444] font-bold mb-2 text-sm uppercase">DECEPTION</div>
+                                        <div className="text-[#FF4444] font-bold mb-2 text-sm uppercase">偽装工作</div>
                                         <div className={styles.statRow()}>
-                                            <span className={styles.statLabel()}>TARGET</span>
+                                            <span className={styles.statLabel()}>ターゲット</span>
                                             <span className={styles.statValue()}>
-                                                {jankenEvent.fakeTarget === 'NONE' && 'NONE'}
-                                                {jankenEvent.fakeTarget === 'INITIAL_HAND' && 'FAKE HAND'}
-                                                {jankenEvent.fakeTarget === 'CHANGE_RATE' && 'FAKE RATE'}
-                                                {jankenEvent.fakeTarget === 'FAVORITE_HAND' && 'FAKE FAV'}
+                                                {jankenEvent.fakeTarget === 'NONE' && 'なし'}
+                                                {jankenEvent.fakeTarget === 'INITIAL_HAND' && '手を偽装'}
+                                                {jankenEvent.fakeTarget === 'CHANGE_RATE' && '確率を偽装'}
+                                                {jankenEvent.fakeTarget === 'FAVORITE_HAND' && '得意手を偽装'}
                                             </span>
                                         </div>
                                         {jankenEvent.fakeTarget !== 'NONE' && (
                                             <div className={styles.statRow()}>
-                                                <span className={styles.statLabel()}>VALUE</span>
+                                                <span className={styles.statLabel()}>偽装値</span>
                                                 <span className="text-white font-bold">
                                                     {jankenEvent.fakeTarget === 'INITIAL_HAND' && jankenEvent.fakeHandValue}
                                                     {jankenEvent.fakeTarget === 'CHANGE_RATE' && `${jankenEvent.fakeChangeRateValue}%`}
@@ -671,13 +673,13 @@ export function NullHandGame({
                             {/* リアル統計 */}
                             {hostStats && (
                                 <div>
-                                    <div className="text-[#FF4444] font-bold mb-2 text-sm uppercase">REAL STATS (HIDDEN)</div>
+                                    <div className="text-[#FF4444] font-bold mb-2 text-sm uppercase">極秘データ</div>
                                     <div className={styles.statRow()}>
-                                        <span className={styles.statLabel()}>FAV HAND</span>
+                                        <span className={styles.statLabel()}>本当の得意手</span>
                                         <span className={styles.statValue()}>{hostStats.realFavoriteHand}</span>
                                     </div>
                                     <div className={styles.statRow()}>
-                                        <span className={styles.statLabel()}>CHANGE %</span>
+                                        <span className={styles.statLabel()}>本当の変える確率</span>
                                         <span className={styles.statValue()}>{hostStats.realChangeRate}%</span>
                                     </div>
                                 </div>
@@ -694,10 +696,10 @@ export function NullHandGame({
                 {phase === 'RESULT' && jankenEvent && (
                     <>
                         <div className={styles.mainArea()}>
-                            <h2 className={styles.messageText()}>HOST'S FINAL HAND</h2>
+                            <h2 className={styles.messageText()}>ホストの最終手</h2>
                             <div className={styles.vsContainer()}>
                                 <div>
-                                    <div className="text-[#FF4444] font-bold text-center mb-2 tracking-widest">HOST</div>
+                                    <div className="text-[#FF4444] font-bold text-center mb-2 tracking-widest">ホスト</div>
                                     <div className="w-64 mx-auto">
                                         <Hand3D
                                             handType={jankenEvent.finalHostHand as HandType}
@@ -716,13 +718,13 @@ export function NullHandGame({
                                     onClick={handleNextRound}
                                     disabled={isProcessing}
                                 >
-                                    NEXT ROUND
+                                    次のラウンドへ
                                 </button>
                             </div>
                         </div>
 
                         <div className={styles.sideArea()}>
-                            <div className="text-[#44FFFF] font-bold text-xl mb-4 border-b-2 border-[#44FFFF] pb-2">ROUND RESULTS</div>
+                            <div className="text-[#44FFFF] font-bold text-xl mb-4 border-b-2 border-[#44FFFF] pb-2">ラウンド結果</div>
                             <div className="space-y-4">
                                 {/* ホスト（自分/相手）の結果 */}
                                 {(() => {
@@ -742,7 +744,7 @@ export function NullHandGame({
                                     return (
                                         <div className="flex justify-between items-center bg-[#FF4444]/20 border border-[#FF4444] p-3">
                                             <div className="flex items-center gap-3">
-                                                <span className="bg-[#FF4444] text-black font-bold px-2 py-0.5 text-xs">HOST</span>
+                                                <span className="bg-[#FF4444] text-black font-bold px-2 py-0.5 text-xs">ホスト</span>
                                                 <span className="text-white font-bold">{hostScore?.user.name}</span>
                                             </div>
                                             <div className="flex items-center gap-4">
@@ -752,8 +754,8 @@ export function NullHandGame({
                                                     {jankenEvent.finalHostHand === 'PAPER' && '✋'}
                                                 </span>
                                                 <div className="text-right">
-                                                    <div className="text-[#FF4444] font-bold">+{hostGained} PT</div>
-                                                    <div className="text-xs text-gray-400">TOTAL: {hostScore?.points}</div>
+                                                    <div className="text-[#FF4444] font-bold">+{hostGained} 点</div>
+                                                    <div className="text-xs text-gray-400">合計: {hostScore?.points}</div>
                                                 </div>
                                             </div>
                                         </div>
@@ -783,7 +785,7 @@ export function NullHandGame({
                                     return (
                                         <div key={gh.userId} className="flex justify-between items-center bg-gray-900 border border-gray-700 p-3">
                                             <div className="flex items-center gap-3">
-                                                <span className="bg-gray-700 text-white font-bold px-2 py-0.5 text-xs">GUEST</span>
+                                                <span className="bg-gray-700 text-white font-bold px-2 py-0.5 text-xs">ゲスト</span>
                                                 <span className="text-white font-bold">{gh.user.name}</span>
                                             </div>
                                             <div className="flex items-center gap-4">
@@ -794,9 +796,9 @@ export function NullHandGame({
                                                 </span>
                                                 <div className="text-right">
                                                     <div className={cn("font-bold", result === 'WIN' ? "text-[#44FFFF]" : "text-gray-500")}>
-                                                        +{gained} PT
+                                                        +{gained} 点
                                                     </div>
-                                                    <div className="text-xs text-gray-400">TOTAL: {score?.points}</div>
+                                                    <div className="text-xs text-gray-400">合計: {score?.points}</div>
                                                 </div>
                                             </div>
                                         </div>
@@ -818,13 +820,13 @@ export function NullHandGame({
                                     className={cn(styles.button(), styles.buttonPrimary())}
                                     onClick={handleClose}
                                 >
-                                    RETURN TO LOBBY
+                                    ロビーに戻る
                                 </button>
                             </div>
                         </div>
 
                         <div className={styles.sideArea()}>
-                            <div className="text-[#44FFFF] font-bold text-xl mb-4 border-b-2 border-[#44FFFF] pb-2">FINAL STANDINGS</div>
+                            <div className="text-[#44FFFF] font-bold text-xl mb-4 border-b-2 border-[#44FFFF] pb-2">最終順位</div>
                             {currentScores.length > 0 && (
                                 <div className="space-y-4">
                                     {currentScores.map((score, index) => (
@@ -839,7 +841,7 @@ export function NullHandGame({
                                                 <span className={cn(styles.rankBadge(), index === 0 ? "bg-[#FF4444] text-black" : "")}>#{index + 1}</span>
                                                 <span className="text-white font-mono text-lg">{score.user.name}</span>
                                             </div>
-                                            <span className="text-[#44FFFF] font-bold font-mono text-2xl">{score.points} PTS</span>
+                                            <span className="text-[#44FFFF] font-bold font-mono text-2xl">{score.points} 点</span>
                                         </div>
                                     ))}
                                 </div>
