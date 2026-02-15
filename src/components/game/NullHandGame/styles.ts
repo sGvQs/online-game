@@ -179,9 +179,9 @@ export const nullHandGame = tv({
             'col-span-12',
             'border-[4px]',
             'border-[#FF4444]',
-            'p-4',
+            'p-2', // 4 → 2
             'text-center',
-            'text-2xl',
+            'text-xl', // 2xl → xl
             'font-bold',
             'text-[#44FFFF]', // 水色
             'tracking-[0.3em]',
@@ -192,8 +192,8 @@ export const nullHandGame = tv({
             'col-span-12 lg:col-span-8',
             'border-[4px]',
             'border-[#FF4444]',
-            'p-6',
-            'min-h-[400px]',
+            'p-4', // 6 → 4
+            'min-h-[400px]', // 400px → 350px
             'flex',
             'flex-col',
             'justify-between',
@@ -204,10 +204,10 @@ export const nullHandGame = tv({
             'col-span-12 lg:col-span-4',
             'border-[4px]',
             'border-[#FF4444]',
-            'p-6',
+            'p-4', // 6 → 4
             'flex',
             'flex-col',
-            'gap-4',
+            'gap-3', // 4 → 3
         ],
 
         // 統計項目
@@ -218,7 +218,7 @@ export const nullHandGame = tv({
             'border-b',
             'border-gray-700',
             'pb-1',
-            'mb-2',
+            'mb-1', // 2 → 1
         ],
 
         statLabel: [
@@ -236,7 +236,7 @@ export const nullHandGame = tv({
 
         // メッセージテキスト（下部ボックス用）
         messageText: [
-            'text-2xl',
+            'text-xl', // 2xl → xl
             'font-bold',
             'text-[#44FFFF]',
             'tracking-wide',
@@ -249,9 +249,9 @@ export const nullHandGame = tv({
             'border-[#FF4444]',
             'bg-black',
             'text-white',
-            'px-8',
-            'py-3',
-            'text-xl',
+            'px-6', // 8 → 6
+            'py-2', // 3 → 2
+            'text-lg', // xl → lg
             'font-bold',
             'uppercase',
             'tracking-widest',
@@ -284,13 +284,13 @@ export const nullHandGame = tv({
         handGrid: [
             'grid',
             'grid-cols-3',
-            'gap-4',
+            'gap-3', // 4 → 3
             'w-full',
         ],
 
         // 偽装オプション
         fakeOption: [
-            'p-3',
+            'p-2', // 3 → 2
             'border-[2px]',
             'border-gray-700',
             'text-gray-400',
@@ -307,10 +307,10 @@ export const nullHandGame = tv({
 
         // 入力フォーム
         inputGroup: [
-            'mt-4',
+            'mt-3', // 4 → 3
             'border-[2px]',
             'border-[#44FFFF]',
-            'p-4',
+            'p-3', // 4 → 3
         ],
 
         select: [

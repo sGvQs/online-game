@@ -193,13 +193,13 @@ export function NullHandGame({
                                         ))}
                                     </div>
 
-                                    <div className="border-t border-gray-700 my-4"></div>
+                                    <div className="border-t border-gray-700 my-2"></div>
 
                                     {/* 偽装選択 */}
-                                    <h3 className="text-[#FF4444] font-bold mb-2 uppercase">偽装工作: {selectedFake === 'NONE' ? 'なし' :
+                                    <h3 className="text-[#FF4444] font-bold mb-1 uppercase text-lg">偽装工作: {selectedFake === 'NONE' ? 'なし' :
                                         selectedFake === 'INITIAL_HAND' ? '手' :
                                             selectedFake === 'CHANGE_RATE' ? '確率' : 'よく出す手'}</h3>
-                                    <div className="grid grid-cols-2 gap-2 mb-4">
+                                    <div className="grid grid-cols-2 gap-2 mb-2">
                                         {([
                                             { value: 'NONE', label: '偽装なし' },
                                             { value: 'INITIAL_HAND', label: '手を偽装' },
@@ -221,7 +221,7 @@ export function NullHandGame({
 
                                     {/* 偽装詳細入力 */}
                                     {selectedFake !== 'NONE' && (
-                                        <div className={styles.inputGroup()}>
+                                        <div className='mt-2'>
                                             {selectedFake === 'INITIAL_HAND' && (
                                                 <select
                                                     className={styles.select()}
@@ -283,12 +283,12 @@ export function NullHandGame({
 
                         {/* 右サイドエリア（統計情報等） */}
                         <div className={styles.sideArea()}>
-                            <div className="text-[#44FFFF] font-bold text-xl mb-4 border-b-2 border-[#44FFFF] pb-2">DATA ANALYSIS</div>
+                            <div className="text-[#44FFFF] font-bold text-lg mb-2 border-b-2 border-[#44FFFF] pb-1">あなたのデータ</div>
 
                             {/* ホスト用リアル統計 */}
                             {isCurrentHost && hostStats && (
                                 <div>
-                                    <div className="mb-6">
+                                    <div className="mb-4">
                                         <div className="text-[#FF4444] font-bold mb-2">あなたの情報</div>
                                         <div className={styles.statRow()}>
                                             <span className={styles.statLabel()}>本当のよく出す手</span>
