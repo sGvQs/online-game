@@ -117,7 +117,6 @@ model JankenEvent {
   currentHostId          String   @map("current_host_id") @db.Uuid
   turnNumber             Int      @default(1) @map("turn_number")
   phase                  String   @default("SETUP")
-  phaseEndsAt            DateTime @map("phase_ends_at")
   initialHand            String?  @map("initial_hand")
   finalHostHand          String?  @map("final_host_hand")
   fakeTarget             String   @default("NONE") @map("fake_target")
@@ -152,10 +151,11 @@ model JankenLog {
   userId      String   @map("user_id") @db.Uuid
   initialHand String   @map("initial_hand")
   finalHand   String   @map("final_hand")
-  matchId     String   @map("match_id") @db.Uuid
+  matchId     String?  @map("match_id") @db.Uuid
   createdAt   DateTime @default(now()) @map("created_at")
+  isWinning   Boolean  @default(false) @map("is_winning")
   
-  match       Match    @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  match       Match?   @relation(fields: [matchId], references: [id], onDelete: SetNull)
   user        User     @relation(fields: [userId], references: [id])
   
   @@index([userId, initialHand])

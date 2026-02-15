@@ -1,4 +1,3 @@
-import { createClient } from '@/server/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { getCurrentUser } from '@/server/actions'
 import { getRoomWithReadyStatus } from '@/server/actions/room'

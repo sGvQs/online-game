@@ -36,3 +36,18 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO postgres, an
 DROP PUBLICATION IF EXISTS supabase_realtime;
 CREATE PUBLICATION supabase_realtime FOR ALL TABLES;
 ```
+
+
+# 便利なコマンド集
+
+### migrationの型がTSに反映されないとき
+```
+npx prisma migrate dev
+```
+
+### migrationを名前だけで作成したい時
+```
+npx prisma migrate dev --name <名前> --create-only
+```
+
+
