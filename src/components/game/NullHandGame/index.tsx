@@ -9,6 +9,16 @@ import { RoomWithUsersAndReadyStatus, HandType, FakeTarget, RoomUserWithReadySta
 import { useState } from 'react'
 import { cn } from '@/lib/utils'
 
+// ヘルパー関数: HandTypeを絵文字付きカタカナ表記に変換
+const getHandDisplayWithEmoji = (hand: HandType): string => {
+    switch (hand) {
+        case 'ROCK': return '✊ グー'
+        case 'SCISSORS': return '✌️ チョキ'
+        case 'PAPER': return '✋ パー'
+        default: return hand
+    }
+}
+
 interface NullHandGameProps {
     room: RoomWithUsersAndReadyStatus
     isHost: boolean
@@ -110,10 +120,9 @@ export function NullHandGame({
                     {/* 下部: インフォメーション */}
                     <div className={styles.infoBox()}>
                         <div className='w-full'>
-                            <p className={styles.subtitle()}>I.Q FINAL MODE</p>
+                            <p className={styles.subtitle()}>NULL HAND PLAY MEMBERS</p>
 
                             <div className={styles.playerListWrapper()}>
-                                <div className="text-[#FF4444] font-bold mb-2">参加者</div>
                                 {room.users.map((u: RoomUserWithReadyStatus) => (
                                     <div key={u.id} className={styles.playerItem()}>
                                         <span className={u.isReady ? 'text-[#44FFFF]' : 'text-gray-500'}>
@@ -152,11 +161,11 @@ export function NullHandGame({
             <div className={styles.gameGrid()}>
                 {/* フェーズ表示 */}
                 <div className={styles.phaseBox()}>
-                    {phase === 'SETUP' && 'フェーズ: セットアップ - 決断'}
-                    {phase === 'SHOWCASE' && 'フェーズ: ショーケース - 観察'}
-                    {phase === 'FINAL_DECISION' && 'フェーズ: 最終決断 - 確定'}
-                    {phase === 'BATTLE' && 'フェーズ: バトル - 衝突'}
-                    {phase === 'RESULT' && 'フェーズ: リザルト - 評価'}
+                    {phase === 'SETUP' && 'ホストの公開する手を設定'}
+                    {phase === 'SHOWCASE' && 'ホストの手を公開（未確定）'}
+                    {phase === 'FINAL_DECISION' && 'ホストが手を確定'}
+                    {phase === 'BATTLE' && 'ゲストの最終決断'}
+                    {phase === 'RESULT' && '結果発表'}
                 </div>
 
                 {/* メインエリア（左/中央） */}
@@ -189,13 +198,13 @@ export function NullHandGame({
                                     {/* 偽装選択 */}
                                     <h3 className="text-[#FF4444] font-bold mb-2 uppercase">偽装工作: {selectedFake === 'NONE' ? 'なし' :
                                         selectedFake === 'INITIAL_HAND' ? '手' :
-                                            selectedFake === 'CHANGE_RATE' ? '確率' : '得意手'}</h3>
+                                            selectedFake === 'CHANGE_RATE' ? '確率' : 'よく出す手'}</h3>
                                     <div className="grid grid-cols-2 gap-2 mb-4">
                                         {([
                                             { value: 'NONE', label: '偽装なし' },
                                             { value: 'INITIAL_HAND', label: '手を偽装' },
                                             { value: 'CHANGE_RATE', label: '変える確率を偽装' },
-                                            { value: 'FAVORITE_HAND', label: '得意手を偽装' },
+                                            { value: 'FAVORITE_HAND', label: 'よく出す手を偽装' },
                                         ] as const).map((option) => (
                                             <div
                                                 key={option.value}
@@ -220,9 +229,9 @@ export function NullHandGame({
                                                     onChange={(e) => setFakeDetails({ ...fakeDetails, fakeHandValue: e.target.value as HandType })}
                                                 >
                                                     <option value="">偽装する手を選択...</option>
-                                                    <option value="ROCK">ROCK</option>
-                                                    <option value="SCISSORS">SCISSORS</option>
-                                                    <option value="PAPER">PAPER</option>
+                                                    <option value="ROCK">✊ グー</option>
+                                                    <option value="SCISSORS">✌️ チョキ</option>
+                                                    <option value="PAPER">✋ パー</option>
                                                 </select>
                                             )}
                                             {selectedFake === 'CHANGE_RATE' && (
@@ -240,10 +249,10 @@ export function NullHandGame({
                                                     value={fakeDetails.fakeFavoriteHandValue || ''}
                                                     onChange={(e) => setFakeDetails({ ...fakeDetails, fakeFavoriteHandValue: e.target.value as HandType })}
                                                 >
-                                                    <option value="">偽装する得意手を選択...</option>
-                                                    <option value="ROCK">ROCK</option>
-                                                    <option value="SCISSORS">SCISSORS</option>
-                                                    <option value="PAPER">PAPER</option>
+                                                    <option value="">偽装するよく出す手を選択...</option>
+                                                    <option value="ROCK">✊ グー</option>
+                                                    <option value="SCISSORS">✌️ チョキ</option>
+                                                    <option value="PAPER">✋ パー</option>
                                                 </select>
                                             )}
                                         </div>
@@ -266,7 +275,7 @@ export function NullHandGame({
                                 <div className="flex flex-col items-center justify-center h-full">
                                     <div className={styles.messageText()}>ホストの選択を待っています...</div>
                                     <div className="w-48 h-48 mt-8">
-                                        <Hand3D handType={null} revealed={false} size="medium" isRotating={true} />
+                                        <Hand3D handType={'ROCK'} revealed={true} size="medium" isRotating={true} />
                                     </div>
                                 </div>
                             )}
@@ -280,10 +289,10 @@ export function NullHandGame({
                             {isCurrentHost && hostStats && (
                                 <div>
                                     <div className="mb-6">
-                                        <div className="text-[#FF4444] font-bold mb-2">極秘データ</div>
+                                        <div className="text-[#FF4444] font-bold mb-2">あなたの情報</div>
                                         <div className={styles.statRow()}>
-                                            <span className={styles.statLabel()}>本当の得意手</span>
-                                            <span className={styles.statValue()}>{hostStats.realFavoriteHand}</span>
+                                            <span className={styles.statLabel()}>本当のよく出す手</span>
+                                            <span className={styles.statValue()}>{getHandDisplayWithEmoji(hostStats.realFavoriteHand as HandType)}</span>
                                         </div>
                                         <div className={styles.statRow()}>
                                             <span className={styles.statLabel()}>本当の変える確率</span>
@@ -298,8 +307,8 @@ export function NullHandGame({
                                             <span className={styles.statValue()}>{hostStats.totalGames}</span>
                                         </div>
                                         <div className={styles.statRow()}>
-                                            <span className={styles.statLabel()}>得意手</span>
-                                            <span className={styles.statValue()}>{hostStats.favoriteHand}</span>
+                                            <span className={styles.statLabel()}>よく出す手</span>
+                                            <span className={styles.statValue()}>{getHandDisplayWithEmoji(hostStats.favoriteHand as HandType)}</span>
                                         </div>
                                         <div className={styles.statRow()}>
                                             <span className={styles.statLabel()}>変える確率</span>
@@ -330,7 +339,11 @@ export function NullHandGame({
                             <div className={styles.handDisplay()}>
                                 <div className="w-64 mx-auto">
                                     <Hand3D
-                                        handType={jankenEvent.initialHand as HandType}
+                                        handType={
+                                            (jankenEvent.fakeTarget === 'INITIAL_HAND' && jankenEvent.fakeHandValue
+                                                ? jankenEvent.fakeHandValue
+                                                : jankenEvent.initialHand) as HandType
+                                        }
                                         revealed={!!jankenEvent.initialHand}
                                         size="large"
                                     />
@@ -359,19 +372,17 @@ export function NullHandGame({
                             {hostStats && (
                                 <div>
                                     <div className={styles.statRow()}>
-                                        <span className={styles.statLabel()}>得意手</span>
+                                        <span className={styles.statLabel()}>よく出す手</span>
                                         <span className={styles.statValue()}>
-                                            {hostStats.favoriteHand === 'ROCK' && '✊ グー'}
-                                            {hostStats.favoriteHand === 'SCISSORS' && '✌️ チョキ'}
-                                            {hostStats.favoriteHand === 'PAPER' && '✋ パー'}
+                                            {getHandDisplayWithEmoji(hostStats.favoriteHand as HandType)}
                                         </span>
                                     </div>
                                     <div className={styles.statRow()}>
-                                        <span className={styles.statLabel()}>CHANGE %</span>
+                                        <span className={styles.statLabel()}>手を変える可能性</span>
                                         <span className={styles.statValue()}>{hostStats.changeRate}%</span>
                                     </div>
                                     <div className="mt-4 text-xs text-gray-500">
-                                        * DATA MAY BE DECEPTIVE
+                                        * 全てのデータはホストの過去の動向を正確に表していますが、嘘の情報が紛れています。（初回の手、一番選ぶ可能性が高い手、変える確率、のどれか一つは嘘の可能性が高いです）
                                     </div>
                                 </div>
                             )}
@@ -417,32 +428,27 @@ export function NullHandGame({
 
                             {/* 初期手 */}
                             <div className="mb-6">
-                                <div className="text-[#FF4444] font-bold mb-2 text-sm uppercase">初期手 (公開済み)</div>
+                                <div className="text-[#FF4444] font-bold mb-2 text-sm uppercase">最初に公開した 🖐️</div>
                                 <div className="flex items-center gap-2">
-                                    <span className="text-2xl">
-                                        {jankenEvent.initialHand === 'ROCK' && '✊'}
-                                        {jankenEvent.initialHand === 'SCISSORS' && '✌️'}
-                                        {jankenEvent.initialHand === 'PAPER' && '✋'}
-                                    </span>
-                                    <span className={styles.statValue()}>{jankenEvent.initialHand}</span>
+                                    <span className={styles.statValue()}>{getHandDisplayWithEmoji(jankenEvent.initialHand as HandType)}</span>
                                 </div>
                             </div>
 
                             {/* 嘘の情報 */}
                             <div className="mb-6">
-                                <div className="text-[#FF4444] font-bold mb-2 text-sm uppercase">偽装工作</div>
+                                <div className="text-[#FF4444] font-bold mb-2 text-sm uppercase">偽装工作（公開済み） 🤫</div>
                                 <div className={styles.statRow()}>
-                                    <span className={styles.statLabel()}>ターゲット</span>
+                                    <span className={styles.statLabel()}>偽造した情報</span>
                                     <span className={styles.statValue()}>
                                         {jankenEvent.fakeTarget === 'NONE' && 'なし'}
                                         {jankenEvent.fakeTarget === 'INITIAL_HAND' && '手を偽装'}
-                                        {jankenEvent.fakeTarget === 'CHANGE_RATE' && '確率を偽装'}
-                                        {jankenEvent.fakeTarget === 'FAVORITE_HAND' && '得意手を偽装'}
+                                        {jankenEvent.fakeTarget === 'CHANGE_RATE' && '手を変える確率'}
+                                        {jankenEvent.fakeTarget === 'FAVORITE_HAND' && 'よく出す手を偽装'}
                                     </span>
                                 </div>
                                 {jankenEvent.fakeTarget !== 'NONE' && (
                                     <div className={styles.statRow()}>
-                                        <span className={styles.statLabel()}>偽装値</span>
+                                        <span className={styles.statLabel()}>偽造した値</span>
                                         <span className="text-white font-bold">
                                             {jankenEvent.fakeTarget === 'INITIAL_HAND' && jankenEvent.fakeHandValue}
                                             {jankenEvent.fakeTarget === 'CHANGE_RATE' && `${jankenEvent.fakeChangeRateValue}%`}
@@ -455,10 +461,10 @@ export function NullHandGame({
                             {/* リアル統計 */}
                             {hostStats && (
                                 <div>
-                                    <div className="text-[#FF4444] font-bold mb-2 text-sm uppercase">極秘データ</div>
+                                    <div className="text-[#FF4444] font-bold mb-2 text-sm uppercase">あなたの情報</div>
                                     <div className={styles.statRow()}>
-                                        <span className={styles.statLabel()}>本当の得意手</span>
-                                        <span className={styles.statValue()}>{hostStats.realFavoriteHand}</span>
+                                        <span className={styles.statLabel()}>本当のよく出す手</span>
+                                        <span className={styles.statValue()}>{getHandDisplayWithEmoji(hostStats.realFavoriteHand as HandType)}</span>
                                     </div>
                                     <div className={styles.statRow()}>
                                         <span className={styles.statLabel()}>本当の変える確率</span>
@@ -477,38 +483,47 @@ export function NullHandGame({
                             <div className={styles.messageText()}>
                                 <p>ホストが最終決断を下しています...</p>
                                 <div className="w-48 h-48 mx-auto mt-8">
-                                    <Hand3D handType={null} revealed={false} size="medium" isRotating={true} />
+                                    {jankenEvent && <>
+                                        {jankenEvent.fakeTarget === 'INITIAL_HAND' && jankenEvent.fakeHandValue ?
+                                            <Hand3D handType={jankenEvent.fakeHandValue as HandType} revealed={true} size="medium" isRotating={true} />
+                                            :
+                                            <Hand3D handType={jankenEvent.initialHand as HandType} revealed={true} size="medium" isRotating={true} />
+                                        }
+                                    </>
+                                    }
                                 </div>
                             </div>
                         </div>
                         <div className={styles.sideArea()}>
-                            <div className="text-[#44FFFF] font-bold text-xl mb-4 border-b-2 border-[#44FFFF] pb-2">HOST INFO</div>
+                            <div className="text-[#44FFFF] font-bold text-xl mb-4 border-b-2 border-[#44FFFF] pb-2">ホストの情報</div>
 
                             {/* ホストの初期手 */}
-                            {jankenEvent && (
-                                <div className="mb-6">
-                                    <div className="text-[#FF4444] font-bold mb-2 text-sm uppercase">INITIAL HAND</div>
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-2xl">
-                                            {jankenEvent.initialHand === 'ROCK' && '✊'}
-                                            {jankenEvent.initialHand === 'SCISSORS' && '✌️'}
-                                            {jankenEvent.initialHand === 'PAPER' && '✋'}
-                                        </span>
-                                        <span className={styles.statValue()}>{jankenEvent.initialHand}</span>
+                            {jankenEvent &&
+                                (
+                                    <div className="mb-6">
+                                        <div className="text-[#FF4444] font-bold mb-2 text-sm uppercase">初回の手</div>
+
+                                        {jankenEvent.fakeTarget === 'INITIAL_HAND' && jankenEvent.fakeHandValue ?
+                                            <div className="flex items-center gap-2">
+                                                <span className={styles.statValue()}>{getHandDisplayWithEmoji(jankenEvent.fakeHandValue as HandType)}</span>
+                                            </div>
+                                            :
+                                            <div className="flex items-center gap-2">
+                                                <span className={styles.statValue()}>{getHandDisplayWithEmoji(jankenEvent.initialHand as HandType)}</span>
+                                            </div>
+                                        }
                                     </div>
-                                </div>
-                            )}
+                                )
+                            }
 
                             {/* ホストの統計（公開用） */}
                             {hostStats && (
                                 <div>
-                                    <div className="text-[#FF4444] font-bold mb-2 text-sm uppercase">HOST TENDENCY</div>
+                                    <div className="text-[#FF4444] font-bold mb-2 text-sm uppercase">ホストの情報</div>
                                     <div className={styles.statRow()}>
-                                        <span className={styles.statLabel()}>FAV HAND</span>
+                                        <span className={styles.statLabel()}>一番選ぶ可能性が高い手</span>
                                         <span className={styles.statValue()}>
-                                            {hostStats.favoriteHand === 'ROCK' && '✊ ROCK'}
-                                            {hostStats.favoriteHand === 'SCISSORS' && '✌️ SCISSORS'}
-                                            {hostStats.favoriteHand === 'PAPER' && '✋ PAPER'}
+                                            {getHandDisplayWithEmoji(hostStats.favoriteHand)}
                                         </span>
                                     </div>
                                     <div className={styles.statRow()}>
@@ -516,7 +531,7 @@ export function NullHandGame({
                                         <span className={styles.statValue()}>{hostStats.changeRate}%</span>
                                     </div>
                                     <div className="mt-4 text-xs text-gray-500">
-                                        * DATA MAY BE DECEPTIVE
+                                        * 全てのデータはホストの過去の動向を正確に表していますが、嘘の情報が紛れています。（初回の手、一番選ぶ可能性が高い手、変える確率、のどれか一つは嘘の可能性が高いです）
                                     </div>
                                 </div>
                             )}
@@ -558,41 +573,59 @@ export function NullHandGame({
                             </div>
                         </div>
                         <div className={styles.sideArea()}>
-                            <div className="text-[#44FFFF] font-bold text-xl mb-4 border-b-2 border-[#44FFFF] pb-2">HOST INFO</div>
+                            <div className="text-[#44FFFF] font-bold text-xl mb-4 border-b-2 border-[#44FFFF] pb-2">ホストの情報</div>
 
                             {/* ホストの初期手 */}
                             {jankenEvent && (
                                 <div className="mb-6">
-                                    <div className="text-[#FF4444] font-bold mb-2 text-sm uppercase">INITIAL HAND</div>
-                                    <div className="flex items-center gap-2">
-                                        <span className="text-2xl">
-                                            {jankenEvent.initialHand === 'ROCK' && '✊'}
-                                            {jankenEvent.initialHand === 'SCISSORS' && '✌️'}
-                                            {jankenEvent.initialHand === 'PAPER' && '✋'}
-                                        </span>
-                                        <span className={styles.statValue()}>{jankenEvent.initialHand}</span>
-                                    </div>
+                                    <div className="text-[#FF4444] font-bold mb-2 text-sm uppercase">初回の手</div>
+
+                                    {jankenEvent.fakeTarget === 'INITIAL_HAND' && jankenEvent.fakeHandValue ? (
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-2xl">
+                                                {jankenEvent.fakeHandValue === 'ROCK' && '✊'}
+                                                {jankenEvent.fakeHandValue === 'SCISSORS' && '✌️'}
+                                                {jankenEvent.fakeHandValue === 'PAPER' && '✋'}
+                                            </span>
+                                            <span className={styles.statValue()}>{jankenEvent.fakeHandValue}</span>
+                                        </div>
+                                    ) : (
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-2xl">
+                                                {jankenEvent.initialHand === 'ROCK' && '✊'}
+                                                {jankenEvent.initialHand === 'SCISSORS' && '✌️'}
+                                                {jankenEvent.initialHand === 'PAPER' && '✋'}
+                                            </span>
+                                            <span className={styles.statValue()}>{jankenEvent.initialHand}</span>
+                                        </div>
+                                    )}
                                 </div>
                             )}
 
                             {/* ホストの統計（公開用） */}
                             {hostStats && (
                                 <div>
-                                    <div className="text-[#FF4444] font-bold mb-2 text-sm uppercase">HOST TENDENCY</div>
+                                    <div className="text-[#FF4444] font-bold mb-2 text-sm uppercase">ホストの情報</div>
                                     <div className={styles.statRow()}>
-                                        <span className={styles.statLabel()}>FAV HAND</span>
+                                        <span className={styles.statLabel()}>一番選ぶ可能性が高い手</span>
                                         <span className={styles.statValue()}>
-                                            {hostStats.favoriteHand === 'ROCK' && '✊ ROCK'}
-                                            {hostStats.favoriteHand === 'SCISSORS' && '✌️ SCISSORS'}
-                                            {hostStats.favoriteHand === 'PAPER' && '✋ PAPER'}
+                                            {getHandDisplayWithEmoji(
+                                                (jankenEvent?.fakeTarget === 'FAVORITE_HAND' && jankenEvent?.fakeFavoriteHandValue
+                                                    ? jankenEvent.fakeFavoriteHandValue
+                                                    : hostStats.favoriteHand) as HandType
+                                            )}
                                         </span>
                                     </div>
                                     <div className={styles.statRow()}>
                                         <span className={styles.statLabel()}>変える確率</span>
-                                        <span className={styles.statValue()}>{hostStats.changeRate}%</span>
+                                        <span className={styles.statValue()}>
+                                            {jankenEvent?.fakeTarget === 'CHANGE_RATE' && jankenEvent?.fakeChangeRateValue !== null && jankenEvent?.fakeChangeRateValue !== undefined
+                                                ? jankenEvent.fakeChangeRateValue
+                                                : hostStats.changeRate}%
+                                        </span>
                                     </div>
                                     <div className="mt-4 text-xs text-gray-500">
-                                        * DATA MAY BE DECEPTIVE
+                                        * 全てのデータはホストの過去の動向を正確に表していますが、嘘の情報が紛れています。（初回の手、一番選ぶ可能性が高い手、変える確率、のどれか一つは嘘の可能性が高いです）
                                     </div>
                                 </div>
                             )}
@@ -617,9 +650,7 @@ export function NullHandGame({
                                             />
                                         </div>
                                         <div className="text-3xl font-bold mt-6 text-white tracking-widest">
-                                            {jankenEvent.finalHostHand === 'ROCK' && '✊ グー'}
-                                            {jankenEvent.finalHostHand === 'SCISSORS' && '✌️ チョキ'}
-                                            {jankenEvent.finalHostHand === 'PAPER' && '✋ パー'}
+                                            {getHandDisplayWithEmoji(jankenEvent.finalHostHand as HandType)}
                                         </div>
                                     </div>
                                 ) : (
@@ -636,32 +667,27 @@ export function NullHandGame({
                                 <>
                                     {/* 初期手 */}
                                     <div className="mb-6">
-                                        <div className="text-[#FF4444] font-bold mb-2 text-sm uppercase">初期手 (公開済み)</div>
+                                        <div className="text-[#FF4444] font-bold mb-2 text-sm uppercase">最初に公開した 🖐️</div>
                                         <div className="flex items-center gap-2">
-                                            <span className="text-2xl">
-                                                {jankenEvent.initialHand === 'ROCK' && '✊'}
-                                                {jankenEvent.initialHand === 'SCISSORS' && '✌️'}
-                                                {jankenEvent.initialHand === 'PAPER' && '✋'}
-                                            </span>
-                                            <span className={styles.statValue()}>{jankenEvent.initialHand}</span>
+                                            <span className={styles.statValue()}>{getHandDisplayWithEmoji(jankenEvent.initialHand as HandType)}</span>
                                         </div>
                                     </div>
 
                                     {/* 嘘の情報 */}
                                     <div className="mb-6">
-                                        <div className="text-[#FF4444] font-bold mb-2 text-sm uppercase">偽装工作</div>
+                                        <div className="text-[#FF4444] font-bold mb-2 text-sm uppercase">偽装工作（未公開 🤫</div>
                                         <div className={styles.statRow()}>
-                                            <span className={styles.statLabel()}>ターゲット</span>
+                                            <span className={styles.statLabel()}>偽造した情報</span>
                                             <span className={styles.statValue()}>
                                                 {jankenEvent.fakeTarget === 'NONE' && 'なし'}
                                                 {jankenEvent.fakeTarget === 'INITIAL_HAND' && '手を偽装'}
-                                                {jankenEvent.fakeTarget === 'CHANGE_RATE' && '確率を偽装'}
-                                                {jankenEvent.fakeTarget === 'FAVORITE_HAND' && '得意手を偽装'}
+                                                {jankenEvent.fakeTarget === 'CHANGE_RATE' && '手を変える確率'}
+                                                {jankenEvent.fakeTarget === 'FAVORITE_HAND' && 'よく出す手を偽装'}
                                             </span>
                                         </div>
                                         {jankenEvent.fakeTarget !== 'NONE' && (
                                             <div className={styles.statRow()}>
-                                                <span className={styles.statLabel()}>偽装値</span>
+                                                <span className={styles.statLabel()}>偽造した値</span>
                                                 <span className="text-white font-bold">
                                                     {jankenEvent.fakeTarget === 'INITIAL_HAND' && jankenEvent.fakeHandValue}
                                                     {jankenEvent.fakeTarget === 'CHANGE_RATE' && `${jankenEvent.fakeChangeRateValue}%`}
@@ -676,10 +702,10 @@ export function NullHandGame({
                             {/* リアル統計 */}
                             {hostStats && (
                                 <div>
-                                    <div className="text-[#FF4444] font-bold mb-2 text-sm uppercase">極秘データ</div>
+                                    <div className="text-[#FF4444] font-bold mb-2 text-sm uppercase">あなたの情報</div>
                                     <div className={styles.statRow()}>
-                                        <span className={styles.statLabel()}>本当の得意手</span>
-                                        <span className={styles.statValue()}>{hostStats.realFavoriteHand}</span>
+                                        <span className={styles.statLabel()}>本当のよく出す手</span>
+                                        <span className={styles.statValue()}>{getHandDisplayWithEmoji(hostStats.realFavoriteHand as HandType)}</span>
                                     </div>
                                     <div className={styles.statRow()}>
                                         <span className={styles.statLabel()}>本当の変える確率</span>
@@ -711,7 +737,7 @@ export function NullHandGame({
                                         />
                                     </div>
                                     <div className="text-center text-xl font-bold mt-2">
-                                        {jankenEvent.finalHostHand}
+                                        {getHandDisplayWithEmoji(jankenEvent.finalHostHand as HandType)}
                                     </div>
                                 </div>
                             </div>
