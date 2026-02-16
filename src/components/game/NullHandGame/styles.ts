@@ -377,6 +377,14 @@ export const nullHandGame = tv({
             'border-y-[4px]',
             'border-gray-800',
             'mb-8',
+            'mb-8',
+        ],
+
+        rankingChange: [
+            'text-sm',
+            'text-gray-400',
+            'ml-4',
+            'font-mono',
         ],
     },
 })
