@@ -411,10 +411,15 @@ async function judgeRound(eventId: string) {
     const hostHand = event.finalHostHand as HandType
     const winners: Array<{ userId: string; hand: HandType }> = []
     const guestWinners: Set<string> = new Set() // 勝ったゲストのID
+    let hasDraw = false
 
     for (const guestHand of event.guestHands) {
         const result = judgeHand(hostHand, guestHand.hand as HandType)
         const isWin = result === 'GUEST_WIN'
+
+        if (result === 'DRAW') {
+            hasDraw = true
+        }
 
         if (isWin) {
             winners.push({
@@ -437,8 +442,8 @@ async function judgeRound(eventId: string) {
     }
 
     // ポイントを更新
-    if (winners.length === 0) {
-        // ホストが全員に勝利 → +3ポイント
+    if (winners.length === 0 && !hasDraw) {
+        // ホストが全員に勝利（引き分けなし） → +3ポイント
         hostWon = true
         await prisma.matchScore.update({
             where: {
@@ -453,7 +458,7 @@ async function judgeRound(eventId: string) {
                 }
             }
         })
-    } else {
+    } else if (winners.length > 0) {
         // ゲストが勝利 → 各+1ポイント
         await Promise.all(
             winners.map(winner =>
