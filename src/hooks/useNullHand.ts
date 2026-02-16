@@ -261,6 +261,7 @@ export function useNullHand({
 
         setIsProcessing(true)
         try {
+            await finishJanken(matchIdRef.current, roomId)
             setPhase('TITLE')
             setJankenEvent(null)
             setHostStats(null)
@@ -272,7 +273,7 @@ export function useNullHand({
         } finally {
             setIsProcessing(false)
         }
-    }, [isProcessing, play])
+    }, [roomId, isProcessing, play])
 
     // ============================================
     // Effects
