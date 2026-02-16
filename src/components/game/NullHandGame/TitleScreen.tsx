@@ -1,0 +1,116 @@
+import { RoomWithUsersAndReadyStatus, UserRanking, HandType, RoomUserWithReadyStatus } from '@/shared/types'
+import { nullHandGame } from './styles'
+import { Hand3D } from './Hand3D'
+import { cn } from '@/lib/utils'
+
+interface TitleScreenProps {
+    room: RoomWithUsersAndReadyStatus
+    isHost: boolean
+    isReady: boolean
+    allUsersReady: boolean
+    titleHand: HandType
+    initialRankings: UserRanking[]
+    onToggleReady: () => void
+    onStartGame: () => void
+    onExit: () => void
+}
+
+export function TitleScreen({
+    room,
+    isHost,
+    isReady,
+    allUsersReady,
+    titleHand,
+    initialRankings,
+    onToggleReady,
+    onStartGame,
+    onExit
+}: TitleScreenProps) {
+    const styles = nullHandGame()
+
+    const readyCount = room.users.filter((u: RoomUserWithReadyStatus) => u.isReady).length
+    const totalUsers = room.users.length
+
+    return (
+        <div className={styles.container()}>
+            <div className={styles.titleGrid()}>
+                {/* 左上: メニュー */}
+                <div className={styles.menuBox()}>
+                    <div
+                        className={cn(
+                            styles.menuItem(),
+                            isReady && styles.menuItemReady()
+                        )}
+                        onClick={onToggleReady}
+                    >
+                        READY
+                    </div>
+
+                    {isHost && (
+                        <div
+                            className={cn(
+                                styles.menuItem(),
+                                allUsersReady ? styles.menuItemSelected() : styles.menuItemDisabled()
+                            )}
+                            onClick={() => allUsersReady && onStartGame()}
+                        >
+                            START
+                        </div>
+                    )}
+
+                    <div className={styles.menuItem()} onClick={onExit}>
+                        EXIT
+                    </div>
+                </div>
+
+                {/* 右上: ビジュアル・ロゴ */}
+                <div className={styles.visualBox()}>
+                    <div className="text-center">
+                        <div className={styles.logo()}>NULL HAND</div>
+                        <div className="w-64 h-64 mx-auto">
+                            <Hand3D handType={titleHand} revealed={true} size="medium" isRotating={true} />
+                        </div>
+                    </div>
+                </div>
+
+                {/* 下部: インフォメーション */}
+                <div className={styles.infoBox()}>
+                    <div className='w-full'>
+                        <p className={styles.subtitle()}>NULL HAND PLAY MEMBERS</p>
+
+                        <div className={styles.playerListWrapper()}>
+                            {[...room.users].sort((a, b) => {
+                                const rankA = initialRankings.find(r => r.userId === a.userId)?.rank ?? Infinity
+                                const rankB = initialRankings.find(r => r.userId === b.userId)?.rank ?? Infinity
+                                return rankA - rankB
+                            }).map((u: RoomUserWithReadyStatus) => {
+                                const ranking = initialRankings.find(r => r.userId === u.userId)
+                                // ランキングが見つからない場合は未プレイ扱い
+                                const rankDisplay = ranking ? `世界順位:${ranking.rank}位 ${Math.floor(ranking.points)}pt` : '世界ランキング: 最下位 0pt'
+
+                                return (
+                                    <div key={u.id} className={styles.playerItem()}>
+                                        <div className="flex items-center">
+                                            <span className={styles.rankingText()}>
+                                                {rankDisplay}
+                                            </span>
+                                            <span className={u.isReady ? 'text-[#44FFFF]' : 'text-gray-500'}>
+                                                {u.user?.name || '不明'}
+                                            </span>
+                                        </div>
+                                        <span className={u.isReady ? 'text-[#FF4444]' : 'text-gray-700'}>
+                                            {u.isReady ? 'READY' : 'WAITING'}
+                                        </span>
+                                    </div>
+                                )
+                            })}
+                            <div className="mt-4 text-right text-gray-400">
+                                {readyCount} / {totalUsers} READY
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    )
+}
