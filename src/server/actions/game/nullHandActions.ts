@@ -102,8 +102,13 @@ export async function startJankenMatch(roomId: string) {
             }
         })
 
+        // ...
         return newMatch
     })
+
+    const { revalidatePath } = await import('next/cache')
+    revalidatePath(`/room/${roomId}`)
+    revalidatePath(`/game/${roomId}/null-hand`)
 
     return match
 }
@@ -581,19 +586,31 @@ export async function getJankenEvent(eventId: string): Promise<JankenEventWithGu
  * マッチIDから最新のJankenEventを取得
  */
 export async function getLatestJankenEvent(matchId: string): Promise<JankenEventWithGuests | null> {
-    const event = await prisma.jankenEvent.findFirst({
-        where: { matchId },
-        orderBy: { turnNumber: 'desc' },
-        include: {
-            guestHands: {
-                include: {
-                    user: true
+    console.log('[getLatestJankenEvent] Called with matchId:', matchId)
+    if (!matchId) {
+        console.log('[getLatestJankenEvent] matchId is invalid')
+        return null
+    }
+
+    try {
+        const event = await prisma.jankenEvent.findFirst({
+            where: { matchId },
+            orderBy: { turnNumber: 'desc' },
+            include: {
+                guestHands: {
+                    include: {
+                        user: true
+                    }
                 }
             }
-        }
-    })
+        })
 
-    return event
+        console.log('[getLatestJankenEvent] Result:', event ? `Found Event ID: ${event.id}, Turn: ${event.turnNumber}` : 'NULL')
+        return event
+    } catch (error) {
+        console.error('[getLatestJankenEvent] Error:', error)
+        throw error
+    }
 }
 
 /**

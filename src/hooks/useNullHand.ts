@@ -114,7 +114,9 @@ export function useNullHand({
      * 最新のJankenEventを取得して状態を更新
      */
     const fetchJankenEvent = useCallback(async () => {
-        if (!matchIdRef.current) return
+        if (!matchIdRef.current) {
+            return
+        }
 
         try {
             const latest = await getLatestJankenEvent(matchIdRef.current)
@@ -328,35 +330,8 @@ export function useNullHand({
                 schema: 'public',
                 table: 'janken_events',
                 filter: `match_id=eq.${matchId}`,
-            }, async (payload: any) => {
-                console.log('Janken Event Update:', payload)
-
-                const newData = payload.new
-                setJankenEvent(() => {
-                    const updatedEvent = {
-                        id: newData.id,
-                        matchId: newData.match_id,
-                        currentHostId: newData.current_host_id,
-                        turnNumber: newData.turn_number,
-                        phase: newData.phase as JankenPhase,
-                        phaseEndsAt: newData.phase_ends_at ? new Date(newData.phase_ends_at) : null,
-                        initialHand: newData.initial_hand as HandType | null,
-                        finalHostHand: newData.final_host_hand as HandType | null,
-                        fakeTarget: newData.fake_target as FakeTarget,
-                        fakeHandValue: newData.fake_hand_value as HandType | null,
-                        fakeChangeRateValue: newData.fake_change_rate_value,
-                        fakeFavoriteHandValue: newData.fake_favorite_hand_value as HandType | null,
-                        createdAt: new Date(newData.created_at),
-                        updatedAt: new Date(newData.updated_at),
-                        // 初回は確実に空配列
-                        guestHands: [],
-                    } as JankenEventWithGuests
-
-                    if (newData.phase !== phaseRef.current) {
-                        setPhase(newData.phase as JankenPhase)
-                    }
-                    return updatedEvent
-                })
+            }, async () => {
+                await fetchJankenEvent()
             })
             .on('postgres_changes', {
                 event: 'UPDATE',
