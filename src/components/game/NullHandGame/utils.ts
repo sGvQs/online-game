@@ -9,3 +9,13 @@ export const getHandDisplayWithEmoji = (hand: HandType): string => {
         default: return hand
     }
 }
+// じゃんけんの勝敗を判定
+export const judgeHand = (hostHand: HandType, guestHand: HandType): 'HOST_WIN' | 'GUEST_WIN' | 'DRAW' => {
+    if (hostHand === guestHand) return 'DRAW'
+    const winPatterns: Record<HandType, HandType> = {
+        ROCK: 'SCISSORS',
+        SCISSORS: 'PAPER',
+        PAPER: 'ROCK',
+    }
+    return winPatterns[hostHand] === guestHand ? 'HOST_WIN' : 'GUEST_WIN'
+}
