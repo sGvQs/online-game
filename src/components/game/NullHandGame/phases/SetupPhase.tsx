@@ -152,39 +152,25 @@ export function SetupPhase({
     const SideArea = () => {
         return (
             <div className={styles.sideArea()}>
-                <div className="text-[#44FFFF] font-bold text-lg mb-2 border-b-2 border-[#44FFFF] pb-1">あなたのデータ</div>
-
-                {/* ホスト用リアル統計 */}
                 {isCurrentHost && hostStats && (
-                    <div>
-                        <div className="mb-4">
-                            <div className="text-[#FF4444] font-bold mb-2">あなたの情報</div>
-                            <div className={styles.statRow()}>
-                                <span className={styles.statLabel()}>本当のよく出す手</span>
-                                <span className={styles.statValue()}>{getHandDisplayWithEmoji(hostStats.realFavoriteHand as HandType)}</span>
-                            </div>
-                            <div className={styles.statRow()}>
-                                <span className={styles.statLabel()}>本当の変える確率</span>
-                                <span className={styles.statValue()}>{hostStats.realChangeRate}%</span>
-                            </div>
-                        </div>
+                    <>
+                        <div className="text-[#44FFFF] font-bold text-lg mb-2 border-b-2 border-[#44FFFF] pb-1">あなたのデータ</div>
 
+                        {/* ホスト用リアル統計 */}
                         <div>
-                            <div className="text-gray-400 font-bold mb-2">公開データ (プレビュー)</div>
-                            <div className={styles.statRow()}>
-                                <span className={styles.statLabel()}>試合数</span>
-                                <span className={styles.statValue()}>{hostStats.totalGames}</span>
-                            </div>
-                            <div className={styles.statRow()}>
-                                <span className={styles.statLabel()}>よく出す手</span>
-                                <span className={styles.statValue()}>{getHandDisplayWithEmoji(hostStats.favoriteHand as HandType)}</span>
-                            </div>
-                            <div className={styles.statRow()}>
-                                <span className={styles.statLabel()}>変える確率</span>
-                                <span className={styles.statValue()}>{hostStats.changeRate}%</span>
+                            <div className="mb-4">
+                                <div className="text-[#FF4444] font-bold mb-2">あなたの情報</div>
+                                <div className={styles.statRow()}>
+                                    <span className={styles.statLabel()}>本当のよく出す手</span>
+                                    <span className={styles.statValue()}>{getHandDisplayWithEmoji(hostStats.realFavoriteHand as HandType)}</span>
+                                </div>
+                                <div className={styles.statRow()}>
+                                    <span className={styles.statLabel()}>本当の変える確率</span>
+                                    <span className={styles.statValue()}>{hostStats.realChangeRate}%</span>
+                                </div>
                             </div>
                         </div>
-                    </div>
+                    </>
                 )}
 
                 {/* ゲスト用（今は待機中表示） */}

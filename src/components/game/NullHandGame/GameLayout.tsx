@@ -16,12 +16,12 @@ export function GameLayout({ phase, error, children, mainArea, sideArea, hostNam
 
     const getPhaseText = (p: JankenPhase) => {
         switch (p) {
-            case 'SETUP': return `${hostName}の手を設定（未確定）`
-            case 'SHOWCASE': return `${hostName}の手を公開（未確定）`
-            case 'FINAL_DECISION': return `${hostName}の手を設定（確定）`
-            case 'BATTLE': return 'ゲストの手を設定（確定）'
-            case 'RESULT': return '結果発表'
-            case 'GAME_OVER': return '最終結果'
+            case 'SETUP': return `LIE HAND SELECTION`
+            case 'SHOWCASE': return `SHOW HAND`
+            case 'FINAL_DECISION': return `FINAL HAND SELECTION`
+            case 'BATTLE': return `BATTLE`
+            case 'RESULT': return 'RESULT'
+            case 'GAME_OVER': return 'GAME OVER'
             default: return ''
         }
     }
@@ -45,12 +45,13 @@ export function GameLayout({ phase, error, children, mainArea, sideArea, hostNam
                 </div>
             )}
 
-            <div className={styles.gameGrid()}>
-                {/* フェーズ表示 */}
-                <div className={styles.phaseBox()}>
-                    {getPhaseText(phase)}
-                </div>
 
+            <div className={styles.gameGrid()}>
+                <div className={styles.phaseBox()}>
+                    <h2 className="text-3xl font-black text-[#FF4444] mb-6 text-center tracking-[0.2em] uppercase drop-shadow-[2px_2px_0_rgba(255,0,0,0.3)]">
+                        {getPhaseText(phase)}
+                    </h2>
+                </div>
                 {content}
             </div>
         </div>

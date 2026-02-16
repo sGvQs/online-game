@@ -184,8 +184,6 @@ export const nullHandGame = tv({
         // フェーズ表示（上部）
         phaseBox: [
             'col-span-12',
-            'border-[4px]',
-            'border-[#FF4444]',
             'p-2', // 4 → 2
             'text-center',
             'text-xl', // 2xl → xl
