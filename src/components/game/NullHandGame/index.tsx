@@ -94,6 +94,12 @@ export function NullHandGame({
         await returnToRoom(roomId)
     }
 
+    const handleSetupSubmit = () => {
+        if (selectedHand) {
+            handleSetInitialHand(selectedHand, selectedFake, fakeDetails)
+        }
+    }
+
     const allUsersReady = room.users.every((u) => u.isReady)
 
     // ホスト名の取得
@@ -137,8 +143,9 @@ export function NullHandGame({
                     onSelectHand={setSelectedHand}
                     onSelectFake={setSelectedFake}
                     onUpdateFakeDetails={setFakeDetails}
-                    onSubmit={() => selectedHand && handleSetInitialHand(selectedHand, selectedFake, fakeDetails)}
+                    onSubmit={handleSetupSubmit}
                     hostName={hostName}
+                    onReselectHand={() => setSelectedHand(null)}
                 />
             )}
 
