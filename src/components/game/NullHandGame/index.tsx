@@ -64,7 +64,7 @@ export function NullHandGame({
     // タイトル画面用の手のローテーション
     const [titleHand, setTitleHand] = useState<HandType>('ROCK')
     useEffect(() => {
-        if (phase !== 'TITLE') return
+        if (phase !== 'TITLE' && phase !== 'SETUP') return
         const hands: HandType[] = ['ROCK', 'SCISSORS', 'PAPER']
         let index = 0
         const interval = setInterval(() => {
@@ -325,7 +325,7 @@ export function NullHandGame({
                                 <div className="flex flex-col items-center justify-center h-full">
                                     <div className={styles.messageText()}>ホストの選択を待っています...</div>
                                     <div className="w-48 h-48 mt-8">
-                                        <Hand3D handType={'ROCK'} revealed={true} size="medium" isRotating={true} />
+                                        <Hand3D handType={titleHand} revealed={true} size="medium" isRotating={true} />
                                     </div>
                                 </div>
                             )}
