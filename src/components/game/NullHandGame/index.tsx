@@ -929,9 +929,9 @@ export function NullHandGame({
 
                                 <button
                                     className={cn(styles.button(), styles.buttonPrimary())}
-                                    onClick={handleClose}
+                                    onClick={handleFinish}
                                 >
-                                    ロビーに戻る
+                                    タイトルに戻る
                                 </button>
                             </div>
                         </div>
