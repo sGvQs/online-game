@@ -96,6 +96,10 @@ export function NullHandGame({
 
     const allUsersReady = room.users.every((u) => u.isReady)
 
+    // ホスト名の取得
+    const hostUser = room.users.find(u => u.userId === jankenEvent?.currentHostId)
+    const hostName = hostUser?.user.name || 'HOST'
+
     // ============================================
     // TITLE フェーズ
     // ============================================
@@ -120,7 +124,7 @@ export function NullHandGame({
     // ============================================
 
     return (
-        <GameLayout phase={phase} error={error}>
+        <GameLayout phase={phase} error={error} hostName={hostName}>
             {phase === 'SETUP' && (
                 <SetupPhase
                     isCurrentHost={isCurrentHost}
@@ -134,6 +138,7 @@ export function NullHandGame({
                     onSelectFake={setSelectedFake}
                     onUpdateFakeDetails={setFakeDetails}
                     onSubmit={() => selectedHand && handleSetInitialHand(selectedHand, selectedFake, fakeDetails)}
+                    hostName={hostName}
                 />
             )}
 
@@ -144,6 +149,7 @@ export function NullHandGame({
                     isCurrentHost={isCurrentHost}
                     isProcessing={isProcessing}
                     onConfirm={handleConfirmShowcase}
+                    hostName={hostName}
                 />
             )}
 
@@ -156,6 +162,7 @@ export function NullHandGame({
                     isProcessing={isProcessing}
                     onSelectHand={setSelectedHand}
                     onSubmit={() => selectedHand && handleSetFinalHostHand(selectedHand)}
+                    hostName={hostName}
                 />
             )}
 
@@ -168,6 +175,7 @@ export function NullHandGame({
                     isProcessing={isProcessing}
                     onSelectHand={setSelectedHand}
                     onSubmit={() => selectedHand && handleSetGuestHand(selectedHand)}
+                    hostName={hostName}
                 />
             )}
 
@@ -177,6 +185,7 @@ export function NullHandGame({
                     currentScores={currentScores}
                     isProcessing={isProcessing}
                     onNextRound={handleNextRound}
+                    hostName={hostName}
                 />
             )}
 

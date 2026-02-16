@@ -9,13 +9,15 @@ interface ResultPhaseProps {
     currentScores: MatchScoreWithUser[]
     isProcessing: boolean
     onNextRound: () => void
+    hostName: string
 }
 
 export function ResultPhase({
     jankenEvent,
     currentScores,
     isProcessing,
-    onNextRound
+    onNextRound,
+    hostName
 }: ResultPhaseProps) {
     const styles = nullHandGame()
 
@@ -23,10 +25,10 @@ export function ResultPhase({
 
     const MainArea = () => (
         <div className={styles.mainArea()}>
-            <h2 className={styles.messageText()}>ホストの最終手</h2>
+            <h2 className={styles.messageText()}>{hostName}の最終手</h2>
             <div className={styles.vsContainer()}>
                 <div>
-                    <div className="text-[#FF4444] font-bold text-center mb-2 tracking-widest">ホスト</div>
+                    <div className="text-[#FF4444] font-bold text-center mb-2 tracking-widest">{hostName}</div>
                     <div className="w-64 mx-auto">
                         <Hand3D
                             handType={jankenEvent.finalHostHand as HandType}

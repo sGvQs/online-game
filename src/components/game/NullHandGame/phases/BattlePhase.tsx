@@ -12,6 +12,7 @@ interface BattlePhaseProps {
     isProcessing: boolean
     onSelectHand: (hand: HandType) => void
     onSubmit: () => void
+    hostName: string
 }
 
 export function BattlePhase({
@@ -21,7 +22,8 @@ export function BattlePhase({
     selectedHand,
     isProcessing,
     onSelectHand,
-    onSubmit
+    onSubmit,
+    hostName
 }: BattlePhaseProps) {
     const styles = nullHandGame()
 
@@ -60,7 +62,7 @@ export function BattlePhase({
 
         const SideArea = () => (
             <div className={styles.sideArea()}>
-                <div className="text-[#44FFFF] font-bold text-xl mb-4 border-b-2 border-[#44FFFF] pb-2">ホストの情報</div>
+                <div className="text-[#44FFFF] font-bold text-xl mb-4 border-b-2 border-[#44FFFF] pb-2">{hostName}の情報</div>
 
                 {/* ホストの初期手 */}
                 {jankenEvent && (
@@ -82,7 +84,7 @@ export function BattlePhase({
                 {/* ホストの統計（公開用） */}
                 {hostStats && (
                     <div>
-                        <div className="text-[#FF4444] font-bold mb-2 text-sm uppercase">ホストの情報</div>
+                        <div className="text-[#FF4444] font-bold mb-2 text-sm uppercase">{hostName}の情報</div>
                         <div className={styles.statRow()}>
                             <span className={styles.statLabel()}>一番選ぶ可能性が高い手</span>
                             <span className={styles.statValue()}>
@@ -102,7 +104,7 @@ export function BattlePhase({
                             </span>
                         </div>
                         <div className="mt-4 text-xs text-gray-500">
-                            * 全てのデータはホストの過去の動向を正確に表していますが、嘘の情報が紛れています。（初回の手、一番選ぶ可能性が高い手、変える確率、のどれか一つは嘘の可能性が高いです）
+                            * 全てのデータは{hostName}の過去の動向を正確に表していますが、嘘の情報が紛れています。（初回の手、一番選ぶ可能性が高い手、変える確率、のどれか一つは嘘の可能性が高いです）
                         </div>
                     </div>
                 )}

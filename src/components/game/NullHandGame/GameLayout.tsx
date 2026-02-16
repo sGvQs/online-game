@@ -8,16 +8,17 @@ interface GameLayoutProps {
     children: ReactNode // Expecting Main Area and Side Area or other content
     mainArea?: ReactNode
     sideArea?: ReactNode
+    hostName: string
 }
 
-export function GameLayout({ phase, error, children, mainArea, sideArea }: GameLayoutProps) {
+export function GameLayout({ phase, error, children, mainArea, sideArea, hostName }: GameLayoutProps) {
     const styles = nullHandGame()
 
     const getPhaseText = (p: JankenPhase) => {
         switch (p) {
-            case 'SETUP': return 'ホストの手を設定（未確定）'
-            case 'SHOWCASE': return 'ホストの手を公開（未確定）'
-            case 'FINAL_DECISION': return 'ホストの手を設定（確定）'
+            case 'SETUP': return `${hostName}の手を設定（未確定）`
+            case 'SHOWCASE': return `${hostName}の手を公開（未確定）`
+            case 'FINAL_DECISION': return `${hostName}の手を設定（確定）`
             case 'BATTLE': return 'ゲストの手を設定（確定）'
             case 'RESULT': return '結果発表'
             case 'GAME_OVER': return '最終結果'

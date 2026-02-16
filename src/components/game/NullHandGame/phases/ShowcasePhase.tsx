@@ -10,6 +10,7 @@ interface ShowcasePhaseProps {
     isCurrentHost: boolean
     isProcessing: boolean
     onConfirm: () => void
+    hostName: string
 }
 
 export function ShowcasePhase({
@@ -17,7 +18,8 @@ export function ShowcasePhase({
     hostStats,
     isCurrentHost,
     isProcessing,
-    onConfirm
+    onConfirm,
+    hostName
 }: ShowcasePhaseProps) {
     const styles = nullHandGame()
 
@@ -25,7 +27,7 @@ export function ShowcasePhase({
 
     const MainArea = () => (
         <div className={styles.mainArea()}>
-            <h2 className={styles.messageText()}>ホストの手を観察</h2>
+            <h2 className={styles.messageText()}>{hostName}の手を観察</h2>
             <div className={styles.handDisplay()}>
                 <div className="w-64 mx-auto">
                     <Hand3D
@@ -60,7 +62,7 @@ export function ShowcasePhase({
 
     const SideArea = () => (
         <div className={styles.sideArea()}>
-            <div className="text-[#44FFFF] font-bold text-xl mb-4 border-b-2 border-[#44FFFF] pb-2">ホストデータ (公開)</div>
+            <div className="text-[#44FFFF] font-bold text-xl mb-4 border-b-2 border-[#44FFFF] pb-2">{hostName}のデータ (公開)</div>
             {hostStats && (
                 <div>
                     <div className={styles.statRow()}>
@@ -77,7 +79,7 @@ export function ShowcasePhase({
                             : hostStats.changeRate}%
                     </div>
                     <div className="mt-4 text-xs text-gray-500">
-                        * 全てのデータはホストの過去の動向を正確に表していますが、嘘の情報が紛れています。（初回の手、一番選ぶ可能性が高い手、変える確率、のどれか一つは嘘の可能性が高いです）
+                        * 全てのデータは{hostName}の過去の動向を正確に表していますが、嘘の情報が紛れています。（初回の手、一番選ぶ可能性が高い手、変える確率、のどれか一つは嘘の可能性が高いです）
                     </div>
                 </div>
             )}

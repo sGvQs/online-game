@@ -16,6 +16,7 @@ interface SetupPhaseProps {
     onSelectFake: (fake: FakeTarget) => void
     onUpdateFakeDetails: (details: FakeDetails) => void
     onSubmit: () => void
+    hostName: string
 }
 
 export function SetupPhase({
@@ -29,7 +30,8 @@ export function SetupPhase({
     onSelectHand,
     onSelectFake,
     onUpdateFakeDetails,
-    onSubmit
+    onSubmit,
+    hostName
 }: SetupPhaseProps) {
     const styles = nullHandGame()
 
@@ -38,7 +40,7 @@ export function SetupPhase({
             return (
                 <div className={styles.mainArea()}>
                     <div className="flex flex-col items-center justify-center h-full">
-                        <div className={styles.messageText()}>ホストの選択を待っています...</div>
+                        <div className={styles.messageText()}>{hostName}の選択を待っています...</div>
                         <div className="w-48 h-48 mt-8">
                             <Hand3D handType={titleHand} revealed={true} size="medium" isRotating={true} />
                         </div>
@@ -187,8 +189,8 @@ export function SetupPhase({
 
                 {/* ゲスト用（今は待機中表示） */}
                 {!isCurrentHost && (
-                    <div className="text-gray-500 italic">
-                        WAITING FOR HOST...
+                    <div className="text-gray-500 italic uppercase">
+                        WAITING FOR {hostName}...
                     </div>
                 )}
             </div>

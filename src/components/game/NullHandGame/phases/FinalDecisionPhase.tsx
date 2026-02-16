@@ -12,6 +12,7 @@ interface FinalDecisionPhaseProps {
     isProcessing: boolean
     onSelectHand: (hand: HandType) => void
     onSubmit: () => void
+    hostName: string
 }
 
 export function FinalDecisionPhase({
@@ -21,7 +22,8 @@ export function FinalDecisionPhase({
     selectedHand,
     isProcessing,
     onSelectHand,
-    onSubmit
+    onSubmit,
+    hostName
 }: FinalDecisionPhaseProps) {
     const styles = nullHandGame()
 
@@ -122,7 +124,7 @@ export function FinalDecisionPhase({
         const MainArea = () => (
             <div className={styles.mainArea()}>
                 <div className={styles.messageText()}>
-                    <p>ホストが最終決断を下しています...</p>
+                    <p>{hostName}が最終決断を下しています...</p>
                     <div className="w-48 h-48 mx-auto mt-8">
                         {jankenEvent && <>
                             {jankenEvent.fakeTarget === 'INITIAL_HAND' && jankenEvent.fakeHandValue ?
@@ -139,7 +141,7 @@ export function FinalDecisionPhase({
 
         const SideArea = () => (
             <div className={styles.sideArea()}>
-                <div className="text-[#44FFFF] font-bold text-xl mb-4 border-b-2 border-[#44FFFF] pb-2">ホストの情報</div>
+                <div className="text-[#44FFFF] font-bold text-xl mb-4 border-b-2 border-[#44FFFF] pb-2">{hostName}の情報</div>
 
                 {/* ホストの初期手 */}
                 {jankenEvent &&
@@ -163,7 +165,7 @@ export function FinalDecisionPhase({
                 {/* ホストの統計（公開用） */}
                 {hostStats && (
                     <div>
-                        <div className="text-[#FF4444] font-bold mb-2 text-sm uppercase">ホストの情報</div>
+                        <div className="text-[#FF4444] font-bold mb-2 text-sm uppercase">{hostName}の情報</div>
                         <div className={styles.statRow()}>
                             <span className={styles.statLabel()}>一番選ぶ可能性が高い手</span>
 
@@ -176,7 +178,7 @@ export function FinalDecisionPhase({
                             <span className={styles.statValue()}>{hostStats.changeRate}%</span>
                         </div>
                         <div className="mt-4 text-xs text-gray-500">
-                            * 全てのデータはホストの過去の動向を正確に表していますが、嘘の情報が紛れています。（初回の手、一番選ぶ可能性が高い手、変える確率、のどれか一つは嘘の可能性が高いです）
+                            * 全てのデータは{hostName}の過去の動向を正確に表していますが、嘘の情報が紛れています。（初回の手、一番選ぶ可能性が高い手、変える確率、のどれか一つは嘘の可能性が高いです）
                         </div>
                     </div>
                 )}
