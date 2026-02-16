@@ -11,6 +11,7 @@ interface ResultPhaseProps {
     onNextRound: () => void
     hostName: string
     currentUserId: string
+    isCurrentHost: boolean
 }
 
 export function ResultPhase({
@@ -19,7 +20,8 @@ export function ResultPhase({
     isProcessing,
     onNextRound,
     hostName,
-    currentUserId
+    currentUserId,
+    isCurrentHost
 }: ResultPhaseProps) {
     const styles = nullHandGame()
 
@@ -106,17 +108,56 @@ export function ResultPhase({
         }
 
         // ホスト視点または観戦者（フォールバック）
+        // ホストの勝敗を計算
+        let hostStatus: 'WIN' | 'LOSE' | 'DRAW' = 'WIN'
+        let hasGuestWin = false
+        let hasDraw = false
+
+        jankenEvent.guestHands.forEach(gh => {
+            const res = judgeHand(hostHand, gh.hand as HandType)
+            if (res === 'GUEST_WIN') hasGuestWin = true
+            if (res === 'DRAW') hasDraw = true
+        })
+
+        if (hasGuestWin) {
+            hostStatus = 'LOSE'
+        } else if (hasDraw) {
+            hostStatus = 'DRAW'
+        } else {
+            hostStatus = 'WIN'
+        }
+
+        // 観戦者の場合は勝敗を表示しない（常にMedium）
+        const isSpectator = !isCurrentHost && !myHandData
+        const showResult = isCurrentHost // ホストのみ勝敗表示
+
+        // 観戦者ならサイズはmedium固定、ホストなら勝敗に応じて変更
+        const handSize = isSpectator ? 'medium' :
+            (hostStatus === 'LOSE' ? 'small' : 'medium')
+
+        const isOpacityReduced = !isSpectator && hostStatus === 'LOSE'
+
         return (
             <div className={styles.mainArea()}>
                 <h2 className={styles.messageText()}>{hostName}の最終手</h2>
                 <div className={styles.vsContainer()}>
-                    <div>
+                    <div className="flex flex-col items-center">
                         <div className="text-[#FF4444] font-bold text-center mb-2 tracking-widest">{hostName}</div>
-                        <div className="w-64 mx-auto">
+
+                        {/* ホスト用勝敗バッジ */}
+                        {showResult && (
+                            <div className="mb-4 h-8">
+                                {hostStatus === 'WIN' && <span className="bg-[#FF4444] text-black font-bold px-4 py-1 rounded">WIN</span>}
+                                {hostStatus === 'LOSE' && <span className="bg-gray-600 text-white font-bold px-4 py-1 rounded">LOSE</span>}
+                                {hostStatus === 'DRAW' && <span className="bg-gray-500 text-white font-bold px-4 py-1 rounded">DRAW</span>}
+                            </div>
+                        )}
+
+                        <div className={cn("transition-all duration-500", isSpectator ? "w-64 mx-auto" : (hostStatus === 'LOSE' ? "w-40 h-40 opacity-70" : "w-48 h-48"))}>
                             <Hand3D
                                 handType={hostHand}
                                 revealed={true}
-                                size="medium"
+                                size={handSize}
                             />
                         </div>
                         <div className="text-center text-xl font-bold mt-2">
@@ -154,6 +195,15 @@ export function ResultPhase({
                                 <div className="flex items-center gap-3">
                                     <span className="text-white font-mono text-lg">{score.user.name}</span>
                                 </div>
+                                {/* ホストの場合のみ、ゲストの手を表示 */}
+                                {isCurrentHost && (
+                                    <div className="text-sm text-gray-400 pl-2">
+                                        {(() => {
+                                            const guestHand = jankenEvent.guestHands.find(g => g.userId === score.userId)?.hand
+                                            return guestHand ? getHandDisplayWithEmoji(guestHand as HandType) : '自分'
+                                        })()}
+                                    </div>
+                                )}
                             </div>
                             <span className="text-[#44FFFF] font-bold font-mono text-2xl">
                                 {score.points > 0 ? `+${score.points}` : '0'} 点

@@ -339,9 +339,7 @@ export const nullHandGame = tv({
             'justify-center',
             'gap-8',
             'py-8',
-            'border-y-[4px]',
-            'border-[#FF4444]',
-            'bg-[#111]',
+            'bg-black',
         ],
 
         // 結果ランク

@@ -188,6 +188,7 @@ export function NullHandGame({
                     onNextRound={handleNextRound}
                     hostName={hostName}
                     currentUserId={currentUserId}
+                    isCurrentHost={isCurrentHost}
                 />
             )}
 
