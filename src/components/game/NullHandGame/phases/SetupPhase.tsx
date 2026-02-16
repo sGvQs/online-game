@@ -135,14 +135,14 @@ export function SetupPhase({
                     ) : (
                         /* STEP 2: 偽装の選択 */
                         <div className="flex flex-col h-full animate-in slide-in-from-right duration-300">
-                            <h2 className={styles.messageText()}>偽装工作を選択 (必須)</h2>
+                            <h2 className={styles.messageText()}>どの情報を偽装する？</h2>
 
                             <div className="flex-1 flex flex-col justify-center">
                                 <div className="grid grid-cols-3 gap-4 mb-6">
                                     {([
-                                        { value: 'INITIAL_HAND', label: '手を偽装' },
-                                        { value: 'CHANGE_RATE', label: '変える確率を偽装' },
-                                        { value: 'FAVORITE_HAND', label: 'よく出す手を偽装' },
+                                        { value: 'INITIAL_HAND', label: '選択した手' },
+                                        { value: 'CHANGE_RATE', label: '手を変える確率' },
+                                        { value: 'FAVORITE_HAND', label: '選ぶ確率の高い手' },
                                     ] as const).map((option) => (
                                         <div
                                             key={option.value}
@@ -228,11 +228,11 @@ export function SetupPhase({
                         {/* ホスト用リアル統計 */}
                         <div className="mb-6">
                             <div className={styles.statRow()}>
-                                <span className={styles.statLabel()}>本当のよく出す手</span>
+                                <span className={styles.statLabel()}>最終的に選ぶ確率の高い手</span>
                                 <span className={styles.statValue()}>{getHandDisplayWithEmoji(hostStats.realFavoriteHand as HandType)}</span>
                             </div>
                             <div className={styles.statRow()}>
-                                <span className={styles.statLabel()}>本当の変える確率</span>
+                                <span className={styles.statLabel()}>最終的に手を変える確率</span>
                                 <span className={styles.statValue()}>{hostStats.realChangeRate}%</span>
                             </div>
                         </div>

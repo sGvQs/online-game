@@ -167,9 +167,9 @@ export function BattlePhase({
                                 <span className={styles.statLabel()}>偽造した情報</span>
                                 <span className={styles.statValue()}>
                                     {jankenEvent.fakeTarget === 'NONE' && 'なし'}
-                                    {jankenEvent.fakeTarget === 'INITIAL_HAND' && '手を偽装'}
+                                    {jankenEvent.fakeTarget === 'INITIAL_HAND' && '選択した手'}
                                     {jankenEvent.fakeTarget === 'CHANGE_RATE' && '手を変える確率'}
-                                    {jankenEvent.fakeTarget === 'FAVORITE_HAND' && 'よく出す手を偽装'}
+                                    {jankenEvent.fakeTarget === 'FAVORITE_HAND' && '選ぶ確率の高い手'}
                                 </span>
                             </div>
                             {jankenEvent.fakeTarget !== 'NONE' && (
@@ -191,11 +191,11 @@ export function BattlePhase({
                     <div>
                         <div className="text-[#FF4444] font-bold mb-2 text-sm uppercase">あなたの情報</div>
                         <div className={styles.statRow()}>
-                            <span className={styles.statLabel()}>本当のよく出す手</span>
+                            <span className={styles.statLabel()}>最終的に選ぶ確率の高い手</span>
                             <span className={styles.statValue()}>{getHandDisplayWithEmoji(hostStats.realFavoriteHand as HandType)}</span>
                         </div>
                         <div className={styles.statRow()}>
-                            <span className={styles.statLabel()}>本当の変える確率</span>
+                            <span className={styles.statLabel()}>最終的に手を変える確率</span>
                             <span className={styles.statValue()}>{hostStats.realChangeRate}%</span>
                         </div>
                     </div>
