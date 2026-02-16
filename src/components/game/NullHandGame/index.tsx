@@ -100,6 +100,15 @@ export function NullHandGame({
         }
     }
 
+    // フェーズが変わった際に選択状態をリセット
+    useEffect(() => {
+        if (phase === 'SETUP') {
+            setSelectedHand(null)
+            setSelectedFake('NONE')
+            setFakeDetails({})
+        }
+    }, [phase])
+
     const allUsersReady = room.users.every((u) => u.isReady)
 
     // ホスト名の取得

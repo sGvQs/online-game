@@ -138,64 +138,114 @@ export function SetupPhase({
                             <h2 className={styles.messageText()}>どの情報を偽装する？</h2>
 
                             <div className="flex-1 flex flex-col justify-center">
-                                <div className="grid grid-cols-3 gap-4 mb-6">
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                                     {([
-                                        { value: 'INITIAL_HAND', label: '選択した手' },
-                                        { value: 'CHANGE_RATE', label: '手を変える確率' },
-                                        { value: 'FAVORITE_HAND', label: '選ぶ確率の高い手' },
+                                        { value: 'INITIAL_HAND', label: '選択した手', icon: '✋' },
+                                        { value: 'CHANGE_RATE', label: '手を変える確率', icon: '📊' },
+                                        { value: 'FAVORITE_HAND', label: '選ぶ確率の高い手', icon: '⭐' },
                                     ] as const).map((option) => (
-                                        <div
+                                        <button
                                             key={option.value}
                                             className={cn(
-                                                styles.fakeOption(),
-                                                "py-6 text-lg", // 少し大きく
-                                                selectedFake === option.value && styles.fakeOptionSelected()
+                                                "relative group overflow-hidden p-6 transition-all duration-300",
+                                                "border-2 bg-black/50 backdrop-blur-sm",
+                                                selectedFake === option.value
+                                                    ? "border-[#44FFFF] shadow-[0_0_20px_rgba(68,255,255,0.3)] text-[#44FFFF]"
+                                                    : "border-gray-700 text-gray-400 hover:border-gray-500 hover:text-gray-200"
                                             )}
                                             onClick={() => handleFakeOptionClick(option.value)}
                                         >
-                                            {option.label}
-                                        </div>
+                                            <div className="text-4xl mb-3 group-hover:scale-110 transition-transform duration-300">{option.icon}</div>
+                                            <div className="font-bold tracking-widest text-lg">{option.label}</div>
+
+                                            {selectedFake === option.value && (
+                                                <div className="absolute inset-0 bg-[#44FFFF]/5 pointer-events-none" />
+                                            )}
+                                        </button>
                                     ))}
                                 </div>
 
-                                {/* 偽装詳細入力 */}
-                                <div className="h-32 flex items-center justify-center">
+                                {/* 偽装詳細入力エリア */}
+                                <div className="h-48 flex items-center justify-center bg-black/30 border border-gray-800 p-8 rounded-lg relative overflow-hidden">
+                                    {/* 背景装飾 */}
+                                    {selectedFake === 'NONE' && (
+                                        <div className="text-gray-600 font-bold text-xl tracking-widest text-center">
+                                            偽装する項目を選択してください
+                                        </div>
+                                    )}
+
                                     {selectedFake !== 'NONE' && (
-                                        <div className='w-full max-w-md animate-in fade-in slide-in-from-top-2 duration-300'>
+                                        <div className='w-full max-w-lg animate-in fade-in slide-in-from-bottom-4 duration-300 z-10'>
                                             {selectedFake === 'INITIAL_HAND' && (
-                                                <select
-                                                    className={styles.select()}
-                                                    value={fakeDetails.fakeHandValue || ''}
-                                                    onChange={(e) => onUpdateFakeDetails({ ...fakeDetails, fakeHandValue: e.target.value as HandType })}
-                                                >
-                                                    <option value="">偽装する手を選択...</option>
-                                                    <option value="ROCK">✊ グー</option>
-                                                    <option value="SCISSORS">✌️ チョキ</option>
-                                                    <option value="PAPER">✋ パー</option>
-                                                </select>
-                                            )}
-                                            {selectedFake === 'CHANGE_RATE' && (
-                                                <div className="w-full">
-                                                    <input
-                                                        type="number"
-                                                        className={styles.numberInput()}
-                                                        value={fakeDetails.fakeChangeRateValue ?? ''}
-                                                        onChange={(e) => onUpdateFakeDetails({ ...fakeDetails, fakeChangeRateValue: parseInt(e.target.value) || 0 })}
-                                                        placeholder="偽装する確率 (0-100)"
-                                                    />
+                                                <div className="text-center space-y-4">
+                                                    <div className="text-[#44FFFF] font-bold mb-4 uppercase tracking-widest">偽装として表示する手を選択</div>
+                                                    <div className="flex justify-center gap-4">
+                                                        {(['ROCK', 'SCISSORS', 'PAPER'] as const).map(hand => (
+                                                            <button
+                                                                key={hand}
+                                                                onClick={() => onUpdateFakeDetails({ ...fakeDetails, fakeHandValue: hand })}
+                                                                className={cn(
+                                                                    "w-24 h-24 border-2 flex flex-col items-center justify-center gap-2 transition-all duration-200",
+                                                                    fakeDetails.fakeHandValue === hand
+                                                                        ? "border-[#FF4444] bg-[#FF4444]/10 text-white shadow-[0_0_15px_rgba(255,68,68,0.3)]"
+                                                                        : "border-gray-700 text-gray-500 hover:border-gray-500 hover:text-gray-300"
+                                                                )}
+                                                            >
+                                                                <span className="text-3xl">{hand === 'ROCK' ? '✊' : hand === 'SCISSORS' ? '✌️' : '✋'}</span>
+                                                                <span className="text-xs font-bold">{hand}</span>
+                                                            </button>
+                                                        ))}
+                                                    </div>
                                                 </div>
                                             )}
+
+                                            {selectedFake === 'CHANGE_RATE' && (
+                                                <div className="w-full space-y-6">
+                                                    <div className="text-[#44FFFF] font-bold text-center uppercase tracking-widest">
+                                                        偽装する確率: <span className="text-3xl ml-2">{fakeDetails.fakeChangeRateValue ?? 50}%</span>
+                                                    </div>
+                                                    <div className="relative w-full h-12 flex items-center">
+                                                        <input
+                                                            type="range"
+                                                            min="0"
+                                                            max="100"
+                                                            step="1"
+                                                            value={fakeDetails.fakeChangeRateValue ?? 50}
+                                                            onChange={(e) => onUpdateFakeDetails({ ...fakeDetails, fakeChangeRateValue: parseInt(e.target.value) })}
+                                                            className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-[#44FFFF] hover:accent-[#88FFFF] transition-all"
+                                                        />
+                                                        {/* 目盛り */}
+                                                        <div className="absolute top-8 left-0 text-xs text-gray-500">0%</div>
+                                                        <div className="absolute top-8 right-0 text-xs text-gray-500">100%</div>
+                                                        <div className="absolute top-8 left-1/2 -translate-x-1/2 text-xs text-gray-500">50%</div>
+                                                    </div>
+                                                    <div className="text-center text-xs text-gray-400">
+                                                        ※ この確率はゲストに「あなたが最終的に手を変える確率」として表示されます
+                                                    </div>
+                                                </div>
+                                            )}
+
                                             {selectedFake === 'FAVORITE_HAND' && (
-                                                <select
-                                                    className={styles.select()}
-                                                    value={fakeDetails.fakeFavoriteHandValue || ''}
-                                                    onChange={(e) => onUpdateFakeDetails({ ...fakeDetails, fakeFavoriteHandValue: e.target.value as HandType })}
-                                                >
-                                                    <option value="">偽装するよく出す手を選択...</option>
-                                                    <option value="ROCK">✊ グー</option>
-                                                    <option value="SCISSORS">✌️ チョキ</option>
-                                                    <option value="PAPER">✋ パー</option>
-                                                </select>
+                                                <div className="text-center space-y-4">
+                                                    <div className="text-[#44FFFF] font-bold mb-4 uppercase tracking-widest">偽装として表示する「よく出す手」</div>
+                                                    <div className="flex justify-center gap-4">
+                                                        {(['ROCK', 'SCISSORS', 'PAPER'] as const).map(hand => (
+                                                            <button
+                                                                key={hand}
+                                                                onClick={() => onUpdateFakeDetails({ ...fakeDetails, fakeFavoriteHandValue: hand })}
+                                                                className={cn(
+                                                                    "w-24 h-24 border-2 flex flex-col items-center justify-center gap-2 transition-all duration-200",
+                                                                    fakeDetails.fakeFavoriteHandValue === hand
+                                                                        ? "border-[#FF4444] bg-[#FF4444]/10 text-white shadow-[0_0_15px_rgba(255,68,68,0.3)]"
+                                                                        : "border-gray-700 text-gray-500 hover:border-gray-500 hover:text-gray-300"
+                                                                )}
+                                                            >
+                                                                <span className="text-3xl">{hand === 'ROCK' ? '✊' : hand === 'SCISSORS' ? '✌️' : '✋'}</span>
+                                                                <span className="text-xs font-bold">{hand}</span>
+                                                            </button>
+                                                        ))}
+                                                    </div>
+                                                </div>
                                             )}
                                         </div>
                                     )}
