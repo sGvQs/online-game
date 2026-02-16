@@ -11,6 +11,7 @@ interface ShowcasePhaseProps {
     isProcessing: boolean
     onConfirm: () => void
     hostName: string
+    currentUserId: string
 }
 
 export function ShowcasePhase({
@@ -19,11 +20,14 @@ export function ShowcasePhase({
     isCurrentHost,
     isProcessing,
     onConfirm,
-    hostName
+    hostName,
+    currentUserId
 }: ShowcasePhaseProps) {
     const styles = nullHandGame()
 
     if (!jankenEvent) return null
+
+    const isConfirmed = jankenEvent.guestHands.some(gh => gh.userId === currentUserId && gh.isConfirmed)
 
     const MainArea = () => (
         <div className={styles.mainArea()}>
@@ -44,13 +48,17 @@ export function ShowcasePhase({
 
             {!isCurrentHost && (
                 <div className="text-center mt-8">
-                    <button
-                        className={cn(styles.button(), styles.buttonPrimary())}
-                        disabled={isProcessing}
-                        onClick={onConfirm}
-                    >
-                        確認して次へ
-                    </button>
+                    {isConfirmed ? (
+                        <p className={styles.messageText()}>他のゲストを待っています...</p>
+                    ) : (
+                        <button
+                            className={cn(styles.button(), styles.buttonPrimary())}
+                            disabled={isProcessing}
+                            onClick={onConfirm}
+                        >
+                            確認して次へ
+                        </button>
+                    )}
                 </div>
             )}
 

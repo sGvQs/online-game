@@ -150,6 +150,7 @@ export function NullHandGame({
                     isProcessing={isProcessing}
                     onConfirm={handleConfirmShowcase}
                     hostName={hostName}
+                    currentUserId={currentUserId}
                 />
             )}
 
