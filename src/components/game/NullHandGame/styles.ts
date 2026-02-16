@@ -165,8 +165,8 @@ export const nullHandGame = tv({
         ],
 
         rankingText: [
-            'mr-3',
-            'text-yellow-400',
+            'mr-6',
+            'text-[#44FFFF]',
             'font-mono',
             'text-base',
         ],

@@ -138,7 +138,11 @@ export function NullHandGame({
                             <p className={styles.subtitle()}>NULL HAND PLAY MEMBERS</p>
 
                             <div className={styles.playerListWrapper()}>
-                                {room.users.map((u: RoomUserWithReadyStatus) => {
+                                {[...room.users].sort((a, b) => {
+                                    const rankA = initialRankings.find(r => r.userId === a.userId)?.rank ?? Infinity
+                                    const rankB = initialRankings.find(r => r.userId === b.userId)?.rank ?? Infinity
+                                    return rankA - rankB
+                                }).map((u: RoomUserWithReadyStatus) => {
                                     const ranking = initialRankings.find(r => r.userId === u.userId)
                                     // ランキングが見つからない場合は未プレイ扱い
                                     const rankDisplay = ranking ? `世界順位:${ranking.rank}位 ${Math.floor(ranking.points)}pt` : '世界ランキング: 最下位 0pt'
