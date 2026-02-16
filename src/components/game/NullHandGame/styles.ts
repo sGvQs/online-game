@@ -164,6 +164,13 @@ export const nullHandGame = tv({
             'tracking-wider',
         ],
 
+        rankingText: [
+            'mr-3',
+            'text-yellow-400',
+            'font-mono',
+            'text-base',
+        ],
+
         // ゲーム画面グリッド
         gameGrid: [
             'grid',

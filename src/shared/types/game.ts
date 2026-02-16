@@ -145,5 +145,16 @@ export type JankenPhase = 'TITLE' | 'SETUP' | 'SHOWCASE' | 'FINAL_DECISION' | 'B
 export type HandType = 'ROCK' | 'SCISSORS' | 'PAPER';
 
 /** 嘘の対象 */
+// ... existing types
 export type FakeTarget = 'NONE' | 'INITIAL_HAND' | 'CHANGE_RATE' | 'FAVORITE_HAND';
+
+export type UserRanking = {
+    userId: string
+    name: string
+    wins: number
+    totalGames: number
+    winRate: number
+    points: number
+    rank: number
+}
 

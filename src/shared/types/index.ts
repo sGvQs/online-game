@@ -50,5 +50,6 @@ export type {
     JankenPhase,
     HandType,
     FakeTarget,
+    UserRanking,
 } from './game';
 

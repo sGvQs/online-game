@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { getCurrentUser } from '@/server/actions'
 import { getRoomWithReadyStatus } from '@/server/actions/room'
+import { getNullHandRankings } from '@/server/actions/game/rankingActions'
 import { NullHandGame } from '@/components/game/NullHandGame'
 import { RoomUserWithReadyStatus } from '@/shared/types'
 
@@ -26,6 +27,10 @@ export default async function NullHandPage({ params }: { params: { roomId: strin
         redirect(`/room/${roomId}`)
     }
 
+    // ランキング情報を取得
+    const userIds = room.users.map((u: RoomUserWithReadyStatus) => u.userId)
+    const initialRankings = await getNullHandRankings(userIds)
+
     // ユーザーがホストかチェック
     const isHost = room.createdBy === currentUser.user.id
 
@@ -37,6 +42,7 @@ export default async function NullHandPage({ params }: { params: { roomId: strin
                 roomId={roomId}
                 initialMatchId={room.currentMatchId}
                 currentUserId={currentUser.user.id}
+                initialRankings={initialRankings}
             />
         </div>
     )

@@ -5,8 +5,8 @@ import { useGameRoom } from '@/hooks/useGameRoom'
 import { returnToRoom } from '@/server/actions/room'
 import { nullHandGame } from './styles'
 import { Hand3D } from './Hand3D'
-import { RoomWithUsersAndReadyStatus, HandType, FakeTarget, RoomUserWithReadyStatus, FakeDetails } from '@/shared/types'
-import { useState } from 'react'
+import { RoomWithUsersAndReadyStatus, HandType, FakeTarget, RoomUserWithReadyStatus, FakeDetails, UserRanking } from '@/shared/types'
+import { useState, useEffect } from 'react'
 import { cn } from '@/lib/utils'
 
 // ヘルパー関数: HandTypeを絵文字付きカタカナ表記に変換
@@ -25,6 +25,7 @@ interface NullHandGameProps {
     roomId: string
     initialMatchId: string | null
     currentUserId: string
+    initialRankings?: UserRanking[]
 }
 
 export function NullHandGame({
@@ -33,6 +34,7 @@ export function NullHandGame({
     roomId,
     initialMatchId,
     currentUserId,
+    initialRankings = [],
 }: NullHandGameProps) {
     const styles = nullHandGame()
 
@@ -58,6 +60,19 @@ export function NullHandGame({
         isCurrentHost,
         error,
     } = useNullHand({ roomId, isHost, initialMatchId, currentUserId })
+
+    // タイトル画面用の手のローテーション
+    const [titleHand, setTitleHand] = useState<HandType>('ROCK')
+    useEffect(() => {
+        if (phase !== 'TITLE') return
+        const hands: HandType[] = ['ROCK', 'SCISSORS', 'PAPER']
+        let index = 0
+        const interval = setInterval(() => {
+            index = (index + 1) % hands.length
+            setTitleHand(hands[index])
+        }, 3000)
+        return () => clearInterval(interval)
+    }, [phase])
 
     const [selectedHand, setSelectedHand] = useState<HandType | null>(null)
     const [selectedFake, setSelectedFake] = useState<FakeTarget>('NONE')
@@ -112,7 +127,7 @@ export function NullHandGame({
                         <div className="text-center">
                             <div className={styles.logo()}>NULL HAND</div>
                             <div className="w-64 h-64 mx-auto">
-                                <Hand3D handType="ROCK" revealed={true} size="medium" isRotating={true} />
+                                <Hand3D handType={titleHand} revealed={true} size="medium" isRotating={true} />
                             </div>
                         </div>
                     </div>
@@ -123,16 +138,27 @@ export function NullHandGame({
                             <p className={styles.subtitle()}>NULL HAND PLAY MEMBERS</p>
 
                             <div className={styles.playerListWrapper()}>
-                                {room.users.map((u: RoomUserWithReadyStatus) => (
-                                    <div key={u.id} className={styles.playerItem()}>
-                                        <span className={u.isReady ? 'text-[#44FFFF]' : 'text-gray-500'}>
-                                            {u.user?.name || '不明'}
-                                        </span>
-                                        <span className={u.isReady ? 'text-[#FF4444]' : 'text-gray-700'}>
-                                            {u.isReady ? 'READY' : 'WAITING'}
-                                        </span>
-                                    </div>
-                                ))}
+                                {room.users.map((u: RoomUserWithReadyStatus) => {
+                                    const ranking = initialRankings.find(r => r.userId === u.userId)
+                                    // ランキングが見つからない場合は未プレイ扱い
+                                    const rankDisplay = ranking ? `世界順位:${ranking.rank}位 ${Math.floor(ranking.points)}pt` : '世界ランキング: 最下位 0pt'
+
+                                    return (
+                                        <div key={u.id} className={styles.playerItem()}>
+                                            <div className="flex items-center">
+                                                <span className={styles.rankingText()}>
+                                                    {rankDisplay}
+                                                </span>
+                                                <span className={u.isReady ? 'text-[#44FFFF]' : 'text-gray-500'}>
+                                                    {u.user?.name || '不明'}
+                                                </span>
+                                            </div>
+                                            <span className={u.isReady ? 'text-[#FF4444]' : 'text-gray-700'}>
+                                                {u.isReady ? 'READY' : 'WAITING'}
+                                            </span>
+                                        </div>
+                                    )
+                                })}
                                 <div className="mt-4 text-right text-gray-400">
                                     {readyCount} / {totalUsers} READY
                                 </div>
