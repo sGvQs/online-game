@@ -51,6 +51,7 @@ export function NullHandGame({
         handleSetFinalHostHand,
         handleSetGuestHand,
         handleNextRound,
+        handleMarkNextRoundReady,
         handleFinish,
         isCurrentHost,
         error,
@@ -211,11 +212,12 @@ export function NullHandGame({
                         jankenEvent={jankenEvent}
                         currentScores={currentScores}
                         isProcessing={isProcessing}
-                        onNextRound={handleNextRound}
+                        onNextRound={handleMarkNextRoundReady}
                         hostName={hostName}
                         currentUserId={currentUserId}
                         isCurrentHost={isCurrentHost}
                         hostStats={hostStats}
+                        roomUsers={room.users}
                     />
                 )}
 

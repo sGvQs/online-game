@@ -25,5 +25,6 @@ export {
     getMatchScores,
     startNextTurn,
     finishJanken,
+    markNextRoundReady,
 } from './nullHandActions'
 

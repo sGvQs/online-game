@@ -14,6 +14,7 @@ import {
     getMatchScores,
     startNextTurn,
     finishJanken,
+    markNextRoundReady,
 } from '@/server/actions/game'
 import { resetAllReady } from '@/server/actions/room'
 import type {
@@ -59,6 +60,7 @@ export interface UseNullHandReturn {
     handleSetFinalHostHand: (hand: HandType) => Promise<void>
     handleSetGuestHand: (hand: HandType) => Promise<void>
     handleNextRound: () => Promise<void>
+    handleMarkNextRoundReady: () => Promise<void>
     handleFinish: () => Promise<void>
     isCurrentHost: boolean
     error: string | null
@@ -255,6 +257,23 @@ export function useNullHand({
     }, [jankenEvent, isProcessing, fetchJankenEvent])
 
     /**
+     * 次のラウンドへの準備完了をマーク
+     */
+    const handleMarkNextRoundReady = useCallback(async () => {
+        if (!jankenEvent || isProcessing) return
+
+        setIsProcessing(true)
+        try {
+            await markNextRoundReady(roomId, currentUserId, jankenEvent.matchId)
+        } catch (error) {
+            console.error('準備完了のマークに失敗:', error)
+            setError('準備完了の送信に失敗しました')
+        } finally {
+            setIsProcessing(false)
+        }
+    }, [jankenEvent, roomId, currentUserId, isProcessing])
+
+    /**
      * ゲーム終了 → タイトルに戻る
      */
     const handleFinish = useCallback(async () => {
@@ -422,6 +441,7 @@ export function useNullHand({
         handleSetFinalHostHand,
         handleSetGuestHand,
         handleNextRound,
+        handleMarkNextRoundReady,
         handleFinish,
         isCurrentHost,
         error,

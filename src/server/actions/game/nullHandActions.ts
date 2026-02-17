@@ -619,6 +619,43 @@ export async function getLatestJankenEvent(matchId: string): Promise<JankenEvent
 }
 
 /**
+ * 次のラウンドへの準備完了をマーク
+ * 全員準備完了したら次のターンを開始
+ */
+export async function markNextRoundReady(roomId: string, userId: string, matchId: string) {
+    // ユーザーのisReadyをtrueにする
+    await prisma.roomUser.update({
+        where: { roomId_userId: { roomId, userId } },
+        data: { isReady: true }
+    })
+
+    // 全員の準備完了状態を確認
+    const roomUsers = await prisma.roomUser.findMany({
+        where: { roomId }
+    })
+
+    const allReady = roomUsers.every(u => u.isReady)
+
+    if (allReady) {
+        // 全員準備完了なら次のターンへ（またはゲーム終了へ）
+        const event = await prisma.jankenEvent.findFirst({
+            where: { matchId },
+            orderBy: { turnNumber: 'desc' },
+        })
+
+        if (event) {
+            await startNextTurn(event.id)
+            // 全員のisReadyをリセット
+            await prisma.roomUser.updateMany({
+                where: { roomId },
+                data: { isReady: false }
+            })
+        }
+    }
+}
+
+
+/**
  * マッチの現在のスコアを取得
  */
 export async function getMatchScores(matchId: string): Promise<MatchScoreWithUser[]> {

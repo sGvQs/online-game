@@ -1,4 +1,4 @@
-import { HandType, JankenEventWithGuests, MatchScoreWithUser, HostStats, FakeTarget } from '@/shared/types'
+import { HandType, JankenEventWithGuests, MatchScoreWithUser, HostStats, FakeTarget, RoomUser } from '@/shared/types'
 import { Hand3D } from '../Hand3D'
 import { nullHandGame } from '../styles'
 import { cn } from '@/lib/utils'
@@ -11,11 +11,12 @@ interface ResultPhaseProps {
     jankenEvent: JankenEventWithGuests | null
     currentScores: MatchScoreWithUser[]
     isProcessing: boolean
-    onNextRound: () => void
+    onNextRound: () => Promise<void>
     hostName: string
     currentUserId: string
     isCurrentHost: boolean
     hostStats: HostStats | null
+    roomUsers: RoomUser[]
 }
 
 export function ResultPhase({
@@ -26,10 +27,16 @@ export function ResultPhase({
     hostName,
     currentUserId,
     isCurrentHost,
-    hostStats
+    hostStats,
+    roomUsers
 }: ResultPhaseProps) {
     const styles = nullHandGame()
     const [step, setStep] = useState<'RESULT' | 'REVEAL'>('RESULT')
+
+    const currentUser = roomUsers.find(u => u.userId === currentUserId)
+    const isReady = currentUser?.isReady ?? false
+    const readyCount = roomUsers.filter(u => u.isReady).length
+    const totalCount = roomUsers.length
 
     if (!jankenEvent) return null
 
@@ -217,9 +224,9 @@ export function ResultPhase({
                                     <button
                                         className={cn(styles.button(), styles.buttonPrimary())}
                                         onClick={onNextRound}
-                                        disabled={isProcessing}
+                                        disabled={isProcessing || isReady}
                                     >
-                                        次のラウンドへ
+                                        {isReady ? `待機中 (${readyCount}/${totalCount})` : '次のラウンドへ'}
                                     </button>
                                 </div>
                             </motion.div>
@@ -399,15 +406,15 @@ export function ResultPhase({
                                 <button
                                     className={cn(styles.button(), styles.buttonPrimary())}
                                     onClick={onNextRound}
-                                    disabled={isProcessing}
+                                    disabled={isProcessing || isReady}
                                 >
-                                    次のラウンドへ
+                                    {isReady ? `待機中 (${readyCount}/${totalCount})` : '次のラウンドへ'}
                                 </button>
                             </div>
                         </motion.div>
                     )}
                 </AnimatePresence>
-            </div>
+            </div >
         )
     }
 
