@@ -59,10 +59,47 @@ export function SetupPhase({
         if (!isCurrentHost) {
             return (
                 <div className={styles.mainArea()}>
-                    <div className="flex flex-col items-center justify-center h-full">
-                        <div className={styles.messageText()}>{hostName}の選択を待っています...</div>
-                        <div className="w-48 h-48 mt-8">
-                            <Hand3D handType={titleHand} revealed={true} size="medium" isRotating={true} />
+                    <div className="h-full flex flex-col p-4">
+                        <div className="text-[#44FFFF] font-black text-3xl mb-6 border-b-4 border-[#44FFFF] pb-2 tracking-widest uppercase">
+                            HOW TO PLAY
+                        </div>
+                        <div className="space-y-6 text-gray-200 flex-1 overflow-y-auto">
+                            <div className="flex gap-4 items-start">
+                                <div className="bg-[#44FFFF] text-black font-bold w-8 h-8 flex items-center justify-center rounded-sm shrink-0">1</div>
+                                <div>
+                                    <div className="text-[#44FFFF] font-bold text-lg mb-1">ホストの嘘を見破れ</div>
+                                    <p className="text-sm text-gray-400 leading-relaxed">
+                                        ホストは「公開する手」を設定し、<br />
+                                        その後「公開する手」「よく勝負する手」「変更する確率」の3つのデータを公開します。<br />
+                                        ただし、公開されるデータには必ず<span className="text-[#FF4444]">嘘</span>が混ざっています。
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="flex gap-4 items-start">
+                                <div className="bg-[#44FFFF] text-black font-bold w-8 h-8 flex items-center justify-center rounded-sm shrink-0">2</div>
+                                <div>
+                                    <div className="text-[#44FFFF] font-bold text-lg mb-1">勝つ手を予想せよ</div>
+                                    <p className="text-sm text-gray-400 leading-relaxed">
+                                        ホストの心理を読み、最終的に出す手に<span className="text-[#44FFFF] font-bold">勝てる手</span>を選んでください。<br />
+                                        「嘘」と設定された項目は、表示されている内容が事実とは異なります。<br />
+                                        <span className="text-gray-400 text-xs">
+                                            （例：「公開する手」が嘘の場合、表示されている手とは別の手が、本当の「公開する手」として設定されています）
+                                        </span>
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="flex gap-4 items-start">
+                                <div className="bg-[#44FFFF] text-black font-bold w-8 h-8 flex items-center justify-center rounded-sm shrink-0">3</div>
+                                <div>
+                                    <div className="text-[#44FFFF] font-bold text-lg mb-1">Null Hand</div>
+                                    <p className="text-sm text-gray-400 leading-relaxed">
+                                        プレイヤー： ホストに勝てば<span className="text-[#44FFFF] font-bold">1点</span>獲得<br />
+                                        ホスト： 全員に勝てば<span className="text-[#44FFFF] font-bold">3点</span>獲得<br />
+                                    </p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -324,8 +361,13 @@ export function SetupPhase({
 
                 {/* ゲスト用（今は待機中表示） */}
                 {!isCurrentHost && (
-                    <div className="text-gray-500 italic uppercase">
-                        WAITING FOR {hostName}...
+                    <div className="flex flex-col items-center justify-center p-6 bg-[#111] rounded border border-gray-800 animate-pulse h-full">
+                        <Hand3D handType={titleHand} revealed={true} size="small" isRotating={true} />
+                        <div className="text-[#44FFFF] font-bold text-lg mb-1 tracking-widest text-center mt-4">WAITING FOR</div>
+                        <div className="text-white font-black text-2xl tracking-widest text-center border-b-2 border-[#44FFFF] pb-1 w-full max-w-[200px] whitespace-nowrap overflow-hidden text-ellipsis">
+                            {hostName}
+                        </div>
+                        <div className="text-gray-500 text-xs mt-4 text-center">ホストが設定中です...</div>
                     </div>
                 )}
             </div>

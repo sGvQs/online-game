@@ -23,7 +23,7 @@ export function Hand3D({
     size = 'medium',
     isRotating = true,
 }: Hand3DProps) {
-    const canvasHeight = size === 'small' ? '150px' : size === 'large' ? '400px' : '250px'
+    const canvasHeight = size === 'small' ? '200px' : size === 'large' ? '400px' : '250px'
 
     return (
         <div style={{ width: '100%', height: canvasHeight, background: '#000000' }}>
