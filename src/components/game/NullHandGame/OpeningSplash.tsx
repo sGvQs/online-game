@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { HandType } from '@/shared/types'
 import { Hand3D } from './Hand3D'
 import { nullHandGame } from './styles'
+import { NullHandLogo } from './NullHandLogo'
 
 interface OpeningSplashProps {
     onComplete: () => void
@@ -56,16 +57,11 @@ export function OpeningSplash({ onComplete, phase, titleHand }: OpeningSplashPro
                     {/* 中央のロゴと手 */}
                     <div className="relative flex flex-col items-center">
                         <motion.div
+                            className={styles.visualBox()}
                             layoutId="hero-logo-container"
                             transition={{ duration: 0.8, ease: "easeInOut" }}
-                            className="bg-black border-[6px] border-[#FF4444] p-8 mb-12 relative flex flex-col items-center justify-center min-w-[500px] min-h-[350px]"
                         >
-                            <h1 className="text-6xl font-black text-white tracking-widest mb-4 drop-shadow-[4px_4px_0_rgba(255,0,0,0.5)] uppercase">
-                                NULL HAND
-                            </h1>
-                            <div className="w-64 h-64">
-                                <Hand3D handType={titleHand} revealed={true} size="medium" isRotating={true} />
-                            </div>
+                            <NullHandLogo titleHand={titleHand} />
                         </motion.div>
 
                         {/* プログレスバー */}

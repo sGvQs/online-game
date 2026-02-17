@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import { nullHandGame } from './styles'
 import { Hand3D } from './Hand3D'
 import { cn } from '@/lib/utils'
+import { NullHandLogo } from './NullHandLogo'
 
 interface TitleScreenProps {
     room: RoomWithUsersAndReadyStatus
@@ -69,18 +70,12 @@ export function TitleScreen({
                     </div>
                 </motion.div>
 
-                {/* 右上: ビジュアル・ロゴ */}
                 <motion.div
                     className={styles.visualBox()}
                     layoutId="hero-logo-container"
                     transition={{ duration: 0.8, ease: "easeInOut" }}
                 >
-                    <div className="text-center">
-                        <div className={styles.logo()}>NULL HAND</div>
-                        <div className="w-64 h-64 mx-auto">
-                            <Hand3D handType={titleHand} revealed={true} size="medium" isRotating={true} />
-                        </div>
-                    </div>
+                    <NullHandLogo titleHand={titleHand} />
                 </motion.div>
 
                 {/* 下部: インフォメーション */}
