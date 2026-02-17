@@ -130,7 +130,8 @@ export function useNullHand({
             }
 
             // SETUP フェーズなら統計取得（ゲストもホストのデータを見る）
-            if (eventPhase === 'SETUP' || eventPhase === 'SHOWCASE' || eventPhase === 'FINAL_DECISION') {
+            // BATTLE, RESULT フェーズでも表示などのために必要
+            if (eventPhase === 'SETUP' || eventPhase === 'SHOWCASE' || eventPhase === 'FINAL_DECISION' || eventPhase === 'BATTLE' || eventPhase === 'RESULT') {
                 const stats = await getHostStats(latest.currentHostId, latest.id)
                 setHostStats(stats)
             }
