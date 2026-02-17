@@ -5,6 +5,7 @@ import { useGameRoom } from '@/hooks/useGameRoom'
 import { returnToRoom } from '@/server/actions/room'
 import { RoomWithUsersAndReadyStatus, HandType, FakeTarget, FakeDetails, UserRanking } from '@/shared/types'
 import { useState, useEffect } from 'react'
+import { AnimatePresence } from 'framer-motion'
 import { TitleScreen } from './TitleScreen'
 import { GameLayout } from './GameLayout'
 import { SetupPhase } from './phases/SetupPhase'
@@ -13,6 +14,7 @@ import { FinalDecisionPhase } from './phases/FinalDecisionPhase'
 import { BattlePhase } from './phases/BattlePhase'
 import { ResultPhase } from './phases/ResultPhase'
 import { GameOverPhase } from './phases/GameOverPhase'
+import { OpeningSplash } from './OpeningSplash'
 
 interface NullHandGameProps {
     room: RoomWithUsersAndReadyStatus
@@ -116,107 +118,117 @@ export function NullHandGame({
     const hostName = hostUser?.user.name || 'HOST'
 
     // ============================================
-    // TITLE フェーズ
+    // OPENING SPLASH
     // ============================================
-    if (phase === 'TITLE') {
-        return (
-            <TitleScreen
-                room={room}
-                isHost={isHost}
-                isReady={isReady}
-                allUsersReady={allUsersReady}
-                titleHand={titleHand}
-                initialRankings={initialRankings}
-                onToggleReady={toggleReady}
-                onStartGame={handleStartGame}
-                onExit={handleClose}
-            />
-        )
-    }
+    const [showSplash, setShowSplash] = useState(true)
 
     // ============================================
-    // ゲーム中の共通UI + フェーズごとのコンテンツ
+    // RENDER (AnimatePresenceで遷移を管理)
     // ============================================
 
     return (
-        <GameLayout phase={phase} error={error} hostName={hostName}>
-            {phase === 'SETUP' && (
-                <SetupPhase
-                    isCurrentHost={isCurrentHost}
+        <AnimatePresence mode="popLayout">
+            {showSplash ? (
+                <OpeningSplash
+                    key="splash"
+                    onComplete={() => setShowSplash(false)}
+                    phase={phase}
                     titleHand={titleHand}
-                    hostStats={hostStats}
-                    selectedHand={selectedHand}
-                    selectedFake={selectedFake}
-                    fakeDetails={fakeDetails}
-                    isProcessing={isProcessing}
-                    onSelectHand={setSelectedHand}
-                    onSelectFake={setSelectedFake}
-                    onUpdateFakeDetails={setFakeDetails}
-                    onSubmit={handleSetupSubmit}
-                    hostName={hostName}
-                    onReselectHand={() => setSelectedHand(null)}
                 />
-            )}
-
-            {phase === 'SHOWCASE' && (
-                <ShowcasePhase
-                    jankenEvent={jankenEvent}
-                    hostStats={hostStats}
-                    isCurrentHost={isCurrentHost}
-                    isProcessing={isProcessing}
-                    onConfirm={handleConfirmShowcase}
-                    hostName={hostName}
-                    currentUserId={currentUserId}
-                />
-            )}
-
-            {phase === 'FINAL_DECISION' && (
-                <FinalDecisionPhase
-                    jankenEvent={jankenEvent}
-                    hostStats={hostStats}
-                    isCurrentHost={isCurrentHost}
-                    selectedHand={selectedHand}
-                    isProcessing={isProcessing}
-                    onSelectHand={setSelectedHand}
-                    onSubmit={() => selectedHand && handleSetFinalHostHand(selectedHand)}
-                    hostName={hostName}
-                />
-            )}
-
-            {phase === 'BATTLE' && (
-                <BattlePhase
-                    jankenEvent={jankenEvent}
-                    hostStats={hostStats}
-                    isCurrentHost={isCurrentHost}
-                    selectedHand={selectedHand}
-                    isProcessing={isProcessing}
-                    onSelectHand={setSelectedHand}
-                    onSubmit={() => selectedHand && handleSetGuestHand(selectedHand)}
-                    hostName={hostName}
-                />
-            )}
-
-            {phase === 'RESULT' && (
-                <ResultPhase
-                    jankenEvent={jankenEvent}
-                    currentScores={currentScores}
-                    isProcessing={isProcessing}
-                    onNextRound={handleNextRound}
-                    hostName={hostName}
-                    currentUserId={currentUserId}
-                    isCurrentHost={isCurrentHost}
-                />
-            )}
-
-            {phase === 'GAME_OVER' && (
-                <GameOverPhase
-                    currentUserId={currentUserId}
-                    newRankings={newRankings}
+            ) : phase === 'TITLE' ? (
+                <TitleScreen
+                    key="title"
+                    room={room}
+                    isHost={isHost}
+                    isReady={isReady}
+                    allUsersReady={allUsersReady}
+                    titleHand={titleHand}
                     initialRankings={initialRankings}
-                    currentScores={currentScores}
-                    onFinish={handleFinish}
+                    onToggleReady={toggleReady}
+                    onStartGame={handleStartGame}
+                    onExit={handleClose}
                 />
+            ) : (
+                <GameLayout key="game" phase={phase} error={error} hostName={hostName}>
+                    {phase === 'SETUP' && (
+                        <SetupPhase
+                            isCurrentHost={isCurrentHost}
+                            titleHand={titleHand}
+                            hostStats={hostStats}
+                            selectedHand={selectedHand}
+                            selectedFake={selectedFake}
+                            fakeDetails={fakeDetails}
+                            isProcessing={isProcessing}
+                            onSelectHand={setSelectedHand}
+                            onSelectFake={setSelectedFake}
+                            onUpdateFakeDetails={setFakeDetails}
+                            onSubmit={handleSetupSubmit}
+                            hostName={hostName}
+                            onReselectHand={() => setSelectedHand(null)}
+                        />
+                    )}
+
+                    {phase === 'SHOWCASE' && (
+                        <ShowcasePhase
+                            jankenEvent={jankenEvent}
+                            hostStats={hostStats}
+                            isCurrentHost={isCurrentHost}
+                            isProcessing={isProcessing}
+                            onConfirm={handleConfirmShowcase}
+                            hostName={hostName}
+                            currentUserId={currentUserId}
+                        />
+                    )}
+
+                    {phase === 'FINAL_DECISION' && (
+                        <FinalDecisionPhase
+                            jankenEvent={jankenEvent}
+                            hostStats={hostStats}
+                            isCurrentHost={isCurrentHost}
+                            selectedHand={selectedHand}
+                            isProcessing={isProcessing}
+                            onSelectHand={setSelectedHand}
+                            onSubmit={() => selectedHand && handleSetFinalHostHand(selectedHand)}
+                            hostName={hostName}
+                        />
+                    )}
+
+                    {phase === 'BATTLE' && (
+                        <BattlePhase
+                            jankenEvent={jankenEvent}
+                            hostStats={hostStats}
+                            isCurrentHost={isCurrentHost}
+                            selectedHand={selectedHand}
+                            isProcessing={isProcessing}
+                            onSelectHand={setSelectedHand}
+                            onSubmit={() => selectedHand && handleSetGuestHand(selectedHand)}
+                            hostName={hostName}
+                        />
+                    )}
+
+                    {phase === 'RESULT' && (
+                        <ResultPhase
+                            jankenEvent={jankenEvent}
+                            currentScores={currentScores}
+                            isProcessing={isProcessing}
+                            onNextRound={handleNextRound}
+                            hostName={hostName}
+                            currentUserId={currentUserId}
+                            isCurrentHost={isCurrentHost}
+                        />
+                    )}
+
+                    {phase === 'GAME_OVER' && (
+                        <GameOverPhase
+                            currentUserId={currentUserId}
+                            newRankings={newRankings}
+                            initialRankings={initialRankings}
+                            currentScores={currentScores}
+                            onFinish={handleFinish}
+                        />
+                    )}
+                </GameLayout>
             )}
-        </GameLayout>
+        </AnimatePresence>
     )
 }

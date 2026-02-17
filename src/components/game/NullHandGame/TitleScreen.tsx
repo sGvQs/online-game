@@ -1,4 +1,5 @@
 import { RoomWithUsersAndReadyStatus, UserRanking, HandType, RoomUserWithReadyStatus } from '@/shared/types'
+import { motion } from 'framer-motion'
 import { nullHandGame } from './styles'
 import { Hand3D } from './Hand3D'
 import { cn } from '@/lib/utils'
@@ -35,7 +36,12 @@ export function TitleScreen({
         <div className={styles.container()}>
             <div className={styles.titleGrid()}>
                 {/* 左上: メニュー */}
-                <div className={styles.menuBox()}>
+                <motion.div
+                    className={styles.menuBox()}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.8, duration: 0.5 }}
+                >
                     <div
                         className={cn(
                             styles.menuItem(),
@@ -61,20 +67,29 @@ export function TitleScreen({
                     <div className={styles.menuItem()} onClick={onExit}>
                         EXIT
                     </div>
-                </div>
+                </motion.div>
 
                 {/* 右上: ビジュアル・ロゴ */}
-                <div className={styles.visualBox()}>
+                <motion.div
+                    className={styles.visualBox()}
+                    layoutId="hero-logo-container"
+                    transition={{ duration: 0.8, ease: "easeInOut" }}
+                >
                     <div className="text-center">
                         <div className={styles.logo()}>NULL HAND</div>
                         <div className="w-64 h-64 mx-auto">
                             <Hand3D handType={titleHand} revealed={true} size="medium" isRotating={true} />
                         </div>
                     </div>
-                </div>
+                </motion.div>
 
                 {/* 下部: インフォメーション */}
-                <div className={styles.infoBox()}>
+                <motion.div
+                    className={styles.infoBox()}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 1.0, duration: 0.5 }}
+                >
                     <div className='w-full'>
                         <p className={styles.subtitle()}>NULL HAND PLAY MEMBERS</p>
 
@@ -109,7 +124,7 @@ export function TitleScreen({
                             </div>
                         </div>
                     </div>
-                </div>
+                </motion.div>
             </div>
         </div>
     )
