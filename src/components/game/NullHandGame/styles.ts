@@ -74,6 +74,18 @@ export const nullHandGame = tv({
             'w-full', // Ensure it fills container
         ],
 
+        noBorderVisualBox: [
+            'bg-black',
+            'flex',
+            'items-center',
+            'justify-center',
+            'min-h-[350px]', // 300 -> 350 to match splash
+            'p-8',
+            'relative',
+            'overflow-hidden',
+            'w-full', // Ensure it fills container
+        ],
+
         // 下部エリア（インフォメーション）
         infoBox: [
             'col-span-1 md:col-span-2',

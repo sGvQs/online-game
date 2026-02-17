@@ -41,7 +41,7 @@ export function TitleScreen({
                     className={styles.menuBox()}
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.8, duration: 0.5 }}
+                    transition={{ delay: 0.8, duration: 0.8 }}
                 >
                     <div
                         className={cn(
@@ -71,8 +71,11 @@ export function TitleScreen({
                 </motion.div>
 
                 <motion.div
+                    layout
+                    layoutId="main-box"
                     className={styles.visualBox()}
-                    layoutId="hero-logo-container"
+                    initial={{ borderWidth: "0px", borderColor: "rgba(255, 64, 64, 0)" }} // 最初は0
+                    animate={{ borderWidth: "6px", borderColor: "#FF4444" }}
                     transition={{ duration: 0.8, ease: "easeInOut" }}
                 >
                     <NullHandLogo titleHand={titleHand} />
@@ -83,7 +86,7 @@ export function TitleScreen({
                     className={styles.infoBox()}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 1.0, duration: 0.5 }}
+                    transition={{ delay: 1.6, duration: 0.8 }}
                 >
                     <div className='w-full'>
                         <p className={styles.subtitle()}>NULL HAND PLAY MEMBERS</p>

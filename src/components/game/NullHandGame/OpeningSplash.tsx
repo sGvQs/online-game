@@ -7,11 +7,10 @@ import { NullHandLogo } from './NullHandLogo'
 
 interface OpeningSplashProps {
     onComplete: () => void
-    phase: string
     titleHand: HandType
 }
 
-export function OpeningSplash({ onComplete, phase, titleHand }: OpeningSplashProps) {
+export function OpeningSplash({ onComplete, titleHand }: OpeningSplashProps) {
     const [progress, setProgress] = useState(0)
     const [isTransitioning, setIsTransitioning] = useState(false)
     const styles = nullHandGame()
@@ -41,47 +40,45 @@ export function OpeningSplash({ onComplete, phase, titleHand }: OpeningSplashPro
             // トランジション完了後の処理
             const timer = setTimeout(() => {
                 onComplete()
-            }, 500) // プログレスバー完了後、少し待って遷移 (0.5s)
+            }, 800) // プログレスバー完了後、少し待って遷移 (0.8s)
             return () => clearTimeout(timer)
         }
     }, [isTransitioning, onComplete])
 
     return (
-        <AnimatePresence>
-            {!isTransitioning && (
+        <motion.div
+            className="fixed inset-0 z-50 bg-black flex flex-col items-center justify-center font-sans"
+            transition={{ duration: 1 }}
+        >
+            {/* 中央のロゴと手 */}
+            <div className="relative flex flex-col items-center w-full max-w-[564px]">
                 <motion.div
-                    className="fixed inset-0 z-50 bg-black flex flex-col items-center justify-center font-sans"
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 1 }}
+                    className={styles.noBorderVisualBox()}
+                    layoutId="main-box"
                 >
-                    {/* 中央のロゴと手 */}
-                    <div className="relative flex flex-col items-center w-full max-w-[564px]">
-                        <motion.div
-                            className={styles.visualBox()}
-                            layoutId="hero-logo-container"
-                            transition={{ duration: 0.8, ease: "easeInOut" }}
-                        >
-                            <NullHandLogo titleHand={titleHand} />
-                        </motion.div>
+                    <NullHandLogo titleHand={titleHand} />
+                </motion.div>
 
-                        {/* プログレスバー */}
-                        <div className="w-64 space-y-2 mt-10">
-                            <div className="flex justify-between text-xs font-bold tracking-widest text-[#44FFFF]">
-                                <span>LOADING SYSTEM...</span>
-                                <span>{Math.round(progress)}%</span>
-                            </div>
-                            <div className="h-1 bg-gray-900 w-full overflow-hidden">
-                                <motion.div
-                                    className="h-full bg-[#44FFFF] shadow-[0_0_10px_#44FFFF]"
-                                    style={{ width: `${progress}%` }}
-                                />
-                            </div>
-                        </div>
+                {/* プログレスバー */}
+                <motion.div className="w-64 space-y-2"
+                    exit={{ opacity: 0 }}
+                    animate={{ opacity: isTransitioning ? 0 : 1 }}
+                    transition={{ duration: 0.8, ease: "easeInOut" }}>
+                    <div className="flex justify-between text-xs font-bold tracking-widest text-[#44FFFF]">
+                        <span>LOADING SYSTEM...</span>
+                        <span>{Math.round(progress)}%</span>
+                    </div>
+                    <div className="h-1 bg-gray-900 w-full overflow-hidden">
+                        <motion.div
+                            className="h-full bg-[#44FFFF] shadow-[0_0_10px_#44FFFF]"
+                            style={{ width: `${progress}%` }}
+                        />
                     </div>
                 </motion.div>
-            )}
+            </div>
+        </motion.div>
 
-            {/* Manual animation removed in favor of layoutId transition */}
-        </AnimatePresence>
+
+
     )
 }
