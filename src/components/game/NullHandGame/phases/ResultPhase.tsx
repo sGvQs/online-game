@@ -44,7 +44,6 @@ export function ResultPhase({
 
             return (
                 <div className={styles.mainArea()}>
-                    <h2 className={styles.messageText()}>結果発表</h2>
                     <div className="flex justify-center items-center gap-8 mt-8">
                         {/* ホスト */}
                         <div className="flex flex-col items-center">
@@ -197,7 +196,6 @@ export function ResultPhase({
 
         return (
             <div className={styles.mainArea()}>
-                <h2 className={styles.messageText()}>{hostName}の最終手</h2>
                 <div className={styles.vsContainer()}>
                     <div className="flex flex-col items-center">
                         <div className="text-[#FF4444] font-bold text-center mb-2 tracking-widest">{hostName}</div>
