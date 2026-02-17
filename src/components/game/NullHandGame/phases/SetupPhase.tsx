@@ -45,6 +45,13 @@ export function SetupPhase({
             onSelectFake('NONE')
         } else {
             onSelectFake(value)
+            // CHANGE_RATEが選択された場合、初期値をhostStats.realChangeRateに設定（未設定の場合）
+            if (value === 'CHANGE_RATE' && fakeDetails.fakeChangeRateValue === undefined && hostStats) {
+                onUpdateFakeDetails({
+                    ...fakeDetails,
+                    fakeChangeRateValue: hostStats.realChangeRate
+                })
+            }
         }
     }
 
@@ -140,9 +147,9 @@ export function SetupPhase({
                             <div className="flex-1 flex flex-col justify-center">
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                                     {([
-                                        { value: 'INITIAL_HAND', label: '選択した手', icon: '✋' },
+                                        { value: 'INITIAL_HAND', label: '選択した手', icon: '🖐️' },
                                         { value: 'CHANGE_RATE', label: '手を変える確率', icon: '📊' },
-                                        { value: 'FAVORITE_HAND', label: '選ぶ確率の高い手', icon: '⭐' },
+                                        { value: 'FAVORITE_HAND', label: '選ぶ確率の高い手', icon: '🎲' },
                                     ] as const).map((option) => (
                                         <button
                                             key={option.value}
@@ -180,21 +187,23 @@ export function SetupPhase({
                                                 <div className="text-center space-y-4">
                                                     <div className="text-[#44FFFF] font-bold mb-4 uppercase tracking-widest">偽装として表示する手を選択</div>
                                                     <div className="flex justify-center gap-4">
-                                                        {(['ROCK', 'SCISSORS', 'PAPER'] as const).map(hand => (
-                                                            <button
-                                                                key={hand}
-                                                                onClick={() => onUpdateFakeDetails({ ...fakeDetails, fakeHandValue: hand })}
-                                                                className={cn(
-                                                                    "w-24 h-24 border-2 flex flex-col items-center justify-center gap-2 transition-all duration-200",
-                                                                    fakeDetails.fakeHandValue === hand
-                                                                        ? "border-[#FF4444] bg-[#FF4444]/10 text-white shadow-[0_0_15px_rgba(255,68,68,0.3)]"
-                                                                        : "border-gray-700 text-gray-500 hover:border-gray-500 hover:text-gray-300"
-                                                                )}
-                                                            >
-                                                                <span className="text-3xl">{hand === 'ROCK' ? '✊' : hand === 'SCISSORS' ? '✌️' : '✋'}</span>
-                                                                <span className="text-xs font-bold">{hand}</span>
-                                                            </button>
-                                                        ))}
+                                                        {(['ROCK', 'SCISSORS', 'PAPER'] as const)
+                                                            .filter(h => h !== selectedHand)
+                                                            .map(hand => (
+                                                                <button
+                                                                    key={hand}
+                                                                    onClick={() => onUpdateFakeDetails({ ...fakeDetails, fakeHandValue: hand })}
+                                                                    className={cn(
+                                                                        "w-24 h-24 border-2 flex flex-col items-center justify-center gap-2 transition-all duration-200",
+                                                                        fakeDetails.fakeHandValue === hand
+                                                                            ? "border-[#FF4444] bg-[#FF4444]/10 text-white shadow-[0_0_15px_rgba(255,68,68,0.3)]"
+                                                                            : "border-gray-700 text-gray-500 hover:border-gray-500 hover:text-gray-300"
+                                                                    )}
+                                                                >
+                                                                    <span className="text-3xl">{hand === 'ROCK' ? '✊' : hand === 'SCISSORS' ? '✌️' : '✋'}</span>
+                                                                    <span className="text-xs font-bold">{hand}</span>
+                                                                </button>
+                                                            ))}
                                                     </div>
                                                 </div>
                                             )}
@@ -229,21 +238,23 @@ export function SetupPhase({
                                                 <div className="text-center space-y-4">
                                                     <div className="text-[#44FFFF] font-bold mb-4 uppercase tracking-widest">偽装として表示する「よく出す手」</div>
                                                     <div className="flex justify-center gap-4">
-                                                        {(['ROCK', 'SCISSORS', 'PAPER'] as const).map(hand => (
-                                                            <button
-                                                                key={hand}
-                                                                onClick={() => onUpdateFakeDetails({ ...fakeDetails, fakeFavoriteHandValue: hand })}
-                                                                className={cn(
-                                                                    "w-24 h-24 border-2 flex flex-col items-center justify-center gap-2 transition-all duration-200",
-                                                                    fakeDetails.fakeFavoriteHandValue === hand
-                                                                        ? "border-[#FF4444] bg-[#FF4444]/10 text-white shadow-[0_0_15px_rgba(255,68,68,0.3)]"
-                                                                        : "border-gray-700 text-gray-500 hover:border-gray-500 hover:text-gray-300"
-                                                                )}
-                                                            >
-                                                                <span className="text-3xl">{hand === 'ROCK' ? '✊' : hand === 'SCISSORS' ? '✌️' : '✋'}</span>
-                                                                <span className="text-xs font-bold">{hand}</span>
-                                                            </button>
-                                                        ))}
+                                                        {(['ROCK', 'SCISSORS', 'PAPER'] as const)
+                                                            .filter(h => h !== hostStats?.realFavoriteHand)
+                                                            .map(hand => (
+                                                                <button
+                                                                    key={hand}
+                                                                    onClick={() => onUpdateFakeDetails({ ...fakeDetails, fakeFavoriteHandValue: hand })}
+                                                                    className={cn(
+                                                                        "w-24 h-24 border-2 flex flex-col items-center justify-center gap-2 transition-all duration-200",
+                                                                        fakeDetails.fakeFavoriteHandValue === hand
+                                                                            ? "border-[#FF4444] bg-[#FF4444]/10 text-white shadow-[0_0_15px_rgba(255,68,68,0.3)]"
+                                                                            : "border-gray-700 text-gray-500 hover:border-gray-500 hover:text-gray-300"
+                                                                    )}
+                                                                >
+                                                                    <span className="text-3xl">{hand === 'ROCK' ? '✊' : hand === 'SCISSORS' ? '✌️' : '✋'}</span>
+                                                                    <span className="text-xs font-bold">{hand}</span>
+                                                                </button>
+                                                            ))}
                                                     </div>
                                                 </div>
                                             )}
