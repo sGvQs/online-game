@@ -134,7 +134,7 @@ export function ResultPhase({
                             >
                                 <div className="text-center mb-6">
                                     <h3 className="text-[#FF4444] font-black text-2xl tracking-[0.2em] uppercase border-b-2 border-[#FF4444] inline-block pb-1">
-                                        TRUTH REVEAL
+                                        HOST LIED ABOUT
                                     </h3>
                                     <p className="text-gray-500 text-sm mt-2">ホストが仕掛けた「嘘」のおさらい</p>
                                 </div>
@@ -149,39 +149,59 @@ export function ResultPhase({
                                             LIE DETECTED
                                         </div>
 
-                                        <div className="text-center mb-6">
-                                            <div className="text-gray-400 text-xs uppercase mb-1">嘘をついていた項目</div>
-                                            <div className="text-[#44FFFF] font-bold text-xl">
-                                                {jankenEvent.fakeTarget === 'INITIAL_HAND' && '最初に公開した手'}
-                                                {jankenEvent.fakeTarget === 'CHANGE_RATE' && '手を変える確率'}
-                                                {jankenEvent.fakeTarget === 'FAVORITE_HAND' && '選ぶ確率の高い手'}
+                                        <div className="flex flex-col gap-4">
+                                            {/* 1. 最初に公開した手 */}
+                                            <div className={cn("p-3 rounded-lg border", jankenEvent.fakeTarget === 'INITIAL_HAND' ? "bg-[#1a1a1a] border-[#FF4444]" : "bg-black/20 border-gray-800")}>
+                                                <div className="text-xs text-gray-500 mb-1">最初に公開した手</div>
+                                                {jankenEvent.fakeTarget === 'INITIAL_HAND' ? (
+                                                    <div className="flex items-center justify-center gap-4">
+                                                        <div className="text-gray-500 line-through text-lg">{getHandDisplayWithEmoji(jankenEvent.fakeHandValue as HandType)}</div>
+                                                        <div className="text-[#FF4444] text-sm">→</div>
+                                                        <div className="text-[#FF4444] font-bold text-xl">{getHandDisplayWithEmoji(jankenEvent.initialHand as HandType)}</div>
+                                                        <div className="text-[#FF4444] text-[10px] font-bold ml-2 px-1.5 py-0.5 border border-[#FF4444] rounded">LIE</div>
+                                                    </div>
+                                                ) : (
+                                                    <div className="flex items-center justify-center gap-2">
+                                                        <div className="text-white font-bold text-lg">{getHandDisplayWithEmoji(jankenEvent.initialHand as HandType)}</div>
+                                                        <div className="text-gray-600 text-[10px] ml-2 px-1.5 py-0.5 border border-gray-700 rounded">TRUE</div>
+                                                    </div>
+                                                )}
                                             </div>
-                                        </div>
 
-                                        <div className="flex items-center justify-center gap-8">
-                                            {/* 嘘の情報 */}
-                                            <div className="flex flex-col items-center opacity-70 grayscale">
-                                                <div className="text-[#FF4444] font-bold text-sm mb-2 uppercase line-through">SHOWN (LIE)</div>
-                                                <div className="font-bold text-2xl text-white">
-                                                    {jankenEvent.fakeTarget === 'INITIAL_HAND' && getHandDisplayWithEmoji(jankenEvent.fakeHandValue as HandType)}
-                                                    {jankenEvent.fakeTarget === 'CHANGE_RATE' && `${jankenEvent.fakeChangeRateValue}%`}
-                                                    {jankenEvent.fakeTarget === 'FAVORITE_HAND' && getHandDisplayWithEmoji(jankenEvent.fakeFavoriteHandValue as HandType)}
-                                                </div>
+                                            {/* 2. 手を変える確率 */}
+                                            <div className={cn("p-3 rounded-lg border", jankenEvent.fakeTarget === 'CHANGE_RATE' ? "bg-[#1a1a1a] border-[#FF4444]" : "bg-black/20 border-gray-800")}>
+                                                <div className="text-xs text-gray-500 mb-1">手を変える確率</div>
+                                                {jankenEvent.fakeTarget === 'CHANGE_RATE' ? (
+                                                    <div className="flex items-center justify-center gap-4">
+                                                        <div className="text-gray-500 line-through text-lg">{jankenEvent.fakeChangeRateValue}%</div>
+                                                        <div className="text-[#FF4444] text-sm">→</div>
+                                                        <div className="text-[#FF4444] font-bold text-xl">{hostStats ? `${hostStats.realChangeRate}%` : '?'}</div>
+                                                        <div className="text-[#FF4444] text-[10px] font-bold ml-2 px-1.5 py-0.5 border border-[#FF4444] rounded">LIE</div>
+                                                    </div>
+                                                ) : (
+                                                    <div className="flex items-center justify-center gap-2">
+                                                        <div className="text-white font-bold text-lg">{hostStats ? `${hostStats.realChangeRate}%` : '?'}</div>
+                                                        <div className="text-gray-600 text-[10px] ml-2 px-1.5 py-0.5 border border-gray-700 rounded">TRUE</div>
+                                                    </div>
+                                                )}
                                             </div>
 
-                                            <div className="text-gray-600 text-2xl">➔</div>
-
-                                            {/* 真実の情報 */}
-                                            <div className="flex flex-col items-center">
-                                                <div className="text-[#44FFFF] font-bold text-sm mb-2 uppercase">REAL (TRUTH)</div>
-                                                <div className="font-bold text-3xl text-white drop-shadow-[0_0_10px_rgba(68,255,255,0.5)]">
-                                                    {(() => {
-                                                        if (jankenEvent.fakeTarget === 'INITIAL_HAND') return getHandDisplayWithEmoji(jankenEvent.initialHand as HandType)
-                                                        if (jankenEvent.fakeTarget === 'CHANGE_RATE' && hostStats) return `${hostStats.realChangeRate}%`
-                                                        if (jankenEvent.fakeTarget === 'FAVORITE_HAND' && hostStats) return getHandDisplayWithEmoji(hostStats.realFavoriteHand as HandType)
-                                                        return '?'
-                                                    })()}
-                                                </div>
+                                            {/* 3. 選ぶ確率の高い手 */}
+                                            <div className={cn("p-3 rounded-lg border", jankenEvent.fakeTarget === 'FAVORITE_HAND' ? "bg-[#1a1a1a] border-[#FF4444]" : "bg-black/20 border-gray-800")}>
+                                                <div className="text-xs text-gray-500 mb-1">選ぶ確率の高い手</div>
+                                                {jankenEvent.fakeTarget === 'FAVORITE_HAND' ? (
+                                                    <div className="flex items-center justify-center gap-4">
+                                                        <div className="text-gray-500 line-through text-lg">{getHandDisplayWithEmoji(jankenEvent.fakeFavoriteHandValue as HandType)}</div>
+                                                        <div className="text-[#FF4444] text-sm">→</div>
+                                                        <div className="text-[#FF4444] font-bold text-xl">{hostStats ? getHandDisplayWithEmoji(hostStats.realFavoriteHand as HandType) : '?'}</div>
+                                                        <div className="text-[#FF4444] text-[10px] font-bold ml-2 px-1.5 py-0.5 border border-[#FF4444] rounded">LIE</div>
+                                                    </div>
+                                                ) : (
+                                                    <div className="flex items-center justify-center gap-2">
+                                                        <div className="text-white font-bold text-lg">{hostStats ? getHandDisplayWithEmoji(hostStats.realFavoriteHand as HandType) : '?'}</div>
+                                                        <div className="text-gray-600 text-[10px] ml-2 px-1.5 py-0.5 border border-gray-700 rounded">TRUE</div>
+                                                    </div>
+                                                )}
                                             </div>
                                         </div>
                                     </div>
@@ -311,35 +331,59 @@ export function ResultPhase({
                                 </div>
                             ) : (
                                 <div className="max-w-md mx-auto bg-[#1a1a1a] border border-[#FF4444]/30 rounded-lg p-6">
-                                    <div className="text-center mb-4">
-                                        <div className="text-gray-400 text-xs uppercase mb-1">ターゲット</div>
-                                        <div className="text-[#FF4444] font-bold text-xl">
-                                            {jankenEvent.fakeTarget === 'INITIAL_HAND' && '最初に公開した手'}
-                                            {jankenEvent.fakeTarget === 'CHANGE_RATE' && '手を変える確率'}
-                                            {jankenEvent.fakeTarget === 'FAVORITE_HAND' && '選ぶ確率の高い手'}
+                                    <div className="flex flex-col gap-4">
+                                        {/* 1. 最初に公開した手 */}
+                                        <div className={cn("p-3 rounded-lg border", jankenEvent.fakeTarget === 'INITIAL_HAND' ? "bg-[#1a1a1a] border-[#FF4444]" : "bg-black/20 border-gray-800")}>
+                                            <div className="text-xs text-gray-500 mb-1">最初に公開した手</div>
+                                            {jankenEvent.fakeTarget === 'INITIAL_HAND' ? (
+                                                <div className="flex items-center justify-center gap-4">
+                                                    <div className="text-gray-500 line-through text-lg">{getHandDisplayWithEmoji(jankenEvent.fakeHandValue as HandType)}</div>
+                                                    <div className="text-[#FF4444] text-sm">→</div>
+                                                    <div className="text-[#FF4444] font-bold text-xl">{getHandDisplayWithEmoji(jankenEvent.initialHand as HandType)}</div>
+                                                    <div className="text-[#FF4444] text-[10px] font-bold ml-2 px-1.5 py-0.5 border border-[#FF4444] rounded">LIE</div>
+                                                </div>
+                                            ) : (
+                                                <div className="flex items-center justify-center gap-2">
+                                                    <div className="text-white font-bold text-lg">{getHandDisplayWithEmoji(jankenEvent.initialHand as HandType)}</div>
+                                                    <div className="text-gray-600 text-[10px] ml-2 px-1.5 py-0.5 border border-gray-700 rounded">TRUE</div>
+                                                </div>
+                                            )}
                                         </div>
-                                    </div>
 
-                                    <div className="flex justify-center gap-8 text-center">
-                                        <div>
-                                            <div className="text-xs text-gray-500 mb-1">嘘（公開）</div>
-                                            <div className="font-bold text-xl text-gray-300">
-                                                {jankenEvent.fakeTarget === 'INITIAL_HAND' && getHandDisplayWithEmoji(jankenEvent.fakeHandValue as HandType)}
-                                                {jankenEvent.fakeTarget === 'CHANGE_RATE' && `${jankenEvent.fakeChangeRateValue}%`}
-                                                {jankenEvent.fakeTarget === 'FAVORITE_HAND' && getHandDisplayWithEmoji(jankenEvent.fakeFavoriteHandValue as HandType)}
-                                            </div>
+                                        {/* 2. 手を変える確率 */}
+                                        <div className={cn("p-3 rounded-lg border", jankenEvent.fakeTarget === 'CHANGE_RATE' ? "bg-[#1a1a1a] border-[#FF4444]" : "bg-black/20 border-gray-800")}>
+                                            <div className="text-xs text-gray-500 mb-1">手を変える確率</div>
+                                            {jankenEvent.fakeTarget === 'CHANGE_RATE' ? (
+                                                <div className="flex items-center justify-center gap-4">
+                                                    <div className="text-gray-500 line-through text-lg">{jankenEvent.fakeChangeRateValue}%</div>
+                                                    <div className="text-[#FF4444] text-sm">→</div>
+                                                    <div className="text-[#FF4444] font-bold text-xl">{hostStats ? `${hostStats.realChangeRate}%` : '?'}</div>
+                                                    <div className="text-[#FF4444] text-[10px] font-bold ml-2 px-1.5 py-0.5 border border-[#FF4444] rounded">LIE</div>
+                                                </div>
+                                            ) : (
+                                                <div className="flex items-center justify-center gap-2">
+                                                    <div className="text-white font-bold text-lg">{hostStats ? `${hostStats.realChangeRate}%` : '?'}</div>
+                                                    <div className="text-gray-600 text-[10px] ml-2 px-1.5 py-0.5 border border-gray-700 rounded">TRUE</div>
+                                                </div>
+                                            )}
                                         </div>
-                                        <div className="text-gray-600">vs</div>
-                                        <div>
-                                            <div className="text-xs text-gray-500 mb-1">真実（隠蔽）</div>
-                                            <div className="font-bold text-xl text-[#FF4444]">
-                                                {(() => {
-                                                    if (jankenEvent.fakeTarget === 'INITIAL_HAND') return getHandDisplayWithEmoji(jankenEvent.initialHand as HandType)
-                                                    if (jankenEvent.fakeTarget === 'CHANGE_RATE' && hostStats) return `${hostStats.realChangeRate}%`
-                                                    if (jankenEvent.fakeTarget === 'FAVORITE_HAND' && hostStats) return getHandDisplayWithEmoji(hostStats.realFavoriteHand as HandType)
-                                                    return '?'
-                                                })()}
-                                            </div>
+
+                                        {/* 3. 選ぶ確率の高い手 */}
+                                        <div className={cn("p-3 rounded-lg border", jankenEvent.fakeTarget === 'FAVORITE_HAND' ? "bg-[#1a1a1a] border-[#FF4444]" : "bg-black/20 border-gray-800")}>
+                                            <div className="text-xs text-gray-500 mb-1">選ぶ確率の高い手</div>
+                                            {jankenEvent.fakeTarget === 'FAVORITE_HAND' ? (
+                                                <div className="flex items-center justify-center gap-4">
+                                                    <div className="text-gray-500 line-through text-lg">{getHandDisplayWithEmoji(jankenEvent.fakeFavoriteHandValue as HandType)}</div>
+                                                    <div className="text-[#FF4444] text-sm">→</div>
+                                                    <div className="text-[#FF4444] font-bold text-xl">{hostStats ? getHandDisplayWithEmoji(hostStats.realFavoriteHand as HandType) : '?'}</div>
+                                                    <div className="text-[#FF4444] text-[10px] font-bold ml-2 px-1.5 py-0.5 border border-[#FF4444] rounded">LIE</div>
+                                                </div>
+                                            ) : (
+                                                <div className="flex items-center justify-center gap-2">
+                                                    <div className="text-white font-bold text-lg">{hostStats ? getHandDisplayWithEmoji(hostStats.realFavoriteHand as HandType) : '?'}</div>
+                                                    <div className="text-gray-600 text-[10px] ml-2 px-1.5 py-0.5 border border-gray-700 rounded">TRUE</div>
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                 </div>
