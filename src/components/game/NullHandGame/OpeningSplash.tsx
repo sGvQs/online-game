@@ -50,12 +50,12 @@ export function OpeningSplash({ onComplete, phase, titleHand }: OpeningSplashPro
         <AnimatePresence>
             {!isTransitioning && (
                 <motion.div
-                    className="fixed inset-0 z-50 bg-black flex flex-col items-center justify-center"
+                    className="fixed inset-0 z-50 bg-black flex flex-col items-center justify-center font-sans"
                     exit={{ opacity: 0 }}
                     transition={{ duration: 1 }}
                 >
                     {/* 中央のロゴと手 */}
-                    <div className="relative flex flex-col items-center">
+                    <div className="relative flex flex-col items-center w-full max-w-[564px]">
                         <motion.div
                             className={styles.visualBox()}
                             layoutId="hero-logo-container"
@@ -65,7 +65,7 @@ export function OpeningSplash({ onComplete, phase, titleHand }: OpeningSplashPro
                         </motion.div>
 
                         {/* プログレスバー */}
-                        <div className="w-64 space-y-2">
+                        <div className="w-64 space-y-2 mt-10">
                             <div className="flex justify-between text-xs font-bold tracking-widest text-[#44FFFF]">
                                 <span>LOADING SYSTEM...</span>
                                 <span>{Math.round(progress)}%</span>

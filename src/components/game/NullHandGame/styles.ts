@@ -67,9 +67,11 @@ export const nullHandGame = tv({
             'flex',
             'items-center',
             'justify-center',
-            'min-h-[300px]',
+            'min-h-[350px]', // 300 -> 350 to match splash
+            'p-8',
             'relative',
             'overflow-hidden',
+            'w-full', // Ensure it fills container
         ],
 
         // 下部エリア（インフォメーション）
