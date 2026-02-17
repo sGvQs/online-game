@@ -74,10 +74,10 @@ export function ShowcasePhase({
             {hostStats && (
                 <div>
                     <div className={styles.statRow()}>
-                        <span className={styles.statLabel()}>よく出す手</span>
+                        <span className={styles.statLabel()}>よく勝負に出す手</span>
 
-                        {jankenEvent.fakeTarget === 'FAVORITE_HAND' && jankenEvent.fakeHandValue
-                            ? getHandDisplayWithEmoji(jankenEvent.fakeHandValue as HandType)
+                        {jankenEvent.fakeTarget === 'FAVORITE_HAND' && jankenEvent.fakeFavoriteHandValue
+                            ? getHandDisplayWithEmoji(jankenEvent.fakeFavoriteHandValue as HandType)
                             : getHandDisplayWithEmoji(hostStats.favoriteHand as HandType)}
                     </div>
                     <div className={styles.statRow()}>

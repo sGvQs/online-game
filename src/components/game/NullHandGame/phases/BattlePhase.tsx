@@ -162,7 +162,7 @@ export function BattlePhase({
 
                         {/* 嘘の情報 */}
                         <div className="mb-6">
-                            <div className="text-[#FF4444] font-bold mb-2 text-sm uppercase">偽装工作（未公開 🤫</div>
+                            <div className="text-[#FF4444] font-bold mb-2 text-sm uppercase">偽装工作</div>
                             <div className={styles.statRow()}>
                                 <span className={styles.statLabel()}>偽造した情報</span>
                                 <span className={styles.statValue()}>

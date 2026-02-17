@@ -39,9 +39,13 @@ export function TitleScreen({
                 {/* 左上: メニュー */}
                 <motion.div
                     className={styles.menuBox()}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 2, duration: 0.8 }}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{
+                        duration: 1,
+                        ease: "easeOut",
+                        delay: 1
+                    }}
                 >
                     <div
                         className={cn(
@@ -74,7 +78,7 @@ export function TitleScreen({
                     layout
                     layoutId="main-box"
                     className={styles.visualBox()}
-                    transition={{ duration: 1, ease: "easeInOut" }}
+                    transition={{ duration: 0.8, ease: "easeInOut" }}
                 >
                     <motion.div
                         className="absolute inset-0 z-0 border-[6px] border-[#FF4444]"
@@ -92,9 +96,13 @@ export function TitleScreen({
                 {/* 下部: インフォメーション */}
                 <motion.div
                     className={styles.infoBox()}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 3, duration: 0.8 }}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{
+                        duration: 1,
+                        ease: "easeOut",
+                        delay: 1
+                    }}
                 >
                     <div className='w-full'>
                         <p className={styles.subtitle()}>NULL HAND PLAY MEMBERS</p>
