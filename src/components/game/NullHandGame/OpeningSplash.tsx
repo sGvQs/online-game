@@ -53,7 +53,7 @@ export function OpeningSplash({ onComplete, titleHand }: OpeningSplashProps) {
             {/* 中央のロゴと手 */}
             <div className="relative flex flex-col items-center w-full max-w-[564px]">
                 <motion.div
-                    className={styles.noBorderVisualBox()}
+                    className={styles.visualBox()}
                     layoutId="main-box"
                 >
                     <NullHandLogo titleHand={titleHand} />

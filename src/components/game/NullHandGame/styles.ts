@@ -61,20 +61,6 @@ export const nullHandGame = tv({
 
         // 右上エリア（ロゴ・ビジュアル）
         visualBox: [
-            'border-[6px]',
-            'border-[#FF4444]',
-            'bg-black',
-            'flex',
-            'items-center',
-            'justify-center',
-            'min-h-[350px]', // 300 -> 350 to match splash
-            'p-8',
-            'relative',
-            'overflow-hidden',
-            'w-full', // Ensure it fills container
-        ],
-
-        noBorderVisualBox: [
             'bg-black',
             'flex',
             'items-center',
