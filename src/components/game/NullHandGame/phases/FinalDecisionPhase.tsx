@@ -44,12 +44,48 @@ export function FinalDecisionPhase({
                         最終決断: その手を変えるか、貫くか？
                     </p>
 
-                    <div className="flex-1 flex items-center justify-center">
+                    <div className="flex-1 flex flex-col items-center justify-center gap-8">
                         <HandSelectionGrid
                             selectedHand={selectedHand}
                             onSelectHand={onSelectHand}
                             isProcessing={isProcessing}
                         />
+
+                        {/* Strategy Tip - Moved to Main Area */}
+                        {hostStats && (
+                            <div className="w-full max-w-md bg-[#1a1a1a]/80 border border-[#44FFFF]/20 rounded-lg p-4 backdrop-blur-sm animate-in slide-in-from-bottom-4 duration-500 delay-200">
+                                <div className="flex items-center gap-2 mb-2 border-b border-[#44FFFF]/10 pb-2">
+                                    <span className="text-[#44FFFF] font-bold text-xs tracking-widest uppercase">🧠 Strategy Tip</span>
+                                    <span className="text-[10px] text-gray-500 ml-auto font-mono">ADVICE</span>
+                                </div>
+                                <p className="text-xs text-gray-300 leading-relaxed">
+                                    ゲストは上の「FAKE DATA」を見て予想しています。<br />
+                                    {jankenEvent.fakeTarget === 'CHANGE_RATE' &&
+                                        <>
+                                            「変える確率」を <span className="text-[#44FFFF] font-bold">{jankenEvent.fakeChangeRateValue ?? 0}%</span> と偽装中。
+                                            ゲストは<span className="text-white font-bold underline decoration-[#44FFFF]/50 decoration-2 underline-offset-2">{(jankenEvent.fakeChangeRateValue ?? 0) > 50 ? '変えてくる' : '変えない'}</span>と予想するでしょう。
+                                        </>
+                                    }
+                                    {jankenEvent.fakeTarget === 'INITIAL_HAND' &&
+                                        <>
+                                            「選択した手」を <span className="text-[#44FFFF] font-bold">{getHandDisplayWithEmoji(jankenEvent.fakeHandValue as HandType)}</span> と偽装中。
+                                            ゲストはこれに<span className="text-white font-bold underline decoration-[#44FFFF]/50 decoration-2 underline-offset-2">勝てる手</span>を出すかもしれません。
+                                        </>
+                                    }
+                                    {jankenEvent.fakeTarget === 'FAVORITE_HAND' &&
+                                        <>
+                                            「お気に入り」を <span className="text-[#44FFFF] font-bold">{getHandDisplayWithEmoji(jankenEvent.fakeFavoriteHandValue as HandType)}</span> と偽装中。
+                                            ゲストはこれに<span className="text-white font-bold underline decoration-[#44FFFF]/50 decoration-2 underline-offset-2">勝てる手</span>を出すかもしれません。
+                                        </>
+                                    }
+                                    {jankenEvent.fakeTarget === 'NONE' &&
+                                        <>
+                                            今回は正直に全ての情報を公開しています。<br />あえて<span className="text-white font-bold underline decoration-[#44FFFF]/50 decoration-2 underline-offset-2">裏の裏</span>をかくチャンスです。
+                                        </>
+                                    }
+                                </p>
+                            </div>
+                        )}
                     </div>
 
                     <div className="mt-8 mb-4 text-center">
@@ -143,20 +179,6 @@ export function FinalDecisionPhase({
                                             {hostStats.realChangeRate}%
                                         </div>
                                     </div>
-                                </div>
-
-                                <div className="bg-black/20 p-4 rounded text-xs text-gray-400 leading-relaxed border border-gray-800">
-                                    <span className="text-[#44FFFF] font-bold">Strategy Tip:</span><br />
-                                    ゲストは上の「FAKE DATA」を見て予想しています。<br />
-                                    {jankenEvent.fakeTarget === 'CHANGE_RATE' &&
-                                        `「変える確率」を ${jankenEvent.fakeChangeRateValue ?? 0}% と偽装しています。ゲストは${(jankenEvent.fakeChangeRateValue ?? 0) > 50 ? '変えてくる' : '変えない'}と予想するでしょう。`
-                                    }
-                                    {jankenEvent.fakeTarget === 'INITIAL_HAND' &&
-                                        `「初期手」を ${getHandDisplayWithEmoji(jankenEvent.fakeHandValue as HandType)} と偽装しています。ゲストはこれに対する勝ち手を出そうとするかもしれません。`
-                                    }
-                                    {jankenEvent.fakeTarget === 'NONE' &&
-                                        `今回は正直に全ての情報を公開しています。裏の裏をかくチャンスです。`
-                                    }
                                 </div>
                             </div>
                         )}
