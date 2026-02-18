@@ -1,9 +1,11 @@
 import { HandType, JankenEventWithGuests, HostStats } from '@/shared/types'
 import { Hand3D } from '../Hand3D'
 import { nullHandGame } from '../styles'
-import { cn } from '@/lib/utils'
 import { getHandDisplayWithEmoji } from '../utils'
 import { HandSelectionGrid } from '../HandSelectionGrid'
+import { PhaseHeader } from '../common/PhaseHeader'
+import { SideHeader } from '../common/SideHeader'
+import { GameButton } from '../common/GameButton'
 
 interface BattlePhaseProps {
     jankenEvent: JankenEventWithGuests | null
@@ -34,11 +36,11 @@ export function BattlePhase({
         // Guest View
         const MainArea = () => (
             <div className={styles.mainArea()}>
-                <div className="text-center mb-8">
-                    <h2 className="text-[#44FFFF] text-sm font-bold tracking-[0.3em] mb-2 font-mono">BATTLE PHASE</h2>
-                    <h3 className="text-white text-3xl font-bold tracking-wider">{hostName}に勝つ手を選べ</h3>
-                    <p className="text-gray-500 text-xs mt-1 tracking-[0.2em] font-mono">OBSERVE & DECIDE</p>
-                </div>
+                <PhaseHeader
+                    engLabel="BATTLE PHASE"
+                    title={`${hostName}に勝つ手を選べ`}
+                    subLabel="OBSERVE & DECIDE"
+                />
 
                 <div className="flex justify-center w-full mb-8">
                     <HandSelectionGrid
@@ -49,23 +51,22 @@ export function BattlePhase({
                     />
                 </div>
                 <div className="text-center mt-auto">
-                    <button
-                        className={cn(styles.button(), styles.buttonPrimary())}
+                    <GameButton
                         disabled={!selectedHand || isProcessing}
                         onClick={onSubmit}
                     >
                         勝負する
-                    </button>
+                    </GameButton>
                 </div>
             </div>
         )
 
         const SideArea = () => (
             <div className={styles.sideArea()}>
-                <div className="mb-4 border-b-2 border-[#44FFFF] pb-2">
-                    <h2 className="text-[#44FFFF] text-xs font-bold tracking-[0.2em] mb-1">DATA ANALYSIS</h2>
-                    <h3 className="text-white text-xl font-bold">{hostName}のデータ</h3>
-                </div>
+                <SideHeader
+                    engLabel="DATA ANALYSIS"
+                    label={`${hostName}のデータ`}
+                />
 
                 <div className="space-y-4">
                     {/* ホストの初期手 */}
@@ -140,11 +141,11 @@ export function BattlePhase({
         // Host View
         const MainArea = () => (
             <div className={styles.mainArea()}>
-                <div className="text-center mb-8">
-                    <h2 className="text-[#44FFFF] text-sm font-bold tracking-[0.3em] mb-2 font-mono">WAITING...</h2>
-                    <h3 className="text-white text-3xl font-bold tracking-wider">ゲストの選択を待機中</h3>
-                    <p className="text-gray-500 text-xs mt-1 tracking-[0.2em] font-mono">WAITING FOR GUESTS</p>
-                </div>
+                <PhaseHeader
+                    engLabel="WAITING..."
+                    title="ゲストの選択を待機中"
+                    subLabel="WAITING FOR GUESTS"
+                />
 
                 <div className="flex-1 flex flex-col items-center justify-center">
                     {jankenEvent?.finalHostHand ? (
@@ -174,10 +175,10 @@ export function BattlePhase({
 
         const SideArea = () => (
             <div className={styles.sideArea()}>
-                <div className="mb-4 border-b-2 border-[#44FFFF] pb-2">
-                    <h2 className="text-[#44FFFF] text-xs font-bold tracking-[0.2em] mb-1">STATUS MONITOR</h2>
-                    <h3 className="text-white text-xl font-bold">あなたの状況</h3>
-                </div>
+                <SideHeader
+                    engLabel="STATUS MONITOR"
+                    label="あなたの状況"
+                />
 
                 {jankenEvent && (
                     <div className="space-y-6">

@@ -4,6 +4,8 @@ import { nullHandGame } from '../styles'
 import { cn } from '@/lib/utils'
 import { getHandDisplayWithEmoji, judgeHand } from '../utils'
 import { LieRevealCard } from '../LieRevealCard'
+import { SideHeader } from '../common/SideHeader'
+import { GameButton } from '../common/GameButton'
 
 import { useState } from 'react'
 import { motion } from 'framer-motion'
@@ -119,13 +121,12 @@ export function ResultPhase({
                             </div>
 
                             <div className="text-center mt-12">
-                                <button
-                                    className={cn(styles.button(), styles.buttonPrimary())}
+                                <GameButton
                                     onClick={() => setStep('REVEAL')}
                                     disabled={isProcessing}
                                 >
                                     ネタバラシを見る
-                                </button>
+                                </GameButton>
                             </div>
                         </motion.div>
                     )}
@@ -157,19 +158,18 @@ export function ResultPhase({
                             )}
 
                             <div className="flex justify-center gap-4 mt-12">
-                                <button
-                                    className={cn(styles.button(), "bg-gray-800 hover:bg-gray-700 text-gray-300 border-gray-600")}
+                                <GameButton
+                                    variant="secondary"
                                     onClick={() => setStep('RESULT')}
                                 >
                                     結果に戻る
-                                </button>
-                                <button
-                                    className={cn(styles.button(), styles.buttonPrimary())}
+                                </GameButton>
+                                <GameButton
                                     onClick={onNextRound}
                                     disabled={isProcessing || isReady}
                                 >
                                     {isReady ? `待機中 (${readyCount}/${totalCount})` : '次のラウンドへ'}
-                                </button>
+                                </GameButton>
                             </div>
                         </motion.div>
                     )}
@@ -246,13 +246,12 @@ export function ResultPhase({
                         </div>
 
                         <div className="text-center mt-8">
-                            <button
-                                className={cn(styles.button(), styles.buttonPrimary())}
+                            <GameButton
                                 onClick={() => setStep('REVEAL')}
                                 disabled={isProcessing}
                             >
                                 ネタバラシを見る
-                            </button>
+                            </GameButton>
                         </div>
                     </motion.div>
                 )}
@@ -284,19 +283,18 @@ export function ResultPhase({
                         )}
 
                         <div className="flex justify-center gap-4 mt-8">
-                            <button
-                                className={cn(styles.button(), "bg-gray-800 hover:bg-gray-700 text-gray-300 border-gray-600")}
+                            <GameButton
+                                variant="secondary"
                                 onClick={() => setStep('RESULT')}
                             >
                                 結果に戻る
-                            </button>
-                            <button
-                                className={cn(styles.button(), styles.buttonPrimary())}
+                            </GameButton>
+                            <GameButton
                                 onClick={onNextRound}
                                 disabled={isProcessing || isReady}
                             >
                                 {isReady ? `待機中 (${readyCount}/${totalCount})` : '次のラウンドへ'}
-                            </button>
+                            </GameButton>
                         </div>
                     </motion.div>
                 )}
@@ -311,10 +309,10 @@ export function ResultPhase({
             layout
             transition={{ duration: 0.3 }}
         >
-            <div className="mb-4 border-b-2 border-[#44FFFF] pb-2">
-                <h2 className="text-[#44FFFF] text-xs font-bold tracking-[0.2em] mb-1">ROUND RESULT</h2>
-                <h3 className="text-white text-xl font-bold">ラウンド結果</h3>
-            </div>
+            <SideHeader
+                engLabel="ROUND RESULT"
+                label="ラウンド結果"
+            />
 
             {currentScores.length > 0 && (
                 <motion.div className="space-y-3" layout>

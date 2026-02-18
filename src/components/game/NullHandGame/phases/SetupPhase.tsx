@@ -6,6 +6,10 @@ import { getHandDisplayWithEmoji } from '../utils'
 import { HandSelectionGrid } from '../HandSelectionGrid'
 import React from 'react'
 import { motion } from 'framer-motion'
+import { PhaseHeader } from '../common/PhaseHeader'
+import { SideHeader } from '../common/SideHeader'
+import { WaitingDisplay } from '../common/WaitingDisplay'
+import { GameButton } from '../common/GameButton'
 
 interface SetupPhaseProps {
     isCurrentHost: boolean
@@ -164,11 +168,11 @@ export function SetupPhase({
                     {!selectedHand ? (
                         /* STEP 1: 手の選択 */
                         <div className="flex flex-col h-full animate-in fade-in zoom-in duration-300">
-                            <div className="text-center mb-8">
-                                <h2 className="text-[#44FFFF] text-sm font-bold tracking-[0.3em] mb-2 font-mono">STEP 1</h2>
-                                <h3 className="text-white text-3xl font-bold tracking-wider">あなたの手を選択</h3>
-                                <p className="text-gray-500 text-sm mt-2 tracking-wide">SELECT YOUR REAL HAND</p>
-                            </div>
+                            <PhaseHeader
+                                engLabel="STEP 1"
+                                title="あなたの手を選択"
+                                subLabel="SELECT YOUR REAL HAND"
+                            />
                             <div className="flex-1 flex items-center justify-center">
                                 <div className="flex justify-center w-full">
                                     <HandSelectionGrid
@@ -186,11 +190,11 @@ export function SetupPhase({
                             className="flex flex-col h-full animate-in slide-in-from-right duration-300"
                         >
 
-                            <div className="text-center mb-8">
-                                <h2 className="text-[#44FFFF] text-sm font-bold tracking-[0.3em] mb-2 font-mono">STEP 2</h2>
-                                <h3 className="text-white text-3xl font-bold tracking-wider">どの情報を偽装する？</h3>
-                                <p className="text-gray-500 text-sm mt-2 tracking-wide">CHOOSE DECEPTION</p>
-                            </div>
+                            <PhaseHeader
+                                engLabel="STEP 2"
+                                title="どの情報を偽装する？"
+                                subLabel="CHOOSE DECEPTION"
+                            />
 
                             <div className="flex-1 flex flex-col justify-center">
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -312,20 +316,21 @@ export function SetupPhase({
                             </div>
 
                             <div className="mt-auto pt-4 flex justify-end">
-                                <button
-                                    className={styles.button()}
-                                    disabled={
-                                        !selectedHand ||
-                                        selectedFake === 'NONE' ||
-                                        (selectedFake === 'INITIAL_HAND' && !fakeDetails.fakeHandValue) ||
-                                        (selectedFake === 'CHANGE_RATE' && fakeDetails.fakeChangeRateValue === undefined) ||
-                                        (selectedFake === 'FAVORITE_HAND' && !fakeDetails.fakeFavoriteHandValue) ||
-                                        isProcessing
-                                    }
-                                    onClick={onSubmit}
-                                >
-                                    選択を確定
-                                </button>
+                                <div className="mt-auto pt-4 flex justify-end">
+                                    <GameButton
+                                        disabled={
+                                            !selectedHand ||
+                                            selectedFake === 'NONE' ||
+                                            (selectedFake === 'INITIAL_HAND' && !fakeDetails.fakeHandValue) ||
+                                            (selectedFake === 'CHANGE_RATE' && fakeDetails.fakeChangeRateValue === undefined) ||
+                                            (selectedFake === 'FAVORITE_HAND' && !fakeDetails.fakeFavoriteHandValue) ||
+                                            isProcessing
+                                        }
+                                        onClick={onSubmit}
+                                    >
+                                        選択を確定
+                                    </GameButton>
+                                </div>
                             </div>
                         </div>
                     )}
@@ -348,10 +353,12 @@ export function SetupPhase({
                             <div className="bg-[#1a0505] border border-[#FF4444]/30 rounded-xl p-6 relative overflow-hidden group">
 
 
-                                <h3 className="text-[#FF4444] font-black text-xs tracking-widest border-b border-[#FF4444]/30 pb-2 mb-4 flex items-center justify-between">
-                                    <span>YOUR SELECTION</span>
-                                    <span className="bg-[#FF4444] text-black px-1.5 rounded text-[10px]">PRIVATE</span>
-                                </h3>
+                                <SideHeader
+                                    engLabel="YOUR SELECTION"
+                                    label="選択した手"
+                                    badge="PRIVATE"
+                                    className="border-[#FF4444]/30"
+                                />
 
                                 <div className="flex items-center gap-4">
                                     <div className="relative w-16 h-16 bg-black/50 rounded-lg border border-[#FF4444]/20 overflow-hidden">
@@ -379,10 +386,63 @@ export function SetupPhase({
 
                         {/* ホスト用リアル統計 */}
                         <div className="bg-[#051a1a] border border-[#44FFFF]/30 rounded-xl p-6 flex-1 flex flex-col">
-                            <h3 className="text-[#44FFFF] font-black text-xs tracking-widest border-b border-[#44FFFF]/30 pb-2 mb-4 flex items-center justify-between">
-                                <span>YOUR DATA</span>
-                                <span className="bg-[#44FFFF] text-black px-1.5 rounded text-[10px]">PUBLIC</span>
-                            </h3>
+                            {/* Note: The new SideHeader puts label on a new line. 
+                                The original was `YOUR DATA [PUBLIC]` on one line (ish).
+                                The new SideHeader is:
+                                YOUR DATA
+                                PUBLIC [Badge]
+                                
+                                Wait, my updated SideHeader is:
+                                engLabel (YOUR DATA)
+                                label (PUBLIC) | badge (PUBLIC)
+                                
+                                That seems redundant.
+                                Original: 
+                                YOUR DATA [PUBLIC]
+                                
+                                In SetupPhase original:
+                                h3 ... YOUR DATA span... PUBLIC
+                                
+                                In BattlePhase original:
+                                h2 DATA ANALYSIS
+                                h3 {hostName}のデータ
+                                
+                                They are fundamentally different headers.
+                                
+                                BattlePhase style: 
+                                Small EN Header
+                                Large JP Header
+                                
+                                SetupPhase style:
+                                Small EN Header + Badge
+                                (No Large JP Header)
+                                
+                                I might need to make SideHeader more flexible or just stick to the BattlePhase style for everywhere which is cleaner.
+                                If I use SideHeader with:
+                                engLabel="YOUR DATA"
+                                label="データを公開中"
+                                badge="PUBLIC"
+                                
+                                It might look good?
+                                
+                                Let's try to match the BattlePhase aesthetic which is the "Standard".
+                                
+                                For SetupPhase "YOUR SELECTION":
+                                engLabel="YOUR SELECTION"
+                                label="選択した手"
+                                badge="PRIVATE"
+                                
+                                For SetupPhase "YOUR DATA":
+                                engLabel="YOUR DATA"
+                                label="公開データ"
+                                badge="PUBLIC"
+                            */}
+                            <SideHeader
+                                engLabel="YOUR DATA"
+                                label="公開データ"
+                                badge="PUBLIC"
+                                className="border-[#44FFFF]/30 !mb-4"
+                            />
 
                             <div className="space-y-4">
                                 <div className="bg-black/30 rounded-lg p-3 border border-[#44FFFF]/10">
@@ -408,13 +468,14 @@ export function SetupPhase({
 
                 {/* ゲスト用（今は待機中表示） */}
                 {!isCurrentHost && (
-                    <div className="flex flex-col items-center justify-center p-6 bg-[#111] rounded border border-gray-800 animate-pulse h-full">
-                        <Hand3D handType={titleHand} revealed={true} size="small" isRotating={true} />
-                        <div className="text-[#44FFFF] font-bold text-lg mb-1 tracking-widest text-center mt-4">WAITING FOR</div>
-                        <div className="text-white font-black text-2xl tracking-widest text-center border-b-2 border-[#44FFFF] pb-1 w-full max-w-[200px] whitespace-nowrap overflow-hidden text-ellipsis">
-                            {hostName}
-                        </div>
-                        <div className="text-gray-500 text-xs mt-4 text-center">ホストが設定中です...</div>
+                    <div className="h-full border border-gray-800 rounded bg-[#111]">
+                        <WaitingDisplay
+                            engLabel="WAITING FOR"
+                            text={hostName}
+                            subText="ホストが設定中です..."
+                            handType={titleHand}
+                            isRotating={true}
+                        />
                     </div>
                 )}
             </motion.div>

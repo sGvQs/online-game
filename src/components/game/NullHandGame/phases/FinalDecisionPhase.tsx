@@ -6,6 +6,10 @@ import { getHandDisplayWithEmoji } from '../utils'
 import { motion } from 'framer-motion'
 import { useState } from 'react'
 import { HandSelectionGrid } from '../HandSelectionGrid'
+import { PhaseHeader } from '../common/PhaseHeader'
+import { SideHeader } from '../common/SideHeader'
+import { WaitingDisplay } from '../common/WaitingDisplay'
+import { GameButton } from '../common/GameButton'
 
 interface FinalDecisionPhaseProps {
     jankenEvent: JankenEventWithGuests | null
@@ -39,11 +43,11 @@ export function FinalDecisionPhase({
         const MainArea = () => (
             <div className={styles.mainArea()}>
                 <div className="flex flex-col h-full animate-in fade-in zoom-in duration-300">
-                    <div className="text-center mb-8">
-                        <h2 className="text-[#44FFFF] text-sm font-bold tracking-[0.3em] mb-2 font-mono">FINAL SELECTION</h2>
-                        <h3 className="text-white text-3xl font-bold tracking-wider mb-2">最終決断</h3>
-                        <p className="text-gray-500 text-xs mt-1 tracking-[0.2em] font-mono">CHANGE OR KEEP YOUR HAND?</p>
-                    </div>
+                    <PhaseHeader
+                        engLabel="FINAL SELECTION"
+                        title="最終決断"
+                        subLabel="CHANGE OR KEEP YOUR HAND?"
+                    />
 
                     <div className="flex-1 flex flex-col items-center justify-center gap-4">
                         <HandSelectionGrid
@@ -90,13 +94,13 @@ export function FinalDecisionPhase({
                     </div>
 
                     <div className="mt-8 mb-4 text-center">
-                        <button
-                            className={cn(styles.button(), styles.buttonPrimary(), "px-16 py-4 text-lg")}
+                        <GameButton
+                            className="px-16 py-4 text-lg"
                             disabled={!selectedHand || isProcessing}
                             onClick={onSubmit}
                         >
                             DECIDE FINAL HAND
-                        </button>
+                        </GameButton>
                     </div>
                 </div>
             </div>
@@ -108,9 +112,12 @@ export function FinalDecisionPhase({
 
                     {/* Publicly Shown Fake Info */}
                     <div className="bg-[#1a0505] border border-[#FF4444]/30 rounded-lg p-5">
-                        <h3 className="text-[#FF4444] font-black text-sm tracking-widest border-b border-[#FF4444]/30 pb-2 mb-4 flex items-center gap-2">
-                            🔪 YOUR FAKE DATA <span className="text-[10px] bg-[#FF4444] text-black px-1 rounded ml-auto">PUBLIC</span>
-                        </h3>
+                        <SideHeader
+                            engLabel="YOUR FAKE DATA"
+                            label="PUBLIC"
+                            badge="PUBLIC"
+                            className="border-[#FF4444]/30"
+                        />
 
                         <div className="space-y-4">
                             <div className="flex justify-between items-center">
@@ -154,9 +161,12 @@ export function FinalDecisionPhase({
 
                     {/* Real Private Info */}
                     <div className="bg-[#051a1a] border border-[#44FFFF]/30 rounded-lg p-5 flex-1">
-                        <h3 className="text-[#44FFFF] font-black text-sm tracking-widest border-b border-[#44FFFF]/30 pb-2 mb-4 flex items-center gap-2">
-                            💎 YOUR REAL STATS <span className="text-[10px] bg-[#44FFFF] text-black px-1 rounded ml-auto">PRIVATE</span>
-                        </h3>
+                        <SideHeader
+                            engLabel="YOUR REAL STATS"
+                            label="PRIVATE"
+                            badge="PRIVATE"
+                            className="border-[#44FFFF]/30"
+                        />
 
                         {hostStats && (
                             <div className="space-y-6">
@@ -202,18 +212,12 @@ export function FinalDecisionPhase({
     const GuestView = () => {
         const MainArea = () => (
             <div className={styles.mainArea()}>
-                <div className="flex flex-col h-full animate-in fade-in zoom-in duration-300 relative overflow-hidden">
-                    {/* Background Hand Animation */}
-                    <Hand3D handType={jankenEvent.initialHand as HandType || 'ROCK'} revealed={true} size="large" isRotating={true} />
-
-                    <div className="flex-1 flex flex-col items-center justify-center relative z-10 text-center">
-                        <div className="animate-pulse">
-                            <h2 className="text-[#44FFFF] text-sm font-bold tracking-[0.3em] mb-2 font-mono">WAITING...</h2>
-                            <h3 className="text-white text-4xl font-bold tracking-wider mb-2">{hostName}の決断を待機中</h3>
-                            <p className="text-gray-600 text-xs font-mono tracking-[0.2em] uppercase">WAITING FOR HOST DECISION</p>
-                        </div>
-                    </div>
-                </div>
+                <WaitingDisplay
+                    engLabel="WAITING..."
+                    text={`${hostName}の決断を待機中`}
+                    subText="WAITING FOR HOST DECISION"
+                    handType={jankenEvent.initialHand as HandType || 'ROCK'}
+                />
             </div>
         )
 
@@ -223,9 +227,12 @@ export function FinalDecisionPhase({
 
                     {/* Publicly Shown Fake Info for Guest */}
                     <div className="bg-[#1a0505] border border-[#FF4444]/30 rounded-lg p-5 flex-1">
-                        <h3 className="text-[#FF4444] font-black text-sm tracking-widest border-b border-[#FF4444]/30 pb-2 mb-4 flex items-center gap-2">
-                            🔪 HOST'S PUBLIC DATA <span className="text-[10px] bg-[#FF4444] text-black px-1 rounded ml-auto">PUBLIC</span>
-                        </h3>
+                        <SideHeader
+                            engLabel="HOST'S PUBLIC DATA"
+                            label="PUBLIC"
+                            badge="PUBLIC"
+                            className="border-[#FF4444]/30"
+                        />
 
                         <div className="space-y-6">
                             <div className="bg-black/20 p-4 rounded text-xs text-gray-400 leading-relaxed border border-gray-800">

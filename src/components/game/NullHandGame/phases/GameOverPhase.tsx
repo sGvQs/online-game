@@ -1,6 +1,8 @@
 import { MatchScoreWithUser, UserRanking } from '@/shared/types'
 import { nullHandGame } from '../styles'
 import { cn } from '@/lib/utils'
+import { SideHeader } from '../common/SideHeader'
+import { GameButton } from '../common/GameButton'
 
 interface GameOverPhaseProps {
     currentUserId: string
@@ -62,19 +64,21 @@ export function GameOverPhase({
                     )
                 })()}
 
-                <button
-                    className={cn(styles.button(), styles.buttonPrimary())}
+                <GameButton
                     onClick={onFinish}
                 >
                     タイトルに戻る
-                </button>
+                </GameButton>
             </div>
         </div>
     )
 
     const SideArea = () => (
         <div className={styles.sideArea()}>
-            <div className="text-[#44FFFF] font-bold text-xl mb-4 border-b-2 border-[#44FFFF] pb-2">最終順位</div>
+            <SideHeader
+                engLabel="FINAL RANKING"
+                label="最終順位"
+            />
             {currentScores.length > 0 && (
                 <div className="space-y-4">
                     {(() => {

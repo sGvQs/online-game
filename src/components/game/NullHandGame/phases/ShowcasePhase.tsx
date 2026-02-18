@@ -3,6 +3,9 @@ import { Hand3D } from '../Hand3D'
 import { nullHandGame } from '../styles'
 import { cn } from '@/lib/utils'
 import { getHandDisplayWithEmoji } from '../utils'
+import { PhaseHeader } from '../common/PhaseHeader'
+import { SideHeader } from '../common/SideHeader'
+import { GameButton } from '../common/GameButton'
 
 interface ShowcasePhaseProps {
     jankenEvent: JankenEventWithGuests | null
@@ -31,11 +34,11 @@ export function ShowcasePhase({
 
     const MainArea = () => (
         <div className={styles.mainArea()}>
-            <div className="text-center mb-8">
-                <h2 className="text-[#44FFFF] text-sm font-bold tracking-[0.3em] mb-2 font-mono">OBSERVATION</h2>
-                <h3 className="text-white text-3xl font-bold tracking-wider">{hostName}の手を観察</h3>
-                <p className="text-gray-500 text-xs mt-1 tracking-[0.2em] font-mono">CHECK THE ENEMY</p>
-            </div>
+            <PhaseHeader
+                engLabel="OBSERVATION"
+                title={`${hostName}の手を観察`}
+                subLabel="CHECK THE ENEMY"
+            />
 
             <div className="flex-1 flex flex-col items-center justify-center">
                 <div className="relative group w-64 h-64 mx-auto flex items-center justify-center">
@@ -63,13 +66,13 @@ export function ShowcasePhase({
                                 <span className="text-gray-500 text-xs">他のゲストの確認を待っています</span>
                             </div>
                         ) : (
-                            <button
-                                className={cn(styles.button(), styles.buttonPrimary(), "w-full max-w-sm mx-auto")}
+                            <GameButton
+                                className="w-full max-w-sm mx-auto"
                                 disabled={isProcessing}
                                 onClick={onConfirm}
                             >
                                 確認して次へ
-                            </button>
+                            </GameButton>
                         )}
                     </div>
                 )}
@@ -81,15 +84,16 @@ export function ShowcasePhase({
                     </div>
                 )}
             </div>
-        </div>
+        </div >
     )
 
     const SideArea = () => (
         <div className={styles.sideArea()}>
-            <div className="mb-6 border-b-2 border-[#44FFFF] pb-2">
-                <h2 className="text-[#44FFFF] text-xs font-bold tracking-[0.2em] mb-1">DATA ANALYSIS</h2>
-                <h3 className="text-white text-xl font-bold">{hostName}のデータ</h3>
-            </div>
+            <SideHeader
+                engLabel="DATA ANALYSIS"
+                label={`${hostName}のデータ`}
+                className="mb-6"
+            />
 
             {hostStats && (
                 <div className="space-y-4">
