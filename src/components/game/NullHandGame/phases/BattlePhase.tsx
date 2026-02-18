@@ -3,6 +3,7 @@ import { Hand3D } from '../Hand3D'
 import { nullHandGame } from '../styles'
 import { cn } from '@/lib/utils'
 import { getHandDisplayWithEmoji } from '../utils'
+import { HandSelectionGrid } from '../HandSelectionGrid'
 
 interface BattlePhaseProps {
     jankenEvent: JankenEventWithGuests | null
@@ -34,19 +35,13 @@ export function BattlePhase({
         const MainArea = () => (
             <div className={styles.mainArea()}>
                 <h2 className={styles.messageText()}>勝つための手を選択せよ！</h2>
-                <div className={styles.handGrid()}>
-                    {(['ROCK', 'SCISSORS', 'PAPER'] as const).map((hand) => (
-                        <div
-                            key={hand}
-                            className={cn(
-                                styles.hand3DWrapper(),
-                                selectedHand === hand && styles.hand3DWrapperSelected()
-                            )}
-                            onClick={() => onSelectHand(hand)}
-                        >
-                            <Hand3D handType={hand} revealed={true} size="medium" />
-                        </div>
-                    ))}
+                <div className="flex justify-center w-full">
+                    <HandSelectionGrid
+                        selectedHand={selectedHand}
+                        onSelectHand={onSelectHand}
+                        isProcessing={isProcessing}
+                        size="small"
+                    />
                 </div>
                 <div className="text-center mt-8">
                     <button

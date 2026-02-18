@@ -3,6 +3,7 @@ import { Hand3D } from '../Hand3D'
 import { nullHandGame } from '../styles'
 import { cn } from '@/lib/utils'
 import { getHandDisplayWithEmoji } from '../utils'
+import { HandSelectionGrid } from '../HandSelectionGrid'
 import React from 'react'
 
 interface SetupPhaseProps {
@@ -156,23 +157,13 @@ export function SetupPhase({
                         <div className="flex flex-col h-full animate-in fade-in zoom-in duration-300">
                             <h2 className={styles.messageText()}>あなたの手を選択</h2>
                             <div className="flex-1 flex items-center justify-center">
-                                <div className={styles.handGrid()}>
-                                    {(['ROCK', 'SCISSORS', 'PAPER'] as const).map((hand) => (
-                                        <div
-                                            key={hand}
-                                            className={cn(
-                                                styles.hand3DWrapper(),
-                                                "h-64", // 少し大きく
-                                                selectedHand === hand && styles.hand3DWrapperSelected()
-                                            )}
-                                            onClick={() => onSelectHand(hand)}
-                                        >
-                                            <Hand3D handType={hand} revealed={true} size="medium" />
-                                            <div className="absolute bottom-2 w-full text-center font-bold text-xl tracking-widest text-[#44FFFF]">
-                                                {getHandDisplayWithEmoji(hand)}
-                                            </div>
-                                        </div>
-                                    ))}
+                                <div className="flex justify-center w-full">
+                                    <HandSelectionGrid
+                                        selectedHand={selectedHand}
+                                        onSelectHand={onSelectHand}
+                                        isProcessing={isProcessing}
+                                        size="small"
+                                    />
                                 </div>
                             </div>
                         </div>
