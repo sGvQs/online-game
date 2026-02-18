@@ -318,43 +318,68 @@ export function SetupPhase({
         return (
             <div className={styles.sideArea()}>
                 {isCurrentHost && hostStats && (
-                    <>
-                        <div className="text-[#44FFFF] font-bold text-lg mb-4 border-b-2 border-[#44FFFF] pb-1">あなたのデータ</div>
-
-                        {/* ホスト用リアル統計 */}
-                        <div className="mb-6">
-                            <div className={styles.statRow()}>
-                                <span className={styles.statLabel()}>最終的に選ぶ確率の高い手</span>
-                                <span className={styles.statValue()}>{getHandDisplayWithEmoji(hostStats.realFavoriteHand as HandType)}</span>
-                            </div>
-                            <div className={styles.statRow()}>
-                                <span className={styles.statLabel()}>最終的に手を変える確率</span>
-                                <span className={styles.statValue()}>{hostStats.realChangeRate}%</span>
-                            </div>
-                        </div>
-
+                    <div className="flex flex-col gap-4 h-full">
                         {/* 選択した手の表示（ステップ2のみ） */}
                         {selectedHand && (
-                            <div className="animate-in fade-in slide-in-from-left duration-500">
-                                <div className="text-[#FF4444] font-bold text-lg mb-2 border-b-2 border-[#FF4444] pb-1">選択した手</div>
-                                <div
-                                    className="cursor-pointer hover:opacity-80 transition-opacity relative group"
-                                    onClick={onReselectHand}
-                                >
-                                    <div className="border border-[#FF4444] bg-black p-2">
-                                        <div className="h-32 w-full">
+                            <div className="bg-[#1a0505] border border-[#FF4444]/30 rounded-xl p-6 relative overflow-hidden group">
+
+
+                                <h3 className="text-[#FF4444] font-black text-xs tracking-widest border-b border-[#FF4444]/30 pb-2 mb-4 flex items-center justify-between">
+                                    <span>YOUR SELECTION</span>
+                                    <span className="bg-[#FF4444] text-black px-1.5 rounded text-[10px]">PRIVATE</span>
+                                </h3>
+
+                                <div className="flex items-center gap-4">
+                                    <div className="relative w-16 h-16 bg-black/50 rounded-lg border border-[#FF4444]/20 overflow-hidden">
+                                        <div className="absolute inset-0 flex items-center justify-center">
                                             <Hand3D handType={selectedHand} revealed={true} size="small" />
                                         </div>
-                                        <div className="text-center font-bold text-white mt-1">{getHandDisplayWithEmoji(selectedHand)}</div>
-
-                                        <div className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <span className="text-[#FF4444] font-bold border border-[#FF4444] px-2 py-1">変更する</span>
+                                    </div>
+                                    <div>
+                                        <div className="text-gray-400 text-[10px] uppercase tracking-wider mb-1">選択した手</div>
+                                        <div className="text-2xl font-bold text-white leading-none">
+                                            {getHandDisplayWithEmoji(selectedHand)}
                                         </div>
+                                    </div>
+                                    <button
+                                        onClick={onReselectHand}
+                                        className="ml-auto text-[#FF4444] text-xs font-bold border border-[#FF4444]/30 px-3 py-1.5 rounded hover:bg-[#FF4444] hover:text-black transition-colors"
+                                    >
+                                        変更
+                                    </button>
+                                </div>
+
+
+                            </div>
+                        )}
+
+                        {/* ホスト用リアル統計 */}
+                        <div className="bg-[#051a1a] border border-[#44FFFF]/30 rounded-xl p-6 flex-1 flex flex-col">
+                            <h3 className="text-[#44FFFF] font-black text-xs tracking-widest border-b border-[#44FFFF]/30 pb-2 mb-4 flex items-center justify-between">
+                                <span>YOUR DATA</span>
+                                <span className="bg-[#44FFFF] text-black px-1.5 rounded text-[10px]">PUBLIC</span>
+                            </h3>
+
+                            <div className="space-y-4">
+                                <div className="bg-black/30 rounded-lg p-3 border border-[#44FFFF]/10">
+                                    <div className="text-gray-500 text-[10px] uppercase tracking-wider mb-1">お気に入り</div>
+                                    <div className="text-lg font-bold text-white flex items-center gap-2">
+                                        {getHandDisplayWithEmoji(hostStats.realFavoriteHand as HandType)}
+                                    </div>
+                                </div>
+                                <div className="bg-black/30 rounded-lg p-3 border border-[#44FFFF]/10">
+                                    <div className="text-gray-500 text-[10px] uppercase tracking-wider mb-1">変える確率</div>
+                                    <div className="text-lg font-bold text-white font-mono">
+                                        {hostStats.realChangeRate}%
                                     </div>
                                 </div>
                             </div>
-                        )}
-                    </>
+
+                            <div className="mt-auto pt-4 text-[10px] text-gray-500 leading-relaxed border-t border-[#44FFFF]/10">
+                                <span className="text-[#44FFFF]">Note:</span> このデータは全員に公開されています。これを逆手に取って偽装工作を行いましょう。
+                            </div>
+                        </div>
+                    </div>
                 )}
 
                 {/* ゲスト用（今は待機中表示） */}
