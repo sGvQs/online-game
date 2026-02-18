@@ -71,8 +71,8 @@ export function SetupPhase({
                                 <div>
                                     <div className="text-[#44FFFF] font-bold text-lg mb-1">ホストの嘘を見破れ</div>
                                     <p className="text-sm text-gray-400 leading-relaxed">
-                                        ホストは「公開する手」を設定し、<br />
-                                        その後「公開する手」「よく勝負する手」「変更する確率」の3つのデータを公開します。<br />
+                                        ホストは「選択する手」を設定し、<br />
+                                        その後「選択する手」「お気に入り」「変える確率」の3つのデータを公開します。<br />
                                         ただし、公開されるデータには必ず<span className="text-[#FF4444]">嘘</span>が混ざっています。
                                     </p>
                                 </div>
@@ -86,7 +86,7 @@ export function SetupPhase({
                                         ホストの心理を読み、最終的に出す手に<span className="text-[#44FFFF] font-bold">勝てる手</span>を選んでください。<br />
                                         「嘘」と設定された項目は、表示されている内容が事実とは異なります。<br />
                                         <span className="text-gray-400 text-xs">
-                                            （例：「公開する手」が嘘の場合、表示されている手とは別の手が、本当の「公開する手」として設定されています）
+                                            （例：「選択する手」が嘘の場合、表示されている手とは別の手が、本当の「選択する手」として設定されています）
                                         </span>
                                     </p>
                                 </div>
@@ -192,8 +192,8 @@ export function SetupPhase({
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                                     {([
                                         { value: 'INITIAL_HAND', label: '選択した手', icon: '🖐️' },
-                                        { value: 'CHANGE_RATE', label: '手を変える確率', icon: '📊' },
-                                        { value: 'FAVORITE_HAND', label: '選ぶ確率の高い手', icon: '🎲' },
+                                        { value: 'CHANGE_RATE', label: '変える確率', icon: '📊' },
+                                        { value: 'FAVORITE_HAND', label: 'お気に入り', icon: '🎲' },
                                     ] as const).map((option) => (
                                         <button
                                             key={option.value}
@@ -229,7 +229,7 @@ export function SetupPhase({
                                         <div className='w-full max-w-lg animate-in fade-in slide-in-from-bottom-4 duration-300 z-10'>
                                             {selectedFake === 'INITIAL_HAND' && (
                                                 <div className="text-center space-y-4">
-                                                    <div className="text-[#44FFFF] font-bold mb-4 uppercase tracking-widest">偽装として表示する手を選択</div>
+                                                    <div className="text-[#44FFFF] font-bold mb-4 uppercase tracking-widest">偽装として表示する「選択した手」を選択</div>
                                                     <div className="flex justify-center gap-4">
                                                         {(['ROCK', 'SCISSORS', 'PAPER'] as const)
                                                             .filter(h => h !== selectedHand)
@@ -255,7 +255,7 @@ export function SetupPhase({
                                             {selectedFake === 'CHANGE_RATE' && (
                                                 <div className="w-full space-y-6">
                                                     <div className="text-[#44FFFF] font-bold text-center uppercase tracking-widest">
-                                                        偽装する確率: <span className="text-3xl ml-2">{fakeDetails.fakeChangeRateValue ?? 50}%</span>
+                                                        変える確率: <span className="text-3xl ml-2">{fakeDetails.fakeChangeRateValue ?? 50}%</span>
                                                     </div>
                                                     <div className="relative w-full h-12 flex items-center">
                                                         <input
@@ -273,14 +273,14 @@ export function SetupPhase({
                                                         <div className="absolute top-8 left-1/2 -translate-x-1/2 text-xs text-gray-500">50%</div>
                                                     </div>
                                                     <div className="text-center text-xs text-gray-400">
-                                                        ※ この確率はゲストに「あなたが最終的に手を変える確率」として表示されます
+                                                        ※ この確率はゲストに「あなたが最終的に変える確率」として表示されます
                                                     </div>
                                                 </div>
                                             )}
 
                                             {selectedFake === 'FAVORITE_HAND' && (
                                                 <div className="text-center space-y-4">
-                                                    <div className="text-[#44FFFF] font-bold mb-4 uppercase tracking-widest">偽装として表示する「よく出す手」</div>
+                                                    <div className="text-[#44FFFF] font-bold mb-4 uppercase tracking-widest">偽装として表示する「お気に入り」</div>
                                                     <div className="flex justify-center gap-4">
                                                         {(['ROCK', 'SCISSORS', 'PAPER'] as const)
                                                             .filter(h => h !== hostStats?.realFavoriteHand)

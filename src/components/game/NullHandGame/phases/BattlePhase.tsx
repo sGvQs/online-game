@@ -49,7 +49,6 @@ export function BattlePhase({
                     />
                 </div>
                 <div className="text-center mt-auto">
-                    <p className="text-gray-400 text-sm mb-4">勝てると思う手を選択してください</p>
                     <button
                         className={cn(styles.button(), styles.buttonPrimary())}
                         disabled={!selectedHand || isProcessing}
@@ -65,7 +64,7 @@ export function BattlePhase({
             <div className={styles.sideArea()}>
                 <div className="mb-4 border-b-2 border-[#44FFFF] pb-2">
                     <h2 className="text-[#44FFFF] text-xs font-bold tracking-[0.2em] mb-1">DATA ANALYSIS</h2>
-                    <h3 className="text-white text-xl font-bold">{hostName}のデータ (公開)</h3>
+                    <h3 className="text-white text-xl font-bold">{hostName}のデータ</h3>
                 </div>
 
                 <div className="space-y-4">
@@ -73,7 +72,7 @@ export function BattlePhase({
                     {jankenEvent && (
                         <div className="bg-[#1a1a1a] p-3 rounded border border-gray-800">
                             <div className="flex justify-between items-center mb-2">
-                                <span className="text-[#FF4444] font-bold text-xs uppercase tracking-wider">初回の手 (公開)</span>
+                                <span className="text-[#FF4444] font-bold text-xs uppercase tracking-wider">選択した手 (公開)</span>
                                 <span className="text-gray-500 text-[10px] font-mono">INITIAL HAND</span>
                             </div>
 
@@ -96,7 +95,7 @@ export function BattlePhase({
                         <div className="space-y-1">
                             <div className="flex justify-between items-center py-2 border-b border-gray-800">
                                 <div className="flex flex-col">
-                                    <span className="text-gray-300 text-sm font-bold">よく勝負に出す手</span>
+                                    <span className="text-gray-300 text-sm font-bold">お気に入り</span>
                                     <span className="text-[#44FFFF] text-[10px] uppercase tracking-wider opacity-70">FAVORITE HAND</span>
                                 </div>
                                 <span className="text-xl font-bold text-white">
@@ -110,7 +109,7 @@ export function BattlePhase({
 
                             <div className="flex justify-between items-center py-2 border-b border-gray-800">
                                 <div className="flex flex-col">
-                                    <span className="text-gray-300 text-sm font-bold">手を変える可能性</span>
+                                    <span className="text-gray-300 text-sm font-bold">変える確率</span>
                                     <span className="text-[#44FFFF] text-[10px] uppercase tracking-wider opacity-70">CHANGE RATE</span>
                                 </div>
                                 <span className="text-xl font-bold text-white font-mono">
@@ -162,9 +161,6 @@ export function BattlePhase({
 
                             <div className="mt-6">
                                 <span className="text-[#44FFFF] text-xs font-bold tracking-[0.2em] block mb-1">YOUR DECISION</span>
-                                <div className="text-3xl font-bold text-white tracking-widest">
-                                    {getHandDisplayWithEmoji(jankenEvent.finalHostHand as HandType)}
-                                </div>
                             </div>
                         </div>
                     ) : (
@@ -188,7 +184,7 @@ export function BattlePhase({
                         {/* 初期手 */}
                         <div>
                             <div className="flex justify-between items-center mb-2">
-                                <span className="text-[#FF4444] font-bold text-xs uppercase tracking-wider">最初に公開した手</span>
+                                <span className="text-[#FF4444] font-bold text-xs uppercase tracking-wider">選択した手</span>
                             </div>
                             <div className="bg-[#1a1a1a] p-3 rounded border border-gray-800 flex items-center gap-3">
                                 <span className="text-2xl">{getHandDisplayWithEmoji(jankenEvent.initialHand as HandType)}</span>
@@ -209,8 +205,8 @@ export function BattlePhase({
                                     <span className="text-white text-sm font-bold">
                                         {jankenEvent.fakeTarget === 'NONE' && 'なし'}
                                         {jankenEvent.fakeTarget === 'INITIAL_HAND' && '選択した手'}
-                                        {jankenEvent.fakeTarget === 'CHANGE_RATE' && '手を変える確率'}
-                                        {jankenEvent.fakeTarget === 'FAVORITE_HAND' && '選ぶ確率の高い手'}
+                                        {jankenEvent.fakeTarget === 'CHANGE_RATE' && '変える確率'}
+                                        {jankenEvent.fakeTarget === 'FAVORITE_HAND' && 'お気に入り'}
                                     </span>
                                 </div>
 

@@ -140,7 +140,7 @@ export async function getHostStats(userId: string, eventId?: string): Promise<Ho
         }
     }
 
-    // よく出す手を集計
+    // お気に入りを集計
     const handCounts: Record<HandType, number> = {
         ROCK: 0,
         SCISSORS: 0,
@@ -161,7 +161,7 @@ export async function getHostStats(userId: string, eventId?: string): Promise<Ho
     // 最も多く出した手
     const realFavoriteHand = (Object.entries(handCounts).sort((a, b) => b[1] - a[1])[0][0] as HandType) || 'ROCK'
 
-    // 手を変える確率
+    // 変える確率
     const realChangeRate = Math.round((changedCount / logs.length) * 100)
 
     // 偽装データを取得（eventIdが指定されている場合）

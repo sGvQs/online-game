@@ -70,24 +70,24 @@ export function ShowcasePhase({
 
     const SideArea = () => (
         <div className={styles.sideArea()}>
-            <div className="text-[#44FFFF] font-bold text-xl mb-4 border-b-2 border-[#44FFFF] pb-2">{hostName}のデータ (公開)</div>
+            <div className="text-[#44FFFF] font-bold text-xl mb-4 border-b-2 border-[#44FFFF] pb-2">{hostName}のデータ</div>
             {hostStats && (
                 <div>
                     <div className={styles.statRow()}>
-                        <span className={styles.statLabel()}>よく勝負に出す手</span>
+                        <span className={styles.statLabel()}>お気に入り</span>
 
                         {jankenEvent.fakeTarget === 'FAVORITE_HAND' && jankenEvent.fakeFavoriteHandValue
                             ? getHandDisplayWithEmoji(jankenEvent.fakeFavoriteHandValue as HandType)
                             : getHandDisplayWithEmoji(hostStats.favoriteHand as HandType)}
                     </div>
                     <div className={styles.statRow()}>
-                        <span className={styles.statLabel()}>手を変える可能性</span>
+                        <span className={styles.statLabel()}>変える確率</span>
                         {jankenEvent.fakeTarget === 'CHANGE_RATE' && jankenEvent.fakeChangeRateValue
                             ? jankenEvent.fakeChangeRateValue
                             : hostStats.changeRate}%
                     </div>
                     <div className="mt-4 text-xs text-gray-500">
-                        * 全てのデータは{hostName}の過去の動向を正確に表していますが、嘘の情報が紛れています。（初回の手、一番選ぶ可能性が高い手、変える確率、のどれか一つは嘘の可能性が高いです）
+                        * 全てのデータは{hostName}の過去の動向を正確に表していますが、嘘の情報が紛れています。（選択した手、お気に入り、変える確率、のどれか一つは嘘の可能性が高いです）
                     </div>
                 </div>
             )}

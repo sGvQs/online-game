@@ -112,7 +112,7 @@ export type MatchScoreWithUser = Prisma.MatchScoreGetPayload<{
 /** ホストの統計データ（本物と表示用） */
 export interface HostStats {
     favoriteHand: HandType
-    changeRate: number  // 手を変える確率 (0-100)
+    changeRate: number  // 変える確率 (0-100)
     totalGames: number
     // 偽装前の本物のデータ（SETUP画面で表示用）
     realFavoriteHand?: HandType

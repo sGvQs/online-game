@@ -80,7 +80,7 @@ export function FinalDecisionPhase({
                                 <span className="text-gray-400 text-xs uppercase tracking-wider">どれに嘘をついたか</span>
                                 <span className="text-white font-bold text-sm bg-[#FF4444]/20 px-2 py-0.5 rounded border border-[#FF4444]/30">
                                     {jankenEvent.fakeTarget === 'NONE' && 'NONE'}
-                                    {jankenEvent.fakeTarget === 'INITIAL_HAND' && '最初に出した'}
+                                    {jankenEvent.fakeTarget === 'INITIAL_HAND' && '選択した手'}
                                     {jankenEvent.fakeTarget === 'CHANGE_RATE' && '変える確率'}
                                     {jankenEvent.fakeTarget === 'FAVORITE_HAND' && 'お気に入り'}
                                 </span>
@@ -88,7 +88,7 @@ export function FinalDecisionPhase({
 
                             <div className="space-y-2 pt-2 border-t border-[#FF4444]/10">
                                 <div className="flex justify-between items-center">
-                                    <span className="text-gray-500 text-xs">最初に出した</span>
+                                    <span className="text-gray-500 text-xs">選択した手</span>
                                     <span className={cn("font-bold", jankenEvent.fakeTarget === 'INITIAL_HAND' ? "text-[#FF4444]" : "text-gray-300")}>
                                         {jankenEvent.fakeTarget === 'INITIAL_HAND'
                                             ? getHandDisplayWithEmoji(jankenEvent.fakeHandValue as HandType)
@@ -124,7 +124,7 @@ export function FinalDecisionPhase({
                         {hostStats && (
                             <div className="space-y-6">
                                 <div>
-                                    <div className="text-[#44FFFF] text-xs uppercase mb-1 opacity-70">最初に出した</div>
+                                    <div className="text-[#44FFFF] text-xs uppercase mb-1 opacity-70">選択した手</div>
                                     <div className="text-2xl font-bold text-white flex items-center gap-2">
                                         {getHandDisplayWithEmoji(jankenEvent.initialHand as HandType)}
                                     </div>
@@ -216,7 +216,7 @@ export function FinalDecisionPhase({
 
                             <div className="space-y-4 pt-2">
                                 <div className="flex justify-between items-center bg-black/30 p-3 rounded border border-[#FF4444]/10">
-                                    <span className="text-gray-400 text-xs uppercase">最初に出した</span>
+                                    <span className="text-gray-400 text-xs uppercase">選択した手</span>
                                     <span className="font-bold text-[#FF4444]">
                                         {jankenEvent.fakeTarget === 'INITIAL_HAND'
                                             ? getHandDisplayWithEmoji(jankenEvent.fakeHandValue as HandType)

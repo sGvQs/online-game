@@ -158,9 +158,9 @@ export function ResultPhase({
                                     </div>
 
                                     <div className="flex flex-col gap-4">
-                                        {/* 1. 最初に公開した手 */}
+                                        {/* 1. 選択した手 */}
                                         <div className={cn("p-3 rounded-lg border", jankenEvent.fakeTarget === 'INITIAL_HAND' ? "bg-[#1a1a1a] border-[#FF4444]" : "bg-black/20 border-gray-800")}>
-                                            <div className="text-xs text-gray-500 mb-1">最初に公開した手</div>
+                                            <div className="text-xs text-gray-500 mb-1">選択した手</div>
                                             {jankenEvent.fakeTarget === 'INITIAL_HAND' ? (
                                                 <div className="flex items-center justify-center gap-4">
                                                     <div className="text-gray-500 line-through text-lg">{getHandDisplayWithEmoji(jankenEvent.fakeHandValue as HandType)}</div>
@@ -176,9 +176,9 @@ export function ResultPhase({
                                             )}
                                         </div>
 
-                                        {/* 2. 手を変える確率 */}
+                                        {/* 2. 変える確率 */}
                                         <div className={cn("p-3 rounded-lg border", jankenEvent.fakeTarget === 'CHANGE_RATE' ? "bg-[#1a1a1a] border-[#FF4444]" : "bg-black/20 border-gray-800")}>
-                                            <div className="text-xs text-gray-500 mb-1">手を変える確率</div>
+                                            <div className="text-xs text-gray-500 mb-1">変える確率</div>
                                             {jankenEvent.fakeTarget === 'CHANGE_RATE' ? (
                                                 <div className="flex items-center justify-center gap-4">
                                                     <div className="text-gray-500 line-through text-lg">{jankenEvent.fakeChangeRateValue}%</div>
@@ -194,9 +194,9 @@ export function ResultPhase({
                                             )}
                                         </div>
 
-                                        {/* 3. 選ぶ確率の高い手 */}
+                                        {/* 3. お気に入り */}
                                         <div className={cn("p-3 rounded-lg border", jankenEvent.fakeTarget === 'FAVORITE_HAND' ? "bg-[#1a1a1a] border-[#FF4444]" : "bg-black/20 border-gray-800")}>
-                                            <div className="text-xs text-gray-500 mb-1">選ぶ確率の高い手</div>
+                                            <div className="text-xs text-gray-500 mb-1">お気に入り</div>
                                             {jankenEvent.fakeTarget === 'FAVORITE_HAND' ? (
                                                 <div className="flex items-center justify-center gap-4">
                                                     <div className="text-gray-500 line-through text-lg">{getHandDisplayWithEmoji(jankenEvent.fakeFavoriteHandValue as HandType)}</div>
@@ -341,9 +341,9 @@ export function ResultPhase({
                         ) : (
                             <div className="max-w-md mx-auto bg-[#1a1a1a] border border-[#FF4444]/30 rounded-lg p-6">
                                 <div className="flex flex-col gap-4">
-                                    {/* 1. 最初に公開した手 */}
+                                    {/* 1. 選択した手 */}
                                     <div className={cn("p-3 rounded-lg border", jankenEvent.fakeTarget === 'INITIAL_HAND' ? "bg-[#1a1a1a] border-[#FF4444]" : "bg-black/20 border-gray-800")}>
-                                        <div className="text-xs text-gray-500 mb-1">最初に公開した手</div>
+                                        <div className="text-xs text-gray-500 mb-1">選択した手</div>
                                         {jankenEvent.fakeTarget === 'INITIAL_HAND' ? (
                                             <div className="flex items-center justify-center gap-4">
                                                 <div className="text-gray-500 line-through text-lg">{getHandDisplayWithEmoji(jankenEvent.fakeHandValue as HandType)}</div>
@@ -359,9 +359,9 @@ export function ResultPhase({
                                         )}
                                     </div>
 
-                                    {/* 2. 手を変える確率 */}
+                                    {/* 2. 変える確率 */}
                                     <div className={cn("p-3 rounded-lg border", jankenEvent.fakeTarget === 'CHANGE_RATE' ? "bg-[#1a1a1a] border-[#FF4444]" : "bg-black/20 border-gray-800")}>
-                                        <div className="text-xs text-gray-500 mb-1">手を変える確率</div>
+                                        <div className="text-xs text-gray-500 mb-1">変える確率</div>
                                         {jankenEvent.fakeTarget === 'CHANGE_RATE' ? (
                                             <div className="flex items-center justify-center gap-4">
                                                 <div className="text-gray-500 line-through text-lg">{jankenEvent.fakeChangeRateValue}%</div>
@@ -377,9 +377,9 @@ export function ResultPhase({
                                         )}
                                     </div>
 
-                                    {/* 3. 選ぶ確率の高い手 */}
+                                    {/* 3. お気に入り */}
                                     <div className={cn("p-3 rounded-lg border", jankenEvent.fakeTarget === 'FAVORITE_HAND' ? "bg-[#1a1a1a] border-[#FF4444]" : "bg-black/20 border-gray-800")}>
-                                        <div className="text-xs text-gray-500 mb-1">選ぶ確率の高い手</div>
+                                        <div className="text-xs text-gray-500 mb-1">お気に入り</div>
                                         {jankenEvent.fakeTarget === 'FAVORITE_HAND' ? (
                                             <div className="flex items-center justify-center gap-4">
                                                 <div className="text-gray-500 line-through text-lg">{getHandDisplayWithEmoji(jankenEvent.fakeFavoriteHandValue as HandType)}</div>
