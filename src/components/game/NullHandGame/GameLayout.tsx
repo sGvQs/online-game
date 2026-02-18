@@ -1,6 +1,7 @@
 import { ReactNode } from 'react'
 import { nullHandGame } from './styles'
 import { JankenPhase } from '@/shared/types'
+import { motion } from 'framer-motion'
 
 interface GameLayoutProps {
     phase: JankenPhase
@@ -47,11 +48,15 @@ export function GameLayout({ phase, error, children, mainArea, sideArea, hostNam
 
 
             <div className={styles.gameGrid()}>
-                <div className={styles.phaseBox()}>
+                <motion.div
+                    className={styles.phaseBox()}
+                    layout
+                    transition={{ duration: 0.3 }}
+                >
                     <h2 className="text-3xl font-black text-[#FF4444] mb-6 text-center tracking-[0.2em] uppercase drop-shadow-[2px_2px_0_rgba(255,0,0,0.3)]">
                         {getPhaseText(phase)}
                     </h2>
-                </div>
+                </motion.div>
                 {content}
             </div>
         </div>

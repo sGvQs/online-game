@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils'
 import { getHandDisplayWithEmoji } from '../utils'
 import { HandSelectionGrid } from '../HandSelectionGrid'
 import React from 'react'
+import { motion } from 'framer-motion'
 
 interface SetupPhaseProps {
     isCurrentHost: boolean
@@ -108,7 +109,11 @@ export function SetupPhase({
         }
 
         return (
-            <div className={styles.mainArea()}>
+            <motion.div
+                className={styles.mainArea()}
+                layout
+                transition={{ duration: 0.3 }}
+            >
                 <div className="w-full h-full flex flex-col relative">
                     {/* ヘルプボタン（右下に配置） */}
                     <button
@@ -169,7 +174,10 @@ export function SetupPhase({
                         </div>
                     ) : (
                         /* STEP 2: 偽装の選択 */
-                        <div className="flex flex-col h-full animate-in slide-in-from-right duration-300">
+                        <div
+                            className="flex flex-col h-full animate-in slide-in-from-right duration-300"
+                        >
+
                             <h2 className={styles.messageText()}>どの情報を偽装する？</h2>
 
                             <div className="flex-1 flex flex-col justify-center">
@@ -310,13 +318,17 @@ export function SetupPhase({
                         </div>
                     )}
                 </div>
-            </div>
+            </motion.div>
         )
     }
 
     const SideArea = () => {
         return (
-            <div className={styles.sideArea()}>
+            <motion.div
+                className={styles.sideArea()}
+                layout
+                transition={{ duration: 0.3 }}
+            >
                 {isCurrentHost && hostStats && (
                     <div className="flex flex-col gap-4 h-full">
                         {/* 選択した手の表示（ステップ2のみ） */}
@@ -393,7 +405,7 @@ export function SetupPhase({
                         <div className="text-gray-500 text-xs mt-4 text-center">ホストが設定中です...</div>
                     </div>
                 )}
-            </div>
+            </motion.div>
         )
     }
 
