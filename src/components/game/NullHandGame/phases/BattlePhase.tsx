@@ -155,7 +155,7 @@ export function BattlePhase({
                                     <Hand3D
                                         handType={jankenEvent.finalHostHand as HandType}
                                         revealed={true}
-                                        size="small"
+                                        size="medium"
                                     />
                                 </div>
                             </div>

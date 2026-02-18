@@ -2,6 +2,7 @@ import { HandType } from '@/shared/types'
 import { Hand3D } from '../Hand3D'
 import { nullHandGame } from '../styles'
 import { cn } from '@/lib/utils'
+import { useEffect, useState } from 'react'
 
 interface WaitingDisplayProps {
     engLabel?: string
@@ -22,11 +23,28 @@ export const WaitingDisplay = ({
 }: WaitingDisplayProps) => {
     const styles = nullHandGame()
 
+    // Cycle through hands for visual effect/obfuscation
+    const [displayHand, setDisplayHand] = useState<HandType>(handType || 'ROCK')
+
+    useEffect(() => {
+        const hands: HandType[] = ['ROCK', 'PAPER', 'SCISSORS']
+        let currentIndex = hands.indexOf(displayHand)
+        if (currentIndex === -1) currentIndex = 0
+
+
+        const interval = setInterval(() => {
+            currentIndex = (currentIndex + 1) % hands.length
+            setDisplayHand(hands[currentIndex])
+        }, 2000)
+
+        return () => clearInterval(interval)
+    }, [])
+
     return (
         <div className={cn("flex flex-col h-full animate-in fade-in zoom-in duration-300 relative overflow-hidden", className)}>
             {/* Background Hand Animation */}
-            <div className="absolute inset-0 flex items-center justify-center opacity-10 pointer-events-none filter blur-[1px]">
-                <Hand3D handType={handType || null} revealed={!!handType} size="large" isRotating={isRotating} />
+            <div className="absolute inset-0 flex items-center justify-center opacity-20 pointer-events-none filter blur-[2px]">
+                <Hand3D handType={displayHand} revealed={true} size="large" isRotating={isRotating} />
             </div>
 
             <div className="flex-1 flex flex-col items-center justify-center relative z-10 text-center">
