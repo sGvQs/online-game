@@ -303,7 +303,14 @@ export function SetupPhase({
                             <div className="mt-auto pt-4 flex justify-end">
                                 <button
                                     className={styles.button()}
-                                    disabled={!selectedHand || selectedFake === 'NONE' || isProcessing}
+                                    disabled={
+                                        !selectedHand ||
+                                        selectedFake === 'NONE' ||
+                                        (selectedFake === 'INITIAL_HAND' && !fakeDetails.fakeHandValue) ||
+                                        (selectedFake === 'CHANGE_RATE' && fakeDetails.fakeChangeRateValue === undefined) ||
+                                        (selectedFake === 'FAVORITE_HAND' && !fakeDetails.fakeFavoriteHandValue) ||
+                                        isProcessing
+                                    }
                                     onClick={onSubmit}
                                 >
                                     選択を確定
