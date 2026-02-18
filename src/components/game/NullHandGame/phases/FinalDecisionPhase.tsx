@@ -65,7 +65,7 @@ export function FinalDecisionPhase({
                                         "absolute bottom-4 inset-x-0 text-center font-black text-xl tracking-[0.2em] transition-colors",
                                         selectedHand === hand ? "text-[#44FFFF]" : "text-gray-500 group-hover:text-gray-300"
                                     )}>
-                                        {hand}
+                                        {getHandDisplayWithEmoji(hand)}
                                     </div>
 
                                     {/* Selection Indicator */}
@@ -106,18 +106,18 @@ export function FinalDecisionPhase({
 
                         <div className="space-y-4">
                             <div className="flex justify-between items-center">
-                                <span className="text-gray-400 text-xs uppercase tracking-wider">Lied About</span>
+                                <span className="text-gray-400 text-xs uppercase tracking-wider">どれに嘘をついたか</span>
                                 <span className="text-white font-bold text-sm bg-[#FF4444]/20 px-2 py-0.5 rounded border border-[#FF4444]/30">
                                     {jankenEvent.fakeTarget === 'NONE' && 'NONE'}
-                                    {jankenEvent.fakeTarget === 'INITIAL_HAND' && 'INITIAL HAND'}
-                                    {jankenEvent.fakeTarget === 'CHANGE_RATE' && 'CHANGE RATE'}
-                                    {jankenEvent.fakeTarget === 'FAVORITE_HAND' && 'FAVORITE HAND'}
+                                    {jankenEvent.fakeTarget === 'INITIAL_HAND' && '最初に出した'}
+                                    {jankenEvent.fakeTarget === 'CHANGE_RATE' && '変える確率'}
+                                    {jankenEvent.fakeTarget === 'FAVORITE_HAND' && 'お気に入り'}
                                 </span>
                             </div>
 
                             <div className="space-y-2 pt-2 border-t border-[#FF4444]/10">
                                 <div className="flex justify-between items-center">
-                                    <span className="text-gray-500 text-xs">Initial Hand</span>
+                                    <span className="text-gray-500 text-xs">最初に出した</span>
                                     <span className={cn("font-bold", jankenEvent.fakeTarget === 'INITIAL_HAND' ? "text-[#FF4444]" : "text-gray-300")}>
                                         {jankenEvent.fakeTarget === 'INITIAL_HAND'
                                             ? getHandDisplayWithEmoji(jankenEvent.fakeHandValue as HandType)
@@ -125,7 +125,7 @@ export function FinalDecisionPhase({
                                     </span>
                                 </div>
                                 <div className="flex justify-between items-center">
-                                    <span className="text-gray-500 text-xs">Change Rate</span>
+                                    <span className="text-gray-500 text-xs">変える確率</span>
                                     <span className={cn("font-bold", jankenEvent.fakeTarget === 'CHANGE_RATE' ? "text-[#FF4444]" : "text-gray-300")}>
                                         {jankenEvent.fakeTarget === 'CHANGE_RATE'
                                             ? `${jankenEvent.fakeChangeRateValue ?? 0}%`
@@ -133,7 +133,7 @@ export function FinalDecisionPhase({
                                     </span>
                                 </div>
                                 <div className="flex justify-between items-center">
-                                    <span className="text-gray-500 text-xs">Favorite Hand</span>
+                                    <span className="text-gray-500 text-xs">お気に入り</span>
                                     <span className={cn("font-bold", jankenEvent.fakeTarget === 'FAVORITE_HAND' ? "text-[#FF4444]" : "text-gray-300")}>
                                         {jankenEvent.fakeTarget === 'FAVORITE_HAND'
                                             ? getHandDisplayWithEmoji(jankenEvent.fakeFavoriteHandValue as HandType)
@@ -153,7 +153,7 @@ export function FinalDecisionPhase({
                         {hostStats && (
                             <div className="space-y-6">
                                 <div>
-                                    <div className="text-[#44FFFF] text-xs uppercase mb-1 opacity-70">True Initial Hand</div>
+                                    <div className="text-[#44FFFF] text-xs uppercase mb-1 opacity-70">最初に出した</div>
                                     <div className="text-2xl font-bold text-white flex items-center gap-2">
                                         {getHandDisplayWithEmoji(jankenEvent.initialHand as HandType)}
                                     </div>
@@ -161,13 +161,13 @@ export function FinalDecisionPhase({
 
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="bg-black/30 p-3 rounded border border-[#44FFFF]/20">
-                                        <div className="text-gray-500 text-[10px] uppercase mb-1">True Fav. Hand</div>
+                                        <div className="text-gray-500 text-[10px] uppercase mb-1">お気に入り</div>
                                         <div className="text-white font-bold">
                                             {getHandDisplayWithEmoji(hostStats.realFavoriteHand as HandType)}
                                         </div>
                                     </div>
                                     <div className="bg-black/30 p-3 rounded border border-[#44FFFF]/20">
-                                        <div className="text-gray-500 text-[10px] uppercase mb-1">True Chg. Rate</div>
+                                        <div className="text-gray-500 text-[10px] uppercase mb-1">変える確率</div>
                                         <div className="text-white font-bold text-xl font-mono">
                                             {hostStats.realChangeRate}%
                                         </div>
@@ -210,37 +210,17 @@ export function FinalDecisionPhase({
             <div className={styles.mainArea()}>
                 <div className="flex flex-col h-full animate-in fade-in zoom-in duration-300 relative overflow-hidden">
                     {/* Background Hand Animation */}
-                    <div className="absolute inset-0 opacity-10 blur-sm pointer-events-none flex items-center justify-center">
-                        <Hand3D handType={jankenEvent.initialHand as HandType || 'ROCK'} revealed={true} size="large" isRotating={true} />
-                    </div>
+                    <Hand3D handType={jankenEvent.initialHand as HandType || 'ROCK'} revealed={true} size="large" isRotating={true} />
 
                     <div className="flex-1 flex flex-col items-center justify-center relative z-10 text-center">
-                        <h2 className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-[#44FFFF] to-white mb-4 tracking-widest animate-pulse">
+                        <h2 className="text-4xl font-black text-white mb-4 tracking-widest animate-pulse">
                             WAITING FOR HOST
                         </h2>
-                        <div className="w-16 h-1 bg-[#44FFFF] mx-auto mb-8 rounded-full" />
-                        <p className="text-gray-400 text-lg tracking-wider font-light">
-                            {hostName} IS MAKING THE FINAL DECISION...
+                        <p className="text-gray-400 text-sm tracking-wider font-light">
+                            {hostName}は勝負する手を考えています...
                         </p>
 
-                        {/* Visual Loader */}
-                        <div className="flex gap-2 justify-center mt-12">
-                            <motion.div
-                                className="w-3 h-3 bg-[#44FFFF] rounded-full"
-                                animate={{ scale: [1, 1.5, 1], opacity: [0.5, 1, 0.5] }}
-                                transition={{ repeat: Infinity, duration: 1 }}
-                            />
-                            <motion.div
-                                className="w-3 h-3 bg-[#44FFFF] rounded-full"
-                                animate={{ scale: [1, 1.5, 1], opacity: [0.5, 1, 0.5] }}
-                                transition={{ repeat: Infinity, duration: 1, delay: 0.2 }}
-                            />
-                            <motion.div
-                                className="w-3 h-3 bg-[#44FFFF] rounded-full"
-                                animate={{ scale: [1, 1.5, 1], opacity: [0.5, 1, 0.5] }}
-                                transition={{ repeat: Infinity, duration: 1, delay: 0.4 }}
-                            />
-                        </div>
+
                     </div>
                 </div>
             </div>
@@ -265,7 +245,7 @@ export function FinalDecisionPhase({
 
                             <div className="space-y-4 pt-2">
                                 <div className="flex justify-between items-center bg-black/30 p-3 rounded border border-[#FF4444]/10">
-                                    <span className="text-gray-400 text-xs uppercase">Initial Hand</span>
+                                    <span className="text-gray-400 text-xs uppercase">最初に出した</span>
                                     <span className="font-bold text-[#FF4444]">
                                         {jankenEvent.fakeTarget === 'INITIAL_HAND'
                                             ? getHandDisplayWithEmoji(jankenEvent.fakeHandValue as HandType)
@@ -273,7 +253,7 @@ export function FinalDecisionPhase({
                                     </span>
                                 </div>
                                 <div className="flex justify-between items-center bg-black/30 p-3 rounded border border-[#FF4444]/10">
-                                    <span className="text-gray-400 text-xs uppercase">Change Rate</span>
+                                    <span className="text-gray-400 text-xs uppercase">変える確率</span>
                                     <span className="font-bold text-[#FF4444]">
                                         {jankenEvent.fakeTarget === 'CHANGE_RATE'
                                             ? `${jankenEvent.fakeChangeRateValue ?? 0}%`
@@ -281,7 +261,7 @@ export function FinalDecisionPhase({
                                     </span>
                                 </div>
                                 <div className="flex justify-between items-center bg-black/30 p-3 rounded border border-[#FF4444]/10">
-                                    <span className="text-gray-400 text-xs uppercase">Favorite Hand</span>
+                                    <span className="text-gray-400 text-xs uppercase">お気に入り</span>
                                     <span className="font-bold text-[#FF4444]">
                                         {jankenEvent.fakeTarget === 'FAVORITE_HAND'
                                             ? getHandDisplayWithEmoji(jankenEvent.fakeFavoriteHandValue as HandType)
