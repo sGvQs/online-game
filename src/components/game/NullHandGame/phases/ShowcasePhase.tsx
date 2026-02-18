@@ -31,63 +31,97 @@ export function ShowcasePhase({
 
     const MainArea = () => (
         <div className={styles.mainArea()}>
-            <h2 className={styles.messageText()}>{hostName}の手を観察</h2>
-            <div className={styles.handDisplay()}>
-                <div className="w-64 mx-auto">
-                    <Hand3D
-                        handType={
-                            (jankenEvent.fakeTarget === 'INITIAL_HAND' && jankenEvent.fakeHandValue
-                                ? jankenEvent.fakeHandValue
-                                : jankenEvent.initialHand) as HandType
-                        }
-                        revealed={!!jankenEvent.initialHand}
-                        size="medium"
-                    />
+            <div className="text-center mb-8">
+                <h2 className="text-[#44FFFF] text-sm font-bold tracking-[0.3em] mb-2 font-mono">OBSERVATION</h2>
+                <h3 className="text-white text-3xl font-bold tracking-wider">{hostName}の手を観察</h3>
+                <p className="text-gray-500 text-xs mt-1 tracking-[0.2em] font-mono">CHECK THE ENEMY</p>
+            </div>
+
+            <div className="flex-1 flex flex-col items-center justify-center">
+                <div className="relative group w-64 h-64 mx-auto flex items-center justify-center">
+                    <div className="absolute inset-0 bg-[#44FFFF]/5 rounded-full blur-2xl group-hover:bg-[#44FFFF]/10 transition-all duration-500" />
+                    <div className="relative z-10 w-full h-full">
+                        <Hand3D
+                            handType={
+                                (jankenEvent.fakeTarget === 'INITIAL_HAND' && jankenEvent.fakeHandValue
+                                    ? jankenEvent.fakeHandValue
+                                    : jankenEvent.initialHand) as HandType
+                            }
+                            revealed={!!jankenEvent.initialHand}
+                            size="medium"
+                        />
+                    </div>
                 </div>
             </div>
 
-            {!isCurrentHost && (
-                <div className="text-center mt-8">
-                    {isConfirmed ? (
-                        <p className={styles.messageText()}>他のゲストを待っています...</p>
-                    ) : (
-                        <button
-                            className={cn(styles.button(), styles.buttonPrimary())}
-                            disabled={isProcessing}
-                            onClick={onConfirm}
-                        >
-                            確認して次へ
-                        </button>
-                    )}
-                </div>
-            )}
+            <div className="mt-auto pt-8">
+                {!isCurrentHost && (
+                    <div className="text-center">
+                        {isConfirmed ? (
+                            <div className="flex flex-col items-center gap-2 animate-pulse">
+                                <span className="text-[#44FFFF] font-bold tracking-widest text-sm">WAITING FOR OTHERS...</span>
+                                <span className="text-gray-500 text-xs">他のゲストの確認を待っています</span>
+                            </div>
+                        ) : (
+                            <button
+                                className={cn(styles.button(), styles.buttonPrimary(), "w-full max-w-sm mx-auto")}
+                                disabled={isProcessing}
+                                onClick={onConfirm}
+                            >
+                                確認して次へ
+                            </button>
+                        )}
+                    </div>
+                )}
 
-            {isCurrentHost && (
-                <p className={styles.messageText()}>ゲストの確認を待っています...</p>
-            )}
+                {isCurrentHost && (
+                    <div className="flex flex-col items-center gap-2 animate-pulse text-center">
+                        <span className="text-[#44FFFF] font-bold tracking-widest text-sm">WAITING FOR GUESTS...</span>
+                        <span className="text-gray-500 text-xs">ゲストの確認を待っています</span>
+                    </div>
+                )}
+            </div>
         </div>
     )
 
     const SideArea = () => (
         <div className={styles.sideArea()}>
-            <div className="text-[#44FFFF] font-bold text-xl mb-4 border-b-2 border-[#44FFFF] pb-2">{hostName}のデータ</div>
-            {hostStats && (
-                <div>
-                    <div className={styles.statRow()}>
-                        <span className={styles.statLabel()}>お気に入り</span>
+            <div className="mb-6 border-b-2 border-[#44FFFF] pb-2">
+                <h2 className="text-[#44FFFF] text-xs font-bold tracking-[0.2em] mb-1">DATA ANALYSIS</h2>
+                <h3 className="text-white text-xl font-bold">{hostName}のデータ</h3>
+            </div>
 
-                        {jankenEvent.fakeTarget === 'FAVORITE_HAND' && jankenEvent.fakeFavoriteHandValue
-                            ? getHandDisplayWithEmoji(jankenEvent.fakeFavoriteHandValue as HandType)
-                            : getHandDisplayWithEmoji(hostStats.favoriteHand as HandType)}
+            {hostStats && (
+                <div className="space-y-4">
+                    <div className="bg-[#1a1a1a] p-4 rounded border border-gray-800 flex flex-col gap-2 relative overflow-hidden group hover:border-gray-700 transition-colors">
+                        <div className="flex justify-between items-center z-10">
+                            <span className="text-gray-400 text-xs font-bold uppercase tracking-wider">お気に入り</span>
+                            <span className="text-[#44FFFF] text-[10px] font-mono opacity-50">FAVORITE</span>
+                        </div>
+                        <div className="text-3xl font-bold text-white z-10 flex items-center justify-end gap-2">
+                            {jankenEvent.fakeTarget === 'FAVORITE_HAND' && jankenEvent.fakeFavoriteHandValue
+                                ? getHandDisplayWithEmoji(jankenEvent.fakeFavoriteHandValue as HandType)
+                                : getHandDisplayWithEmoji(hostStats.favoriteHand as HandType)}
+                        </div>
                     </div>
-                    <div className={styles.statRow()}>
-                        <span className={styles.statLabel()}>変える確率</span>
-                        {jankenEvent.fakeTarget === 'CHANGE_RATE' && jankenEvent.fakeChangeRateValue
-                            ? jankenEvent.fakeChangeRateValue
-                            : hostStats.changeRate}%
+
+                    <div className="bg-[#1a1a1a] p-4 rounded border border-gray-800 flex flex-col gap-2 relative overflow-hidden group hover:border-gray-700 transition-colors">
+                        <div className="flex justify-between items-center z-10">
+                            <span className="text-gray-400 text-xs font-bold uppercase tracking-wider">変える確率</span>
+                            <span className="text-[#44FFFF] text-[10px] font-mono opacity-50">CHANGE RATE</span>
+                        </div>
+                        <div className="text-3xl font-bold text-white z-10 text-right font-mono">
+                            {jankenEvent.fakeTarget === 'CHANGE_RATE' && jankenEvent.fakeChangeRateValue
+                                ? jankenEvent.fakeChangeRateValue
+                                : hostStats.changeRate}<span className="text-lg text-gray-500 font-bold ml-1">%</span>
+                        </div>
+                        <div className="absolute top-0 right-0 h-1 bg-gradient-to-l from-[#44FFFF] to-transparent w-full opacity-20" />
                     </div>
-                    <div className="mt-4 text-xs text-gray-500">
-                        * 全てのデータは{hostName}の過去の動向を正確に表していますが、嘘の情報が紛れています。（選択した手、お気に入り、変える確率、のどれか一つは嘘の可能性が高いです）
+
+                    <div className="mt-auto pt-6 text-[10px] text-gray-500 leading-relaxed border-t border-gray-800">
+                        * 全てのデータは{hostName}の過去の動向を正確に表していますが、<span className="text-[#FF4444] font-bold">嘘の情報</span>が紛れています。
+                        <br />
+                        <span className="text-[9px] text-gray-600 block mt-1">（選択した手、お気に入り、変える確率、のどれか一つは嘘です）</span>
                     </div>
                 </div>
             )}
