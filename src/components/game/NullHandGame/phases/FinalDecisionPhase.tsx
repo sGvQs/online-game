@@ -39,10 +39,11 @@ export function FinalDecisionPhase({
         const MainArea = () => (
             <div className={styles.mainArea()}>
                 <div className="flex flex-col h-full animate-in fade-in zoom-in duration-300">
-                    <h2 className={styles.messageText()}>FINAL HAND SELECTION</h2>
-                    <p className="text-center text-gray-500 text-sm mb-8 tracking-widest">
-                        最終決断: その手を変えるか、貫くか？
-                    </p>
+                    <div className="text-center mb-8">
+                        <h2 className="text-[#44FFFF] text-sm font-bold tracking-[0.3em] mb-2 font-mono">FINAL SELECTION</h2>
+                        <h3 className="text-white text-3xl font-bold tracking-wider mb-2">最終決断</h3>
+                        <p className="text-gray-500 text-xs mt-1 tracking-[0.2em] font-mono">CHANGE OR KEEP YOUR HAND?</p>
+                    </div>
 
                     <div className="flex-1 flex flex-col items-center justify-center gap-8">
                         <HandSelectionGrid
@@ -206,14 +207,11 @@ export function FinalDecisionPhase({
                     <Hand3D handType={jankenEvent.initialHand as HandType || 'ROCK'} revealed={true} size="large" isRotating={true} />
 
                     <div className="flex-1 flex flex-col items-center justify-center relative z-10 text-center">
-                        <h2 className="text-4xl font-black text-white mb-4 tracking-widest animate-pulse">
-                            WAITING FOR HOST
-                        </h2>
-                        <p className="text-gray-400 text-sm tracking-wider font-light">
-                            {hostName}は勝負する手を考えています...
-                        </p>
-
-
+                        <div className="animate-pulse">
+                            <h2 className="text-[#44FFFF] text-sm font-bold tracking-[0.3em] mb-2 font-mono">WAITING...</h2>
+                            <h3 className="text-white text-4xl font-bold tracking-wider mb-2">ホストの決断を待機中</h3>
+                            <p className="text-gray-600 text-xs font-mono tracking-[0.2em] uppercase">WAITING FOR HOST DECISION</p>
+                        </div>
                     </div>
                 </div>
             </div>
