@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils'
 import { getHandDisplayWithEmoji, judgeHand } from '../utils'
 
 import { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 
 interface ResultPhaseProps {
     jankenEvent: JankenEventWithGuests | null
@@ -54,256 +54,70 @@ export function ResultPhase({
             const isDraw = result === 'DRAW'
 
             return (
-                <div className={styles.mainArea()}>
-                    <AnimatePresence mode="wait">
-                        {/* 結果画面（バトル） - STEP 1 */}
-                        {step === 'RESULT' && (
-                            <motion.div
-                                key="result"
-                                initial={{ opacity: 0, x: -20 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                exit={{ opacity: 0, x: 20 }}
-                                transition={{ duration: 0.3 }}
-                                className="w-full"
-                            >
-                                <div className="flex justify-center items-center gap-8 mt-8">
-                                    {/* ホスト */}
-                                    <div className="flex flex-col items-center">
-                                        <div className="text-[#FF4444] font-bold text-xl mb-4 tracking-widest">{hostName}</div>
-
-                                        {/* 勝敗バッジ */}
-                                        <div className="mb-4 h-8">
-                                            {isHostWin && <span className="bg-[#FF4444] text-black font-bold px-4 py-1 rounded">WIN</span>}
-                                            {isGuestWin && <span className="bg-gray-600 text-white font-bold px-4 py-1 rounded">LOSE</span>}
-                                            {isDraw && <span className="bg-gray-500 text-white font-bold px-4 py-1 rounded">DRAW</span>}
-                                        </div>
-
-                                        <div className={cn("transition-all duration-500", isHostWin || isDraw ? "w-48 h-48" : "w-40 h-40 opacity-70")}>
-                                            <Hand3D
-                                                handType={hostHand}
-                                                revealed={true}
-                                                size={isHostWin || isDraw ? "medium" : "small"}
-                                            />
-                                        </div>
-                                        <div className="text-center text-xl font-bold mt-2">
-                                            {getHandDisplayWithEmoji(hostHand)}
-                                        </div>
-                                    </div>
-
-                                    {/* VS */}
-                                    <div className="text-4xl font-bold text-white italic opacity-50">VS</div>
-
-                                    {/* 自分 */}
-                                    <div className="flex flex-col items-center">
-                                        <div className="text-[#44FFFF] font-bold text-xl mb-4 tracking-widest">自分</div>
-
-                                        {/* 勝敗バッジ */}
-                                        <div className="mb-4 h-8">
-                                            {isGuestWin && <span className="bg-[#44FFFF] text-black font-bold px-4 py-1 rounded">WIN</span>}
-                                            {isHostWin && <span className="bg-gray-600 text-white font-bold px-4 py-1 rounded">LOSE</span>}
-                                            {isDraw && <span className="bg-gray-500 text-white font-bold px-4 py-1 rounded">DRAW</span>}
-                                        </div>
-
-                                        <div className={cn("transition-all duration-500", isGuestWin || isDraw ? "w-48 h-48" : "w-40 h-40 opacity-70")}>
-                                            <Hand3D
-                                                handType={myHand}
-                                                revealed={true}
-                                                size={isGuestWin || isDraw ? "medium" : "small"}
-                                            />
-                                        </div>
-                                        <div className="text-center text-xl font-bold mt-2">
-                                            {getHandDisplayWithEmoji(myHand)}
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="text-center mt-12">
-                                    <button
-                                        className={cn(styles.button(), styles.buttonPrimary())}
-                                        onClick={() => setStep('REVEAL')}
-                                        disabled={isProcessing}
-                                    >
-                                        ネタバラシを見る
-                                    </button>
-                                </div>
-                            </motion.div>
-                        )}
-
-                        {/* ネタバラシ（嘘の公開） - STEP 2 */}
-                        {step === 'REVEAL' && (
-                            <motion.div
-                                key="reveal"
-                                initial={{ opacity: 0, x: 20 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                exit={{ opacity: 0, x: -20 }}
-                                transition={{ duration: 0.3 }}
-                                className="w-full mt-8 border-t border-gray-800 pt-8"
-                            >
-                                <div className="text-center mb-6">
-                                    <h3 className="text-[#FF4444] font-black text-2xl tracking-[0.2em] uppercase border-b-2 border-[#FF4444] inline-block pb-1">
-                                        HOST LIED ABOUT
-                                    </h3>
-                                    <p className="text-gray-500 text-sm mt-2">ホストが仕掛けた「嘘」のおさらい</p>
-                                </div>
-
-                                {jankenEvent.fakeTarget === 'NONE' ? (
-                                    <div className="text-center text-gray-400 italic">
-                                        今回、ホストは嘘をつきませんでした... (正直者です)
-                                    </div>
-                                ) : (
-                                    <div className="max-w-md mx-auto bg-[#111] border border-gray-800 rounded-lg p-6 relative overflow-hidden">
-                                        <div className="absolute top-0 right-0 bg-[#FF4444] text-black text-xs font-bold px-3 py-1">
-                                            LIE DETECTED
-                                        </div>
-
-                                        <div className="flex flex-col gap-4">
-                                            {/* 1. 最初に公開した手 */}
-                                            <div className={cn("p-3 rounded-lg border", jankenEvent.fakeTarget === 'INITIAL_HAND' ? "bg-[#1a1a1a] border-[#FF4444]" : "bg-black/20 border-gray-800")}>
-                                                <div className="text-xs text-gray-500 mb-1">最初に公開した手</div>
-                                                {jankenEvent.fakeTarget === 'INITIAL_HAND' ? (
-                                                    <div className="flex items-center justify-center gap-4">
-                                                        <div className="text-gray-500 line-through text-lg">{getHandDisplayWithEmoji(jankenEvent.fakeHandValue as HandType)}</div>
-                                                        <div className="text-[#FF4444] text-sm">→</div>
-                                                        <div className="text-[#FF4444] font-bold text-xl">{getHandDisplayWithEmoji(jankenEvent.initialHand as HandType)}</div>
-                                                        <div className="text-[#FF4444] text-[10px] font-bold ml-2 px-1.5 py-0.5 border border-[#FF4444] rounded">LIE</div>
-                                                    </div>
-                                                ) : (
-                                                    <div className="flex items-center justify-center gap-2">
-                                                        <div className="text-white font-bold text-lg">{getHandDisplayWithEmoji(jankenEvent.initialHand as HandType)}</div>
-                                                        <div className="text-gray-600 text-[10px] ml-2 px-1.5 py-0.5 border border-gray-700 rounded">TRUE</div>
-                                                    </div>
-                                                )}
-                                            </div>
-
-                                            {/* 2. 手を変える確率 */}
-                                            <div className={cn("p-3 rounded-lg border", jankenEvent.fakeTarget === 'CHANGE_RATE' ? "bg-[#1a1a1a] border-[#FF4444]" : "bg-black/20 border-gray-800")}>
-                                                <div className="text-xs text-gray-500 mb-1">手を変える確率</div>
-                                                {jankenEvent.fakeTarget === 'CHANGE_RATE' ? (
-                                                    <div className="flex items-center justify-center gap-4">
-                                                        <div className="text-gray-500 line-through text-lg">{jankenEvent.fakeChangeRateValue}%</div>
-                                                        <div className="text-[#FF4444] text-sm">→</div>
-                                                        <div className="text-[#FF4444] font-bold text-xl">{hostStats ? `${hostStats.realChangeRate}%` : '?'}</div>
-                                                        <div className="text-[#FF4444] text-[10px] font-bold ml-2 px-1.5 py-0.5 border border-[#FF4444] rounded">LIE</div>
-                                                    </div>
-                                                ) : (
-                                                    <div className="flex items-center justify-center gap-2">
-                                                        <div className="text-white font-bold text-lg">{hostStats ? `${hostStats.realChangeRate}%` : '?'}</div>
-                                                        <div className="text-gray-600 text-[10px] ml-2 px-1.5 py-0.5 border border-gray-700 rounded">TRUE</div>
-                                                    </div>
-                                                )}
-                                            </div>
-
-                                            {/* 3. 選ぶ確率の高い手 */}
-                                            <div className={cn("p-3 rounded-lg border", jankenEvent.fakeTarget === 'FAVORITE_HAND' ? "bg-[#1a1a1a] border-[#FF4444]" : "bg-black/20 border-gray-800")}>
-                                                <div className="text-xs text-gray-500 mb-1">選ぶ確率の高い手</div>
-                                                {jankenEvent.fakeTarget === 'FAVORITE_HAND' ? (
-                                                    <div className="flex items-center justify-center gap-4">
-                                                        <div className="text-gray-500 line-through text-lg">{getHandDisplayWithEmoji(jankenEvent.fakeFavoriteHandValue as HandType)}</div>
-                                                        <div className="text-[#FF4444] text-sm">→</div>
-                                                        <div className="text-[#FF4444] font-bold text-xl">{hostStats ? getHandDisplayWithEmoji(hostStats.realFavoriteHand as HandType) : '?'}</div>
-                                                        <div className="text-[#FF4444] text-[10px] font-bold ml-2 px-1.5 py-0.5 border border-[#FF4444] rounded">LIE</div>
-                                                    </div>
-                                                ) : (
-                                                    <div className="flex items-center justify-center gap-2">
-                                                        <div className="text-white font-bold text-lg">{hostStats ? getHandDisplayWithEmoji(hostStats.realFavoriteHand as HandType) : '?'}</div>
-                                                        <div className="text-gray-600 text-[10px] ml-2 px-1.5 py-0.5 border border-gray-700 rounded">TRUE</div>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
-
-                                <div className="flex justify-center gap-4 mt-12">
-                                    <button
-                                        className={cn(styles.button(), "bg-gray-800 hover:bg-gray-700 text-gray-300 border-gray-600")}
-                                        onClick={() => setStep('RESULT')}
-                                    >
-                                        結果に戻る
-                                    </button>
-                                    <button
-                                        className={cn(styles.button(), styles.buttonPrimary())}
-                                        onClick={onNextRound}
-                                        disabled={isProcessing || isReady}
-                                    >
-                                        {isReady ? `待機中 (${readyCount}/${totalCount})` : '次のラウンドへ'}
-                                    </button>
-                                </div>
-                            </motion.div>
-                        )}
-                    </AnimatePresence>
-                </div>
-            )
-        }
-
-        // ホスト視点または観戦者（フォールバック）
-        // ホストの勝敗を計算
-        let hostStatus: 'WIN' | 'LOSE' | 'DRAW' = 'WIN'
-        let hasGuestWin = false
-        let hasDraw = false
-
-        jankenEvent.guestHands.forEach(gh => {
-            const res = judgeHand(hostHand, gh.hand as HandType)
-            if (res === 'GUEST_WIN') hasGuestWin = true
-            if (res === 'DRAW') hasDraw = true
-        })
-
-        if (hasGuestWin) {
-            hostStatus = 'LOSE'
-        } else if (hasDraw) {
-            hostStatus = 'DRAW'
-        } else {
-            hostStatus = 'WIN'
-        }
-
-        // 観戦者の場合は勝敗を表示しない（常にMedium）
-        const isSpectator = !isCurrentHost && !myHandData
-        const showResult = isCurrentHost // ホストのみ勝敗表示
-
-        // 観戦者ならサイズはmedium固定、ホストなら勝敗に応じて変更
-        const handSize = isSpectator ? 'medium' :
-            (hostStatus === 'LOSE' ? 'small' : 'medium')
-
-        return (
-            <div className={styles.mainArea()}>
-                <AnimatePresence mode="wait">
+                <motion.div className={styles.mainArea()} layout transition={{ duration: 0.3 }}>
                     {/* 結果画面（バトル） - STEP 1 */}
                     {step === 'RESULT' && (
                         <motion.div
-                            key="host-result"
+                            key="result"
                             initial={{ opacity: 0, x: -20 }}
                             animate={{ opacity: 1, x: 0 }}
                             exit={{ opacity: 0, x: 20 }}
                             transition={{ duration: 0.3 }}
+                            layout
                             className="w-full"
                         >
-                            <div className={styles.vsContainer()}>
+                            <div className="flex justify-center items-center gap-8 mt-8">
+                                {/* ホスト */}
                                 <div className="flex flex-col items-center">
-                                    <div className="text-[#FF4444] font-bold text-center mb-2 tracking-widest">{hostName}</div>
+                                    <div className="text-[#FF4444] font-bold text-xl mb-4 tracking-widest">{hostName}</div>
 
-                                    {/* ホスト用勝敗バッジ */}
-                                    {showResult && (
-                                        <div className="mb-4 h-8">
-                                            {hostStatus === 'WIN' && <span className="bg-[#FF4444] text-black font-bold px-4 py-1 rounded">WIN</span>}
-                                            {hostStatus === 'LOSE' && <span className="bg-gray-600 text-white font-bold px-4 py-1 rounded">LOSE</span>}
-                                            {hostStatus === 'DRAW' && <span className="bg-gray-500 text-white font-bold px-4 py-1 rounded">DRAW</span>}
-                                        </div>
-                                    )}
+                                    {/* 勝敗バッジ */}
+                                    <div className="mb-4 h-8">
+                                        {isHostWin && <span className="bg-[#FF4444] text-black font-bold px-4 py-1 rounded">WIN</span>}
+                                        {isGuestWin && <span className="bg-gray-600 text-white font-bold px-4 py-1 rounded">LOSE</span>}
+                                        {isDraw && <span className="bg-gray-500 text-white font-bold px-4 py-1 rounded">DRAW</span>}
+                                    </div>
 
-                                    <div className={cn("transition-all duration-500", isSpectator ? "w-64 mx-auto" : (hostStatus === 'LOSE' ? "w-40 h-40 opacity-70" : "w-48 h-48"))}>
+                                    <div className={cn("transition-all duration-500", isHostWin || isDraw ? "w-48 h-48" : "w-40 h-40 opacity-70")}>
                                         <Hand3D
                                             handType={hostHand}
                                             revealed={true}
-                                            size={handSize}
+                                            size={isHostWin || isDraw ? "medium" : "small"}
                                         />
                                     </div>
                                     <div className="text-center text-xl font-bold mt-2">
                                         {getHandDisplayWithEmoji(hostHand)}
                                     </div>
                                 </div>
+
+                                {/* VS */}
+                                <div className="text-4xl font-bold text-white italic opacity-50">VS</div>
+
+                                {/* 自分 */}
+                                <div className="flex flex-col items-center">
+                                    <div className="text-[#44FFFF] font-bold text-xl mb-4 tracking-widest">自分</div>
+
+                                    {/* 勝敗バッジ */}
+                                    <div className="mb-4 h-8">
+                                        {isGuestWin && <span className="bg-[#44FFFF] text-black font-bold px-4 py-1 rounded">WIN</span>}
+                                        {isHostWin && <span className="bg-gray-600 text-white font-bold px-4 py-1 rounded">LOSE</span>}
+                                        {isDraw && <span className="bg-gray-500 text-white font-bold px-4 py-1 rounded">DRAW</span>}
+                                    </div>
+
+                                    <div className={cn("transition-all duration-500", isGuestWin || isDraw ? "w-48 h-48" : "w-40 h-40 opacity-70")}>
+                                        <Hand3D
+                                            handType={myHand}
+                                            revealed={true}
+                                            size={isGuestWin || isDraw ? "medium" : "small"}
+                                        />
+                                    </div>
+                                    <div className="text-center text-xl font-bold mt-2">
+                                        {getHandDisplayWithEmoji(myHand)}
+                                    </div>
+                                </div>
                             </div>
 
-                            <div className="text-center mt-8">
+                            <div className="text-center mt-12">
                                 <button
                                     className={cn(styles.button(), styles.buttonPrimary())}
                                     onClick={() => setStep('REVEAL')}
@@ -315,29 +129,34 @@ export function ResultPhase({
                         </motion.div>
                     )}
 
-                    {/* ネタバラシ（ホスト視点） - STEP 2 */}
+                    {/* ネタバラシ（嘘の公開） - STEP 2 */}
                     {step === 'REVEAL' && (
                         <motion.div
-                            key="host-reveal"
+                            key="reveal"
                             initial={{ opacity: 0, x: 20 }}
                             animate={{ opacity: 1, x: 0 }}
                             exit={{ opacity: 0, x: -20 }}
                             transition={{ duration: 0.3 }}
-                            className="w-full mt-8 border-t border-gray-800 pt-8"
+                            layout
+                            className="w-full"
                         >
                             <div className="text-center mb-6">
                                 <h3 className="text-[#FF4444] font-black text-2xl tracking-[0.2em] uppercase border-b-2 border-[#FF4444] inline-block pb-1">
-                                    YOU LIED ABOUT
+                                    HOST LIED ABOUT
                                 </h3>
-                                <p className="text-gray-500 text-sm mt-2">あなたのついた嘘の結果</p>
+                                <p className="text-gray-500 text-sm mt-2">ホストが仕掛けた「嘘」のおさらい</p>
                             </div>
 
                             {jankenEvent.fakeTarget === 'NONE' ? (
                                 <div className="text-center text-gray-400 italic">
-                                    あなたは嘘をつきませんでした
+                                    今回、ホストは嘘をつきませんでした... (正直者です)
                                 </div>
                             ) : (
-                                <div className="max-w-md mx-auto bg-[#1a1a1a] border border-[#FF4444]/30 rounded-lg p-6">
+                                <div className="max-w-md mx-auto bg-[#111] border border-gray-800 rounded-lg p-6 relative overflow-hidden">
+                                    <div className="absolute top-0 right-0 bg-[#FF4444] text-black text-xs font-bold px-3 py-1">
+                                        LIE DETECTED
+                                    </div>
+
                                     <div className="flex flex-col gap-4">
                                         {/* 1. 最初に公開した手 */}
                                         <div className={cn("p-3 rounded-lg border", jankenEvent.fakeTarget === 'INITIAL_HAND' ? "bg-[#1a1a1a] border-[#FF4444]" : "bg-black/20 border-gray-800")}>
@@ -396,7 +215,7 @@ export function ResultPhase({
                                 </div>
                             )}
 
-                            <div className="flex justify-center gap-4 mt-8">
+                            <div className="flex justify-center gap-4 mt-12">
                                 <button
                                     className={cn(styles.button(), "bg-gray-800 hover:bg-gray-700 text-gray-300 border-gray-600")}
                                     onClick={() => setStep('RESULT')}
@@ -413,19 +232,203 @@ export function ResultPhase({
                             </div>
                         </motion.div>
                     )}
-                </AnimatePresence>
-            </div >
+                </motion.div >
+
+            )
+        }
+
+        // ホスト視点または観戦者（フォールバック）
+        // ホストの勝敗を計算
+        let hostStatus: 'WIN' | 'LOSE' | 'DRAW' = 'WIN'
+        let hasGuestWin = false
+        let hasDraw = false
+
+        jankenEvent.guestHands.forEach(gh => {
+            const res = judgeHand(hostHand, gh.hand as HandType)
+            if (res === 'GUEST_WIN') hasGuestWin = true
+            if (res === 'DRAW') hasDraw = true
+        })
+
+        if (hasGuestWin) {
+            hostStatus = 'LOSE'
+        } else if (hasDraw) {
+            hostStatus = 'DRAW'
+        } else {
+            hostStatus = 'WIN'
+        }
+
+        // 観戦者の場合は勝敗を表示しない（常にMedium）
+        const isSpectator = !isCurrentHost && !myHandData
+        const showResult = isCurrentHost // ホストのみ勝敗表示
+
+        // 観戦者ならサイズはmedium固定、ホストなら勝敗に応じて変更
+        const handSize = isSpectator ? 'medium' :
+            (hostStatus === 'LOSE' ? 'small' : 'medium')
+
+        return (
+            <motion.div className={styles.mainArea()} layout transition={{ duration: 0.3 }}>
+                {/* 結果画面（バトル） - STEP 1 */}
+                {step === 'RESULT' && (
+                    <motion.div
+                        key="host-result"
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: 20 }}
+                        transition={{ duration: 0.3 }}
+                        layout
+                        className="w-full"
+                    >
+                        <div className={styles.vsContainer()}>
+                            <div className="flex flex-col items-center">
+                                <div className="text-[#FF4444] font-bold text-center mb-2 tracking-widest">{hostName}</div>
+
+                                {/* ホスト用勝敗バッジ */}
+                                {showResult && (
+                                    <div className="mb-4 h-8">
+                                        {hostStatus === 'WIN' && <span className="bg-[#FF4444] text-black font-bold px-4 py-1 rounded">WIN</span>}
+                                        {hostStatus === 'LOSE' && <span className="bg-gray-600 text-white font-bold px-4 py-1 rounded">LOSE</span>}
+                                        {hostStatus === 'DRAW' && <span className="bg-gray-500 text-white font-bold px-4 py-1 rounded">DRAW</span>}
+                                    </div>
+                                )}
+
+                                <div className={cn("transition-all duration-500", isSpectator ? "w-64 mx-auto" : (hostStatus === 'LOSE' ? "w-40 h-40 opacity-70" : "w-48 h-48"))}>
+                                    <Hand3D
+                                        handType={hostHand}
+                                        revealed={true}
+                                        size={handSize}
+                                    />
+                                </div>
+                                <div className="text-center text-xl font-bold mt-2">
+                                    {getHandDisplayWithEmoji(hostHand)}
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="text-center mt-8">
+                            <button
+                                className={cn(styles.button(), styles.buttonPrimary())}
+                                onClick={() => setStep('REVEAL')}
+                                disabled={isProcessing}
+                            >
+                                ネタバラシを見る
+                            </button>
+                        </div>
+                    </motion.div>
+                )}
+
+                {/* ネタバラシ（ホスト視点） - STEP 2 */}
+                {step === 'REVEAL' && (
+                    <motion.div
+                        key="host-reveal"
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: -20 }}
+                        transition={{ duration: 0.3 }}
+                        layout
+                        className="w-full"
+                    >
+                        <div className="text-center mb-6">
+                            <h3 className="text-[#FF4444] font-black text-2xl tracking-[0.2em] uppercase border-b-2 border-[#FF4444] inline-block pb-1">
+                                YOU LIED ABOUT
+                            </h3>
+                            <p className="text-gray-500 text-sm mt-2">あなたのついた嘘の結果</p>
+                        </div>
+
+                        {jankenEvent.fakeTarget === 'NONE' ? (
+                            <div className="text-center text-gray-400 italic">
+                                あなたは嘘をつきませんでした
+                            </div>
+                        ) : (
+                            <div className="max-w-md mx-auto bg-[#1a1a1a] border border-[#FF4444]/30 rounded-lg p-6">
+                                <div className="flex flex-col gap-4">
+                                    {/* 1. 最初に公開した手 */}
+                                    <div className={cn("p-3 rounded-lg border", jankenEvent.fakeTarget === 'INITIAL_HAND' ? "bg-[#1a1a1a] border-[#FF4444]" : "bg-black/20 border-gray-800")}>
+                                        <div className="text-xs text-gray-500 mb-1">最初に公開した手</div>
+                                        {jankenEvent.fakeTarget === 'INITIAL_HAND' ? (
+                                            <div className="flex items-center justify-center gap-4">
+                                                <div className="text-gray-500 line-through text-lg">{getHandDisplayWithEmoji(jankenEvent.fakeHandValue as HandType)}</div>
+                                                <div className="text-[#FF4444] text-sm">→</div>
+                                                <div className="text-[#FF4444] font-bold text-xl">{getHandDisplayWithEmoji(jankenEvent.initialHand as HandType)}</div>
+                                                <div className="text-[#FF4444] text-[10px] font-bold ml-2 px-1.5 py-0.5 border border-[#FF4444] rounded">LIE</div>
+                                            </div>
+                                        ) : (
+                                            <div className="flex items-center justify-center gap-2">
+                                                <div className="text-white font-bold text-lg">{getHandDisplayWithEmoji(jankenEvent.initialHand as HandType)}</div>
+                                                <div className="text-gray-600 text-[10px] ml-2 px-1.5 py-0.5 border border-gray-700 rounded">TRUE</div>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* 2. 手を変える確率 */}
+                                    <div className={cn("p-3 rounded-lg border", jankenEvent.fakeTarget === 'CHANGE_RATE' ? "bg-[#1a1a1a] border-[#FF4444]" : "bg-black/20 border-gray-800")}>
+                                        <div className="text-xs text-gray-500 mb-1">手を変える確率</div>
+                                        {jankenEvent.fakeTarget === 'CHANGE_RATE' ? (
+                                            <div className="flex items-center justify-center gap-4">
+                                                <div className="text-gray-500 line-through text-lg">{jankenEvent.fakeChangeRateValue}%</div>
+                                                <div className="text-[#FF4444] text-sm">→</div>
+                                                <div className="text-[#FF4444] font-bold text-xl">{hostStats ? `${hostStats.realChangeRate}%` : '?'}</div>
+                                                <div className="text-[#FF4444] text-[10px] font-bold ml-2 px-1.5 py-0.5 border border-[#FF4444] rounded">LIE</div>
+                                            </div>
+                                        ) : (
+                                            <div className="flex items-center justify-center gap-2">
+                                                <div className="text-white font-bold text-lg">{hostStats ? `${hostStats.realChangeRate}%` : '?'}</div>
+                                                <div className="text-gray-600 text-[10px] ml-2 px-1.5 py-0.5 border border-gray-700 rounded">TRUE</div>
+                                            </div>
+                                        )}
+                                    </div>
+
+                                    {/* 3. 選ぶ確率の高い手 */}
+                                    <div className={cn("p-3 rounded-lg border", jankenEvent.fakeTarget === 'FAVORITE_HAND' ? "bg-[#1a1a1a] border-[#FF4444]" : "bg-black/20 border-gray-800")}>
+                                        <div className="text-xs text-gray-500 mb-1">選ぶ確率の高い手</div>
+                                        {jankenEvent.fakeTarget === 'FAVORITE_HAND' ? (
+                                            <div className="flex items-center justify-center gap-4">
+                                                <div className="text-gray-500 line-through text-lg">{getHandDisplayWithEmoji(jankenEvent.fakeFavoriteHandValue as HandType)}</div>
+                                                <div className="text-[#FF4444] text-sm">→</div>
+                                                <div className="text-[#FF4444] font-bold text-xl">{hostStats ? getHandDisplayWithEmoji(hostStats.realFavoriteHand as HandType) : '?'}</div>
+                                                <div className="text-[#FF4444] text-[10px] font-bold ml-2 px-1.5 py-0.5 border border-[#FF4444] rounded">LIE</div>
+                                            </div>
+                                        ) : (
+                                            <div className="flex items-center justify-center gap-2">
+                                                <div className="text-white font-bold text-lg">{hostStats ? getHandDisplayWithEmoji(hostStats.realFavoriteHand as HandType) : '?'}</div>
+                                                <div className="text-gray-600 text-[10px] ml-2 px-1.5 py-0.5 border border-gray-700 rounded">TRUE</div>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        <div className="flex justify-center gap-4 mt-8">
+                            <button
+                                className={cn(styles.button(), "bg-gray-800 hover:bg-gray-700 text-gray-300 border-gray-600")}
+                                onClick={() => setStep('RESULT')}
+                            >
+                                結果に戻る
+                            </button>
+                            <button
+                                className={cn(styles.button(), styles.buttonPrimary())}
+                                onClick={onNextRound}
+                                disabled={isProcessing || isReady}
+                            >
+                                {isReady ? `待機中 (${readyCount}/${totalCount})` : '次のラウンドへ'}
+                            </button>
+                        </div>
+                    </motion.div>
+                )}
+            </motion.div >
+
         )
     }
 
     const SideArea = () => (
-        <div className={styles.sideArea()}>
+        <motion.div className={styles.sideArea()} layout transition={{ duration: 0.3 }}>
             <div className="text-[#44FFFF] font-bold text-xl mb-4 border-b-2 border-[#44FFFF] pb-2">ラウンド結果</div>
             {currentScores.length > 0 && (
-                <div className="space-y-4">
+                <motion.div className="space-y-4" layout>
                     {currentScores.map((score, index) => (
-                        <div
+                        <motion.div
                             key={score.userId}
+                            layout
                             className={cn(
                                 "flex justify-between items-center p-4 border-l-4",
                                 score.points > 0 ? "bg-[#FF4444]/20 border-[#FF4444]" : "bg-gray-900 border-gray-700"
@@ -448,11 +451,11 @@ export function ResultPhase({
                             <span className="text-[#44FFFF] font-bold font-mono text-2xl">
                                 {score.points > 0 ? `+${score.points}` : '0'} 点
                             </span>
-                        </div>
+                        </motion.div>
                     ))}
-                </div>
+                </motion.div>
             )}
-        </div>
+        </motion.div>
     )
 
     return (

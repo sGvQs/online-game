@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { HandType } from '@/shared/types'
 import { Hand3D } from './Hand3D'
 import { nullHandGame } from './styles'
