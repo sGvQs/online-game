@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils'
 import { getHandDisplayWithEmoji, judgeHand } from '../utils'
 
 import { useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 
 interface ResultPhaseProps {
     jankenEvent: JankenEventWithGuests | null
@@ -433,65 +433,63 @@ export function ResultPhase({
 
             {currentScores.length > 0 && (
                 <motion.div className="space-y-3" layout>
-                    <AnimatePresence>
-                        {currentScores.map((score, index) => {
-                            const isMe = score.userId === currentUserId
-                            const isWinner = score.points > 0
+                    {currentScores.map((score, index) => {
+                        const isMe = score.userId === currentUserId
+                        const isWinner = score.points > 0
 
-                            // Find hand played by this user (only relevant for host view or self)
-                            const userHandData = jankenEvent.guestHands.find(g => g.userId === score.userId)
-                            const handPlayed = userHandData?.hand as HandType | undefined
+                        // Find hand played by this user (only relevant for host view or self)
+                        const userHandData = jankenEvent.guestHands.find(g => g.userId === score.userId)
+                        const handPlayed = userHandData?.hand as HandType | undefined
 
-                            // Host sees everyone's hands. Guests see only their own if needed (though current logic only shows for host).
-                            const showHand = isCurrentHost && handPlayed
+                        // Host sees everyone's hands. Guests see only their own if needed (though current logic only shows for host).
+                        const showHand = isCurrentHost && handPlayed
 
-                            return (
-                                <motion.div
-                                    key={score.userId}
-                                    layout
-                                    initial={{ opacity: 0, x: 20 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    transition={{ duration: 0.3, delay: index * 0.1 }}
-                                    className={cn(
-                                        "flex justify-between items-center p-3 rounded transition-colors relative overflow-hidden group",
-                                        isWinner
-                                            ? "bg-[#FF4444]/10"
-                                            : "bg-white/5",
-                                        isMe && !isWinner && "border border-gray-600"
-                                    )}
-                                >
-                                    {/* Winner highlight effect */}
-                                    {isWinner && (
-                                        <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#FF4444]" />
-                                    )}
+                        return (
+                            <motion.div
+                                key={score.userId}
+                                layout
+                                initial={{ opacity: 0, x: 20 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ duration: 0.3, delay: index * 0.1 }}
+                                className={cn(
+                                    "flex justify-between items-center p-3 rounded transition-colors relative overflow-hidden group",
+                                    isWinner
+                                        ? "bg-[#FF4444]/10"
+                                        : "bg-white/5",
+                                    isMe && !isWinner && "border border-gray-600"
+                                )}
+                            >
+                                {/* Winner highlight effect */}
+                                {isWinner && (
+                                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#FF4444]" />
+                                )}
 
-                                    <div className="flex flex-col gap-1 z-10 pl-2">
-                                        <div className="flex items-center gap-2">
-                                            <span className={cn("font-bold text-sm tracking-wide", isMe ? "text-white" : "text-gray-300")}>
-                                                {score.user.name}
-                                            </span>
-                                            {isMe && (
-                                                <span className="text-[10px] bg-gray-800 text-gray-400 border border-gray-700 px-1.5 py-0.5 rounded font-mono">YOU</span>
-                                            )}
-                                        </div>
-
-                                        {showHand && (
-                                            <div className="text-sm text-gray-500 flex items-center gap-2">
-                                                <span className="text-lg leading-none">{getHandDisplayWithEmoji(handPlayed)}</span>
-                                            </div>
+                                <div className="flex flex-col gap-1 z-10 pl-2">
+                                    <div className="flex items-center gap-2">
+                                        <span className={cn("font-bold text-sm tracking-wide", isMe ? "text-white" : "text-gray-300")}>
+                                            {score.user.name}
+                                        </span>
+                                        {isMe && (
+                                            <span className="text-[10px] bg-gray-800 text-gray-400 border border-gray-700 px-1.5 py-0.5 rounded font-mono">YOU</span>
                                         )}
                                     </div>
 
-                                    <div className="flex flex-col items-end z-10 pr-2">
-                                        <span className={cn("font-black font-mono text-xl", isWinner ? "text-[#FF4444]" : "text-gray-500")}>
-                                            {score.points > 0 ? `+${score.points}` : '0'}
-                                        </span>
-                                        <span className="text-[10px] text-gray-700 font-bold uppercase tracking-wider">PTS</span>
-                                    </div>
-                                </motion.div>
-                            )
-                        })}
-                    </AnimatePresence>
+                                    {showHand && (
+                                        <div className="text-sm text-gray-500 flex items-center gap-2">
+                                            <span className="text-lg leading-none">{getHandDisplayWithEmoji(handPlayed)}</span>
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="flex flex-col items-end z-10 pr-2">
+                                    <span className={cn("font-black font-mono text-xl", isWinner ? "text-[#FF4444]" : "text-gray-500")}>
+                                        {score.points > 0 ? `+${score.points}` : '0'}
+                                    </span>
+                                    <span className="text-[10px] text-gray-700 font-bold uppercase tracking-wider">PTS</span>
+                                </div>
+                            </motion.div>
+                        )
+                    })}
                 </motion.div>
             )}
 
