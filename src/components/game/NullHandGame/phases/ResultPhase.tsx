@@ -3,6 +3,7 @@ import { Hand3D } from '../Hand3D'
 import { nullHandGame } from '../styles'
 import { cn } from '@/lib/utils'
 import { getHandDisplayWithEmoji, judgeHand } from '../utils'
+import { LieRevealCard } from '../LieRevealCard'
 
 import { useState } from 'react'
 import { motion } from 'framer-motion'
@@ -152,67 +153,7 @@ export function ResultPhase({
                                     今回、ホストは嘘をつきませんでした... (正直者です)
                                 </div>
                             ) : (
-                                <div className="max-w-md mx-auto bg-[#111] border border-gray-800 rounded-lg p-6 relative overflow-hidden">
-                                    <div className="absolute top-0 right-0 bg-[#FF4444] text-black text-xs font-bold px-3 py-1">
-                                        LIE DETECTED
-                                    </div>
-
-                                    <div className="flex flex-col gap-4">
-                                        {/* 1. 選択した手 */}
-                                        <div className={cn("p-3 rounded-lg border", jankenEvent.fakeTarget === 'INITIAL_HAND' ? "bg-[#1a1a1a] border-[#FF4444]" : "bg-black/20 border-gray-800")}>
-                                            <div className="text-xs text-gray-500 mb-1">選択した手</div>
-                                            {jankenEvent.fakeTarget === 'INITIAL_HAND' ? (
-                                                <div className="flex items-center justify-center gap-4">
-                                                    <div className="text-gray-500 line-through text-lg">{getHandDisplayWithEmoji(jankenEvent.initialHand as HandType)}</div>
-                                                    <div className="text-[#FF4444] text-sm">→</div>
-                                                    <div className="text-[#FF4444] font-bold text-xl">{getHandDisplayWithEmoji(jankenEvent.fakeHandValue as HandType)}</div>
-                                                    <div className="text-[#FF4444] text-[10px] font-bold ml-2 px-1.5 py-0.5 border border-[#FF4444] rounded">LIE</div>
-                                                </div>
-                                            ) : (
-                                                <div className="flex items-center justify-center gap-2">
-                                                    <div className="text-white font-bold text-lg">{getHandDisplayWithEmoji(jankenEvent.initialHand as HandType)}</div>
-                                                    <div className="text-gray-600 text-[10px] ml-2 px-1.5 py-0.5 border border-gray-700 rounded">TRUE</div>
-                                                </div>
-                                            )}
-                                        </div>
-
-                                        {/* 2. 変える確率 */}
-                                        <div className={cn("p-3 rounded-lg border", jankenEvent.fakeTarget === 'CHANGE_RATE' ? "bg-[#1a1a1a] border-[#FF4444]" : "bg-black/20 border-gray-800")}>
-                                            <div className="text-xs text-gray-500 mb-1">変える確率</div>
-                                            {jankenEvent.fakeTarget === 'CHANGE_RATE' ? (
-                                                <div className="flex items-center justify-center gap-4">
-                                                    <div className="text-gray-500 line-through text-lg">{hostStats ? `${hostStats.realChangeRate}%` : '?'}%</div>
-                                                    <div className="text-[#FF4444] text-sm">→</div>
-                                                    <div className="text-[#FF4444] font-bold text-xl">{jankenEvent.fakeChangeRateValue}%</div>
-                                                    <div className="text-[#FF4444] text-[10px] font-bold ml-2 px-1.5 py-0.5 border border-[#FF4444] rounded">LIE</div>
-                                                </div>
-                                            ) : (
-                                                <div className="flex items-center justify-center gap-2">
-                                                    <div className="text-white font-bold text-lg">{hostStats ? `${hostStats.realChangeRate}%` : '?'}</div>
-                                                    <div className="text-gray-600 text-[10px] ml-2 px-1.5 py-0.5 border border-gray-700 rounded">TRUE</div>
-                                                </div>
-                                            )}
-                                        </div>
-
-                                        {/* 3. お気に入り */}
-                                        <div className={cn("p-3 rounded-lg border", jankenEvent.fakeTarget === 'FAVORITE_HAND' ? "bg-[#1a1a1a] border-[#FF4444]" : "bg-black/20 border-gray-800")}>
-                                            <div className="text-xs text-gray-500 mb-1">お気に入り</div>
-                                            {jankenEvent.fakeTarget === 'FAVORITE_HAND' ? (
-                                                <div className="flex items-center justify-center gap-4">
-                                                    <div className="text-gray-500 line-through text-lg">{hostStats ? getHandDisplayWithEmoji(hostStats.realFavoriteHand as HandType) : '?'}</div>
-                                                    <div className="text-[#FF4444] text-sm">→</div>
-                                                    <div className="text-[#FF4444] font-bold text-xl">{getHandDisplayWithEmoji(jankenEvent.fakeFavoriteHandValue as HandType)}</div>
-                                                    <div className="text-[#FF4444] text-[10px] font-bold ml-2 px-1.5 py-0.5 border border-[#FF4444] rounded">LIE</div>
-                                                </div>
-                                            ) : (
-                                                <div className="flex items-center justify-center gap-2">
-                                                    <div className="text-white font-bold text-lg">{hostStats ? getHandDisplayWithEmoji(hostStats.realFavoriteHand as HandType) : '?'}</div>
-                                                    <div className="text-gray-600 text-[10px] ml-2 px-1.5 py-0.5 border border-gray-700 rounded">TRUE</div>
-                                                </div>
-                                            )}
-                                        </div>
-                                    </div>
-                                </div>
+                                <LieRevealCard jankenEvent={jankenEvent} hostStats={hostStats} />
                             )}
 
                             <div className="flex justify-center gap-4 mt-12">
@@ -339,63 +280,7 @@ export function ResultPhase({
                                 あなたは嘘をつきませんでした
                             </div>
                         ) : (
-                            <div className="max-w-md mx-auto bg-[#1a1a1a] border border-[#FF4444]/30 rounded-lg p-6">
-                                <div className="flex flex-col gap-4">
-                                    {/* 1. 選択した手 */}
-                                    <div className={cn("p-3 rounded-lg border", jankenEvent.fakeTarget === 'INITIAL_HAND' ? "bg-[#1a1a1a] border-[#FF4444]" : "bg-black/20 border-gray-800")}>
-                                        <div className="text-xs text-gray-500 mb-1">選択した手</div>
-                                        {jankenEvent.fakeTarget === 'INITIAL_HAND' ? (
-                                            <div className="flex items-center justify-center gap-4">
-                                                <div className="text-gray-500 line-through text-lg">{getHandDisplayWithEmoji(jankenEvent.fakeHandValue as HandType)}</div>
-                                                <div className="text-[#FF4444] text-sm">→</div>
-                                                <div className="text-[#FF4444] font-bold text-xl">{getHandDisplayWithEmoji(jankenEvent.initialHand as HandType)}</div>
-                                                <div className="text-[#FF4444] text-[10px] font-bold ml-2 px-1.5 py-0.5 border border-[#FF4444] rounded">LIE</div>
-                                            </div>
-                                        ) : (
-                                            <div className="flex items-center justify-center gap-2">
-                                                <div className="text-white font-bold text-lg">{getHandDisplayWithEmoji(jankenEvent.initialHand as HandType)}</div>
-                                                <div className="text-gray-600 text-[10px] ml-2 px-1.5 py-0.5 border border-gray-700 rounded">TRUE</div>
-                                            </div>
-                                        )}
-                                    </div>
-
-                                    {/* 2. 変える確率 */}
-                                    <div className={cn("p-3 rounded-lg border", jankenEvent.fakeTarget === 'CHANGE_RATE' ? "bg-[#1a1a1a] border-[#FF4444]" : "bg-black/20 border-gray-800")}>
-                                        <div className="text-xs text-gray-500 mb-1">変える確率</div>
-                                        {jankenEvent.fakeTarget === 'CHANGE_RATE' ? (
-                                            <div className="flex items-center justify-center gap-4">
-                                                <div className="text-gray-500 line-through text-lg">{jankenEvent.fakeChangeRateValue}%</div>
-                                                <div className="text-[#FF4444] text-sm">→</div>
-                                                <div className="text-[#FF4444] font-bold text-xl">{hostStats ? `${hostStats.realChangeRate}%` : '?'}</div>
-                                                <div className="text-[#FF4444] text-[10px] font-bold ml-2 px-1.5 py-0.5 border border-[#FF4444] rounded">LIE</div>
-                                            </div>
-                                        ) : (
-                                            <div className="flex items-center justify-center gap-2">
-                                                <div className="text-white font-bold text-lg">{hostStats ? `${hostStats.realChangeRate}%` : '?'}</div>
-                                                <div className="text-gray-600 text-[10px] ml-2 px-1.5 py-0.5 border border-gray-700 rounded">TRUE</div>
-                                            </div>
-                                        )}
-                                    </div>
-
-                                    {/* 3. お気に入り */}
-                                    <div className={cn("p-3 rounded-lg border", jankenEvent.fakeTarget === 'FAVORITE_HAND' ? "bg-[#1a1a1a] border-[#FF4444]" : "bg-black/20 border-gray-800")}>
-                                        <div className="text-xs text-gray-500 mb-1">お気に入り</div>
-                                        {jankenEvent.fakeTarget === 'FAVORITE_HAND' ? (
-                                            <div className="flex items-center justify-center gap-4">
-                                                <div className="text-gray-500 line-through text-lg">{getHandDisplayWithEmoji(jankenEvent.fakeFavoriteHandValue as HandType)}</div>
-                                                <div className="text-[#FF4444] text-sm">→</div>
-                                                <div className="text-[#FF4444] font-bold text-xl">{hostStats ? getHandDisplayWithEmoji(hostStats.realFavoriteHand as HandType) : '?'}</div>
-                                                <div className="text-[#FF4444] text-[10px] font-bold ml-2 px-1.5 py-0.5 border border-[#FF4444] rounded">LIE</div>
-                                            </div>
-                                        ) : (
-                                            <div className="flex items-center justify-center gap-2">
-                                                <div className="text-white font-bold text-lg">{hostStats ? getHandDisplayWithEmoji(hostStats.realFavoriteHand as HandType) : '?'}</div>
-                                                <div className="text-gray-600 text-[10px] ml-2 px-1.5 py-0.5 border border-gray-700 rounded">TRUE</div>
-                                            </div>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
+                            <LieRevealCard jankenEvent={jankenEvent} hostStats={hostStats} />
                         )}
 
                         <div className="flex justify-center gap-4 mt-8">
