@@ -5,7 +5,7 @@ import { cn } from '@/lib/utils'
 import { getHandDisplayWithEmoji, judgeHand } from '../utils'
 
 import { useState } from 'react'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 
 interface ResultPhaseProps {
     jankenEvent: JankenEventWithGuests | null
@@ -421,40 +421,87 @@ export function ResultPhase({
     }
 
     const SideArea = () => (
-        <motion.div className={styles.sideArea()} layout transition={{ duration: 0.3 }}>
-            <div className="text-[#44FFFF] font-bold text-xl mb-4 border-b-2 border-[#44FFFF] pb-2">ラウンド結果</div>
+        <motion.div
+            className={styles.sideArea()}
+            layout
+            transition={{ duration: 0.3 }}
+        >
+            <div className="mb-4 border-b-2 border-[#44FFFF] pb-2">
+                <h2 className="text-[#44FFFF] text-xs font-bold tracking-[0.2em] mb-1">ROUND RESULT</h2>
+                <h3 className="text-white text-xl font-bold">ラウンド結果</h3>
+            </div>
+
             {currentScores.length > 0 && (
-                <motion.div className="space-y-4" layout>
-                    {currentScores.map((score, index) => (
-                        <motion.div
-                            key={score.userId}
-                            layout
-                            className={cn(
-                                "flex justify-between items-center p-4 border-l-4",
-                                score.points > 0 ? "bg-[#FF4444]/20 border-[#FF4444]" : "bg-gray-900 border-gray-700"
-                            )}
-                        >
-                            <div className="flex flex-col gap-1">
-                                <div className="flex items-center gap-3">
-                                    <span className="text-white font-mono text-lg">{score.user.name}</span>
-                                </div>
-                                {/* ホストの場合のみ、ゲストの手を表示 */}
-                                {isCurrentHost && (
-                                    <div className="text-sm text-gray-400 pl-2">
-                                        {(() => {
-                                            const guestHand = jankenEvent.guestHands.find(g => g.userId === score.userId)?.hand
-                                            return guestHand ? getHandDisplayWithEmoji(guestHand as HandType) : '自分'
-                                        })()}
+                <motion.div className="space-y-3" layout>
+                    <AnimatePresence>
+                        {currentScores.map((score, index) => {
+                            const isMe = score.userId === currentUserId
+                            const isWinner = score.points > 0
+
+                            // Find hand played by this user (only relevant for host view or self)
+                            const userHandData = jankenEvent.guestHands.find(g => g.userId === score.userId)
+                            const handPlayed = userHandData?.hand as HandType | undefined
+
+                            // Host sees everyone's hands. Guests see only their own if needed (though current logic only shows for host).
+                            const showHand = isCurrentHost && handPlayed
+
+                            return (
+                                <motion.div
+                                    key={score.userId}
+                                    layout
+                                    initial={{ opacity: 0, x: 20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ duration: 0.3, delay: index * 0.1 }}
+                                    className={cn(
+                                        "flex justify-between items-center p-3 rounded transition-colors relative overflow-hidden group",
+                                        isWinner
+                                            ? "bg-[#FF4444]/10"
+                                            : "bg-white/5",
+                                        isMe && !isWinner && "border border-gray-600"
+                                    )}
+                                >
+                                    {/* Winner highlight effect */}
+                                    {isWinner && (
+                                        <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#FF4444]" />
+                                    )}
+
+                                    <div className="flex flex-col gap-1 z-10 pl-2">
+                                        <div className="flex items-center gap-2">
+                                            <span className={cn("font-bold text-sm tracking-wide", isMe ? "text-white" : "text-gray-300")}>
+                                                {score.user.name}
+                                            </span>
+                                            {isMe && (
+                                                <span className="text-[10px] bg-gray-800 text-gray-400 border border-gray-700 px-1.5 py-0.5 rounded font-mono">YOU</span>
+                                            )}
+                                        </div>
+
+                                        {showHand && (
+                                            <div className="text-sm text-gray-500 flex items-center gap-2">
+                                                <span className="text-lg leading-none">{getHandDisplayWithEmoji(handPlayed)}</span>
+                                            </div>
+                                        )}
                                     </div>
-                                )}
-                            </div>
-                            <span className="text-[#44FFFF] font-bold font-mono text-2xl">
-                                {score.points > 0 ? `+${score.points}` : '0'} 点
-                            </span>
-                        </motion.div>
-                    ))}
+
+                                    <div className="flex flex-col items-end z-10 pr-2">
+                                        <span className={cn("font-black font-mono text-xl", isWinner ? "text-[#FF4444]" : "text-gray-500")}>
+                                            {score.points > 0 ? `+${score.points}` : '0'}
+                                        </span>
+                                        <span className="text-[10px] text-gray-700 font-bold uppercase tracking-wider">PTS</span>
+                                    </div>
+                                </motion.div>
+                            )
+                        })}
+                    </AnimatePresence>
                 </motion.div>
             )}
+
+            {/* Footer with game info */}
+            <div className="mt-auto pt-4 border-t border-gray-800">
+                <div className="flex justify-between text-[10px] text-gray-500 uppercase tracking-widest font-bold">
+                    <span>Host: {hostName}</span>
+                    <span>Total: {currentScores.reduce((acc, curr) => acc + curr.points, 0)}</span>
+                </div>
+            </div>
         </motion.div>
     )
 
