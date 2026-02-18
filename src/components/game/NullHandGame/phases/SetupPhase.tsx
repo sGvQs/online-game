@@ -160,7 +160,11 @@ export function SetupPhase({
                     {!selectedHand ? (
                         /* STEP 1: 手の選択 */
                         <div className="flex flex-col h-full animate-in fade-in zoom-in duration-300">
-                            <h2 className={styles.messageText()}>あなたの手を選択</h2>
+                            <div className="text-center mb-8">
+                                <h2 className="text-[#44FFFF] text-sm font-bold tracking-[0.3em] mb-2 font-mono">STEP 1</h2>
+                                <h3 className="text-white text-3xl font-bold tracking-wider">あなたの手を選択</h3>
+                                <p className="text-gray-500 text-sm mt-2 tracking-wide">SELECT YOUR REAL HAND</p>
+                            </div>
                             <div className="flex-1 flex items-center justify-center">
                                 <div className="flex justify-center w-full">
                                     <HandSelectionGrid
@@ -178,7 +182,11 @@ export function SetupPhase({
                             className="flex flex-col h-full animate-in slide-in-from-right duration-300"
                         >
 
-                            <h2 className={styles.messageText()}>どの情報を偽装する？</h2>
+                            <div className="text-center mb-8">
+                                <h2 className="text-[#44FFFF] text-sm font-bold tracking-[0.3em] mb-2 font-mono">STEP 2</h2>
+                                <h3 className="text-white text-3xl font-bold tracking-wider">どの情報を偽装する？</h3>
+                                <p className="text-gray-500 text-sm mt-2 tracking-wide">CHOOSE DECEPTION</p>
+                            </div>
 
                             <div className="flex-1 flex flex-col justify-center">
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
