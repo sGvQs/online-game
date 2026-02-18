@@ -45,7 +45,7 @@ export function FinalDecisionPhase({
                         <p className="text-gray-500 text-xs mt-1 tracking-[0.2em] font-mono">CHANGE OR KEEP YOUR HAND?</p>
                     </div>
 
-                    <div className="flex-1 flex flex-col items-center justify-center gap-8">
+                    <div className="flex-1 flex flex-col items-center justify-center gap-4">
                         <HandSelectionGrid
                             selectedHand={selectedHand}
                             onSelectHand={onSelectHand}
@@ -54,7 +54,7 @@ export function FinalDecisionPhase({
 
                         {/* Strategy Tip - Moved to Main Area */}
                         {hostStats && (
-                            <div className="w-full max-w-md bg-[#1a1a1a]/80 border border-[#44FFFF]/20 rounded-lg p-4 backdrop-blur-sm animate-in slide-in-from-bottom-4 duration-500 delay-200">
+                            <div className="w-full max-w-2xl bg-[#1a1a1a]/80 border border-[#44FFFF]/20 rounded-lg p-4 backdrop-blur-sm animate-in slide-in-from-bottom-4 duration-500 delay-200 mt-2">
                                 <div className="flex items-center gap-2 mb-2 border-b border-[#44FFFF]/10 pb-2">
                                     <span className="text-[#44FFFF] font-bold text-xs tracking-widest uppercase">🧠 Strategy Tip</span>
                                     <span className="text-[10px] text-gray-500 ml-auto font-mono">ADVICE</span>
@@ -209,7 +209,7 @@ export function FinalDecisionPhase({
                     <div className="flex-1 flex flex-col items-center justify-center relative z-10 text-center">
                         <div className="animate-pulse">
                             <h2 className="text-[#44FFFF] text-sm font-bold tracking-[0.3em] mb-2 font-mono">WAITING...</h2>
-                            <h3 className="text-white text-4xl font-bold tracking-wider mb-2">ホストの決断を待機中</h3>
+                            <h3 className="text-white text-4xl font-bold tracking-wider mb-2">{hostName}の決断を待機中</h3>
                             <p className="text-gray-600 text-xs font-mono tracking-[0.2em] uppercase">WAITING FOR HOST DECISION</p>
                         </div>
                     </div>

@@ -163,9 +163,9 @@ export function ResultPhase({
                                             <div className="text-xs text-gray-500 mb-1">選択した手</div>
                                             {jankenEvent.fakeTarget === 'INITIAL_HAND' ? (
                                                 <div className="flex items-center justify-center gap-4">
-                                                    <div className="text-gray-500 line-through text-lg">{getHandDisplayWithEmoji(jankenEvent.fakeHandValue as HandType)}</div>
+                                                    <div className="text-gray-500 line-through text-lg">{getHandDisplayWithEmoji(jankenEvent.initialHand as HandType)}</div>
                                                     <div className="text-[#FF4444] text-sm">→</div>
-                                                    <div className="text-[#FF4444] font-bold text-xl">{getHandDisplayWithEmoji(jankenEvent.initialHand as HandType)}</div>
+                                                    <div className="text-[#FF4444] font-bold text-xl">{getHandDisplayWithEmoji(jankenEvent.fakeHandValue as HandType)}</div>
                                                     <div className="text-[#FF4444] text-[10px] font-bold ml-2 px-1.5 py-0.5 border border-[#FF4444] rounded">LIE</div>
                                                 </div>
                                             ) : (
@@ -181,9 +181,9 @@ export function ResultPhase({
                                             <div className="text-xs text-gray-500 mb-1">変える確率</div>
                                             {jankenEvent.fakeTarget === 'CHANGE_RATE' ? (
                                                 <div className="flex items-center justify-center gap-4">
-                                                    <div className="text-gray-500 line-through text-lg">{jankenEvent.fakeChangeRateValue}%</div>
+                                                    <div className="text-gray-500 line-through text-lg">{hostStats ? `${hostStats.realChangeRate}%` : '?'}%</div>
                                                     <div className="text-[#FF4444] text-sm">→</div>
-                                                    <div className="text-[#FF4444] font-bold text-xl">{hostStats ? `${hostStats.realChangeRate}%` : '?'}</div>
+                                                    <div className="text-[#FF4444] font-bold text-xl">{jankenEvent.fakeChangeRateValue}%</div>
                                                     <div className="text-[#FF4444] text-[10px] font-bold ml-2 px-1.5 py-0.5 border border-[#FF4444] rounded">LIE</div>
                                                 </div>
                                             ) : (
@@ -199,9 +199,9 @@ export function ResultPhase({
                                             <div className="text-xs text-gray-500 mb-1">お気に入り</div>
                                             {jankenEvent.fakeTarget === 'FAVORITE_HAND' ? (
                                                 <div className="flex items-center justify-center gap-4">
-                                                    <div className="text-gray-500 line-through text-lg">{getHandDisplayWithEmoji(jankenEvent.fakeFavoriteHandValue as HandType)}</div>
+                                                    <div className="text-gray-500 line-through text-lg">{hostStats ? getHandDisplayWithEmoji(hostStats.realFavoriteHand as HandType) : '?'}</div>
                                                     <div className="text-[#FF4444] text-sm">→</div>
-                                                    <div className="text-[#FF4444] font-bold text-xl">{hostStats ? getHandDisplayWithEmoji(hostStats.realFavoriteHand as HandType) : '?'}</div>
+                                                    <div className="text-[#FF4444] font-bold text-xl">{getHandDisplayWithEmoji(jankenEvent.fakeFavoriteHandValue as HandType)}</div>
                                                     <div className="text-[#FF4444] text-[10px] font-bold ml-2 px-1.5 py-0.5 border border-[#FF4444] rounded">LIE</div>
                                                 </div>
                                             ) : (

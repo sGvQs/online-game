@@ -60,7 +60,11 @@ export function SetupPhase({
     const MainArea = () => {
         if (!isCurrentHost) {
             return (
-                <div className={styles.mainArea()}>
+                <motion.div
+                    className={styles.mainArea()}
+                    layout
+                    transition={{ duration: 0.3 }}
+                >
                     <div className="h-full flex flex-col p-4">
                         <div className="text-[#44FFFF] font-black text-3xl mb-6 border-b-4 border-[#44FFFF] pb-2 tracking-widest uppercase">
                             HOW TO PLAY
@@ -104,7 +108,7 @@ export function SetupPhase({
                             </div>
                         </div>
                     </div>
-                </div>
+                </motion.div>
             )
         }
 

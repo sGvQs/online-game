@@ -72,7 +72,7 @@ export function BattlePhase({
                     {jankenEvent && (
                         <div className="bg-[#1a1a1a] p-3 rounded border border-gray-800">
                             <div className="flex justify-between items-center mb-2">
-                                <span className="text-[#FF4444] font-bold text-xs uppercase tracking-wider">選択した手 (公開)</span>
+                                <span className="text-[#FF4444] font-bold text-xs uppercase tracking-wider">選択した手</span>
                                 <span className="text-gray-500 text-[10px] font-mono">INITIAL HAND</span>
                             </div>
 
@@ -188,7 +188,6 @@ export function BattlePhase({
                             </div>
                             <div className="bg-[#1a1a1a] p-3 rounded border border-gray-800 flex items-center gap-3">
                                 <span className="text-2xl">{getHandDisplayWithEmoji(jankenEvent.initialHand as HandType)}</span>
-                                <span className="text-gray-400 text-xs">GUESTS SEE THIS</span>
                             </div>
                         </div>
 
