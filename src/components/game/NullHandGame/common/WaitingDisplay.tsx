@@ -25,7 +25,7 @@ export const WaitingDisplay = ({
     return (
         <div className={cn("flex flex-col h-full animate-in fade-in zoom-in duration-300 relative overflow-hidden", className)}>
             {/* Background Hand Animation */}
-            <div className="absolute inset-0 flex items-center justify-center opacity-50 pointer-events-none">
+            <div className="absolute inset-0 flex items-center justify-center opacity-10 pointer-events-none filter blur-[1px]">
                 <Hand3D handType={handType || null} revealed={!!handType} size="large" isRotating={isRotating} />
             </div>
 

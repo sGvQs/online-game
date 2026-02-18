@@ -357,6 +357,7 @@ export function SetupPhase({
                                     engLabel="YOUR SELECTION"
                                     label="選択した手"
                                     badge="PRIVATE"
+                                    variant="red"
                                     className="border-[#FF4444]/30"
                                 />
 

@@ -116,6 +116,7 @@ export function FinalDecisionPhase({
                             engLabel="YOUR FAKE DATA"
                             label="PUBLIC"
                             badge="PUBLIC"
+                            variant="red"
                             className="border-[#FF4444]/30"
                         />
 
@@ -231,6 +232,7 @@ export function FinalDecisionPhase({
                             engLabel="HOST'S PUBLIC DATA"
                             label="PUBLIC"
                             badge="PUBLIC"
+                            variant="red"
                             className="border-[#FF4444]/30"
                         />
 

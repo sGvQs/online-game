@@ -46,7 +46,7 @@ export const LieRevealCard = ({ jankenEvent, hostStats }: LieRevealCardProps) =>
                     <div className="text-xs text-gray-500 mb-1">変える確率</div>
                     {jankenEvent.fakeTarget === 'CHANGE_RATE' ? (
                         <div className="flex items-center justify-center gap-4">
-                            <div className="text-gray-500 line-through text-lg">{hostStats ? `${hostStats.realChangeRate}%` : '?'}%</div>
+                            <div className="text-gray-500 line-through text-lg">{hostStats ? `${hostStats.realChangeRate}` : '?'}%</div>
                             <div className="text-[#FF4444] text-sm">→</div>
                             <div className="text-[#FF4444] font-bold text-xl">{jankenEvent.fakeChangeRateValue}%</div>
                             <div className="text-[#FF4444] text-[10px] font-bold ml-2 px-1.5 py-0.5 border border-[#FF4444] rounded">LIE</div>

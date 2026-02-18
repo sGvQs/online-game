@@ -231,11 +231,11 @@ export function BattlePhase({
                         <div className="text-[#44FFFF] font-bold mb-3 text-xs uppercase tracking-wider opacity-70">REAL DATA reference</div>
                         <div className="space-y-2">
                             <div className="flex justify-between text-xs text-gray-400">
-                                <span>Real Favorite</span>
+                                <span>お気に入り</span>
                                 <span>{getHandDisplayWithEmoji(hostStats.realFavoriteHand as HandType)}</span>
                             </div>
                             <div className="flex justify-between text-xs text-gray-400">
-                                <span>Real Change Rate</span>
+                                <span>変える確率</span>
                                 <span>{hostStats.realChangeRate}%</span>
                             </div>
                         </div>
