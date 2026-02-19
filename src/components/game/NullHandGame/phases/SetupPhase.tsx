@@ -149,7 +149,7 @@ export function SetupPhase({
                                     </p>
                                     <p>
                                         <span className="text-white border-b border-gray-500">統計情報の活用</span><br />
-                                        右側に表示されている「あなたのデータ」は下記の実績から算出されたものです。
+                                        右側に表示されている「あなたのデータ」は過去の実績から算出されたものです。
                                         あなたが偽装情報を設定後、偽装情報を含むデータは全員に共有されます。
                                     </p>
                                 </div>
