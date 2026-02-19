@@ -151,87 +151,89 @@ export function NullHandGame({
                         onExit={handleClose}
                     />
                 )}
-                <GameLayout key="game" phase={phase} error={error} hostName={hostName}>
-                    {phase === 'SETUP' && (
-                        <SetupPhase
-                            isCurrentHost={isCurrentHost}
-                            titleHand={titleHand}
-                            hostStats={hostStats}
-                            selectedHand={selectedHand}
-                            selectedFake={selectedFake}
-                            fakeDetails={fakeDetails}
-                            isProcessing={isProcessing}
-                            onSelectHand={setSelectedHand}
-                            onSelectFake={setSelectedFake}
-                            onUpdateFakeDetails={setFakeDetails}
-                            onSubmit={handleSetupSubmit}
-                            hostName={hostName}
-                            onReselectHand={() => setSelectedHand(null)}
-                        />
-                    )}
+                {phase !== 'TITLE' && (
+                    <GameLayout key="game" phase={phase} error={error} hostName={hostName}>
+                        {phase === 'SETUP' && (
+                            <SetupPhase
+                                isCurrentHost={isCurrentHost}
+                                titleHand={titleHand}
+                                hostStats={hostStats}
+                                selectedHand={selectedHand}
+                                selectedFake={selectedFake}
+                                fakeDetails={fakeDetails}
+                                isProcessing={isProcessing}
+                                onSelectHand={setSelectedHand}
+                                onSelectFake={setSelectedFake}
+                                onUpdateFakeDetails={setFakeDetails}
+                                onSubmit={handleSetupSubmit}
+                                hostName={hostName}
+                                onReselectHand={() => setSelectedHand(null)}
+                            />
+                        )}
 
-                    {phase === 'SHOWCASE' && (
-                        <ShowcasePhase
-                            jankenEvent={jankenEvent}
-                            hostStats={hostStats}
-                            isCurrentHost={isCurrentHost}
-                            isProcessing={isProcessing}
-                            onConfirm={handleConfirmShowcase}
-                            hostName={hostName}
-                            currentUserId={currentUserId}
-                        />
-                    )}
+                        {phase === 'SHOWCASE' && (
+                            <ShowcasePhase
+                                jankenEvent={jankenEvent}
+                                hostStats={hostStats}
+                                isCurrentHost={isCurrentHost}
+                                isProcessing={isProcessing}
+                                onConfirm={handleConfirmShowcase}
+                                hostName={hostName}
+                                currentUserId={currentUserId}
+                            />
+                        )}
 
-                    {phase === 'FINAL_DECISION' && (
-                        <FinalDecisionPhase
-                            jankenEvent={jankenEvent}
-                            hostStats={hostStats}
-                            isCurrentHost={isCurrentHost}
-                            selectedHand={selectedHand}
-                            isProcessing={isProcessing}
-                            onSelectHand={setSelectedHand}
-                            onSubmit={() => selectedHand && handleSetFinalHostHand(selectedHand)}
-                            hostName={hostName}
-                        />
-                    )}
+                        {phase === 'FINAL_DECISION' && (
+                            <FinalDecisionPhase
+                                jankenEvent={jankenEvent}
+                                hostStats={hostStats}
+                                isCurrentHost={isCurrentHost}
+                                selectedHand={selectedHand}
+                                isProcessing={isProcessing}
+                                onSelectHand={setSelectedHand}
+                                onSubmit={() => selectedHand && handleSetFinalHostHand(selectedHand)}
+                                hostName={hostName}
+                            />
+                        )}
 
-                    {phase === 'BATTLE' && (
-                        <BattlePhase
-                            jankenEvent={jankenEvent}
-                            hostStats={hostStats}
-                            isCurrentHost={isCurrentHost}
-                            selectedHand={selectedHand}
-                            isProcessing={isProcessing}
-                            onSelectHand={setSelectedHand}
-                            onSubmit={() => selectedHand && handleSetGuestHand(selectedHand)}
-                            hostName={hostName}
-                        />
-                    )}
+                        {phase === 'BATTLE' && (
+                            <BattlePhase
+                                jankenEvent={jankenEvent}
+                                hostStats={hostStats}
+                                isCurrentHost={isCurrentHost}
+                                selectedHand={selectedHand}
+                                isProcessing={isProcessing}
+                                onSelectHand={setSelectedHand}
+                                onSubmit={() => selectedHand && handleSetGuestHand(selectedHand)}
+                                hostName={hostName}
+                            />
+                        )}
 
-                    {phase === 'RESULT' && (
-                        <ResultPhase
-                            jankenEvent={jankenEvent}
-                            currentScores={currentScores}
-                            isProcessing={isProcessing}
-                            onNextRound={handleMarkNextRoundReady}
-                            hostName={hostName}
-                            currentUserId={currentUserId}
-                            isCurrentHost={isCurrentHost}
-                            hostStats={hostStats}
-                            roomUsers={room.users}
-                        />
-                    )}
+                        {phase === 'RESULT' && (
+                            <ResultPhase
+                                jankenEvent={jankenEvent}
+                                currentScores={currentScores}
+                                isProcessing={isProcessing}
+                                onNextRound={handleMarkNextRoundReady}
+                                hostName={hostName}
+                                currentUserId={currentUserId}
+                                isCurrentHost={isCurrentHost}
+                                hostStats={hostStats}
+                                roomUsers={room.users}
+                            />
+                        )}
 
-                    {phase === 'GAME_OVER' && (
-                        <GameOverPhase
-                            currentUserId={currentUserId}
-                            newRankings={newRankings}
-                            initialRankings={initialRankings}
-                            currentScores={currentScores}
-                            onFinish={handleFinish}
-                        />
-                    )}
-                </GameLayout>
+                        {phase === 'GAME_OVER' && (
+                            <GameOverPhase
+                                currentUserId={currentUserId}
+                                newRankings={newRankings}
+                                initialRankings={initialRankings}
+                                currentScores={currentScores}
+                                onFinish={handleFinish}
+                            />
+                        )}
+                    </GameLayout>
+                )}
             </AnimatePresence>
         </>
     )

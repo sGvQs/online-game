@@ -174,7 +174,7 @@ export function SetupPhase({
                                 subLabel="SELECT YOUR REAL HAND"
                             />
                             <div className="flex-1 flex items-center justify-center">
-                                <div className="flex justify-center w-full">
+                                <div className="flex justify-center w-full mb-8">
                                     <HandSelectionGrid
                                         selectedHand={selectedHand}
                                         onSelectHand={onSelectHand}

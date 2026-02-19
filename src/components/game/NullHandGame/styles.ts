@@ -12,10 +12,11 @@ export const nullHandGame = tv({
     slots: {
         container: [
             'bg-black',
-            'min-h-screen',
+            'h-screen',
+            'w-screen',
             'font-sans', // I.Qはサンセリフ系
             'text-white',
-            'overflow-auto', // スクロール可能に
+            'overflow-hidden',
             'flex',
             'items-center',
             'justify-center',
@@ -178,7 +179,6 @@ export const nullHandGame = tv({
             'gap-4',
             'w-full',
             'max-w-7xl',
-            'h-full',
         ],
 
         // フェーズ表示（上部）
