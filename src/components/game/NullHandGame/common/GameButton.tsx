@@ -1,5 +1,6 @@
 import { nullHandGame } from '../styles'
 import { cn } from '@/lib/utils'
+import { useSE } from '@/hooks/useSE'
 
 interface GameButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
     variant?: 'primary' | 'secondary' | 'danger'
@@ -13,9 +14,11 @@ export const GameButton = ({
     fullWidth = false,
     size = 'md',
     children,
+    onClick,
     ...props
 }: GameButtonProps) => {
     const styles = nullHandGame()
+    const { play } = useSE()
 
     const variantStyles = {
         primary: styles.buttonPrimary(),
@@ -38,6 +41,10 @@ export const GameButton = ({
                 fullWidth && "w-full",
                 className
             )}
+            onClick={(e) => {
+                play('select')
+                if (onClick) onClick(e)
+            }}
             {...props}
         >
             {children}

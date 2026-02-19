@@ -10,6 +10,7 @@ import { PhaseHeader } from '../common/PhaseHeader'
 import { SideHeader } from '../common/SideHeader'
 import { WaitingDisplay } from '../common/WaitingDisplay'
 import { GameButton } from '../common/GameButton'
+import { useSE } from '@/hooks/useSE'
 
 interface SetupPhaseProps {
     isCurrentHost: boolean
@@ -43,10 +44,12 @@ export function SetupPhase({
     onReselectHand
 }: SetupPhaseProps) {
     const styles = nullHandGame()
+    const { play } = useSE()
 
     const [showHelp, setShowHelp] = React.useState(false)
 
     const handleFakeOptionClick = (value: FakeTarget) => {
+        play('select')
         if (selectedFake === value) {
             onSelectFake('NONE')
         } else {
@@ -124,7 +127,10 @@ export function SetupPhase({
             >
                 <div className="w-full h-full flex flex-col relative">
                     <button
-                        onClick={() => setShowHelp(true)}
+                        onClick={() => {
+                            play('select')
+                            setShowHelp(true)
+                        }}
                         className="absolute top-5 right-5 px-5 py-2 border border-[#44FFFF]/30 text-[#44FFFF]/80 font-bold text-[10px] tracking-[0.2em] uppercase hover:bg-[#44FFFF] hover:text-black hover:border-[#44FFFF] transition-all duration-300 z-30 bg-black/80 backdrop-blur-sm hover:shadow-[0_0_20px_rgba(68,255,255,0.4)]"
                     >
                         HOW TO PLAY
@@ -132,7 +138,7 @@ export function SetupPhase({
 
                     {/* ヘルプモーダル */}
                     {showHelp && (
-                        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4" onClick={() => setShowHelp(false)}>
+                        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4" onClick={() => { play('select'); setShowHelp(false); }}>
                             <div className="bg-black border-[2px] border-[#44FFFF] p-6 max-w-md w-full shadow-[0_0_30px_rgba(68,255,255,0.2)]" onClick={e => e.stopPropagation()}>
                                 <h3 className="text-xl font-black text-[#44FFFF] mb-4 border-b border-[#44FFFF] pb-2 uppercase tracking-widest">
                                     HOW TO PLAY
@@ -156,7 +162,7 @@ export function SetupPhase({
                                 <div className="mt-6 flex justify-end">
                                     <button
                                         className="px-6 py-1.5 bg-[#44FFFF] text-black font-bold text-sm uppercase tracking-widest hover:bg-white transition-colors"
-                                        onClick={() => setShowHelp(false)}
+                                        onClick={() => { play('select'); setShowHelp(false); }}
                                     >
                                         CLOSE
                                     </button>
@@ -244,7 +250,7 @@ export function SetupPhase({
                                                             .map(hand => (
                                                                 <button
                                                                     key={hand}
-                                                                    onClick={() => onUpdateFakeDetails({ ...fakeDetails, fakeHandValue: hand })}
+                                                                    onClick={() => { play('select'); onUpdateFakeDetails({ ...fakeDetails, fakeHandValue: hand }); }}
                                                                     className={cn(
                                                                         "w-24 h-24 border-2 flex flex-col items-center justify-center gap-2 transition-all duration-200",
                                                                         fakeDetails.fakeHandValue === hand
@@ -295,7 +301,7 @@ export function SetupPhase({
                                                             .map(hand => (
                                                                 <button
                                                                     key={hand}
-                                                                    onClick={() => onUpdateFakeDetails({ ...fakeDetails, fakeFavoriteHandValue: hand })}
+                                                                    onClick={() => { play('select'); onUpdateFakeDetails({ ...fakeDetails, fakeFavoriteHandValue: hand }); }}
                                                                     className={cn(
                                                                         "w-24 h-24 border-2 flex flex-col items-center justify-center gap-2 transition-all duration-200",
                                                                         fakeDetails.fakeFavoriteHandValue === hand
@@ -374,7 +380,7 @@ export function SetupPhase({
                                         </div>
                                     </div>
                                     <button
-                                        onClick={onReselectHand}
+                                        onClick={() => { play('select'); onReselectHand(); }}
                                         className="ml-auto text-[#FF4444] text-xs font-bold border border-[#FF4444]/30 px-3 py-1.5 rounded hover:bg-[#FF4444] hover:text-black transition-colors"
                                     >
                                         変更

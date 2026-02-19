@@ -3,6 +3,7 @@ import { Hand3D } from './Hand3D'
 import { cn } from '@/lib/utils'
 import { motion } from 'framer-motion'
 import { getHandDisplayWithEmoji } from './utils'
+import { useSE } from '@/hooks/useSE'
 
 interface HandSelectionGridProps {
     selectedHand: HandType | null
@@ -17,6 +18,8 @@ export function HandSelectionGrid({
     isProcessing = false,
     size = 'small'
 }: HandSelectionGridProps) {
+    const { play } = useSE()
+
     return (
         <div className="grid grid-cols-3 gap-8 w-full max-w-4xl px-8">
             {(['ROCK', 'SCISSORS', 'PAPER'] as const).map((hand) => (
@@ -30,7 +33,10 @@ export function HandSelectionGrid({
                             : "border-gray-800 hover:border-gray-600 hover:bg-white/5",
                         isProcessing && "opacity-50 cursor-not-allowed"
                     )}
-                    onClick={() => onSelectHand(hand)}
+                    onClick={() => {
+                        play('select')
+                        onSelectHand(hand)
+                    }}
                     disabled={isProcessing}
                 >
                     <div className="absolute inset-0 p-4">
