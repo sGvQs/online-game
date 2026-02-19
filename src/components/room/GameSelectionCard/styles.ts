@@ -10,16 +10,28 @@ export const gameSelection = tv({
         header: 'font-bold text-lg text-brand-900 flex items-center gap-2 mb-4',
         headerIcon: 'w-5 h-5',
         grid: 'grid grid-cols-1 gap-3',
+        // Base button style
         gameButton: [
-            'w-full justify-start gap-3 h-16 text-left border-0',
-            // Win95風の単色ティールグリーン
-            'bg-teal-700 hover:bg-teal-600 text-white',
+            'w-full justify-start gap-4 h-24 text-left border-2 relative overflow-hidden group transition-all duration-300',
         ],
-        gameIcon: 'text-2xl',
-        gameInfo: '',
-        gameTitle: 'font-bold',
-        gameDescription: 'text-xs opacity-80',
+        // Error Hunter Theme (Win95/Teal)
+        errorHunterButton: [
+            'border-teal-600 bg-teal-700 hover:bg-teal-600 text-white',
+            'shadow-[4px_4px_0_rgba(0,0,0,0.5)] active:shadow-none active:translate-y-1', // Retro 3D effect
+        ],
+        // Null Hand Theme (Black/Red)
+        nullHandButton: [
+            'border-[#FF4444] bg-black hover:bg-[#1a0505] text-[#FF4444]',
+            'shadow-[0_0_15px_rgba(255,68,68,0.2)] hover:shadow-[0_0_25px_rgba(255,68,68,0.4)]',
+        ],
+        gameIcon: 'text-3xl relative z-10 group-hover:scale-110 transition-transform duration-300',
+        gameInfo: 'flex flex-col relative z-10',
+        gameTitle: 'font-black text-xl tracking-widest',
+        gameDescription: 'text-xs opacity-70 font-mono tracking-wider',
         loadingText: 'mt-4 text-center text-brand-600 text-sm',
+
+        // Background effects
+        nullHandBg: 'absolute inset-0 bg-[#FF4444]/5 group-hover:bg-[#FF4444]/10 transition-colors',
     },
 })
 

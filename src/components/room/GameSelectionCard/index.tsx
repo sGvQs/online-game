@@ -24,9 +24,9 @@ export function GameSelectionCard({ onSelectGame, isPending, isHost }: GameSelec
                 <Button
                     onClick={() => onSelectGame('error-hunter')}
                     disabled={isPending}
-                    className={styles.gameButton()}
+                    className={styles.gameButton({ class: styles.errorHunterButton() })}
                 >
-                    <span className={styles.gameIcon()}>⚠️</span>
+                    <span className={styles.gameIcon()}>👾</span>
                     <div className={styles.gameInfo()}>
                         <div className={styles.gameTitle()}>ERROR HUNTER</div>
                         <div className={styles.gameDescription()}>
@@ -37,13 +37,14 @@ export function GameSelectionCard({ onSelectGame, isPending, isHost }: GameSelec
                 <Button
                     onClick={() => onSelectGame('null-hand')}
                     disabled={isPending}
-                    className={styles.gameButton()}
+                    className={styles.gameButton({ class: styles.nullHandButton() })}
                 >
-                    <span className={styles.gameIcon()}>⚠️</span>
+                    <div className={styles.nullHandBg()} />
+                    <span className={styles.gameIcon()}>🤏</span>
                     <div className={styles.gameInfo()}>
-                        <div className={styles.gameTitle()}>ERROR HUNTER</div>
+                        <div className={styles.gameTitle()}>NULL HAND</div>
                         <div className={styles.gameDescription()}>
-                            {isHost ? 'バグを見つけて潰せ！' : 'クリックでルールを表示'}
+                            {isHost ? '心理戦で相手を欺け' : 'クリックでルールを表示'}
                         </div>
                     </div>
                 </Button>
