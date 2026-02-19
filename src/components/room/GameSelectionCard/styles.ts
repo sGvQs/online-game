@@ -16,8 +16,7 @@ export const gameSelection = tv({
         ],
         // Error Hunter Theme (Win95/Teal)
         errorHunterButton: [
-            'border-teal-600 bg-teal-700 hover:bg-teal-600 text-white',
-            'shadow-[4px_4px_0_rgba(0,0,0,0.5)] active:shadow-none active:translate-y-1', // Retro 3D effect
+            'border-teal-600 bg-teal-700 hover:bg-teal-600 text-white'
         ],
         // Null Hand Theme (Black/Red)
         nullHandButton: [
