@@ -165,7 +165,7 @@ export function useNullHand({
         } finally {
             setIsProcessing(false)
         }
-    }, [roomId, isHost, isProcessing])
+    }, [roomId, isHost, isProcessing, play])
 
     /**
      * ホストの初期手と嘘を設定
@@ -183,7 +183,7 @@ export function useNullHand({
         } finally {
             setIsProcessing(false)
         }
-    }, [jankenEvent, isProcessing, fetchJankenEvent])
+    }, [jankenEvent, isProcessing, fetchJankenEvent, play])
 
     /**
      * ゲストの確認完了
@@ -200,7 +200,7 @@ export function useNullHand({
         } finally {
             setIsProcessing(false)
         }
-    }, [jankenEvent, currentUserId, isProcessing, fetchJankenEvent])
+    }, [jankenEvent, currentUserId, isProcessing, fetchJankenEvent, play])
 
     /**
      * ホストの最終決定
@@ -218,7 +218,7 @@ export function useNullHand({
         } finally {
             setIsProcessing(false)
         }
-    }, [jankenEvent, isProcessing, fetchJankenEvent])
+    }, [jankenEvent, isProcessing, fetchJankenEvent, play])
 
     /**
      * ゲストの手を設定
@@ -236,7 +236,7 @@ export function useNullHand({
         } finally {
             setIsProcessing(false)
         }
-    }, [jankenEvent, currentUserId, isProcessing, fetchJankenEvent])
+    }, [jankenEvent, currentUserId, isProcessing, fetchJankenEvent, play])
 
     /**
      * 次のラウンドへ遷移
@@ -254,7 +254,7 @@ export function useNullHand({
         } finally {
             setIsProcessing(false)
         }
-    }, [jankenEvent, isProcessing, fetchJankenEvent])
+    }, [jankenEvent, isProcessing, fetchJankenEvent, play])
 
     /**
      * 次のラウンドへの準備完了をマーク
@@ -271,7 +271,7 @@ export function useNullHand({
         } finally {
             setIsProcessing(false)
         }
-    }, [jankenEvent, roomId, currentUserId, isProcessing])
+    }, [jankenEvent, roomId, currentUserId, isProcessing, play])
 
     /**
      * ゲーム終了 → タイトルに戻る

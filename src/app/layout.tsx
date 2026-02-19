@@ -3,6 +3,7 @@ import { Geist, Geist_Mono, Zen_Maru_Gothic, DotGothic16, Kaisei_Opti, Yusei_Mag
 import "./globals.css";
 import { ThemeProvider } from "@/lib/theme-context";
 import BGMPlayer from "@/components/ui/BGMPlayer";
+import { SoundProvider } from "@/lib/sound-context";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -65,10 +66,12 @@ export default function RootLayout({
       <body
         className={`${dotGothic16.variable} ${yuseiMagic.variable} ${kaiseiOpti.variable} ${zenMaruGothic.variable} ${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <ThemeProvider>
-          {children}
-          <BGMPlayer />
-        </ThemeProvider>
+        <SoundProvider>
+          <ThemeProvider>
+            {children}
+            <BGMPlayer />
+          </ThemeProvider>
+        </SoundProvider>
       </body>
     </html>
   );

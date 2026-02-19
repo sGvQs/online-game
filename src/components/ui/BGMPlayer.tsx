@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
+import { useSound } from '@/lib/sound-context';
 
 const BGM_CONFIG = {
     ERROR_HUNTER: {
@@ -29,7 +30,7 @@ const BGM_CONFIG = {
 export default function BGMPlayer() {
     const pathname = usePathname();
     const audioRef = useRef<HTMLAudioElement>(null);
-    const [isPlaying, setIsPlaying] = useState(false);
+    const { isPlaying, setIsPlaying } = useSound();
 
     // 現在どの曲を再生しているかのインデックス管理
     const [trackIndex, setTrackIndex] = useState(0);

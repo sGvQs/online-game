@@ -84,6 +84,7 @@ export function ErrorHunterGame({
     const [initProgress, setInitProgress] = useState(0)
     const [isInitializing, setIsInitializing] = useState(true)
     const [showDescription, setShowDescription] = useState(false)
+    const { play } = useSE()
 
     // Simulate initialization progress
     useEffect(() => {
@@ -92,7 +93,7 @@ export function ErrorHunterGame({
                 setInitProgress(prev => {
                     if (prev >= 200) {
                         setIsInitializing(false)
-                        useSE().play('chime')
+                        play('chime')
                         return 200
                     }
                     return prev + 8
@@ -100,7 +101,7 @@ export function ErrorHunterGame({
             }, 200)
             return () => clearInterval(interval)
         }
-    }, [isInitializing])
+    }, [isInitializing, play])
 
     const ASCII_ART =
         `███████╗██████╗ ██████╗  ██████╗ ██████╗ 

@@ -109,6 +109,7 @@ export function useErrorHunter({
     currentUserId,
 }: UseErrorHunterProps): UseErrorHunterReturn {
     const supabase = createClient()
+    const { play } = useSE()
 
     // ---- State ----
     const [phase, setPhase] = useState<GamePhase>('TITLE')
@@ -193,15 +194,15 @@ export function useErrorHunter({
 
         if (delay <= 0) {
             setPhase('APPEARING');
-            useSE().play('error');
+            play('error');
         } else {
             setPhase('WAITING');
             timerRef.current = setTimeout(() => {
                 setPhase('APPEARING');
-                useSE().play('error');
+                play('error');
             }, delay);
         }
-    }, []);
+    }, [play]);
 
     // ============================================
     // ヘルパー関数
@@ -258,7 +259,7 @@ export function useErrorHunter({
      * ゲーム状態を完全にリセット（次のゲーム準備）
      */
     const resetGameState = useCallback(() => {
-        useSE().play('chime');
+        play('chime');
         setMatch(null)
         setProgress(null)
         setPhase('TITLE')
@@ -266,7 +267,7 @@ export function useErrorHunter({
         matchIdRef.current = null
         isSetupGameStatusRef.current = false
         closedEventIds.current.clear()
-    }, [])
+    }, [play])
 
     // ============================================
     // アクションハンドラ
@@ -506,7 +507,7 @@ export function useErrorHunter({
                 const commentData = await getUserComment(payload.new.winner_id)
                 setWinnerComment(commentData?.comment || '私の勝ちです')
                 setWinnerName(commentData?.userName || '勝者')
-                useSE().play('tada')
+                play('tada')
                 setPhase('RESULT')
             })
             .subscribe()
@@ -519,7 +520,7 @@ export function useErrorHunter({
             supabase.removeChannel(broadcastChannel)
             broadcastChannelRef.current = null
         }
-    }, [supabase, roomId])
+    }, [supabase, roomId, play, setupAppearanceTimer])
 
     /**
      * クリーンアップ: アンマウント時にタイマーを解除
