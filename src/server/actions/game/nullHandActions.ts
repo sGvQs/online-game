@@ -591,31 +591,49 @@ export async function getJankenEvent(eventId: string): Promise<JankenEventWithGu
  * マッチIDから最新のJankenEventを取得
  */
 export async function getLatestJankenEvent(matchId: string): Promise<JankenEventWithGuests | null> {
-    console.log('[getLatestJankenEvent] Called with matchId:', matchId)
-    if (!matchId) {
-        console.log('[getLatestJankenEvent] matchId is invalid')
-        return null
-    }
+    if (!matchId) return null
 
-    try {
-        const event = await prisma.jankenEvent.findFirst({
-            where: { matchId },
-            orderBy: { turnNumber: 'desc' },
-            include: {
-                guestHands: {
-                    include: {
-                        user: true
-                    }
-                }
+    const event = await prisma.jankenEvent.findFirst({
+        where: { matchId },
+        orderBy: { turnNumber: 'desc' },
+        include: {
+            guestHands: {
+                include: { user: true }
             }
-        })
+        }
+    })
 
-        console.log('[getLatestJankenEvent] Result:', event ? `Found Event ID: ${event.id}, Turn: ${event.turnNumber}` : 'NULL')
-        return event
-    } catch (error) {
-        console.error('[getLatestJankenEvent] Error:', error)
-        throw error
-    }
+    return event
+}
+
+/**
+ * マッチIDから最新の JankenEvent と HostStats を一度に取得
+ * クライアントへの往復を 2 → 1 に削減するためのヘルパー
+ */
+export async function getLatestJankenEventWithStats(
+    matchId: string
+): Promise<{ event: JankenEventWithGuests; stats: HostStats } | null> {
+    if (!matchId) return null
+
+    const event = await prisma.jankenEvent.findFirst({
+        where: { matchId },
+        orderBy: { turnNumber: 'desc' },
+        include: {
+            guestHands: {
+                include: { user: true }
+            }
+        }
+    })
+
+    if (!event) return null
+
+    // 統計が必要なフェーズかどうか判断
+    const needsStats = ['SETUP', 'SHOWCASE', 'FINAL_DECISION', 'BATTLE', 'RESULT'].includes(event.phase)
+    const stats = needsStats
+        ? await getHostStats(event.currentHostId, event.id)
+        : { favoriteHand: 'ROCK' as HandType, changeRate: 50, totalGames: 0, realFavoriteHand: 'ROCK' as HandType, realChangeRate: 50 }
+
+    return { event, stats }
 }
 
 /**

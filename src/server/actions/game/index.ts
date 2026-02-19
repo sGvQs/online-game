@@ -22,6 +22,7 @@ export {
     setGuestHand,
     getJankenEvent,
     getLatestJankenEvent,
+    getLatestJankenEventWithStats,
     getMatchScores,
     startNextTurn,
     finishJanken,
