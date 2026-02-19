@@ -4,6 +4,7 @@ import { nullHandGame } from './styles'
 import { Hand3D } from './Hand3D'
 import { cn } from '@/lib/utils'
 import { NullHandLogo } from './NullHandLogo'
+import { useSE } from '@/hooks/useSE'
 
 interface TitleScreenProps {
     room: RoomWithUsersAndReadyStatus
@@ -32,6 +33,7 @@ export function TitleScreen({
 
     const readyCount = room.users.filter((u: RoomUserWithReadyStatus) => u.isReady).length
     const totalUsers = room.users.length
+    const { play } = useSE();
 
     return (
         <div className={styles.container()}>
@@ -52,7 +54,10 @@ export function TitleScreen({
                             styles.menuItem(),
                             isReady && styles.menuItemReady()
                         )}
-                        onClick={onToggleReady}
+                        onClick={() => {
+                            play("select")
+                            return !isReady && onToggleReady()
+                        }}
                     >
                         READY
                     </div>
@@ -63,14 +68,20 @@ export function TitleScreen({
                                 styles.menuItem(),
                                 allUsersReady ? styles.menuItemSelected() : styles.menuItemDisabled()
                             )}
-                            onClick={() => allUsersReady && onStartGame()}
+                            onClick={() => {
+                                play("submit")
+                                return allUsersReady && onStartGame()
+                            }}
                         >
                             START
                         </div>
                     )}
 
                     {isHost && (
-                        <div className={styles.menuItem()} onClick={onExit}>
+                        <div className={styles.menuItem()} onClick={() => {
+                            play("submit")
+                            return onExit();
+                        }}>
                             EXIT
                         </div>
                     )}
@@ -140,6 +151,20 @@ export function TitleScreen({
                             </div>
                         </div>
                     </div>
+                </motion.div>
+                {/* Music Credits */}
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{
+                        duration: 1,
+                        ease: "easeOut",
+                        delay: 1
+                    }}
+                    className="col-span-1 md:col-span-2 bg-black flex items-center justify-center text-center w-full text-center pointer-events-none opacity-100">
+                    <p className="text-[12px] text-white font-mono tracking-[0.2em] leading-relaxed uppercase drop-shadow-md">
+                        Music by <span className="text-[#FF4444] font-bold">Dream or real?</span>
+                    </p>
                 </motion.div>
             </div>
         </div>

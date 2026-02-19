@@ -49,7 +49,7 @@ export default function BGMPlayer() {
     // 音量設定
     useEffect(() => {
         if (audioRef.current) {
-            audioRef.current.volume = activeConfig.label === 'error-hunter' ? 0.2 : 0.05;
+            audioRef.current.volume = 0.2;
         }
     }, [activeConfig.label]);
 

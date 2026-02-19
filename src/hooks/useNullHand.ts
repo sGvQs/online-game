@@ -152,7 +152,7 @@ export function useNullHand({
      */
     const handleStartGame = useCallback(async () => {
         if (!isHost || isProcessing) return
-
+        play('submit')
         setIsProcessing(true)
         try {
             await resetAllReady(roomId)
@@ -172,7 +172,7 @@ export function useNullHand({
      */
     const handleSetInitialHand = useCallback(async (hand: HandType, fakeTarget: FakeTarget, fakeDetails?: FakeDetails) => {
         if (!jankenEvent || isProcessing) return
-
+        play('select')
         setIsProcessing(true)
         try {
             await setInitialHand(jankenEvent.id, hand, fakeTarget, fakeDetails)
@@ -190,7 +190,7 @@ export function useNullHand({
      */
     const handleConfirmShowcase = useCallback(async () => {
         if (!jankenEvent || isProcessing) return
-
+        play('select')
         setIsProcessing(true)
         try {
             await confirmShowcase(jankenEvent.id, currentUserId)
@@ -207,7 +207,7 @@ export function useNullHand({
      */
     const handleSetFinalHostHand = useCallback(async (hand: HandType) => {
         if (!jankenEvent || isProcessing) return
-
+        play('select')
         setIsProcessing(true)
         try {
             await setFinalHostHand(jankenEvent.id, hand)
@@ -225,7 +225,7 @@ export function useNullHand({
      */
     const handleSetGuestHand = useCallback(async (hand: HandType) => {
         if (!jankenEvent || isProcessing) return
-
+        play('select')
         setIsProcessing(true)
         try {
             await setGuestHand(jankenEvent.id, currentUserId, hand)
@@ -243,7 +243,7 @@ export function useNullHand({
      */
     const handleNextRound = useCallback(async () => {
         if (!jankenEvent || isProcessing) return
-
+        play('select')
         setIsProcessing(true)
         try {
             await startNextTurn(jankenEvent.id)
@@ -261,7 +261,7 @@ export function useNullHand({
      */
     const handleMarkNextRoundReady = useCallback(async () => {
         if (!jankenEvent || isProcessing) return
-
+        play('select')
         setIsProcessing(true)
         try {
             await markNextRoundReady(roomId, currentUserId, jankenEvent.matchId)
@@ -278,7 +278,7 @@ export function useNullHand({
      */
     const handleFinish = useCallback(async () => {
         if (!matchIdRef.current || isProcessing) return
-
+        play('submit')
         setIsProcessing(true)
         try {
             await finishJanken(matchIdRef.current, roomId)
@@ -286,7 +286,6 @@ export function useNullHand({
             setJankenEvent(null)
             setHostStats(null)
             matchIdRef.current = null
-            play('chime')
         } catch (error) {
             console.error('ゲーム終了に失敗:', error)
             setError('ゲーム終了処理に失敗しました')
