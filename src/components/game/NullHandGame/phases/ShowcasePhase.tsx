@@ -71,7 +71,7 @@ export function ShowcasePhase({
                                 disabled={isProcessing}
                                 onClick={onConfirm}
                             >
-                                確認して次へ
+                                Confirm and Next
                             </GameButton>
                         )}
                     </div>

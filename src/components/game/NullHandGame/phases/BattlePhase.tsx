@@ -55,7 +55,7 @@ export function BattlePhase({
                         disabled={!selectedHand || isProcessing}
                         onClick={onSubmit}
                     >
-                        勝負する
+                        BATTLE
                     </GameButton>
                 </div>
             </div>
@@ -195,13 +195,13 @@ export function BattlePhase({
                         {/* 嘘の情報 */}
                         <div>
                             <div className="flex justify-between items-center mb-2">
-                                <span className="text-[#FF4444] font-bold text-xs uppercase tracking-wider">偽装工作</span>
+                                <span className="text-[#FF4444] font-bold text-xs uppercase tracking-wider">嘘の情報</span>
                                 <span className="text-[#FF4444] font-bold text-[10px] border border-[#FF4444] px-1 rounded">ACTIVE</span>
                             </div>
 
                             <div className="bg-[#1a1a1a] rounded border border-gray-800 overflow-hidden">
                                 <div className="flex justify-between items-center p-3 border-b border-gray-800">
-                                    <span className="text-gray-400 text-xs font-bold">偽装ターゲット</span>
+                                    <span className="text-gray-400 text-xs font-bold">何に嘘をついたか</span>
                                     <span className="text-white text-sm font-bold">
                                         {jankenEvent.fakeTarget === 'NONE' && 'なし'}
                                         {jankenEvent.fakeTarget === 'INITIAL_HAND' && '選択した手'}
@@ -212,7 +212,7 @@ export function BattlePhase({
 
                                 {jankenEvent.fakeTarget !== 'NONE' && (
                                     <div className="flex justify-between items-center p-3 bg-[#FF4444]/5">
-                                        <span className="text-[#FF4444] text-xs font-bold">偽装値 (公開中)</span>
+                                        <span className="text-[#FF4444] text-xs font-bold">嘘の値</span>
                                         <span className="text-white font-bold font-mono">
                                             {jankenEvent.fakeTarget === 'INITIAL_HAND' && getHandDisplayWithEmoji(jankenEvent.fakeHandValue as HandType)}
                                             {jankenEvent.fakeTarget === 'CHANGE_RATE' && `${jankenEvent.fakeChangeRateValue}%`}
@@ -228,7 +228,7 @@ export function BattlePhase({
                 {/* リアル統計 */}
                 {hostStats && (
                     <div className="mt-8 pt-4 border-t border-gray-800">
-                        <div className="text-[#44FFFF] font-bold mb-3 text-xs uppercase tracking-wider opacity-70">REAL DATA reference</div>
+                        <div className="text-[#44FFFF] font-bold mb-3 text-xs uppercase tracking-wider opacity-70">あなたの情報</div>
                         <div className="space-y-2">
                             <div className="flex justify-between text-xs text-gray-400">
                                 <span>お気に入り</span>

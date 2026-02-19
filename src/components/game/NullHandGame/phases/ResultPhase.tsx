@@ -125,7 +125,7 @@ export function ResultPhase({
                                     onClick={() => setStep('REVEAL')}
                                     disabled={isProcessing}
                                 >
-                                    ネタバラシを見る
+                                    NEXT
                                 </GameButton>
                             </div>
                         </motion.div>
@@ -162,13 +162,13 @@ export function ResultPhase({
                                     variant="secondary"
                                     onClick={() => setStep('RESULT')}
                                 >
-                                    結果に戻る
+                                    BACK
                                 </GameButton>
                                 <GameButton
                                     onClick={onNextRound}
                                     disabled={isProcessing || isReady}
                                 >
-                                    {isReady ? `待機中 (${readyCount}/${totalCount})` : '次のラウンドへ'}
+                                    {isReady ? `WAITING (${readyCount}/${totalCount})` : 'NEXT'}
                                 </GameButton>
                             </div>
                         </motion.div>
@@ -250,7 +250,7 @@ export function ResultPhase({
                                 onClick={() => setStep('REVEAL')}
                                 disabled={isProcessing}
                             >
-                                ネタバラシを見る
+                                NEXT
                             </GameButton>
                         </div>
                     </motion.div>
@@ -287,13 +287,13 @@ export function ResultPhase({
                                 variant="secondary"
                                 onClick={() => setStep('RESULT')}
                             >
-                                結果に戻る
+                                BACK
                             </GameButton>
                             <GameButton
                                 onClick={onNextRound}
                                 disabled={isProcessing || isReady}
                             >
-                                {isReady ? `待機中 (${readyCount}/${totalCount})` : '次のラウンドへ'}
+                                {isReady ? `WAITING (${readyCount}/${totalCount})` : 'NEXT'}
                             </GameButton>
                         </div>
                     </motion.div>

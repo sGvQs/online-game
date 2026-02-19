@@ -69,9 +69,11 @@ export function TitleScreen({
                         </div>
                     )}
 
-                    <div className={styles.menuItem()} onClick={onExit}>
-                        EXIT
-                    </div>
+                    {isHost && (
+                        <div className={styles.menuItem()} onClick={onExit}>
+                            EXIT
+                        </div>
+                    )}
                 </motion.div>
 
                 <motion.div

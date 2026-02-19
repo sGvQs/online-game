@@ -67,7 +67,7 @@ export function GameOverPhase({
                 <GameButton
                     onClick={onFinish}
                 >
-                    タイトルに戻る
+                    BACK TO TITLE
                 </GameButton>
             </div>
         </div>

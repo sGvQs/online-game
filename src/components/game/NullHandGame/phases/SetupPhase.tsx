@@ -123,12 +123,11 @@ export function SetupPhase({
                 transition={{ duration: 0.3 }}
             >
                 <div className="w-full h-full flex flex-col relative">
-                    {/* ヘルプボタン（右下に配置） */}
                     <button
                         onClick={() => setShowHelp(true)}
-                        className="absolute bottom-0 left-0 w-10 h-10 rounded-full border border-[#44FFFF] text-[#44FFFF] font-bold flex items-center justify-center hover:bg-[#44FFFF]/20 transition-colors z-20 bg-black"
+                        className="absolute top-5 right-5 px-5 py-2 border border-[#44FFFF]/30 text-[#44FFFF]/80 font-bold text-[10px] tracking-[0.2em] uppercase hover:bg-[#44FFFF] hover:text-black hover:border-[#44FFFF] transition-all duration-300 z-30 bg-black/80 backdrop-blur-sm hover:shadow-[0_0_20px_rgba(68,255,255,0.4)]"
                     >
-                        ?
+                        HOW TO PLAY
                     </button>
 
                     {/* ヘルプモーダル */}
@@ -140,17 +139,18 @@ export function SetupPhase({
                                 </h3>
                                 <div className="space-y-3 text-gray-200 text-sm leading-relaxed">
                                     <p>
-                                        <span className="text-[#FF4444] font-bold">1. 本当の『手』を選択</span><br />
-                                        まずはあなたが本当に出す手を選んでください。
+                                        <span className="text-[#FF4444] font-bold">1.『選択する手』を選択</span><br />
+                                        まずはあなたがゲストに見せる手を選んでください。
                                     </p>
                                     <p>
                                         <span className="text-[#44FFFF] font-bold">2. 偽装工作 (必須)</span><br />
-                                        ゲストに表示される「事前予告」情報を偽装してください。<br />
-                                        <span className="text-xs text-gray-400">※このゲームでは嘘をつくことが重要です。</span>
+                                        ゲストに表示される情報を偽装してください。<br />
+                                        <span className="text-xs text-gray-400">「選択する手」「変える確率」「お気に入り」の値のどれかに嘘をつけます</span>
                                     </p>
                                     <p>
                                         <span className="text-white border-b border-gray-500">統計情報の活用</span><br />
-                                        右側に表示されている「あなたのデータ」は全員に公開されています。裏をかくか、正直にいくか... 駆け引きを楽しんでください！
+                                        右側に表示されている「あなたのデータ」は下記の実績から算出されたものです。
+                                        あなたが偽装情報を設定後、偽装情報を含むデータは全員に共有されます。
                                     </p>
                                 </div>
                                 <div className="mt-6 flex justify-end">
@@ -328,7 +328,7 @@ export function SetupPhase({
                                         }
                                         onClick={onSubmit}
                                     >
-                                        選択を確定
+                                        SUBMIT
                                     </GameButton>
                                 </div>
                             </div>
