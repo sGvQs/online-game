@@ -60,3 +60,101 @@ export interface MatchProgress {
     scores: Record<string, number>
     events: ErrorEventWithUser[]
 }
+
+// ============================================
+// NULL HAND (じゃんけん) types
+// ============================================
+
+/** JankenEvent model type */
+export type JankenEvent = Prisma.JankenEventGetPayload<{}>;
+
+/** GuestHand model type */
+export type GuestHand = Prisma.GuestHandGetPayload<{}>;
+
+/** JankenLog model type */
+export type JankenLog = Prisma.JankenLogGetPayload<{}>;
+
+/** MatchScore model type (ポイント管理) */
+export type MatchScore = Prisma.MatchScoreGetPayload<{}>;
+
+/** JankenEvent with GuestHands including User */
+export type JankenEventWithGuests = Prisma.JankenEventGetPayload<{
+    include: {
+        guestHands: {
+            include: {
+                user: true
+            }
+        }
+    }
+}>;
+
+/** Match with JankenEvents */
+export type MatchWithJankenEvents = Prisma.MatchGetPayload<{
+    include: { jankenEvents: true }
+}>;
+
+/** Match with Scores */
+export type MatchWithScores = Prisma.MatchGetPayload<{
+    include: {
+        matchScores: {
+            include: {
+                user: true
+            }
+        }
+    }
+}>;
+
+/** MatchScore with User */
+export type MatchScoreWithUser = Prisma.MatchScoreGetPayload<{
+    include: { user: true }
+}>;
+
+/** ホストの統計データ（本物と表示用） */
+export interface HostStats {
+    favoriteHand: HandType
+    changeRate: number  // 変える確率 (0-100)
+    totalGames: number
+    // 偽装前の本物のデータ（SETUP画面で表示用）
+    realFavoriteHand?: HandType
+    realChangeRate?: number
+}
+
+/** 偽装の詳細情報 */
+export interface FakeDetails {
+    fakeHandValue?: HandType | null
+    fakeChangeRateValue?: number | null
+    fakeFavoriteHandValue?: HandType | null
+}
+
+/** ラウンド結果 */
+export interface RoundResult {
+    hostId: string
+    hostHand: HandType
+    winners: Array<{
+        userId: string
+        userName: string
+        hand: HandType
+    }>
+    hostWonAll: boolean
+}
+
+/** じゃんけんのフェーズ */
+export type JankenPhase = 'TITLE' | 'SETUP' | 'SHOWCASE' | 'FINAL_DECISION' | 'BATTLE' | 'RESULT' | 'GAME_OVER';
+
+/** 手の種類 */
+export type HandType = 'ROCK' | 'SCISSORS' | 'PAPER';
+
+/** 嘘の対象 */
+// ... existing types
+export type FakeTarget = 'NONE' | 'INITIAL_HAND' | 'CHANGE_RATE' | 'FAVORITE_HAND';
+
+export type UserRanking = {
+    userId: string
+    name: string
+    wins: number
+    totalGames: number
+    winRate: number
+    points: number
+    rank: number
+}
+

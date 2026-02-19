@@ -1,25 +1,28 @@
-// components/BGMPlayer.tsx
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
+import { useSound } from '@/lib/sound-context';
 
 const BGM_CONFIG = {
-    GAME_MODE: {
-        // URLに "error-hunter" が含まれる場合
+    ERROR_HUNTER: {
         check: (path: string) => path.includes('error-hunter'),
-        src: '/music/error-hunter.mp3',
+        srcs: ['/music/error-hunter.mp3'],
         label: 'error-hunter'
     },
+    NULL_HAND: {
+        check: (path: string) => path.includes('null-hand'),
+        srcs: ['/music/null-hand-opening.mp3', '/music/null-hand-playing.mp3'],
+        label: 'null-hand'
+    },
     MAIN_SYSTEM: {
-        // /dashboard または /room/... の場合は同じ曲
         check: (path: string) => path.includes('/dashboard') || path.includes('/room/'),
-        src: '/music/default.mp3',
+        srcs: ['/music/default.mp3'], // 1曲のみの場合は1つだけ入れる
         label: 'default'
     },
     DEFAULT: {
         check: () => true,
-        src: '/music/default.mp3',
+        srcs: ['/music/default.mp3'],
         label: 'default'
     }
 } as const;
@@ -27,54 +30,70 @@ const BGM_CONFIG = {
 export default function BGMPlayer() {
     const pathname = usePathname();
     const audioRef = useRef<HTMLAudioElement>(null);
-    const [isPlaying, setIsPlaying] = useState(false);
+    const { isPlaying, setIsPlaying } = useSound();
 
-    // 現在のパスに一致する設定を取得
+    // 現在どの曲を再生しているかのインデックス管理
+    const [trackIndex, setTrackIndex] = useState(0);
+
     const activeConfig =
-        BGM_CONFIG.GAME_MODE.check(pathname) ? BGM_CONFIG.GAME_MODE :
-            BGM_CONFIG.MAIN_SYSTEM.check(pathname) ? BGM_CONFIG.MAIN_SYSTEM :
-                BGM_CONFIG.DEFAULT;
+        Object.values(BGM_CONFIG).find(config => config.check(pathname))
+        ?? BGM_CONFIG.DEFAULT;
 
+    // 現在流すべきソース
+    const currentSrc = activeConfig.srcs[trackIndex % activeConfig.srcs.length];
 
-    // 初回レンダリング時とソース変更時に音量を設定
+    // パスが変わったときにインデックスをリセット（別のモードに移動した場合）
+    useEffect(() => {
+        setTrackIndex(0);
+    }, [activeConfig.label]);
+
+    // 音量設定
     useEffect(() => {
         if (audioRef.current) {
-            if (activeConfig.label === 'error-hunter') {
-                audioRef.current.volume = 0.2;
-            } else {
-                audioRef.current.volume = 0.05;
-            }
+            audioRef.current.volume = 0.2;
         }
-    }, [activeConfig.src]); // 曲が変わっても音量を維持
+    }, [activeConfig.label]);
 
+    // ソースの切り替えと再生
     useEffect(() => {
         if (!audioRef.current) return;
 
-        // 重要：今流れている曲と、次に流すべき曲が「同じ」なら何もしない
-        // これにより、dashboard ↔ room の移動で音が途切れない
-        if (audioRef.current.src.endsWith(activeConfig.src)) {
+        // すでに現在のソースが設定されているならリロードしない
+        if (audioRef.current.src.endsWith(currentSrc)) {
             return;
         }
 
-        // 曲が違う場合のみ、新しくロードして再生
-        audioRef.current.src = activeConfig.src;
+        audioRef.current.src = currentSrc;
         audioRef.current.load();
 
         if (isPlaying) {
             audioRef.current.play().catch(console.error);
         }
-    }, [activeConfig.src]); // 曲のパスが変わった時だけ発火
+    }, [currentSrc, isPlaying]);
+
+    // 曲が終了した時の処理
+    const handleEnded = () => {
+        // 次の曲へ（配列の最後までいったら0に戻る）
+        setTrackIndex((prev) => (prev + 1) % activeConfig.srcs.length);
+    };
 
     return (
         <div className="fixed bottom-6 right-6 z-50">
-            <audio ref={audioRef} loop />
+            {/* loop属性を削除し、onEndedを追加 */}
+            <audio
+                ref={audioRef}
+                onEnded={handleEnded}
+            />
             <button
                 onClick={() => {
-                    if (isPlaying) audioRef.current?.pause();
-                    else audioRef.current?.play();
+                    if (isPlaying) {
+                        audioRef.current?.pause();
+                    } else {
+                        audioRef.current?.play();
+                    }
                     setIsPlaying(!isPlaying);
                 }}
-                className="w-12 h-12 bg-indigo-600 rounded-full shadow-lg text-white"
+                className="w-12 h-12 bg-indigo-600 rounded-full shadow-lg text-white flex items-center justify-center"
             >
                 {!isPlaying ? '🔇' : '🔊'}
             </button>
