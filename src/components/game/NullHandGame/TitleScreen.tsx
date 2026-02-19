@@ -1,5 +1,6 @@
 import { RoomWithUsersAndReadyStatus, UserRanking, HandType, RoomUserWithReadyStatus } from '@/shared/types'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
+import { useState } from 'react'
 import { nullHandGame } from './styles'
 import { Hand3D } from './Hand3D'
 import { cn } from '@/lib/utils'
@@ -34,6 +35,7 @@ export function TitleScreen({
     const readyCount = room.users.filter((u: RoomUserWithReadyStatus) => u.isReady).length
     const totalUsers = room.users.length
     const { play } = useSE();
+    const [showAbout, setShowAbout] = useState(false);
 
     return (
         <div className={styles.container()}>
@@ -76,6 +78,16 @@ export function TitleScreen({
                             START
                         </div>
                     )}
+
+                    <div
+                        className={styles.menuItem()}
+                        onClick={() => {
+                            play("select")
+                            setShowAbout(true)
+                        }}
+                    >
+                        ABOUT
+                    </div>
 
                     {isHost && (
                         <div className={styles.menuItem()} onClick={() => {
@@ -167,6 +179,135 @@ export function TitleScreen({
                     </p>
                 </motion.div>
             </div>
+
+            {showAbout && (
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+                >
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        exit={{ opacity: 0, scale: 0.95 }}
+                        className="relative w-full max-w-2xl max-h-[90vh] bg-black border border-[#FF4444] rounded-lg overflow-hidden flex flex-col shadow-[0_0_30px_rgba(255,68,68,0.3)]"
+                    >
+                        <div className="overflow-y-auto p-6 custom-scrollbar flex-1" style={{ scrollbarWidth: 'thin', scrollbarColor: '#FF4444 #000' }}>
+                            <div className="space-y-6">
+                                {/* タイトル部 */}
+                                <div className="bg-black border border-[#FF4444] rounded p-4 text-center relative overflow-hidden group">
+                                    <div className="absolute inset-0 bg-[#FF4444]/10 pointer-events-none" />
+                                    <h2 className="text-2xl font-black text-[#FF4444] tracking-[0.2em] mb-2 uppercase relative z-10">
+                                        NULL HAND
+                                    </h2>
+                                    <div className="flex justify-center my-2">
+                                        <div className="w-24 h-24">
+                                            <Hand3D handType={"ROCK"} revealed={true} size={"small"} />
+                                        </div>
+                                    </div>
+                                    <p className="text-[#FF4444]/80 text-[10px] font-mono tracking-wider relative z-10">
+                                        PSYCHOLOGICAL ROCK-PAPER-SCISSORS
+                                    </p>
+                                </div>
+
+                                {/* キャッチコピー */}
+                                <div className="text-center space-y-2">
+                                    <h2 className="text-xl font-bold text-white">
+                                        👁️ 嘘を見抜け。心理を読め。
+                                    </h2>
+                                    <p className="text-xs italic text-gray-400">
+                                        ホストの「偽装工作」を暴き、じゃんけんで完全勝利せよ！
+                                    </p>
+                                </div>
+
+                                {/* ゲームの流れ */}
+                                <div className="space-y-3">
+                                    <h3 className="text-sm font-bold border-b border-[#FF4444] pb-1 text-white">
+                                        📋 ゲームの流れ
+                                    </h3>
+                                    <ol className="space-y-3 text-xs pl-2 text-gray-300">
+                                        <li className="flex items-start">
+                                            <span className="font-bold mr-2 text-[#FF4444]">1.</span>
+                                            <span>
+                                                <strong className="text-white">ホストの準備</strong><br />
+                                                ホストは自分の「手」と「嘘」を決定します。
+                                            </span>
+                                        </li>
+                                        <li className="flex items-start">
+                                            <span className="font-bold mr-2 text-[#FF4444]">2.</span>
+                                            <span>
+                                                <strong className="text-white">ホストの情報公開</strong><br />
+                                                「設定した手」とホストのステータスが公開されます。<br />
+                                                <span className="text-[#FF4444] font-semibold">※ この中に嘘が含まれています</span>
+                                            </span>
+                                        </li>
+                                        <li className="flex items-start">
+                                            <span className="font-bold mr-2 text-[#FF4444]">3.</span>
+                                            <span>
+                                                <strong className="text-white">ホストの最終決定</strong><br />
+                                                ホストは勝負する手を決定します。
+                                            </span>
+                                        </li>
+                                        <li className="flex items-start">
+                                            <span className="font-bold mr-2 text-[#FF4444]">4.</span>
+                                            <span>
+                                                <strong className="text-white">決断の時！</strong><br />
+                                                嘘に惑わされず、勝てる手を選択！
+                                            </span>
+                                        </li>
+                                    </ol>
+                                </div>
+
+                                {/* 勝利条件 */}
+                                <div className="space-y-2">
+                                    <h3 className="text-sm font-bold border-b border-[#FF4444] pb-1 text-white">
+                                        🏆 勝利条件
+                                    </h3>
+                                    <div className="border border-[#FF4444]/30 p-3 rounded bg-[#FF4444]/5">
+                                        <p className="text-xs font-bold text-white mb-2">
+                                            <span className="text-[#FF4444]">ゲスト</span>： ホストにじゃんけんで勝つ（+1点）
+                                        </p>
+                                        <p className="text-xs text-gray-400">
+                                            <span className="font-bold text-white">ホスト</span>： 全員に勝つ（+3点）<br />
+                                        </p>
+                                    </div>
+                                </div>
+
+                                {/* プレイのコツ */}
+                                <div className="space-y-2">
+                                    <h3 className="text-sm font-bold border-b border-[#FF4444] pb-1 text-white">
+                                        💡 プレイのコツ
+                                    </h3>
+                                    <ul className="space-y-2 text-xs pl-2 text-gray-300">
+                                        <li className="flex items-start">
+                                            <span className="mr-2 text-[#FF4444]">•</span>
+                                            <span>「変える確率」や「お気に入り」からホストの心理を読み取ろう</span>
+                                        </li>
+                                        <li className="flex items-start">
+                                            <span className="mr-2 text-[#FF4444]">•</span>
+                                            <span><span className="text-[#FF4444] font-semibold">裏の裏をかくか、素直に信じるか...</span>駆け引きが重要です</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* フッター（閉じるボタン） */}
+                        <div className="p-4 border-t border-[#FF4444] bg-black flex justify-center">
+                            <button
+                                onClick={() => {
+                                    play("submit")
+                                    setShowAbout(false)
+                                }}
+                                className="w-full max-w-xs py-3 rounded font-bold text-sm transition-all duration-200 bg-[#FF4444] text-black hover:bg-[#FF8888] shadow-[0_0_15px_rgba(255,68,68,0.5)]"
+                            >
+                                OK
+                            </button>
+                        </div>
+                    </motion.div>
+                </motion.div>
+            )}
         </div>
     )
 }
