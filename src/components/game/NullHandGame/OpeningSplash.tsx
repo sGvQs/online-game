@@ -64,13 +64,13 @@ export function OpeningSplash({ onComplete, titleHand }: OpeningSplashProps) {
                     exit={{ opacity: 0 }}
                     animate={{ opacity: isTransitioning ? 0 : 1 }}
                     transition={{ duration: 0.8, ease: "easeInOut" }}>
-                    <div className="flex justify-between text-xs font-bold tracking-widest text-[#44FFFF]">
+                    <div className="flex justify-between text-xs font-bold tracking-widest">
                         <span>LOADING SYSTEM...</span>
                         <span>{Math.round(progress)}%</span>
                     </div>
                     <div className="h-1 bg-gray-900 w-full overflow-hidden">
                         <motion.div
-                            className="h-full bg-[#44FFFF] shadow-[0_0_10px_#44FFFF]"
+                            className="h-full bg-white shadow-[0_0_10px_#44FFFF]"
                             style={{ width: `${progress}%` }}
                         />
                     </div>

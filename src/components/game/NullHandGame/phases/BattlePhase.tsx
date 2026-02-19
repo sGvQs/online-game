@@ -158,6 +158,16 @@ export function BattlePhase({
                                         size="medium"
                                     />
                                 </div>
+                                <p className="text-[12px] text-gray-500 text-center">
+                                    {(() => {
+                                        switch (jankenEvent.finalHostHand as HandType) {
+                                            case 'ROCK': return 'ゲストがチョキならあなたの勝ちです'
+                                            case 'SCISSORS': return 'ゲストがパーならあなたの勝ちです'
+                                            case 'PAPER': return 'ゲストがグーならあなたの勝ちです'
+                                            default: return ''
+                                        }
+                                    })()}
+                                </p>
                             </div>
 
                             <div className="mt-6">
