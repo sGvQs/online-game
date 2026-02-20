@@ -108,30 +108,30 @@ export function FinalDecisionPhase({
 
         const SideArea = () => (
             <div className={styles.sideArea()}>
-                <div className="h-full flex flex-col gap-6 overflow-y-auto">
+                <div className="h-full flex flex-col gap-4 overflow-y-auto">
 
                     {/* Publicly Shown Fake Info */}
-                    <div className="bg-[#1a0505] border border-[#FF4444]/30 rounded-lg p-5">
+                    <div className="bg-[#1a0505] border border-[#FF4444]/30 rounded-xl p-6">
                         <SideHeader
                             engLabel="YOUR FAKE DATA"
-                            label="PUBLIC"
+                            label="公開中のデータ"
                             badge="PUBLIC"
                             variant="red"
                             className="border-[#FF4444]/30"
                         />
 
-                        <div className="space-y-4">
-                            <div className="flex justify-between items-center">
-                                <span className="text-gray-400 text-xs uppercase tracking-wider">どれに嘘をついたか</span>
-                                <span className="text-white font-bold text-sm bg-[#FF4444]/20 px-2 py-0.5 rounded border border-[#FF4444]/30">
+                        <div className="space-y-3">
+                            <div className="bg-black/30 rounded-lg p-4 border border-[#FF4444]/10">
+                                <div className="text-gray-500 text-[10px] uppercase tracking-wider mb-1">どれに嘘をついたか</div>
+                                <div className="text-white font-bold">
                                     {jankenEvent.fakeTarget === 'NONE' && 'NONE'}
                                     {jankenEvent.fakeTarget === 'INITIAL_HAND' && '選択した手'}
                                     {jankenEvent.fakeTarget === 'CHANGE_RATE' && '変える確率'}
                                     {jankenEvent.fakeTarget === 'FAVORITE_HAND' && 'お気に入り'}
-                                </span>
+                                </div>
                             </div>
 
-                            <div className="space-y-2 pt-2 border-t border-[#FF4444]/10">
+                            <div className="bg-black/30 rounded-lg p-4 border border-[#FF4444]/10 space-y-3">
                                 <div className="flex justify-between items-center">
                                     <span className="text-gray-500 text-xs">選択した手</span>
                                     <span className={cn("font-bold", jankenEvent.fakeTarget === 'INITIAL_HAND' ? "text-[#FF4444]" : "text-gray-300")}>
@@ -161,32 +161,32 @@ export function FinalDecisionPhase({
                     </div>
 
                     {/* Real Private Info */}
-                    <div className="bg-[#051a1a] border border-[#44FFFF]/30 rounded-lg p-5 flex-1">
+                    <div className="bg-[#051a1a] border border-[#44FFFF]/30 rounded-xl p-6 flex-1">
                         <SideHeader
                             engLabel="YOUR REAL STATS"
-                            label="PRIVATE"
+                            label="本当のデータ"
                             badge="PRIVATE"
                             className="border-[#44FFFF]/30"
                         />
 
                         {hostStats && (
-                            <div className="space-y-6">
-                                <div>
-                                    <div className="text-[#44FFFF] text-xs uppercase mb-1 opacity-70">選択した手</div>
-                                    <div className="text-2xl font-bold text-white flex items-center gap-2">
+                            <div className="space-y-4">
+                                <div className="bg-black/30 rounded-lg p-4 border border-[#44FFFF]/10">
+                                    <div className="text-gray-500 text-[10px] uppercase tracking-wider mb-1">選択した手</div>
+                                    <div className="text-2xl font-bold text-white">
                                         {getHandDisplayWithEmoji(jankenEvent.initialHand as HandType)}
                                     </div>
                                 </div>
 
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="bg-black/30 p-3 rounded border border-[#44FFFF]/20">
-                                        <div className="text-gray-500 text-[10px] uppercase mb-1">お気に入り</div>
+                                <div className="grid grid-cols-2 gap-3">
+                                    <div className="bg-black/30 rounded-lg p-3 border border-[#44FFFF]/10">
+                                        <div className="text-gray-500 text-[10px] uppercase tracking-wider mb-1">お気に入り</div>
                                         <div className="text-white font-bold">
                                             {getHandDisplayWithEmoji(hostStats.realFavoriteHand as HandType)}
                                         </div>
                                     </div>
-                                    <div className="bg-black/30 p-3 rounded border border-[#44FFFF]/20">
-                                        <div className="text-gray-500 text-[10px] uppercase mb-1">変える確率</div>
+                                    <div className="bg-black/30 rounded-lg p-3 border border-[#44FFFF]/10">
+                                        <div className="text-gray-500 text-[10px] uppercase tracking-wider mb-1">変える確率</div>
                                         <div className="text-white font-bold text-xl font-mono">
                                             {hostStats.realChangeRate}%
                                         </div>
@@ -224,50 +224,43 @@ export function FinalDecisionPhase({
 
         const SideArea = () => (
             <div className={styles.sideArea()}>
-                <div className="h-full flex flex-col gap-6 overflow-y-auto">
+                <div className="bg-[#051a1a] border border-[#44FFFF]/30 rounded-xl p-6 flex-1 flex flex-col">
+                    <SideHeader
+                        engLabel="HOST'S PUBLIC DATA"
+                        label={`${hostName}のデータ`}
+                        badge="PUBLIC"
+                        className="border-[#44FFFF]/30"
+                    />
 
-                    {/* Publicly Shown Fake Info for Guest */}
-                    <div className="bg-[#1a0505] border border-[#FF4444]/30 rounded-lg p-5 flex-1">
-                        <SideHeader
-                            engLabel="HOST'S PUBLIC DATA"
-                            label="PUBLIC"
-                            badge="PUBLIC"
-                            variant="red"
-                            className="border-[#FF4444]/30"
-                        />
+                    <div className="space-y-4">
+                        <div className="bg-black/30 rounded-lg p-4 border border-[#44FFFF]/10 text-xs text-gray-400 leading-relaxed">
+                            <span className="text-[#44FFFF] font-bold">Note:</span><br />
+                            ここに表示されているデータには<span className="text-[#FF4444] font-bold">１つだけ嘘</span>が含まれています。<br />
+                            ホストはこのデータを元に、さらに裏をかくか、そのまま手を変えないか迷っています。
+                        </div>
 
-                        <div className="space-y-6">
-                            <div className="bg-black/20 p-4 rounded text-xs text-gray-400 leading-relaxed border border-gray-800">
-                                <span className="text-[#FF4444] font-bold">INFO:</span><br />
-                                ここに表示されているデータには<span className="text-[#FF4444] font-bold">１つだけ嘘</span>が含まれています。<br />
-                                ホストはこのデータを元に、さらに裏をかくか、そのまま手を変えないか迷っています。
+                        <div className="bg-black/30 rounded-lg p-4 border border-[#44FFFF]/10">
+                            <div className="text-gray-500 text-[10px] uppercase tracking-wider mb-2">選択した手</div>
+                            <div className="text-2xl font-bold text-white">
+                                {jankenEvent.fakeTarget === 'INITIAL_HAND'
+                                    ? getHandDisplayWithEmoji(jankenEvent.fakeHandValue as HandType)
+                                    : getHandDisplayWithEmoji(jankenEvent.initialHand as HandType)}
                             </div>
-
-                            <div className="space-y-4 pt-2">
-                                <div className="flex justify-between items-center bg-black/30 p-3 rounded border border-[#FF4444]/10">
-                                    <span className="text-gray-400 text-xs uppercase">選択した手</span>
-                                    <span className="font-bold text-[#FF4444]">
-                                        {jankenEvent.fakeTarget === 'INITIAL_HAND'
-                                            ? getHandDisplayWithEmoji(jankenEvent.fakeHandValue as HandType)
-                                            : getHandDisplayWithEmoji(jankenEvent.initialHand as HandType)}
-                                    </span>
-                                </div>
-                                <div className="flex justify-between items-center bg-black/30 p-3 rounded border border-[#FF4444]/10">
-                                    <span className="text-gray-400 text-xs uppercase">変える確率</span>
-                                    <span className="font-bold text-[#FF4444]">
-                                        {jankenEvent.fakeTarget === 'CHANGE_RATE'
-                                            ? `${jankenEvent.fakeChangeRateValue ?? 0}%`
-                                            : `${hostStats?.realChangeRate ?? 0}%`}
-                                    </span>
-                                </div>
-                                <div className="flex justify-between items-center bg-black/30 p-3 rounded border border-[#FF4444]/10">
-                                    <span className="text-gray-400 text-xs uppercase">お気に入り</span>
-                                    <span className="font-bold text-[#FF4444]">
-                                        {jankenEvent.fakeTarget === 'FAVORITE_HAND'
-                                            ? getHandDisplayWithEmoji(jankenEvent.fakeFavoriteHandValue as HandType)
-                                            : getHandDisplayWithEmoji(hostStats?.realFavoriteHand as HandType)}
-                                    </span>
-                                </div>
+                        </div>
+                        <div className="bg-black/30 rounded-lg p-4 border border-[#44FFFF]/10">
+                            <div className="text-gray-500 text-[10px] uppercase tracking-wider mb-2">変える確率</div>
+                            <div className="text-2xl font-bold text-white font-mono">
+                                {jankenEvent.fakeTarget === 'CHANGE_RATE'
+                                    ? `${jankenEvent.fakeChangeRateValue ?? 0}`
+                                    : `${hostStats?.realChangeRate ?? 0}`}<span className="text-lg text-gray-500 font-bold ml-1">%</span>
+                            </div>
+                        </div>
+                        <div className="bg-black/30 rounded-lg p-4 border border-[#44FFFF]/10">
+                            <div className="text-gray-500 text-[10px] uppercase tracking-wider mb-2">お気に入り</div>
+                            <div className="text-2xl font-bold text-white">
+                                {jankenEvent.fakeTarget === 'FAVORITE_HAND'
+                                    ? getHandDisplayWithEmoji(jankenEvent.fakeFavoriteHandValue as HandType)
+                                    : getHandDisplayWithEmoji(hostStats?.realFavoriteHand as HandType)}
                             </div>
                         </div>
                     </div>

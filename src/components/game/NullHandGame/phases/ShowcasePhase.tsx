@@ -89,46 +89,42 @@ export function ShowcasePhase({
 
     const SideArea = () => (
         <div className={styles.sideArea()}>
-            <SideHeader
-                engLabel="DATA ANALYSIS"
-                label={`${hostName}のデータ`}
-                className="mb-6"
-            />
+            <div className="bg-[#051a1a] border border-[#44FFFF]/30 rounded-xl p-6 flex-1 flex flex-col">
+                <SideHeader
+                    engLabel="DATA ANALYSIS"
+                    label={`${hostName}のデータ`}
+                    badge="PUBLIC"
+                    className="border-[#44FFFF]/30 mb-6"
+                />
 
-            {hostStats && (
-                <div className="space-y-4">
-                    <div className="bg-[#1a1a1a] p-4 rounded border border-gray-800 flex flex-col gap-2 relative overflow-hidden group hover:border-gray-700 transition-colors">
-                        <div className="flex justify-between items-center z-10">
-                            <span className="text-gray-400 text-xs font-bold uppercase tracking-wider">お気に入り</span>
-                            <span className="text-[#44FFFF] text-[10px] font-mono opacity-50">FAVORITE</span>
+                {hostStats && (
+                    <div className="space-y-4">
+                        <div className="bg-black/30 rounded-lg p-4 border border-[#44FFFF]/10">
+                            <div className="text-gray-500 text-[10px] uppercase tracking-wider mb-1">お気に入り</div>
+                            <div className="text-2xl font-bold text-white">
+                                {jankenEvent.fakeTarget === 'FAVORITE_HAND' && jankenEvent.fakeFavoriteHandValue
+                                    ? getHandDisplayWithEmoji(jankenEvent.fakeFavoriteHandValue as HandType)
+                                    : getHandDisplayWithEmoji(hostStats.favoriteHand as HandType)}
+                            </div>
                         </div>
-                        <div className="text-3xl font-bold text-white z-10 flex items-center justify-end gap-2">
-                            {jankenEvent.fakeTarget === 'FAVORITE_HAND' && jankenEvent.fakeFavoriteHandValue
-                                ? getHandDisplayWithEmoji(jankenEvent.fakeFavoriteHandValue as HandType)
-                                : getHandDisplayWithEmoji(hostStats.favoriteHand as HandType)}
+
+                        <div className="bg-black/30 rounded-lg p-4 border border-[#44FFFF]/10">
+                            <div className="text-gray-500 text-[10px] uppercase tracking-wider mb-1">変える確率</div>
+                            <div className="text-2xl font-bold text-white font-mono">
+                                {jankenEvent.fakeTarget === 'CHANGE_RATE' && jankenEvent.fakeChangeRateValue
+                                    ? jankenEvent.fakeChangeRateValue
+                                    : hostStats.changeRate}<span className="text-lg text-gray-500 font-bold ml-1">%</span>
+                            </div>
+                        </div>
+
+                        <div className="mt-auto pt-6 text-[10px] text-gray-500 leading-relaxed border-t border-[#44FFFF]/10">
+                            <span className="text-[#44FFFF]">Note:</span> 全てのデータは{hostName}の過去の動向を正確に表していますが、<span className="text-[#FF4444] font-bold">嘘の情報</span>が紛れています。
+                            <br />
+                            <span className="text-[9px] text-gray-600 block mt-1">（選択した手、お気に入り、変える確率、のどれか一つは嘘です）</span>
                         </div>
                     </div>
-
-                    <div className="bg-[#1a1a1a] p-4 rounded border border-gray-800 flex flex-col gap-2 relative overflow-hidden group hover:border-gray-700 transition-colors">
-                        <div className="flex justify-between items-center z-10">
-                            <span className="text-gray-400 text-xs font-bold uppercase tracking-wider">変える確率</span>
-                            <span className="text-[#44FFFF] text-[10px] font-mono opacity-50">CHANGE RATE</span>
-                        </div>
-                        <div className="text-3xl font-bold text-white z-10 text-right font-mono">
-                            {jankenEvent.fakeTarget === 'CHANGE_RATE' && jankenEvent.fakeChangeRateValue
-                                ? jankenEvent.fakeChangeRateValue
-                                : hostStats.changeRate}<span className="text-lg text-gray-500 font-bold ml-1">%</span>
-                        </div>
-                        <div className="absolute top-0 right-0 h-1 bg-gradient-to-l from-[#44FFFF] to-transparent w-full opacity-20" />
-                    </div>
-
-                    <div className="mt-auto pt-6 text-[10px] text-gray-500 leading-relaxed border-t border-gray-800">
-                        * 全てのデータは{hostName}の過去の動向を正確に表していますが、<span className="text-[#FF4444] font-bold">嘘の情報</span>が紛れています。
-                        <br />
-                        <span className="text-[9px] text-gray-600 block mt-1">（選択した手、お気に入り、変える確率、のどれか一つは嘘です）</span>
-                    </div>
-                </div>
-            )}
+                )}
+            </div>
         </div>
     )
 
