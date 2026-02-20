@@ -22,7 +22,7 @@ export function HandSelectionGrid({
 
     return (
         <div className="grid grid-cols-3 gap-8 w-full max-w-4xl px-8">
-            {(['ROCK', 'SCISSORS', 'PAPER'] as const).map((hand) => (
+            {Object.values(HandType).map((hand) => (
                 <button
                     key={hand}
                     className={cn(

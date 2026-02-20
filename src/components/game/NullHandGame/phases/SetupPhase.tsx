@@ -245,7 +245,7 @@ export function SetupPhase({
                                                 <div className="text-center space-y-4">
                                                     <div className="text-[#44FFFF] font-bold mb-4 uppercase tracking-widest">偽装として表示する「選択した手」を選択</div>
                                                     <div className="flex justify-center gap-4">
-                                                        {(['ROCK', 'SCISSORS', 'PAPER'] as const)
+                                                        {Object.values(HandType)
                                                             .filter(h => h !== selectedHand)
                                                             .map(hand => (
                                                                 <button
@@ -258,7 +258,7 @@ export function SetupPhase({
                                                                             : "border-gray-700 text-gray-500 hover:border-gray-500 hover:text-gray-300"
                                                                     )}
                                                                 >
-                                                                    <span className="text-3xl">{hand === 'ROCK' ? '✊' : hand === 'SCISSORS' ? '✌️' : '✋'}</span>
+                                                                    <span className="text-3xl">{hand === HandType.ROCK ? '✊' : hand === HandType.SCISSORS ? '✌️' : '✋'}</span>
                                                                     <span className="text-xs font-bold">{hand}</span>
                                                                 </button>
                                                             ))}
@@ -296,7 +296,7 @@ export function SetupPhase({
                                                 <div className="text-center space-y-4">
                                                     <div className="text-[#44FFFF] font-bold mb-4 uppercase tracking-widest">偽装として表示する「お気に入り」</div>
                                                     <div className="flex justify-center gap-4">
-                                                        {(['ROCK', 'SCISSORS', 'PAPER'] as const)
+                                                        {Object.values(HandType)
                                                             .filter(h => h !== hostStats?.realFavoriteHand)
                                                             .map(hand => (
                                                                 <button
@@ -309,7 +309,7 @@ export function SetupPhase({
                                                                             : "border-gray-700 text-gray-500 hover:border-gray-500 hover:text-gray-300"
                                                                     )}
                                                                 >
-                                                                    <span className="text-3xl">{hand === 'ROCK' ? '✊' : hand === 'SCISSORS' ? '✌️' : '✋'}</span>
+                                                                    <span className="text-3xl">{hand === HandType.ROCK ? '✊' : hand === HandType.SCISSORS ? '✌️' : '✋'}</span>
                                                                     <span className="text-xs font-bold">{hand}</span>
                                                                 </button>
                                                             ))}

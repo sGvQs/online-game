@@ -149,9 +149,9 @@ export function BattlePhase({
                                 <p className="text-[12px] text-gray-500 text-center">
                                     {(() => {
                                         switch (jankenEvent.finalHostHand as HandType) {
-                                            case 'ROCK': return 'ゲストがチョキならあなたの勝ちです'
-                                            case 'SCISSORS': return 'ゲストがパーならあなたの勝ちです'
-                                            case 'PAPER': return 'ゲストがグーならあなたの勝ちです'
+                                            case HandType.ROCK: return 'ゲストがチョキならあなたの勝ちです'
+                                            case HandType.SCISSORS: return 'ゲストがパーならあなたの勝ちです'
+                                            case HandType.PAPER: return 'ゲストがグーならあなたの勝ちです'
                                             default: return ''
                                         }
                                     })()}

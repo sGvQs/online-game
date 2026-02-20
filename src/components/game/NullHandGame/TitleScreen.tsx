@@ -203,7 +203,7 @@ export function TitleScreen({
                                     </h2>
                                     <div className="flex justify-center my-2">
                                         <div className="w-24 h-24">
-                                            <Hand3D handType={"ROCK"} revealed={true} size={"small"} />
+                                            <Hand3D handType={HandType.ROCK} revealed={true} size={"small"} />
                                         </div>
                                     </div>
                                     <p className="text-[#FF4444]/80 text-[10px] font-mono tracking-wider relative z-10">

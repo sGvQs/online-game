@@ -58,10 +58,10 @@ export function NullHandGame({
     } = useNullHand({ roomId, isHost, initialMatchId, currentUserId })
 
     // タイトル画面用の手のローテーション
-    const [titleHand, setTitleHand] = useState<HandType>('ROCK')
+    const [titleHand, setTitleHand] = useState<HandType>(HandType.ROCK)
     useEffect(() => {
         if (phase !== 'TITLE' && phase !== 'SETUP') return
-        const hands: HandType[] = ['ROCK', 'SCISSORS', 'PAPER']
+        const hands = Object.values(HandType)
         let index = 0
         const interval = setInterval(() => {
             index = (index + 1) % hands.length

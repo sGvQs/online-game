@@ -23,9 +23,9 @@ function judgeHand(hostHand: HandType, guestHand: HandType): 'HOST_WIN' | 'GUEST
     if (hostHand === guestHand) return 'DRAW'
 
     const winPatterns: Record<HandType, HandType> = {
-        ROCK: 'SCISSORS',
-        SCISSORS: 'PAPER',
-        PAPER: 'ROCK',
+        [HandType.ROCK]: HandType.SCISSORS,
+        [HandType.SCISSORS]: HandType.PAPER,
+        [HandType.PAPER]: HandType.ROCK,
     }
 
     return winPatterns[hostHand] === guestHand ? 'HOST_WIN' : 'GUEST_WIN'
@@ -143,20 +143,20 @@ export async function getHostStats(userId: string, eventId?: string): Promise<Ho
 
     if (logs.length === 0) {
         return {
-            favoriteHand: 'ROCK',
+            favoriteHand: HandType.ROCK,
             changeRate: 50,
             totalGames: 0,
             // ホスト以外にはrealデータを隠す
-            realFavoriteHand: isHost ? 'ROCK' : 'ROCK',
+            realFavoriteHand: isHost ? HandType.ROCK : HandType.ROCK,
             realChangeRate: isHost ? 50 : 0,
         }
     }
 
     // お気に入りを集計
     const handCounts: Record<HandType, number> = {
-        ROCK: 0,
-        SCISSORS: 0,
-        PAPER: 0
+        [HandType.ROCK]: 0,
+        [HandType.SCISSORS]: 0,
+        [HandType.PAPER]: 0
     }
 
     let changedCount = 0
@@ -171,7 +171,7 @@ export async function getHostStats(userId: string, eventId?: string): Promise<Ho
     })
 
     // 最も多く出した手
-    const realFavoriteHand = (Object.entries(handCounts).sort((a, b) => b[1] - a[1])[0][0] as HandType) || 'ROCK'
+    const realFavoriteHand = (Object.entries(handCounts).sort((a, b) => b[1] - a[1])[0][0] as HandType) || HandType.ROCK
 
     // 変える確率
     const realChangeRate = Math.round((changedCount / logs.length) * 100)
@@ -223,7 +223,7 @@ export async function setInitialHand(
     const user = await getAuthenticatedUser()
 
     // バリデーション
-    const validHands: HandType[] = ['ROCK', 'SCISSORS', 'PAPER']
+    const validHands = Object.values(HandType)
     if (!validHands.includes(hand)) throw new Error('無効な手です')
     const validFakeTargets: FakeTarget[] = ['NONE', 'INITIAL_HAND', 'CHANGE_RATE', 'FAVORITE_HAND']
     if (!validFakeTargets.includes(fakeTarget)) throw new Error('無効な偽装ターゲットです')
@@ -279,7 +279,7 @@ export async function confirmShowcase(eventId: string) {
         create: {
             jankenEventId: eventId,
             userId: userId,
-            hand: 'ROCK', // ダミー
+            hand: HandType.ROCK, // ダミー
             isConfirmed: true
         },
         update: {
@@ -341,7 +341,7 @@ export async function setGuestHand(
     const userId = currentUser.id
 
     // hand のバリデーション
-    const validHands: HandType[] = ['ROCK', 'SCISSORS', 'PAPER']
+    const validHands = Object.values(HandType)
     if (!validHands.includes(hand)) throw new Error('無効な手です')
     await prisma.guestHand.upsert({
         where: {
@@ -658,7 +658,7 @@ export async function getLatestJankenEventWithStats(
     const needsStats = ['SETUP', 'SHOWCASE', 'FINAL_DECISION', 'BATTLE', 'RESULT'].includes(event.phase)
     const stats = needsStats
         ? await getHostStats(event.currentHostId, event.id)
-        : { favoriteHand: 'ROCK' as HandType, changeRate: 50, totalGames: 0, realFavoriteHand: 'ROCK' as HandType, realChangeRate: 50 }
+        : { favoriteHand: HandType.ROCK, changeRate: 50, totalGames: 0, realFavoriteHand: HandType.ROCK, realChangeRate: 50 }
 
     return { event, stats }
 }
@@ -723,12 +723,11 @@ export async function getMatchScores(matchId: string): Promise<MatchScoreWithUse
  * ゲーム終了
  */
 export async function finishJanken(matchId: string, roomId: string) {
-    const currentUser = await getAuthenticatedUser()
+    await getAuthenticatedUser()
 
-    // ホストのみ終了可能
-    const room = await prisma.room.findUnique({ where: { id: roomId } })
-    if (!room) throw new Error('ルームが見つかりません')
-    if (room.createdBy !== currentUser.id) throw new Error('ゲームを終了する権限がありません')
+    // 既に終了済みかチェック（重複呼び出し防止）
+    const match = await prisma.match.findUnique({ where: { id: matchId } })
+    if (!match || match.status === 'FINISHED') return
     // Match を終了
     await prisma.match.update({
         where: { id: matchId },

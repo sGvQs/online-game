@@ -3,6 +3,7 @@
 import Image from 'next/image'
 import { RoomModal } from './RoomModal'
 import { Hand3D } from '../game/NullHandGame/Hand3D'
+import { HandType } from '@/shared/types'
 
 interface GameDescriptionModalProps {
     isOpen: boolean
@@ -163,7 +164,7 @@ export function GameDescriptionModal({ isOpen, onClose, gameType }: GameDescript
                         <h2 className="text-3xl font-black text-[#FF4444] tracking-[0.2em] mb-2 uppercase relative z-10">
                             NULL HAND
                         </h2>
-                        <Hand3D handType={"ROCK"} revealed={true} size={"small"} />
+                        <Hand3D handType={HandType.ROCK} revealed={true} size={"small"} />
                         <p className="text-[#FF4444]/80 text-xs font-mono tracking-wider relative z-10">
                             PSYCHOLOGICAL ROCK-PAPER-SCISSORS
                         </p>

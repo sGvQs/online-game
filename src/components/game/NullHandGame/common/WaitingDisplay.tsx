@@ -24,10 +24,10 @@ export const WaitingDisplay = ({
     const styles = nullHandGame()
 
     // Cycle through hands for visual effect/obfuscation
-    const [displayHand, setDisplayHand] = useState<HandType>(handType || 'ROCK')
+    const [displayHand, setDisplayHand] = useState<HandType>(handType || HandType.ROCK)
 
     useEffect(() => {
-        const hands: HandType[] = ['ROCK', 'PAPER', 'SCISSORS']
+        const hands = Object.values(HandType)
         let currentIndex = hands.indexOf(displayHand)
         if (currentIndex === -1) currentIndex = 0
 

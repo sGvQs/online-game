@@ -4,8 +4,7 @@ import React, { useRef } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
 import { OrbitControls, PerspectiveCamera, RoundedBox } from '@react-three/drei'
 import * as THREE from 'three'
-
-type HandType = 'ROCK' | 'SCISSORS' | 'PAPER'
+import { HandType } from '@/shared/types'
 
 interface Hand3DProps {
     handType: HandType | null
@@ -72,9 +71,9 @@ function HandContainer({ handType, isRotating }: { handType: HandType; isRotatin
 
     return (
         <group ref={groupRef}>
-            {handType === 'ROCK' && <Rock />}
-            {handType === 'SCISSORS' && <Scissors />}
-            {handType === 'PAPER' && <Paper />}
+            {handType === HandType.ROCK && <Rock />}
+            {handType === HandType.SCISSORS && <Scissors />}
+            {handType === HandType.PAPER && <Paper />}
         </group>
     )
 }
