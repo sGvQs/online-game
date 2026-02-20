@@ -254,8 +254,7 @@ export function SetupPhase({
                                                                             : spStyles.fakeHandInactive()
                                                                     )}
                                                                 >
-                                                                    <span className="text-3xl">{hand === HandType.ROCK ? '✊' : hand === HandType.SCISSORS ? '✌️' : '✋'}</span>
-                                                                    <span>{hand}</span>
+                                                                    <Hand3D handType={hand} size="micro" />
                                                                 </button>
                                                             ))}
                                                     </div>
@@ -290,7 +289,7 @@ export function SetupPhase({
 
                                             {selectedFake === 'FAVORITE_HAND' && (
                                                 <div className="text-center space-y-4">
-                                                    <div className="text-[#44FFFF] font-bold mb-4 uppercase tracking-widest">偽装として表示する「お気に入り」</div>
+                                                    <div className="text-[#44FFFF] font-bold mb-4 uppercase tracking-widest">偽装として表示する「お気に入り」を選択</div>
                                                     <div className={spStyles.fakeHandGrid()}>
                                                         {Object.values(HandType)
                                                             .filter(h => h !== hostStats?.realFavoriteHand)
@@ -305,8 +304,7 @@ export function SetupPhase({
                                                                             : spStyles.fakeHandInactive()
                                                                     )}
                                                                 >
-                                                                    <span className="text-3xl">{hand === HandType.ROCK ? '✊' : hand === HandType.SCISSORS ? '✌️' : '✋'}</span>
-                                                                    <span>{hand}</span>
+                                                                    <Hand3D handType={hand} size="micro" />
                                                                 </button>
                                                             ))}
                                                     </div>
@@ -362,7 +360,7 @@ export function SetupPhase({
                                 <div className="flex items-center gap-4 mt-4">
                                     <div className="w-16 h-16 bg-[#1a1a1a] rounded-lg border border-[#FF4444]/20 relative overflow-hidden shrink-0 pointer-events-none">
                                         <div className="w-[150%] h-[150%] absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-                                            <Hand3D handType={selectedHand} revealed={true} size="small" />
+                                            <Hand3D handType={selectedHand} revealed={true} size="micro" />
                                         </div>
                                     </div>
                                     <div>

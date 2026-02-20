@@ -9,7 +9,7 @@ import { HandType } from '@/shared/types'
 interface Hand3DProps {
     handType: HandType | null
     revealed?: boolean
-    size?: 'small' | 'medium' | 'large'
+    size?: 'micro' | 'small' | 'medium' | 'large'
     isRotating?: boolean
 }
 
@@ -22,10 +22,10 @@ export function Hand3D({
     size = 'medium',
     isRotating = true,
 }: Hand3DProps) {
-    const canvasHeight = size === 'small' ? '150px' : size === 'large' ? '400px' : '250px'
-
+    const canvasHeight = size === 'micro' ? '100px' : size === 'small' ? '150px' : size === 'large' ? '400px' : '250px'
+    const canvasWidth = size === 'micro' ? '100px' : '100%'
     return (
-        <div style={{ width: '100%', height: canvasHeight, background: '#000000' }}>
+        <div style={{ width: canvasWidth, height: canvasHeight, background: '#000000' }}>
             <Canvas>
                 <PerspectiveCamera makeDefault position={[0, 0, 6]} fov={40} />
 
