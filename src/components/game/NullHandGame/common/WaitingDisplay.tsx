@@ -1,8 +1,8 @@
 import { HandType } from '@/shared/types'
 import { Hand3D } from '../Hand3D'
-import { nullHandGame } from '../styles'
 import { cn } from '@/lib/utils'
 import { useEffect, useState } from 'react'
+import { waitingDisplay } from './WaitingDisplay.styles'
 
 interface WaitingDisplayProps {
     engLabel?: string
@@ -21,16 +21,14 @@ export const WaitingDisplay = ({
     isRotating = true,
     className
 }: WaitingDisplayProps) => {
-    const styles = nullHandGame()
+    const styles = waitingDisplay()
 
-    // Cycle through hands for visual effect/obfuscation
-    const [displayHand, setDisplayHand] = useState<HandType>(handType || 'ROCK')
+    const [displayHand, setDisplayHand] = useState<HandType>(handType || HandType.ROCK)
 
     useEffect(() => {
-        const hands: HandType[] = ['ROCK', 'PAPER', 'SCISSORS']
+        const hands = Object.values(HandType)
         let currentIndex = hands.indexOf(displayHand)
         if (currentIndex === -1) currentIndex = 0
-
 
         const interval = setInterval(() => {
             currentIndex = (currentIndex + 1) % hands.length
@@ -41,18 +39,18 @@ export const WaitingDisplay = ({
     }, [])
 
     return (
-        <div className={cn("flex flex-col h-full animate-in fade-in zoom-in duration-300 relative overflow-hidden", className)}>
+        <div className={cn(styles.root(), className)}>
             {/* Background Hand Animation */}
-            <div className="absolute inset-0 flex items-center justify-center opacity-20 pointer-events-none filter blur-[2px]">
+            <div className={styles.bgHand()}>
                 <Hand3D handType={displayHand} revealed={true} size="large" isRotating={isRotating} />
             </div>
 
-            <div className="flex-1 flex flex-col items-center justify-center relative z-10 text-center">
-                <div className="animate-pulse">
-                    <h2 className="text-[#44FFFF] text-sm font-bold tracking-[0.3em] mb-2 font-mono uppercase">{engLabel}</h2>
-                    <h3 className="text-white text-4xl font-bold tracking-wider mb-2">{text}</h3>
+            <div className={styles.content()}>
+                <div className={styles.pulse()}>
+                    <h2 className={styles.engLabel()}>{engLabel}</h2>
+                    <h3 className={styles.title()}>{text}</h3>
                     {subText && (
-                        <p className="text-gray-600 text-xs font-mono tracking-[0.2em] uppercase">{subText}</p>
+                        <p className={styles.subText()}>{subText}</p>
                     )}
                 </div>
             </div>

@@ -23,9 +23,9 @@ function judgeHand(hostHand: HandType, guestHand: HandType): 'HOST_WIN' | 'GUEST
     if (hostHand === guestHand) return 'DRAW'
 
     const winPatterns: Record<HandType, HandType> = {
-        ROCK: 'SCISSORS',
-        SCISSORS: 'PAPER',
-        PAPER: 'ROCK',
+        [HandType.ROCK]: HandType.SCISSORS,
+        [HandType.SCISSORS]: HandType.PAPER,
+        [HandType.PAPER]: HandType.ROCK,
     }
 
     return winPatterns[hostHand] === guestHand ? 'HOST_WIN' : 'GUEST_WIN'
@@ -124,6 +124,17 @@ export async function startJankenMatch(roomId: string) {
  * JankenLogから過去のデータを集計
  */
 export async function getHostStats(userId: string, eventId?: string): Promise<HostStats> {
+    // 認証チェック: 呼び出し元のユーザーがホスト本人かどうかで返すデータを分ける
+    let currentUserId: string | null = null
+    try {
+        const currentUser = await getAuthenticatedUser()
+        currentUserId = currentUser.id
+    } catch {
+        // 認証なしの場合はゲスト扱い
+    }
+
+    const isHost = currentUserId === userId
+
     const logs = await prisma.jankenLog.findMany({
         where: { userId },
         orderBy: { createdAt: 'desc' },
@@ -132,19 +143,20 @@ export async function getHostStats(userId: string, eventId?: string): Promise<Ho
 
     if (logs.length === 0) {
         return {
-            favoriteHand: 'ROCK',
+            favoriteHand: HandType.ROCK,
             changeRate: 50,
             totalGames: 0,
-            realFavoriteHand: 'ROCK',
-            realChangeRate: 50,
+            // ホスト以外にはrealデータを隠す
+            realFavoriteHand: isHost ? HandType.ROCK : HandType.ROCK,
+            realChangeRate: isHost ? 50 : 0,
         }
     }
 
     // お気に入りを集計
     const handCounts: Record<HandType, number> = {
-        ROCK: 0,
-        SCISSORS: 0,
-        PAPER: 0
+        [HandType.ROCK]: 0,
+        [HandType.SCISSORS]: 0,
+        [HandType.PAPER]: 0
     }
 
     let changedCount = 0
@@ -159,7 +171,7 @@ export async function getHostStats(userId: string, eventId?: string): Promise<Ho
     })
 
     // 最も多く出した手
-    const realFavoriteHand = (Object.entries(handCounts).sort((a, b) => b[1] - a[1])[0][0] as HandType) || 'ROCK'
+    const realFavoriteHand = (Object.entries(handCounts).sort((a, b) => b[1] - a[1])[0][0] as HandType) || HandType.ROCK
 
     // 変える確率
     const realChangeRate = Math.round((changedCount / logs.length) * 100)
@@ -188,8 +200,9 @@ export async function getHostStats(userId: string, eventId?: string): Promise<Ho
         favoriteHand,
         changeRate,
         totalGames: logs.length,
-        realFavoriteHand,
-        realChangeRate,
+        // ホスト本人にのみ本物のデータを返す
+        realFavoriteHand: isHost ? realFavoriteHand : favoriteHand,
+        realChangeRate: isHost ? realChangeRate : changeRate,
     }
 }
 
@@ -208,6 +221,12 @@ export async function setInitialHand(
     fakeDetails?: FakeDetails
 ) {
     const user = await getAuthenticatedUser()
+
+    // バリデーション
+    const validHands = Object.values(HandType)
+    if (!validHands.includes(hand)) throw new Error('無効な手です')
+    const validFakeTargets: FakeTarget[] = ['NONE', 'INITIAL_HAND', 'CHANGE_RATE', 'FAVORITE_HAND']
+    if (!validFakeTargets.includes(fakeTarget)) throw new Error('無効な偽装ターゲットです')
 
     const event = await prisma.jankenEvent.findUnique({ where: { id: eventId } })
     if (!event) throw new Error('イベントが見つかりません')
@@ -231,7 +250,9 @@ export async function setInitialHand(
  * ゲストの確認完了
  * 全ゲストが確認したら FINAL_DECISION へ
  */
-export async function confirmShowcase(eventId: string, userId: string) {
+export async function confirmShowcase(eventId: string) {
+    const currentUser = await getAuthenticatedUser()
+    const userId = currentUser.id
     const event = await prisma.jankenEvent.findUnique({
         where: { id: eventId },
         include: {
@@ -258,7 +279,7 @@ export async function confirmShowcase(eventId: string, userId: string) {
         create: {
             jankenEventId: eventId,
             userId: userId,
-            hand: 'ROCK', // ダミー
+            hand: HandType.ROCK, // ダミー
             isConfirmed: true
         },
         update: {
@@ -314,9 +335,14 @@ export async function setFinalHostHand(eventId: string, hand: HandType) {
  */
 export async function setGuestHand(
     eventId: string,
-    userId: string,
     hand: HandType
 ) {
+    const currentUser = await getAuthenticatedUser()
+    const userId = currentUser.id
+
+    // hand のバリデーション
+    const validHands = Object.values(HandType)
+    if (!validHands.includes(hand)) throw new Error('無効な手です')
     await prisma.guestHand.upsert({
         where: {
             jankenEventId_userId: {
@@ -506,6 +532,7 @@ async function judgeRound(eventId: string) {
  * 次のターンを開始
  */
 export async function startNextTurn(eventId: string) {
+    await getAuthenticatedUser() // 認証チェック
     const event = await prisma.jankenEvent.findUnique({
         where: { id: eventId },
         include: {
@@ -591,38 +618,58 @@ export async function getJankenEvent(eventId: string): Promise<JankenEventWithGu
  * マッチIDから最新のJankenEventを取得
  */
 export async function getLatestJankenEvent(matchId: string): Promise<JankenEventWithGuests | null> {
-    console.log('[getLatestJankenEvent] Called with matchId:', matchId)
-    if (!matchId) {
-        console.log('[getLatestJankenEvent] matchId is invalid')
-        return null
-    }
+    if (!matchId) return null
 
-    try {
-        const event = await prisma.jankenEvent.findFirst({
-            where: { matchId },
-            orderBy: { turnNumber: 'desc' },
-            include: {
-                guestHands: {
-                    include: {
-                        user: true
-                    }
-                }
+    const event = await prisma.jankenEvent.findFirst({
+        where: { matchId },
+        orderBy: { turnNumber: 'desc' },
+        include: {
+            guestHands: {
+                include: { user: true }
             }
-        })
+        }
+    })
 
-        console.log('[getLatestJankenEvent] Result:', event ? `Found Event ID: ${event.id}, Turn: ${event.turnNumber}` : 'NULL')
-        return event
-    } catch (error) {
-        console.error('[getLatestJankenEvent] Error:', error)
-        throw error
-    }
+    return event
+}
+
+/**
+ * マッチIDから最新の JankenEvent と HostStats を一度に取得
+ * クライアントへの往復を 2 → 1 に削減するためのヘルパー
+ */
+export async function getLatestJankenEventWithStats(
+    matchId: string
+): Promise<{ event: JankenEventWithGuests; stats: HostStats } | null> {
+    if (!matchId) return null
+
+    const event = await prisma.jankenEvent.findFirst({
+        where: { matchId },
+        orderBy: { turnNumber: 'desc' },
+        include: {
+            guestHands: {
+                include: { user: true }
+            }
+        }
+    })
+
+    if (!event) return null
+
+    // 統計が必要なフェーズかどうか判断
+    const needsStats = ['SETUP', 'SHOWCASE', 'FINAL_DECISION', 'BATTLE', 'RESULT'].includes(event.phase)
+    const stats = needsStats
+        ? await getHostStats(event.currentHostId, event.id)
+        : { favoriteHand: HandType.ROCK, changeRate: 50, totalGames: 0, realFavoriteHand: HandType.ROCK, realChangeRate: 50 }
+
+    return { event, stats }
 }
 
 /**
  * 次のラウンドへの準備完了をマーク
  * 全員準備完了したら次のターンを開始
  */
-export async function markNextRoundReady(roomId: string, userId: string, matchId: string) {
+export async function markNextRoundReady(roomId: string, matchId: string) {
+    const currentUser = await getAuthenticatedUser()
+    const userId = currentUser.id
     // ユーザーのisReadyをtrueにする
     await prisma.roomUser.update({
         where: { roomId_userId: { roomId, userId } },
@@ -676,6 +723,11 @@ export async function getMatchScores(matchId: string): Promise<MatchScoreWithUse
  * ゲーム終了
  */
 export async function finishJanken(matchId: string, roomId: string) {
+    await getAuthenticatedUser()
+
+    // 既に終了済みかチェック（重複呼び出し防止）
+    const match = await prisma.match.findUnique({ where: { id: matchId } })
+    if (!match || match.status === 'FINISHED') return
     // Match を終了
     await prisma.match.update({
         where: { id: matchId },

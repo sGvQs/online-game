@@ -142,7 +142,11 @@ export interface RoundResult {
 export type JankenPhase = 'TITLE' | 'SETUP' | 'SHOWCASE' | 'FINAL_DECISION' | 'BATTLE' | 'RESULT' | 'GAME_OVER';
 
 /** 手の種類 */
-export type HandType = 'ROCK' | 'SCISSORS' | 'PAPER';
+export enum HandType {
+    ROCK = 'ROCK',
+    SCISSORS = 'SCISSORS',
+    PAPER = 'PAPER',
+}
 
 /** 嘘の対象 */
 // ... existing types

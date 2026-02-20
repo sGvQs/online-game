@@ -1,15 +1,18 @@
 import { HandType, FakeTarget, FakeDetails, HostStats, JankenPhase } from '@/shared/types'
-import { Hand3D } from '../Hand3D'
-import { nullHandGame } from '../styles'
+import { Hand3D } from '../../Hand3D'
+import { nullHandGame } from '../../styles'
 import { cn } from '@/lib/utils'
-import { getHandDisplayWithEmoji } from '../utils'
-import { HandSelectionGrid } from '../HandSelectionGrid'
+import { getHandDisplayWithEmoji } from '../../utils'
+import { HandSelectionGrid } from '../../HandSelectionGrid'
 import React from 'react'
 import { motion } from 'framer-motion'
-import { PhaseHeader } from '../common/PhaseHeader'
-import { SideHeader } from '../common/SideHeader'
-import { WaitingDisplay } from '../common/WaitingDisplay'
-import { GameButton } from '../common/GameButton'
+import { PhaseHeader } from '../../common/PhaseHeader'
+import { SideHeader } from '../../common/SideHeader'
+import { WaitingDisplay } from '../../common/WaitingDisplay'
+import { GameButton } from '../../common/GameButton'
+import { useSE } from '@/hooks/useSE'
+import { setupPhase } from './styles'
+import { sideCard } from '../phaseCard.styles'
 
 interface SetupPhaseProps {
     isCurrentHost: boolean
@@ -43,10 +46,13 @@ export function SetupPhase({
     onReselectHand
 }: SetupPhaseProps) {
     const styles = nullHandGame()
+    const spStyles = setupPhase()
+    const { play } = useSE()
 
     const [showHelp, setShowHelp] = React.useState(false)
 
     const handleFakeOptionClick = (value: FakeTarget) => {
+        play('select')
         if (selectedFake === value) {
             onSelectFake('NONE')
         } else {
@@ -70,14 +76,14 @@ export function SetupPhase({
                     transition={{ duration: 0.3 }}
                 >
                     <div className="h-full flex flex-col p-4">
-                        <div className="text-[#44FFFF] font-black text-3xl mb-6 border-b-4 border-[#44FFFF] pb-2 tracking-widest uppercase">
+                        <div className={spStyles.howToPlayTitle()}>
                             HOW TO PLAY
                         </div>
                         <div className="space-y-6 text-gray-200 flex-1 overflow-y-auto">
                             <div className="flex gap-4 items-start">
-                                <div className="bg-[#44FFFF] text-black font-bold w-8 h-8 flex items-center justify-center rounded-sm shrink-0">1</div>
+                                <div className={spStyles.stepBadge()}>1</div>
                                 <div>
-                                    <div className="text-[#44FFFF] font-bold text-lg mb-1">ホストの嘘を見破れ</div>
+                                    <div className={spStyles.stepTitle()}>ホストの嘘を見破れ</div>
                                     <p className="text-sm text-gray-400 leading-relaxed">
                                         ホストは「選択する手」を設定し、<br />
                                         その後「選択する手」「お気に入り」「変える確率」の3つのデータを公開します。<br />
@@ -87,9 +93,9 @@ export function SetupPhase({
                             </div>
 
                             <div className="flex gap-4 items-start">
-                                <div className="bg-[#44FFFF] text-black font-bold w-8 h-8 flex items-center justify-center rounded-sm shrink-0">2</div>
+                                <div className={spStyles.stepBadge()}>2</div>
                                 <div>
-                                    <div className="text-[#44FFFF] font-bold text-lg mb-1">勝つ手を予想せよ</div>
+                                    <div className={spStyles.stepTitle()}>勝つ手を予想せよ</div>
                                     <p className="text-sm text-gray-400 leading-relaxed">
                                         ホストの心理を読み、最終的に出す手に<span className="text-[#44FFFF] font-bold">勝てる手</span>を選んでください。<br />
                                         「嘘」と設定された項目は、表示されている内容が事実とは異なります。<br />
@@ -101,9 +107,9 @@ export function SetupPhase({
                             </div>
 
                             <div className="flex gap-4 items-start">
-                                <div className="bg-[#44FFFF] text-black font-bold w-8 h-8 flex items-center justify-center rounded-sm shrink-0">3</div>
+                                <div className={spStyles.stepBadge()}>3</div>
                                 <div>
-                                    <div className="text-[#44FFFF] font-bold text-lg mb-1">Null Hand</div>
+                                    <div className={spStyles.stepTitle()}>Null Hand</div>
                                     <p className="text-sm text-gray-400 leading-relaxed">
                                         プレイヤー： ホストに勝てば<span className="text-[#44FFFF] font-bold">1点</span>獲得<br />
                                         ホスト： 全員に勝てば<span className="text-[#44FFFF] font-bold">3点</span>獲得<br />
@@ -124,7 +130,10 @@ export function SetupPhase({
             >
                 <div className="w-full h-full flex flex-col relative">
                     <button
-                        onClick={() => setShowHelp(true)}
+                        onClick={() => {
+                            play('select')
+                            setShowHelp(true)
+                        }}
                         className="absolute top-5 right-5 px-5 py-2 border border-[#44FFFF]/30 text-[#44FFFF]/80 font-bold text-[10px] tracking-[0.2em] uppercase hover:bg-[#44FFFF] hover:text-black hover:border-[#44FFFF] transition-all duration-300 z-30 bg-black/80 backdrop-blur-sm hover:shadow-[0_0_20px_rgba(68,255,255,0.4)]"
                     >
                         HOW TO PLAY
@@ -132,7 +141,7 @@ export function SetupPhase({
 
                     {/* ヘルプモーダル */}
                     {showHelp && (
-                        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4" onClick={() => setShowHelp(false)}>
+                        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4" onClick={() => { play('select'); setShowHelp(false); }}>
                             <div className="bg-black border-[2px] border-[#44FFFF] p-6 max-w-md w-full shadow-[0_0_30px_rgba(68,255,255,0.2)]" onClick={e => e.stopPropagation()}>
                                 <h3 className="text-xl font-black text-[#44FFFF] mb-4 border-b border-[#44FFFF] pb-2 uppercase tracking-widest">
                                     HOW TO PLAY
@@ -156,7 +165,7 @@ export function SetupPhase({
                                 <div className="mt-6 flex justify-end">
                                     <button
                                         className="px-6 py-1.5 bg-[#44FFFF] text-black font-bold text-sm uppercase tracking-widest hover:bg-white transition-colors"
-                                        onClick={() => setShowHelp(false)}
+                                        onClick={() => { play('select'); setShowHelp(false); }}
                                     >
                                         CLOSE
                                     </button>
@@ -167,13 +176,13 @@ export function SetupPhase({
 
                     {!selectedHand ? (
                         /* STEP 1: 手の選択 */
-                        <div className="flex flex-col h-full animate-in fade-in zoom-in duration-300">
+                        <div className="flex flex-col flex-1 min-h-0 animate-in fade-in zoom-in duration-300">
                             <PhaseHeader
                                 engLabel="STEP 1"
                                 title="あなたの手を選択"
                                 subLabel="SELECT YOUR REAL HAND"
                             />
-                            <div className="flex-1 flex items-center justify-center">
+                            <div className="flex-1 flex items-center justify-center min-h-0">
                                 <div className="flex justify-center w-full mb-8">
                                     <HandSelectionGrid
                                         selectedHand={selectedHand}
@@ -186,9 +195,7 @@ export function SetupPhase({
                         </div>
                     ) : (
                         /* STEP 2: 偽装の選択 */
-                        <div
-                            className="flex flex-col h-full animate-in slide-in-from-right duration-300"
-                        >
+                        <div className="flex flex-col flex-1 min-h-0 animate-in slide-in-from-right duration-300">
 
                             <PhaseHeader
                                 engLabel="STEP 2"
@@ -196,8 +203,8 @@ export function SetupPhase({
                                 subLabel="CHOOSE DECEPTION"
                             />
 
-                            <div className="flex-1 flex flex-col justify-center">
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                            <div className="flex flex-col flex-1 justify-center gap-6 min-h-0">
+                                <div className={spStyles.fakeOptionGrid()}>
                                     {([
                                         { value: 'INITIAL_HAND', label: '選択した手', icon: '🖐️' },
                                         { value: 'CHANGE_RATE', label: '変える確率', icon: '📊' },
@@ -206,26 +213,21 @@ export function SetupPhase({
                                         <button
                                             key={option.value}
                                             className={cn(
-                                                "relative group overflow-hidden p-6 transition-all duration-300",
-                                                "border-2 bg-black/50 backdrop-blur-sm",
+                                                spStyles.fakeOption(),
                                                 selectedFake === option.value
-                                                    ? "border-[#44FFFF] shadow-[0_0_20px_rgba(68,255,255,0.3)] text-[#44FFFF]"
-                                                    : "border-gray-700 text-gray-400 hover:border-gray-500 hover:text-gray-200"
+                                                    ? spStyles.fakeOptionActive()
+                                                    : spStyles.fakeOptionInactive()
                                             )}
                                             onClick={() => handleFakeOptionClick(option.value)}
                                         >
                                             <div className="text-4xl mb-3 group-hover:scale-110 transition-transform duration-300">{option.icon}</div>
-                                            <div className="font-bold tracking-widest text-lg">{option.label}</div>
-
-                                            {selectedFake === option.value && (
-                                                <div className="absolute inset-0 bg-[#44FFFF]/5 pointer-events-none" />
-                                            )}
+                                            <div>{option.label}</div>
                                         </button>
                                     ))}
                                 </div>
 
                                 {/* 偽装詳細入力エリア */}
-                                <div className="h-48 flex items-center justify-center bg-black/30 border border-gray-800 p-8 rounded-lg relative overflow-hidden">
+                                <div className="h-48 shrink-0 flex items-center justify-center bg-black/30 border border-gray-800 p-8 rounded-lg relative overflow-hidden">
                                     {/* 背景装飾 */}
                                     {selectedFake === 'NONE' && (
                                         <div className="text-gray-600 font-bold text-xl tracking-widest text-center">
@@ -238,22 +240,21 @@ export function SetupPhase({
                                             {selectedFake === 'INITIAL_HAND' && (
                                                 <div className="text-center space-y-4">
                                                     <div className="text-[#44FFFF] font-bold mb-4 uppercase tracking-widest">偽装として表示する「選択した手」を選択</div>
-                                                    <div className="flex justify-center gap-4">
-                                                        {(['ROCK', 'SCISSORS', 'PAPER'] as const)
+                                                    <div className={spStyles.fakeHandGrid()}>
+                                                        {Object.values(HandType)
                                                             .filter(h => h !== selectedHand)
                                                             .map(hand => (
                                                                 <button
                                                                     key={hand}
-                                                                    onClick={() => onUpdateFakeDetails({ ...fakeDetails, fakeHandValue: hand })}
+                                                                    onClick={() => { play('select'); onUpdateFakeDetails({ ...fakeDetails, fakeHandValue: hand }); }}
                                                                     className={cn(
-                                                                        "w-24 h-24 border-2 flex flex-col items-center justify-center gap-2 transition-all duration-200",
+                                                                        spStyles.fakeHandOption(),
                                                                         fakeDetails.fakeHandValue === hand
-                                                                            ? "border-[#FF4444] bg-[#FF4444]/10 text-white shadow-[0_0_15px_rgba(255,68,68,0.3)]"
-                                                                            : "border-gray-700 text-gray-500 hover:border-gray-500 hover:text-gray-300"
+                                                                            ? spStyles.fakeHandActive()
+                                                                            : spStyles.fakeHandInactive()
                                                                     )}
                                                                 >
-                                                                    <span className="text-3xl">{hand === 'ROCK' ? '✊' : hand === 'SCISSORS' ? '✌️' : '✋'}</span>
-                                                                    <span className="text-xs font-bold">{hand}</span>
+                                                                    <Hand3D handType={hand} size="micro" />
                                                                 </button>
                                                             ))}
                                                     </div>
@@ -273,7 +274,7 @@ export function SetupPhase({
                                                             step="1"
                                                             value={fakeDetails.fakeChangeRateValue ?? 50}
                                                             onChange={(e) => onUpdateFakeDetails({ ...fakeDetails, fakeChangeRateValue: parseInt(e.target.value) })}
-                                                            className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-[#44FFFF] hover:accent-[#88FFFF] transition-all"
+                                                            className={spStyles.probabilityInput()}
                                                         />
                                                         {/* 目盛り */}
                                                         <div className="absolute top-8 left-0 text-xs text-gray-500">0%</div>
@@ -288,23 +289,22 @@ export function SetupPhase({
 
                                             {selectedFake === 'FAVORITE_HAND' && (
                                                 <div className="text-center space-y-4">
-                                                    <div className="text-[#44FFFF] font-bold mb-4 uppercase tracking-widest">偽装として表示する「お気に入り」</div>
-                                                    <div className="flex justify-center gap-4">
-                                                        {(['ROCK', 'SCISSORS', 'PAPER'] as const)
+                                                    <div className="text-[#44FFFF] font-bold mb-4 uppercase tracking-widest">偽装として表示する「お気に入り」を選択</div>
+                                                    <div className={spStyles.fakeHandGrid()}>
+                                                        {Object.values(HandType)
                                                             .filter(h => h !== hostStats?.realFavoriteHand)
                                                             .map(hand => (
                                                                 <button
                                                                     key={hand}
-                                                                    onClick={() => onUpdateFakeDetails({ ...fakeDetails, fakeFavoriteHandValue: hand })}
+                                                                    onClick={() => { play('select'); onUpdateFakeDetails({ ...fakeDetails, fakeFavoriteHandValue: hand }); }}
                                                                     className={cn(
-                                                                        "w-24 h-24 border-2 flex flex-col items-center justify-center gap-2 transition-all duration-200",
+                                                                        spStyles.fakeHandOption(),
                                                                         fakeDetails.fakeFavoriteHandValue === hand
-                                                                            ? "border-[#FF4444] bg-[#FF4444]/10 text-white shadow-[0_0_15px_rgba(255,68,68,0.3)]"
-                                                                            : "border-gray-700 text-gray-500 hover:border-gray-500 hover:text-gray-300"
+                                                                            ? spStyles.fakeHandActive()
+                                                                            : spStyles.fakeHandInactive()
                                                                     )}
                                                                 >
-                                                                    <span className="text-3xl">{hand === 'ROCK' ? '✊' : hand === 'SCISSORS' ? '✌️' : '✋'}</span>
-                                                                    <span className="text-xs font-bold">{hand}</span>
+                                                                    <Hand3D handType={hand} size="micro" />
                                                                 </button>
                                                             ))}
                                                     </div>
@@ -315,22 +315,20 @@ export function SetupPhase({
                                 </div>
                             </div>
 
-                            <div className="mt-auto pt-4 flex justify-end">
-                                <div className="mt-auto pt-4 flex justify-end">
-                                    <GameButton
-                                        disabled={
-                                            !selectedHand ||
-                                            selectedFake === 'NONE' ||
-                                            (selectedFake === 'INITIAL_HAND' && !fakeDetails.fakeHandValue) ||
-                                            (selectedFake === 'CHANGE_RATE' && fakeDetails.fakeChangeRateValue === undefined) ||
-                                            (selectedFake === 'FAVORITE_HAND' && !fakeDetails.fakeFavoriteHandValue) ||
-                                            isProcessing
-                                        }
-                                        onClick={onSubmit}
-                                    >
-                                        SUBMIT
-                                    </GameButton>
-                                </div>
+                            <div className="mt-4 shrink-0 flex justify-end">
+                                <GameButton
+                                    disabled={
+                                        !selectedHand ||
+                                        selectedFake === 'NONE' ||
+                                        (selectedFake === 'INITIAL_HAND' && !fakeDetails.fakeHandValue) ||
+                                        (selectedFake === 'CHANGE_RATE' && fakeDetails.fakeChangeRateValue === undefined) ||
+                                        (selectedFake === 'FAVORITE_HAND' && !fakeDetails.fakeFavoriteHandValue) ||
+                                        isProcessing
+                                    }
+                                    onClick={onSubmit}
+                                >
+                                    SUBMIT
+                                </GameButton>
                             </div>
                         </div>
                     )}
@@ -350,9 +348,7 @@ export function SetupPhase({
                     <div className="flex flex-col gap-4 h-full">
                         {/* 選択した手の表示（ステップ2のみ） */}
                         {selectedHand && (
-                            <div className="bg-[#1a0505] border border-[#FF4444]/30 rounded-xl p-6 relative overflow-hidden group">
-
-
+                            <div className={sideCard({ variant: 'red', size: 'lg' }).card()}>
                                 <SideHeader
                                     engLabel="YOUR SELECTION"
                                     label="選択した手"
@@ -361,83 +357,30 @@ export function SetupPhase({
                                     className="border-[#FF4444]/30"
                                 />
 
-                                <div className="flex items-center gap-4">
-                                    <div className="relative w-16 h-16 bg-black/50 rounded-lg border border-[#FF4444]/20 overflow-hidden">
-                                        <div className="absolute inset-0 flex items-center justify-center">
-                                            <Hand3D handType={selectedHand} revealed={true} size="small" />
+                                <div className="flex items-center gap-4 mt-4">
+                                    <div className="w-16 h-16 bg-[#1a1a1a] rounded-lg border border-[#FF4444]/20 relative overflow-hidden shrink-0 pointer-events-none">
+                                        <div className="w-[150%] h-[150%] absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+                                            <Hand3D handType={selectedHand} revealed={true} size="micro" />
                                         </div>
                                     </div>
                                     <div>
-                                        <div className="text-gray-400 text-[10px] uppercase tracking-wider mb-1">選択した手</div>
-                                        <div className="text-2xl font-bold text-white leading-none">
+                                        <div className={sideCard().cardTitle()}>選択した手</div>
+                                        <div className={sideCard({ size: 'lg' }).cardValue()}>
                                             {getHandDisplayWithEmoji(selectedHand)}
                                         </div>
                                     </div>
                                     <button
-                                        onClick={onReselectHand}
-                                        className="ml-auto text-[#FF4444] text-xs font-bold border border-[#FF4444]/30 px-3 py-1.5 rounded hover:bg-[#FF4444] hover:text-black transition-colors"
+                                        onClick={() => { play('select'); onReselectHand(); }}
+                                        className="ml-auto text-[#FF4444] text-xs font-bold border border-[#FF4444]/30 px-3 py-1.5 rounded hover:bg-[#FF4444] hover:text-black transition-colors shrink-0"
                                     >
                                         変更
                                     </button>
                                 </div>
-
-
                             </div>
                         )}
 
                         {/* ホスト用リアル統計 */}
-                        <div className="bg-[#051a1a] border border-[#44FFFF]/30 rounded-xl p-6 flex-1 flex flex-col">
-                            {/* Note: The new SideHeader puts label on a new line. 
-                                The original was `YOUR DATA [PUBLIC]` on one line (ish).
-                                The new SideHeader is:
-                                YOUR DATA
-                                PUBLIC [Badge]
-                                
-                                Wait, my updated SideHeader is:
-                                engLabel (YOUR DATA)
-                                label (PUBLIC) | badge (PUBLIC)
-                                
-                                That seems redundant.
-                                Original: 
-                                YOUR DATA [PUBLIC]
-                                
-                                In SetupPhase original:
-                                h3 ... YOUR DATA span... PUBLIC
-                                
-                                In BattlePhase original:
-                                h2 DATA ANALYSIS
-                                h3 {hostName}のデータ
-                                
-                                They are fundamentally different headers.
-                                
-                                BattlePhase style: 
-                                Small EN Header
-                                Large JP Header
-                                
-                                SetupPhase style:
-                                Small EN Header + Badge
-                                (No Large JP Header)
-                                
-                                I might need to make SideHeader more flexible or just stick to the BattlePhase style for everywhere which is cleaner.
-                                If I use SideHeader with:
-                                engLabel="YOUR DATA"
-                                label="データを公開中"
-                                badge="PUBLIC"
-                                
-                                It might look good?
-                                
-                                Let's try to match the BattlePhase aesthetic which is the "Standard".
-                                
-                                For SetupPhase "YOUR SELECTION":
-                                engLabel="YOUR SELECTION"
-                                label="選択した手"
-                                badge="PRIVATE"
-                                
-                                For SetupPhase "YOUR DATA":
-                                engLabel="YOUR DATA"
-                                label="公開データ"
-                                badge="PUBLIC"
-                            */}
+                        <div className={sideCard({ variant: 'cyan', size: 'lg', className: 'flex-1' }).card()}>
                             <SideHeader
                                 engLabel="YOUR DATA"
                                 label="公開データ"
@@ -446,16 +389,16 @@ export function SetupPhase({
                             />
 
                             <div className="space-y-4">
-                                <div className="bg-black/30 rounded-lg p-3 border border-[#44FFFF]/10">
-                                    <div className="text-gray-500 text-[10px] uppercase tracking-wider mb-1">お気に入り</div>
-                                    <div className="text-lg font-bold text-white flex items-center gap-2">
+                                <div className={sideCard({ variant: 'cyan', size: 'sm' }).dataBlock()}>
+                                    <div className={sideCard().cardTitle()}>お気に入り</div>
+                                    <div className={sideCard({ size: 'lg' }).cardValue()}>
                                         {getHandDisplayWithEmoji(hostStats.realFavoriteHand as HandType)}
                                     </div>
                                 </div>
-                                <div className="bg-black/30 rounded-lg p-3 border border-[#44FFFF]/10">
-                                    <div className="text-gray-500 text-[10px] uppercase tracking-wider mb-1">変える確率</div>
-                                    <div className="text-lg font-bold text-white font-mono">
-                                        {hostStats.realChangeRate}%
+                                <div className={sideCard({ variant: 'cyan', size: 'sm' }).dataBlock()}>
+                                    <div className={sideCard().cardTitle()}>変える確率</div>
+                                    <div className={sideCard({ size: 'lg' }).cardValueWithUnit()}>
+                                        {hostStats.realChangeRate}<span className="text-lg text-gray-500 font-bold ml-1">%</span>
                                     </div>
                                 </div>
                             </div>

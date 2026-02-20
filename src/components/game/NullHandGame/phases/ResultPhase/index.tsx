@@ -1,11 +1,13 @@
 import { HandType, JankenEventWithGuests, MatchScoreWithUser, HostStats, FakeTarget, RoomUser } from '@/shared/types'
-import { Hand3D } from '../Hand3D'
-import { nullHandGame } from '../styles'
+import { Hand3D } from '../../Hand3D'
+import { nullHandGame } from '../../styles'
 import { cn } from '@/lib/utils'
-import { getHandDisplayWithEmoji, judgeHand } from '../utils'
-import { LieRevealCard } from '../LieRevealCard'
-import { SideHeader } from '../common/SideHeader'
-import { GameButton } from '../common/GameButton'
+import { getHandDisplayWithEmoji, judgeHand } from '../../utils'
+import { LieRevealCard } from '../../LieRevealCard'
+import { SideHeader } from '../../common/SideHeader'
+import { GameButton } from '../../common/GameButton'
+import { resultPhase } from './styles'
+import { sideCard } from '../phaseCard.styles'
 
 import { useState } from 'react'
 import { motion } from 'framer-motion'
@@ -34,6 +36,7 @@ export function ResultPhase({
     roomUsers
 }: ResultPhaseProps) {
     const styles = nullHandGame()
+    const rpStyles = resultPhase()
     const [step, setStep] = useState<'RESULT' | 'REVEAL'>('RESULT')
 
     const currentUser = roomUsers.find(u => u.userId === currentUserId)
@@ -72,7 +75,7 @@ export function ResultPhase({
                             <div className="flex justify-center items-center gap-8 mt-8">
                                 {/* ホスト */}
                                 <div className="flex flex-col items-center">
-                                    <div className="text-[#FF4444] font-bold text-xl mb-4 tracking-widest">{hostName}</div>
+                                    <div className={cn(rpStyles.playerName(), rpStyles.hostName())}>{hostName}</div>
 
                                     {/* 勝敗バッジ */}
                                     <div className="mb-4 h-8">
@@ -81,7 +84,7 @@ export function ResultPhase({
                                         {isDraw && <span className="bg-gray-500 text-white font-bold px-4 py-1 rounded">DRAW</span>}
                                     </div>
 
-                                    <div className={cn("transition-all duration-500", isHostWin || isDraw ? "w-48 h-48" : "w-40 h-40 opacity-70")}>
+                                    <div className={cn(rpStyles.handWrapper(), isHostWin || isDraw ? rpStyles.handWrapperWin() : rpStyles.handWrapperLose())}>
                                         <Hand3D
                                             handType={hostHand}
                                             revealed={true}
@@ -94,11 +97,11 @@ export function ResultPhase({
                                 </div>
 
                                 {/* VS */}
-                                <div className="text-4xl font-bold text-white italic opacity-50">VS</div>
+                                <div className={rpStyles.vsText()}>VS</div>
 
                                 {/* 自分 */}
                                 <div className="flex flex-col items-center">
-                                    <div className="text-[#44FFFF] font-bold text-xl mb-4 tracking-widest">自分</div>
+                                    <div className={cn(rpStyles.playerName(), rpStyles.myselfName())}>自分</div>
 
                                     {/* 勝敗バッジ */}
                                     <div className="mb-4 h-8">
@@ -107,7 +110,7 @@ export function ResultPhase({
                                         {isDraw && <span className="bg-gray-500 text-white font-bold px-4 py-1 rounded">DRAW</span>}
                                     </div>
 
-                                    <div className={cn("transition-all duration-500", isGuestWin || isDraw ? "w-48 h-48" : "w-40 h-40 opacity-70")}>
+                                    <div className={cn(rpStyles.handWrapper(), isGuestWin || isDraw ? rpStyles.handWrapperWin() : rpStyles.handWrapperLose())}>
                                         <Hand3D
                                             handType={myHand}
                                             revealed={true}
@@ -143,10 +146,10 @@ export function ResultPhase({
                             className="w-full"
                         >
                             <div className="text-center mb-6">
-                                <h3 className="text-[#FF4444] font-black text-2xl tracking-[0.2em] uppercase border-b-2 border-[#FF4444] inline-block pb-1">
+                                <h3 className={rpStyles.revealTitle()}>
                                     HOST LIED ABOUT
                                 </h3>
-                                <p className="text-gray-500 text-sm mt-2">ホストが仕掛けた「嘘」のおさらい</p>
+                                <p className={rpStyles.revealSubtitle()}>ホストが仕掛けた「嘘」のおさらい</p>
                             </div>
 
                             {jankenEvent.fakeTarget === 'NONE' ? (
@@ -219,9 +222,9 @@ export function ResultPhase({
                         layout
                         className="w-full"
                     >
-                        <div className={styles.vsContainer()}>
+                        <div className="flex justify-center mt-12">
                             <div className="flex flex-col items-center">
-                                <div className="text-[#FF4444] font-bold text-center mb-2 tracking-widest">{hostName}</div>
+                                <div className={cn(rpStyles.playerName(), rpStyles.hostName(), "text-center mb-2")}>{hostName}</div>
 
                                 {/* ホスト用勝敗バッジ */}
                                 {showResult && (
@@ -232,7 +235,7 @@ export function ResultPhase({
                                     </div>
                                 )}
 
-                                <div className={cn("transition-all duration-500", isSpectator ? "w-64 mx-auto" : (hostStatus === 'LOSE' ? "w-40 h-40 opacity-70" : "w-48 h-48"))}>
+                                <div className={cn(rpStyles.handWrapper(), isSpectator ? "w-64 mx-auto" : (hostStatus === 'LOSE' ? rpStyles.handWrapperLose() : rpStyles.handWrapperWin()))}>
                                     <Hand3D
                                         handType={hostHand}
                                         revealed={true}
@@ -268,10 +271,10 @@ export function ResultPhase({
                         className="w-full"
                     >
                         <div className="text-center mb-6">
-                            <h3 className="text-[#FF4444] font-black text-2xl tracking-[0.2em] uppercase border-b-2 border-[#FF4444] inline-block pb-1">
+                            <h3 className={rpStyles.revealTitle()}>
                                 YOU LIED ABOUT
                             </h3>
-                            <p className="text-gray-500 text-sm mt-2">あなたのついた嘘の結果</p>
+                            <p className={rpStyles.revealSubtitle()}>あなたのついた嘘の結果</p>
                         </div>
 
                         {jankenEvent.fakeTarget === 'NONE' ? (
@@ -309,78 +312,78 @@ export function ResultPhase({
             layout
             transition={{ duration: 0.3 }}
         >
-            <SideHeader
-                engLabel="ROUND RESULT"
-                label="ラウンド結果"
-            />
+            <div className={sideCard({ variant: 'cyan', size: 'lg' }).card()}>
+                <SideHeader
+                    engLabel="ROUND RESULT"
+                    label="ラウンド結果"
+                    className="border-[#44FFFF]/30"
+                />
 
-            {currentScores.length > 0 && (
-                <motion.div className="space-y-3" layout>
-                    {currentScores.map((score, index) => {
-                        const isMe = score.userId === currentUserId
-                        const isWinner = score.points > 0
+                {currentScores.length > 0 && (
+                    <motion.div className="space-y-3" layout>
+                        {currentScores.map((score, index) => {
+                            const isMe = score.userId === currentUserId
+                            const isWinner = score.points > 0
 
-                        // Find hand played by this user (only relevant for host view or self)
-                        const userHandData = jankenEvent.guestHands.find(g => g.userId === score.userId)
-                        const handPlayed = userHandData?.hand as HandType | undefined
+                            const userHandData = jankenEvent.guestHands.find(g => g.userId === score.userId)
+                            const handPlayed = userHandData?.hand as HandType | undefined
 
-                        // Host sees everyone's hands. Guests see only their own if needed (though current logic only shows for host).
-                        const showHand = isCurrentHost && handPlayed
+                            const showHand = isCurrentHost && handPlayed
 
-                        return (
-                            <motion.div
-                                key={score.userId}
-                                layout
-                                initial={{ opacity: 0, x: 20 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                transition={{ duration: 0.3, delay: index * 0.1 }}
-                                className={cn(
-                                    "flex justify-between items-center p-3 rounded transition-colors relative overflow-hidden group",
-                                    isWinner
-                                        ? "bg-[#FF4444]/10"
-                                        : "bg-white/5",
-                                    isMe && !isWinner && "border border-gray-600"
-                                )}
-                            >
-                                {/* Winner highlight effect */}
-                                {isWinner && (
-                                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#FF4444]" />
-                                )}
+                            return (
+                                <motion.div
+                                    key={score.userId}
+                                    layout
+                                    initial={{ opacity: 0, x: 20 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ duration: 0.3, delay: index * 0.1 }}
+                                    className={cn(
+                                        "flex justify-between items-center p-4 rounded-lg transition-colors relative overflow-hidden border",
+                                        isWinner
+                                            ? "bg-black/30 border-[#FF4444]/20"
+                                            : "bg-black/30 border-[#44FFFF]/10",
+                                        isMe && !isWinner && "border-gray-600"
+                                    )}
+                                >
+                                    {isWinner && (
+                                        <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#FF4444]" />
+                                    )}
 
-                                <div className="flex flex-col gap-1 z-10 pl-2">
-                                    <div className="flex items-center gap-2">
-                                        <span className={cn("font-bold text-sm tracking-wide", isMe ? "text-white" : "text-gray-300")}>
-                                            {score.user.name}
-                                        </span>
-                                        {isMe && (
-                                            <span className="text-[10px] bg-gray-800 text-gray-400 border border-gray-700 px-1.5 py-0.5 rounded font-mono">YOU</span>
+                                    <div className="flex flex-col gap-1 z-10 pl-2">
+                                        <div className="flex items-center gap-2">
+                                            <span className={cn("font-bold text-sm tracking-wide", isMe ? "text-white" : "text-gray-300")}>
+                                                {score.user.name}
+                                            </span>
+                                            {isMe && (
+                                                <span className={rpStyles.youBadge()}>YOU</span>
+                                            )}
+                                        </div>
+
+                                        {showHand && (
+                                            <div className="text-sm text-gray-500 flex items-center gap-2">
+                                                <span className="text-lg leading-none">{getHandDisplayWithEmoji(handPlayed)}</span>
+                                            </div>
                                         )}
                                     </div>
 
-                                    {showHand && (
-                                        <div className="text-sm text-gray-500 flex items-center gap-2">
-                                            <span className="text-lg leading-none">{getHandDisplayWithEmoji(handPlayed)}</span>
-                                        </div>
-                                    )}
-                                </div>
+                                    <div className="flex flex-col items-end z-10 pr-2">
+                                        <span className={cn("font-black font-mono text-xl", isWinner ? "text-[#FF4444]" : "text-gray-500")}>
+                                            {score.points > 0 ? `+${score.points}` : '0'}
+                                        </span>
+                                        <span className="text-[10px] text-gray-700 font-bold uppercase tracking-wider">PTS</span>
+                                    </div>
+                                </motion.div>
+                            )
+                        })}
+                    </motion.div>
+                )}
 
-                                <div className="flex flex-col items-end z-10 pr-2">
-                                    <span className={cn("font-black font-mono text-xl", isWinner ? "text-[#FF4444]" : "text-gray-500")}>
-                                        {score.points > 0 ? `+${score.points}` : '0'}
-                                    </span>
-                                    <span className="text-[10px] text-gray-700 font-bold uppercase tracking-wider">PTS</span>
-                                </div>
-                            </motion.div>
-                        )
-                    })}
-                </motion.div>
-            )}
-
-            {/* Footer with game info */}
-            <div className="mt-auto pt-4 border-t border-gray-800">
-                <div className="flex justify-between text-[10px] text-gray-500 uppercase tracking-widest font-bold">
-                    <span>Host: {hostName}</span>
-                    <span>Total: {currentScores.reduce((acc, curr) => acc + curr.points, 0)}</span>
+                {/* Footer with game info */}
+                <div className={rpStyles.sideFooter()}>
+                    <div className={rpStyles.sideFooterContent()}>
+                        <span>Host: {hostName}</span>
+                        <span>Total: {currentScores.reduce((acc, curr) => acc + curr.points, 0)}</span>
+                    </div>
                 </div>
             </div>
         </motion.div>

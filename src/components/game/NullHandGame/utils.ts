@@ -3,9 +3,9 @@ import { HandType } from '@/shared/types'
 // ヘルパー関数: HandTypeを絵文字付きカタカナ表記に変換
 export const getHandDisplayWithEmoji = (hand: HandType): string => {
     switch (hand) {
-        case 'ROCK': return '✊ グー'
-        case 'SCISSORS': return '✌️ チョキ'
-        case 'PAPER': return '✋ パー'
+        case HandType.ROCK: return '✊ グー'
+        case HandType.SCISSORS: return '✌️ チョキ'
+        case HandType.PAPER: return '✋ パー'
         default: return hand
     }
 }
@@ -13,9 +13,9 @@ export const getHandDisplayWithEmoji = (hand: HandType): string => {
 export const judgeHand = (hostHand: HandType, guestHand: HandType): 'HOST_WIN' | 'GUEST_WIN' | 'DRAW' => {
     if (hostHand === guestHand) return 'DRAW'
     const winPatterns: Record<HandType, HandType> = {
-        ROCK: 'SCISSORS',
-        SCISSORS: 'PAPER',
-        PAPER: 'ROCK',
+        [HandType.ROCK]: HandType.SCISSORS,
+        [HandType.SCISSORS]: HandType.PAPER,
+        [HandType.PAPER]: HandType.ROCK,
     }
     return winPatterns[hostHand] === guestHand ? 'HOST_WIN' : 'GUEST_WIN'
 }

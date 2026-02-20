@@ -1,8 +1,8 @@
 import { MatchScoreWithUser, UserRanking } from '@/shared/types'
-import { nullHandGame } from '../styles'
+import { nullHandGame } from '../../styles'
 import { cn } from '@/lib/utils'
-import { SideHeader } from '../common/SideHeader'
-import { GameButton } from '../common/GameButton'
+import { SideHeader } from '../../common/SideHeader'
+import { GameButton } from '../../common/GameButton'
 
 interface GameOverPhaseProps {
     currentUserId: string
@@ -75,59 +75,54 @@ export function GameOverPhase({
 
     const SideArea = () => (
         <div className={styles.sideArea()}>
-            <SideHeader
-                engLabel="FINAL RANKING"
-                label="最終順位"
-            />
-            {currentScores.length > 0 && (
-                <div className="space-y-4">
-                    {(() => {
-                        // ポイント順にソート（念のため）
-                        const sortedScores = [...currentScores].sort((a, b) => b.points - a.points)
+            <div className="bg-[#051a1a] border border-[#44FFFF]/30 rounded-xl p-6 flex-1 flex flex-col">
+                <SideHeader
+                    engLabel="FINAL RANKING"
+                    label="最終順位"
+                    className="border-[#44FFFF]/30"
+                />
+                {currentScores.length > 0 && (
+                    <div className="space-y-3">
+                        {(() => {
+                            const sortedScores = [...currentScores].sort((a, b) => b.points - a.points)
 
-                        return sortedScores.map((score, index) => {
-                            const oldRank = initialRankings.find(r => r.userId === score.userId)?.rank
-                            const newRank = newRankings.find(r => r.userId === score.userId)?.rank ?? oldRank
+                            return sortedScores.map((score, index) => {
+                                const oldRank = initialRankings.find(r => r.userId === score.userId)?.rank
+                                const newRank = newRankings.find(r => r.userId === score.userId)?.rank ?? oldRank
 
-                            // 同率順位の計算 (1, 1, 3方式)
-                            // 前の人と同じポイントなら同じ順位、そうでなければ index + 1
-                            let rank = index + 1
-                            if (index > 0 && score.points === sortedScores[index - 1].points) {
-                                // 前の人と同じランクを探す（再帰的にこれまでの人を確認する必要はない、直前の人の計算済みランクを使えばよいが
-                                // mapの中なので単純に配列から比較）
-                                let prevIndex = index - 1
-                                while (prevIndex >= 0 && sortedScores[prevIndex].points === score.points) {
-                                    rank = prevIndex + 1
-                                    prevIndex--
+                                let rank = index + 1
+                                if (index > 0 && score.points === sortedScores[index - 1].points) {
+                                    let prevIndex = index - 1
+                                    while (prevIndex >= 0 && sortedScores[prevIndex].points === score.points) {
+                                        rank = prevIndex + 1
+                                        prevIndex--
+                                    }
                                 }
-                            }
 
-                            return (
-                                <div
-                                    key={score.userId}
-                                    className={cn(
-                                        "flex justify-between items-center p-4 border-l-4",
-                                        rank === 1 ? "bg-[#FF4444]/20 border-[#FF4444]" : "bg-gray-900 border-gray-700"
-                                    )}
-                                >
-                                    <div className="flex flex-col gap-1">
-                                        <div className="flex items-center gap-3">
-                                            <span className={cn(styles.rankBadge(), rank === 1 ? "bg-[#FF4444] text-black" : "")}>{rank}位</span>
-                                            <span className="text-white font-mono text-lg">{score.user.name}</span>
-                                        </div>
-                                        {oldRank && newRank && (
-                                            <div className={styles.rankingChange()}>
-                                                World Rank: #{oldRank} <span className="text-[#44FFFF]">→ #{newRank}</span>
-                                            </div>
+                                return (
+                                    <div
+                                        key={score.userId}
+                                        className={cn(
+                                            "flex justify-between items-center p-3 rounded-lg border",
+                                            rank === 1
+                                                ? "bg-black/30 border-[#FF4444]/20"
+                                                : "bg-black/30 border-[#44FFFF]/10"
                                         )}
+                                    >
+                                        <div className="flex flex-col gap-1">
+                                            <div className="flex items-center gap-2">
+                                                <span className={cn(styles.rankBadge(), rank === 1 ? "bg-[#FF4444] text-black" : "")}>{rank}位</span>
+                                                <span className="text-white font-mono text-lg">{score.user.name}</span>
+                                            </div>
+                                        </div>
+                                        <span className="text-[#44FFFF] font-bold font-mono text-1xl">{score.points}点</span>
                                     </div>
-                                    <span className="text-[#44FFFF] font-bold font-mono text-2xl">{score.points}点</span>
-                                </div>
-                            )
-                        })
-                    })()}
-                </div>
-            )}
+                                )
+                            })
+                        })()}
+                    </div>
+                )}
+            </div>
         </div>
     )
 

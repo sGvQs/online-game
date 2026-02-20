@@ -48,8 +48,9 @@ export type {
     FakeDetails,
     RoundResult,
     JankenPhase,
-    HandType,
     FakeTarget,
     UserRanking,
 } from './game';
+// enumは値としてexportが必要
+export { HandType } from './game';
 
