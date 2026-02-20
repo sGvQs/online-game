@@ -93,20 +93,24 @@ export function BattlePhase({
                                 <div className={sideCard({ variant: 'cyan', size: 'sm' }).dataBlock()}>
                                     <div className={sideCard().cardTitle()}>お気に入り</div>
                                     <div className={sideCard({ size: 'lg' }).cardValue()}>
-                                        {getHandDisplayWithEmoji(
-                                            (jankenEvent?.fakeTarget === 'FAVORITE_HAND' && jankenEvent?.fakeFavoriteHandValue
-                                                ? jankenEvent.fakeFavoriteHandValue
-                                                : hostStats.favoriteHand) as HandType
-                                        )}
+                                        {hostStats.favoriteHand === null
+                                            ? '???'
+                                            : getHandDisplayWithEmoji(
+                                                (jankenEvent?.fakeTarget === 'FAVORITE_HAND' && jankenEvent?.fakeFavoriteHandValue
+                                                    ? jankenEvent.fakeFavoriteHandValue
+                                                    : hostStats.favoriteHand) as HandType
+                                            )}
                                     </div>
                                 </div>
 
                                 <div className={sideCard({ variant: 'cyan', size: 'sm' }).dataBlock()}>
                                     <div className={sideCard().cardTitle()}>変える確率</div>
                                     <div className={sideCard({ size: 'lg' }).cardValueWithUnit()}>
-                                        {jankenEvent?.fakeTarget === 'CHANGE_RATE' && jankenEvent?.fakeChangeRateValue !== null && jankenEvent?.fakeChangeRateValue !== undefined
-                                            ? jankenEvent.fakeChangeRateValue
-                                            : hostStats.changeRate}<span className="text-lg text-gray-500 font-bold ml-1">%</span>
+                                        {hostStats.changeRate === null
+                                            ? '???'
+                                            : <>{jankenEvent?.fakeTarget === 'CHANGE_RATE' && jankenEvent?.fakeChangeRateValue !== null && jankenEvent?.fakeChangeRateValue !== undefined
+                                                ? jankenEvent.fakeChangeRateValue
+                                                : hostStats.changeRate}<span className="text-lg text-gray-500 font-bold ml-1">%</span></>}
                                     </div>
                                 </div>
                             </>
@@ -229,11 +233,11 @@ export function BattlePhase({
                             <div className="space-y-3">
                                 <div className={sideCard({ variant: 'cyan', size: 'sm' }).dataBlock()}>
                                     <div className={sideCard().cardTitle()}>お気に入り</div>
-                                    <div className={sideCard({ size: 'lg' }).cardValue()}>{getHandDisplayWithEmoji(hostStats.realFavoriteHand as HandType)}</div>
+                                    <div className={sideCard({ size: 'lg' }).cardValue()}>{hostStats.realFavoriteHand ? getHandDisplayWithEmoji(hostStats.realFavoriteHand as HandType) : '???'}</div>
                                 </div>
                                 <div className={sideCard({ variant: 'cyan', size: 'sm' }).dataBlock()}>
                                     <div className={sideCard().cardTitle()}>変える確率</div>
-                                    <div className={sideCard({ size: 'lg' }).cardValueWithUnit()}>{hostStats.realChangeRate}%</div>
+                                    <div className={sideCard({ size: 'lg' }).cardValueWithUnit()}>{hostStats.realChangeRate !== null && hostStats.realChangeRate !== undefined ? `${hostStats.realChangeRate}%` : '???'}</div>
                                 </div>
                             </div>
                         </div>

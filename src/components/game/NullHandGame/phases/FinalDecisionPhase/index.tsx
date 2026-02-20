@@ -149,7 +149,7 @@ export function FinalDecisionPhase({
                                     <span className={cn("font-bold text-xs", jankenEvent.fakeTarget === 'CHANGE_RATE' ? "text-[#FF4444]" : "text-gray-300")}>
                                         {jankenEvent.fakeTarget === 'CHANGE_RATE'
                                             ? `${jankenEvent.fakeChangeRateValue ?? 0}%`
-                                            : `${hostStats?.realChangeRate ?? 0}%`}
+                                            : hostStats?.realChangeRate !== null && hostStats?.realChangeRate !== undefined ? `${hostStats.realChangeRate}%` : '???'}
                                     </span>
                                 </div>
                                 <div className="flex justify-between items-center">
@@ -157,7 +157,7 @@ export function FinalDecisionPhase({
                                     <span className={cn("font-bold text-xs", jankenEvent.fakeTarget === 'FAVORITE_HAND' ? "text-[#FF4444]" : "text-gray-300")}>
                                         {jankenEvent.fakeTarget === 'FAVORITE_HAND'
                                             ? getHandDisplayWithEmoji(jankenEvent.fakeFavoriteHandValue as HandType)
-                                            : getHandDisplayWithEmoji(hostStats?.realFavoriteHand as HandType)}
+                                            : hostStats?.realFavoriteHand ? getHandDisplayWithEmoji(hostStats.realFavoriteHand as HandType) : '???'}
                                     </span>
                                 </div>
                             </div>
@@ -186,13 +186,13 @@ export function FinalDecisionPhase({
                                 <div className={sideCard({ variant: 'cyan', size: 'sm' }).dataBlock()}>
                                     <div className={sideCard().cardTitle()}>お気に入り</div>
                                     <div className={sideCard({ size: 'sm' }).cardValue()}>
-                                        {getHandDisplayWithEmoji(hostStats.realFavoriteHand as HandType)}
+                                        {hostStats.realFavoriteHand ? getHandDisplayWithEmoji(hostStats.realFavoriteHand as HandType) : '???'}
                                     </div>
                                 </div>
                                 <div className={sideCard({ variant: 'cyan', size: 'sm' }).dataBlock()}>
                                     <div className={sideCard().cardTitle()}>変える確率</div>
                                     <div className={sideCard({ size: 'sm' }).cardValueWithUnit()}>
-                                        {hostStats.realChangeRate}%
+                                        {hostStats.realChangeRate !== null && hostStats.realChangeRate !== undefined ? `${hostStats.realChangeRate}%` : '???'}
                                     </div>
                                 </div>
                             </div>
@@ -255,7 +255,7 @@ export function FinalDecisionPhase({
                             <div className={sideCard({ size: 'lg' }).cardValueWithUnit()}>
                                 {jankenEvent.fakeTarget === 'CHANGE_RATE'
                                     ? `${jankenEvent.fakeChangeRateValue ?? 0}`
-                                    : `${hostStats?.realChangeRate ?? 0}`}<span className="text-lg text-gray-500 font-bold ml-1">%</span>
+                                    : hostStats?.realChangeRate !== null && hostStats?.realChangeRate !== undefined ? `${hostStats.realChangeRate}` : '???'}<span className="text-lg text-gray-500 font-bold ml-1">%</span>
                             </div>
                         </div>
                         <div className={sideCard({ variant: 'cyan', size: 'sm' }).dataBlock()}>
@@ -263,7 +263,7 @@ export function FinalDecisionPhase({
                             <div className={sideCard({ size: 'lg' }).cardValue()}>
                                 {jankenEvent.fakeTarget === 'FAVORITE_HAND'
                                     ? getHandDisplayWithEmoji(jankenEvent.fakeFavoriteHandValue as HandType)
-                                    : getHandDisplayWithEmoji(hostStats?.realFavoriteHand as HandType)}
+                                    : hostStats?.realFavoriteHand ? getHandDisplayWithEmoji(hostStats.realFavoriteHand as HandType) : '???'}
                             </div>
                         </div>
                     </div>

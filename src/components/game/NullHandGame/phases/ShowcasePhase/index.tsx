@@ -33,7 +33,7 @@ export function ShowcasePhase({
 
     if (!jankenEvent) return null
 
-    const isConfirmed = jankenEvent.guestHands.some(gh => gh.userId === currentUserId && gh.isConfirmed)
+    const isConfirmed = jankenEvent.guestHands.some(gh => gh.userId === currentUserId)
 
     const MainArea = () => (
         <div className={styles.mainArea()}>
@@ -105,18 +105,22 @@ export function ShowcasePhase({
                         <div className={sideCard({ variant: 'cyan', size: 'sm' }).dataBlock()}>
                             <div className={sideCard().cardTitle()}>お気に入り</div>
                             <div className={sideCard({ size: 'lg' }).cardValue()}>
-                                {jankenEvent.fakeTarget === 'FAVORITE_HAND' && jankenEvent.fakeFavoriteHandValue
-                                    ? getHandDisplayWithEmoji(jankenEvent.fakeFavoriteHandValue as HandType)
-                                    : getHandDisplayWithEmoji(hostStats.favoriteHand as HandType)}
+                                {hostStats.favoriteHand === null
+                                    ? '???'
+                                    : jankenEvent.fakeTarget === 'FAVORITE_HAND' && jankenEvent.fakeFavoriteHandValue
+                                        ? getHandDisplayWithEmoji(jankenEvent.fakeFavoriteHandValue as HandType)
+                                        : getHandDisplayWithEmoji(hostStats.favoriteHand as HandType)}
                             </div>
                         </div>
 
                         <div className={sideCard({ variant: 'cyan', size: 'sm' }).dataBlock()}>
                             <div className={sideCard().cardTitle()}>変える確率</div>
                             <div className={sideCard({ size: 'lg' }).cardValueWithUnit()}>
-                                {jankenEvent.fakeTarget === 'CHANGE_RATE' && jankenEvent.fakeChangeRateValue !== null && jankenEvent.fakeChangeRateValue !== undefined
-                                    ? jankenEvent.fakeChangeRateValue
-                                    : hostStats.changeRate}<span className="text-lg text-gray-500 font-bold ml-1">%</span>
+                                {hostStats.changeRate === null
+                                    ? '???'
+                                    : <>{jankenEvent.fakeTarget === 'CHANGE_RATE' && jankenEvent.fakeChangeRateValue !== null && jankenEvent.fakeChangeRateValue !== undefined
+                                        ? jankenEvent.fakeChangeRateValue
+                                        : hostStats.changeRate}<span className="text-lg text-gray-500 font-bold ml-1">%</span></>}
                             </div>
                         </div>
 

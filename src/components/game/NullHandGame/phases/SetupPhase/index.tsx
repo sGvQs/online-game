@@ -392,13 +392,13 @@ export function SetupPhase({
                                 <div className={sideCard({ variant: 'cyan', size: 'sm' }).dataBlock()}>
                                     <div className={sideCard().cardTitle()}>お気に入り</div>
                                     <div className={sideCard({ size: 'lg' }).cardValue()}>
-                                        {getHandDisplayWithEmoji(hostStats.realFavoriteHand as HandType)}
+                                        {hostStats.realFavoriteHand ? getHandDisplayWithEmoji(hostStats.realFavoriteHand as HandType) : '???'}
                                     </div>
                                 </div>
                                 <div className={sideCard({ variant: 'cyan', size: 'sm' }).dataBlock()}>
                                     <div className={sideCard().cardTitle()}>変える確率</div>
                                     <div className={sideCard({ size: 'lg' }).cardValueWithUnit()}>
-                                        {hostStats.realChangeRate}<span className="text-lg text-gray-500 font-bold ml-1">%</span>
+                                        {hostStats.realChangeRate !== null && hostStats.realChangeRate !== undefined ? <>{hostStats.realChangeRate}<span className="text-lg text-gray-500 font-bold ml-1">%</span></> : '???'}
                                     </div>
                                 </div>
                             </div>

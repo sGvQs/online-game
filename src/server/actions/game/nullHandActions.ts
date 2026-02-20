@@ -13,6 +13,22 @@ import {
 } from '@/shared/types'
 
 // ============================================
+// ユーティリティ
+// ============================================
+
+/**
+ * Fisher-Yates シャッフル（配列をランダムに並べ替え）
+ */
+function shuffleArray<T>(array: T[]): T[] {
+    const shuffled = [...array]
+    for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+    }
+    return shuffled
+}
+
+// ============================================
 // じゃんけん判定ロジック
 // ============================================
 
@@ -54,8 +70,8 @@ export async function startJankenMatch(roomId: string) {
     if (!room) throw new Error('ルームが見つかりません')
     if (room.createdBy !== user.id) throw new Error('ゲームを開始する権限がありません（ホストのみ）')
 
-    // 参加者リストを取得
-    const participants = room.users.map(ru => ru.userId)
+    // 参加者リストを取得し、シャッフルしてホスト順をランダム化
+    const participants = shuffleArray(room.users.map(ru => ru.userId))
     if (participants.length < 2) throw new Error('最低2人のプレイヤーが必要です')
 
     // トランザクションで一括実行して、不整合（MatchはあるがEventがない等）を防ぐ
@@ -143,12 +159,11 @@ export async function getHostStats(userId: string, eventId?: string): Promise<Ho
 
     if (logs.length === 0) {
         return {
-            favoriteHand: HandType.ROCK,
-            changeRate: 50,
+            favoriteHand: null,
+            changeRate: null,
             totalGames: 0,
-            // ホスト以外にはrealデータを隠す
-            realFavoriteHand: isHost ? HandType.ROCK : HandType.ROCK,
-            realChangeRate: isHost ? 50 : 0,
+            realFavoriteHand: null,
+            realChangeRate: null,
         }
     }
 
@@ -268,7 +283,7 @@ export async function confirmShowcase(eventId: string) {
 
     if (!event) throw new Error('イベントが見つかりません')
 
-    // ゲストの確認を記録（GuestHandにダミーデータを作成）
+    // ゲストの確認を記録（GuestHandにダミーデータを作成、isConfirmedはfalseのまま）
     await prisma.guestHand.upsert({
         where: {
             jankenEventId_userId: {
@@ -279,22 +294,21 @@ export async function confirmShowcase(eventId: string) {
         create: {
             jankenEventId: eventId,
             userId: userId,
-            hand: HandType.ROCK, // ダミー
-            isConfirmed: true
+            hand: HandType.ROCK, // ダミー（BATTLEフェーズで上書きされる）
+            isConfirmed: false   // まだ手は決定していない
         },
         update: {
-            isConfirmed: true
+            // 既にレコードがあればそのまま（確認済みとして扱う）
         }
     })
 
-    //全ゲストが確認したかチェック
+    //全ゲストが確認したかチェック（レコードの存在で判定）
     const participants = event.match.room.users.map(ru => ru.userId)
     const guests = participants.filter(p => p !== event.currentHostId)
 
     const confirmedGuests = await prisma.guestHand.count({
         where: {
             jankenEventId: eventId,
-            isConfirmed: true
         }
     })
 
@@ -382,6 +396,7 @@ export async function setGuestHand(
     const participants = event.match.room.users.map(ru => ru.userId)
     const guests = participants.filter(p => p !== event.currentHostId)
 
+    // isConfirmed === true のゲストのみがBATTLEフェーズで手を送信済み
     const submittedHands = event.guestHands.filter(gh => gh.isConfirmed)
 
     if (submittedHands.length >= guests.length) {
@@ -658,7 +673,7 @@ export async function getLatestJankenEventWithStats(
     const needsStats = ['SETUP', 'SHOWCASE', 'FINAL_DECISION', 'BATTLE', 'RESULT'].includes(event.phase)
     const stats = needsStats
         ? await getHostStats(event.currentHostId, event.id)
-        : { favoriteHand: HandType.ROCK, changeRate: 50, totalGames: 0, realFavoriteHand: HandType.ROCK, realChangeRate: 50 }
+        : { favoriteHand: null, changeRate: null, totalGames: 0, realFavoriteHand: null, realChangeRate: null }
 
     return { event, stats }
 }
