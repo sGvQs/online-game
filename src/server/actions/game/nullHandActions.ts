@@ -124,6 +124,17 @@ export async function startJankenMatch(roomId: string) {
  * JankenLogから過去のデータを集計
  */
 export async function getHostStats(userId: string, eventId?: string): Promise<HostStats> {
+    // 認証チェック: 呼び出し元のユーザーがホスト本人かどうかで返すデータを分ける
+    let currentUserId: string | null = null
+    try {
+        const currentUser = await getAuthenticatedUser()
+        currentUserId = currentUser.id
+    } catch {
+        // 認証なしの場合はゲスト扱い
+    }
+
+    const isHost = currentUserId === userId
+
     const logs = await prisma.jankenLog.findMany({
         where: { userId },
         orderBy: { createdAt: 'desc' },
@@ -135,8 +146,9 @@ export async function getHostStats(userId: string, eventId?: string): Promise<Ho
             favoriteHand: 'ROCK',
             changeRate: 50,
             totalGames: 0,
-            realFavoriteHand: 'ROCK',
-            realChangeRate: 50,
+            // ホスト以外にはrealデータを隠す
+            realFavoriteHand: isHost ? 'ROCK' : 'ROCK',
+            realChangeRate: isHost ? 50 : 0,
         }
     }
 
@@ -188,8 +200,9 @@ export async function getHostStats(userId: string, eventId?: string): Promise<Ho
         favoriteHand,
         changeRate,
         totalGames: logs.length,
-        realFavoriteHand,
-        realChangeRate,
+        // ホスト本人にのみ本物のデータを返す
+        realFavoriteHand: isHost ? realFavoriteHand : favoriteHand,
+        realChangeRate: isHost ? realChangeRate : changeRate,
     }
 }
 
@@ -208,6 +221,12 @@ export async function setInitialHand(
     fakeDetails?: FakeDetails
 ) {
     const user = await getAuthenticatedUser()
+
+    // バリデーション
+    const validHands: HandType[] = ['ROCK', 'SCISSORS', 'PAPER']
+    if (!validHands.includes(hand)) throw new Error('無効な手です')
+    const validFakeTargets: FakeTarget[] = ['NONE', 'INITIAL_HAND', 'CHANGE_RATE', 'FAVORITE_HAND']
+    if (!validFakeTargets.includes(fakeTarget)) throw new Error('無効な偽装ターゲットです')
 
     const event = await prisma.jankenEvent.findUnique({ where: { id: eventId } })
     if (!event) throw new Error('イベントが見つかりません')
@@ -231,7 +250,9 @@ export async function setInitialHand(
  * ゲストの確認完了
  * 全ゲストが確認したら FINAL_DECISION へ
  */
-export async function confirmShowcase(eventId: string, userId: string) {
+export async function confirmShowcase(eventId: string) {
+    const currentUser = await getAuthenticatedUser()
+    const userId = currentUser.id
     const event = await prisma.jankenEvent.findUnique({
         where: { id: eventId },
         include: {
@@ -314,9 +335,14 @@ export async function setFinalHostHand(eventId: string, hand: HandType) {
  */
 export async function setGuestHand(
     eventId: string,
-    userId: string,
     hand: HandType
 ) {
+    const currentUser = await getAuthenticatedUser()
+    const userId = currentUser.id
+
+    // hand のバリデーション
+    const validHands: HandType[] = ['ROCK', 'SCISSORS', 'PAPER']
+    if (!validHands.includes(hand)) throw new Error('無効な手です')
     await prisma.guestHand.upsert({
         where: {
             jankenEventId_userId: {
@@ -506,6 +532,7 @@ async function judgeRound(eventId: string) {
  * 次のターンを開始
  */
 export async function startNextTurn(eventId: string) {
+    await getAuthenticatedUser() // 認証チェック
     const event = await prisma.jankenEvent.findUnique({
         where: { id: eventId },
         include: {
@@ -640,7 +667,9 @@ export async function getLatestJankenEventWithStats(
  * 次のラウンドへの準備完了をマーク
  * 全員準備完了したら次のターンを開始
  */
-export async function markNextRoundReady(roomId: string, userId: string, matchId: string) {
+export async function markNextRoundReady(roomId: string, matchId: string) {
+    const currentUser = await getAuthenticatedUser()
+    const userId = currentUser.id
     // ユーザーのisReadyをtrueにする
     await prisma.roomUser.update({
         where: { roomId_userId: { roomId, userId } },
@@ -694,6 +723,12 @@ export async function getMatchScores(matchId: string): Promise<MatchScoreWithUse
  * ゲーム終了
  */
 export async function finishJanken(matchId: string, roomId: string) {
+    const currentUser = await getAuthenticatedUser()
+
+    // ホストのみ終了可能
+    const room = await prisma.room.findUnique({ where: { id: roomId } })
+    if (!room) throw new Error('ルームが見つかりません')
+    if (room.createdBy !== currentUser.id) throw new Error('ゲームを終了する権限がありません')
     // Match を終了
     await prisma.match.update({
         where: { id: matchId },

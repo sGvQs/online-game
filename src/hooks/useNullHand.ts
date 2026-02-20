@@ -175,7 +175,7 @@ export function useNullHand({
         play('select')
         setIsProcessing(true)
         try {
-            await confirmShowcase(jankenEvent.id, currentUserId)
+            await confirmShowcase(jankenEvent.id)
             // 全員揃ったら Realtime で FINAL_DECISION に移行するため、自分だけ即時状態更新
             await fetchState()
         } catch (err) {
@@ -212,7 +212,7 @@ export function useNullHand({
         play('select')
         setIsProcessing(true)
         try {
-            await setGuestHand(jankenEvent.id, currentUserId, hand)
+            await setGuestHand(jankenEvent.id, hand)
             await fetchState()
         } catch (err) {
             console.error('手の設定に失敗:', err)
@@ -237,7 +237,7 @@ export function useNullHand({
         play('select')
         setIsProcessing(true)
         try {
-            await markNextRoundReady(roomId, currentUserId, jankenEvent.matchId)
+            await markNextRoundReady(roomId, jankenEvent.matchId)
             // 全員揃ったら Realtime で次ターン SETUP が届く
             // 自分の isReady 状態をローカルでも即時反映させるため fetch
             await fetchState()
