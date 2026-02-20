@@ -16,9 +16,8 @@ export {
 export {
     startJankenMatch,
     getHostStats,
-    setInitialHand,
-    confirmShowcase,
-    setFinalHostHand,
+    dealSystemHands,
+    setHostChoice,
     setGuestHand,
     getJankenEvent,
     getLatestJankenEvent,
@@ -28,4 +27,5 @@ export {
     finishJanken,
     markNextRoundReady,
 } from './nullHandActions'
+
 

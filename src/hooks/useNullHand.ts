@@ -4,9 +4,8 @@ import { useEffect, useState, useCallback, useRef, useMemo } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import {
     startJankenMatch,
-    setInitialHand,
-    confirmShowcase,
-    setFinalHostHand,
+    dealSystemHands,
+    setHostChoice,
     setGuestHand,
     getLatestJankenEventWithStats,
     getMatchScores,
@@ -19,8 +18,7 @@ import type {
     HostStats,
     JankenPhase,
     HandType,
-    FakeTarget,
-    FakeDetails,
+    HostChoice,
     MatchScoreWithUser,
 } from '@/shared/types'
 import { useSE } from './useSE'
@@ -36,9 +34,8 @@ export interface UseNullHandReturn {
     isProcessing: boolean
     currentScores: MatchScoreWithUser[]
     handleStartGame: () => Promise<void>
-    handleSetInitialHand: (hand: HandType, fakeTarget: FakeTarget, fakeDetails?: FakeDetails) => Promise<void>
-    handleConfirmShowcase: () => Promise<void>
-    handleSetFinalHostHand: (hand: HandType) => Promise<void>
+    handleDealSystemHands: () => Promise<void>
+    handleSetHostChoice: (choice: HostChoice) => Promise<void>
     handleSetGuestHand: (hand: HandType) => Promise<void>
     handleNextRound: () => Promise<void>
     handleMarkNextRoundReady: () => Promise<void>
@@ -64,7 +61,6 @@ export function useNullHand({
     initialMatchId,
     currentUserId,
 }: UseNullHandProps): UseNullHandReturn {
-    // useMemo でクライアントを1度だけ生成し、再レンダーによる再生成を防ぐ
     const supabase = useMemo(() => createClient(), [])
     const { play } = useSE()
 
@@ -80,10 +76,8 @@ export function useNullHand({
     // ---- Refs ----
     const matchIdRef = useRef<string | null>(initialMatchId)
     const phaseRef = useRef<JankenPhase>('TITLE')
-    // 重複フェッチ防止フラグ
     const isFetchingRef = useRef(false)
 
-    // state の最新値を ref に同期
     useEffect(() => {
         phaseRef.current = phase
     }, [phase])
@@ -92,13 +86,8 @@ export function useNullHand({
     // 状態取得ヘルパー
     // ============================================
 
-    /**
-     * 最新の JankenEvent と HostStats を1往復で取得して状態を更新。
-     * in-flight な fetch がある場合はスキップして重複リクエストを防ぐ。
-     */
     const fetchState = useCallback(async () => {
         if (!matchIdRef.current) return
-        // 既に fetch 中なら今回のリクエストはスキップ
         if (isFetchingRef.current) return
         isFetchingRef.current = true
 
@@ -112,7 +101,6 @@ export function useNullHand({
             setJankenEvent(event)
             setHostStats(stats)
 
-            // フェーズが変わった時のみ setPhase を呼ぶ（余計な再レンダーを防ぐ）
             if (phaseRef.current !== eventPhase) {
                 setPhase(eventPhase)
             }
@@ -122,7 +110,7 @@ export function useNullHand({
         } finally {
             isFetchingRef.current = false
         }
-    }, []) // matchIdRef は ref なので依存不要
+    }, [])
 
     // ============================================
     // アクションハンドラ
@@ -149,56 +137,38 @@ export function useNullHand({
     }, [roomId, isHost, isProcessing, play])
 
     /**
-     * ホストの初期手と嘘を設定
+     * システムDEAL（ホストがDEALアクションを確認）
+     * DEAL → CHOICE フェーズへ
      */
-    const handleSetInitialHand = useCallback(async (hand: HandType, fakeTarget: FakeTarget, fakeDetails?: FakeDetails) => {
+    const handleDealSystemHands = useCallback(async () => {
         if (!jankenEvent || isProcessing) return
-        play('select')
+        play('submit')
         setIsProcessing(true)
         try {
-            await setInitialHand(jankenEvent.id, hand, fakeTarget, fakeDetails)
-            // Realtime で全員に通知されるため自分自身も fetchState で最新化
+            await dealSystemHands(jankenEvent.id)
             await fetchState()
         } catch (err) {
-            console.error('初期手設定に失敗:', err)
-            setError('手の設定に失敗しました')
+            console.error('DEAL処理に失敗:', err)
+            setError('DEALの処理に失敗しました')
         } finally {
             setIsProcessing(false)
         }
     }, [jankenEvent, isProcessing, fetchState, play])
 
     /**
-     * ゲストの確認完了
+     * ホストのSTAY/REVERSE選択
+     * CHOICE → BATTLE フェーズへ
      */
-    const handleConfirmShowcase = useCallback(async () => {
+    const handleSetHostChoice = useCallback(async (choice: HostChoice) => {
         if (!jankenEvent || isProcessing) return
         play('select')
         setIsProcessing(true)
         try {
-            await confirmShowcase(jankenEvent.id)
-            // 全員揃ったら Realtime で FINAL_DECISION に移行するため、自分だけ即時状態更新
+            await setHostChoice(jankenEvent.id, choice)
             await fetchState()
         } catch (err) {
-            console.error('確認完了に失敗:', err)
-            setError('確認処理に失敗しました')
-        } finally {
-            setIsProcessing(false)
-        }
-    }, [jankenEvent, currentUserId, isProcessing, fetchState, play])
-
-    /**
-     * ホストの最終決定
-     */
-    const handleSetFinalHostHand = useCallback(async (hand: HandType) => {
-        if (!jankenEvent || isProcessing) return
-        play('select')
-        setIsProcessing(true)
-        try {
-            await setFinalHostHand(jankenEvent.id, hand)
-            await fetchState()
-        } catch (err) {
-            console.error('最終決定に失敗:', err)
-            setError('決定処理に失敗しました')
+            console.error('ホスト選択に失敗:', err)
+            setError('選択の送信に失敗しました')
         } finally {
             setIsProcessing(false)
         }
@@ -220,13 +190,13 @@ export function useNullHand({
         } finally {
             setIsProcessing(false)
         }
-    }, [jankenEvent, currentUserId, isProcessing, fetchState, play])
+    }, [jankenEvent, isProcessing, fetchState, play])
 
     /**
      * 次のラウンドへ遷移（後方互換のため残す）
      */
     const handleNextRound = useCallback(async () => {
-        // markNextRoundReady に統合したため空実装
+        // markNextRoundReady に統合
     }, [])
 
     /**
@@ -238,8 +208,6 @@ export function useNullHand({
         setIsProcessing(true)
         try {
             await markNextRoundReady(roomId, jankenEvent.matchId)
-            // 全員揃ったら Realtime で次ターン SETUP が届く
-            // 自分の isReady 状態をローカルでも即時反映させるため fetch
             await fetchState()
         } catch (err) {
             console.error('準備完了のマークに失敗:', err)
@@ -247,7 +215,7 @@ export function useNullHand({
         } finally {
             setIsProcessing(false)
         }
-    }, [jankenEvent, roomId, currentUserId, isProcessing, fetchState, play])
+    }, [jankenEvent, roomId, isProcessing, fetchState, play])
 
     /**
      * ゲーム終了 → タイトルに戻る
@@ -274,9 +242,6 @@ export function useNullHand({
     // Effects
     // ============================================
 
-    /**
-     * スコア取得（RESULT / GAME_OVER フェーズのみ）
-     */
     useEffect(() => {
         if (!matchIdRef.current) return
         if (phase !== 'RESULT' && phase !== 'GAME_OVER') return
@@ -293,9 +258,6 @@ export function useNullHand({
         fetchScores()
     }, [phase])
 
-    /**
-     * 初期データ取得（ページロード時、試合が既に進行中の場合）
-     */
     useEffect(() => {
         if (!initialMatchId) return
         matchIdRef.current = initialMatchId
@@ -304,9 +266,6 @@ export function useNullHand({
 
     /**
      * janken_events テーブルのリアルタイム監視
-     *
-     * ペイロードの phase を即時 setPhase して UX を向上させつつ、
-     * fetchState でデータを最新化する（isFetchingRef で重複防止済み）。
      */
     useEffect(() => {
         if (!matchId) return
@@ -319,7 +278,6 @@ export function useNullHand({
                 table: 'janken_events',
                 filter: `match_id=eq.${matchId}`,
             }, (payload: { new: Record<string, unknown> }) => {
-                // INSERT = 新しいターン開始。ペイロードから phase を即時反映
                 const newPhase = payload.new.phase as JankenPhase
                 if (newPhase && phaseRef.current !== newPhase) {
                     setPhase(newPhase)
@@ -332,7 +290,6 @@ export function useNullHand({
                 table: 'janken_events',
                 filter: `match_id=eq.${matchId}`,
             }, (payload: { new: Record<string, unknown> }) => {
-                // UPDATE = フェーズ変更など。ペイロードから phase を即時反映
                 const newPhase = payload.new.phase as JankenPhase
                 if (newPhase && phaseRef.current !== newPhase) {
                     setPhase(newPhase)
@@ -362,10 +319,6 @@ export function useNullHand({
                 const newMatchId = payload.new.id as string
                 matchIdRef.current = newMatchId
                 setMatchId(newMatchId)
-                // matches と janken_events はトランザクションで同時作成される。
-                // janken_events の購読は setMatchId による再レンダー後になるため、
-                // 最初の INSERT イベントは取りこぼす（Race Condition）。
-                // そのため、ここで即時 fetchState を呼んで最新の SETUP フェーズを取得する。
                 fetchState()
             })
             .subscribe()
@@ -376,8 +329,7 @@ export function useNullHand({
     }, [roomId, supabase, fetchState])
 
     /**
-     * ウインドウ復帰時の再取得（長時間放置後の対策）
-     * isFetchingRef により多発しても1リクエストに収束する
+     * ウインドウ復帰時の再取得
      */
     useEffect(() => {
         const handleVisibilityChange = () => {
@@ -403,9 +355,8 @@ export function useNullHand({
         isProcessing,
         currentScores,
         handleStartGame,
-        handleSetInitialHand,
-        handleConfirmShowcase,
-        handleSetFinalHostHand,
+        handleDealSystemHands,
+        handleSetHostChoice,
         handleSetGuestHand,
         handleNextRound,
         handleMarkNextRoundReady,

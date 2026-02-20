@@ -3,14 +3,13 @@
 import { useNullHand } from '@/hooks/useNullHand'
 import { useGameRoom } from '@/hooks/useGameRoom'
 import { returnToRoom } from '@/server/actions/room'
-import { RoomWithUsersAndReadyStatus, HandType, FakeTarget, FakeDetails, UserRanking } from '@/shared/types'
+import { RoomWithUsersAndReadyStatus, HandType, HostChoice, UserRanking } from '@/shared/types'
 import { useState, useEffect } from 'react'
 import { AnimatePresence } from 'framer-motion'
 import { TitleScreen } from './TitleScreen'
 import { GameLayout } from './GameLayout'
-import { SetupPhase } from './phases/SetupPhase'
-import { ShowcasePhase } from './phases/ShowcasePhase'
-import { FinalDecisionPhase } from './phases/FinalDecisionPhase'
+import { DealPhase } from './phases/DealPhase'
+import { ChoicePhase } from './phases/ChoicePhase'
 import { BattlePhase } from './phases/BattlePhase'
 import { ResultPhase } from './phases/ResultPhase'
 import { GameOverPhase } from './phases/GameOverPhase'
@@ -46,9 +45,8 @@ export function NullHandGame({
         isProcessing,
         currentScores,
         handleStartGame,
-        handleSetInitialHand,
-        handleConfirmShowcase,
-        handleSetFinalHostHand,
+        handleDealSystemHands,
+        handleSetHostChoice,
         handleSetGuestHand,
         handleNextRound,
         handleMarkNextRoundReady,
@@ -60,7 +58,7 @@ export function NullHandGame({
     // タイトル画面用の手のローテーション
     const [titleHand, setTitleHand] = useState<HandType>(HandType.ROCK)
     useEffect(() => {
-        if (phase !== 'TITLE' && phase !== 'SETUP') return
+        if (phase !== 'TITLE' && phase !== 'DEAL') return
         const hands = Object.values(HandType)
         let index = 0
         const interval = setInterval(() => {
@@ -71,8 +69,6 @@ export function NullHandGame({
     }, [phase])
 
     const [selectedHand, setSelectedHand] = useState<HandType | null>(null)
-    const [selectedFake, setSelectedFake] = useState<FakeTarget>('NONE')
-    const [fakeDetails, setFakeDetails] = useState<FakeDetails>({})
     const [newRankings, setNewRankings] = useState<UserRanking[]>([])
 
     // GAME_OVER時に最新のランキングを取得
@@ -81,7 +77,6 @@ export function NullHandGame({
             const fetchRankings = async () => {
                 const userIds = room.users.map(u => u.userId)
                 try {
-                    // Server Actionをクライアントから呼び出す
                     const { getNullHandRankings } = await import('@/server/actions/game/rankingActions')
                     const rankings = await getNullHandRankings(userIds)
                     setNewRankings(rankings)
@@ -97,18 +92,10 @@ export function NullHandGame({
         await returnToRoom(roomId)
     }
 
-    const handleSetupSubmit = () => {
-        if (selectedHand) {
-            handleSetInitialHand(selectedHand, selectedFake, fakeDetails)
-        }
-    }
-
     // フェーズが変わった際に選択状態をリセット
     useEffect(() => {
-        if (phase === 'SETUP') {
+        if (phase === 'DEAL' || phase === 'CHOICE') {
             setSelectedHand(null)
-            setSelectedFake('NONE')
-            setFakeDetails({})
         }
     }, [phase])
 
@@ -124,7 +111,7 @@ export function NullHandGame({
     const [showSplash, setShowSplash] = useState(true)
 
     // ============================================
-    // RENDER (AnimatePresenceで遷移を管理)
+    // RENDER
     // ============================================
 
     return (
@@ -153,45 +140,24 @@ export function NullHandGame({
                 )}
                 {phase !== 'TITLE' && (
                     <GameLayout key="game" phase={phase} error={error} hostName={hostName}>
-                        {phase === 'SETUP' && (
-                            <SetupPhase
+                        {phase === 'DEAL' && (
+                            <DealPhase
+                                jankenEvent={jankenEvent}
                                 isCurrentHost={isCurrentHost}
+                                isProcessing={isProcessing}
+                                onDeal={handleDealSystemHands}
+                                hostName={hostName}
                                 titleHand={titleHand}
-                                hostStats={hostStats}
-                                selectedHand={selectedHand}
-                                selectedFake={selectedFake}
-                                fakeDetails={fakeDetails}
-                                isProcessing={isProcessing}
-                                onSelectHand={setSelectedHand}
-                                onSelectFake={setSelectedFake}
-                                onUpdateFakeDetails={setFakeDetails}
-                                onSubmit={handleSetupSubmit}
-                                hostName={hostName}
-                                onReselectHand={() => setSelectedHand(null)}
                             />
                         )}
 
-                        {phase === 'SHOWCASE' && (
-                            <ShowcasePhase
+                        {phase === 'CHOICE' && (
+                            <ChoicePhase
                                 jankenEvent={jankenEvent}
                                 hostStats={hostStats}
                                 isCurrentHost={isCurrentHost}
                                 isProcessing={isProcessing}
-                                onConfirm={handleConfirmShowcase}
-                                hostName={hostName}
-                                currentUserId={currentUserId}
-                            />
-                        )}
-
-                        {phase === 'FINAL_DECISION' && (
-                            <FinalDecisionPhase
-                                jankenEvent={jankenEvent}
-                                hostStats={hostStats}
-                                isCurrentHost={isCurrentHost}
-                                selectedHand={selectedHand}
-                                isProcessing={isProcessing}
-                                onSelectHand={setSelectedHand}
-                                onSubmit={() => selectedHand && handleSetFinalHostHand(selectedHand)}
+                                onChoice={handleSetHostChoice}
                                 hostName={hostName}
                             />
                         )}
