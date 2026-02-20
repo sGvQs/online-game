@@ -172,7 +172,7 @@ export function FinalDecisionPhase({
                         />
 
                         {hostStats && (
-                            <div className="space-y-1.5">
+                            <div className="space-y-2">
                                 <div className="bg-black/30 rounded-lg px-3 py-2 border border-[#44FFFF]/10">
                                     <div className="text-gray-500 text-[10px] uppercase tracking-wider">選択した手</div>
                                     <div className="text-sm font-bold text-white">
@@ -180,18 +180,16 @@ export function FinalDecisionPhase({
                                     </div>
                                 </div>
 
-                                <div className="grid grid-cols-2 gap-1.5">
-                                    <div className="bg-black/30 rounded-lg px-3 py-2 border border-[#44FFFF]/10">
-                                        <div className="text-gray-500 text-[10px] uppercase tracking-wider">お気に入り</div>
-                                        <div className="text-white font-bold text-xs">
-                                            {getHandDisplayWithEmoji(hostStats.realFavoriteHand as HandType)}
-                                        </div>
+                                <div className="bg-black/30 rounded-lg px-3 py-2 border border-[#44FFFF]/10">
+                                    <div className="text-gray-500 text-[10px] uppercase tracking-wider">お気に入り</div>
+                                    <div className="text-sm font-bold text-white">
+                                        {getHandDisplayWithEmoji(hostStats.realFavoriteHand as HandType)}
                                     </div>
-                                    <div className="bg-black/30 rounded-lg px-3 py-2 border border-[#44FFFF]/10">
-                                        <div className="text-gray-500 text-[10px] uppercase tracking-wider">変える確率</div>
-                                        <div className="text-white font-bold text-sm font-mono">
-                                            {hostStats.realChangeRate}%
-                                        </div>
+                                </div>
+                                <div className="bg-black/30 rounded-lg px-3 py-2 border border-[#44FFFF]/10">
+                                    <div className="text-gray-500 text-[10px] uppercase tracking-wider">変える確率</div>
+                                    <div className="text-sm font-bold text-white">
+                                        {hostStats.realChangeRate}%
                                     </div>
                                 </div>
                             </div>
