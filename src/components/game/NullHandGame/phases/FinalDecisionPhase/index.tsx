@@ -1,15 +1,17 @@
 import { HandType, JankenEventWithGuests, HostStats, FakeTarget } from '@/shared/types'
-import { Hand3D } from '../Hand3D'
-import { nullHandGame } from '../styles'
+import { Hand3D } from '../../Hand3D'
+import { nullHandGame } from '../../styles'
 import { cn } from '@/lib/utils'
-import { getHandDisplayWithEmoji } from '../utils'
+import { getHandDisplayWithEmoji } from '../../utils'
 import { motion } from 'framer-motion'
 import { useState } from 'react'
-import { HandSelectionGrid } from '../HandSelectionGrid'
-import { PhaseHeader } from '../common/PhaseHeader'
-import { SideHeader } from '../common/SideHeader'
-import { WaitingDisplay } from '../common/WaitingDisplay'
-import { GameButton } from '../common/GameButton'
+import { HandSelectionGrid } from '../../HandSelectionGrid'
+import { PhaseHeader } from '../../common/PhaseHeader'
+import { SideHeader } from '../../common/SideHeader'
+import { WaitingDisplay } from '../../common/WaitingDisplay'
+import { GameButton } from '../../common/GameButton'
+import { finalDecisionPhase } from './styles'
+import { sideCard } from '../phaseCard.styles'
 
 interface FinalDecisionPhaseProps {
     jankenEvent: JankenEventWithGuests | null
@@ -33,6 +35,7 @@ export function FinalDecisionPhase({
     hostName
 }: FinalDecisionPhaseProps) {
     const styles = nullHandGame()
+    const fdpStyles = finalDecisionPhase()
 
     if (!jankenEvent) return null
 
@@ -58,34 +61,34 @@ export function FinalDecisionPhase({
 
                         {/* Strategy Tip - Moved to Main Area */}
                         {hostStats && (
-                            <div className="w-full max-w-2xl bg-[#1a1a1a]/80 border border-[#44FFFF]/20 rounded-lg p-4 backdrop-blur-sm animate-in slide-in-from-bottom-4 duration-500 delay-200 mt-2">
-                                <div className="flex items-center gap-2 mb-2 border-b border-[#44FFFF]/10 pb-2">
-                                    <span className="text-[#44FFFF] font-bold text-xs tracking-widest uppercase">🧠 Strategy Tip</span>
-                                    <span className="text-[10px] text-gray-500 ml-auto font-mono">ADVICE</span>
+                            <div className={fdpStyles.strategyTip()}>
+                                <div className={fdpStyles.strategyTipHeader()}>
+                                    <span className={fdpStyles.strategyTipTitle()}>🧠 Strategy Tip</span>
+                                    <span className={fdpStyles.strategyTipMeta()}>ADVICE</span>
                                 </div>
-                                <p className="text-xs text-gray-300 leading-relaxed">
+                                <p className={fdpStyles.strategyTipBody()}>
                                     ゲストは上の「FAKE DATA」を見て予想しています。<br />
                                     {jankenEvent.fakeTarget === 'CHANGE_RATE' &&
                                         <>
-                                            「変える確率」を <span className="text-[#44FFFF] font-bold">{jankenEvent.fakeChangeRateValue ?? 0}%</span> と偽装中。
-                                            ゲストは<span className="text-white font-bold underline decoration-[#44FFFF]/50 decoration-2 underline-offset-2">{(jankenEvent.fakeChangeRateValue ?? 0) > 50 ? '変えてくる' : '変えない'}</span>と予想するでしょう。
+                                            「変える確率」を <span className={fdpStyles.strategyTipHighlight()}>{jankenEvent.fakeChangeRateValue ?? 0}%</span> と偽装中。
+                                            ゲストは<span className={fdpStyles.strategyTipUnderline()}>{(jankenEvent.fakeChangeRateValue ?? 0) > 50 ? '変えてくる' : '変えない'}</span>と予想するでしょう。
                                         </>
                                     }
                                     {jankenEvent.fakeTarget === 'INITIAL_HAND' &&
                                         <>
-                                            「選択した手」を <span className="text-[#44FFFF] font-bold">{getHandDisplayWithEmoji(jankenEvent.fakeHandValue as HandType)}</span> と偽装中。
-                                            ゲストはこれに<span className="text-white font-bold underline decoration-[#44FFFF]/50 decoration-2 underline-offset-2">勝てる手</span>を出すかもしれません。
+                                            「選択した手」を <span className={fdpStyles.strategyTipHighlight()}>{getHandDisplayWithEmoji(jankenEvent.fakeHandValue as HandType)}</span> と偽装中。
+                                            ゲストはこれに<span className={fdpStyles.strategyTipUnderline()}>勝てる手</span>を出すかもしれません。
                                         </>
                                     }
                                     {jankenEvent.fakeTarget === 'FAVORITE_HAND' &&
                                         <>
-                                            「お気に入り」を <span className="text-[#44FFFF] font-bold">{getHandDisplayWithEmoji(jankenEvent.fakeFavoriteHandValue as HandType)}</span> と偽装中。
-                                            ゲストはこれに<span className="text-white font-bold underline decoration-[#44FFFF]/50 decoration-2 underline-offset-2">勝てる手</span>を出すかもしれません。
+                                            「お気に入り」を <span className={fdpStyles.strategyTipHighlight()}>{getHandDisplayWithEmoji(jankenEvent.fakeFavoriteHandValue as HandType)}</span> と偽装中。
+                                            ゲストはこれに<span className={fdpStyles.strategyTipUnderline()}>勝てる手</span>を出すかもしれません。
                                         </>
                                     }
                                     {jankenEvent.fakeTarget === 'NONE' &&
                                         <>
-                                            今回は正直に全ての情報を公開しています。<br />あえて<span className="text-white font-bold underline decoration-[#44FFFF]/50 decoration-2 underline-offset-2">裏の裏</span>をかくチャンスです。
+                                            今回は正直に全ての情報を公開しています。<br />あえて<span className={fdpStyles.strategyTipUnderline()}>裏の裏</span>をかくチャンスです。
                                         </>
                                     }
                                 </p>
@@ -111,7 +114,7 @@ export function FinalDecisionPhase({
                 <div className="h-full flex flex-col gap-2 overflow-y-auto">
 
                     {/* Publicly Shown Fake Info */}
-                    <div className="bg-[#1a0505] border border-[#FF4444]/30 rounded-xl p-3">
+                    <div className={sideCard({ variant: 'red', size: 'sm' }).card()}>
                         <SideHeader
                             engLabel="YOUR FAKE DATA"
                             label="公開中のデータ"
@@ -162,7 +165,7 @@ export function FinalDecisionPhase({
                     </div>
 
                     {/* Real Private Info */}
-                    <div className="bg-[#051a1a] border border-[#44FFFF]/30 rounded-xl p-3 flex-1">
+                    <div className={sideCard({ variant: 'cyan', size: 'sm', className: 'flex-1' }).card()}>
                         <SideHeader
                             engLabel="YOUR REAL STATS"
                             label="本当のデータ"
@@ -173,22 +176,22 @@ export function FinalDecisionPhase({
 
                         {hostStats && (
                             <div className="space-y-2">
-                                <div className="bg-black/30 rounded-lg px-3 py-2 border border-[#44FFFF]/10">
-                                    <div className="text-gray-500 text-[10px] uppercase tracking-wider">選択した手</div>
-                                    <div className="text-sm font-bold text-white">
+                                <div className={sideCard({ variant: 'cyan', size: 'sm' }).dataBlock()}>
+                                    <div className={sideCard().cardTitle()}>選択した手</div>
+                                    <div className={sideCard({ size: 'sm' }).cardValue()}>
                                         {getHandDisplayWithEmoji(jankenEvent.initialHand as HandType)}
                                     </div>
                                 </div>
 
-                                <div className="bg-black/30 rounded-lg px-3 py-2 border border-[#44FFFF]/10">
-                                    <div className="text-gray-500 text-[10px] uppercase tracking-wider">お気に入り</div>
-                                    <div className="text-sm font-bold text-white">
+                                <div className={sideCard({ variant: 'cyan', size: 'sm' }).dataBlock()}>
+                                    <div className={sideCard().cardTitle()}>お気に入り</div>
+                                    <div className={sideCard({ size: 'sm' }).cardValue()}>
                                         {getHandDisplayWithEmoji(hostStats.realFavoriteHand as HandType)}
                                     </div>
                                 </div>
-                                <div className="bg-black/30 rounded-lg px-3 py-2 border border-[#44FFFF]/10">
-                                    <div className="text-gray-500 text-[10px] uppercase tracking-wider">変える確率</div>
-                                    <div className="text-sm font-bold text-white">
+                                <div className={sideCard({ variant: 'cyan', size: 'sm' }).dataBlock()}>
+                                    <div className={sideCard().cardTitle()}>変える確率</div>
+                                    <div className={sideCard({ size: 'sm' }).cardValueWithUnit()}>
                                         {hostStats.realChangeRate}%
                                     </div>
                                 </div>
@@ -224,7 +227,7 @@ export function FinalDecisionPhase({
 
         const SideArea = () => (
             <div className={styles.sideArea()}>
-                <div className="bg-[#051a1a] border border-[#44FFFF]/30 rounded-xl p-6 flex-1 flex flex-col">
+                <div className={sideCard({ variant: 'cyan', size: 'lg' }).card()}>
                     <SideHeader
                         engLabel="HOST'S PUBLIC DATA"
                         label={`${hostName}のデータ`}
@@ -239,25 +242,25 @@ export function FinalDecisionPhase({
                             ホストはこのデータを元に、さらに裏をかくか、そのまま手を変えないか迷っています。
                         </div>
 
-                        <div className="bg-black/30 rounded-lg p-4 border border-[#44FFFF]/10">
-                            <div className="text-gray-500 text-[10px] uppercase tracking-wider mb-2">選択した手</div>
-                            <div className="text-2xl font-bold text-white">
+                        <div className={sideCard({ variant: 'cyan', size: 'sm' }).dataBlock()}>
+                            <div className={sideCard().cardTitle()}>選択した手</div>
+                            <div className={sideCard({ size: 'lg' }).cardValue()}>
                                 {jankenEvent.fakeTarget === 'INITIAL_HAND'
                                     ? getHandDisplayWithEmoji(jankenEvent.fakeHandValue as HandType)
                                     : getHandDisplayWithEmoji(jankenEvent.initialHand as HandType)}
                             </div>
                         </div>
-                        <div className="bg-black/30 rounded-lg p-4 border border-[#44FFFF]/10">
-                            <div className="text-gray-500 text-[10px] uppercase tracking-wider mb-2">変える確率</div>
-                            <div className="text-2xl font-bold text-white font-mono">
+                        <div className={sideCard({ variant: 'cyan', size: 'sm' }).dataBlock()}>
+                            <div className={sideCard().cardTitle()}>変える確率</div>
+                            <div className={sideCard({ size: 'lg' }).cardValueWithUnit()}>
                                 {jankenEvent.fakeTarget === 'CHANGE_RATE'
                                     ? `${jankenEvent.fakeChangeRateValue ?? 0}`
                                     : `${hostStats?.realChangeRate ?? 0}`}<span className="text-lg text-gray-500 font-bold ml-1">%</span>
                             </div>
                         </div>
-                        <div className="bg-black/30 rounded-lg p-4 border border-[#44FFFF]/10">
-                            <div className="text-gray-500 text-[10px] uppercase tracking-wider mb-2">お気に入り</div>
-                            <div className="text-2xl font-bold text-white">
+                        <div className={sideCard({ variant: 'cyan', size: 'sm' }).dataBlock()}>
+                            <div className={sideCard().cardTitle()}>お気に入り</div>
+                            <div className={sideCard({ size: 'lg' }).cardValue()}>
                                 {jankenEvent.fakeTarget === 'FAVORITE_HAND'
                                     ? getHandDisplayWithEmoji(jankenEvent.fakeFavoriteHandValue as HandType)
                                     : getHandDisplayWithEmoji(hostStats?.realFavoriteHand as HandType)}

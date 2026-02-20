@@ -1,11 +1,13 @@
 import { HandType, JankenEventWithGuests, HostStats } from '@/shared/types'
-import { Hand3D } from '../Hand3D'
-import { nullHandGame } from '../styles'
-import { getHandDisplayWithEmoji } from '../utils'
-import { HandSelectionGrid } from '../HandSelectionGrid'
-import { PhaseHeader } from '../common/PhaseHeader'
-import { SideHeader } from '../common/SideHeader'
-import { GameButton } from '../common/GameButton'
+import { Hand3D } from '../../Hand3D'
+import { nullHandGame } from '../../styles'
+import { getHandDisplayWithEmoji } from '../../utils'
+import { HandSelectionGrid } from '../../HandSelectionGrid'
+import { PhaseHeader } from '../../common/PhaseHeader'
+import { SideHeader } from '../../common/SideHeader'
+import { GameButton } from '../../common/GameButton'
+import { sideCard } from '../phaseCard.styles'
+import { battlePhase } from './styles'
 
 interface BattlePhaseProps {
     jankenEvent: JankenEventWithGuests | null
@@ -29,6 +31,7 @@ export function BattlePhase({
     hostName
 }: BattlePhaseProps) {
     const styles = nullHandGame()
+    const bpStyles = battlePhase()
 
     if (!jankenEvent) return null
 
@@ -63,7 +66,7 @@ export function BattlePhase({
 
         const SideArea = () => (
             <div className={styles.sideArea()}>
-                <div className="bg-[#051a1a] border border-[#44FFFF]/30 rounded-xl p-6 flex-1 flex flex-col">
+                <div className={sideCard({ variant: 'cyan', size: 'lg' }).card()}>
                     <SideHeader
                         engLabel="DATA ANALYSIS"
                         label={`${hostName}のデータ`}
@@ -74,9 +77,9 @@ export function BattlePhase({
                     <div className="space-y-4">
                         {/* ホストの初期手 */}
                         {jankenEvent && (
-                            <div className="bg-black/30 rounded-lg p-4 border border-[#44FFFF]/10">
-                                <div className="text-gray-500 text-[10px] uppercase tracking-wider mb-1">選択した手</div>
-                                <div className="text-2xl font-bold text-white">
+                            <div className={sideCard({ variant: 'cyan', size: 'sm' }).dataBlock()}>
+                                <div className={sideCard().cardTitle()}>選択した手</div>
+                                <div className={sideCard({ size: 'lg' }).cardValue()}>
                                     {jankenEvent.fakeTarget === 'INITIAL_HAND' && jankenEvent.fakeHandValue
                                         ? getHandDisplayWithEmoji(jankenEvent.fakeHandValue as HandType)
                                         : getHandDisplayWithEmoji(jankenEvent.initialHand as HandType)}
@@ -87,9 +90,9 @@ export function BattlePhase({
                         {/* ホストの統計（公開用） */}
                         {hostStats && (
                             <>
-                                <div className="bg-black/30 rounded-lg p-4 border border-[#44FFFF]/10">
-                                    <div className="text-gray-500 text-[10px] uppercase tracking-wider mb-1">お気に入り</div>
-                                    <div className="text-2xl font-bold text-white">
+                                <div className={sideCard({ variant: 'cyan', size: 'sm' }).dataBlock()}>
+                                    <div className={sideCard().cardTitle()}>お気に入り</div>
+                                    <div className={sideCard({ size: 'lg' }).cardValue()}>
                                         {getHandDisplayWithEmoji(
                                             (jankenEvent?.fakeTarget === 'FAVORITE_HAND' && jankenEvent?.fakeFavoriteHandValue
                                                 ? jankenEvent.fakeFavoriteHandValue
@@ -98,9 +101,9 @@ export function BattlePhase({
                                     </div>
                                 </div>
 
-                                <div className="bg-black/30 rounded-lg p-4 border border-[#44FFFF]/10">
-                                    <div className="text-gray-500 text-[10px] uppercase tracking-wider mb-1">変える確率</div>
-                                    <div className="text-2xl font-bold text-white font-mono">
+                                <div className={sideCard({ variant: 'cyan', size: 'sm' }).dataBlock()}>
+                                    <div className={sideCard().cardTitle()}>変える確率</div>
+                                    <div className={sideCard({ size: 'lg' }).cardValueWithUnit()}>
                                         {jankenEvent?.fakeTarget === 'CHANGE_RATE' && jankenEvent?.fakeChangeRateValue !== null && jankenEvent?.fakeChangeRateValue !== undefined
                                             ? jankenEvent.fakeChangeRateValue
                                             : hostStats.changeRate}<span className="text-lg text-gray-500 font-bold ml-1">%</span>
@@ -176,7 +179,7 @@ export function BattlePhase({
                 <div className="flex flex-col gap-4 h-full">
                     {/* 選択した手 + 嘘の情報カード */}
                     {jankenEvent && (
-                        <div className="bg-[#1a0505] border border-[#FF4444]/30 rounded-xl p-6">
+                        <div className={sideCard({ variant: 'red', size: 'lg' }).card()}>
                             <SideHeader
                                 engLabel="STATUS MONITOR"
                                 label="あなたの状況"
@@ -186,16 +189,16 @@ export function BattlePhase({
                             />
 
                             <div className="space-y-4">
-                                <div className="bg-black/30 rounded-lg p-4 border border-[#FF4444]/10">
-                                    <div className="text-gray-500 text-[10px] uppercase tracking-wider mb-1">選択した手</div>
-                                    <div className="text-2xl font-bold text-white">
+                                <div className={sideCard({ variant: 'red', size: 'sm' }).dataBlock()}>
+                                    <div className={sideCard().cardTitle()}>選択した手</div>
+                                    <div className={sideCard({ size: 'lg' }).cardValue()}>
                                         {getHandDisplayWithEmoji(jankenEvent.initialHand as HandType)}
                                     </div>
                                 </div>
 
-                                <div className="bg-black/30 rounded-lg p-4 border border-[#FF4444]/10">
+                                <div className={sideCard({ variant: 'red', size: 'sm' }).dataBlock()}>
                                     <div className="flex justify-between items-center mb-2">
-                                        <div className="text-gray-500 text-[10px] uppercase tracking-wider">嘘の情報</div>
+                                        <div className={sideCard().cardTitle()}>嘘の情報</div>
                                         <span className="text-[#FF4444] font-bold text-[10px] border border-[#FF4444]/30 px-1.5 py-0.5 rounded">ACTIVE</span>
                                     </div>
                                     <div className="text-white font-bold text-sm">
@@ -221,16 +224,16 @@ export function BattlePhase({
 
                     {/* リアル統計カード */}
                     {hostStats && (
-                        <div className="bg-[#051a1a] border border-[#44FFFF]/30 rounded-xl p-6 flex-1">
+                        <div className={sideCard({ variant: 'cyan', size: 'lg' }).card()}>
                             <div className="text-[#44FFFF] font-bold mb-3 text-xs uppercase tracking-wider opacity-70">あなたの情報</div>
                             <div className="space-y-3">
-                                <div className="bg-black/30 rounded-lg p-3 border border-[#44FFFF]/10">
-                                    <div className="text-gray-500 text-[10px] uppercase tracking-wider mb-1">お気に入り</div>
-                                    <div className="text-lg font-bold text-white">{getHandDisplayWithEmoji(hostStats.realFavoriteHand as HandType)}</div>
+                                <div className={sideCard({ variant: 'cyan', size: 'sm' }).dataBlock()}>
+                                    <div className={sideCard().cardTitle()}>お気に入り</div>
+                                    <div className={sideCard({ size: 'lg' }).cardValue()}>{getHandDisplayWithEmoji(hostStats.realFavoriteHand as HandType)}</div>
                                 </div>
-                                <div className="bg-black/30 rounded-lg p-3 border border-[#44FFFF]/10">
-                                    <div className="text-gray-500 text-[10px] uppercase tracking-wider mb-1">変える確率</div>
-                                    <div className="text-lg font-bold text-white font-mono">{hostStats.realChangeRate}%</div>
+                                <div className={sideCard({ variant: 'cyan', size: 'sm' }).dataBlock()}>
+                                    <div className={sideCard().cardTitle()}>変える確率</div>
+                                    <div className={sideCard({ size: 'lg' }).cardValueWithUnit()}>{hostStats.realChangeRate}%</div>
                                 </div>
                             </div>
                         </div>

@@ -1,8 +1,8 @@
 import { MatchScoreWithUser, UserRanking } from '@/shared/types'
-import { nullHandGame } from '../styles'
+import { nullHandGame } from '../../styles'
 import { cn } from '@/lib/utils'
-import { SideHeader } from '../common/SideHeader'
-import { GameButton } from '../common/GameButton'
+import { SideHeader } from '../../common/SideHeader'
+import { GameButton } from '../../common/GameButton'
 
 interface GameOverPhaseProps {
     currentUserId: string

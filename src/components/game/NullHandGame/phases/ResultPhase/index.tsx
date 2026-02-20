@@ -1,11 +1,13 @@
 import { HandType, JankenEventWithGuests, MatchScoreWithUser, HostStats, FakeTarget, RoomUser } from '@/shared/types'
-import { Hand3D } from '../Hand3D'
-import { nullHandGame } from '../styles'
+import { Hand3D } from '../../Hand3D'
+import { nullHandGame } from '../../styles'
 import { cn } from '@/lib/utils'
-import { getHandDisplayWithEmoji, judgeHand } from '../utils'
-import { LieRevealCard } from '../LieRevealCard'
-import { SideHeader } from '../common/SideHeader'
-import { GameButton } from '../common/GameButton'
+import { getHandDisplayWithEmoji, judgeHand } from '../../utils'
+import { LieRevealCard } from '../../LieRevealCard'
+import { SideHeader } from '../../common/SideHeader'
+import { GameButton } from '../../common/GameButton'
+import { resultPhase } from './styles'
+import { sideCard } from '../phaseCard.styles'
 
 import { useState } from 'react'
 import { motion } from 'framer-motion'
@@ -34,6 +36,7 @@ export function ResultPhase({
     roomUsers
 }: ResultPhaseProps) {
     const styles = nullHandGame()
+    const rpStyles = resultPhase()
     const [step, setStep] = useState<'RESULT' | 'REVEAL'>('RESULT')
 
     const currentUser = roomUsers.find(u => u.userId === currentUserId)
@@ -72,7 +75,7 @@ export function ResultPhase({
                             <div className="flex justify-center items-center gap-8 mt-8">
                                 {/* ホスト */}
                                 <div className="flex flex-col items-center">
-                                    <div className="text-[#FF4444] font-bold text-xl mb-4 tracking-widest">{hostName}</div>
+                                    <div className={cn(rpStyles.playerName(), rpStyles.hostName())}>{hostName}</div>
 
                                     {/* 勝敗バッジ */}
                                     <div className="mb-4 h-8">
@@ -81,7 +84,7 @@ export function ResultPhase({
                                         {isDraw && <span className="bg-gray-500 text-white font-bold px-4 py-1 rounded">DRAW</span>}
                                     </div>
 
-                                    <div className={cn("transition-all duration-500", isHostWin || isDraw ? "w-48 h-48" : "w-40 h-40 opacity-70")}>
+                                    <div className={cn(rpStyles.handWrapper(), isHostWin || isDraw ? rpStyles.handWrapperWin() : rpStyles.handWrapperLose())}>
                                         <Hand3D
                                             handType={hostHand}
                                             revealed={true}
@@ -94,11 +97,11 @@ export function ResultPhase({
                                 </div>
 
                                 {/* VS */}
-                                <div className="text-4xl font-bold text-white italic opacity-50">VS</div>
+                                <div className={rpStyles.vsText()}>VS</div>
 
                                 {/* 自分 */}
                                 <div className="flex flex-col items-center">
-                                    <div className="text-[#44FFFF] font-bold text-xl mb-4 tracking-widest">自分</div>
+                                    <div className={cn(rpStyles.playerName(), rpStyles.myselfName())}>自分</div>
 
                                     {/* 勝敗バッジ */}
                                     <div className="mb-4 h-8">
@@ -107,7 +110,7 @@ export function ResultPhase({
                                         {isDraw && <span className="bg-gray-500 text-white font-bold px-4 py-1 rounded">DRAW</span>}
                                     </div>
 
-                                    <div className={cn("transition-all duration-500", isGuestWin || isDraw ? "w-48 h-48" : "w-40 h-40 opacity-70")}>
+                                    <div className={cn(rpStyles.handWrapper(), isGuestWin || isDraw ? rpStyles.handWrapperWin() : rpStyles.handWrapperLose())}>
                                         <Hand3D
                                             handType={myHand}
                                             revealed={true}
@@ -143,10 +146,10 @@ export function ResultPhase({
                             className="w-full"
                         >
                             <div className="text-center mb-6">
-                                <h3 className="text-[#FF4444] font-black text-2xl tracking-[0.2em] uppercase border-b-2 border-[#FF4444] inline-block pb-1">
+                                <h3 className={rpStyles.revealTitle()}>
                                     HOST LIED ABOUT
                                 </h3>
-                                <p className="text-gray-500 text-sm mt-2">ホストが仕掛けた「嘘」のおさらい</p>
+                                <p className={rpStyles.revealSubtitle()}>ホストが仕掛けた「嘘」のおさらい</p>
                             </div>
 
                             {jankenEvent.fakeTarget === 'NONE' ? (
@@ -219,9 +222,9 @@ export function ResultPhase({
                         layout
                         className="w-full"
                     >
-                        <div className={styles.vsContainer()}>
+                        <div className="flex justify-center mt-12">
                             <div className="flex flex-col items-center">
-                                <div className="text-[#FF4444] font-bold text-center mb-2 tracking-widest">{hostName}</div>
+                                <div className={cn(rpStyles.playerName(), rpStyles.hostName(), "text-center mb-2")}>{hostName}</div>
 
                                 {/* ホスト用勝敗バッジ */}
                                 {showResult && (
@@ -232,7 +235,7 @@ export function ResultPhase({
                                     </div>
                                 )}
 
-                                <div className={cn("transition-all duration-500", isSpectator ? "w-64 mx-auto" : (hostStatus === 'LOSE' ? "w-40 h-40 opacity-70" : "w-48 h-48"))}>
+                                <div className={cn(rpStyles.handWrapper(), isSpectator ? "w-64 mx-auto" : (hostStatus === 'LOSE' ? rpStyles.handWrapperLose() : rpStyles.handWrapperWin()))}>
                                     <Hand3D
                                         handType={hostHand}
                                         revealed={true}
@@ -268,10 +271,10 @@ export function ResultPhase({
                         className="w-full"
                     >
                         <div className="text-center mb-6">
-                            <h3 className="text-[#FF4444] font-black text-2xl tracking-[0.2em] uppercase border-b-2 border-[#FF4444] inline-block pb-1">
+                            <h3 className={rpStyles.revealTitle()}>
                                 YOU LIED ABOUT
                             </h3>
-                            <p className="text-gray-500 text-sm mt-2">あなたのついた嘘の結果</p>
+                            <p className={rpStyles.revealSubtitle()}>あなたのついた嘘の結果</p>
                         </div>
 
                         {jankenEvent.fakeTarget === 'NONE' ? (
@@ -309,7 +312,7 @@ export function ResultPhase({
             layout
             transition={{ duration: 0.3 }}
         >
-            <div className="bg-[#051a1a] border border-[#44FFFF]/30 rounded-xl p-6 flex-1 flex flex-col">
+            <div className={sideCard({ variant: 'cyan', size: 'lg' }).card()}>
                 <SideHeader
                     engLabel="ROUND RESULT"
                     label="ラウンド結果"
@@ -352,7 +355,7 @@ export function ResultPhase({
                                                 {score.user.name}
                                             </span>
                                             {isMe && (
-                                                <span className="text-[10px] bg-[#44FFFF]/10 text-[#44FFFF] border border-[#44FFFF]/20 px-1.5 py-0.5 rounded font-mono">YOU</span>
+                                                <span className={rpStyles.youBadge()}>YOU</span>
                                             )}
                                         </div>
 
@@ -376,8 +379,8 @@ export function ResultPhase({
                 )}
 
                 {/* Footer with game info */}
-                <div className="mt-auto pt-4 border-t border-[#44FFFF]/10">
-                    <div className="flex justify-between text-[10px] text-gray-500 uppercase tracking-widest font-bold">
+                <div className={rpStyles.sideFooter()}>
+                    <div className={rpStyles.sideFooterContent()}>
                         <span>Host: {hostName}</span>
                         <span>Total: {currentScores.reduce((acc, curr) => acc + curr.points, 0)}</span>
                     </div>
