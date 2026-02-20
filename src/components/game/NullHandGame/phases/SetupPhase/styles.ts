@@ -17,7 +17,7 @@ export const setupPhase = tv({
         // 偽装選択エリア
         fakeSection: 'bg-[#0a0a0a] border border-[#FF4444]/30 rounded-xl p-4',
         fakeSectionTitle: 'text-[#FF4444] font-bold text-sm tracking-[0.2em] uppercase mb-3',
-        fakeOptionGrid: 'grid grid-cols-3 gap-4 w-full max-w-2xl mx-auto',
+        fakeOptionGrid: 'grid grid-cols-3 gap-4 w-full',
         fakeOption: 'rounded-lg border-2 px-3 py-2 text-center cursor-pointer transition-all duration-200 text-xs font-bold tracking-wider',
         fakeOptionActive: 'border-[#FF4444] bg-[#FF4444]/10 text-[#FF4444]',
         fakeOptionInactive: 'border-gray-700 text-gray-500 hover:border-gray-500 hover:text-gray-300',
