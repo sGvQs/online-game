@@ -121,6 +121,9 @@ export async function startJankenMatch(roomId: string) {
             )
         )
 
+        const systemRealHand = generateRandomHand()
+        const systemBluffHand = getBluffHand(systemRealHand)
+
         // 最初のターンを作成（DEALフェーズ）
         await tx.jankenEvent.create({
             data: {
@@ -128,6 +131,8 @@ export async function startJankenMatch(roomId: string) {
                 currentHostId: participants[0],
                 turnNumber: 1,
                 phase: 'DEAL',
+                systemRealHand,
+                systemBluffHand,
             }
         })
 
@@ -198,15 +203,10 @@ export async function dealSystemHands(eventId: string) {
     if (event.currentHostId !== user.id) throw new Error('ホストではありません')
     if (event.phase !== 'DEAL') throw new Error('DEALフェーズではありません')
 
-    // REAL手をランダム生成し、BLUFFはREALに必ず負ける手を設定
-    const systemRealHand = generateRandomHand()
-    const systemBluffHand = getBluffHand(systemRealHand)
-
+    // 手は既に生成されているため、フェーズをCHOICEへ進めるだけ
     await prisma.jankenEvent.update({
         where: { id: eventId },
         data: {
-            systemRealHand,
-            systemBluffHand,
             phase: 'CHOICE',
         }
     })
@@ -489,12 +489,17 @@ export async function startNextTurn(eventId: string) {
     const nextHostIndex = event.turnNumber
     const nextHostId = participants[nextHostIndex]
 
+    const systemRealHand = generateRandomHand()
+    const systemBluffHand = getBluffHand(systemRealHand)
+
     await prisma.jankenEvent.create({
         data: {
             matchId: event.matchId,
             currentHostId: nextHostId,
             turnNumber: event.turnNumber + 1,
             phase: 'DEAL',
+            systemRealHand,
+            systemBluffHand,
         }
     })
 

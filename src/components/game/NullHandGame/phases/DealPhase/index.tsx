@@ -107,7 +107,7 @@ export function DealPhase({
                         disabled={isProcessing}
                         onClick={() => { play('submit'); onDeal() }}
                     >
-                        START DEAL
+                        NEXT
                     </GameButton>
                 </div>
             )}
@@ -126,7 +126,7 @@ export function DealPhase({
                     />
                     <div className="space-y-4 mt-4">
                         <div className="text-xs text-gray-400 leading-relaxed">
-                            <span className="text-[#44FFFF] font-bold">STEP 1:</span> 「START DEAL」を押してシステムに手を配布させる
+                            <span className="text-[#44FFFF] font-bold">STEP 1:</span> システムが配布したREAL/BLUFF手を確認し、「NEXT」を押して進む
                         </div>
                         <div className="text-xs text-gray-400 leading-relaxed">
                             <span className="text-[#44FFFF] font-bold">STEP 2:</span> STAY（REALをそのまま）かREVERSE（BLUFFに変更）かを選択する
@@ -137,11 +137,11 @@ export function DealPhase({
                     </div>
                 </div>
             ) : (
-                <div className="h-full border border-gray-800 rounded bg-[#111]">
+                <div className="h-full border border-gray-800 rounded bg-[#111] flex items-center justify-center p-6">
                     <WaitingDisplay
                         engLabel="WAITING FOR"
                         text={hostName}
-                        subText="ホストがゲームを開始するのを待っています..."
+                        subText="ホストが手を確認して進めるのを待っています..."
                         handType={titleHand}
                         isRotating={true}
                     />
