@@ -57,8 +57,8 @@ export function ChoicePhase({
             {isCurrentHost ? (
                 <>
                     <PhaseHeader
-                        engLabel="勝負に出す手を選んでください"
-                        title="あなたはホストです"
+                        engLabel="あなたはホストです"
+                        title="勝負に出す手を選んでください"
                         subLabel=""
                     />
 
@@ -154,13 +154,13 @@ export function ChoicePhase({
                 // Guest View
                 <>
                     <PhaseHeader
-                        engLabel={`${hostName}がホストです`}
-                        title="あなたはゲストです"
-                        subLabel=""
+                        engLabel={`あなたはゲストです`}
+                        title={`しばらくお待ちください...`}
+                        subLabel={`${hostName}がホストです `}
                     />
 
-                    {hostStats ? (
-                        <div className="flex flex-col items-center mt-8">
+                    {hostStats && (
+                        <div className="flex flex-col items-center mt-12">
                             <div className="flex justify-center items-center gap-2 text-gray-400 text-xs">
                                 <div className="w-2 h-2 bg-[#44FFFF] rounded-full animate-pulse mr-2" />
                                 {hostName}は<span className="text-[#44FFFF] text-sm font-bold">{hostStats.reverseRate !== null
@@ -170,16 +170,11 @@ export function ChoicePhase({
                             </div>
                             <div className="flex justify-center items-center gap-2 text-gray-400 text-xs">
                                 <div className="w-2 h-2 bg-[#44FFFF] rounded-full animate-pulse mr-2" />
-                                {hostName}は<span className="text-[#44FFFF] text-sm font-bold">CHOICE</span>か<span className="text-[#FF4444] text-sm font-bold">BLUFF</span>しか選ぶことはできません
+                                {hostName}は下に<span className="text-[#44FFFF] text-sm font-bold">表示されている🖐️</span>しか選ぶことはできません
                             </div>
                             <div className="flex justify-center items-center gap-2 text-gray-400 animate-pulse text-xs mt-1">
                                 {hostName}は現在選択中です...
                             </div>
-                        </div>
-                    ) : (
-                        <div className="flex justify-center items-center gap-2 text-gray-400 text-xs">
-                            <div className="w-2 h-2 bg-[#44FFFF] rounded-full animate-pulse mr-2" />
-                            {hostName}は<span className="text-[#44FFFF] text-sm font-bold">CHOICE</span>か<span className="text-[#FF4444] text-sm font-bold">BLUFF</span>しか選ぶことはできません
                         </div>
                     )}
 
