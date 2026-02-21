@@ -143,7 +143,7 @@ export function NullHandGame({
     // = :::::::::::::::::::::::::::::::::::::::::
     // RENDER
     // = :::::::::::::::::::::::::::::::::::::::::
-    const [userColor, setUserColor] = useState<string>('#44FFFF')
+    const [userColor, setUserColor] = useState<string>('#00FF00')
 
     useEffect(() => {
         const savedColor = localStorage.getItem('nullhand_user_color')

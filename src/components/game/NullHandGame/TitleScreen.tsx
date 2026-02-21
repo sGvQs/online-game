@@ -23,12 +23,12 @@ interface TitleScreenProps {
 }
 
 const NEON_PALETTE = [
-    '#44FFFF', // シアン
-    '#FF44FF', // マゼンタ
-    '#FFFF44', // イエロー
-    '#44FF44', // ライム
-    '#FF4444', // レッド
-    '#FFAA44', // オレンジ
+    '#00FF00', // Terminal Green
+    '#AA44FF', // Neon Purple
+    '#FF9900', // Cyber Orange
+    '#FF22CC', // Hot Magenta
+    '#FFFF00', // Electric Yellow
+    '#DDDDFF', // Ghost White
 ]
 
 export function TitleScreen({
