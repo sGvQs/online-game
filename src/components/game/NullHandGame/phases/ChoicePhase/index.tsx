@@ -92,7 +92,7 @@ export function ChoicePhase({
                                     <p className="text-xs text-[#44FFFF] font-bold text-center translate-y-2">DEFAULT CHOICE</p>
                                 </div>
                                 <div className="flex flex-col items-center gap-1 translate-y-2">
-                                    <div className="w-48 h-48">
+                                    <div className="w-48 h-48 flex items-center justify-center">
                                         {bluffHand && <Hand3D handType={bluffHand} revealed={true} size="small" personalColor={userColor} />}
                                     </div>
                                 </div>
@@ -110,7 +110,7 @@ export function ChoicePhase({
                                     }}
                                 >
                                     <div className="text-xs font-black tracking-[0.3em] text-[#44FFFF] mb-1">CHOICE</div>
-                                    <div className="w-48 h-48 border-2 border-[#44FFFF] shadow-[0_0_15px_rgba(68,255,255,0.2)] bg-[#44FFFF]/5" />
+                                    <div className="w-48 h-48 border-2 border-[#44FFFF]" />
                                     <div className="h-4" />
                                 </motion.div>
                                 <div className="order-2 text-gray-500 font-black text-xl translate-y-4">OR</div>
@@ -177,10 +177,6 @@ export function ChoicePhase({
                                         : '???'
                                     }%</span> の確率で <span className="text-[#44FFFF] text-sm font-bold"> DEFAULT CHOICE </span>を選びます
                                 </div>
-                                <div className="flex justify-center items-center gap-2 text-gray-400 text-xs">
-                                    <div className="w-2 h-2 bg-[#44FFFF] rounded-full animate-pulse mr-2" />
-                                    {hostName}は下に<span className="text-[#44FFFF] text-sm font-bold">表示されている🖐️</span>しか選ぶことはできません
-                                </div>
                             </div>
                             <div className="flex justify-center items-center gap-2 text-gray-400 animate-pulse text-xs mt-1">
                                 {hostName}は現在選択中です...
@@ -199,9 +195,10 @@ export function ChoicePhase({
                                     <p className="text-xs text-[#44FFFF] font-bold text-center translate-y-2">DEFAULT CHOICE</p>
                                 </div>
                                 <div className="flex flex-col items-center gap-1 translate-y-2">
-                                    <div className="w-48 h-48">
+                                    <div className="w-48 h-48 flex items-center justify-center">
                                         {bluffHand && <Hand3D handType={bluffHand} revealed={true} size="small" />}
                                     </div>
+                                    <p className="text-xs text-gray-400 text-center translate-y-2">ANOTHER CHOICE</p>
                                 </div>
                             </div>
 
@@ -214,7 +211,7 @@ export function ChoicePhase({
                                     className="flex flex-col items-center gap-1"
                                 >
                                     <div className="text-xs font-black tracking-[0.3em] text-[#44FFFF] mb-1">CHOICE</div>
-                                    <div className="w-48 h-48 border-2 border-[#44FFFF] shadow-[0_0_15px_rgba(68,255,255,0.2)] bg-[#44FFFF]/5" />
+                                    <div className="w-48 h-48 border-2 border-[#44FFFF]" />
                                     <div className="h-4" />
                                 </motion.div>
 
@@ -226,8 +223,7 @@ export function ChoicePhase({
                                     style={{ order: isSwapped ? 1 : 3 }}
                                     className="flex flex-col items-center gap-1"
                                 >
-                                    <div className="text-xs font-black tracking-[0.3em] text-[#FF4444] mb-1 opacity-50">BLUFF</div>
-                                    <div className="w-48 h-48 border-2 border-[#FF4444] shadow-[0_0_15px_rgba(255,68,68,0.2)] bg-[#FF4444]/5 opacity-50" />
+                                    <div className="w-48 h-48" />
                                     <div className="h-4" />
                                 </motion.div>
                             </div>

@@ -109,15 +109,17 @@ export function NullHandGame({
     // ============================================
     const [showSplash, setShowSplash] = useState(true)
 
-    // ============================================
+    // = :::::::::::::::::::::::::::::::::::::::::
     // RENDER
-    // ============================================
-    const [userColor, setUserColor] = useState<string>(() => {
-        if (typeof window !== 'undefined') {
-            return localStorage.getItem('nullhand_user_color') || '#44FFFF'
+    // = :::::::::::::::::::::::::::::::::::::::::
+    const [userColor, setUserColor] = useState<string>('#44FFFF')
+
+    useEffect(() => {
+        const savedColor = localStorage.getItem('nullhand_user_color')
+        if (savedColor) {
+            setUserColor(savedColor)
         }
-        return '#44FFFF'
-    })
+    }, [])
 
     useEffect(() => {
         localStorage.setItem('nullhand_user_color', userColor)
@@ -131,6 +133,7 @@ export function NullHandGame({
                         key="splash"
                         onComplete={() => setShowSplash(false)}
                         titleHand={titleHand}
+                        userColor={userColor}
                     />
                 )}
                 {phase === 'TITLE' && !showSplash && (

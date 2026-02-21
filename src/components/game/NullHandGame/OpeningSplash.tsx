@@ -8,19 +8,13 @@ import { NullHandLogo } from './NullHandLogo'
 interface OpeningSplashProps {
     onComplete: () => void
     titleHand: HandType
+    userColor: string
 }
 
-export function OpeningSplash({ onComplete, titleHand }: OpeningSplashProps) {
+export function OpeningSplash({ onComplete, titleHand, userColor }: OpeningSplashProps) {
     const [progress, setProgress] = useState(0)
     const [isTransitioning, setIsTransitioning] = useState(false)
     const styles = nullHandGame()
-
-    const userColor = useMemo<string>(() => {
-        if (typeof window !== 'undefined') {
-            return localStorage.getItem('nullhand_user_color') || '#44FFFF'
-        }
-        return '#44FFFF'
-    }, [])
 
     useEffect(() => {
         const duration = 10000 // 10秒
@@ -68,6 +62,7 @@ export function OpeningSplash({ onComplete, titleHand }: OpeningSplashProps) {
 
                 {/* プログレスバー */}
                 <motion.div className="w-64 space-y-2"
+                    style={{ color: userColor }}
                     exit={{ opacity: 0 }}
                     animate={{ opacity: isTransitioning ? 0 : 1 }}
                     transition={{ duration: 0.8, ease: "easeInOut" }}>
@@ -78,7 +73,7 @@ export function OpeningSplash({ onComplete, titleHand }: OpeningSplashProps) {
                     <div className="h-1 bg-gray-900 w-full overflow-hidden">
                         <motion.div
                             className="h-full bg-white shadow-[0_0_10px_#44FFFF]"
-                            style={{ width: `${progress}%` }}
+                            style={{ width: `${progress}%`, backgroundColor: userColor }}
                         />
                     </div>
                 </motion.div>

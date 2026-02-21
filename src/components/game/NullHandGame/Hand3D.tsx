@@ -32,8 +32,8 @@ export function Hand3D({
                 <PerspectiveCamera makeDefault position={[0, 0, 6]} fov={40} />
 
                 {/* ライティング：面を際立たせる強い光 */}
-                <ambientLight intensity={personalColor ? 0.3 : 0.6} />
-                <directionalLight position={[5, 5, 5]} intensity={personalColor ? 0.8 : 1.2} />
+                <ambientLight intensity={personalColor ? 0.4 : 0.6} />
+                <directionalLight position={[5, 5, 5]} intensity={personalColor ? 3 : 1.2} />
                 <directionalLight position={[-5, -5, 2]} intensity={0.4} color="#aaccff" />
 
                 <group>

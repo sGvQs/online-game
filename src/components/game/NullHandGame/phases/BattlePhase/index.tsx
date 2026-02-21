@@ -84,16 +84,9 @@ export function BattlePhase({
                                     </span>
                                     の確率で
                                     <span className="text-[#44FFFF] text-sm font-bold ml-1">DEFAULT CHOICE</span>
-                                    を選びます
+                                    を選んでいます
                                 </span>
                             </div>
-                            <div className="flex items-center">
-                                <div className="w-2 h-2 bg-[#44FFFF] rounded-full animate-pulse mr-2 flex-shrink-0" />
-                                <span>
-                                    {hostName}は下に<span className="text-[#44FFFF] text-sm font-bold">表示されている🖐️</span>しか選ぶことはできません
-                                </span>
-                            </div>
-
                         </div>
                     </div>
                 )}
@@ -107,12 +100,13 @@ export function BattlePhase({
                                 <div className="w-32 h-32 flex items-center justify-center">
                                     {realHand && <Hand3D handType={realHand} revealed={true} size="small" />}
                                 </div>
-                                <p className="text-[10px] text-[#44FFFF] font-bold text-center -translate-y-4">DEFAULT CHOICE</p>
+                                <p className="text-[10px] text-[#44FFFF] font-bold text-center -translate-y-8">DEFAULT CHOICE</p>
                             </div>
                             <div className="flex flex-col items-center gap-1">
-                                <div className="w-32 h-32">
+                                <div className="w-32 h-32 flex items-center justify-center">
                                     {bluffHand && <Hand3D handType={bluffHand} revealed={true} size="small" />}
                                 </div>
+                                <p className="text-[8px] text-gray-400 text-center -translate-y-8">ANOTHER CHOICE</p>
                             </div>
                         </div>
                     </div>
