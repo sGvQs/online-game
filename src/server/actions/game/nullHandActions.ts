@@ -351,16 +351,24 @@ async function judgeRound(eventId: string) {
         }
     }
 
-    const participants = event.match.room.users.map(ru => ru.userId)
-    const guestCount = participants.length - 1 // ホストを除く
+    // ===== 新ルール スコア判定 =====
+    // ゲストの人数を取得
+    const guestCount = event.guestHands.length
 
-    // ===== スコア判定 =====
-    // Null Hand: 全員あいこ（全ゲストがホストと同じ手）、かつゲストが2人以上
-    const isNullHand = allDraw && event.guestHands.length > 0 && guestCount >= 2
+    // 1. Null Hand判定: ゲスト全員がホストと**同じ手**を出した（全ゲストの結果がDRAW）
+    // ※ゲストが1人の場合はスキップ（必ずfalse）
+    const isNullHand = guestCount > 1 && allDraw
 
-    // ゲスト勝利なし、かつNullHandでもない = ホスト完全勝利
-    const isHostPerfectWin = guestWinners.length === 0 && !isNullHand
+    // 2. ゲスト勝利判定: 1(NullHand)に該当せず、かつホストに勝ったゲストが1人以上いる
+    const isGuestWin = !isNullHand && guestWinners.length > 0
 
+    // 3. ホスト完全勝利判定: 1(NullHand)に該当せず、ゲスト全員に勝利した（ゲスト勝利がおらず、かつ引き分けもいない）
+    // ※今回は「無敗（引き分け含む）」ではなく「完全勝利（全員負け）」が条件
+    // ※ゲストが1人の場合はスキップ（必ずfalse）
+    const guestDraws = event.guestHands.filter(gh => judgeHand(hostHand, gh.hand as HandType) === 'DRAW')
+    const isHostPerfectWin = guestCount > 1 && !isNullHand && guestWinners.length === 0 && guestDraws.length === 0
+
+    // スコア付与の実行
     if (isNullHand) {
         // Null Hand: ホスト+5pt
         await prisma.matchScore.update({
@@ -372,19 +380,8 @@ async function judgeRound(eventId: string) {
             },
             data: { points: { increment: 5 } }
         })
-    } else if (guestWinners.length === 1) {
-        // ゲスト単独勝利: そのゲスト+3pt
-        await prisma.matchScore.update({
-            where: {
-                matchId_userId: {
-                    matchId: event.matchId,
-                    userId: guestWinners[0]
-                }
-            },
-            data: { points: { increment: 3 } }
-        })
-    } else if (guestWinners.length > 1) {
-        // ゲスト複数勝利: 勝ったゲスト全員+1pt
+    } else if (isGuestWin) {
+        // ゲスト勝利: 勝ったゲスト全員に各+3pt
         await Promise.all(
             guestWinners.map(winnerId =>
                 prisma.matchScore.update({
@@ -394,12 +391,12 @@ async function judgeRound(eventId: string) {
                             userId: winnerId
                         }
                     },
-                    data: { points: { increment: 1 } }
+                    data: { points: { increment: 3 } }
                 })
             )
         )
     } else if (isHostPerfectWin) {
-        // ホスト完全勝利: ホスト+2pt
+        // ホスト完全勝利判定: ホスト+3pt
         await prisma.matchScore.update({
             where: {
                 matchId_userId: {
@@ -407,9 +404,10 @@ async function judgeRound(eventId: string) {
                     userId: event.currentHostId
                 }
             },
-            data: { points: { increment: 2 } }
+            data: { points: { increment: 3 } }
         })
     }
+    // ドロー（該当なし）は何もしない（全員 0pt）
 
     // ホストのJankenLogを記録（REVERSE統計用）
     await prisma.jankenLog.create({

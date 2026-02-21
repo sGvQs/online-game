@@ -197,17 +197,29 @@ export function ResultPhase({
             if (res === 'DRAW') hasDraw = true
         })
 
-        if (hasGuestWin) {
-            hostStatus = 'LOSE'
-        } else if (hasDraw && !hasGuestWin) {
-            // 全員あいこ = Null Hand
-            hostStatus = 'WIN'
-        }
-
-        // Null Hand判定（全員あいこ、2人以上）
+        // 新ルールに合わせた判定
         const guestCount = jankenEvent.guestHands.length
-        const isNullHand = hasDraw && !hasGuestWin && guestCount >= 2 &&
-            jankenEvent.guestHands.every(gh => judgeHand(hostHand, gh.hand as HandType) === 'DRAW')
+
+        // 1. NullHand判定: ゲストが2人以上かつ全員DRAW
+        const isNullHand = guestCount > 1 && !hasGuestWin && jankenEvent.guestHands.every(gh => judgeHand(hostHand, gh.hand as HandType) === 'DRAW')
+
+        // 2. ゲスト勝利判定: NullHandでなく、1人以上GUEST_WINがいる
+        const isGuestWin = !isNullHand && hasGuestWin
+
+        // 3. ホスト完全勝利判定: ゲストが2人以上かつNullHandでなく、GUEST_WINが0人かつDRAWが0人
+        const isHostPerfectWin = guestCount > 1 && !isNullHand && !hasGuestWin && !hasDraw
+
+        // hostStatusはUIのWIN/LOSE/DRAWバッジ表示用
+        if (isNullHand) {
+            hostStatus = 'WIN'
+        } else if (isGuestWin) {
+            hostStatus = 'LOSE'
+        } else if (isHostPerfectWin) {
+            hostStatus = 'WIN'
+        } else {
+            // ドロー（完全勝利でもNullHandでもない）
+            hostStatus = 'DRAW'
+        }
 
         const isSpectator = !isCurrentHost && !myHandData
 
@@ -237,9 +249,14 @@ export function ResultPhase({
                                 <div className={cn(rpStyles.playerName(), rpStyles.hostName(), "text-center mb-2")}>{hostName}</div>
 
                                 {isCurrentHost && (
-                                    <div className="mb-4 h-8">
-                                        {hostStatus === 'WIN' && <span className="bg-[#FF4444] text-black font-bold px-4 py-1 rounded">{isNullHand ? 'NULL HAND' : 'WIN'}</span>}
+                                    <div className="mb-4 h-8 flex flex-col items-center">
+                                        {hostStatus === 'WIN' && (
+                                            <span className="bg-[#FF4444] text-black font-bold px-4 py-1 rounded">
+                                                {isNullHand ? 'NULL HAND (+5pt)' : 'PERFECT WIN (+3pt)'}
+                                            </span>
+                                        )}
                                         {hostStatus === 'LOSE' && <span className="bg-gray-600 text-white font-bold px-4 py-1 rounded">LOSE</span>}
+                                        {hostStatus === 'DRAW' && <span className="bg-gray-500 text-white font-bold px-4 py-1 rounded">DRAW (0pt)</span>}
                                     </div>
                                 )}
 
