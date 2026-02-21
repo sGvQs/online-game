@@ -103,6 +103,9 @@ export function ChoicePhase({
                                     transition={{ duration: 0.8, type: 'spring', bounce: 0.4 }}
                                     style={{ order: isSwapped ? 3 : 1 }}
                                     className="flex flex-col items-center gap-1"
+                                    onClick={() => {
+                                        setIsSwapped(prev => !prev)
+                                    }}
                                 >
                                     <div className="text-xs font-black tracking-[0.3em] text-[#44FFFF] mb-1">CHOICE</div>
                                     <div className="w-48 h-48 border-2 border-[#44FFFF] shadow-[0_0_15px_rgba(68,255,255,0.2)] bg-[#44FFFF]/5" />
@@ -115,6 +118,9 @@ export function ChoicePhase({
                                     transition={{ duration: 0.8, type: 'spring', bounce: 0.4 }}
                                     style={{ order: isSwapped ? 1 : 3 }}
                                     className="flex flex-col items-center gap-1"
+                                    onClick={() => {
+                                        setIsSwapped(prev => !prev)
+                                    }}
                                 >
                                     <div className="w-48 h-48" />
                                     <div className="h-4" />
@@ -236,7 +242,7 @@ export function ChoicePhase({
             <div className="flex flex-col gap-4 h-full">
 
                 {/* スコア表示カード */}
-                <div className={sideCard({ variant: 'cyan', size: 'lg' }).card() + " flex-1 overflow-hidden flex flex-col"}>
+                <div className={sideCard({ variant: 'cyan', size: 'md' }).card() + " flex-1 overflow-hidden flex flex-col"}>
                     <SideHeader
                         engLabel="CURRENT SCORES"
                         label="現在のスコア"
@@ -272,7 +278,7 @@ export function ChoicePhase({
                 </div>
 
 
-                <div className={sideCard({ variant: 'red', size: 'sm' }).card()}>
+                <div className={sideCard({ variant: 'red', size: 'md' }).card()}>
                     <SideHeader
                         engLabel="REWARD SYSTEM"
                         label="ポイント配当"
@@ -280,42 +286,35 @@ export function ChoicePhase({
                         className="border-[#FF4444]/30"
                         compact
                     />
-                    <p className="text-[12px] text-gray-400 leading-relaxed mt-1">
-                        [NULL HAND] ───────────────
-                    </p>
-                    <p className="text-[8px] text-gray-400 leading-relaxed ml-2">
-                        条件：全員がホストと同じ手（あいこ）
-                    </p>
-                    <p className="text-[8px] text-gray-400 leading-relaxed ml-2">
-                        報酬：HOST +5pt / GUEST 0pt
-                    </p>
-                    <p className="text-[10px] text-gray-400 leading-relaxed mt-1">
-                        [GUEST WIN] ───────────────
-                    </p>
-                    <p className="text-[8px] text-gray-400 leading-relaxed ml-2">
-                        条件：ホストに勝利したゲストが1人以上
-                    </p>
-                    <p className="text-[8px] text-gray-400 leading-relaxed ml-2">
-                        報酬：WINNER +3pt / HOST 0pt
-                    </p>
-                    <p className="text-[10px] text-gray-400 leading-relaxed mt-1">
-                        [HOST PERFECT] ────────────
-                    </p>
-                    <p className="text-[8px] text-gray-400 leading-relaxed ml-2">
-                        条件：ホストがゲスト全員を撃破
-                    </p>
-                    <p className="text-[8px] text-gray-400 leading-relaxed ml-2">
-                        報酬：HOST +3pt / GUEST 0pt
-                    </p>
-                    <p className="text-[10px] text-gray-400 leading-relaxed mt-1">
-                        [DRAW] ──────────────────
-                    </p>
-                    <p className="text-[8px] text-gray-400 leading-relaxed ml-2">
-                        条件：上記以外（勝ち・負け混在など）
-                    </p>
-                    <p className="text-[8px] text-gray-400 leading-relaxed ml-2">
-                        報酬：ALL 0pt
-                    </p>
+                    <div className="mt-4 space-y-4">
+                        {(() => {
+                            const guestCount = currentScores.length - 1;
+                            const rules = [
+                                { title: 'NULL HAND', desc: '全員があいこ', show: guestCount >= 2, pts: '+5', target: 'HOST', color: '#44FFFF' },
+                                { title: 'GUEST WIN', desc: 'ホストに勝利', show: true, pts: '+3', target: 'GUEST', color: '#FF4444' },
+                                { title: 'HOST PERFECT', desc: 'ゲスト全員を撃破', show: guestCount >= 2, pts: '+3', target: 'HOST', color: '#44FFFF' },
+                                { title: 'DRAW', desc: '上記以外（勝ち・負け混在など）', show: true, pts: '0', target: 'ALL', color: '#666666' },
+                            ];
+
+                            return rules.map((item) => item.show && (
+                                <div key={item.title} className="group relative">
+                                    <div className="flex items-center justify-between mb-1">
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-1 h-3 rounded-full shadow-[0_0_8px_rgba(0,0,0,0.5)]" style={{ backgroundColor: item.color }} />
+                                            <span className="text-[10px] font-black tracking-widest text-white/90 font-mono">{item.title}</span>
+                                        </div>
+                                        <div className="flex items-center gap-1.5 bg-black/40 px-2 py-0.5 rounded border border-white/5">
+                                            <span className="text-[8px] font-bold text-white/90 uppercase tracking-tighter">{item.target}</span>
+                                            <span className="text-xs font-black font-mono tabular-nums" style={{ color: item.color }}>
+                                                {item.pts}<span className="text-[8px] ml-0.5 opacity-70">PT</span>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div className="text-[9px] text-white/50 font-bold pl-3 leading-tight tracking-tight">{item.desc}</div>
+                                </div>
+                            ));
+                        })()}
+                    </div>
                 </div>
 
             </div>

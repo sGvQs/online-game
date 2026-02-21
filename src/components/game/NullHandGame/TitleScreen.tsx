@@ -223,54 +223,64 @@ export function TitleScreen({
 
                                 {/* ゲームの流れ */}
                                 <div className="space-y-3">
-                                    <h3 className="text-sm font-bold border-b border-[#FF4444] pb-1 text-white">
+                                    <h3 className="text-sm font-bold border-b border-[#FF4444] pb-1 text-white flex items-center gap-2">
+                                        <div className="w-1.5 h-1.5 bg-[#FF4444] rounded-full" />
                                         📋 ゲームの流れ
                                     </h3>
-                                    <ol className="space-y-3 text-xs pl-2 text-gray-300">
+                                    <ol className="space-y-3 text-[11px] pl-2 text-gray-400">
                                         <li className="flex items-start">
                                             <span className="font-bold mr-2 text-[#FF4444]">1.</span>
                                             <span>
-                                                <strong className="text-white">ホストの準備</strong><br />
-                                                ホストは自分の「手」と「嘘」を決定します。
+                                                <strong className="text-white">ホストの選択 (CHOICE)</strong><br />
+                                                ホストは提示された「DEFAULT CHOICE」と「BLUFF」のどちらで勝負するかを裏で決断します。
                                             </span>
                                         </li>
                                         <li className="flex items-start">
                                             <span className="font-bold mr-2 text-[#FF4444]">2.</span>
                                             <span>
-                                                <strong className="text-white">ホストの情報公開</strong><br />
-                                                「設定した手」とホストのステータスが公開されます。<br />
-                                                <span className="text-[#FF4444] font-semibold">※ この中に嘘が含まれています</span>
+                                                <strong className="text-white">ゲストの予測 & 勝負 (BATTLE)</strong><br />
+                                                ゲストは統計情報を参考に、ホストの「意志」を読み合い、自分の手を選択します。
                                             </span>
                                         </li>
                                         <li className="flex items-start">
                                             <span className="font-bold mr-2 text-[#FF4444]">3.</span>
                                             <span>
-                                                <strong className="text-white">ホストの最終決定</strong><br />
-                                                ホストは勝負する手を決定します。
-                                            </span>
-                                        </li>
-                                        <li className="flex items-start">
-                                            <span className="font-bold mr-2 text-[#FF4444]">4.</span>
-                                            <span>
-                                                <strong className="text-white">決断の時！</strong><br />
-                                                嘘に惑わされず、勝てる手を選択！
+                                                <strong className="text-white">意志の開示 (RESULT)</strong><br />
+                                                ホストが実際にどちらの手を選んでいたのかが暴かれ、最終的な勝敗が確定します。
                                             </span>
                                         </li>
                                     </ol>
                                 </div>
 
-                                {/* 勝利条件 */}
-                                <div className="space-y-2">
-                                    <h3 className="text-sm font-bold border-b border-[#FF4444] pb-1 text-white">
-                                        🏆 勝利条件
+                                {/* ポイント配当 (REWARD SYSTEM) */}
+                                <div className="space-y-3">
+                                    <h3 className="text-sm font-bold border-b border-[#FF4444] pb-1 text-white flex items-center gap-2">
+                                        <div className="w-1.5 h-1.5 bg-[#FF4444] rounded-full" />
+                                        ■ REWARD SYSTEM / ポイント配当
                                     </h3>
-                                    <div className="border border-[#FF4444]/30 p-3 rounded bg-[#FF4444]/5">
-                                        <p className="text-xs font-bold text-white mb-2">
-                                            <span className="text-[#FF4444]">ゲスト</span>： ホストにじゃんけんで勝つ（+1点）
-                                        </p>
-                                        <p className="text-xs text-gray-400">
-                                            <span className="font-bold text-white">ホスト</span>： 全員に勝つ（+3点）<br />
-                                        </p>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
+                                        {(() => {
+                                            const guestCount = room.users.length - 1;
+                                            const rules = [
+                                                { title: 'NULL HAND', desc: '全員があいこ', show: guestCount >= 2, pts: '+5', target: 'HOST', color: '#44FFFF' },
+                                                { title: 'GUEST WIN', desc: '勝利ゲストが1人以上', show: true, pts: '+3', target: 'GUEST', color: '#FF4444' },
+                                                { title: 'HOST PERFECT', desc: 'ゲスト全員を撃破', show: guestCount >= 2, pts: '+3', target: 'HOST', color: '#FF4444' },
+                                                { title: 'DRAW', desc: '上記以外（勝敗混在）', show: true, pts: '0', target: 'ALL', color: '#666666' },
+                                            ];
+
+                                            return rules.map((item) => item.show && (
+                                                <div key={item.title} className="bg-white/5 border border-white/10 p-3 rounded-lg flex flex-col justify-between">
+                                                    <div className="flex justify-between items-start mb-1">
+                                                        <span className="text-[10px] font-black text-white/90 italic tracking-wider">{item.title}</span>
+                                                        <div className="bg-black/60 px-1.5 py-0.5 rounded border border-white/10 flex items-center gap-1">
+                                                            <span className="text-[7px] text-gray-500 font-bold">{item.target}</span>
+                                                            <span className="text-[11px] font-black" style={{ color: item.color }}>{item.pts}</span>
+                                                        </div>
+                                                    </div>
+                                                    <div className="text-[9px] text-gray-500 font-bold leading-tight mt-1">{item.desc}</div>
+                                                </div>
+                                            ));
+                                        })()}
                                     </div>
                                 </div>
 

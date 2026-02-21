@@ -85,14 +85,39 @@ export function BattlePhase({
 
                 <div className={sideCard({ variant: 'red', size: 'sm' }).card()}>
                     <SideHeader
-                        engLabel="RULE"
-                        label="バトル中"
+                        engLabel="REWARD SYSTEM"
+                        label="ポイント配当"
                         variant="red"
                         className="border-[#FF4444]/30"
                         compact
                     />
-                    <div className="text-[10px] text-gray-400 leading-relaxed mt-1 italic">
-                        ホストの手を読み切り、勝利を掴め。
+                    <div className="mt-4 space-y-4">
+                        {(() => {
+                            const guestCount = currentScores.length - 1;
+                            const rules = [
+                                { title: 'NULL HAND', desc: '全員があいこ', show: guestCount >= 2, pts: '+5', target: 'HOST', color: '#44FFFF' },
+                                { title: 'GUEST WIN', desc: 'ホストに勝利', show: true, pts: '+3', target: 'GUEST', color: '#FF4444' },
+                                { title: 'HOST PERFECT', desc: 'ゲスト全員を撃破', show: guestCount >= 2, pts: '+3', target: 'HOST', color: '#44FFFF' },
+                                { title: 'DRAW', desc: '上記以外（勝ち・負け混在など）', show: true, pts: '0', target: 'ALL', color: '#666666' },
+                            ];
+
+                            return rules.map((item) => item.show && (
+                                <div key={item.title} className="group relative">
+                                    <div className="flex items-center justify-between mb-1">
+                                        <div className="flex items-center gap-2">
+                                            <div className="w-0.5 h-2.5 rounded-full" style={{ backgroundColor: item.color }} />
+                                            <span className="text-[9px] font-black tracking-widest text-white/90 font-mono italic">{item.title}</span>
+                                        </div>
+                                        <div className="flex items-center gap-1 bg-black/40 px-1 py-0.5 rounded border border-white/5">
+                                            <span className="text-[7px] font-black font-mono tabular-nums" style={{ color: item.color }}>
+                                                {item.pts}<span className="text-[6px] ml-0.5 opacity-70">PT</span>
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div className="text-[8px] text-gray-600 font-bold pl-2.5 leading-tight tracking-tight">{item.desc}</div>
+                                </div>
+                            ));
+                        })()}
                     </div>
                 </div>
             </div>
