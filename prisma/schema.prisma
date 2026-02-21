@@ -166,6 +166,7 @@ model MatchScore {
   matchId   String   @map("match_id") @db.Uuid
   userId    String   @map("user_id") @db.Uuid
   points    Int      @default(0)
+  turnOrder Int      @default(0) @map("turn_order")
   createdAt DateTime @default(now()) @map("created_at")
   
   match     Match    @relation(fields: [matchId], references: [id], onDelete: Cascade)

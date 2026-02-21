@@ -108,14 +108,15 @@ export async function startJankenMatch(roomId: string) {
             }
         })
 
-        // 全参加者のMatchScoreを初期化
+        // 全参加者のMatchScoreを初期化（シャッフルされた順序を保存）
         await Promise.all(
-            participants.map(userId =>
+            participants.map((userId, index) =>
                 tx.matchScore.create({
                     data: {
                         matchId: newMatch.id,
                         userId: userId,
                         points: 0,
+                        turnOrder: index, // シャッフル順を永続化
                     }
                 })
             )
@@ -432,8 +433,8 @@ export async function startNextTurn(eventId: string) {
         include: {
             match: {
                 include: {
-                    room: {
-                        include: { users: true }
+                    matchScores: {
+                        orderBy: { turnOrder: 'asc' }
                     }
                 }
             }
@@ -441,8 +442,9 @@ export async function startNextTurn(eventId: string) {
     })
 
     if (!event) throw new Error('イベントが見つかりません')
+    if (!event.match.matchScores.length) throw new Error('参加者データが見つかりません')
 
-    const participants = event.match.room.users.map(ru => ru.userId)
+    const participants = event.match.matchScores.map(ms => ms.userId)
     const totalTurns = participants.length
 
     if (event.turnNumber >= totalTurns) {
