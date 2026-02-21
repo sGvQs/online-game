@@ -148,6 +148,8 @@ export function NullHandGame({
                                 onDeal={handleDealSystemHands}
                                 hostName={hostName}
                                 titleHand={titleHand}
+                                currentScores={currentScores}
+                                currentUserId={currentUserId}
                             />
                         )}
 

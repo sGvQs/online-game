@@ -1,4 +1,4 @@
-import { JankenEventWithGuests, HandType } from '@/shared/types'
+import { JankenEventWithGuests, HandType, MatchScoreWithUser } from '@/shared/types'
 import { Hand3D } from '../../Hand3D'
 import { nullHandGame } from '../../styles'
 import { getHandDisplayWithEmoji } from '../../utils'
@@ -17,6 +17,8 @@ interface DealPhaseProps {
     onDeal: () => Promise<void>
     hostName: string
     titleHand: HandType
+    currentScores: MatchScoreWithUser[]
+    currentUserId: string
 }
 
 export function DealPhase({
@@ -26,6 +28,8 @@ export function DealPhase({
     onDeal,
     hostName,
     titleHand,
+    currentScores,
+    currentUserId,
 }: DealPhaseProps) {
     const styles = nullHandGame()
     const { play } = useSE()
@@ -116,37 +120,70 @@ export function DealPhase({
 
     const SideArea = () => (
         <motion.div className={styles.sideArea()} layout transition={{ duration: 0.3 }}>
-            {isCurrentHost ? (
-                <div className={sideCard({ variant: 'cyan', size: 'lg' }).card()}>
-                    <SideHeader
-                        engLabel="YOUR TURN"
-                        label="あなたがホストです"
-                        badge="HOST"
-                        className="border-[#44FFFF]/30"
-                    />
-                    <div className="space-y-4 mt-4">
-                        <div className="text-xs text-gray-400 leading-relaxed">
-                            <span className="text-[#44FFFF] font-bold">STEP 1:</span> システムが配布したREAL/BLUFF手を確認し、「NEXT」を押して進む
-                        </div>
-                        <div className="text-xs text-gray-400 leading-relaxed">
-                            <span className="text-[#44FFFF] font-bold">STEP 2:</span> STAY（REALをそのまま）かREVERSE（BLUFFに変更）かを選択する
-                        </div>
-                        <div className="text-xs text-gray-400 leading-relaxed">
-                            <span className="text-white font-bold">ヒント:</span> REVERSEを選んだ場合、BLUFFで出すため他のゲストに負ける可能性が高いですが、相手の裏をかくことができます。
+            <div className="flex flex-col gap-4 h-full">
+                {/* 状態表示カード */}
+                {isCurrentHost ? (
+                    <div className={sideCard({ variant: 'cyan', size: 'sm' }).card()}>
+                        <SideHeader
+                            engLabel="YOUR TURN"
+                            label="あなたがホストです"
+                            badge="HOST"
+                            className="border-[#44FFFF]/30"
+                        />
+                        <div className="space-y-2 mt-2">
+                            <div className="text-[10px] text-gray-400 leading-relaxed">
+                                <span className="text-[#44FFFF] font-bold">STEP 1:</span> 手を確認し「NEXT」で進む
+                            </div>
                         </div>
                     </div>
-                </div>
-            ) : (
-                <div className="h-full border border-gray-800 rounded bg-[#111] flex items-center justify-center p-6">
-                    <WaitingDisplay
-                        engLabel="WAITING FOR"
-                        text={hostName}
-                        subText="ホストが手を確認して進めるのを待っています..."
-                        handType={titleHand}
-                        isRotating={true}
+                ) : (
+                    <div className="border border-gray-800 rounded bg-[#111] p-4 flex flex-col items-center justify-center">
+                        <WaitingDisplay
+                            engLabel="WAITING FOR"
+                            text={hostName}
+                            subText="ホストの確認待ち..."
+                            handType={titleHand}
+                            isRotating={true}
+                        />
+                    </div>
+                )}
+
+                {/* スコア表示カード */}
+                <div className={sideCard({ variant: 'cyan', size: 'lg' }).card() + " flex-1 overflow-hidden flex flex-col"}>
+                    <SideHeader
+                        engLabel="CURRENT SCORES"
+                        label="現在のスコア"
+                        className="border-[#44FFFF]/30"
                     />
+                    <div className="mt-4 flex-1 overflow-y-auto space-y-2 pr-1 custom-scrollbar scrollbar-hide">
+                        {currentScores.length > 0 ? (
+                            currentScores.map((score, index) => (
+                                <div
+                                    key={score.userId}
+                                    className={`flex items-center justify-between p-2 rounded ${score.userId === currentUserId ? 'bg-[#44FFFF]/10 border border-[#44FFFF]/30' : 'bg-black/20 border border-gray-800'
+                                        }`}
+                                >
+                                    <div className="flex items-center gap-2 min-w-0">
+                                        <div className="text-[10px] font-black text-gray-500 w-4">
+                                            {index + 1}
+                                        </div>
+                                        <div className={`text-xs font-bold truncate ${score.userId === currentUserId ? 'text-[#44FFFF]' : 'text-gray-300'}`}>
+                                            {score.user.name}
+                                        </div>
+                                    </div>
+                                    <div className="text-sm font-black text-white tabular-nums">
+                                        {score.points}<span className="text-[10px] text-gray-500 ml-1">pt</span>
+                                    </div>
+                                </div>
+                            ))
+                        ) : (
+                            <div className="text-center py-8 text-xs text-gray-600 italic">
+                                No scores recorded
+                            </div>
+                        )}
+                    </div>
                 </div>
-            )}
+            </div>
         </motion.div>
     )
 

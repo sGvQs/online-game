@@ -244,7 +244,7 @@ export function useNullHand({
 
     useEffect(() => {
         if (!matchIdRef.current) return
-        if (phase !== 'RESULT' && phase !== 'GAME_OVER') return
+        if (phase !== 'DEAL' && phase !== 'RESULT' && phase !== 'GAME_OVER') return
 
         const fetchScores = async () => {
             try {
