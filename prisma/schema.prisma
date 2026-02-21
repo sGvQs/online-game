@@ -21,7 +21,9 @@ model User {
   userIDPs     UserIDP[]
   guestHands   GuestHand[]
   jankenLogs   JankenLog[]
-  matchScores  MatchScore[]
+  matchScores     MatchScore[]
+  monthlyRankings MonthlyRanking[]
+  pointLogs       PointLog[]
 
   @@map("users")
 }
@@ -174,4 +176,39 @@ model MatchScore {
   
   @@unique([matchId, userId])
   @@map("match_scores")
+}
+
+// -------------------------------------------------------------------------------------------------
+// 世界ランキング・永続ポイント管理
+// -------------------------------------------------------------------------------------------------
+
+// 月ごとのプレイヤーのランクと累計スコア
+model MonthlyRanking {
+  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId      String   @map("user_id") @db.Uuid
+  year        Int      // 2026 など
+  month       Int      // 1〜12
+  totalPoints Int      @default(0) @map("total_points")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, year, month]) // 「誰が」「いつ」のレコードかを一意にする
+  @@index([year, month, totalPoints(sort: Desc)]) // 月ごとのランキングを高速化
+  @@map("monthly_rankings")
+}
+
+// ポイント増減の履歴（不正調査や他ゲームとの共通仕様）
+model PointLog {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  amount    Int      // 獲得（または消費）した量
+  gameType  String   @map("game_type") // "NULL_HAND", "ERROR_HUNTER" など
+  reason    String?  // "MATCH_WIN", "GAMBLE_LOSS" など
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, gameType])
+  @@map("point_logs")
 }

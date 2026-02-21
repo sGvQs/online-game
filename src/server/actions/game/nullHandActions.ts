@@ -618,24 +618,128 @@ export async function getMatchScores(matchId: string): Promise<MatchScoreWithUse
 
 /**
  * ゲーム終了
+ * - 試合を終了ステータスにする
+ * - 獲得したポイントを月間ランキングに反映（世界ランキング用）
  */
 export async function finishJanken(matchId: string, roomId: string) {
     await getAuthenticatedUser()
 
-    const match = await prisma.match.findUnique({ where: { id: matchId } })
+    const match = await prisma.match.findUnique({
+        where: { id: matchId },
+        include: {
+            matchScores: true // 最終スコアを取得
+        }
+    })
+
     if (!match || match.status === 'FINISHED') return
 
-    await prisma.match.update({
-        where: { id: matchId },
-        data: {
-            status: 'FINISHED',
+    const now = new Date()
+    const year = now.getFullYear()
+    const month = now.getMonth() + 1 // 1〜12
+
+    // トランザクションで一括処理
+    await prisma.$transaction(async (tx) => {
+        // 1. マッチを終了状態に更新
+        await tx.match.update({
+            where: { id: matchId },
+            data: { status: 'FINISHED' }
+        })
+
+        await tx.room.update({
+            where: { id: roomId },
+            data: { currentMatchId: null }
+        })
+
+        // 2. 月間ランキングとポイント履歴の更新
+        for (const score of match.matchScores) {
+            if (score.points > 0) {
+                // 月間ランキングを加算（または新規作成）
+                await tx.monthlyRanking.upsert({
+                    where: {
+                        userId_year_month: {
+                            userId: score.userId,
+                            year,
+                            month
+                        }
+                    },
+                    update: {
+                        totalPoints: { increment: score.points }
+                    },
+                    create: {
+                        userId: score.userId,
+                        year,
+                        month,
+                        totalPoints: score.points
+                    }
+                })
+
+                // 獲得履歴を記録
+                await tx.pointLog.create({
+                    data: {
+                        userId: score.userId,
+                        amount: score.points,
+                        gameType: 'NULL_HAND',
+                        reason: `MATCH_REWARD_${matchId}`
+                    }
+                })
+            }
+        }
+    })
+}
+
+// ============================================
+// 世界ランキング関連取得
+// ============================================
+
+export type UserRankingInfo = {
+    rank: number;
+    totalPoints: number;
+    year: number;
+    month: number;
+}
+
+/**
+ * ユーザーの現在の月間ランキングと累計ポイントを取得
+ */
+export async function getMonthlyRanking(userId: string): Promise<UserRankingInfo | null> {
+    const now = new Date()
+    const year = now.getFullYear()
+    const month = now.getMonth() + 1
+
+    const userRanking = await prisma.monthlyRanking.findUnique({
+        where: {
+            userId_year_month: {
+                userId,
+                year,
+                month
+            }
         }
     })
 
-    await prisma.room.update({
-        where: { id: roomId },
-        data: {
-            currentMatchId: null,
+    if (!userRanking) {
+        return {
+            rank: 0,
+            totalPoints: 0,
+            year,
+            month
+        }
+    }
+
+    // 自分より高いポイントを持っている人の数を数える（+1で順位になる）
+    const higherRankingCount = await prisma.monthlyRanking.count({
+        where: {
+            year,
+            month,
+            totalPoints: {
+                gt: userRanking.totalPoints
+            }
         }
     })
+
+    return {
+        rank: higherRankingCount + 1,
+        totalPoints: userRanking.totalPoints,
+        year,
+        month
+    }
 }
