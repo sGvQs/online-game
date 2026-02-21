@@ -8,6 +8,7 @@ import { sideCard } from '../phaseCard.styles'
 import { motion } from 'framer-motion'
 import { useSE } from '@/hooks/useSE'
 import { useState, useEffect } from 'react'
+import { cn } from '@/lib/utils'
 
 interface ChoicePhaseProps {
     jankenEvent: JankenEventWithGuests | null
@@ -62,12 +63,12 @@ export function ChoicePhase({
                     />
 
                     <div className="flex justify-center items-center gap-2 text-gray-400 text-xs mt-8">
-                        <div className="w-2 h-2 bg-[#FF4444] rounded-full animate-pulse mr-2" />
-                        あなたは過去に <span className="text-[#FF4444] text-sm font-bold">{hostStats ? hostStats.reverseRate !== null
-                            ? hostStats.reverseRate
+                        <div className="w-2 h-2 bg-[#44FFFF] rounded-full animate-pulse mr-2" />
+                        あなたは過去に <span className="text-[#44FFFF] text-sm font-bold">{hostStats ? hostStats.reverseRate !== null
+                            ? 100 - hostStats.reverseRate
                             : '???'
                             : '???'
-                        }%</span> の確率で <span className="text-[#FF4444] text-sm font-bold"> REVERSE </span> を選んでいます
+                        }%</span> の確率で <span className="text-[#44FFFF] text-sm font-bold"> DEFAULT REAL </span> を選んでいます
                     </div>
 
                     <div className="flex-1 flex flex-col items-center justify-center gap-8">
@@ -75,17 +76,17 @@ export function ChoicePhase({
                         <div className="relative w-120 h-48 flex items-center justify-center">
                             {/* 固定レイヤー：3Dの手 */}
                             <div className="absolute inset-0 flex items-center justify-between pointer-events-none px-4">
-                                <div className="flex flex-col items-center gap-1 translate-y-2">
+                                <div className={cn("flex flex-col items-center gap-1 translate-y-2 transition-opacity duration-300", isSwapped ? "opacity-30" : "opacity-100")}>
                                     <div className="w-48 h-48 flex items-center justify-center">
                                         {realHand && <Hand3D handType={realHand} revealed={true} size="small" />}
                                     </div>
                                     <p className="text-xs text-[#44FFFF] font-bold text-center translate-y-2">DEFAULT REAL</p>
                                 </div>
-                                <div className="flex flex-col items-center gap-1 translate-y-2">
+                                <div className={cn("flex flex-col items-center gap-1 translate-y-2 transition-opacity duration-300", isSwapped ? "opacity-100" : "opacity-30")}>
                                     <div className="w-48 h-48 flex items-center justify-center">
                                         {bluffHand && <Hand3D handType={bluffHand} revealed={true} size="small" />}
                                     </div>
-                                    <p className="text-xs text-[#FF4444] font-bold text-center translate-y-2 opacity-50">BLUFF REVERSE</p>
+                                    <p className="text-xs text-[#FF4444] font-bold text-center translate-y-2">BLUFF REVERSE</p>
                                 </div>
                             </div>
 
@@ -93,12 +94,12 @@ export function ChoicePhase({
                             <div className="absolute inset-0 flex items-center justify-between px-4">
                                 <motion.div
                                     layout
-                                    transition={{ duration: 0.8, type: 'spring', bounce: 0.4 }}
+                                    transition={{ duration: 0.8, type: 'spring', bounce: 0.3 }}
                                     style={{ order: isSwapped ? 3 : 1 }}
                                     className="flex flex-col items-center gap-1"
                                 >
                                     <div className="text-xs font-black tracking-[0.3em] text-[#44FFFF] mb-1">REAL</div>
-                                    <div className="w-48 h-48 border-2 border-[#44FFFF] shadow-[0_0_15px_rgba(68,255,255,0.2)] bg-[#44FFFF]/5" />
+                                    <div className={cn("w-48 h-48 border-2 shadow-[0_0_15px_rgba(68,255,255,0.2)] transition-all duration-300", isSwapped ? "border-[#44FFFF]/20 bg-[#44FFFF]/5" : "border-[#44FFFF] bg-[#44FFFF]/10")} />
                                     <div className="h-4" />
                                 </motion.div>
 
@@ -106,12 +107,12 @@ export function ChoicePhase({
 
                                 <motion.div
                                     layout
-                                    transition={{ duration: 0.8, type: 'spring', bounce: 0.4 }}
+                                    transition={{ duration: 0.8, type: 'spring', bounce: 0.3 }}
                                     style={{ order: isSwapped ? 1 : 3 }}
                                     className="flex flex-col items-center gap-1"
                                 >
                                     <div className="text-xs font-black tracking-[0.3em] text-[#FF4444] mb-1">BLUFF</div>
-                                    <div className="w-48 h-48 border-2 border-[#FF4444] shadow-[0_0_15px_rgba(255,68,68,0.2)] bg-[#FF4444]/5" />
+                                    <div className={cn("w-48 h-48 border-2 shadow-[0_0_15px_rgba(255,68,68,0.2)] transition-all duration-300", isSwapped ? "border-[#FF4444] bg-[#FF4444]/10" : "border-[#FF4444]/20 bg-[#FF4444]/5")} />
                                     <div className="h-4" />
                                 </motion.div>
                             </div>
@@ -119,61 +120,30 @@ export function ChoicePhase({
 
                         <div className="flex gap-6 mt-10">
                             <motion.button
-                                onClick={() => { play('submit'); onChoice('STAY') }}
+                                onClick={() => { play('select'); setIsSwapped(prev => !prev) }}
                                 disabled={isProcessing}
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
-                                className="flex flex-col items-center gap-3 px-6 py-2 border-2 border-[#44FFFF] bg-black hover:bg-[#44FFFF]/10 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="flex flex-col items-center gap-3 px-10 py-3 border-2 border-white/20 bg-black hover:bg-white/10 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                                <span className="text-[#44FFFF] font-black text-sm tracking-widest">CHANGE</span>
+                                <span className="text-white font-black text-sm tracking-widest">CHANGE</span>
                             </motion.button>
                             <motion.button
-                                onClick={() => { play('submit'); onChoice('STAY') }}
+                                onClick={() => {
+                                    play('submit')
+                                    onChoice(isSwapped ? 'REVERSE' : 'STAY')
+                                }}
                                 disabled={isProcessing}
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
-                                className="flex flex-col items-center gap-3 px-6 py-2 border-2 text-[#FF4444] bg-black hover:bg-[#44FFFF]/10 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                className={cn(
+                                    "flex flex-col items-center gap-3 px-10 py-3 border-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed",
+                                    isSwapped ? "border-[#FF4444] bg-[#FF4444]/10" : "border-[#44FFFF] bg-[#44FFFF]/10"
+                                )}
                             >
-                                <span className="text-[#FF4444] font-black text-sm tracking-widest">SUBMIT</span>
+                                <span className={cn("font-black text-sm tracking-[0.3em]", isSwapped ? "text-[#FF4444]" : "text-[#44FFFF]")}>SUBMIT</span>
                             </motion.button>
                         </div>
-
-                        {/* STAY / REVERSE ボタン */}
-                        {/* <div className="flex gap-6">
-                            <motion.button
-                                onClick={() => { play('submit'); onChoice('STAY') }}
-                                disabled={isProcessing}
-                                whileHover={{ scale: 1.05 }}
-                                whileTap={{ scale: 0.95 }}
-                                className="flex flex-col items-center gap-3 px-12 py-6 border-2 border-[#44FFFF] bg-black hover:bg-[#44FFFF]/10 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                                <span className="text-[#44FFFF] font-black text-2xl tracking-widest">STAY</span>
-                                <span className="text-gray-400 text-[10px] text-center">
-                                    REAL手<br />
-                                    <span className="text-white font-bold">{realHand ? getHandDisplayWithEmoji(realHand) : '?'}</span>
-                                    をそのまま出す
-                                </span>
-                            </motion.button>
-
-                            <motion.button
-                                onClick={() => { play('submit'); onChoice('REVERSE') }}
-                                disabled={isProcessing}
-                                whileHover={{ scale: 1.05 }}
-                                whileTap={{ scale: 0.95 }}
-                                className="flex flex-col items-center gap-3 px-12 py-6 border-2 border-[#FF4444] bg-black hover:bg-[#FF4444]/10 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                                <span className="text-[#FF4444] font-black text-2xl tracking-widest">REVERSE</span>
-                                <span className="text-gray-400 text-[10px] text-center">
-                                    BLUFF手<br />
-                                    <span className="text-white font-bold">{bluffHand ? getHandDisplayWithEmoji(bluffHand) : '?'}</span>
-                                    に変更する
-                                </span>
-                            </motion.button>
-                        </div>
-
-                        <div className="text-xs text-gray-600 text-center">
-                            ゲストはあなたの選択を読もうとしています
-                        </div> */}
                     </div>
                 </>
             ) : (
