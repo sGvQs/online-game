@@ -1,4 +1,4 @@
-import { JankenEventWithGuests, HostStats, HostChoice, HandType } from '@/shared/types'
+import { JankenEventWithGuests, HostStats, HostChoice, HandType, MatchScoreWithUser } from '@/shared/types'
 import { Hand3D } from '../../Hand3D'
 import { nullHandGame } from '../../styles'
 import { getHandDisplayWithEmoji } from '../../utils'
@@ -16,6 +16,8 @@ interface ChoicePhaseProps {
     isProcessing: boolean
     onChoice: (choice: HostChoice) => Promise<void>
     hostName: string
+    currentScores: MatchScoreWithUser[]
+    currentUserId: string
 }
 
 export function ChoicePhase({
@@ -25,6 +27,8 @@ export function ChoicePhase({
     isProcessing,
     onChoice,
     hostName,
+    currentScores,
+    currentUserId,
 }: ChoicePhaseProps) {
     const styles = nullHandGame()
     const { play } = useSE()
@@ -146,57 +150,91 @@ export function ChoicePhase({
 
     const SideArea = () => (
         <motion.div className={styles.sideArea()} layout transition={{ duration: 0.3 }}>
-            <div className={sideCard({ variant: 'cyan', size: 'lg' }).card()}>
-                <SideHeader
-                    engLabel="HOST STATS"
-                    label={`${hostName}の統計`}
-                    badge="PUBLIC"
-                    className="border-[#44FFFF]/30"
-                />
-
-                {hostStats ? (
-                    <div className="space-y-4 mt-4">
-                        <div className={sideCard({ variant: 'cyan', size: 'sm' }).dataBlock()}>
-                            <div className={sideCard().cardTitle()}>REVERSE RATE</div>
-                            <div className={sideCard({ size: 'lg' }).cardValueWithUnit()}>
-                                {hostStats.reverseRate !== null
-                                    ? <>{hostStats.reverseRate}<span className="text-lg text-gray-500 font-bold ml-1">%</span></>
-                                    : <span className="text-2xl">???</span>
-                                }
-                            </div>
-                            {hostStats.totalHostCount > 0 && (
-                                <div className="text-xs text-gray-600 mt-1">過去 {hostStats.totalHostCount} 回のホスト実績</div>
-                            )}
-                        </div>
-
-                        <div className="text-xs text-gray-600 leading-relaxed border-t border-[#44FFFF]/10 pt-3">
-                            <span className="text-[#44FFFF]">Note:</span>{' '}
-                            {hostName}がREVERSEを選ぶ確率の統計です。
-                            {hostStats.reverseRate === null && ' このゲームが初回のため統計がありません。'}
-                        </div>
-                    </div>
-                ) : (
-                    <div className="mt-4 text-gray-600 text-sm">統計データを読み込み中...</div>
-                )}
-            </div>
-
-            {!isCurrentHost && (
-                <div className={`mt-4 ${sideCard({ variant: 'red', size: 'sm' }).card()}`}>
+            <div className="flex flex-col gap-4 h-full">
+                {/* 統計データカード */}
+                <div className={sideCard({ variant: 'cyan', size: 'md' }).card()}>
                     <SideHeader
-                        engLabel="YOUR STRATEGY"
-                        label="あなたの戦略"
-                        badge="HINT"
-                        variant="red"
-                        className="border-[#FF4444]/30"
-                        compact
+                        engLabel="HOST STATS"
+                        label={`${hostName}の統計`}
+                        badge="PUBLIC"
+                        className="border-[#44FFFF]/30"
                     />
-                    <div className="text-xs text-gray-400 leading-relaxed mt-2">
-                        <span className="text-[#44FFFF] font-bold">REAL</span>{realHand ? `（${getHandDisplayWithEmoji(realHand)}）` : ''} に勝つなら、{realHand ? `${getHandDisplayWithEmoji(realHand)}` : '?'}を倒す手を選ぶ。
-                        <br /><br />
-                        <span className="text-[#FF4444] font-bold">REVERSE</span> と読んで {bluffHand ? `${getHandDisplayWithEmoji(bluffHand)}` : '?'} を倒す手も有効。
+
+                    {hostStats ? (
+                        <div className="space-y-3 mt-3">
+                            <div className={sideCard({ variant: 'cyan', size: 'sm' }).dataBlock()}>
+                                <div className={sideCard().cardTitle()}>REVERSE RATE</div>
+                                <div className={sideCard({ size: 'md' }).cardValueWithUnit()}>
+                                    {hostStats.reverseRate !== null
+                                        ? <>{hostStats.reverseRate}<span className="text-sm text-gray-500 font-bold ml-1">%</span></>
+                                        : <span className="text-xl">???</span>
+                                    }
+                                </div>
+                            </div>
+                            <div className="text-[10px] text-gray-600 leading-tight">
+                                {hostStats.totalHostCount > 0
+                                    ? `過去 ${hostStats.totalHostCount} 回のホスト実績に基づく`
+                                    : '初回ホストのため統計なし'}
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="mt-4 text-gray-600 text-xs text-center italic">読み込み中...</div>
+                    )}
+                </div>
+
+                {/* スコア表示カード */}
+                <div className={sideCard({ variant: 'cyan', size: 'lg' }).card() + " flex-1 overflow-hidden flex flex-col"}>
+                    <SideHeader
+                        engLabel="CURRENT SCORES"
+                        label="現在のスコア"
+                        className="border-[#44FFFF]/30"
+                    />
+                    <div className="mt-3 flex-1 overflow-y-auto space-y-2 pr-1 custom-scrollbar scrollbar-hide">
+                        {currentScores.length > 0 ? (
+                            currentScores.map((score, index) => (
+                                <div
+                                    key={score.userId}
+                                    className={`flex items-center justify-between p-2 rounded ${score.userId === currentUserId ? 'bg-[#44FFFF]/10 border border-[#44FFFF]/30' : 'bg-black/20 border border-gray-800'
+                                        }`}
+                                >
+                                    <div className="flex items-center gap-2 min-w-0">
+                                        <div className="text-[10px] font-black text-gray-500 w-4">
+                                            {index + 1}
+                                        </div>
+                                        <div className={`text-xs font-bold truncate ${score.userId === currentUserId ? 'text-[#44FFFF]' : 'text-gray-300'}`}>
+                                            {score.user.name}
+                                        </div>
+                                    </div>
+                                    <div className="text-sm font-black text-white tabular-nums">
+                                        {score.points}<span className="text-[10px] text-gray-500 ml-1">pt</span>
+                                    </div>
+                                </div>
+                            ))
+                        ) : (
+                            <div className="text-center py-4 text-[10px] text-gray-600 italic">
+                                No scores recorded
+                            </div>
+                        )}
                     </div>
                 </div>
-            )}
+
+                {/* 戦略ヒント（ゲストのみ） */}
+                {!isCurrentHost && (
+                    <div className={sideCard({ variant: 'red', size: 'sm' }).card()}>
+                        <SideHeader
+                            engLabel="STRATEGY"
+                            label="ヒント"
+                            badge="HINT"
+                            variant="red"
+                            className="border-[#FF4444]/30"
+                            compact
+                        />
+                        <div className="text-[10px] text-gray-400 leading-relaxed mt-1">
+                            REAL手勝負か、REVERSE読みか...
+                        </div>
+                    </div>
+                )}
+            </div>
         </motion.div>
     )
 

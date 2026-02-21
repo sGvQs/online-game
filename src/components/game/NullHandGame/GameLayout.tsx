@@ -17,7 +17,7 @@ export function GameLayout({ phase, error, children, mainArea, sideArea, hostNam
 
     const getPhaseText = (p: JankenPhase) => {
         switch (p) {
-            case 'DEAL': return `SYSTEM DEAL`
+            case 'DEAL': return `PREPARING`
             case 'CHOICE': return `HOST CHOICE`
             case 'BATTLE': return `BATTLE`
             case 'RESULT': return 'RESULT'

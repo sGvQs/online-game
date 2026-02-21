@@ -4,7 +4,6 @@ import { useEffect, useState, useCallback, useRef, useMemo } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import {
     startJankenMatch,
-    dealSystemHands,
     setHostChoice,
     setGuestHand,
     getLatestJankenEventWithStats,
@@ -34,7 +33,6 @@ export interface UseNullHandReturn {
     isProcessing: boolean
     currentScores: MatchScoreWithUser[]
     handleStartGame: () => Promise<void>
-    handleDealSystemHands: () => Promise<void>
     handleSetHostChoice: (choice: HostChoice) => Promise<void>
     handleSetGuestHand: (hand: HandType) => Promise<void>
     handleNextRound: () => Promise<void>
@@ -136,24 +134,7 @@ export function useNullHand({
         }
     }, [roomId, isHost, isProcessing, play])
 
-    /**
-     * システムDEAL（ホストがDEALアクションを確認）
-     * DEAL → CHOICE フェーズへ
-     */
-    const handleDealSystemHands = useCallback(async () => {
-        if (!jankenEvent || isProcessing) return
-        play('submit')
-        setIsProcessing(true)
-        try {
-            await dealSystemHands(jankenEvent.id)
-            await fetchState()
-        } catch (err) {
-            console.error('DEAL処理に失敗:', err)
-            setError('DEALの処理に失敗しました')
-        } finally {
-            setIsProcessing(false)
-        }
-    }, [jankenEvent, isProcessing, fetchState, play])
+    // handleDealSystemHands は廃止されました
 
     /**
      * ホストのSTAY/REVERSE選択
@@ -244,7 +225,7 @@ export function useNullHand({
 
     useEffect(() => {
         if (!matchIdRef.current) return
-        if (phase !== 'DEAL' && phase !== 'RESULT' && phase !== 'GAME_OVER') return
+        if (phase !== 'CHOICE' && phase !== 'RESULT' && phase !== 'GAME_OVER') return
 
         const fetchScores = async () => {
             try {
@@ -355,7 +336,6 @@ export function useNullHand({
         isProcessing,
         currentScores,
         handleStartGame,
-        handleDealSystemHands,
         handleSetHostChoice,
         handleSetGuestHand,
         handleNextRound,

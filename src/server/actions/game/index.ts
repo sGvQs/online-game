@@ -16,7 +16,6 @@ export {
 export {
     startJankenMatch,
     getHostStats,
-    dealSystemHands,
     setHostChoice,
     setGuestHand,
     getJankenEvent,

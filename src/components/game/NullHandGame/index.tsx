@@ -8,7 +8,6 @@ import { useState, useEffect } from 'react'
 import { AnimatePresence } from 'framer-motion'
 import { TitleScreen } from './TitleScreen'
 import { GameLayout } from './GameLayout'
-import { DealPhase } from './phases/DealPhase'
 import { ChoicePhase } from './phases/ChoicePhase'
 import { BattlePhase } from './phases/BattlePhase'
 import { ResultPhase } from './phases/ResultPhase'
@@ -45,7 +44,6 @@ export function NullHandGame({
         isProcessing,
         currentScores,
         handleStartGame,
-        handleDealSystemHands,
         handleSetHostChoice,
         handleSetGuestHand,
         handleNextRound,
@@ -140,19 +138,6 @@ export function NullHandGame({
                 )}
                 {phase !== 'TITLE' && (
                     <GameLayout key="game" phase={phase} error={error} hostName={hostName}>
-                        {phase === 'DEAL' && (
-                            <DealPhase
-                                jankenEvent={jankenEvent}
-                                isCurrentHost={isCurrentHost}
-                                isProcessing={isProcessing}
-                                onDeal={handleDealSystemHands}
-                                hostName={hostName}
-                                titleHand={titleHand}
-                                currentScores={currentScores}
-                                currentUserId={currentUserId}
-                            />
-                        )}
-
                         {phase === 'CHOICE' && (
                             <ChoicePhase
                                 jankenEvent={jankenEvent}
@@ -161,6 +146,8 @@ export function NullHandGame({
                                 isProcessing={isProcessing}
                                 onChoice={handleSetHostChoice}
                                 hostName={hostName}
+                                currentScores={currentScores}
+                                currentUserId={currentUserId}
                             />
                         )}
 
