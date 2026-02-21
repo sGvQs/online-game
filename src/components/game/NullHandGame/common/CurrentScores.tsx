@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils'
 interface CurrentScoresProps {
     currentScores: MatchScoreWithUser[]
     currentUserId: string
+    hostId?: string // 追加
     variant?: 'cyan' | 'red'
     size?: 'sm' | 'md' | 'lg'
     userColor?: string
@@ -14,6 +15,7 @@ interface CurrentScoresProps {
 export function CurrentScores({
     currentScores,
     currentUserId,
+    hostId, // 追加
     variant = 'cyan',
     size = 'md',
     userColor
@@ -38,18 +40,38 @@ export function CurrentScores({
                             )}
                         >
                             <div className="flex items-center gap-2 min-w-0">
-                                <div className="text-[10px] font-black text-white w-4">
+                                <div className="text-[10px] font-black text-white w-4" style={{
+                                    color: score.userId === currentUserId
+                                        ? userColor
+                                        : score.userId === hostId
+                                            ? "#FF4444"
+                                            : "#44FFFF"
+                                }}>
                                     {index + 1}
                                 </div>
                                 <div className={cn(
                                     "text-xs font-bold truncate text-gray-300",
                                 )}
-                                    style={{ color: score.userId === currentUserId ? userColor : "" }}
+                                    style={{
+                                        color: score.userId === currentUserId
+                                            ? userColor
+                                            : score.userId === hostId
+                                                ? "#FF4444"
+                                                : "#44FFFF"
+                                    }}
                                 >
                                     {score.user.name}
                                 </div>
                             </div>
-                            <div className="text-sm font-black tabular-nums" style={{ color: score.userId === currentUserId ? userColor : "" }}>
+                            <div className="text-sm font-black tabular-nums"
+                                style={{
+                                    color: score.userId === currentUserId
+                                        ? userColor
+                                        : score.userId === hostId
+                                            ? "#FF4444"
+                                            : "#44FFFF"
+                                }}
+                            >
                                 {score.points}<span className="text-[10px] ml-1">pt</span>
                             </div>
                         </div>

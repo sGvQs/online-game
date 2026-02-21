@@ -93,15 +93,16 @@ function HandContainer({
  * flatShading: true でポリゴン感を強調
  */
 const PolygonMaterial = ({ color }: { color?: string }) => {
-    // ネオンモード（自分の色がある場合）とクレヨンモード（ない場合）
-    const isNeon = !!color
+    // 自分の色の場合はその色、そうでなければホストカラー（レッド）
+    const targetColor = color || "#FF4444"
+    const isNeon = true // クレヨンモードを廃止し、常にネオン
     return (
         <meshStandardMaterial
-            color={color || "#eeeeee"}
-            emissive={color || "#000000"} // 自分の色の場合は発光させる
-            emissiveIntensity={isNeon ? 0.3 : 0}
-            roughness={isNeon ? 0.3 : 0.9} // ネオンは少し光沢、クレヨンはマット
-            metalness={isNeon ? 0.4 : 0.1}
+            color={targetColor}
+            emissive={targetColor} // 常に発光させる
+            emissiveIntensity={0.3}
+            roughness={0.3}
+            metalness={0.4}
             flatShading={true}
         />
     )

@@ -69,7 +69,7 @@ export function ChoicePhase({
                         <div className="flex flex-col items-center gap-2">
                             <div className="flex justify-center items-center gap-2 text-gray-400 text-xs">
                                 <div className="w-2 h-2 bg-[#44FFFF] rounded-full animate-pulse mr-2" />
-                                あなたは過去に <span className="text-[#44FFFF] text-sm font-bold">{hostStats.reverseRate !== null
+                                あなたは過去に <span className="text-[#FF4444] text-sm font-bold">{hostStats.reverseRate !== null
                                     ? 100 - hostStats.reverseRate
                                     : '???'
                                 }%</span> の確率で <span className="text-[#44FFFF] text-sm font-bold"> DEFAULT CHOICE </span> を選んでいます
@@ -171,8 +171,8 @@ export function ChoicePhase({
                         <div className="flex flex-col items-center mt-6 mb-2 w-full mt-12">
                             <div className="inline-flex flex-col items-start text-gray-400 text-xs text-left">
                                 <div className="flex justify-center items-center gap-2 text-gray-400 text-xs">
-                                    <div className="w-2 h-2 bg-[#44FFFF] rounded-full animate-pulse mr-2" />
-                                    {hostName}は<span className="text-[#44FFFF] text-sm font-bold">{hostStats.reverseRate !== null
+                                    <div className="w-2 h-2 bg-[#FF4444] rounded-full animate-pulse mr-2" />
+                                    {hostName}は<span className="text-[#FF4444] text-sm font-bold">{hostStats.reverseRate !== null
                                         ? 100 - hostStats.reverseRate
                                         : '???'
                                     }%</span> の確率で <span className="text-[#44FFFF] text-sm font-bold"> DEFAULT CHOICE </span>を選びます
@@ -241,6 +241,7 @@ export function ChoicePhase({
                 <CurrentScores
                     currentScores={currentScores}
                     currentUserId={currentUserId}
+                    hostId={jankenEvent?.currentHostId}
                     size="md"
                     userColor={userColor}
                 />

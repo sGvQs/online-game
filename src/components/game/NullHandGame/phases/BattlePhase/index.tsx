@@ -51,6 +51,7 @@ export function BattlePhase({
                 <CurrentScores
                     currentScores={currentScores}
                     currentUserId={currentUserId}
+                    hostId={jankenEvent?.currentHostId}
                     size="lg"
                     userColor={userColor}
                 />
@@ -77,10 +78,10 @@ export function BattlePhase({
                     <div className="flex flex-col items-center mt-6 mb-2 w-full">
                         <div className="inline-flex flex-col items-start text-gray-400 text-xs text-left">
                             <div className="flex items-center leading-relaxed">
-                                <div className="w-2 h-2 bg-[#44FFFF] rounded-full animate-pulse mr-2 flex-shrink-0" />
+                                <div className="w-2 h-2 bg-[#FF4444] rounded-full animate-pulse mr-2 flex-shrink-0" />
                                 <span>
                                     {hostName}は過去に
-                                    <span className="text-[#44FFFF] text-sm font-bold mx-1">
+                                    <span className="text-[#FF4444] text-sm font-bold mx-1">
                                         {hostStats.reverseRate !== null ? 100 - hostStats.reverseRate : '???'}%
                                     </span>
                                     の確率で

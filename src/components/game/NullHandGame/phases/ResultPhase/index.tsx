@@ -62,13 +62,13 @@ export function ResultPhase({
 
     // 共通のホスト統計表示コンポーネント
     const HostStatsDisplay = () => hostStats && (
-        <div className="flex flex-col items-center mb-6 w-full opacity-60">
+        <div className="flex flex-col items-center mb-6 w-full">
             <div className="inline-flex flex-col items-start text-gray-400 text-[10px] text-left">
                 <div className="flex items-center leading-relaxed">
-                    <div className="w-1.5 h-1.5 bg-[#44FFFF] rounded-full animate-pulse mr-2 flex-shrink-0" />
+                    <div className="w-1.5 h-1.5 bg-[#FF4444] rounded-full animate-pulse mr-2 flex-shrink-0" />
                     <span>
                         {hostName}は過去に
-                        <span className="text-[#44FFFF] font-bold mx-1">
+                        <span className="text-[#FF4444] font-bold mx-1">
                             {hostStats.reverseRate !== null ? 100 - hostStats.reverseRate : '???'}%
                         </span>
                         の確率で
@@ -250,6 +250,7 @@ export function ResultPhase({
                 <CurrentScores
                     currentScores={currentScores}
                     currentUserId={currentUserId}
+                    hostId={jankenEvent?.currentHostId}
                     size="md"
                     userColor={userColor}
                 />
