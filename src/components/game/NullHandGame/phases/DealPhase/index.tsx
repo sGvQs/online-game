@@ -3,10 +3,10 @@ import { Hand3D } from '../../Hand3D'
 import { nullHandGame } from '../../styles'
 import { getHandDisplayWithEmoji } from '../../utils'
 import { PhaseHeader } from '../../common/PhaseHeader'
-import { SideHeader } from '../../common/SideHeader'
+import { CurrentScores } from '../../common/CurrentScores'
+import { RewardSystem } from '../../common/RewardSystem'
 import { WaitingDisplay } from '../../common/WaitingDisplay'
 import { GameButton } from '../../common/GameButton'
-import { sideCard } from '../phaseCard.styles'
 import { motion } from 'framer-motion'
 import { useSE } from '@/hooks/useSE'
 
@@ -123,14 +123,13 @@ export function DealPhase({
             <div className="flex flex-col gap-4 h-full">
                 {/* 状態表示カード */}
                 {isCurrentHost ? (
-                    <div className={sideCard({ variant: 'cyan', size: 'sm' }).card()}>
-                        <SideHeader
-                            engLabel="YOUR TURN"
-                            label="あなたがホストです"
-                            badge="HOST"
-                            className="border-[#44FFFF]/30"
-                        />
-                        <div className="space-y-2 mt-2">
+                    <div className="bg-[#051a1a] border border-[#44FFFF]/30 rounded-xl p-4">
+                        <div className="flex items-center gap-2 border-b border-[#44FFFF]/30 pb-2 mb-2">
+                            <div className="w-1.5 h-1.5 bg-[#44FFFF] rounded-full animate-pulse" />
+                            <span className="text-[10px] font-black tracking-widest text-[#44FFFF] uppercase">YOUR TURN</span>
+                            <span className="text-[8px] bg-[#44FFFF] text-black px-1 font-black rounded-[2px] ml-auto">HOST</span>
+                        </div>
+                        <div className="space-y-2">
                             <div className="text-[10px] text-gray-400 leading-relaxed">
                                 <span className="text-[#44FFFF] font-bold">STEP 1:</span> 手を確認し「NEXT」で進む
                             </div>
@@ -148,41 +147,15 @@ export function DealPhase({
                     </div>
                 )}
 
-                {/* スコア表示カード */}
-                <div className={sideCard({ variant: 'cyan', size: 'lg' }).card() + " flex-1 overflow-hidden flex flex-col"}>
-                    <SideHeader
-                        engLabel="CURRENT SCORES"
-                        label="現在のスコア"
-                        className="border-[#44FFFF]/30"
-                    />
-                    <div className="mt-4 flex-1 overflow-y-auto space-y-2 pr-1 custom-scrollbar scrollbar-hide">
-                        {currentScores.length > 0 ? (
-                            currentScores.map((score, index) => (
-                                <div
-                                    key={score.userId}
-                                    className={`flex items-center justify-between p-2 rounded ${score.userId === currentUserId ? 'bg-[#44FFFF]/10 border border-[#44FFFF]/30' : 'bg-black/20 border border-gray-800'
-                                        }`}
-                                >
-                                    <div className="flex items-center gap-2 min-w-0">
-                                        <div className="text-[10px] font-black text-gray-500 w-4">
-                                            {index + 1}
-                                        </div>
-                                        <div className={`text-xs font-bold truncate ${score.userId === currentUserId ? 'text-[#44FFFF]' : 'text-gray-300'}`}>
-                                            {score.user.name}
-                                        </div>
-                                    </div>
-                                    <div className="text-sm font-black text-white tabular-nums">
-                                        {score.points}<span className="text-[10px] text-gray-500 ml-1">pt</span>
-                                    </div>
-                                </div>
-                            ))
-                        ) : (
-                            <div className="text-center py-8 text-xs text-gray-600 italic">
-                                No scores recorded
-                            </div>
-                        )}
-                    </div>
-                </div>
+                <CurrentScores
+                    currentScores={currentScores}
+                    currentUserId={currentUserId}
+                    size="lg"
+                />
+                <RewardSystem
+                    guestCount={currentScores.length - 1}
+                    size="md"
+                />
             </div>
         </motion.div>
     )

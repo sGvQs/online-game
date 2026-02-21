@@ -4,9 +4,9 @@ import { nullHandGame } from '../../styles'
 import { getHandDisplayWithEmoji } from '../../utils'
 import { HandSelectionGrid } from '../../HandSelectionGrid'
 import { PhaseHeader } from '../../common/PhaseHeader'
-import { SideHeader } from '../../common/SideHeader'
+import { CurrentScores } from '../../common/CurrentScores'
+import { RewardSystem } from '../../common/RewardSystem'
 import { GameButton } from '../../common/GameButton'
-import { sideCard } from '../phaseCard.styles'
 import { motion } from 'framer-motion'
 import { useState, useEffect } from 'react'
 import { cn } from '@/lib/utils'
@@ -47,79 +47,15 @@ export function BattlePhase({
     const SideArea = () => (
         <motion.div className={styles.sideArea()} layout transition={{ duration: 0.3 }}>
             <div className="flex flex-col gap-4 h-full">
-                {/* スコア表示カード (ChoicePhaseと共通) */}
-                <div className={sideCard({ variant: 'cyan', size: 'lg' }).card() + " flex-1 overflow-hidden flex flex-col"}>
-                    <SideHeader
-                        engLabel="CURRENT SCORES"
-                        label="現在のスコア"
-                        className="border-[#44FFFF]/30"
-                    />
-                    <div className="mt-3 flex-1 overflow-y-auto space-y-2 pr-1 custom-scrollbar scrollbar-hide">
-                        {currentScores.length > 0 ? (
-                            currentScores.map((score, index) => (
-                                <div
-                                    key={score.userId}
-                                    className={`flex items-center justify-between p-2 rounded ${score.userId === currentUserId ? 'bg-[#44FFFF]/10 border border-[#44FFFF]/30' : 'bg-black/20 border border-gray-800'
-                                        }`}
-                                >
-                                    <div className="flex items-center gap-2 min-w-0">
-                                        <div className="text-[10px] font-black text-gray-500 w-4">
-                                            {index + 1}
-                                        </div>
-                                        <div className={`text-xs font-bold truncate ${score.userId === currentUserId ? 'text-[#44FFFF]' : 'text-gray-300'}`}>
-                                            {score.user.name}
-                                        </div>
-                                    </div>
-                                    <div className="text-sm font-black text-white tabular-nums">
-                                        {score.points}<span className="text-[10px] text-gray-500 ml-1">pt</span>
-                                    </div>
-                                </div>
-                            ))
-                        ) : (
-                            <div className="text-center py-4 text-[10px] text-gray-600 italic">
-                                No scores recorded
-                            </div>
-                        )}
-                    </div>
-                </div>
-
-                <div className={sideCard({ variant: 'red', size: 'sm' }).card()}>
-                    <SideHeader
-                        engLabel="REWARD SYSTEM"
-                        label="ポイント配当"
-                        variant="red"
-                        className="border-[#FF4444]/30"
-                        compact
-                    />
-                    <div className="mt-4 space-y-4">
-                        {(() => {
-                            const guestCount = currentScores.length - 1;
-                            const rules = [
-                                { title: 'NULL HAND', desc: '全員があいこ', show: guestCount >= 2, pts: '+5', target: 'HOST', color: '#44FFFF' },
-                                { title: 'GUEST WIN', desc: 'ホストに勝利', show: true, pts: '+3', target: 'GUEST', color: '#FF4444' },
-                                { title: 'HOST PERFECT', desc: 'ゲスト全員を撃破', show: guestCount >= 2, pts: '+3', target: 'HOST', color: '#44FFFF' },
-                                { title: 'DRAW', desc: '上記以外（勝ち・負け混在など）', show: true, pts: '0', target: 'ALL', color: '#666666' },
-                            ];
-
-                            return rules.map((item) => item.show && (
-                                <div key={item.title} className="group relative">
-                                    <div className="flex items-center justify-between mb-1">
-                                        <div className="flex items-center gap-2">
-                                            <div className="w-0.5 h-2.5 rounded-full" style={{ backgroundColor: item.color }} />
-                                            <span className="text-[9px] font-black tracking-widest text-white/90 font-mono italic">{item.title}</span>
-                                        </div>
-                                        <div className="flex items-center gap-1 bg-black/40 px-1 py-0.5 rounded border border-white/5">
-                                            <span className="text-[7px] font-black font-mono tabular-nums" style={{ color: item.color }}>
-                                                {item.pts}<span className="text-[6px] ml-0.5 opacity-70">PT</span>
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <div className="text-[8px] text-gray-600 font-bold pl-2.5 leading-tight tracking-tight">{item.desc}</div>
-                                </div>
-                            ));
-                        })()}
-                    </div>
-                </div>
+                <CurrentScores
+                    currentScores={currentScores}
+                    currentUserId={currentUserId}
+                    size="lg"
+                />
+                <RewardSystem
+                    guestCount={currentScores.length - 1}
+                    size="md"
+                />
             </div>
         </motion.div>
     )

@@ -6,6 +6,7 @@ import { Hand3D } from './Hand3D'
 import { cn } from '@/lib/utils'
 import { NullHandLogo } from './NullHandLogo'
 import { useSE } from '@/hooks/useSE'
+import { RewardSystem } from './common/RewardSystem'
 
 interface TitleScreenProps {
     room: RoomWithUsersAndReadyStatus
@@ -258,30 +259,10 @@ export function TitleScreen({
                                         <div className="w-1.5 h-1.5 bg-[#FF4444] rounded-full" />
                                         ■ REWARD SYSTEM / ポイント配当
                                     </h3>
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
-                                        {(() => {
-                                            const guestCount = room.users.length - 1;
-                                            const rules = [
-                                                { title: 'NULL HAND', desc: '全員があいこ', show: guestCount >= 2, pts: '+5', target: 'HOST', color: '#44FFFF' },
-                                                { title: 'GUEST WIN', desc: '勝利ゲストが1人以上', show: true, pts: '+3', target: 'GUEST', color: '#FF4444' },
-                                                { title: 'HOST PERFECT', desc: 'ゲスト全員を撃破', show: guestCount >= 2, pts: '+3', target: 'HOST', color: '#FF4444' },
-                                                { title: 'DRAW', desc: '上記以外（勝敗混在）', show: true, pts: '0', target: 'ALL', color: '#666666' },
-                                            ];
-
-                                            return rules.map((item) => item.show && (
-                                                <div key={item.title} className="bg-white/5 border border-white/10 p-3 rounded-lg flex flex-col justify-between">
-                                                    <div className="flex justify-between items-start mb-1">
-                                                        <span className="text-[10px] font-black text-white/90 italic tracking-wider">{item.title}</span>
-                                                        <div className="bg-black/60 px-1.5 py-0.5 rounded border border-white/10 flex items-center gap-1">
-                                                            <span className="text-[7px] text-gray-500 font-bold">{item.target}</span>
-                                                            <span className="text-[11px] font-black" style={{ color: item.color }}>{item.pts}</span>
-                                                        </div>
-                                                    </div>
-                                                    <div className="text-[9px] text-gray-500 font-bold leading-tight mt-1">{item.desc}</div>
-                                                </div>
-                                            ));
-                                        })()}
-                                    </div>
+                                    <RewardSystem
+                                        guestCount={room.users.length - 1}
+                                        size="md"
+                                    />
                                 </div>
 
                                 {/* プレイのコツ */}

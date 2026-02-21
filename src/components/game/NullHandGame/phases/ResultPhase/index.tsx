@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils'
 import { getHandDisplayWithEmoji, judgeHand } from '../../utils'
 import { PhaseHeader } from '../../common/PhaseHeader'
 import { SideHeader } from '../../common/SideHeader'
+import { RewardSystem } from '../../common/RewardSystem'
 import { GameButton } from '../../common/GameButton'
 import { resultPhase } from './styles'
 import { sideCard } from '../phaseCard.styles'
@@ -12,6 +13,7 @@ import type { RoomUserWithUser } from '@/shared/types'
 
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { CurrentScores } from '../../common/CurrentScores'
 
 type RoomUser = RoomUserWithUser
 
@@ -348,82 +350,15 @@ export function ResultPhase({
         <motion.div className={styles.sideArea()} layout transition={{ duration: 0.3 }}>
             <div className="flex flex-col gap-4 h-full">
                 {/* ラウンド結果カード（他フェーズと統一） */}
-                <div className={sideCard({ variant: 'cyan', size: 'lg' }).card() + " flex-1 overflow-hidden flex flex-col"}>
-                    <SideHeader
-                        engLabel="ROUND SCORES"
-                        label="今回獲得したpt"
-                        className="border-[#44FFFF]/30"
-                    />
-                    <div className="mt-4 flex-1 overflow-y-auto space-y-2 pr-1 custom-scrollbar scrollbar-hide">
-                        {currentScores.length > 0 ? (
-                            currentScores.map((score, index) => {
-                                const isMe = score.userId === currentUserId
-                                const isWinner = score.points > 0
-                                const userHandData = jankenEvent.guestHands.find(g => g.userId === score.userId)
-                                const handPlayed = userHandData?.hand as HandType | undefined
-
-                                return (
-                                    <div
-                                        key={score.userId}
-                                        className={cn(
-                                            "flex items-center justify-between p-3 rounded-lg border transition-all",
-                                            isMe ? "bg-[#44FFFF]/10 border-[#44FFFF]/40 shadow-[0_0_15px_rgba(68,255,255,0.1)]" : "bg-black/40 border-white/5",
-                                            isWinner && !isMe ? "border-white/20 bg-[#44FFFF]/5" : ""
-                                        )}
-                                    >
-                                        <div className="flex flex-col min-w-0">
-                                            <div className="flex items-center gap-2">
-                                                <div className={cn("text-xs font-bold truncate", isMe ? "text-[#44FFFF]" : "text-gray-300")}>
-                                                    {score.user.name}
-                                                </div>
-                                                {isMe && <span className="text-[8px] bg-[#44FFFF] text-black px-1 font-black rounded-[2px]">YOU</span>}
-                                            </div>
-                                            {(handPlayed || score.userId === jankenEvent.currentHostId) && (
-                                                <div className="text-[10px] text-gray-500 mt-0.5">
-                                                    {score.userId === jankenEvent.currentHostId ? "HOST" : getHandDisplayWithEmoji(handPlayed as HandType)}
-                                                </div>
-                                            )}
-                                        </div>
-                                        <div className="flex flex-col items-end">
-                                            <div className={cn("text-lg font-black tabular-nums", isWinner ? "text-[#44FFFF]" : "text-gray-600")}>
-                                                {isWinner ? `+${score.points}` : '0'}<span className="text-[10px] ml-0.5">pt</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                )
-                            })
-                        ) : (
-                            <div className="text-center py-4 text-[10px] text-gray-600 italic">
-                                No scores recorded
-                            </div>
-                        )}
-                    </div>
-
-                    <div className="mt-4 pt-4 border-t border-white/5 flex justify-between items-center px-1">
-                        <span className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Host of this round</span>
-                        <span className="text-xs text-white font-black">{hostName}</span>
-                    </div>
-                </div>
-
-                <div className={sideCard({ variant: 'red', size: 'sm' }).card()}>
-                    <SideHeader
-                        engLabel="HISTORY"
-                        label="これまでの傾向"
-                        variant="red"
-                        className="border-[#FF4444]/30"
-                        compact
-                    />
-                    <div className="mt-2 space-y-2">
-                        <div className="flex justify-between items-center text-[10px]">
-                            <span className="text-gray-500">Total Rounds</span>
-                            <span className="text-white font-bold">{jankenEvent.turnNumber}</span>
-                        </div>
-                        <div className="flex justify-between items-center text-[10px]">
-                            <span className="text-gray-500">Average Stay Rate</span>
-                            <span className="text-[#44FFFF] font-bold">50%</span>
-                        </div>
-                    </div>
-                </div>
+                <CurrentScores
+                    currentScores={currentScores}
+                    currentUserId={currentUserId}
+                    size="md"
+                />
+                <RewardSystem
+                    guestCount={currentScores.length - 1}
+                    size="md"
+                />
             </div>
         </motion.div>
     )
