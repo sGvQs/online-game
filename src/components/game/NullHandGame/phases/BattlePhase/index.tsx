@@ -22,6 +22,7 @@ interface BattlePhaseProps {
     hostName: string
     currentScores: MatchScoreWithUser[]
     currentUserId: string
+    userColor?: string
 }
 
 export function BattlePhase({
@@ -34,10 +35,10 @@ export function BattlePhase({
     onSubmit,
     hostName,
     currentScores,
-    currentUserId
+    currentUserId,
+    userColor,
 }: BattlePhaseProps) {
     const styles = nullHandGame()
-
 
     if (!jankenEvent) return null
 
@@ -114,15 +115,14 @@ export function BattlePhase({
                                 </div>
                             </div>
                         </div>
-
                     </div>
                 </div>
-
                 <div className="flex-1 flex flex-col items-center justify-center">
                     <HandSelectionGrid
                         selectedHand={selectedHand}
                         onSelectHand={onSelectHand}
                         isProcessing={isProcessing}
+                        personalColor={userColor}
                         size="small"
                     />
 
@@ -164,6 +164,7 @@ export function BattlePhase({
                                     handType={jankenEvent.finalHostHand as HandType}
                                     revealed={true}
                                     size="medium"
+                                    personalColor={userColor}
                                 />
                             </div>
                         </div>

@@ -27,6 +27,7 @@ interface ResultPhaseProps {
     isCurrentHost: boolean
     hostStats: HostStats | null
     roomUsers: RoomUser[]
+    userColor?: string
 }
 
 export function ResultPhase({
@@ -38,7 +39,8 @@ export function ResultPhase({
     currentUserId,
     isCurrentHost,
     hostStats,
-    roomUsers
+    roomUsers,
+    userColor
 }: ResultPhaseProps) {
     const styles = nullHandGame()
     const rpStyles = resultPhase()
@@ -118,7 +120,12 @@ export function ResultPhase({
                                         <div className={cn(rpStyles.playerName(), rpStyles.hostName())}>{hostName}</div>
                                         <div className="mt-4 mb-2">
                                             <div className={cn(rpStyles.handWrapper(), isHostWin || isDraw ? rpStyles.handWrapperWin() : rpStyles.handWrapperLose())}>
-                                                <Hand3D handType={hostHand} revealed={true} size={isHostWin || isDraw ? "medium" : "small"} />
+                                                <Hand3D
+                                                    handType={hostHand}
+                                                    revealed={true}
+                                                    size={isHostWin || isDraw ? "medium" : "small"}
+                                                    personalColor={isCurrentHost ? userColor : undefined}
+                                                />
                                             </div>
                                         </div>
                                         <div className="text-center font-black text-[#44FFFF] tracking-widest text-lg">
@@ -133,7 +140,12 @@ export function ResultPhase({
                                         <div className={cn(rpStyles.playerName(), rpStyles.myselfName())}>YOU</div>
                                         <div className="mt-4 mb-2">
                                             <div className={cn(rpStyles.handWrapper(), isGuestWin || isDraw ? rpStyles.handWrapperWin() : rpStyles.handWrapperLose())}>
-                                                <Hand3D handType={myHand} revealed={true} size={isGuestWin || isDraw ? "medium" : "small"} />
+                                                <Hand3D
+                                                    handType={myHand}
+                                                    revealed={true}
+                                                    size={isGuestWin || isDraw ? "medium" : "small"}
+                                                    personalColor={!isCurrentHost ? userColor : undefined}
+                                                />
                                             </div>
                                         </div>
                                         <div className="text-center font-black text-white tracking-widest text-lg">
@@ -263,7 +275,12 @@ export function ResultPhase({
                                 <div className="flex flex-col items-center">
                                     <div className={cn(rpStyles.playerName(), rpStyles.hostName(), "mb-4")}>{hostName}</div>
                                     <div className={rpStyles.handWrapperWin()}>
-                                        <Hand3D handType={hostHand} revealed={true} size="medium" />
+                                        <Hand3D
+                                            handType={hostHand}
+                                            revealed={true}
+                                            size="medium"
+                                            personalColor={isCurrentHost ? userColor : undefined}
+                                        />
                                     </div>
                                     <div className="text-center font-black text-[#44FFFF] tracking-widest text-2xl mt-4">
                                         {getHandDisplayWithEmoji(hostHand)}

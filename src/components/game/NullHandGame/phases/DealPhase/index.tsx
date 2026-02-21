@@ -19,6 +19,7 @@ interface DealPhaseProps {
     titleHand: HandType
     currentScores: MatchScoreWithUser[]
     currentUserId: string
+    userColor?: string
 }
 
 export function DealPhase({
@@ -30,6 +31,7 @@ export function DealPhase({
     titleHand,
     currentScores,
     currentUserId,
+    userColor,
 }: DealPhaseProps) {
     const styles = nullHandGame()
     const { play } = useSE()
@@ -43,7 +45,7 @@ export function DealPhase({
             </div>
             <div className="w-32 h-32 relative">
                 {hand ? (
-                    <Hand3D handType={hand} revealed={true} size="medium" />
+                    <Hand3D handType={hand} revealed={true} size="medium" personalColor={undefined} />
                 ) : (
                     <Hand3D handType={null} revealed={false} size="medium" isRotating={true} />
                 )}

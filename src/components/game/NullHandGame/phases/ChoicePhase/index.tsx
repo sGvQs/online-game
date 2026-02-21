@@ -19,6 +19,7 @@ interface ChoicePhaseProps {
     hostName: string
     currentScores: MatchScoreWithUser[]
     currentUserId: string
+    userColor?: string
 }
 
 export function ChoicePhase({
@@ -30,6 +31,7 @@ export function ChoicePhase({
     hostName,
     currentScores,
     currentUserId,
+    userColor,
 }: ChoicePhaseProps) {
     const styles = nullHandGame()
     const { play } = useSE()
@@ -85,13 +87,13 @@ export function ChoicePhase({
                             <div className="absolute inset-0 flex items-center justify-between pointer-events-none px-4">
                                 <div className="flex flex-col items-center gap-1 translate-y-2">
                                     <div className="w-48 h-48 flex items-center justify-center">
-                                        {realHand && <Hand3D handType={realHand} revealed={true} size="small" />}
+                                        {realHand && <Hand3D handType={realHand} revealed={true} size="small" personalColor={userColor} />}
                                     </div>
                                     <p className="text-xs text-[#44FFFF] font-bold text-center translate-y-2">DEFAULT CHOICE</p>
                                 </div>
                                 <div className="flex flex-col items-center gap-1 translate-y-2">
                                     <div className="w-48 h-48">
-                                        {bluffHand && <Hand3D handType={bluffHand} revealed={true} size="small" />}
+                                        {bluffHand && <Hand3D handType={bluffHand} revealed={true} size="small" personalColor={userColor} />}
                                     </div>
                                 </div>
                             </div>

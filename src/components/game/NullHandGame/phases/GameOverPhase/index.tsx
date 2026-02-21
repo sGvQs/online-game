@@ -1,8 +1,9 @@
-import { MatchScoreWithUser, UserRanking } from '@/shared/types'
+import { MatchScoreWithUser, UserRanking, HandType } from '@/shared/types'
 import { nullHandGame } from '../../styles'
 import { cn } from '@/lib/utils'
 import { SideHeader } from '../../common/SideHeader'
 import { GameButton } from '../../common/GameButton'
+import { Hand3D } from '../../Hand3D'
 
 interface GameOverPhaseProps {
     currentUserId: string
@@ -10,6 +11,7 @@ interface GameOverPhaseProps {
     initialRankings: UserRanking[]
     currentScores: MatchScoreWithUser[]
     onFinish: () => void
+    userColor?: string
 }
 
 export function GameOverPhase({
@@ -17,7 +19,8 @@ export function GameOverPhase({
     newRankings,
     initialRankings,
     currentScores,
-    onFinish
+    onFinish,
+    userColor,
 }: GameOverPhaseProps) {
     const styles = nullHandGame()
 
@@ -44,6 +47,14 @@ export function GameOverPhase({
 
                     return (
                         <div className="mb-12">
+                            <div className="w-48 h-48 mx-auto mb-4">
+                                <Hand3D
+                                    handType={currentScores.find(s => s.userId === currentUserId)?.userId ? HandType.ROCK : null} // とりあえずROCKかタイトル手を表示
+                                    revealed={true}
+                                    size="medium"
+                                    personalColor={userColor}
+                                />
+                            </div>
                             <div className="text-[#44FFFF] text-xl font-bold mb-2 tracking-widest">世界順位</div>
                             <div className="flex items-center justify-center gap-8 text-4xl font-mono font-bold">
                                 <span className="text-gray-500">{oldRank}位</span>

@@ -18,7 +18,18 @@ interface TitleScreenProps {
     onToggleReady: () => void
     onStartGame: () => void
     onExit: () => void
+    onColorChange: (color: string) => void
+    userColor: string
 }
+
+const NEON_PALETTE = [
+    '#44FFFF', // シアン
+    '#FF44FF', // マゼンタ
+    '#FFFF44', // イエロー
+    '#44FF44', // ライム
+    '#FF4444', // レッド
+    '#FFAA44', // オレンジ
+]
 
 export function TitleScreen({
     room,
@@ -29,7 +40,9 @@ export function TitleScreen({
     initialRankings,
     onToggleReady,
     onStartGame,
-    onExit
+    onExit,
+    userColor,
+    onColorChange,
 }: TitleScreenProps) {
     const styles = nullHandGame()
 
@@ -116,7 +129,16 @@ export function TitleScreen({
                             delay: 1
                         }}
                     />
-                    <NullHandLogo titleHand={titleHand} />
+                    <NullHandLogo
+                        titleHand={titleHand}
+                        userColor={userColor}
+                        onClick={() => {
+                            play("select")
+                            const currentIndex = NEON_PALETTE.indexOf(userColor)
+                            const nextIndex = (currentIndex + 1) % NEON_PALETTE.length
+                            onColorChange(NEON_PALETTE[nextIndex])
+                        }}
+                    />
                 </motion.div>
 
                 {/* 下部: インフォメーション */}

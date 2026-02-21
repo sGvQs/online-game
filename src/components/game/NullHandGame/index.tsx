@@ -12,6 +12,7 @@ import { ChoicePhase } from './phases/ChoicePhase'
 import { BattlePhase } from './phases/BattlePhase'
 import { ResultPhase } from './phases/ResultPhase'
 import { GameOverPhase } from './phases/GameOverPhase'
+import { DealPhase } from './phases/DealPhase' // Added DealPhase import
 import { OpeningSplash } from './OpeningSplash'
 
 interface NullHandGameProps {
@@ -111,6 +112,16 @@ export function NullHandGame({
     // ============================================
     // RENDER
     // ============================================
+    const [userColor, setUserColor] = useState<string>(() => {
+        if (typeof window !== 'undefined') {
+            return localStorage.getItem('nullhand_user_color') || '#44FFFF'
+        }
+        return '#44FFFF'
+    })
+
+    useEffect(() => {
+        localStorage.setItem('nullhand_user_color', userColor)
+    }, [userColor])
 
     return (
         <>
@@ -134,6 +145,8 @@ export function NullHandGame({
                         onToggleReady={toggleReady}
                         onStartGame={handleStartGame}
                         onExit={handleClose}
+                        userColor={userColor}
+                        onColorChange={setUserColor}
                     />
                 )}
                 {phase !== 'TITLE' && (
@@ -148,6 +161,7 @@ export function NullHandGame({
                                 hostName={hostName}
                                 currentScores={currentScores}
                                 currentUserId={currentUserId}
+                                userColor={userColor}
                             />
                         )}
 
@@ -163,6 +177,7 @@ export function NullHandGame({
                                 hostName={hostName}
                                 currentScores={currentScores}
                                 currentUserId={currentUserId}
+                                userColor={userColor}
                             />
                         )}
 
@@ -177,6 +192,7 @@ export function NullHandGame({
                                 isCurrentHost={isCurrentHost}
                                 hostStats={hostStats}
                                 roomUsers={room.users}
+                                userColor={userColor}
                             />
                         )}
 
@@ -187,6 +203,7 @@ export function NullHandGame({
                                 initialRankings={initialRankings}
                                 currentScores={currentScores}
                                 onFinish={handleFinish}
+                                userColor={userColor}
                             />
                         )}
                     </GameLayout>

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import { motion } from 'framer-motion'
 import { HandType } from '@/shared/types'
 import { Hand3D } from './Hand3D'
@@ -14,6 +14,13 @@ export function OpeningSplash({ onComplete, titleHand }: OpeningSplashProps) {
     const [progress, setProgress] = useState(0)
     const [isTransitioning, setIsTransitioning] = useState(false)
     const styles = nullHandGame()
+
+    const userColor = useMemo<string>(() => {
+        if (typeof window !== 'undefined') {
+            return localStorage.getItem('nullhand_user_color') || '#44FFFF'
+        }
+        return '#44FFFF'
+    }, [])
 
     useEffect(() => {
         const duration = 10000 // 10秒
@@ -56,7 +63,7 @@ export function OpeningSplash({ onComplete, titleHand }: OpeningSplashProps) {
                     className={styles.visualBox()}
                     layoutId="main-box"
                 >
-                    <NullHandLogo titleHand={titleHand} />
+                    <NullHandLogo titleHand={titleHand} userColor={userColor} showChangeButton={false} />
                 </motion.div>
 
                 {/* プログレスバー */}
