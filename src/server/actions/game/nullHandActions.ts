@@ -500,6 +500,7 @@ export async function getJankenEvent(eventId: string): Promise<JankenEventWithGu
     const event = await prisma.jankenEvent.findUnique({
         where: { id: eventId },
         include: {
+            match: true,
             guestHands: {
                 include: {
                     user: true
@@ -521,6 +522,7 @@ export async function getLatestJankenEvent(matchId: string): Promise<JankenEvent
         where: { matchId },
         orderBy: { turnNumber: 'desc' },
         include: {
+            match: true,
             guestHands: {
                 include: { user: true }
             }
@@ -542,6 +544,7 @@ export async function getLatestJankenEventWithStats(
         where: { matchId },
         orderBy: { turnNumber: 'desc' },
         include: {
+            match: true,
             guestHands: {
                 include: { user: true }
             }
