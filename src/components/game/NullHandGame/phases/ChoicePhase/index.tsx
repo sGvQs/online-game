@@ -57,8 +57,8 @@ export function ChoicePhase({
             {isCurrentHost ? (
                 <>
                     <PhaseHeader
-                        engLabel="YOUR CHOICE"
-                        title="STAY か REVERSE か"
+                        engLabel="勝負に出す手を選んでください"
+                        title="あなたはホストです"
                         subLabel="MAKE YOUR DECISION"
                     />
 
@@ -68,7 +68,7 @@ export function ChoicePhase({
                             ? 100 - hostStats.reverseRate
                             : '???'
                             : '???'
-                        }%</span> の確率で <span className="text-[#44FFFF] text-sm font-bold"> DEFAULT REAL </span> を選んでいます
+                        }%</span> の確率で <span className="text-[#44FFFF] text-sm font-bold"> DEFAULT REAL </span> を選んでいます（※ゲストに公開中）
                     </div>
 
                     <div className="flex-1 flex flex-col items-center justify-center gap-8">
@@ -76,17 +76,16 @@ export function ChoicePhase({
                         <div className="relative w-120 h-48 flex items-center justify-center">
                             {/* 固定レイヤー：3Dの手 */}
                             <div className="absolute inset-0 flex items-center justify-between pointer-events-none px-4">
-                                <div className={cn("flex flex-col items-center gap-1 translate-y-2 transition-opacity duration-300", isSwapped ? "opacity-30" : "opacity-100")}>
+                                <div className="flex flex-col items-center gap-1 translate-y-2">
                                     <div className="w-48 h-48 flex items-center justify-center">
                                         {realHand && <Hand3D handType={realHand} revealed={true} size="small" />}
                                     </div>
                                     <p className="text-xs text-[#44FFFF] font-bold text-center translate-y-2">DEFAULT REAL</p>
                                 </div>
-                                <div className={cn("flex flex-col items-center gap-1 translate-y-2 transition-opacity duration-300", isSwapped ? "opacity-100" : "opacity-30")}>
-                                    <div className="w-48 h-48 flex items-center justify-center">
+                                <div className="flex flex-col items-center gap-1 translate-y-2">
+                                    <div className="w-48 h-48">
                                         {bluffHand && <Hand3D handType={bluffHand} revealed={true} size="small" />}
                                     </div>
-                                    <p className="text-xs text-[#FF4444] font-bold text-center translate-y-2">BLUFF REVERSE</p>
                                 </div>
                             </div>
 
@@ -94,12 +93,12 @@ export function ChoicePhase({
                             <div className="absolute inset-0 flex items-center justify-between px-4">
                                 <motion.div
                                     layout
-                                    transition={{ duration: 0.8, type: 'spring', bounce: 0.3 }}
+                                    transition={{ duration: 0.8, type: 'spring', bounce: 0.4 }}
                                     style={{ order: isSwapped ? 3 : 1 }}
                                     className="flex flex-col items-center gap-1"
                                 >
                                     <div className="text-xs font-black tracking-[0.3em] text-[#44FFFF] mb-1">REAL</div>
-                                    <div className={cn("w-48 h-48 border-2 shadow-[0_0_15px_rgba(68,255,255,0.2)] transition-all duration-300", isSwapped ? "border-[#44FFFF]/20 bg-[#44FFFF]/5" : "border-[#44FFFF] bg-[#44FFFF]/10")} />
+                                    <div className="w-48 h-48 border-2 border-[#44FFFF] shadow-[0_0_15px_rgba(68,255,255,0.2)] bg-[#44FFFF]/5" />
                                     <div className="h-4" />
                                 </motion.div>
 
@@ -107,12 +106,11 @@ export function ChoicePhase({
 
                                 <motion.div
                                     layout
-                                    transition={{ duration: 0.8, type: 'spring', bounce: 0.3 }}
+                                    transition={{ duration: 0.8, type: 'spring', bounce: 0.4 }}
                                     style={{ order: isSwapped ? 1 : 3 }}
                                     className="flex flex-col items-center gap-1"
                                 >
-                                    <div className="text-xs font-black tracking-[0.3em] text-[#FF4444] mb-1">BLUFF</div>
-                                    <div className={cn("w-48 h-48 border-2 shadow-[0_0_15px_rgba(255,68,68,0.2)] transition-all duration-300", isSwapped ? "border-[#FF4444] bg-[#FF4444]/10" : "border-[#FF4444]/20 bg-[#FF4444]/5")} />
+                                    <div className="w-48 h-48" />
                                     <div className="h-4" />
                                 </motion.div>
                             </div>
@@ -138,10 +136,10 @@ export function ChoicePhase({
                                 whileTap={{ scale: 0.95 }}
                                 className={cn(
                                     "flex flex-col items-center gap-3 px-10 py-3 border-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed",
-                                    isSwapped ? "border-[#FF4444] bg-[#FF4444]/10" : "border-[#44FFFF] bg-[#44FFFF]/10"
+                                    "border-[#44FFFF] bg-[#44FFFF]/10"
                                 )}
                             >
-                                <span className={cn("font-black text-sm tracking-[0.3em]", isSwapped ? "text-[#FF4444]" : "text-[#44FFFF]")}>SUBMIT</span>
+                                <span className={cn("font-black text-sm tracking-[0.3em]", "text-[#44FFFF]")}>SUBMIT</span>
                             </motion.button>
                         </div>
                     </div>
