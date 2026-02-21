@@ -34,7 +34,7 @@ export function ChoicePhase({
     const styles = nullHandGame()
     const { play } = useSE()
 
-    // REALとBLUFFの枠を入れ替えるためのアニメーション状態
+    // CHOICEとBLUFFの枠を入れ替えるためのアニメーション状態
     const [isSwapped, setIsSwapped] = useState(false)
 
     useEffect(() => {
@@ -59,20 +59,27 @@ export function ChoicePhase({
                     <PhaseHeader
                         engLabel="勝負に出す手を選んでください"
                         title="あなたはホストです"
-                        subLabel="MAKE YOUR DECISION"
+                        subLabel=""
                     />
 
-                    <div className="flex justify-center items-center gap-2 text-gray-400 text-xs mt-8">
-                        <div className="w-2 h-2 bg-[#44FFFF] rounded-full animate-pulse mr-2" />
-                        あなたは過去に <span className="text-[#44FFFF] text-sm font-bold">{hostStats ? hostStats.reverseRate !== null
-                            ? 100 - hostStats.reverseRate
-                            : '???'
-                            : '???'
-                        }%</span> の確率で <span className="text-[#44FFFF] text-sm font-bold"> DEFAULT REAL </span> を選んでいます（※ゲストに公開中）
-                    </div>
+                    {/* ホストの統計情報 */}
+                    {hostStats && (
+                        <div className="flex flex-col items-center gap-2">
+                            <div className="flex justify-center items-center gap-2 text-gray-400 text-xs">
+                                <div className="w-2 h-2 bg-[#44FFFF] rounded-full animate-pulse mr-2" />
+                                あなたは過去に <span className="text-[#44FFFF] text-sm font-bold">{hostStats.reverseRate !== null
+                                    ? 100 - hostStats.reverseRate
+                                    : '???'
+                                }%</span> の確率で <span className="text-[#44FFFF] text-sm font-bold"> DEFAULT CHOICE </span> を選んでいます
+                            </div>
+                            <p className="flex justify-center items-center gap-2 text-gray-400 text-xs animate-pulse">
+                                上記のデータはゲストに公開されています...
+                            </p>
+                        </div>
+                    )}
 
-                    <div className="flex-1 flex flex-col items-center justify-center gap-8">
-                        {/* REAL vs BLUFF のコンテナ（高さ固定、大型化） */}
+                    <div className="flex flex-col items-center justify-center gap-8">
+                        {/* CHOICE vs BLUFF のコンテナ（高さ固定、大型化） */}
                         <div className="relative w-120 h-48 flex items-center justify-center">
                             {/* 固定レイヤー：3Dの手 */}
                             <div className="absolute inset-0 flex items-center justify-between pointer-events-none px-4">
@@ -80,7 +87,7 @@ export function ChoicePhase({
                                     <div className="w-48 h-48 flex items-center justify-center">
                                         {realHand && <Hand3D handType={realHand} revealed={true} size="small" />}
                                     </div>
-                                    <p className="text-xs text-[#44FFFF] font-bold text-center translate-y-2">DEFAULT REAL</p>
+                                    <p className="text-xs text-[#44FFFF] font-bold text-center translate-y-2">DEFAULT CHOICE</p>
                                 </div>
                                 <div className="flex flex-col items-center gap-1 translate-y-2">
                                     <div className="w-48 h-48">
@@ -97,12 +104,11 @@ export function ChoicePhase({
                                     style={{ order: isSwapped ? 3 : 1 }}
                                     className="flex flex-col items-center gap-1"
                                 >
-                                    <div className="text-xs font-black tracking-[0.3em] text-[#44FFFF] mb-1">REAL</div>
+                                    <div className="text-xs font-black tracking-[0.3em] text-[#44FFFF] mb-1">CHOICE</div>
                                     <div className="w-48 h-48 border-2 border-[#44FFFF] shadow-[0_0_15px_rgba(68,255,255,0.2)] bg-[#44FFFF]/5" />
                                     <div className="h-4" />
                                 </motion.div>
-
-                                <div className="order-2 text-gray-500 font-black text-xl translate-y-4">VS</div>
+                                <div className="order-2 text-gray-500 font-black text-xl translate-y-4">OR</div>
 
                                 <motion.div
                                     layout
@@ -150,18 +156,33 @@ export function ChoicePhase({
                     <PhaseHeader
                         engLabel={`${hostName}がホストです`}
                         title="あなたはゲストです"
-                        subLabel={`WAITING FOR HOST...`}
+                        subLabel=""
                     />
 
+                    {hostStats ? (
+                        <div className="flex flex-col items-center mt-8">
+                            <div className="flex justify-center items-center gap-2 text-gray-400 text-xs">
+                                <div className="w-2 h-2 bg-[#44FFFF] rounded-full animate-pulse mr-2" />
+                                {hostName}は<span className="text-[#44FFFF] text-sm font-bold">{hostStats.reverseRate !== null
+                                    ? 100 - hostStats.reverseRate
+                                    : '???'
+                                }%</span> の確率で <span className="text-[#44FFFF] text-sm font-bold"> DEFAULT CHOICE </span>を選びます
+                            </div>
+                            <div className="flex justify-center items-center gap-2 text-gray-400 text-xs">
+                                <div className="w-2 h-2 bg-[#44FFFF] rounded-full animate-pulse mr-2" />
+                                {hostName}は<span className="text-[#44FFFF] text-sm font-bold">CHOICE</span>か<span className="text-[#FF4444] text-sm font-bold">BLUFF</span>しか選ぶことはできません
+                            </div>
+                            <div className="flex justify-center items-center gap-2 text-gray-400 animate-pulse text-xs mt-1">
+                                {hostName}は現在選択中です...
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="flex justify-center items-center gap-2 text-gray-400 text-xs">
+                            <div className="w-2 h-2 bg-[#44FFFF] rounded-full animate-pulse mr-2" />
+                            {hostName}は<span className="text-[#44FFFF] text-sm font-bold">CHOICE</span>か<span className="text-[#FF4444] text-sm font-bold">BLUFF</span>しか選ぶことはできません
+                        </div>
+                    )}
 
-                    <div className="flex justify-center items-center gap-2 text-gray-400 text-xs mt-8">
-                        <div className="w-2 h-2 bg-[#44FFFF] rounded-full animate-pulse mr-2" />
-                        {hostName}は<span className="text-[#44FFFF] text-sm font-bold">{hostStats ? hostStats.reverseRate !== null
-                            ? 100 - hostStats.reverseRate
-                            : '???'
-                            : '???'
-                        }%</span> の確率で <span className="text-[#44FFFF] text-sm font-bold"> DEFAULT REAL </span>を選びます
-                    </div>
                     <div className="flex-1 flex flex-col items-center justify-center gap-8">
                         <div className="relative w-120 h-48 flex items-center justify-center">
                             {/* 固定レイヤー：3Dの手 */}
@@ -170,7 +191,7 @@ export function ChoicePhase({
                                     <div className="w-48 h-48 flex items-center justify-center">
                                         {realHand && <Hand3D handType={realHand} revealed={true} size="small" />}
                                     </div>
-                                    <p className="text-xs text-[#44FFFF] font-bold text-center translate-y-2">DEFAULT REAL</p>
+                                    <p className="text-xs text-[#44FFFF] font-bold text-center translate-y-2">DEFAULT CHOICE</p>
                                 </div>
                                 <div className="flex flex-col items-center gap-1 translate-y-2">
                                     <div className="w-48 h-48">
@@ -187,12 +208,12 @@ export function ChoicePhase({
                                     style={{ order: isSwapped ? 3 : 1 }}
                                     className="flex flex-col items-center gap-1"
                                 >
-                                    <div className="text-xs font-black tracking-[0.3em] text-[#44FFFF] mb-1">REAL</div>
+                                    <div className="text-xs font-black tracking-[0.3em] text-[#44FFFF] mb-1">CHOICE</div>
                                     <div className="w-48 h-48 border-2 border-[#44FFFF] shadow-[0_0_15px_rgba(68,255,255,0.2)] bg-[#44FFFF]/5" />
                                     <div className="h-4" />
                                 </motion.div>
 
-                                <div className="order-2 text-gray-500 font-black text-xl translate-y-4">VS</div>
+                                <div className="order-2 text-gray-500 font-black text-xl translate-y-4">OR</div>
 
                                 <motion.div
                                     layout
@@ -263,22 +284,22 @@ export function ChoicePhase({
                         compact
                     />
                     <div className="text-[10px] text-gray-400 leading-relaxed mt-1">
-                        REAL手勝負か、REVERSE読みか...
+                        CHOICE手勝負か、REVERSE読みか...
                     </div>
                     <div className="text-[10px] text-gray-400 leading-relaxed mt-1">
-                        REAL手勝負か、REVERSE読みか...
+                        CHOICE手勝負か、REVERSE読みか...
                     </div>
                     <div className="text-[10px] text-gray-400 leading-relaxed mt-1">
-                        REAL手勝負か、REVERSE読みか...
+                        CHOICE手勝負か、REVERSE読みか...
                     </div>
                     <div className="text-[10px] text-gray-400 leading-relaxed mt-1">
-                        REAL手勝負か、REVERSE読みか...
+                        CHOICE手勝負か、REVERSE読みか...
                     </div>
                     <div className="text-[10px] text-gray-400 leading-relaxed mt-1">
-                        REAL手勝負か、REVERSE読みか...
+                        CHOICE手勝負か、REVERSE読みか...
                     </div>
                     <div className="text-[10px] text-gray-400 leading-relaxed mt-1">
-                        REAL手勝負か、REVERSE読みか...
+                        CHOICE手勝負か、REVERSE読みか...
                     </div>
                 </div>
 
