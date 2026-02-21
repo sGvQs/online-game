@@ -161,6 +161,8 @@ export function NullHandGame({
                                 onSelectHand={setSelectedHand}
                                 onSubmit={() => selectedHand && handleSetGuestHand(selectedHand)}
                                 hostName={hostName}
+                                currentScores={currentScores}
+                                currentUserId={currentUserId}
                             />
                         )}
 

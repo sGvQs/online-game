@@ -1,4 +1,4 @@
-import { HandType, JankenEventWithGuests, HostStats } from '@/shared/types'
+import { HandType, JankenEventWithGuests, HostStats, MatchScoreWithUser } from '@/shared/types'
 import { Hand3D } from '../../Hand3D'
 import { nullHandGame } from '../../styles'
 import { getHandDisplayWithEmoji } from '../../utils'
@@ -7,6 +7,9 @@ import { PhaseHeader } from '../../common/PhaseHeader'
 import { SideHeader } from '../../common/SideHeader'
 import { GameButton } from '../../common/GameButton'
 import { sideCard } from '../phaseCard.styles'
+import { motion } from 'framer-motion'
+import { useState, useEffect } from 'react'
+import { cn } from '@/lib/utils'
 
 interface BattlePhaseProps {
     jankenEvent: JankenEventWithGuests | null
@@ -17,6 +20,8 @@ interface BattlePhaseProps {
     onSelectHand: (hand: HandType) => void
     onSubmit: () => void
     hostName: string
+    currentScores: MatchScoreWithUser[]
+    currentUserId: string
 }
 
 export function BattlePhase({
@@ -27,9 +32,12 @@ export function BattlePhase({
     isProcessing,
     onSelectHand,
     onSubmit,
-    hostName
+    hostName,
+    currentScores,
+    currentUserId
 }: BattlePhaseProps) {
     const styles = nullHandGame()
+
 
     if (!jankenEvent) return null
 
@@ -39,92 +47,135 @@ export function BattlePhase({
     if (!isCurrentHost) {
         // Guest View
         const MainArea = () => (
-            <div className={styles.mainArea()}>
+            <motion.div className={styles.mainArea()} layout transition={{ duration: 0.3 }}>
                 <PhaseHeader
                     engLabel="BATTLE PHASE"
                     title={`${hostName}に勝つ手を選べ`}
-                    subLabel="OBSERVE & DECIDE"
+                    subLabel=""
                 />
 
-                {/* REAL / BLUFF のラベル表示 */}
-                {realHand && bluffHand && (
-                    <div className="flex gap-4 justify-center mb-4">
-                        <div className="text-center">
-                            <div className="text-xs font-bold text-[#44FFFF] tracking-widest mb-1">REAL</div>
-                            <div className="text-sm text-gray-300">{getHandDisplayWithEmoji(realHand)}</div>
-                        </div>
-                        <div className="text-gray-600 font-bold">|</div>
-                        <div className="text-center">
-                            <div className="text-xs font-bold text-[#FF4444] tracking-widest mb-1">BLUFF</div>
-                            <div className="text-sm text-gray-300">{getHandDisplayWithEmoji(bluffHand)}</div>
+                {/* ホストの統計情報 (ChoicePhaseを踏襲したスタイル) */}
+                {hostStats && (
+                    <div className="flex flex-col items-center mt-6 mb-2 w-full">
+                        <div className="inline-flex flex-col items-start text-gray-400 text-xs text-left">
+                            <div className="flex items-center leading-relaxed">
+                                <div className="w-2 h-2 bg-[#44FFFF] rounded-full animate-pulse mr-2 flex-shrink-0" />
+                                <span>
+                                    {hostName}は過去に
+                                    <span className="text-[#44FFFF] text-sm font-bold mx-1">
+                                        {hostStats.reverseRate !== null ? 100 - hostStats.reverseRate : '???'}%
+                                    </span>
+                                    の確率で
+                                    <span className="text-[#44FFFF] text-sm font-bold ml-1">DEFAULT CHOICE</span>
+                                    を選びます
+                                </span>
+                            </div>
+                            <div className="flex items-center">
+                                <div className="w-2 h-2 bg-[#44FFFF] rounded-full animate-pulse mr-2 flex-shrink-0" />
+                                <span>
+                                    {hostName}は下に<span className="text-[#44FFFF] text-sm font-bold">表示されている🖐️</span>しか選ぶことはできません
+                                </span>
+                            </div>
+
                         </div>
                     </div>
                 )}
 
-                <div className="flex justify-center w-full mb-8">
+                {/* ホストの選択肢 (小型版フレーム演出) */}
+                <div className="flex flex-col items-center justify-center gap-4 mb-8">
+                    <div className="relative w-80 h-32 flex items-center justify-center scale-90">
+                        {/* 固定レイヤー：3Dの手 */}
+                        <div className="absolute inset-0 flex items-center justify-between pointer-events-none px-4">
+                            <div className="flex flex-col items-center gap-1">
+                                <div className="w-32 h-32 flex items-center justify-center">
+                                    {realHand && <Hand3D handType={realHand} revealed={true} size="small" />}
+                                </div>
+                                <p className="text-[10px] text-[#44FFFF] font-bold text-center -translate-y-4">DEFAULT CHOICE</p>
+                            </div>
+                            <div className="flex flex-col items-center gap-1">
+                                <div className="w-32 h-32">
+                                    {bluffHand && <Hand3D handType={bluffHand} revealed={true} size="small" />}
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div className="flex-1 flex flex-col items-center justify-center">
                     <HandSelectionGrid
                         selectedHand={selectedHand}
                         onSelectHand={onSelectHand}
                         isProcessing={isProcessing}
                         size="small"
                     />
+
+                    <div className="text-center mt-8">
+                        <GameButton
+                            disabled={!selectedHand || isProcessing}
+                            onClick={onSubmit}
+                            variant="primary"
+                        >
+                            BATTLE !!
+                        </GameButton>
+                    </div>
                 </div>
-                <div className="text-center mt-auto">
-                    <GameButton
-                        disabled={!selectedHand || isProcessing}
-                        onClick={onSubmit}
-                    >
-                        BATTLE
-                    </GameButton>
-                </div>
-            </div>
+            </motion.div>
         )
 
         const SideArea = () => (
-            <div className={styles.sideArea()}>
-                <div className={sideCard({ variant: 'cyan', size: 'lg' }).card()}>
-                    <SideHeader
-                        engLabel="HOST ANALYSIS"
-                        label={`${hostName}の分析`}
-                        badge="PUBLIC"
-                        className="border-[#44FFFF]/30"
-                    />
-
-                    <div className="space-y-4">
-                        {/* REVERSE RATE */}
-                        <div className={sideCard({ variant: 'cyan', size: 'sm' }).dataBlock()}>
-                            <div className={sideCard().cardTitle()}>REVERSE RATE</div>
-                            <div className={sideCard({ size: 'lg' }).cardValueWithUnit()}>
-                                {hostStats?.reverseRate !== null && hostStats?.reverseRate !== undefined
-                                    ? <>{hostStats.reverseRate}<span className="text-lg text-gray-500 font-bold ml-1">%</span></>
-                                    : '???'
-                                }
-                            </div>
-                            {hostStats && hostStats.totalHostCount > 0 && (
-                                <div className="text-xs text-gray-600 mt-1">過去 {hostStats.totalHostCount} 回</div>
+            <motion.div className={styles.sideArea()} layout transition={{ duration: 0.3 }}>
+                <div className="flex flex-col gap-4 h-full">
+                    {/* スコア表示カード (ChoicePhaseと共通) */}
+                    <div className={sideCard({ variant: 'cyan', size: 'lg' }).card() + " flex-1 overflow-hidden flex flex-col"}>
+                        <SideHeader
+                            engLabel="CURRENT SCORES"
+                            label="現在のスコア"
+                            className="border-[#44FFFF]/30"
+                        />
+                        <div className="mt-3 flex-1 overflow-y-auto space-y-2 pr-1 custom-scrollbar scrollbar-hide">
+                            {currentScores.length > 0 ? (
+                                currentScores.map((score, index) => (
+                                    <div
+                                        key={score.userId}
+                                        className={`flex items-center justify-between p-2 rounded ${score.userId === currentUserId ? 'bg-[#44FFFF]/10 border border-[#44FFFF]/30' : 'bg-black/20 border border-gray-800'
+                                            }`}
+                                    >
+                                        <div className="flex items-center gap-2 min-w-0">
+                                            <div className="text-[10px] font-black text-gray-500 w-4">
+                                                {index + 1}
+                                            </div>
+                                            <div className={`text-xs font-bold truncate ${score.userId === currentUserId ? 'text-[#44FFFF]' : 'text-gray-300'}`}>
+                                                {score.user.name}
+                                            </div>
+                                        </div>
+                                        <div className="text-sm font-black text-white tabular-nums">
+                                            {score.points}<span className="text-[10px] text-gray-500 ml-1">pt</span>
+                                        </div>
+                                    </div>
+                                ))
+                            ) : (
+                                <div className="text-center py-4 text-[10px] text-gray-600 italic">
+                                    No scores recorded
+                                </div>
                             )}
                         </div>
-
-                        {/* 今回の手 */}
-                        <div className={sideCard({ variant: 'cyan', size: 'sm' }).dataBlock()}>
-                            <div className={sideCard().cardTitle()}>REAL 手</div>
-                            <div className={sideCard({ size: 'lg' }).cardValue()}>
-                                {realHand ? getHandDisplayWithEmoji(realHand) : '?'}
-                            </div>
-                        </div>
-                        <div className={sideCard({ variant: 'red', size: 'sm' }).dataBlock()}>
-                            <div className={sideCard().cardTitle()}>BLUFF 手</div>
-                            <div className={sideCard({ size: 'lg' }).cardValue()}>
-                                {bluffHand ? getHandDisplayWithEmoji(bluffHand) : '?'}
-                            </div>
-                        </div>
                     </div>
 
-                    <div className="mt-auto pt-4 text-[10px] text-gray-500 leading-relaxed border-t border-[#44FFFF]/10">
-                        <span className="text-[#44FFFF]">Note:</span> REVERSE RATEは{hostName}の過去のホスト時におけるREVERSE選択率です。
+                    <div className={sideCard({ variant: 'red', size: 'sm' }).card()}>
+                        <SideHeader
+                            engLabel="RULE"
+                            label="バトル中"
+                            variant="red"
+                            className="border-[#FF4444]/30"
+                            compact
+                        />
+                        <div className="text-[10px] text-gray-400 leading-relaxed mt-1 italic">
+                            ホストの手を読み切り、勝利を掴め。
+                        </div>
                     </div>
                 </div>
-            </div>
+            </motion.div>
         )
 
         return (
@@ -136,33 +187,34 @@ export function BattlePhase({
     } else {
         // Host View
         const MainArea = () => (
-            <div className={styles.mainArea()}>
+            <motion.div className={styles.mainArea()} layout transition={{ duration: 0.3 }}>
                 <PhaseHeader
                     engLabel="WAITING..."
-                    title="ゲストの選択を待機中"
-                    subLabel="WAITING FOR GUESTS"
+                    title="ゲストが選択しています"
+                    subLabel="PREPARING FOR BATTLE"
                 />
 
                 <div className="flex-1 flex flex-col items-center justify-center">
                     {jankenEvent?.finalHostHand ? (
                         <div className="text-center animate-in zoom-in duration-500">
-                            <div className="w-48 h-48 mx-auto relative group">
-                                <div className="relative z-10">
-                                    <Hand3D
-                                        handType={jankenEvent.finalHostHand as HandType}
-                                        revealed={true}
-                                        size="medium"
-                                    />
-                                </div>
+                            <div className="w-56 h-56 mx-auto relative">
+                                <Hand3D
+                                    handType={jankenEvent.finalHostHand as HandType}
+                                    revealed={true}
+                                    size="medium"
+                                />
                             </div>
 
-                            <div className="mt-6 space-y-1">
-                                <span className={`text-xs font-bold tracking-[0.2em] block ${jankenEvent.hostChoice === 'STAY' ? 'text-[#44FFFF]' : 'text-[#FF4444]'}`}>
-                                    {jankenEvent.hostChoice === 'STAY' ? 'STAY を選択' : 'REVERSE を選択'}
-                                </span>
-                                <span className="text-gray-500 text-xs">
-                                    最終的な手: {getHandDisplayWithEmoji(jankenEvent.finalHostHand as HandType)}
-                                </span>
+                            <div className="mt-8 space-y-2">
+                                <div className={cn(
+                                    "px-8 py-2 border-2 text-xl font-black tracking-[0.5em] inline-block",
+                                    jankenEvent.hostChoice === 'STAY' ? 'border-[#44FFFF] text-[#44FFFF] bg-[#44FFFF]/10' : 'border-[#FF4444] text-[#FF4444] bg-[#FF4444]/10'
+                                )}>
+                                    {jankenEvent.hostChoice === 'STAY' ? 'STAY' : 'REVERSE'}
+                                </div>
+                                <p className="text-gray-500 text-xs tracking-widest mt-2 uppercase">
+                                    Your Final Hand: <span className="text-white font-bold ml-2">{getHandDisplayWithEmoji(jankenEvent.finalHostHand as HandType)}</span>
+                                </p>
                             </div>
                         </div>
                     ) : (
@@ -171,57 +223,53 @@ export function BattlePhase({
                         </div>
                     )}
                 </div>
-            </div>
+            </motion.div>
         )
 
         const SideArea = () => (
-            <div className={styles.sideArea()}>
+            <motion.div className={styles.sideArea()} layout transition={{ duration: 0.3 }}>
                 <div className="flex flex-col gap-4 h-full">
-                    <div className={sideCard({ variant: 'red', size: 'lg' }).card()}>
+                    <div className={sideCard({ variant: 'red', size: 'lg' }).card() + " flex-1 flex flex-col"}>
                         <SideHeader
                             engLabel="YOUR STATUS"
-                            label="あなたの状況"
+                            label="あなたの選択"
                             badge="PRIVATE"
                             variant="red"
                             className="border-[#FF4444]/30"
                         />
 
-                        <div className="space-y-4">
+                        <div className="mt-6 space-y-6">
                             <div className={sideCard({ variant: 'red', size: 'sm' }).dataBlock()}>
-                                <div className={sideCard().cardTitle()}>選択</div>
-                                <div className={`font-black text-xl ${jankenEvent.hostChoice === 'STAY' ? 'text-[#44FFFF]' : 'text-[#FF4444]'}`}>
+                                <div className={sideCard().cardTitle()}>CHOICE</div>
+                                <div className={cn(
+                                    "font-black text-2xl tracking-widest",
+                                    jankenEvent.hostChoice === 'STAY' ? 'text-[#44FFFF]' : 'text-[#FF4444]'
+                                )}>
                                     {jankenEvent.hostChoice ?? '-'}
                                 </div>
                             </div>
 
                             <div className={sideCard({ variant: 'red', size: 'sm' }).dataBlock()}>
-                                <div className={sideCard().cardTitle()}>最終的な手</div>
-                                <div className={sideCard({ size: 'lg' }).cardValue()}>
-                                    {jankenEvent.finalHostHand
-                                        ? getHandDisplayWithEmoji(jankenEvent.finalHostHand as HandType)
-                                        : '-'
-                                    }
+                                <div className={sideCard().cardTitle()}>RESULT HAND</div>
+                                <div className="flex items-center gap-3 mt-1">
+                                    <div className="text-3xl">
+                                        {jankenEvent.finalHostHand ? getHandDisplayWithEmoji(jankenEvent.finalHostHand as HandType).split(' ')[0] : '-'}
+                                    </div>
+                                    <div className="text-lg font-black text-white">
+                                        {jankenEvent.finalHostHand ? getHandDisplayWithEmoji(jankenEvent.finalHostHand as HandType).split(' ')[1] : '-'}
+                                    </div>
                                 </div>
                             </div>
+                        </div>
+
+                        <div className="mt-auto pt-4 border-t border-white/5">
+                            <p className="text-[10px] text-gray-500 leading-relaxed italic text-center">
+                                ゲストに悟られぬよう、冷静に待機してください。
+                            </p>
                         </div>
                     </div>
-
-                    {hostStats && (
-                        <div className={sideCard({ variant: 'cyan', size: 'lg' }).card()}>
-                            <div className="text-[#44FFFF] font-bold mb-3 text-xs uppercase tracking-wider opacity-70">あなたの統計</div>
-                            <div className={sideCard({ variant: 'cyan', size: 'sm' }).dataBlock()}>
-                                <div className={sideCard().cardTitle()}>REVERSE RATE</div>
-                                <div className={sideCard({ size: 'lg' }).cardValueWithUnit()}>
-                                    {hostStats.reverseRate !== null
-                                        ? `${hostStats.reverseRate}%`
-                                        : '???'
-                                    }
-                                </div>
-                            </div>
-                        </div>
-                    )}
                 </div>
-            </div>
+            </motion.div>
         )
 
         return (
