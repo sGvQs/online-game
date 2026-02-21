@@ -160,17 +160,19 @@ export function ChoicePhase({
                     />
 
                     {hostStats && (
-                        <div className="flex flex-col items-center mt-12">
-                            <div className="flex justify-center items-center gap-2 text-gray-400 text-xs">
-                                <div className="w-2 h-2 bg-[#44FFFF] rounded-full animate-pulse mr-2" />
-                                {hostName}は<span className="text-[#44FFFF] text-sm font-bold">{hostStats.reverseRate !== null
-                                    ? 100 - hostStats.reverseRate
-                                    : '???'
-                                }%</span> の確率で <span className="text-[#44FFFF] text-sm font-bold"> DEFAULT CHOICE </span>を選びます
-                            </div>
-                            <div className="flex justify-center items-center gap-2 text-gray-400 text-xs">
-                                <div className="w-2 h-2 bg-[#44FFFF] rounded-full animate-pulse mr-2" />
-                                {hostName}は下に<span className="text-[#44FFFF] text-sm font-bold">表示されている🖐️</span>しか選ぶことはできません
+                        <div className="flex flex-col items-center mt-6 mb-2 w-full mt-12">
+                            <div className="inline-flex flex-col items-start text-gray-400 text-xs text-left">
+                                <div className="flex justify-center items-center gap-2 text-gray-400 text-xs">
+                                    <div className="w-2 h-2 bg-[#44FFFF] rounded-full animate-pulse mr-2" />
+                                    {hostName}は<span className="text-[#44FFFF] text-sm font-bold">{hostStats.reverseRate !== null
+                                        ? 100 - hostStats.reverseRate
+                                        : '???'
+                                    }%</span> の確率で <span className="text-[#44FFFF] text-sm font-bold"> DEFAULT CHOICE </span>を選びます
+                                </div>
+                                <div className="flex justify-center items-center gap-2 text-gray-400 text-xs">
+                                    <div className="w-2 h-2 bg-[#44FFFF] rounded-full animate-pulse mr-2" />
+                                    {hostName}は下に<span className="text-[#44FFFF] text-sm font-bold">表示されている🖐️</span>しか選ぶことはできません
+                                </div>
                             </div>
                             <div className="flex justify-center items-center gap-2 text-gray-400 animate-pulse text-xs mt-1">
                                 {hostName}は現在選択中です...

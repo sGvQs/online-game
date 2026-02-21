@@ -39,9 +39,16 @@ export function HandSelectionGrid({
                         <div className={s.innerPad()}>
                             <Hand3D handType={hand} revealed={true} size={size} />
                         </div>
-                        <div className={s.label()}>
-                            {getHandDisplayWithEmoji(hand)}
-                        </div>
+
+                        {isSelected ? (
+                            <div className={s.label()}>
+                                SELECTED
+                            </div>
+                        ) : (
+                            <div className={s.label()}>
+                                {getHandDisplayWithEmoji(hand)}
+                            </div>
+                        )}
 
                         {/* Selection Indicator */}
                         {isSelected && (
