@@ -37,11 +37,14 @@ export function ChoicePhase({
     const [isSwapped, setIsSwapped] = useState(false)
 
     useEffect(() => {
+        // ゲストの場合のみ、2秒ごとに自動で入れ替える（ホストの迷いを表現）
+        if (isCurrentHost) return
+
         const interval = setInterval(() => {
             setIsSwapped(prev => !prev)
         }, 2000)
         return () => clearInterval(interval)
-    }, [])
+    }, [isCurrentHost])
 
     if (!jankenEvent) return null
 
@@ -112,6 +115,27 @@ export function ChoicePhase({
                                     <div className="h-4" />
                                 </motion.div>
                             </div>
+                        </div>
+
+                        <div className="flex gap-6 mt-10">
+                            <motion.button
+                                onClick={() => { play('submit'); onChoice('STAY') }}
+                                disabled={isProcessing}
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                className="flex flex-col items-center gap-3 px-6 py-2 border-2 border-[#44FFFF] bg-black hover:bg-[#44FFFF]/10 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                <span className="text-[#44FFFF] font-black text-sm tracking-widest">CHANGE</span>
+                            </motion.button>
+                            <motion.button
+                                onClick={() => { play('submit'); onChoice('STAY') }}
+                                disabled={isProcessing}
+                                whileHover={{ scale: 1.05 }}
+                                whileTap={{ scale: 0.95 }}
+                                className="flex flex-col items-center gap-3 px-6 py-2 border-2 text-[#FF4444] bg-black hover:bg-[#44FFFF]/10 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                                <span className="text-[#FF4444] font-black text-sm tracking-widest">SUBMIT</span>
+                            </motion.button>
                         </div>
 
                         {/* STAY / REVERSE ボタン */}
