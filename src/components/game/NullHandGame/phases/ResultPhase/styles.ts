@@ -4,7 +4,7 @@ export const resultPhase = tv({
     slots: {
         // 対決エリア
         playerName: 'font-bold text-xl mb-4 tracking-widest',
-        hostName: 'text-[#FF4444]',
+        hostName: 'text-white opacity-70',
         myselfName: 'text-[#44FFFF]',
         vsText: 'text-4xl font-bold text-white italic opacity-50',
 

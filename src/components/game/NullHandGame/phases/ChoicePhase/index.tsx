@@ -242,6 +242,7 @@ export function ChoicePhase({
                     currentScores={currentScores}
                     currentUserId={currentUserId}
                     size="md"
+                    userColor={userColor}
                 />
                 <RewardSystem
                     guestCount={currentScores.length - 1}

@@ -52,6 +52,7 @@ export function BattlePhase({
                     currentScores={currentScores}
                     currentUserId={currentUserId}
                     size="lg"
+                    userColor={userColor}
                 />
                 <RewardSystem
                     guestCount={currentScores.length - 1}

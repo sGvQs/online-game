@@ -8,13 +8,15 @@ interface CurrentScoresProps {
     currentUserId: string
     variant?: 'cyan' | 'red'
     size?: 'sm' | 'md' | 'lg'
+    userColor?: string
 }
 
 export function CurrentScores({
     currentScores,
     currentUserId,
     variant = 'cyan',
-    size = 'md'
+    size = 'md',
+    userColor
 }: CurrentScoresProps) {
     return (
         <div className={sideCard({ variant, size }).card() + " flex-1 overflow-hidden flex flex-col"}>
@@ -36,18 +38,19 @@ export function CurrentScores({
                             )}
                         >
                             <div className="flex items-center gap-2 min-w-0">
-                                <div className="text-[10px] font-black text-gray-500 w-4">
+                                <div className="text-[10px] font-black text-white w-4">
                                     {index + 1}
                                 </div>
                                 <div className={cn(
-                                    "text-xs font-bold truncate",
-                                    score.userId === currentUserId ? "text-[#44FFFF]" : "text-gray-300"
-                                )}>
+                                    "text-xs font-bold truncate text-gray-300",
+                                )}
+                                    style={{ color: score.userId === currentUserId ? userColor : "" }}
+                                >
                                     {score.user.name}
                                 </div>
                             </div>
-                            <div className="text-sm font-black text-white tabular-nums">
-                                {score.points}<span className="text-[10px] text-gray-500 ml-1">pt</span>
+                            <div className="text-sm font-black tabular-nums" style={{ color: score.userId === currentUserId ? userColor : "" }}>
+                                {score.points}<span className="text-[10px] ml-1">pt</span>
                             </div>
                         </div>
                     ))
