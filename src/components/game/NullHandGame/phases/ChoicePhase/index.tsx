@@ -4,10 +4,10 @@ import { nullHandGame } from '../../styles'
 import { getHandDisplayWithEmoji } from '../../utils'
 import { PhaseHeader } from '../../common/PhaseHeader'
 import { SideHeader } from '../../common/SideHeader'
-import { WaitingDisplay } from '../../common/WaitingDisplay'
 import { sideCard } from '../phaseCard.styles'
 import { motion } from 'framer-motion'
 import { useSE } from '@/hooks/useSE'
+import { useState, useEffect } from 'react'
 
 interface ChoicePhaseProps {
     jankenEvent: JankenEventWithGuests | null
@@ -33,6 +33,16 @@ export function ChoicePhase({
     const styles = nullHandGame()
     const { play } = useSE()
 
+    // REALとBLUFFの枠を入れ替えるためのアニメーション状態
+    const [isSwapped, setIsSwapped] = useState(false)
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setIsSwapped(prev => !prev)
+        }, 2000)
+        return () => clearInterval(interval)
+    }, [])
+
     if (!jankenEvent) return null
 
     const realHand = jankenEvent.systemRealHand as HandType | null
@@ -49,24 +59,49 @@ export function ChoicePhase({
                     />
 
                     <div className="flex-1 flex flex-col items-center justify-center gap-8">
-                        {/* REAL vs BLUFF の表示 */}
-                        <div className="flex gap-6 items-center">
-                            <div className="flex flex-col items-center gap-2">
-                                <div className="text-xs font-black tracking-[0.3em] text-[#44FFFF]">REAL</div>
-                                <div className="w-24 h-24 relative border border-[#44FFFF]/30">
-                                    {realHand && <Hand3D handType={realHand} revealed={true} size="small" />}
+                        {/* REAL vs BLUFF のコンテナ（高さ固定） */}
+                        <div className="relative w-80 h-44 flex items-center justify-center">
+                            {/* 固定レイヤー：3Dの手 */}
+                            <div className="absolute inset-0 flex items-center justify-between pointer-events-none px-4">
+                                <div className="flex flex-col items-center gap-1 translate-y-2">
+                                    <div className="w-24 h-24">
+                                        {realHand && <Hand3D handType={realHand} revealed={true} size="small" />}
+                                    </div>
+                                    {realHand && <div className="text-xs text-white/70 font-bold">{getHandDisplayWithEmoji(realHand)}</div>}
                                 </div>
-                                {realHand && <div className="text-sm text-white font-bold">{getHandDisplayWithEmoji(realHand)}</div>}
+                                <div className="flex flex-col items-center gap-1 translate-y-2">
+                                    <div className="w-24 h-24">
+                                        {bluffHand && <Hand3D handType={bluffHand} revealed={true} size="small" />}
+                                    </div>
+                                    {bluffHand && <div className="text-xs text-white/70 font-bold">{getHandDisplayWithEmoji(bluffHand)}</div>}
+                                </div>
                             </div>
 
-                            <div className="text-gray-500 font-black text-xl">VS</div>
+                            {/* アニメーションレイヤー：動く枠 */}
+                            <div className="absolute inset-0 flex items-center justify-between px-4">
+                                <motion.div
+                                    layout
+                                    transition={{ duration: 0.8, type: 'spring', bounce: 0.4 }}
+                                    style={{ order: isSwapped ? 3 : 1 }}
+                                    className="flex flex-col items-center gap-1"
+                                >
+                                    <div className="text-xs font-black tracking-[0.3em] text-[#44FFFF] mb-1">REAL</div>
+                                    <div className="w-24 h-24 border-2 border-[#44FFFF] shadow-[0_0_15px_rgba(68,255,255,0.2)] bg-[#44FFFF]/5" />
+                                    <div className="h-4" />
+                                </motion.div>
 
-                            <div className="flex flex-col items-center gap-2">
-                                <div className="text-xs font-black tracking-[0.3em] text-[#FF4444]">BLUFF</div>
-                                <div className="w-24 h-24 relative border border-[#FF4444]/30">
-                                    {bluffHand && <Hand3D handType={bluffHand} revealed={true} size="small" />}
-                                </div>
-                                {bluffHand && <div className="text-sm text-white font-bold">{getHandDisplayWithEmoji(bluffHand)}</div>}
+                                <div className="order-2 text-gray-500 font-black text-xl translate-y-4">VS</div>
+
+                                <motion.div
+                                    layout
+                                    transition={{ duration: 0.8, type: 'spring', bounce: 0.4 }}
+                                    style={{ order: isSwapped ? 1 : 3 }}
+                                    className="flex flex-col items-center gap-1"
+                                >
+                                    <div className="text-xs font-black tracking-[0.3em] text-[#FF4444] mb-1">BLUFF</div>
+                                    <div className="w-24 h-24 border-2 border-[#FF4444] shadow-[0_0_15px_rgba(255,68,68,0.2)] bg-[#FF4444]/5" />
+                                    <div className="h-4" />
+                                </motion.div>
                             </div>
                         </div>
 
@@ -112,40 +147,69 @@ export function ChoicePhase({
                 // Guest View
                 <>
                     <PhaseHeader
-                        engLabel="WAITING..."
-                        title={`${hostName}の選択を待機中`}
-                        subLabel="HOST IS DECIDING"
+                        engLabel={`${hostName}がホストです`}
+                        title="あなたはゲストです"
+                        subLabel={`WAITING FOR HOST...`}
                     />
 
+
+                    <div className="flex justify-center items-center gap-2 text-gray-400 text-xs mt-8">
+                        <div className="w-2 h-2 bg-[#44FFFF] rounded-full animate-pulse mr-2" />
+                        {hostName}は<span className="text-[#44FFFF] text-sm font-bold">{hostStats ? hostStats.reverseRate !== null
+                            ? 100 - hostStats.reverseRate
+                            : '???'
+                            : '???'
+                        }%</span> の確率で <span className="text-[#44FFFF] text-sm font-bold"> DEFAULT REAL </span>を選びます
+                    </div>
                     <div className="flex-1 flex flex-col items-center justify-center gap-8">
-                        <div className="flex gap-6 items-center">
-                            <div className="flex flex-col items-center gap-2">
-                                <div className="text-xs font-black tracking-[0.3em] text-[#44FFFF]">REAL</div>
-                                <div className="w-24 h-24 relative border border-[#44FFFF]/30">
-                                    {realHand && <Hand3D handType={realHand} revealed={true} size="small" />}
+                        <div className="relative w-120 h-48 flex items-center justify-center">
+                            {/* 固定レイヤー：3Dの手 */}
+                            <div className="absolute inset-0 flex items-center justify-between pointer-events-none px-4">
+                                <div className="flex flex-col items-center gap-1 translate-y-2">
+                                    <div className="w-48 h-48 flex items-center justify-center">
+                                        {realHand && <Hand3D handType={realHand} revealed={true} size="small" />}
+                                    </div>
+                                    <p className="text-xs text-[#44FFFF] font-bold text-center translate-y-2">DEFAULT REAL</p>
                                 </div>
-                                {realHand && <div className="text-sm text-white font-bold">{getHandDisplayWithEmoji(realHand)}</div>}
+                                <div className="flex flex-col items-center gap-1 translate-y-2">
+                                    <div className="w-48 h-48">
+                                        {bluffHand && <Hand3D handType={bluffHand} revealed={true} size="small" />}
+                                    </div>
+                                </div>
                             </div>
 
-                            <div className="text-gray-500 font-black text-xl">VS</div>
+                            {/* アニメーションレイヤー：動く枠 */}
+                            <div className="absolute inset-0 flex items-center justify-between px-4">
+                                <motion.div
+                                    layout
+                                    transition={{ duration: 0.8, type: 'spring', bounce: 0.4 }}
+                                    style={{ order: isSwapped ? 3 : 1 }}
+                                    className="flex flex-col items-center gap-1"
+                                >
+                                    <div className="text-xs font-black tracking-[0.3em] text-[#44FFFF] mb-1">REAL</div>
+                                    <div className="w-48 h-48 border-2 border-[#44FFFF] shadow-[0_0_15px_rgba(68,255,255,0.2)] bg-[#44FFFF]/5" />
+                                    <div className="h-4" />
+                                </motion.div>
 
-                            <div className="flex flex-col items-center gap-2">
-                                <div className="text-xs font-black tracking-[0.3em] text-[#FF4444]">BLUFF</div>
-                                <div className="w-24 h-24 relative border border-[#FF4444]/30">
-                                    {bluffHand && <Hand3D handType={bluffHand} revealed={true} size="small" />}
-                                </div>
-                                {bluffHand && <div className="text-sm text-white font-bold">{getHandDisplayWithEmoji(bluffHand)}</div>}
+                                <div className="order-2 text-gray-500 font-black text-xl translate-y-4">VS</div>
+
+                                <motion.div
+                                    layout
+                                    transition={{ duration: 0.8, type: 'spring', bounce: 0.4 }}
+                                    style={{ order: isSwapped ? 1 : 3 }}
+                                    className="flex flex-col items-center gap-1"
+                                >
+                                    <div className="text-xs font-black tracking-[0.3em] text-[#FF4444] mb-1 opacity-50">BLUFF</div>
+                                    <div className="w-48 h-48 border-2 border-[#FF4444] shadow-[0_0_15px_rgba(255,68,68,0.2)] bg-[#FF4444]/5 opacity-50" />
+                                    <div className="h-4" />
+                                </motion.div>
                             </div>
-                        </div>
-
-                        <div className="flex items-center gap-2 text-gray-400 text-sm">
-                            <div className="w-2 h-2 bg-[#44FFFF] rounded-full animate-pulse" />
-                            {hostName} が STAY か REVERSE かを選択中...
                         </div>
                     </div>
                 </>
-            )}
-        </motion.div>
+            )
+            }
+        </motion.div >
     )
 
     const SideArea = () => (
