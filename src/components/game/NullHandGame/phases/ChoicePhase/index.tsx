@@ -274,30 +274,48 @@ export function ChoicePhase({
 
                 <div className={sideCard({ variant: 'red', size: 'sm' }).card()}>
                     <SideHeader
-                        engLabel="RULE"
-                        label="ルール"
+                        engLabel="REWARD SYSTEM"
+                        label="ポイント配当"
                         variant="red"
                         className="border-[#FF4444]/30"
                         compact
                     />
-                    <div className="text-[10px] text-gray-400 leading-relaxed mt-1">
-                        CHOICE手勝負か、REVERSE読みか...
-                    </div>
-                    <div className="text-[10px] text-gray-400 leading-relaxed mt-1">
-                        CHOICE手勝負か、REVERSE読みか...
-                    </div>
-                    <div className="text-[10px] text-gray-400 leading-relaxed mt-1">
-                        CHOICE手勝負か、REVERSE読みか...
-                    </div>
-                    <div className="text-[10px] text-gray-400 leading-relaxed mt-1">
-                        CHOICE手勝負か、REVERSE読みか...
-                    </div>
-                    <div className="text-[10px] text-gray-400 leading-relaxed mt-1">
-                        CHOICE手勝負か、REVERSE読みか...
-                    </div>
-                    <div className="text-[10px] text-gray-400 leading-relaxed mt-1">
-                        CHOICE手勝負か、REVERSE読みか...
-                    </div>
+                    <p className="text-[12px] text-gray-400 leading-relaxed mt-1">
+                        [NULL HAND] ───────────────
+                    </p>
+                    <p className="text-[8px] text-gray-400 leading-relaxed ml-2">
+                        条件：全員がホストと同じ手（あいこ）
+                    </p>
+                    <p className="text-[8px] text-gray-400 leading-relaxed ml-2">
+                        報酬：HOST +5pt / GUEST 0pt
+                    </p>
+                    <p className="text-[10px] text-gray-400 leading-relaxed mt-1">
+                        [GUEST WIN] ───────────────
+                    </p>
+                    <p className="text-[8px] text-gray-400 leading-relaxed ml-2">
+                        条件：ホストに勝利したゲストが1人以上
+                    </p>
+                    <p className="text-[8px] text-gray-400 leading-relaxed ml-2">
+                        報酬：WINNER +3pt / HOST 0pt
+                    </p>
+                    <p className="text-[10px] text-gray-400 leading-relaxed mt-1">
+                        [HOST PERFECT] ────────────
+                    </p>
+                    <p className="text-[8px] text-gray-400 leading-relaxed ml-2">
+                        条件：ホストがゲスト全員を撃破
+                    </p>
+                    <p className="text-[8px] text-gray-400 leading-relaxed ml-2">
+                        報酬：HOST +3pt / GUEST 0pt
+                    </p>
+                    <p className="text-[10px] text-gray-400 leading-relaxed mt-1">
+                        [DRAW] ──────────────────
+                    </p>
+                    <p className="text-[8px] text-gray-400 leading-relaxed ml-2">
+                        条件：上記以外（勝ち・負け混在など）
+                    </p>
+                    <p className="text-[8px] text-gray-400 leading-relaxed ml-2">
+                        報酬：ALL 0pt
+                    </p>
                 </div>
 
             </div>
