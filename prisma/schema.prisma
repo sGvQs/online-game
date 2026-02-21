@@ -7,20 +7,20 @@ datasource db {
 }
 
 model User {
-  id           String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name         String
-  email        String       @unique
-  comment      String?
-  createdAt    DateTime     @default(now()) @map("created_at")
-  
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name      String
+  email     String   @unique
+  comment   String?
+  createdAt DateTime @default(now()) @map("created_at")
+
   // リレーション名をキャメルケースに統一
-  errorEvents  ErrorEvent[] 
-  matches      Match[]
-  joinedRooms  RoomUser[]
-  createdRooms Room[]       @relation("CreatedRooms")
-  userIDPs     UserIDP[]
-  guestHands   GuestHand[]
-  jankenLogs   JankenLog[]
+  errorEvents     ErrorEvent[]
+  matches         Match[]
+  joinedRooms     RoomUser[]
+  createdRooms    Room[]           @relation("CreatedRooms")
+  userIDPs        UserIDP[]
+  guestHands      GuestHand[]
+  jankenLogs      JankenLog[]
   matchScores     MatchScore[]
   monthlyRankings MonthlyRanking[]
   pointLogs       PointLog[]
@@ -42,11 +42,11 @@ model Room {
   currentMatchId String?    @map("current_match_id") @db.Uuid
   activeGameType String?    @map("active_game_type")
   status         RoomStatus @default(LOBBY)
-  
-  matches        Match[]
-  users          RoomUser[]
-  
-  creator        User       @relation("CreatedRooms", fields: [createdBy], references: [id])
+
+  matches Match[]
+  users   RoomUser[]
+
+  creator User @relation("CreatedRooms", fields: [createdBy], references: [id])
 
   @@map("rooms")
 }
@@ -57,9 +57,9 @@ model RoomUser {
   userId    String   @map("user_id") @db.Uuid
   isReady   Boolean  @default(false) @map("is_ready")
   createdAt DateTime @default(now()) @map("created_at")
-  
-  room      Room     @relation(fields: [roomId], references: [id], onDelete: Cascade)
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  room Room @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([roomId, userId])
   @@map("room_users")
@@ -69,8 +69,8 @@ model UserIDP {
   id          String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   supabaseUid String @unique @map("supabase_uid") @db.Uuid
   userId      String @map("user_id") @db.Uuid
-  
-  user        User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("user_idp")
 }
@@ -91,21 +91,21 @@ model ErrorEvent {
 }
 
 model Match {
-  id               String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  roomId           String       @map("room_id") @db.Uuid
-  gameType         String       @map("game_type")
-  status           String       @default("WAITING")
-  winnerId         String?      @map("winner_id") @db.Uuid
-  createdAt        DateTime     @default(now()) @map("created_at")
-  currentTurnIndex Int          @default(1) @map("current_turn_index")
-  totalTurns       Int          @default(1) @map("total_turns")
-  
+  id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  roomId           String   @map("room_id") @db.Uuid
+  gameType         String   @map("game_type")
+  status           String   @default("WAITING")
+  winnerId         String?  @map("winner_id") @db.Uuid
+  createdAt        DateTime @default(now()) @map("created_at")
+  currentTurnIndex Int      @default(1) @map("current_turn_index")
+  totalTurns       Int      @default(1) @map("total_turns")
+
   errorEvents  ErrorEvent[]
   jankenEvents JankenEvent[]
   jankenLogs   JankenLog[]
   matchScores  MatchScore[]
-  room         Room         @relation(fields: [roomId], references: [id], onDelete: Cascade)
-  winner       User?        @relation(fields: [winnerId], references: [id])
+  room         Room          @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  winner       User?         @relation(fields: [winnerId], references: [id])
 
   @@map("matches")
 }
@@ -114,50 +114,50 @@ model Match {
 
 // 1ターンの状態管理
 model JankenEvent {
-  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  matchId         String   @map("match_id") @db.Uuid
-  currentHostId   String   @map("current_host_id") @db.Uuid
-  turnNumber      Int      @default(1) @map("turn_number")
-  phase           String   @default("DEAL")
-  systemRealHand  String?  @map("system_real_hand")   // システムが生成した勝ち手
-  systemBluffHand String?  @map("system_bluff_hand")  // システムが生成した負け手
-  hostChoice      String?  @map("host_choice")        // "STAY" | "REVERSE"
-  finalHostHand   String?  @map("final_host_hand")    // 実際に提出された手（計算結果）
-  
-  match         Match      @relation(fields: [matchId], references: [id], onDelete: Cascade)
-  guestHands    GuestHand[]
-  
+  id              String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  matchId         String  @map("match_id") @db.Uuid
+  currentHostId   String  @map("current_host_id") @db.Uuid
+  turnNumber      Int     @default(1) @map("turn_number")
+  phase           String  @default("DEAL")
+  systemRealHand  String? @map("system_real_hand") // システムが生成した勝ち手
+  systemBluffHand String? @map("system_bluff_hand") // システムが生成した負け手
+  hostChoice      String? @map("host_choice") // "STAY" | "REVERSE"
+  finalHostHand   String? @map("final_host_hand") // 実際に提出された手（計算結果）
+
+  match      Match       @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  guestHands GuestHand[]
+
   @@map("janken_events")
 }
 
 // ゲスト各人の手を記録
 model GuestHand {
-  id            String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  jankenEventId String      @map("janken_event_id") @db.Uuid
-  userId        String      @map("user_id") @db.Uuid
+  id            String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  jankenEventId String  @map("janken_event_id") @db.Uuid
+  userId        String  @map("user_id") @db.Uuid
   hand          String
-  isConfirmed   Boolean     @default(false) @map("is_confirmed")
-  
-  jankenEvent   JankenEvent @relation(fields: [jankenEventId], references: [id], onDelete: Cascade)
-  user          User        @relation(fields: [userId], references: [id])
-  
+  isConfirmed   Boolean @default(false) @map("is_confirmed")
+
+  jankenEvent JankenEvent @relation(fields: [jankenEventId], references: [id], onDelete: Cascade)
+  user        User        @relation(fields: [userId], references: [id])
+
   @@unique([jankenEventId, userId])
   @@map("guest_hands")
 }
 
 // 統計データ蓄積（ホストのSTAY/REVERSE選択ログ）
 model JankenLog {
-  id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  userId      String   @map("user_id") @db.Uuid
-  isHost      Boolean  @default(false) @map("is_host")
-  hostChoice  String?  @map("host_choice") // "STAY" | "REVERSE" (ホスト時のみ)
-  matchId     String?  @map("match_id") @db.Uuid
-  createdAt   DateTime @default(now()) @map("created_at")
-  isWinning   Boolean  @default(false) @map("is_winning")
-  
-  match       Match?   @relation(fields: [matchId], references: [id], onDelete: SetNull)
-  user        User     @relation(fields: [userId], references: [id])
-  
+  id         String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId     String   @map("user_id") @db.Uuid
+  isHost     Boolean  @default(false) @map("is_host")
+  hostChoice String?  @map("host_choice") // "STAY" | "REVERSE" (ホスト時のみ)
+  matchId    String?  @map("match_id") @db.Uuid
+  createdAt  DateTime @default(now()) @map("created_at")
+  isWinning  Boolean  @default(false) @map("is_winning")
+
+  match Match? @relation(fields: [matchId], references: [id], onDelete: SetNull)
+  user  User   @relation(fields: [userId], references: [id])
+
   @@index([userId, isHost])
   @@map("janken_logs")
 }
@@ -170,10 +170,10 @@ model MatchScore {
   points    Int      @default(0)
   turnOrder Int      @default(0) @map("turn_order")
   createdAt DateTime @default(now()) @map("created_at")
-  
-  match     Match    @relation(fields: [matchId], references: [id], onDelete: Cascade)
-  user      User     @relation(fields: [userId], references: [id])
-  
+
+  match Match @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id])
+
   @@unique([matchId, userId])
   @@map("match_scores")
 }
@@ -186,12 +186,12 @@ model MatchScore {
 model MonthlyRanking {
   id          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   userId      String   @map("user_id") @db.Uuid
-  year        Int      // 2026 など
-  month       Int      // 1〜12
+  year        Int // 2026 など
+  month       Int // 1〜12
   totalPoints Int      @default(0) @map("total_points")
   updatedAt   DateTime @updatedAt @map("updated_at")
 
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, year, month]) // 「誰が」「いつ」のレコードかを一意にする
   @@index([year, month, totalPoints(sort: Desc)]) // 月ごとのランキングを高速化
@@ -202,12 +202,12 @@ model MonthlyRanking {
 model PointLog {
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   userId    String   @map("user_id") @db.Uuid
-  amount    Int      // 獲得（または消費）した量
+  amount    Int // 獲得（または消費）した量
   gameType  String   @map("game_type") // "NULL_HAND", "ERROR_HUNTER" など
-  reason    String?  // "MATCH_WIN", "GAMBLE_LOSS" など
+  reason    String? // "MATCH_WIN", "GAMBLE_LOSS" など
   createdAt DateTime @default(now()) @map("created_at")
 
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, gameType])
   @@map("point_logs")

@@ -68,33 +68,64 @@ export function NullHandGame({
     }, [phase])
 
     const [selectedHand, setSelectedHand] = useState<HandType | null>(null)
-    const [newRankings, setNewRankings] = useState<UserRanking[]>([])
+    const [localRankings, setLocalRankings] = useState<UserRanking[]>(initialRankings)
+    const [hasCalculatedScores, setHasCalculatedScores] = useState(false)
 
-    // GAME_OVER時に最新のランキングを取得
+    // INITIAL_RANKINGSが外部から更新された場合はローカルステートにも反映(再入室などを想定)
     useEffect(() => {
-        if (phase === 'GAME_OVER') {
-            const fetchRankings = async () => {
-                const userIds = room.users.map(u => u.userId)
-                try {
-                    const { getNullHandRankings } = await import('@/server/actions/game/rankingActions')
-                    const rankings = await getNullHandRankings(userIds)
-                    setNewRankings(rankings)
-                } catch (e) {
-                    console.error('Failed to fetch rankings', e)
+        setLocalRankings(initialRankings)
+    }, [initialRankings])
+
+    // GAME_OVER時にローカルでスコアを合算してランキングをオプティミスティック更新する
+    useEffect(() => {
+        if (phase === 'GAME_OVER' && currentScores.length > 0 && !hasCalculatedScores) {
+            setHasCalculatedScores(true)
+
+            // 現在の localRankings に currentScores のポイントを足す
+            const updated = localRankings.map(ranking => {
+                const scoreAdd = currentScores.find(s => s.userId === ranking.userId)?.points || 0
+                return {
+                    ...ranking,
+                    points: ranking.points + scoreAdd
                 }
-            }
-            fetchRankings()
+            })
+
+            // 新しいポイントで降順ソート
+            updated.sort((a, b) => b.points - a.points)
+
+            // 順位（rank）の再計算
+            let currentRank = 1
+            let previousPoints = -1
+            let tieCount = 0
+
+            const reRanked = updated.map((ranking, index) => {
+                if (previousPoints !== ranking.points) {
+                    currentRank = index + 1
+                    tieCount = 0
+                    previousPoints = ranking.points
+                } else {
+                    tieCount++
+                }
+                return {
+                    ...ranking,
+                    rank: currentRank
+                }
+            })
+
+            // ステートを更新
+            setLocalRankings(reRanked)
         }
-    }, [phase, room.users])
+    }, [phase, currentScores, localRankings, hasCalculatedScores])
 
     const handleClose = async () => {
         await returnToRoom(roomId)
     }
 
-    // フェーズが変わった際に選択状態をリセット
+    // フェーズが変わった際に選択状態とスコア計算フラグをリセット
     useEffect(() => {
         if (phase === 'DEAL' || phase === 'CHOICE') {
             setSelectedHand(null)
+            setHasCalculatedScores(false)
         }
     }, [phase])
 
@@ -144,7 +175,7 @@ export function NullHandGame({
                         isReady={isReady}
                         allUsersReady={allUsersReady}
                         titleHand={titleHand}
-                        initialRankings={initialRankings}
+                        initialRankings={localRankings} // 最新のローカルランキングを渡す
                         onToggleReady={toggleReady}
                         onStartGame={handleStartGame}
                         onExit={handleClose}
@@ -202,8 +233,8 @@ export function NullHandGame({
                         {phase === 'GAME_OVER' && (
                             <GameOverPhase
                                 currentUserId={currentUserId}
-                                newRankings={newRankings}
-                                initialRankings={initialRankings}
+                                newRankings={localRankings} // サーバーからのフェッチではなくローカルで計算済みのものを渡す
+                                initialRankings={initialRankings} // GameOverPhaseで上昇分を見せるために、試合開始時の値も渡す
                                 currentScores={currentScores}
                                 onFinish={handleFinish}
                                 userColor={userColor}
