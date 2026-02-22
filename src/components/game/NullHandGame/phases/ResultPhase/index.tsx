@@ -185,22 +185,61 @@ export function ResultPhase({
                                 subLabel="ORIGINAL OPTIONS"
                             />
 
-                            <div className="flex flex-col items-center justify-center gap-4 mb-8 mt-4 h-full">
-                                <div className="relative w-80 h-32 flex items-center justify-center scale-90">
+                            <div className="flex-1 flex flex-col items-center justify-center">
+                                {/* ChoicePhaseと共通の部品・レイアウト */}
+                                <div className="relative w-120 h-48 flex items-center justify-center">
                                     {/* 固定レイヤー：3Dの手 */}
                                     <div className="absolute inset-0 flex items-center justify-between pointer-events-none px-4">
-                                        <div className="flex flex-col items-center gap-1">
-                                            <div className="w-32 h-32 flex items-center justify-center">
-                                                {realHand && <Hand3D handType={realHand} revealed={true} size="small" />}
+                                        {/* REAL (Left) */}
+                                        <div className="flex flex-col items-center gap-1 translate-y-2">
+                                            <div className="w-48 h-48 flex items-center justify-center">
+                                                {realHand && (
+                                                    <Hand3D
+                                                        handType={realHand as HandType}
+                                                        revealed={true}
+                                                        size="small"
+                                                        personalColor={isCurrentHost ? userColor : "#FF4444"}
+                                                    />
+                                                )}
                                             </div>
-                                            <p className="text-[10px] text-[#44FFFF] font-bold text-center -translate-y-8">DEFAULT CHOICE</p>
+                                            <div className="h-6">
+                                                <p className="text-xs text-[#44FFFF] font-black tracking-widest text-center translate-y-2 px-3 py-2">
+                                                    DEFAULT CHOICE
+                                                </p>
+                                            </div>
                                         </div>
-                                        <div className="text-gray-800 font-black text-4xl italic px-4 translate-y-4">OR</div>
-                                        <div className="flex flex-col items-center gap-1">
-                                            <div className="w-32 h-32 flex items-center justify-center">
-                                                {bluffHand && <Hand3D handType={bluffHand} revealed={true} size="small" />}
+
+                                        {/* BLUFF (Right) */}
+                                        <div className="flex flex-col items-center gap-1 translate-y-2">
+                                            <div className="w-48 h-48 flex items-center justify-center">
+                                                {bluffHand && (
+                                                    <Hand3D
+                                                        handType={bluffHand as HandType}
+                                                        revealed={true}
+                                                        size="small"
+                                                        personalColor={isCurrentHost ? userColor : "#FF4444"}
+                                                    />
+                                                )}
                                             </div>
-                                            <div className="h-8 -translate-y-8" />
+                                            <div className="h-6 mt-4" />
+                                        </div>
+                                    </div>
+
+                                    {/* 枠（CHOICEフレーム）レイヤー */}
+                                    <div className="absolute inset-0 flex items-center justify-between px-4">
+                                        {/* Selection Frame */}
+                                        <div className={cn("flex flex-col items-center gap-1", isHostDefault ? "order-1" : "order-3")}>
+                                            <div className="text-xs font-black tracking-[0.3em] text-[#44FFFF] mb-1">CHOICE</div>
+                                            <div className="w-48 h-48 border-2 border-[#44FFFF]" />
+                                            <div className="h-4" />
+                                        </div>
+
+                                        <div className="order-2 text-gray-500 font-black text-xl translate-y-4">OR</div>
+
+                                        {/* 空のプレースホルダー（反対側） */}
+                                        <div className={cn("flex flex-col items-center gap-1", isHostDefault ? "order-3" : "order-1")}>
+                                            <div className="w-48 h-48" />
+                                            <div className="h-4" />
                                         </div>
                                     </div>
                                 </div>
