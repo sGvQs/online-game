@@ -283,6 +283,8 @@ export function TitleScreen({
                                     </h3>
                                     <RewardSystem
                                         guestCount={room.users.length - 1}
+                                        isHost={isHost}
+                                        userColor={userColor}
                                         size="md"
                                     />
                                 </div>
