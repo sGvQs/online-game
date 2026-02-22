@@ -249,19 +249,20 @@ export function ResultPhase({
                 </AnimatePresence>
 
                 <div className="flex flex-col items-center gap-4 pb-8">
-                    <div className="flex gap-4">
-                        <button
+                    <div className="flex gap-6">
+                        <GameButton
                             onClick={() => setShowSystemSelection(!showSystemSelection)}
-                            className="px-6 py-2 border border-white/10 bg-black/40 hover:bg-white/5 text-[10px] font-black tracking-widest text-gray-500 hover:text-white transition-all rounded"
+                            variant="secondary"
+                            className="min-w-[240px]"
                         >
-                            {showSystemSelection ? 'SHOW RESULT' : 'SHOW SYSTEM SELECTION'}
-                        </button>
+                            {showSystemSelection ? 'VIEW RESULT' : 'VIEW SYSTEM LOG'}
+                        </GameButton>
 
                         <GameButton
                             onClick={onNextRound}
                             disabled={isProcessing || isReady}
                             variant="primary"
-                            className="min-w-[200px]"
+                            className="min-w-[240px]"
                         >
                             {isReady ? `WAITING (${readyCount}/${totalCount})` : 'NEXT ROUND'}
                         </GameButton>
