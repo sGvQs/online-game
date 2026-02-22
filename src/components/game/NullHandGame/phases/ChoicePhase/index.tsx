@@ -48,7 +48,7 @@ export function ChoicePhase({
             const t = setTimeout(() => {
                 setSelectionStep(1)
                 play('select')
-            }, 2000) // 2s: Real Hand フェードイン
+            }, 4000) // 2s: Real Hand フェードイン
             return () => clearTimeout(t)
         } else if (selectionStep === 1) {
             const t = setTimeout(() => {
@@ -143,19 +143,21 @@ export function ChoicePhase({
                     <div className="absolute inset-0 flex items-center justify-between pointer-events-none px-4">
                         {/* REAL (Left) */}
                         <motion.div
+                            layoutId="hand-slot-left"
                             initial={{ opacity: 0 }}
                             animate={{ opacity: selectionStep >= 1 ? 1 : 0 }}
                             className="flex flex-col items-center gap-1 translate-y-2"
                         >
                             <div className="w-48 h-48 flex items-center justify-center">
-                                {realHand && <Hand3D handType={realHand} revealed={true} size="small" personalColor={isCurrentHost && selectionStep === 4 ? userColor : undefined} />}
+                                {realHand && <Hand3D handType={realHand} revealed={true} size="small" personalColor={isCurrentHost ? userColor : undefined} />}
                             </div>
                             <div className="h-6">
                                 {selectionStep >= 3 && (
                                     <motion.p
                                         initial={{ opacity: 0, y: 10 }}
                                         animate={{ opacity: 1, y: 0 }}
-                                        className="text-xs text-[#44FFFF] font-black tracking-widest text-center translate-y-2 bg-[#44FFFF]/10 border border-[#44FFFF]/30 px-3 py-0.5 shadow-[0_0_15px_rgba(68,255,255,0.3)]"
+                                        exit={{ opacity: 0 }}
+                                        className="text-xs text-[#44FFFF] font-black tracking-widest text-center translate-y-2 px-3 py-2"
                                     >
                                         DEFAULT CHOICE
                                     </motion.p>
@@ -165,25 +167,15 @@ export function ChoicePhase({
 
                         {/* BLUFF (Right) */}
                         <motion.div
+                            layoutId="hand-slot-right"
                             initial={{ opacity: 0 }}
                             animate={{ opacity: selectionStep >= 2 ? 1 : 0 }}
                             className="flex flex-col items-center gap-1 translate-y-2"
                         >
-                            <div className="w-48 h-48 flex items-center justify-center mb-6">
-                                {bluffHand && <Hand3D handType={bluffHand} revealed={true} size="small" personalColor={isCurrentHost && selectionStep === 4 ? userColor : undefined} />}
+                            <div className="w-48 h-48 flex items-center justify-center">
+                                {bluffHand && <Hand3D handType={bluffHand} revealed={true} size="small" personalColor={isCurrentHost ? userColor : undefined} />}
                             </div>
-                            <div className="h-6">
-
-                                {selectionStep >= 3 && (
-                                    <motion.p
-                                        initial={{ opacity: 0 }}
-                                        animate={{ opacity: 1 }}
-                                        className="text-xs text-gray-500 font-bold tracking-widest text-center translate-y-2"
-                                    >
-                                        ANOTHER CHOICE
-                                    </motion.p>
-                                )}
-                            </div>
+                            <div className="h-6 mt-4" />
                         </motion.div>
                     </div>
 
@@ -192,10 +184,12 @@ export function ChoicePhase({
                         <motion.div
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
+                            exit={{ opacity: 0 }}
                             className="absolute inset-0 flex items-center justify-between px-4"
                         >
                             <motion.div
                                 layout
+                                layoutId="hand-slot-left-frame"
                                 transition={{ duration: 0.8, type: 'spring', bounce: 0.4 }}
                                 style={{ order: isSwapped ? 3 : 1 }}
                                 className="flex flex-col items-center gap-1 cursor-pointer"
@@ -214,6 +208,7 @@ export function ChoicePhase({
 
                             <motion.div
                                 layout
+                                layoutId="hand-slot-right-frame"
                                 transition={{ duration: 0.8, type: 'spring', bounce: 0.4 }}
                                 style={{ order: isSwapped ? 1 : 3 }}
                                 className="flex flex-col items-center gap-1 cursor-pointer"
@@ -232,12 +227,13 @@ export function ChoicePhase({
                 </div>
 
                 {/* ボタンエリア */}
-                <div className="">
+                <div className="h-20 flex items-center justify-center mt-12">
                     {selectionStep === 4 && (
                         <motion.div
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
-                            className="flex gap-6 mt-16"
+                            exit={{ opacity: 0 }}
+                            className="flex gap-6"
                         >
                             {isCurrentHost && (
                                 <>
