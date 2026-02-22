@@ -233,6 +233,7 @@ export function NullHandGame({
                         {phase === 'GAME_OVER' && (
                             <GameOverPhase
                                 currentUserId={currentUserId}
+                                hostId={jankenEvent?.currentHostId}
                                 newRankings={localRankings} // サーバーからのフェッチではなくローカルで計算済みのものを渡す
                                 initialRankings={initialRankings} // GameOverPhaseで上昇分を見せるために、試合開始時の値も渡す
                                 currentScores={currentScores}

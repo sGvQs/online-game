@@ -103,14 +103,14 @@ export function ResultPhase({
                         <div className="flex items-center justify-center gap-12 mb-8">
                             {/* ホスト */}
                             <div className="flex flex-col items-center">
-                                <div className={cn(rpStyles.playerName(), rpStyles.hostName())}>{hostName}</div>
+                                <div className={cn(rpStyles.playerName())} style={{ color: '#FF4444' }}>{hostName}</div>
                                 <div className="mt-4 mb-2">
                                     <div className={cn(rpStyles.handWrapper(), result === 'HOST_WIN' || isDraw ? rpStyles.handWrapperWin() : rpStyles.handWrapperLose())}>
                                         <Hand3D
                                             handType={hostHand}
                                             revealed={true}
                                             size={result === 'HOST_WIN' || isDraw ? "medium" : "small"}
-                                            personalColor={undefined}
+                                            personalColor="#FF4444"
                                         />
                                     </div>
                                 </div>
@@ -147,8 +147,8 @@ export function ResultPhase({
                         <div className="text-center px-8 py-4 bg-white/5 rounded-xl border border-white/5 max-w-sm">
                             <p className="text-gray-400 text-xs leading-relaxed">
                                 {isHostDefault
-                                    ? `${hostName} は誘惑を断ち切り、システムが提示した DEFAULT CHOICE をそのまま出しました。`
-                                    : `${hostName} は土壇場で ANOTHER CHOICE を選び、裏をかこうとしました。`
+                                    ? <><span style={{ color: '#FF4444' }} className="font-bold">{hostName}</span> は誘惑を断ち切り、システムが提示した DEFAULT CHOICE をそのまま出しました。</>
+                                    : <><span style={{ color: '#FF4444' }} className="font-bold">{hostName}</span> は土壇場で ANOTHER CHOICE を選び、裏をかこうとしました。</>
                                 }
                             </p>
                         </div>
@@ -205,7 +205,7 @@ export function ResultPhase({
                                 handType={hostHand}
                                 revealed={true}
                                 size="medium"
-                                personalColor={isCurrentHost ? userColor : undefined}
+                                personalColor={isCurrentHost ? userColor : "#FF4444"}
                             />
                         </div>
                         <div className="text-center font-black text-white tracking-widest text-2xl mt-4">

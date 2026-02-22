@@ -8,8 +8,6 @@ import { CurrentScores } from '../../common/CurrentScores'
 import { RewardSystem } from '../../common/RewardSystem'
 import { GameButton } from '../../common/GameButton'
 import { motion } from 'framer-motion'
-import { useState, useEffect } from 'react'
-import { cn } from '@/lib/utils'
 
 interface BattlePhaseProps {
     jankenEvent: JankenEventWithGuests | null

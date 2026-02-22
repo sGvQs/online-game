@@ -12,6 +12,7 @@ interface GameOverPhaseProps {
     currentScores: MatchScoreWithUser[]
     onFinish: () => void
     userColor?: string
+    hostId?: string
 }
 
 export function GameOverPhase({
@@ -21,6 +22,7 @@ export function GameOverPhase({
     currentScores,
     onFinish,
     userColor,
+    hostId,
 }: GameOverPhaseProps) {
     const styles = nullHandGame()
 
@@ -115,18 +117,48 @@ export function GameOverPhase({
                                         key={score.userId}
                                         className={cn(
                                             "flex justify-between items-center p-3 rounded-lg border",
-                                            rank === 1
-                                                ? "bg-black/30 border-[#FF4444]/20"
-                                                : "bg-black/30 border-[#44FFFF]/10"
+                                            score.userId === currentUserId
+                                                ? "bg-[#44FFFF]/10 border-[#44FFFF]/30"
+                                                : score.userId === hostId
+                                                    ? "bg-[#FF4444]/10 border-[#FF4444]/30"
+                                                    : "bg-black/30 border-[#44FFFF]/10"
                                         )}
                                     >
                                         <div className="flex flex-col gap-1">
                                             <div className="flex items-center gap-2">
-                                                <span className={cn(styles.rankBadge(), rank === 1 ? "bg-[#FF4444] text-black" : "")}>{rank}位</span>
-                                                <span className="text-white font-mono text-lg">{score.user.name}</span>
+                                                <span className={cn(
+                                                    styles.rankBadge(),
+                                                    rank === 1 ? "bg-[#FF4444] text-black" : "",
+                                                    score.userId === currentUserId && "shadow-[0_0_10px_rgba(68,255,255,0.5)]"
+                                                )}>
+                                                    {rank}位
+                                                </span>
+                                                <span
+                                                    className="font-mono text-lg"
+                                                    style={{
+                                                        color: score.userId === currentUserId
+                                                            ? userColor
+                                                            : score.userId === hostId
+                                                                ? "#FF4444"
+                                                                : "#44FFFF"
+                                                    }}
+                                                >
+                                                    {score.user.name}
+                                                </span>
                                             </div>
                                         </div>
-                                        <span className="text-[#44FFFF] font-bold font-mono text-1xl">{score.points}点</span>
+                                        <span
+                                            className="font-bold font-mono text-1xl"
+                                            style={{
+                                                color: score.userId === currentUserId
+                                                    ? userColor
+                                                    : score.userId === hostId
+                                                        ? "#FF4444"
+                                                        : "#44FFFF"
+                                            }}
+                                        >
+                                            {score.points}点
+                                        </span>
                                     </div>
                                 )
                             })
@@ -134,7 +166,7 @@ export function GameOverPhase({
                     </div>
                 )}
             </div>
-        </div>
+        </div >
     )
 
     return (
