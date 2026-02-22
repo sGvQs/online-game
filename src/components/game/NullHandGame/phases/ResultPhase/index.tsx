@@ -14,6 +14,7 @@ import type { RoomUserWithUser } from '@/shared/types'
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { CurrentScores } from '../../common/CurrentScores'
+import { HandCard } from '../../common/HandCard'
 
 type RoomUser = RoomUserWithUser
 
@@ -80,164 +81,152 @@ export function ResultPhase({
         </div>
     )
 
+    const [showSystemSelection, setShowSystemSelection] = useState(false)
+
     const MainArea = () => {
         const isHostDefault = hostChoice === 'STAY'
 
-        // ゲスト視点かつ自分の手がある場合
-        if (myHand && currentUserId !== jankenEvent.currentHostId) {
-            const result = judgeHand(hostHand, myHand)
-            const isGuestWin = result === 'GUEST_WIN'
-            const isDraw = result === 'DRAW'
+        return (
+            <motion.div className={styles.mainArea()} layout transition={{ duration: 0.3 }}>
+                <AnimatePresence mode="wait">
+                    {!showSystemSelection ? (
+                        <motion.div
+                            key="result-overview"
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -20 }}
+                            className="flex-1 flex flex-col w-full"
+                        >
+                            <PhaseHeader
+                                engLabel="ROUND RESULT"
+                                title={
+                                    myHand && currentUserId !== jankenEvent.currentHostId
+                                        ? (() => {
+                                            const result = judgeHand(hostHand, myHand)
+                                            return result === 'GUEST_WIN' ? "YOU WIN !!" : result === 'DRAW' ? "DRAW GAME" : "YOU LOSE..."
+                                        })()
+                                        : (() => {
+                                            let hasGuestWin = false
+                                            let hasDraw = false
+                                            jankenEvent.guestHands.forEach(gh => {
+                                                const res = judgeHand(hostHand, gh.hand as HandType)
+                                                if (res === 'GUEST_WIN') hasGuestWin = true
+                                                if (res === 'DRAW') hasDraw = true
+                                            })
+                                            const guestCount = jankenEvent.guestHands.length
+                                            const isNullHand = guestCount > 1 && !hasGuestWin && jankenEvent.guestHands.every(gh => judgeHand(hostHand, gh.hand as HandType) === 'DRAW')
+                                            const isGuestWin = !isNullHand && hasGuestWin
+                                            const isHostPerfectWin = guestCount > 1 && !isNullHand && !hasGuestWin && !hasDraw
 
-            return (
-                <motion.div className={styles.mainArea()} layout transition={{ duration: 0.3 }}>
-                    <PhaseHeader
-                        engLabel="ROUND RESULT"
-                        title={isGuestWin ? "YOU WIN !!" : isDraw ? "DRAW GAME" : "YOU LOSE..."}
-                        subLabel=""
-                    />
-
-                    <HostStatsDisplay />
-
-                    <div className="flex-1 flex flex-col items-center justify-center -translate-y-4">
-                        <div className="flex items-center justify-center gap-12 mb-8">
-                            {/* ホスト */}
-                            <div className="flex flex-col items-center">
-                                <div className={cn(rpStyles.playerName())} style={{ color: '#FF4444' }}>{hostName}</div>
-                                <div className="mt-4 mb-2">
-                                    <div className={cn(rpStyles.handWrapper(), result === 'HOST_WIN' || isDraw ? rpStyles.handWrapperWin() : rpStyles.handWrapperLose())}>
-                                        <Hand3D
-                                            handType={hostHand}
-                                            revealed={true}
-                                            size={result === 'HOST_WIN' || isDraw ? "medium" : "small"}
-                                            personalColor="#FF4444"
-                                        />
-                                    </div>
-                                </div>
-                                <div className={cn(
-                                    "mt-2 text-[10px] font-black tracking-widest px-3 py-0.5 border skew-x-[-10deg]",
-                                    isHostDefault ? 'text-[#44FFFF] border-[#44FFFF]/40 bg-[#44FFFF]/5' : 'text-gray-500 border-gray-800 bg-black/40'
-                                )}>
-                                    {isHostDefault ? 'DEFAULT CHOICE' : 'ANOTHER CHOICE'}
-                                </div>
-                            </div>
-
-                            <div className="text-gray-800 font-black text-4xl italic px-4">VS</div>
-
-                            {/* 自分 */}
-                            <div className="flex flex-col items-center">
-                                <div style={{ color: userColor }} className={cn(rpStyles.playerName(), rpStyles.myselfName())}>YOU</div>
-                                <div className="mt-4 mb-2">
-                                    <div className={cn(rpStyles.handWrapper(), isGuestWin || isDraw ? rpStyles.handWrapperWin() : rpStyles.handWrapperLose())}>
-                                        <Hand3D
-                                            handType={myHand}
-                                            revealed={true}
-                                            size={isGuestWin || isDraw ? "medium" : "small"}
-                                            personalColor={userColor}
-                                        />
-                                    </div>
-                                </div>
-                                <div className="text-center font-black text-white tracking-widest text-lg">
-                                    {getHandDisplayWithEmoji(myHand)}
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* 答え合わせテキスト */}
-                        <div className="text-center px-8 py-4 bg-white/5 rounded-xl border border-white/5 max-w-sm">
-                            <p className="text-gray-400 text-xs leading-relaxed">
-                                {isHostDefault
-                                    ? <><span style={{ color: '#FF4444' }} className="font-bold">{hostName}</span> は誘惑を断ち切り、システムが提示した DEFAULT CHOICE をそのまま出しました。</>
-                                    : <><span style={{ color: '#FF4444' }} className="font-bold">{hostName}</span> は土壇場で ANOTHER CHOICE を選び、裏をかこうとしました。</>
+                                            if (isNullHand) return "NULL HAND! (+5pt)"
+                                            if (isHostPerfectWin) return "PERFECT WIN! (+3pt)"
+                                            if (isGuestWin) return "YOU LOSE..."
+                                            if (!isGuestWin && !hasDraw) return "YOU WIN"
+                                            return "DRAW GAME"
+                                        })()
                                 }
-                            </p>
-                        </div>
-                    </div>
+                                subLabel=""
+                            />
 
-                    <div className="text-center pb-8">
+                            <HostStatsDisplay />
+
+                            <div className="flex-1 flex flex-col items-center justify-center">
+                                {myHand && currentUserId !== jankenEvent.currentHostId ? (
+                                    /* 対戦結果ビュー (GUEST) */
+                                    <div className="flex items-center justify-center gap-12 mb-8">
+                                        <div className="flex flex-col items-center">
+                                            <div className={cn(rpStyles.playerName())} style={{ color: '#FF4444' }}>{hostName}</div>
+                                            <HandCard
+                                                handType={hostHand}
+                                                color="red"
+                                                size={judgeHand(hostHand, myHand) === 'HOST_WIN' || judgeHand(hostHand, myHand) === 'DRAW' ? "medium" : "small"}
+                                                className="mt-4"
+                                            />
+                                        </div>
+
+                                        <div className="text-gray-800 font-black text-4xl italic px-4 translate-y-4">VS</div>
+
+                                        <div className="flex flex-col items-center">
+                                            <div style={{ color: userColor }} className={cn(rpStyles.playerName(), rpStyles.myselfName())}>YOU</div>
+                                            <HandCard
+                                                handType={myHand}
+                                                personalColor={userColor}
+                                                size={judgeHand(hostHand, myHand) === 'GUEST_WIN' || judgeHand(hostHand, myHand) === 'DRAW' ? "small" : "small"}
+                                                active={judgeHand(hostHand, myHand) === 'GUEST_WIN' || judgeHand(hostHand, myHand) === 'DRAW'}
+                                                className="mt-4"
+                                            />
+                                        </div>
+                                    </div>
+                                ) : (
+                                    /* ホスト/観戦者向け単一表示 */
+                                    <div className="flex flex-col items-center">
+                                        <HandCard
+                                            handType={hostHand}
+                                            color={isCurrentHost ? 'cyan' : 'red'}
+                                            personalColor={isCurrentHost ? userColor : undefined}
+                                            size="medium"
+                                        />
+                                    </div>
+                                )}
+                            </div>
+                        </motion.div>
+                    ) : (
+                        /* システム選択 (答え合わせ) ビュー */
+                        <motion.div
+                            key="system-selection"
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -20 }}
+                            className="flex-1 flex flex-col w-full"
+                        >
+                            <PhaseHeader
+                                engLabel="SYSTEM SELECTION"
+                                title="答え合わせ"
+                                subLabel="ORIGINAL OPTIONS"
+                            />
+
+                            <div className="flex flex-col items-center justify-center gap-4 mb-8 mt-4 h-full">
+                                <div className="relative w-80 h-32 flex items-center justify-center scale-90">
+                                    {/* 固定レイヤー：3Dの手 */}
+                                    <div className="absolute inset-0 flex items-center justify-between pointer-events-none px-4">
+                                        <div className="flex flex-col items-center gap-1">
+                                            <div className="w-32 h-32 flex items-center justify-center">
+                                                {realHand && <Hand3D handType={realHand} revealed={true} size="small" />}
+                                            </div>
+                                            <p className="text-[10px] text-[#44FFFF] font-bold text-center -translate-y-8">DEFAULT CHOICE</p>
+                                        </div>
+                                        <div className="text-gray-800 font-black text-4xl italic px-4 translate-y-4">OR</div>
+                                        <div className="flex flex-col items-center gap-1">
+                                            <div className="w-32 h-32 flex items-center justify-center">
+                                                {bluffHand && <Hand3D handType={bluffHand} revealed={true} size="small" />}
+                                            </div>
+                                            <div className="h-8 -translate-y-8" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </motion.div>
+                    )}
+                </AnimatePresence>
+
+                <div className="flex flex-col items-center gap-4 pb-8">
+                    <div className="flex gap-4">
+                        <button
+                            onClick={() => setShowSystemSelection(!showSystemSelection)}
+                            className="px-6 py-2 border border-white/10 bg-black/40 hover:bg-white/5 text-[10px] font-black tracking-widest text-gray-500 hover:text-white transition-all rounded"
+                        >
+                            {showSystemSelection ? 'SHOW RESULT' : 'SHOW SYSTEM SELECTION'}
+                        </button>
+
                         <GameButton
                             onClick={onNextRound}
                             disabled={isProcessing || isReady}
                             variant="primary"
-                            className="min-w-[240px]"
+                            className="min-w-[200px]"
                         >
                             {isReady ? `WAITING (${readyCount}/${totalCount})` : 'NEXT ROUND'}
                         </GameButton>
                     </div>
-                </motion.div>
-            )
-        }
-
-        // ホスト視点 or 観戦者
-        let hasGuestWin = false
-        let hasDraw = false
-
-        jankenEvent.guestHands.forEach(gh => {
-            const res = judgeHand(hostHand, gh.hand as HandType)
-            if (res === 'GUEST_WIN') hasGuestWin = true
-            if (res === 'DRAW') hasDraw = true
-        })
-
-        const guestCount = jankenEvent.guestHands.length
-        const isNullHand = guestCount > 1 && !hasGuestWin && jankenEvent.guestHands.every(gh => judgeHand(hostHand, gh.hand as HandType) === 'DRAW')
-        const isGuestWin = !isNullHand && hasGuestWin
-        const isHostPerfectWin = guestCount > 1 && !isNullHand && !hasGuestWin && !hasDraw
-
-        let resultTitle = "ROUND OVER"
-        if (isNullHand) resultTitle = "NULL HAND! (+5pt)"
-        else if (isHostPerfectWin) resultTitle = "PERFECT WIN! (+3pt)"
-        else if (isGuestWin) resultTitle = "YOU LOSE..."
-        else if (!isGuestWin && !hasDraw) resultTitle = "YOU WIN"
-        else resultTitle = "DRAW GAME"
-
-        return (
-            <motion.div className={styles.mainArea()} layout transition={{ duration: 0.3 }}>
-                <PhaseHeader
-                    engLabel="ROUND RESULT"
-                    title={resultTitle}
-                    subLabel=""
-                />
-
-                <div className="flex-1 flex flex-col items-center justify-center -translate-y-4">
-                    <div className="flex flex-col items-center">
-                        <div className={rpStyles.handWrapperWin()}>
-                            <Hand3D
-                                handType={hostHand}
-                                revealed={true}
-                                size="medium"
-                                personalColor={isCurrentHost ? userColor : "#FF4444"}
-                            />
-                        </div>
-                        <div className="text-center font-black text-white tracking-widest text-2xl mt-4">
-                            {getHandDisplayWithEmoji(hostHand)}
-                        </div>
-                        <div className={cn(
-                            "mt-4 text-xs font-black tracking-widest px-6 py-1.5 border-2 skew-x-[-10deg]",
-                            isHostDefault ? 'text-[#44FFFF] border-[#44FFFF]/40 bg-[#44FFFF]/5' : 'text-gray-400 border-gray-700 bg-black/40'
-                        )}>
-                            {isHostDefault ? 'DEFAULT CHOICE' : 'ANOTHER CHOICE'}
-                        </div>
-                    </div>
-
-                    <div className="mt-8 text-center px-8 py-4 bg-white/5 rounded-xl border border-white/5 max-w-sm">
-                        <p className="text-gray-400 text-xs leading-relaxed">
-                            {isHostDefault
-                                ? "あなたは DEFAULT CHOICE を押し通し、システムの提示に従いました。"
-                                : "あなたは ANOTHER CHOICE を選び、土壇場でゲストの裏をかきました。"
-                            }
-                        </p>
-                    </div>
-                </div>
-
-                <div className="text-center pb-8">
-                    <GameButton
-                        onClick={onNextRound}
-                        disabled={isProcessing || isReady}
-                        variant="primary"
-                        className="min-w-[240px]"
-                    >
-                        {isReady ? `WAITING (${readyCount}/${totalCount})` : 'NEXT ROUND'}
-                    </GameButton>
                 </div>
             </motion.div>
         )
