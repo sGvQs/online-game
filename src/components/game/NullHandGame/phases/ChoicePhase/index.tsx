@@ -5,7 +5,7 @@ import { getHandDisplayWithEmoji } from '../../utils'
 import { PhaseHeader } from '../../common/PhaseHeader'
 import { CurrentScores } from '../../common/CurrentScores'
 import { RewardSystem } from '../../common/RewardSystem'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useSE } from '@/hooks/useSE'
 import { useState, useEffect } from 'react'
 import { cn } from '@/lib/utils'
@@ -39,15 +39,46 @@ export function ChoicePhase({
     // CHOICEとBLUFFの枠を入れ替えるためのアニメーション状態
     const [isSwapped, setIsSwapped] = useState(false)
 
+    // システム選択演出用ステート
+    const [selectionStep, setSelectionStep] = useState(0)
+
+    // 演出タイマー
     useEffect(() => {
-        // ゲストの場合のみ、2秒ごとに自動で入れ替える（ホストの迷いを表現）
-        if (isCurrentHost) return
+        if (selectionStep === 0) {
+            const t = setTimeout(() => {
+                setSelectionStep(1)
+                play('select')
+            }, 2000) // 2s: Real Hand フェードイン
+            return () => clearTimeout(t)
+        } else if (selectionStep === 1) {
+            const t = setTimeout(() => {
+                setSelectionStep(2)
+                play('select')
+            }, 2000) // 4s: Bluff Hand フェードイン
+            return () => clearTimeout(t)
+        } else if (selectionStep === 2) {
+            const t = setTimeout(() => {
+                setSelectionStep(3)
+                play('submit')
+            }, 2000) // 6s: DEFAULT CHOICE ラベル点灯
+            return () => clearTimeout(t)
+        } else if (selectionStep === 3) {
+            const t = setTimeout(() => {
+                setSelectionStep(4)
+            }, 1000) // 7s: 通常UIへ
+            return () => clearTimeout(t)
+        }
+    }, [selectionStep, play])
+
+    useEffect(() => {
+        // 演出中（step 4未満）またはホスト自身の場合は自動入れ替えを停止
+        if (isCurrentHost || selectionStep < 4) return
 
         const interval = setInterval(() => {
             setIsSwapped(prev => !prev)
         }, 2000)
         return () => clearInterval(interval)
-    }, [isCurrentHost])
+    }, [isCurrentHost, selectionStep])
 
     if (!jankenEvent) return null
 
@@ -56,183 +87,191 @@ export function ChoicePhase({
 
     const MainArea = () => (
         <motion.div className={styles.mainArea()} layout transition={{ duration: 0.3 }}>
-            {isCurrentHost ? (
-                <>
-                    <PhaseHeader
-                        engLabel="あなたはホストです"
-                        title="勝負に出す手を選んでください"
-                        subLabel=""
-                    />
+            <PhaseHeader
+                engLabel={selectionStep < 4 ? "SYSTEM SELECTION" : (isCurrentHost ? "あなたはホストです" : "あなたはゲストです")}
+                title={selectionStep < 4 ? "システムが選択肢を生成しています..." : (isCurrentHost ? "勝負に出す手を選んでください" : "しばらくお待ちください...")}
+                subLabel={selectionStep < 4 ? "" : (!isCurrentHost ? `${hostName}がホストです` : "")}
+            />
 
-                    {/* ホストの統計情報 */}
-                    {hostStats && (
-                        <div className="flex flex-col items-center gap-2">
+            {/* ホストの統計情報 / 演出中のテキスト */}
+            <div className="h-16 flex items-center justify-center">
+                {selectionStep < 4 ? (
+                    <motion.div
+                        key="generating"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="flex justify-center items-center gap-2 text-gray-500 text-xs font-mono tracking-widest animate-pulse"
+                    >
+                        <span className="w-2 h-2 bg-[#FF4444] rounded-full" />
+                        SYSTEM: GENERATING HANDS...
+                    </motion.div>
+                ) : (
+                    hostStats && (
+                        <motion.div
+                            key="stats"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            className="flex flex-col items-center gap-2"
+                        >
                             <div className="flex justify-center items-center gap-2 text-gray-400 text-xs">
-                                <div className="w-2 h-2 bg-[#44FFFF] rounded-full animate-pulse mr-2" />
-                                あなたは過去に <span className="text-[#FF4444] text-sm font-bold">{hostStats.reverseRate !== null
+                                <div className={cn("w-2 h-2 rounded-full animate-pulse mr-2", isCurrentHost ? "bg-[#44FFFF]" : "bg-[#FF4444]")} />
+                                {isCurrentHost ? "あなたは" : `${hostName}は`}過去に <span className="text-[#FF4444] text-sm font-bold">{hostStats.reverseRate !== null
                                     ? 100 - hostStats.reverseRate
                                     : '???'
                                 }%</span> の確率で <span className="text-[#44FFFF] text-sm font-bold"> DEFAULT CHOICE </span> を選んでいます
                             </div>
-                            <p className="flex justify-center items-center gap-2 text-gray-400 text-xs animate-pulse">
-                                上記のデータはゲストに公開されています...
-                            </p>
-                        </div>
-                    )}
+                            {isCurrentHost ? (
+                                <p className="flex justify-center items-center gap-2 text-gray-400 animate-pulse text-xs">
+                                    上記のデータはゲストに公開されています...
+                                </p>
+                            ) : (
+                                <p className="flex justify-center items-center gap-2 text-gray-400 animate-pulse text-xs">
+                                    {hostName}は現在選択中です...
+                                </p>
 
-                    <div className="flex flex-col items-center justify-center gap-8">
-                        {/* CHOICE vs BLUFF のコンテナ（高さ固定、大型化） */}
-                        <div className="relative w-120 h-48 flex items-center justify-center">
-                            {/* 固定レイヤー：3Dの手 */}
-                            <div className="absolute inset-0 flex items-center justify-between pointer-events-none px-4">
-                                <div className="flex flex-col items-center gap-1 translate-y-2">
-                                    <div className="w-48 h-48 flex items-center justify-center">
-                                        {realHand && <Hand3D handType={realHand} revealed={true} size="small" personalColor={userColor} />}
-                                    </div>
-                                    <p className="text-xs text-[#44FFFF] font-bold text-center translate-y-2">DEFAULT CHOICE</p>
-                                </div>
-                                <div className="flex flex-col items-center gap-1 translate-y-2">
-                                    <div className="w-48 h-48 flex items-center justify-center">
-                                        {bluffHand && <Hand3D handType={bluffHand} revealed={true} size="small" personalColor={userColor} />}
-                                    </div>
-                                </div>
+                            )}
+                        </motion.div>
+                    )
+                )}
+            </div>
+
+            <div className="flex flex-col items-center justify-center gap-8 mt-4">
+                {/* CHOICE vs BLUFF のコンテナ（高さ固定、大型化） */}
+                <div className="relative w-120 h-48 flex items-center justify-center">
+                    {/* 固定レイヤー：3Dの手 */}
+                    <div className="absolute inset-0 flex items-center justify-between pointer-events-none px-4">
+                        {/* REAL (Left) */}
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: selectionStep >= 1 ? 1 : 0 }}
+                            className="flex flex-col items-center gap-1 translate-y-2"
+                        >
+                            <div className="w-48 h-48 flex items-center justify-center">
+                                {realHand && <Hand3D handType={realHand} revealed={true} size="small" personalColor={isCurrentHost && selectionStep === 4 ? userColor : undefined} />}
                             </div>
-
-                            {/* アニメーションレイヤー：動く枠 */}
-                            <div className="absolute inset-0 flex items-center justify-between px-4">
-                                <motion.div
-                                    layout
-                                    transition={{ duration: 0.8, type: 'spring', bounce: 0.4 }}
-                                    style={{ order: isSwapped ? 3 : 1 }}
-                                    className="flex flex-col items-center gap-1"
-                                    onClick={() => {
-                                        setIsSwapped(prev => !prev)
-                                    }}
-                                >
-                                    <div className="text-xs font-black tracking-[0.3em] text-[#44FFFF] mb-1">CHOICE</div>
-                                    <div className="w-48 h-48 border-2 border-[#44FFFF]" />
-                                    <div className="h-4" />
-                                </motion.div>
-                                <div className="order-2 text-gray-500 font-black text-xl translate-y-4">OR</div>
-
-                                <motion.div
-                                    layout
-                                    transition={{ duration: 0.8, type: 'spring', bounce: 0.4 }}
-                                    style={{ order: isSwapped ? 1 : 3 }}
-                                    className="flex flex-col items-center gap-1"
-                                    onClick={() => {
-                                        setIsSwapped(prev => !prev)
-                                    }}
-                                >
-                                    <div className="w-48 h-48" />
-                                    <div className="h-4" />
-                                </motion.div>
-                            </div>
-                        </div>
-
-                        <div className="flex gap-6 mt-10">
-                            <motion.button
-                                onClick={() => { play('select'); setIsSwapped(prev => !prev) }}
-                                disabled={isProcessing}
-                                whileHover={{ scale: 1.05 }}
-                                whileTap={{ scale: 0.95 }}
-                                className="flex flex-col items-center gap-3 px-10 py-3 border-2 border-white/20 bg-black hover:bg-white/10 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                                <span className="text-white font-black text-sm tracking-widest">CHANGE</span>
-                            </motion.button>
-                            <motion.button
-                                onClick={() => {
-                                    play('submit')
-                                    onChoice(isSwapped ? 'REVERSE' : 'STAY')
-                                }}
-                                disabled={isProcessing}
-                                whileHover={{ scale: 1.05 }}
-                                whileTap={{ scale: 0.95 }}
-                                className={cn(
-                                    "flex flex-col items-center gap-3 px-10 py-3 border-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed",
-                                    "border-[#44FFFF] bg-[#44FFFF]/10"
+                            <div className="h-6">
+                                {selectionStep >= 3 && (
+                                    <motion.p
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        className="text-xs text-[#44FFFF] font-black tracking-widest text-center translate-y-2 bg-[#44FFFF]/10 border border-[#44FFFF]/30 px-3 py-0.5 shadow-[0_0_15px_rgba(68,255,255,0.3)]"
+                                    >
+                                        DEFAULT CHOICE
+                                    </motion.p>
                                 )}
+                            </div>
+                        </motion.div>
+
+                        {/* BLUFF (Right) */}
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: selectionStep >= 2 ? 1 : 0 }}
+                            className="flex flex-col items-center gap-1 translate-y-2"
+                        >
+                            <div className="w-48 h-48 flex items-center justify-center mb-6">
+                                {bluffHand && <Hand3D handType={bluffHand} revealed={true} size="small" personalColor={isCurrentHost && selectionStep === 4 ? userColor : undefined} />}
+                            </div>
+                            <div className="h-6">
+
+                                {selectionStep >= 3 && (
+                                    <motion.p
+                                        initial={{ opacity: 0 }}
+                                        animate={{ opacity: 1 }}
+                                        className="text-xs text-gray-500 font-bold tracking-widest text-center translate-y-2"
+                                    >
+                                        ANOTHER CHOICE
+                                    </motion.p>
+                                )}
+                            </div>
+                        </motion.div>
+                    </div>
+
+                    {/* アニメーションレイヤー：動く枠 */}
+                    {selectionStep === 4 && (
+                        <motion.div
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            className="absolute inset-0 flex items-center justify-between px-4"
+                        >
+                            <motion.div
+                                layout
+                                transition={{ duration: 0.8, type: 'spring', bounce: 0.4 }}
+                                style={{ order: isSwapped ? 3 : 1 }}
+                                className="flex flex-col items-center gap-1 cursor-pointer"
+                                onClick={() => {
+                                    if (isCurrentHost && !isProcessing) {
+                                        play('select')
+                                        setIsSwapped(prev => !prev)
+                                    }
+                                }}
                             >
-                                <span className={cn("font-black text-sm tracking-[0.3em]", "text-[#44FFFF]")}>SUBMIT</span>
-                            </motion.button>
-                        </div>
-                    </div>
-                </>
-            ) : (
-                // Guest View
-                <>
-                    <PhaseHeader
-                        engLabel={`あなたはゲストです`}
-                        title={`しばらくお待ちください...`}
-                        subLabel={`${hostName}がホストです `}
-                    />
+                                <div className="text-xs font-black tracking-[0.3em] text-[#44FFFF] mb-1">CHOICE</div>
+                                <div className="w-48 h-48 border-2 border-[#44FFFF]" />
+                                <div className="h-4" />
+                            </motion.div>
+                            <div className="order-2 text-gray-500 font-black text-xl translate-y-4">OR</div>
 
-                    {hostStats && (
-                        <div className="flex flex-col items-center mt-6 mb-2 w-full mt-12">
-                            <div className="inline-flex flex-col items-start text-gray-400 text-xs text-left">
-                                <div className="flex justify-center items-center gap-2 text-gray-400 text-xs">
-                                    <div className="w-2 h-2 bg-[#FF4444] rounded-full animate-pulse mr-2" />
-                                    {hostName}は<span className="text-[#FF4444] text-sm font-bold">{hostStats.reverseRate !== null
-                                        ? 100 - hostStats.reverseRate
-                                        : '???'
-                                    }%</span> の確率で <span className="text-[#44FFFF] text-sm font-bold"> DEFAULT CHOICE </span>を選びます
-                                </div>
-                            </div>
-                            <div className="flex justify-center items-center gap-2 text-gray-400 animate-pulse text-xs mt-1">
-                                {hostName}は現在選択中です...
-                            </div>
-                        </div>
+                            <motion.div
+                                layout
+                                transition={{ duration: 0.8, type: 'spring', bounce: 0.4 }}
+                                style={{ order: isSwapped ? 1 : 3 }}
+                                className="flex flex-col items-center gap-1 cursor-pointer"
+                                onClick={() => {
+                                    if (isCurrentHost && !isProcessing) {
+                                        play('select')
+                                        setIsSwapped(prev => !prev)
+                                    }
+                                }}
+                            >
+                                <div className="w-48 h-48" />
+                                <div className="h-4" />
+                            </motion.div>
+                        </motion.div>
                     )}
+                </div>
 
-                    <div className="flex-1 flex flex-col items-center justify-center gap-8">
-                        <div className="relative w-120 h-48 flex items-center justify-center">
-                            {/* 固定レイヤー：3Dの手 */}
-                            <div className="absolute inset-0 flex items-center justify-between pointer-events-none px-4">
-                                <div className="flex flex-col items-center gap-1 translate-y-2">
-                                    <div className="w-48 h-48 flex items-center justify-center">
-                                        {realHand && <Hand3D handType={realHand} revealed={true} size="small" />}
-                                    </div>
-                                    <p className="text-xs text-[#44FFFF] font-bold text-center translate-y-2">DEFAULT CHOICE</p>
-                                </div>
-                                <div className="flex flex-col items-center gap-1 translate-y-2">
-                                    <div className="w-48 h-48 flex items-center justify-center">
-                                        {bluffHand && <Hand3D handType={bluffHand} revealed={true} size="small" />}
-                                    </div>
-                                    <p className="text-xs text-gray-400 text-center translate-y-2">ANOTHER CHOICE</p>
-                                </div>
-                            </div>
-
-                            {/* アニメーションレイヤー：動く枠 */}
-                            <div className="absolute inset-0 flex items-center justify-between px-4">
-                                <motion.div
-                                    layout
-                                    transition={{ duration: 0.8, type: 'spring', bounce: 0.4 }}
-                                    style={{ order: isSwapped ? 3 : 1 }}
-                                    className="flex flex-col items-center gap-1"
-                                >
-                                    <div className="text-xs font-black tracking-[0.3em] text-[#44FFFF] mb-1">CHOICE</div>
-                                    <div className="w-48 h-48 border-2 border-[#44FFFF]" />
-                                    <div className="h-4" />
-                                </motion.div>
-
-                                <div className="order-2 text-gray-500 font-black text-xl translate-y-4">OR</div>
-
-                                <motion.div
-                                    layout
-                                    transition={{ duration: 0.8, type: 'spring', bounce: 0.4 }}
-                                    style={{ order: isSwapped ? 1 : 3 }}
-                                    className="flex flex-col items-center gap-1"
-                                >
-                                    <div className="w-48 h-48" />
-                                    <div className="h-4" />
-                                </motion.div>
-                            </div>
-                        </div>
-                    </div>
-                </>
-            )
-            }
-        </motion.div >
+                {/* ボタンエリア */}
+                <div className="">
+                    {selectionStep === 4 && (
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="flex gap-6 mt-16"
+                        >
+                            {isCurrentHost && (
+                                <>
+                                    <motion.button
+                                        onClick={() => { play('select'); setIsSwapped(prev => !prev) }}
+                                        disabled={isProcessing}
+                                        whileHover={{ scale: 1.05 }}
+                                        whileTap={{ scale: 0.95 }}
+                                        className="flex flex-col items-center gap-3 px-10 py-3 border-2 border-white/20 bg-black hover:bg-white/10 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                        <span className="text-white font-black text-sm tracking-widest">CHANGE</span>
+                                    </motion.button>
+                                    <motion.button
+                                        onClick={() => {
+                                            play('submit')
+                                            onChoice(isSwapped ? 'REVERSE' : 'STAY')
+                                        }}
+                                        disabled={isProcessing}
+                                        whileHover={{ scale: 1.05 }}
+                                        whileTap={{ scale: 0.95 }}
+                                        className={cn(
+                                            "flex flex-col items-center gap-3 px-10 py-3 border-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed",
+                                            "border-[#44FFFF] bg-[#44FFFF]/10"
+                                        )}
+                                    >
+                                        <span className={cn("font-black text-sm tracking-[0.3em]", "text-[#44FFFF]")}>SUBMIT</span>
+                                    </motion.button>
+                                </>
+                            )}
+                        </motion.div>
+                    )}
+                </div>
+            </div>
+        </motion.div>
     )
 
     const SideArea = () => (
