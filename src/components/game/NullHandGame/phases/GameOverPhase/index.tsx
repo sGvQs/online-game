@@ -4,6 +4,8 @@ import { cn } from '@/lib/utils'
 import { SideHeader } from '../../common/SideHeader'
 import { GameButton } from '../../common/GameButton'
 import { Hand3D } from '../../Hand3D'
+import { CurrentScores } from '../../common/CurrentScores'
+import { motion } from 'framer-motion'
 
 interface GameOverPhaseProps {
     currentUserId: string
@@ -47,6 +49,10 @@ export function GameOverPhase({
 
                     if (!oldRank) return null
 
+                    const isWinner = newRank === 1;
+                    const isSingleWinner = currentScores.filter(s => s.points === Math.max(...currentScores.map(sc => sc.points))).length === 1;
+                    const winnerName = isSingleWinner ? currentScores.find(s => s.points === Math.max(...currentScores.map(sc => sc.points)))?.user.name : null;
+
                     return (
                         <div className="mb-12">
                             <div className="w-48 h-48 mx-auto mb-4">
@@ -64,7 +70,7 @@ export function GameOverPhase({
                                 <span className="text-[#FF4444] text-5xl">{newRank}位</span>
                             </div>
                             {oldPoints !== undefined && newPoints !== undefined && (
-                                <div className="mt-4 flex items-center justify-center gap-4 text-xl font-mono">
+                                <div className="mt-4 flex items-center justify-center gap-4 text-xl font-mono border-b border-white/5 pb-2">
                                     <div className="text-gray-400">合計ポイント:</div>
                                     <div className="flex items-center gap-4">
                                         <span className="text-gray-500">{Math.floor(oldPoints)}pt</span>
@@ -88,85 +94,16 @@ export function GameOverPhase({
 
     const SideArea = () => (
         <div className={styles.sideArea()}>
-            <div className="bg-[#051a1a] border border-[#44FFFF]/30 rounded-xl p-6 flex-1 flex flex-col">
-                <SideHeader
-                    engLabel="FINAL RANKING"
-                    label="最終順位"
-                    className="border-[#44FFFF]/30"
-                />
-                {currentScores.length > 0 && (
-                    <div className="space-y-3">
-                        {(() => {
-                            const sortedScores = [...currentScores].sort((a, b) => b.points - a.points)
-
-                            return sortedScores.map((score, index) => {
-                                const oldRank = initialRankings.find(r => r.userId === score.userId)?.rank
-                                const newRank = newRankings.find(r => r.userId === score.userId)?.rank ?? oldRank
-
-                                let rank = index + 1
-                                if (index > 0 && score.points === sortedScores[index - 1].points) {
-                                    let prevIndex = index - 1
-                                    while (prevIndex >= 0 && sortedScores[prevIndex].points === score.points) {
-                                        rank = prevIndex + 1
-                                        prevIndex--
-                                    }
-                                }
-
-                                return (
-                                    <div
-                                        key={score.userId}
-                                        className={cn(
-                                            "flex justify-between items-center p-3 rounded-lg border",
-                                            score.userId === currentUserId
-                                                ? "bg-[#44FFFF]/10 border-[#44FFFF]/30"
-                                                : score.userId === hostId
-                                                    ? "bg-[#FF4444]/10 border-[#FF4444]/30"
-                                                    : "bg-black/30 border-[#44FFFF]/10"
-                                        )}
-                                    >
-                                        <div className="flex flex-col gap-1">
-                                            <div className="flex items-center gap-2">
-                                                <span className={cn(
-                                                    styles.rankBadge(),
-                                                    rank === 1 ? "bg-[#FF4444] text-black" : "",
-                                                    score.userId === currentUserId && "shadow-[0_0_10px_rgba(68,255,255,0.5)]"
-                                                )}>
-                                                    {rank}位
-                                                </span>
-                                                <span
-                                                    className="font-mono text-lg"
-                                                    style={{
-                                                        color: score.userId === currentUserId
-                                                            ? userColor
-                                                            : score.userId === hostId
-                                                                ? "#FF4444"
-                                                                : "#44FFFF"
-                                                    }}
-                                                >
-                                                    {score.user.name}
-                                                </span>
-                                            </div>
-                                        </div>
-                                        <span
-                                            className="font-bold font-mono text-1xl"
-                                            style={{
-                                                color: score.userId === currentUserId
-                                                    ? userColor
-                                                    : score.userId === hostId
-                                                        ? "#FF4444"
-                                                        : "#44FFFF"
-                                            }}
-                                        >
-                                            {score.points}点
-                                        </span>
-                                    </div>
-                                )
-                            })
-                        })()}
-                    </div>
-                )}
-            </div>
-        </div >
+            <CurrentScores
+                currentScores={currentScores}
+                currentUserId={currentUserId}
+                hostId={hostId}
+                label="最終順位"
+                engLabel="FINAL RANKING"
+                size="lg"
+                userColor={userColor}
+            />
+        </div>
     )
 
     return (

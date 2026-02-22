@@ -6,7 +6,9 @@ import { cn } from '@/lib/utils'
 interface CurrentScoresProps {
     currentScores: MatchScoreWithUser[]
     currentUserId: string
-    hostId?: string // 追加
+    hostId?: string
+    label?: string
+    engLabel?: string
     variant?: 'cyan' | 'red'
     size?: 'sm' | 'md' | 'lg'
     userColor?: string
@@ -15,7 +17,9 @@ interface CurrentScoresProps {
 export function CurrentScores({
     currentScores,
     currentUserId,
-    hostId, // 追加
+    hostId,
+    label = "現在のスコア",
+    engLabel = "CURRENT SCORES",
     variant = 'cyan',
     size = 'md',
     userColor
@@ -23,8 +27,8 @@ export function CurrentScores({
     return (
         <div className={sideCard({ variant, size }).card() + " flex-1 overflow-hidden flex flex-col"}>
             <SideHeader
-                engLabel="CURRENT SCORES"
-                label="現在のスコア"
+                engLabel={engLabel}
+                label={label}
                 className={variant === 'cyan' ? "border-[#44FFFF]/30" : "border-[#FF4444]/30"}
             />
             <div className="mt-3 flex-1 overflow-y-auto space-y-2 pr-1 custom-scrollbar scrollbar-hide">
