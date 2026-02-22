@@ -61,22 +61,20 @@ export function ResultPhase({
     const myHandData = jankenEvent.guestHands.find(gh => gh.userId === currentUserId)
     const myHand = myHandData?.hand as HandType | undefined
 
-    // 共通のホスト統計表示コンポーネント
+    // 共通のホスト統計表示コンポーネント（ChoicePhaseのスタイルを完全移植）
     const HostStatsDisplay = () => hostStats && (
-        <div className="flex flex-col items-center mb-6 w-full">
-            <div className="inline-flex flex-col items-start text-gray-400 text-[10px] text-left">
-                <div className="flex items-center leading-relaxed">
-                    <div className="w-1.5 h-1.5 bg-[#FF4444] rounded-full animate-pulse mr-2 flex-shrink-0" />
-                    <span>
-                        {hostName}は過去に
-                        <span className="text-[#FF4444] font-bold mx-1">
-                            {hostStats.reverseRate !== null ? 100 - hostStats.reverseRate : '???'}%
-                        </span>
-                        の確率で
-                        <span className="text-[#44FFFF] font-bold ml-1 uppercase tracking-tighter">DEFAULT CHOICE</span>
-                        を選んでいました
-                    </span>
-                </div>
+        <div className="flex flex-col items-center mb-4 w-full h-12 justify-center">
+            <div className="flex justify-center items-center gap-2 text-gray-400 text-xs">
+                <div className={cn("w-2 h-2 rounded-full animate-pulse mr-2", isCurrentHost ? "bg-[#44FFFF]" : "bg-[#FF4444]")} />
+                {isCurrentHost ? "あなたは" : `${hostName}は`}過去に
+                <span className="text-[#FF4444] text-sm font-bold mx-1">
+                    {hostStats.reverseRate !== null ? 100 - hostStats.reverseRate : '???'}%
+                </span>
+                の確率で
+                <span className="text-[#44FFFF] text-sm font-bold ml-1 uppercase tracking-tighter">
+                    DEFAULT CHOICE
+                </span>
+                を選んでいました
             </div>
         </div>
     )
@@ -127,8 +125,6 @@ export function ResultPhase({
                                 }
                                 subLabel=""
                             />
-
-                            <HostStatsDisplay />
 
                             <div className="flex-1 flex flex-col items-center justify-center">
                                 {myHand && currentUserId !== jankenEvent.currentHostId ? (
@@ -184,6 +180,10 @@ export function ResultPhase({
                                 title="答え合わせ"
                                 subLabel="ORIGINAL OPTIONS"
                             />
+
+                            <div className="mt-6">
+                                <HostStatsDisplay />
+                            </div>
 
                             <div className="flex-1 flex flex-col items-center justify-center">
                                 {/* ChoicePhaseと共通の部品・レイアウト */}
