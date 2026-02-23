@@ -68,8 +68,8 @@ export function BattlePhase({
         const MainArea = () => (
             <motion.div className={styles.mainArea()} layout transition={{ duration: 0.3 }}>
                 <PhaseHeader
-                    engLabel="BATTLE PHASE"
-                    title={`${hostName}に勝つ手を選べ`}
+                    engLabel="あなたのターンです"
+                    title={`${hostName}に勝つ手を選んでください`}
                     subLabel=""
                 />
 
@@ -147,8 +147,8 @@ export function BattlePhase({
         const MainArea = () => (
             <motion.div className={styles.mainArea()} layout transition={{ duration: 0.3 }}>
                 <PhaseHeader
-                    engLabel="WAITING..."
-                    title="ゲストが選択しています"
+                    engLabel="ゲストが選択しています..."
+                    title="しばらくお待ちください"
                     subLabel=""
                 />
 

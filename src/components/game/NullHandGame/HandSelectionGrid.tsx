@@ -44,7 +44,7 @@ export function HandSelectionGrid({
 
                         {isSelected ? (
                             <div className={s.label()}>
-                                SELECTED
+                                YOUR CHOICE
                             </div>
                         ) : (
                             <div className={s.label()}>

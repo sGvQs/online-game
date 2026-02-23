@@ -100,7 +100,7 @@ export function ResultPhase({
         }
 
         return (
-            <div className="flex flex-col items-center mb-4 w-full h-8 justify-center">
+            <div className="flex flex-col items-center mb-4 w-full h-8 justify-center mt-8">
                 <div className="flex justify-center items-center gap-2 text-gray-400 text-xs font-mono tracking-widest">
                     <div className={cn("w-1.5 h-1.5 rounded-full animate-pulse mr-1", earnedPoints > 0 ? "bg-[#44FFFF]" : "bg-gray-600")} />
 
@@ -138,7 +138,7 @@ export function ResultPhase({
                         className="flex-1 flex flex-col w-full"
                     >
                         <PhaseHeader
-                            engLabel="ROUND RESULT"
+                            engLabel="このラウンドの結果"
                             title={
                                 myHand && currentUserId !== jankenEvent.currentHostId
                                     ? (() => {
@@ -219,9 +219,9 @@ export function ResultPhase({
                         className="flex-1 flex flex-col w-full"
                     >
                         <PhaseHeader
-                            engLabel="SYSTEM SELECTION"
-                            title="答え合わせ"
-                            subLabel="ORIGINAL OPTIONS"
+                            engLabel="答え合わせ"
+                            title={isCurrentHost ? "あなたは何を選んだのか" : "ホストは何を選んだのか"}
+                            subLabel=""
                         />
 
                         <div className="mt-6">
