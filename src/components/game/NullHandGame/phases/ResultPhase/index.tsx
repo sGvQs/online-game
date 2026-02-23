@@ -318,7 +318,9 @@ export function ResultPhase({
                             variant="primary"
                             className="min-w-[240px]"
                         >
-                            {isReady ? `WAITING (${readyCount}/${totalCount})` : 'NEXT ROUND'}
+                            {isReady
+                                ? `WAITING (${readyCount}/${totalCount})`
+                                : (jankenEvent?.turnNumber === jankenEvent?.match.totalTurns ? 'FINAL RESULT' : 'NEXT ROUND')}
                         </GameButton>
                     </div>
                 </div>

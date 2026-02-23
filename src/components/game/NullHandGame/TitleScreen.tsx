@@ -235,7 +235,7 @@ export function TitleScreen({
                                         NULL HAND
                                     </h2>
                                     <div className="flex justify-center my-2">
-                                        <div className="w-24 h-24">
+                                        <div className="w-40 h-40">
                                             <Hand3D handType={HandType.ROCK} revealed={true} size={"small"} />
                                         </div>
                                     </div>
@@ -250,7 +250,7 @@ export function TitleScreen({
                                         👁️ 嘘を見抜け。心理を読め。
                                     </h2>
                                     <p className="text-xs italic text-gray-400">
-                                        ホストの「偽装工作」を暴き、じゃんけんで完全勝利せよ！
+                                        ホストの企みを見抜き、じゃんけんで完全勝利せよ！
                                     </p>
                                 </div>
 
@@ -265,7 +265,7 @@ export function TitleScreen({
                                             <span className="font-bold mr-2 text-[#FF4444]">1.</span>
                                             <span>
                                                 <strong className="text-white">ホストの選択 (CHOICE)</strong><br />
-                                                ホストは提示された「SYSTEM SELECTION」と「BLUFF」のどちらで勝負するかを裏で決断します。
+                                                ホストは提示された「SYSTEM SELECTION」かもう一つの手のどちらで勝負するかを裏で決断します。
                                             </span>
                                         </li>
                                         <li className="flex items-start">
@@ -296,6 +296,7 @@ export function TitleScreen({
                                         isHost={isHost}
                                         userColor={userColor}
                                         size="md"
+                                        showArrow={false}
                                     />
                                 </div>
 
@@ -307,11 +308,15 @@ export function TitleScreen({
                                     <ul className="space-y-2 text-xs pl-2 text-gray-300">
                                         <li className="flex items-start">
                                             <span className="mr-2 text-[#FF4444]">•</span>
-                                            <span>「変える確率」や「お気に入り」からホストの心理を読み取ろう</span>
+                                            <span>「SYSTEM SELECTION」の確率からホストの心理を読み取ろう</span>
                                         </li>
                                         <li className="flex items-start">
                                             <span className="mr-2 text-[#FF4444]">•</span>
-                                            <span><span className="text-[#FF4444] font-semibold">裏の裏をかくか、素直に信じるか...</span>駆け引きが重要です</span>
+                                            <span><span className="text-[#FF4444] font-semibold">裏の裏をかくか、データを信じるか...</span>駆け引きが重要です</span>
+                                        </li>
+                                        <li className="flex items-start">
+                                            <span className="mr-2 text-[#FF4444]">•</span>
+                                            <span className="text-[#FF4444] font-semibold">ポイント配当も重要な情報です</span>
                                         </li>
                                     </ul>
                                 </div>

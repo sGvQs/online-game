@@ -9,6 +9,7 @@ interface RewardSystemProps {
     userColor?: string
     variant?: 'cyan' | 'red'
     size?: 'sm' | 'md' | 'lg'
+    showArrow?: boolean
 }
 
 export function RewardSystem({
@@ -16,7 +17,8 @@ export function RewardSystem({
     isHost = false,
     userColor = '#44FFFF',
     variant = 'red',
-    size = 'md'
+    size = 'md',
+    showArrow = true,
 }: RewardSystemProps) {
     const rules = [
         { title: 'NULL HAND', desc: '全員があいこ', show: guestCount >= 2, pts: '+5', target: 'HOST', color: '#FF4444' },
@@ -49,7 +51,7 @@ export function RewardSystem({
                                             className="absolute inset-0 rounded-full shadow-[0_0_8px_rgba(0,0,0,0.5)]"
                                             style={{ backgroundColor: item.color }}
                                         />
-                                        {isMyTarget && (
+                                        {showArrow && isMyTarget && (
                                             <motion.div
                                                 initial={{ opacity: 0, x: -5 }}
                                                 animate={{
