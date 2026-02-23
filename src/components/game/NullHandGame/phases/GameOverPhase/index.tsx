@@ -49,9 +49,7 @@ export function GameOverPhase({
 
                     if (!oldRank) return null
 
-                    const isWinner = newRank === 1;
                     const isSingleWinner = currentScores.filter(s => s.points === Math.max(...currentScores.map(sc => sc.points))).length === 1;
-                    const winnerName = isSingleWinner ? currentScores.find(s => s.points === Math.max(...currentScores.map(sc => sc.points)))?.user.name : null;
 
                     return (
                         <div className="mb-12">
@@ -70,7 +68,7 @@ export function GameOverPhase({
                                 <span className="text-[#FF4444] text-5xl">{newRank}位</span>
                             </div>
                             {oldPoints !== undefined && newPoints !== undefined && (
-                                <div className="mt-4 flex items-center justify-center gap-4 text-xl font-mono border-b border-white/5 pb-2">
+                                <div className="mt-4 flex items-center justify-center gap-4 text-xl font-mono pb-2">
                                     <div className="text-gray-400">合計ポイント:</div>
                                     <div className="flex items-center gap-4">
                                         <span className="text-gray-500">{Math.floor(oldPoints)}pt</span>
@@ -83,11 +81,15 @@ export function GameOverPhase({
                     )
                 })()}
 
-                <GameButton
-                    onClick={onFinish}
-                >
-                    BACK TO TITLE
-                </GameButton>
+                <div className='flex w-full items-center justify-center'>
+                    <GameButton
+                        onClick={onFinish}
+                    >
+                        BACK TO TITLE
+                    </GameButton>
+
+                </div>
+
             </div>
         </div>
     )
@@ -98,8 +100,8 @@ export function GameOverPhase({
                 currentScores={currentScores}
                 currentUserId={currentUserId}
                 hostId={hostId}
-                label="最終順位"
-                engLabel="FINAL RANKING"
+                label="最終スコア"
+                engLabel="FINAL SCORE"
                 size="lg"
                 userColor={userColor}
             />

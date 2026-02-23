@@ -8,6 +8,7 @@ import { motion } from 'framer-motion'
 import { useSE } from '@/hooks/useSE'
 import { useState, useEffect } from 'react'
 import { cn } from '@/lib/utils'
+import { GameButton } from '../../common/GameButton'
 
 interface ChoicePhaseProps {
     jankenEvent: JankenEventWithGuests | null
@@ -243,32 +244,24 @@ export function ChoicePhase({
                             className="flex gap-6"
                         >
                             {isCurrentHost && (
-                                <>
-                                    <motion.button
-                                        onClick={() => { play('select'); setIsSwapped(prev => !prev) }}
+                                <div className="flex gap-6">
+                                    <GameButton
+                                        variant="secondary"
+                                        onClick={() => { setIsSwapped(prev => !prev) }}
                                         disabled={isProcessing}
-                                        whileHover={{ scale: 1.05 }}
-                                        whileTap={{ scale: 0.95 }}
-                                        className="flex flex-col items-center gap-3 px-10 py-3 border-2 border-white/20 bg-black hover:bg-white/10 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                                     >
-                                        <span className="text-white font-black text-sm tracking-widest">CHANGE</span>
-                                    </motion.button>
-                                    <motion.button
+                                        CHANGE
+                                    </GameButton>
+                                    <GameButton
+                                        variant="cyan"
                                         onClick={() => {
-                                            play('submit')
                                             onChoice(isSwapped ? 'REVERSE' : 'STAY')
                                         }}
                                         disabled={isProcessing}
-                                        whileHover={{ scale: 1.05 }}
-                                        whileTap={{ scale: 0.95 }}
-                                        className={cn(
-                                            "flex flex-col items-center gap-3 px-10 py-3 border-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed",
-                                            "border-[#44FFFF] bg-[#44FFFF]/10"
-                                        )}
                                     >
-                                        <span className={cn("font-black text-sm tracking-[0.3em]", "text-[#44FFFF]")}>SUBMIT</span>
-                                    </motion.button>
-                                </>
+                                        SUBMIT
+                                    </GameButton>
+                                </div>
                             )}
                         </motion.div>
                     )}
