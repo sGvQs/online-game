@@ -163,7 +163,7 @@ export function TitleScreen({
                             }).map((u: RoomUserWithReadyStatus) => {
                                 const ranking = initialRankings.find(r => r.userId === u.userId)
                                 // ランキングが見つからない場合は未プレイ扱い
-                                const rankDisplay = ranking ? `世界順位:${ranking.rank}位 ${Math.floor(ranking.points)}pt` : '世界ランキング: 最下位 0pt'
+                                const rankDisplay = ranking ? `ランキング:${ranking.rank}位 ${Math.floor(ranking.points)}pt` : '世界ランキング: 最下位 0pt'
 
                                 return (
                                     <div key={u.id} className={styles.playerItem()}>

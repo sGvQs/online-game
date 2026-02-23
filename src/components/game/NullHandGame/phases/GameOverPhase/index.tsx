@@ -63,7 +63,7 @@ export function GameOverPhase({
                                     personalColor={userColor}
                                 />
                             </div>
-                            <div className="text-[#44FFFF] text-xl font-bold mb-2 tracking-widest">世界順位</div>
+                            <div className="text-[#44FFFF] text-xl font-bold mb-2 tracking-widest">ランキング</div>
                             <div className="flex items-center justify-center gap-8 text-4xl font-mono font-bold">
                                 <span className="text-gray-500">{oldRank}位</span>
                                 <span className="text-white">→</span>

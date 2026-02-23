@@ -153,7 +153,7 @@ export function DealPhase({
                     currentScores={currentScores}
                     currentUserId={currentUserId}
                     hostId={jankenEvent?.currentHostId}
-                    size="lg"
+                    size="md"
                     userColor={userColor}
                 />
                 <RewardSystem

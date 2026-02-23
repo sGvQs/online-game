@@ -305,7 +305,7 @@ export function ResultPhase({
                             variant="secondary"
                             className="min-w-[240px]"
                         >
-                            {showSystemSelection ? 'VIEW RESULT' : 'VIEW SYSTEM LOG'}
+                            {showSystemSelection ? 'VIEW RESULT' : 'VIEW ANSWER'}
                         </GameButton>
 
                         <GameButton
