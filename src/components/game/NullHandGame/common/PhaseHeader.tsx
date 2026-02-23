@@ -22,7 +22,7 @@ export const PhaseHeader = ({ engLabel, title, subLabel, className, currentTurn,
             )}
             <h2 className={styles.engLabel()}>{engLabel}</h2>
             <h3 className={cn(styles.title(), titleVariant === 'red' && "text-[#FF4444]")}>{title}</h3>
-            <p className={styles.subLabel()}>{subLabel}</p>
+            <p className={cn(styles.subLabel(), titleVariant === 'red' && "text-[#FF4444]")}>{subLabel}</p>
         </div>
     )
 }

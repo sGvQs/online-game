@@ -206,7 +206,7 @@ export function ChoicePhase({
                                     className="text-xs font-black tracking-[0.3em] mb-1"
                                     style={{ color: isCurrentHost ? (userColor || '#FF4444') : '#FF4444' }}
                                 >
-                                    CHOICE
+                                    {hostName}
                                 </div>
                                 <div
                                     className="w-48 h-48 border-2"

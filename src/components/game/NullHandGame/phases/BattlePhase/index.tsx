@@ -114,7 +114,7 @@ export function BattlePhase({
                                 <div className="w-32 h-32 flex items-center justify-center">
                                     {bluffHand && <Hand3D handType={bluffHand} revealed={true} size="small" />}
                                 </div>
-                                <p className="text-[8px] text-gray-400 text-center -translate-y-8">ANOTHER CHOICE</p>
+                                <div className='h-8' />
                             </div>
                         </div>
                     </div>
