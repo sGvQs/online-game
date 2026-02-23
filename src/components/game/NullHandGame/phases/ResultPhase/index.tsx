@@ -59,6 +59,20 @@ export function ResultPhase({
     const myHandData = jankenEvent.guestHands.find(gh => gh.userId === currentUserId)
     const myHand = myHandData?.hand as HandType | undefined
 
+    // 決着状況の判定ロジックを共通化
+    const guestHands = jankenEvent.guestHands
+    const guestCount = guestHands.length
+    let hasGuestWin = false
+    let hasDraw = false
+    guestHands.forEach(gh => {
+        const res = judgeHand(hostHand, gh.hand as HandType)
+        if (res === 'GUEST_WIN') hasGuestWin = true
+        if (res === 'DRAW') hasDraw = true
+    })
+
+    const isNullHand = guestCount > 1 && !hasGuestWin && guestHands.every(gh => judgeHand(hostHand, gh.hand as HandType) === 'DRAW')
+    const isHostPerfectWin = guestCount > 1 && !isNullHand && !hasGuestWin && !hasDraw
+
     // 共通のホスト統計表示コンポーネント（ChoicePhaseのスタイルを完全移植）
     const HostStatsDisplay = () => hostStats && (
         <div className="flex flex-col items-center mb-4 w-full h-12 justify-center">
@@ -72,25 +86,14 @@ export function ResultPhase({
                 <span className="text-[#44FFFF] text-sm font-bold ml-1 uppercase tracking-tighter">
                     SYSTEM SELECTION
                 </span>
-                を選んでいましたが、このラウンドでの選択は……
+                を選んでいましたが、このラウンドでは……
             </div>
         </div>
     )
 
     // 報酬フィードバック（個別の獲得スコア報告）
     const RewardFeedback = () => {
-        const hostHand = jankenEvent.finalHostHand as HandType
-        const myHandData = jankenEvent.guestHands.find(gh => gh.userId === currentUserId)
-        const myHand = myHandData?.hand as HandType | undefined
-
-        // 判定ロジックの再現
         let earnedPoints = 0
-        const guestWinners = jankenEvent.guestHands.filter(gh => judgeHand(hostHand, gh.hand as HandType) === 'GUEST_WIN').map(gh => gh.userId)
-        const guestDraws = jankenEvent.guestHands.filter(gh => judgeHand(hostHand, gh.hand as HandType) === 'DRAW')
-        const guestCount = jankenEvent.guestHands.length
-        const isNullHand = guestCount > 1 && jankenEvent.guestHands.every(gh => judgeHand(hostHand, gh.hand as HandType) === 'DRAW')
-        const isHostPerfectWin = guestCount > 1 && !isNullHand && guestWinners.length === 0 && guestDraws.length === 0
-
         if (isCurrentHost) {
             if (isNullHand) earnedPoints = 5
             else if (isHostPerfectWin) earnedPoints = 3
@@ -140,32 +143,29 @@ export function ResultPhase({
                         <PhaseHeader
                             engLabel="このラウンドの結果"
                             title={
-                                myHand && currentUserId !== jankenEvent.currentHostId
-                                    ? (() => {
+                                (() => {
+                                    if (isNullHand) return "NULL HAND"
+                                    if (isHostPerfectWin) return "HOST PERFECT"
+
+                                    if (myHand && currentUserId !== jankenEvent.currentHostId) {
                                         const result = judgeHand(hostHand, myHand)
                                         return result === 'GUEST_WIN' ? "YOU WIN !!" : result === 'DRAW' ? "DRAW GAME" : "YOU LOSE..."
-                                    })()
-                                    : (() => {
-                                        let hasGuestWin = false
-                                        let hasDraw = false
-                                        jankenEvent.guestHands.forEach(gh => {
-                                            const res = judgeHand(hostHand, gh.hand as HandType)
-                                            if (res === 'GUEST_WIN') hasGuestWin = true
-                                            if (res === 'DRAW') hasDraw = true
-                                        })
-                                        const guestCount = jankenEvent.guestHands.length
-                                        const isNullHand = guestCount > 1 && !hasGuestWin && jankenEvent.guestHands.every(gh => judgeHand(hostHand, gh.hand as HandType) === 'DRAW')
+                                    } else {
                                         const isGuestWin = !isNullHand && hasGuestWin
-                                        const isHostPerfectWin = guestCount > 1 && !isNullHand && !hasGuestWin && !hasDraw
-
-                                        if (isNullHand) return "NULL HAND"
-                                        if (isHostPerfectWin) return "HOST PERFECT"
                                         if (isGuestWin) return "YOU LOSE..."
                                         if (!isGuestWin && !hasDraw) return "GUEST WIN"
                                         return "DRAW GAME"
-                                    })()
+                                    }
+                                })()
                             }
-                            subLabel=""
+                            subLabel={
+                                (isNullHand || isHostPerfectWin) && !isCurrentHost
+                                    ? `${hostName} は ${isNullHand ? 5 : 3}PT 獲得しました`
+                                    : ""
+                            }
+                            titleVariant={
+                                (isNullHand || isHostPerfectWin) && !isCurrentHost ? 'red' : 'cyan'
+                            }
                             currentTurn={jankenEvent?.turnNumber}
                             totalTurns={jankenEvent?.match.totalTurns}
                         />
@@ -222,7 +222,7 @@ export function ResultPhase({
                     >
                         <PhaseHeader
                             engLabel="答え合わせ"
-                            title={isCurrentHost ? "あなたは何を選んだのか" : "ホストは何を選んだのか"}
+                            title={isCurrentHost ? "あなたは何を選んだのか" : `${hostName}は何を選んだのか`}
                             subLabel=""
                             currentTurn={jankenEvent?.turnNumber}
                             totalTurns={jankenEvent?.match.totalTurns}

@@ -8,9 +8,10 @@ interface PhaseHeaderProps {
     className?: string
     currentTurn?: number
     totalTurns?: number
+    titleVariant?: 'cyan' | 'red'
 }
 
-export const PhaseHeader = ({ engLabel, title, subLabel, className, currentTurn, totalTurns }: PhaseHeaderProps) => {
+export const PhaseHeader = ({ engLabel, title, subLabel, className, currentTurn, totalTurns, titleVariant = 'cyan' }: PhaseHeaderProps) => {
     const styles = phaseHeader()
     return (
         <div className={cn(styles.root(), className, "relative")}>
@@ -20,7 +21,7 @@ export const PhaseHeader = ({ engLabel, title, subLabel, className, currentTurn,
                 </div>
             )}
             <h2 className={styles.engLabel()}>{engLabel}</h2>
-            <h3 className={styles.title()}>{title}</h3>
+            <h3 className={cn(styles.title(), titleVariant === 'red' && "text-[#FF4444]")}>{title}</h3>
             <p className={styles.subLabel()}>{subLabel}</p>
         </div>
     )
