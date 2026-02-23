@@ -75,6 +75,8 @@ export function BattlePhase({
                     engLabel={hasSubmitted ? "他の人の選択を待っています..." : "あなたのターンです"}
                     title={hasSubmitted ? "しばらくお待ちください" : `${hostName}に勝つ手を選んでください`}
                     subLabel={""}
+                    currentTurn={jankenEvent?.turnNumber}
+                    totalTurns={jankenEvent?.match.totalTurns}
                 />
 
                 {/* ホストの統計情報 (ChoicePhaseを踏襲したスタイル) */}
@@ -152,9 +154,11 @@ export function BattlePhase({
         const MainArea = () => (
             <motion.div className={styles.mainArea()} layout transition={{ duration: 0.3 }}>
                 <PhaseHeader
-                    engLabel="ゲストが選択しています..."
+                    engLabel={hasSubmitted ? "他の人の選択を待っています..." : "ゲストが選択しています..."}
                     title="しばらくお待ちください"
                     subLabel=""
+                    currentTurn={jankenEvent?.turnNumber}
+                    totalTurns={jankenEvent?.match.totalTurns}
                 />
 
                 <div className="flex flex-col items-center mt-6 mb-2 w-full">

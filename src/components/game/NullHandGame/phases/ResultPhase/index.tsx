@@ -166,6 +166,8 @@ export function ResultPhase({
                                     })()
                             }
                             subLabel=""
+                            currentTurn={jankenEvent?.turnNumber}
+                            totalTurns={jankenEvent?.match.totalTurns}
                         />
 
                         <RewardFeedback />
@@ -222,6 +224,8 @@ export function ResultPhase({
                             engLabel="答え合わせ"
                             title={isCurrentHost ? "あなたは何を選んだのか" : "ホストは何を選んだのか"}
                             subLabel=""
+                            currentTurn={jankenEvent?.turnNumber}
+                            totalTurns={jankenEvent?.match.totalTurns}
                         />
 
                         <div className="mt-6">
