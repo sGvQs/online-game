@@ -182,6 +182,7 @@ export function NullHandGame({
                         onExit={handleClose}
                         userColor={userColor}
                         onColorChange={setUserColor}
+                        currentUserId={currentUserId}
                     />
                 )}
                 {phase !== 'TITLE' && (

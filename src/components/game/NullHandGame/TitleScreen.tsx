@@ -20,6 +20,7 @@ interface TitleScreenProps {
     onExit: () => void
     onColorChange: (color: string) => void
     userColor: string
+    currentUserId: string | null
 }
 
 const NEON_PALETTE = [
@@ -43,6 +44,7 @@ export function TitleScreen({
     onExit,
     userColor,
     onColorChange,
+    currentUserId,
 }: TitleScreenProps) {
     const styles = nullHandGame()
 
@@ -68,7 +70,7 @@ export function TitleScreen({
                     <div
                         className={cn(
                             styles.menuItem(),
-                            isReady && styles.menuItemReady()
+                            isReady ? "text-[#44FFFF] pointer-events-none" : "text-white opacity-80"
                         )}
                         onClick={() => {
                             play("select")
@@ -165,17 +167,25 @@ export function TitleScreen({
                                 // ランキングが見つからない場合は未プレイ扱い
                                 const rankDisplay = ranking ? `ランキング:${ranking.rank}位 ${Math.floor(ranking.points)}pt` : '世界ランキング: 最下位 0pt'
 
+                                const isMe = u.userId === currentUserId
+
                                 return (
                                     <div key={u.id} className={styles.playerItem()}>
                                         <div className="flex items-center">
                                             <span className={styles.rankingText()}>
                                                 {rankDisplay}
                                             </span>
-                                            <span className={u.isReady ? 'text-[#44FFFF]' : 'text-gray-500'}>
+                                            <span style={{
+                                                color: u.isReady
+                                                    ? (isMe ? userColor : '#44FFFF')
+                                                    : '#4b5563' // text-gray-600
+                                            }}>
                                                 {u.user?.name || '不明'}
                                             </span>
                                         </div>
-                                        <span className={u.isReady ? 'text-[#FF4444]' : 'text-gray-700'}>
+                                        <span style={{
+                                            color: u.isReady ? '#44FFFF' : '#374151' // シアン or text-gray-700
+                                        }} className="font-black text-sm">
                                             {u.isReady ? 'READY' : 'WAITING'}
                                         </span>
                                     </div>
