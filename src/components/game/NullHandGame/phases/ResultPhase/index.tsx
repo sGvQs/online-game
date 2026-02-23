@@ -272,8 +272,16 @@ export function ResultPhase({
                                 <div className="absolute inset-0 flex items-center justify-between px-4">
                                     {/* Selection Frame */}
                                     <div className={cn("flex flex-col items-center gap-1", isHostDefault ? "order-1" : "order-3")}>
-                                        <div className="text-xs font-black tracking-[0.3em] text-[#FF4444] mb-1">CHOICE</div>
-                                        <div className="w-48 h-48 border-2 border-[#FF4444]" />
+                                        <div
+                                            className="text-xs font-black tracking-[0.3em] mb-1"
+                                            style={{ color: isCurrentHost ? (userColor || '#FF4444') : '#FF4444' }}
+                                        >
+                                            CHOICE
+                                        </div>
+                                        <div
+                                            className="w-48 h-48 border-2"
+                                            style={{ borderColor: isCurrentHost ? (userColor || '#FF4444') : '#FF4444' }}
+                                        />
                                         <div className="h-4" />
                                     </div>
 

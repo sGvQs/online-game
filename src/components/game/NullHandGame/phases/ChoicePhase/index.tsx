@@ -199,8 +199,16 @@ export function ChoicePhase({
                                     }
                                 }}
                             >
-                                <div className="text-xs font-black tracking-[0.3em] text-[#FF4444] mb-1">CHOICE</div>
-                                <div className="w-48 h-48 border-2 border-[#FF4444]" />
+                                <div
+                                    className="text-xs font-black tracking-[0.3em] mb-1"
+                                    style={{ color: isCurrentHost ? (userColor || '#FF4444') : '#FF4444' }}
+                                >
+                                    CHOICE
+                                </div>
+                                <div
+                                    className="w-48 h-48 border-2"
+                                    style={{ borderColor: isCurrentHost ? (userColor || '#FF4444') : '#FF4444' }}
+                                />
                                 <div className="h-4" />
                             </motion.div>
                             <div className="order-2 text-gray-500 font-black text-xl translate-y-4">OR</div>
