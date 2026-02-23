@@ -158,10 +158,10 @@ export function ResultPhase({
                                         const isGuestWin = !isNullHand && hasGuestWin
                                         const isHostPerfectWin = guestCount > 1 && !isNullHand && !hasGuestWin && !hasDraw
 
-                                        if (isNullHand) return "NULL HAND! (+5pt)"
-                                        if (isHostPerfectWin) return "PERFECT WIN! (+3pt)"
+                                        if (isNullHand) return "NULL HAND"
+                                        if (isHostPerfectWin) return "HOST PERFECT"
                                         if (isGuestWin) return "YOU LOSE..."
-                                        if (!isGuestWin && !hasDraw) return "YOU WIN"
+                                        if (!isGuestWin && !hasDraw) return "GUEST WIN"
                                         return "DRAW GAME"
                                     })()
                             }

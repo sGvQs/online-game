@@ -8,6 +8,7 @@ import { CurrentScores } from '../../common/CurrentScores'
 import { RewardSystem } from '../../common/RewardSystem'
 import { GameButton } from '../../common/GameButton'
 import { motion } from 'framer-motion'
+import { cn } from '@/lib/utils'
 
 interface BattlePhaseProps {
     jankenEvent: JankenEventWithGuests | null
@@ -43,6 +44,9 @@ export function BattlePhase({
     const realHand = jankenEvent.systemRealHand as HandType | null
     const bluffHand = jankenEvent.systemBluffHand as HandType | null
 
+    // 自分が既に手を送信済みか判定
+    const hasSubmitted = jankenEvent.guestHands.some(gh => gh.userId === currentUserId)
+
     const SideArea = () => (
         <motion.div className={styles.sideArea()} layout transition={{ duration: 0.3 }}>
             <div className="flex flex-col gap-4 h-full">
@@ -68,9 +72,9 @@ export function BattlePhase({
         const MainArea = () => (
             <motion.div className={styles.mainArea()} layout transition={{ duration: 0.3 }}>
                 <PhaseHeader
-                    engLabel="あなたのターンです"
-                    title={`${hostName}に勝つ手を選んでください`}
-                    subLabel=""
+                    engLabel={hasSubmitted ? "他の人の選択を待っています..." : "あなたのターンです"}
+                    title={hasSubmitted ? "しばらくお待ちください" : `${hostName}に勝つ手を選んでください`}
+                    subLabel={""}
                 />
 
                 {/* ホストの統計情報 (ChoicePhaseを踏襲したスタイル) */}
@@ -117,18 +121,19 @@ export function BattlePhase({
                     <HandSelectionGrid
                         selectedHand={selectedHand}
                         onSelectHand={onSelectHand}
-                        isProcessing={isProcessing}
+                        isProcessing={isProcessing || hasSubmitted}
                         personalColor={userColor}
                         size="small"
                     />
 
                     <div className="text-center mt-8">
                         <GameButton
-                            disabled={!selectedHand || isProcessing}
+                            disabled={!selectedHand || isProcessing || hasSubmitted}
                             onClick={onSubmit}
-                            variant="primary"
+                            variant={hasSubmitted ? "cyan" : "primary"}
+                            className={cn(hasSubmitted && "pointer-events-none")}
                         >
-                            BATTLE !!
+                            {hasSubmitted ? "SUBMITTED" : "BATTLE !!"}
                         </GameButton>
                     </div>
                 </div>

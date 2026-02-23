@@ -22,7 +22,6 @@ export function RewardSystem({
         { title: 'NULL HAND', desc: '全員があいこ', show: guestCount >= 2, pts: '+5', target: 'HOST', color: '#FF4444' },
         { title: 'GUEST WIN', desc: 'ホストに勝利', show: true, pts: '+3', target: 'GUEST', color: '#44FFFF' },
         { title: 'HOST PERFECT', desc: 'ゲスト全員を撃破', show: guestCount >= 2, pts: '+3', target: 'HOST', color: '#FF4444' },
-        { title: 'DRAW', desc: '上記以外（勝ち・負け混在など）', show: true, pts: '0', target: 'ALL', color: '#666666' },
     ]
 
     return (
