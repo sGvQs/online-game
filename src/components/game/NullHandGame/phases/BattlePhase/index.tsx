@@ -149,47 +149,62 @@ export function BattlePhase({
                 <PhaseHeader
                     engLabel="WAITING..."
                     title="ゲストが選択しています"
-                    subLabel="PREPARING FOR BATTLE"
+                    subLabel=""
                 />
+
+                <div className="flex flex-col items-center mt-6 mb-2 w-full">
+                    <div className="inline-flex flex-col items-start text-gray-400 text-xs text-left">
+                        {hostStats && (
+                            <div className="flex items-center leading-relaxed">
+                                <div className="w-2 h-2 bg-[#44FFFF] rounded-full animate-pulse mr-2 flex-shrink-0" />
+                                <span className="text-[#44FFFF] font-bold ml-1">DEFAULT CHOICEを選ぶ確率 </span>
+                                <span className="text-white font-bold ml-1">
+                                    :
+                                </span>
+                                <span className="text-[#FF4444] text-sm font-bold mx-1">
+                                    {hostStats.reverseRate !== null ? 100 - hostStats.reverseRate : '???'}%
+                                </span>
+                                <span className="text-gray-400 text-[10px] ml-1 animate-pulse">(この情報は公開されています)</span>
+                            </div>
+                        )}
+                        {realHand && (
+                            <div className="flex items-center leading-relaxed">
+                                <div className="w-2 h-2 bg-[#44FFFF] rounded-full animate-pulse mr-2 flex-shrink-0" />
+                                <span className="text-[#44FFFF] font-bold ml-1">DEFAULT CHOICE </span>
+                                <span className="text-white font-bold ml-1">
+                                    : {getHandDisplayWithEmoji(realHand)}
+                                </span>
+                            </div>
+                        )}
+                        <div className="flex items-center leading-relaxed">
+                            <div className="w-2 h-2 bg-[#44FFFF] rounded-full animate-pulse mr-2 flex-shrink-0" />
+                            <span>
+                                <span className="text-[#44FFFF] font-bold ml-1">あなたが選んだ手</span>
+                                <span className="text-white font-bold ml-1">
+                                    : {getHandDisplayWithEmoji(jankenEvent.finalHostHand as HandType)}
+                                </span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
 
                 <div className="flex-1 flex flex-col items-center justify-center">
                     {jankenEvent?.finalHostHand ? (
                         <div className="text-center animate-in zoom-in duration-500">
-                            <div className="w-56 h-56 mx-auto relative">
+                            <div className="w-100 h-100 mx-auto relative">
                                 <Hand3D
                                     handType={jankenEvent.finalHostHand as HandType}
                                     revealed={true}
-                                    size="medium"
+                                    size="large"
                                     personalColor={userColor}
                                 />
                             </div>
                         </div>
                     ) : (
-                        <div className="w-48 h-48 mx-auto opacity-50">
-                            <Hand3D handType={null} revealed={false} size="medium" isRotating={true} />
+                        <div className="w-100 h-100 mx-auto opacity-50">
+                            <Hand3D handType={null} revealed={false} size="large" isRotating={true} />
                         </div>
                     )}
-                </div>
-
-
-                <div className="flex flex-col items-center mt-6 mb-2 w-full">
-                    <div className="inline-flex flex-col items-start text-gray-400 text-xs text-left">
-                        <div className="flex items-center leading-relaxed">
-                            <div className="w-2 h-2 bg-[#44FFFF] rounded-full animate-pulse mr-2 flex-shrink-0" />
-                            <span>
-                                あなたは{getHandDisplayWithEmoji(jankenEvent.finalHostHand as HandType)}を選びました
-                            </span>
-                        </div>
-                        {realHand && (
-                            <div className="flex items-center leading-relaxed">
-                                <div className="w-2 h-2 bg-[#44FFFF] rounded-full animate-pulse mr-2 flex-shrink-0" />
-                                <span>
-                                    <span className="text-[#44FFFF] text-sm font-bold ml-1">DEFAULT CHOICE</span>
-                                    は{getHandDisplayWithEmoji(realHand)}です
-                                </span>
-                            </div>
-                        )}
-                    </div>
                 </div>
             </motion.div>
         )

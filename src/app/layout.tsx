@@ -65,6 +65,7 @@ export default function RootLayout({
     <html lang="ja" suppressHydrationWarning>
       <body
         className={`${dotGothic16.variable} ${yuseiMagic.variable} ${kaiseiOpti.variable} ${zenMaruGothic.variable} ${geistSans.variable} ${geistMono.variable} antialiased`}
+        suppressHydrationWarning
       >
         <SoundProvider>
           <ThemeProvider>

@@ -5,7 +5,7 @@ import { getHandDisplayWithEmoji } from '../../utils'
 import { PhaseHeader } from '../../common/PhaseHeader'
 import { CurrentScores } from '../../common/CurrentScores'
 import { RewardSystem } from '../../common/RewardSystem'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { useSE } from '@/hooks/useSE'
 import { useState, useEffect } from 'react'
 import { cn } from '@/lib/utils'
@@ -200,8 +200,8 @@ export function ChoicePhase({
                                     }
                                 }}
                             >
-                                <div className="text-xs font-black tracking-[0.3em] text-[#44FFFF] mb-1">CHOICE</div>
-                                <div className="w-48 h-48 border-2 border-[#44FFFF]" />
+                                <div className="text-xs font-black tracking-[0.3em] text-[#FF4444] mb-1">CHOICE</div>
+                                <div className="w-48 h-48 border-2 border-[#FF4444]" />
                                 <div className="h-4" />
                             </motion.div>
                             <div className="order-2 text-gray-500 font-black text-xl translate-y-4">OR</div>
