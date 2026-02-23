@@ -1,13 +1,14 @@
-import { HandType, JankenEventWithGuests, HostStats } from '@/shared/types'
+import { HandType, JankenEventWithGuests, HostStats, MatchScoreWithUser } from '@/shared/types'
 import { Hand3D } from '../../Hand3D'
 import { nullHandGame } from '../../styles'
 import { getHandDisplayWithEmoji } from '../../utils'
 import { HandSelectionGrid } from '../../HandSelectionGrid'
 import { PhaseHeader } from '../../common/PhaseHeader'
-import { SideHeader } from '../../common/SideHeader'
+import { CurrentScores } from '../../common/CurrentScores'
+import { RewardSystem } from '../../common/RewardSystem'
 import { GameButton } from '../../common/GameButton'
-import { sideCard } from '../phaseCard.styles'
-import { battlePhase } from './styles'
+import { motion } from 'framer-motion'
+import { cn } from '@/lib/utils'
 
 interface BattlePhaseProps {
     jankenEvent: JankenEventWithGuests | null
@@ -18,6 +19,9 @@ interface BattlePhaseProps {
     onSelectHand: (hand: HandType) => void
     onSubmit: () => void
     hostName: string
+    currentScores: MatchScoreWithUser[]
+    currentUserId: string
+    userColor?: string
 }
 
 export function BattlePhase({
@@ -28,99 +32,116 @@ export function BattlePhase({
     isProcessing,
     onSelectHand,
     onSubmit,
-    hostName
+    hostName,
+    currentScores,
+    currentUserId,
+    userColor,
 }: BattlePhaseProps) {
     const styles = nullHandGame()
-    const bpStyles = battlePhase()
 
     if (!jankenEvent) return null
+
+    const realHand = jankenEvent.systemRealHand as HandType | null
+    const bluffHand = jankenEvent.systemBluffHand as HandType | null
+
+    // 自分が既に手を送信済みか判定
+    const hasSubmitted = jankenEvent.guestHands.some(gh => gh.userId === currentUserId)
+
+    const SideArea = () => (
+        <motion.div className={styles.sideArea()} layout transition={{ duration: 0.3 }}>
+            <div className="flex flex-col gap-4 h-full">
+                <CurrentScores
+                    currentScores={currentScores}
+                    currentUserId={currentUserId}
+                    hostId={jankenEvent?.currentHostId}
+                    size="md"
+                    userColor={userColor}
+                />
+                <RewardSystem
+                    guestCount={currentScores.length - 1}
+                    isHost={isCurrentHost}
+                    userColor={userColor}
+                    size="md"
+                />
+            </div>
+        </motion.div>
+    )
 
     if (!isCurrentHost) {
         // Guest View
         const MainArea = () => (
-            <div className={styles.mainArea()}>
+            <motion.div className={styles.mainArea()} layout transition={{ duration: 0.3 }}>
                 <PhaseHeader
-                    engLabel="BATTLE PHASE"
-                    title={`${hostName}に勝つ手を選べ`}
-                    subLabel="OBSERVE & DECIDE"
+                    engLabel={hasSubmitted ? "他の人の選択を待っています..." : "あなたのターンです"}
+                    title={hasSubmitted ? "しばらくお待ちください" : `${hostName}に勝つ手を選んでください`}
+                    subLabel={""}
+                    currentTurn={jankenEvent?.turnNumber}
+                    totalTurns={jankenEvent?.match.totalTurns}
                 />
 
-                <div className="flex justify-center w-full mb-8">
+                {/* ホストの統計情報 (ChoicePhaseを踏襲したスタイル) */}
+                {hostStats && (
+                    <div className="flex flex-col items-center mt-6 mb-2 w-full">
+                        <div className="inline-flex flex-col items-start text-gray-400 text-xs text-left">
+                            <div className="flex items-center leading-relaxed">
+                                <div className="w-2 h-2 bg-[#FF4444] rounded-full animate-pulse mr-2 flex-shrink-0" />
+                                <span>
+                                    {hostName}は過去に
+                                    <span className="text-[#FF4444] text-sm font-bold mx-1">
+                                        {hostStats.reverseRate !== null ? 100 - hostStats.reverseRate : '???'}%
+                                    </span>
+                                    の確率で
+                                    <span className="text-[#44FFFF] text-sm font-bold ml-1">SYSTEM SELECTION</span>
+                                    を選んでいます
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* ホストの選択肢 (小型版フレーム演出) */}
+                <div className="flex flex-col items-center justify-center gap-4 mb-8 mt-4">
+                    <div className="relative w-80 h-32 flex items-center justify-center scale-90">
+                        {/* 固定レイヤー：3Dの手 */}
+                        <div className="absolute inset-0 flex items-center justify-between pointer-events-none px-4">
+                            <div className="flex flex-col items-center gap-1">
+                                <div className="w-32 h-32 flex items-center justify-center">
+                                    {realHand && <Hand3D handType={realHand} revealed={true} size="small" />}
+                                </div>
+                                <p className="text-[10px] text-[#44FFFF] font-bold text-center -translate-y-8">SYSTEM SELECTION</p>
+                            </div>
+                            <div className="flex flex-col items-center gap-1">
+                                <div className="w-32 h-32 flex items-center justify-center">
+                                    {bluffHand && <Hand3D handType={bluffHand} revealed={true} size="small" />}
+                                </div>
+                                <div className='h-8' />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div className="flex-1 flex flex-col items-center justify-center">
                     <HandSelectionGrid
                         selectedHand={selectedHand}
                         onSelectHand={onSelectHand}
-                        isProcessing={isProcessing}
+                        isProcessing={isProcessing || hasSubmitted}
+                        personalColor={userColor}
                         size="small"
                     />
-                </div>
-                <div className="text-center mt-auto">
-                    <GameButton
-                        disabled={!selectedHand || isProcessing}
-                        onClick={onSubmit}
-                    >
-                        BATTLE
-                    </GameButton>
-                </div>
-            </div>
-        )
 
-        const SideArea = () => (
-            <div className={styles.sideArea()}>
-                <div className={sideCard({ variant: 'cyan', size: 'lg' }).card()}>
-                    <SideHeader
-                        engLabel="DATA ANALYSIS"
-                        label={`${hostName}のデータ`}
-                        badge="PUBLIC"
-                        className="border-[#44FFFF]/30"
-                    />
-
-                    <div className="space-y-4">
-                        {/* ホストの初期手 */}
-                        {jankenEvent && (
-                            <div className={sideCard({ variant: 'cyan', size: 'sm' }).dataBlock()}>
-                                <div className={sideCard().cardTitle()}>選択した手</div>
-                                <div className={sideCard({ size: 'lg' }).cardValue()}>
-                                    {jankenEvent.fakeTarget === 'INITIAL_HAND' && jankenEvent.fakeHandValue
-                                        ? getHandDisplayWithEmoji(jankenEvent.fakeHandValue as HandType)
-                                        : getHandDisplayWithEmoji(jankenEvent.initialHand as HandType)}
-                                </div>
-                            </div>
-                        )}
-
-                        {/* ホストの統計（公開用） */}
-                        {hostStats && (
-                            <>
-                                <div className={sideCard({ variant: 'cyan', size: 'sm' }).dataBlock()}>
-                                    <div className={sideCard().cardTitle()}>お気に入り</div>
-                                    <div className={sideCard({ size: 'lg' }).cardValue()}>
-                                        {getHandDisplayWithEmoji(
-                                            (jankenEvent?.fakeTarget === 'FAVORITE_HAND' && jankenEvent?.fakeFavoriteHandValue
-                                                ? jankenEvent.fakeFavoriteHandValue
-                                                : hostStats.favoriteHand) as HandType
-                                        )}
-                                    </div>
-                                </div>
-
-                                <div className={sideCard({ variant: 'cyan', size: 'sm' }).dataBlock()}>
-                                    <div className={sideCard().cardTitle()}>変える確率</div>
-                                    <div className={sideCard({ size: 'lg' }).cardValueWithUnit()}>
-                                        {jankenEvent?.fakeTarget === 'CHANGE_RATE' && jankenEvent?.fakeChangeRateValue !== null && jankenEvent?.fakeChangeRateValue !== undefined
-                                            ? jankenEvent.fakeChangeRateValue
-                                            : hostStats.changeRate}<span className="text-lg text-gray-500 font-bold ml-1">%</span>
-                                    </div>
-                                </div>
-                            </>
-                        )}
+                    <div className="text-center mt-8">
+                        <GameButton
+                            disabled={!selectedHand || isProcessing || hasSubmitted}
+                            onClick={onSubmit}
+                            variant={hasSubmitted ? "cyan" : "primary"}
+                            className={cn(hasSubmitted && "pointer-events-none")}
+                        >
+                            {hasSubmitted ? "SUBMITTED" : "BATTLE !!"}
+                        </GameButton>
                     </div>
-
-                    {hostStats && (
-                        <div className="mt-auto pt-4 text-[10px] text-gray-500 leading-relaxed border-t border-[#44FFFF]/10">
-                            <span className="text-[#44FFFF]">Note:</span> 全てのデータは{hostName}の過去の動向を正確に表していますが、<span className="text-[#FF4444] font-bold">嘘の情報</span>が紛れています。
-                        </div>
-                    )}
                 </div>
-            </div>
+            </motion.div>
         )
+
 
         return (
             <>
@@ -131,116 +152,72 @@ export function BattlePhase({
     } else {
         // Host View
         const MainArea = () => (
-            <div className={styles.mainArea()}>
+            <motion.div className={styles.mainArea()} layout transition={{ duration: 0.3 }}>
                 <PhaseHeader
-                    engLabel="WAITING..."
-                    title="ゲストの選択を待機中"
-                    subLabel="WAITING FOR GUESTS"
+                    engLabel={hasSubmitted ? "他の人の選択を待っています..." : "ゲストが選択しています..."}
+                    title="しばらくお待ちください"
+                    subLabel=""
+                    currentTurn={jankenEvent?.turnNumber}
+                    totalTurns={jankenEvent?.match.totalTurns}
                 />
+
+                <div className="flex flex-col items-center mt-6 mb-2 w-full">
+                    <div className="inline-flex flex-col items-start text-gray-400 text-xs text-left">
+                        {hostStats && (
+                            <div className="flex items-center leading-relaxed">
+                                <div className="w-2 h-2 bg-[#44FFFF] rounded-full animate-pulse mr-2 flex-shrink-0" />
+                                <span className="text-[#44FFFF] font-bold ml-1">SYSTEM SELECTIONを選ぶ確率 </span>
+                                <span className="text-white font-bold ml-1">
+                                    :
+                                </span>
+                                <span className="text-[#FF4444] text-sm font-bold mx-1">
+                                    {hostStats.reverseRate !== null ? 100 - hostStats.reverseRate : '???'}%
+                                </span>
+                                <span className="text-gray-400 text-[10px] ml-1 animate-pulse">(この情報は公開されています)</span>
+                            </div>
+                        )}
+                        {realHand && (
+                            <div className="flex items-center leading-relaxed">
+                                <div className="w-2 h-2 bg-[#44FFFF] rounded-full animate-pulse mr-2 flex-shrink-0" />
+                                <span className="text-[#44FFFF] font-bold ml-1">SYSTEM SELECTION </span>
+                                <span className="text-white font-bold ml-1">
+                                    : {getHandDisplayWithEmoji(realHand)}
+                                </span>
+                            </div>
+                        )}
+                        <div className="flex items-center leading-relaxed">
+                            <div className="w-2 h-2 bg-[#44FFFF] rounded-full animate-pulse mr-2 flex-shrink-0" />
+                            <span>
+                                <span className="text-[#44FFFF] font-bold ml-1">あなたが選んだ手</span>
+                                <span className="text-white font-bold ml-1">
+                                    : {getHandDisplayWithEmoji(jankenEvent.finalHostHand as HandType)}
+                                </span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
 
                 <div className="flex-1 flex flex-col items-center justify-center">
                     {jankenEvent?.finalHostHand ? (
                         <div className="text-center animate-in zoom-in duration-500">
-                            <div className="w-48 h-48 mx-auto relative group">
-                                <div className="relative z-10">
-                                    <Hand3D
-                                        handType={jankenEvent.finalHostHand as HandType}
-                                        revealed={true}
-                                        size="medium"
-                                    />
-                                </div>
-                                <p className="text-[12px] text-gray-500 text-center">
-                                    {(() => {
-                                        switch (jankenEvent.finalHostHand as HandType) {
-                                            case HandType.ROCK: return 'ゲストがチョキならあなたの勝ちです'
-                                            case HandType.SCISSORS: return 'ゲストがパーならあなたの勝ちです'
-                                            case HandType.PAPER: return 'ゲストがグーならあなたの勝ちです'
-                                            default: return ''
-                                        }
-                                    })()}
-                                </p>
-                            </div>
-
-                            <div className="mt-6">
-                                <span className="text-[#44FFFF] text-xs font-bold tracking-[0.2em] block mb-1">YOUR DECISION</span>
+                            <div className="w-100 h-100 mx-auto relative">
+                                <Hand3D
+                                    handType={jankenEvent.finalHostHand as HandType}
+                                    revealed={true}
+                                    size="large"
+                                    personalColor={userColor}
+                                />
                             </div>
                         </div>
                     ) : (
-                        <div className="w-48 h-48 mx-auto opacity-50">
-                            <Hand3D handType={null} revealed={false} size="medium" isRotating={true} />
+                        <div className="w-100 h-100 mx-auto opacity-50">
+                            <Hand3D handType={null} revealed={false} size="large" isRotating={true} />
                         </div>
                     )}
                 </div>
-            </div>
+            </motion.div>
         )
 
-        const SideArea = () => (
-            <div className={styles.sideArea()}>
-                <div className="flex flex-col gap-4 h-full">
-                    {/* 選択した手 + 嘘の情報カード */}
-                    {jankenEvent && (
-                        <div className={sideCard({ variant: 'red', size: 'lg' }).card()}>
-                            <SideHeader
-                                engLabel="STATUS MONITOR"
-                                label="あなたの状況"
-                                badge="PRIVATE"
-                                variant="red"
-                                className="border-[#FF4444]/30"
-                            />
-
-                            <div className="space-y-4">
-                                <div className={sideCard({ variant: 'red', size: 'sm' }).dataBlock()}>
-                                    <div className={sideCard().cardTitle()}>選択した手</div>
-                                    <div className={sideCard({ size: 'lg' }).cardValue()}>
-                                        {getHandDisplayWithEmoji(jankenEvent.initialHand as HandType)}
-                                    </div>
-                                </div>
-
-                                <div className={sideCard({ variant: 'red', size: 'sm' }).dataBlock()}>
-                                    <div className="flex justify-between items-center mb-2">
-                                        <div className={sideCard().cardTitle()}>嘘の情報</div>
-                                        <span className="text-[#FF4444] font-bold text-[10px] border border-[#FF4444]/30 px-1.5 py-0.5 rounded">ACTIVE</span>
-                                    </div>
-                                    <div className="text-white font-bold text-sm">
-                                        {jankenEvent.fakeTarget === 'NONE' && 'なし'}
-                                        {jankenEvent.fakeTarget === 'INITIAL_HAND' && '選択した手'}
-                                        {jankenEvent.fakeTarget === 'CHANGE_RATE' && '変える確率'}
-                                        {jankenEvent.fakeTarget === 'FAVORITE_HAND' && 'お気に入り'}
-                                    </div>
-                                    {jankenEvent.fakeTarget !== 'NONE' && (
-                                        <div className="mt-2 pt-2 border-t border-[#FF4444]/10 flex justify-between items-center">
-                                            <span className="text-[#FF4444] text-xs font-bold">嘘の値</span>
-                                            <span className="text-white font-bold font-mono">
-                                                {jankenEvent.fakeTarget === 'INITIAL_HAND' && getHandDisplayWithEmoji(jankenEvent.fakeHandValue as HandType)}
-                                                {jankenEvent.fakeTarget === 'CHANGE_RATE' && `${jankenEvent.fakeChangeRateValue}%`}
-                                                {jankenEvent.fakeTarget === 'FAVORITE_HAND' && getHandDisplayWithEmoji(jankenEvent.fakeFavoriteHandValue as HandType)}
-                                            </span>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* リアル統計カード */}
-                    {hostStats && (
-                        <div className={sideCard({ variant: 'cyan', size: 'lg' }).card()}>
-                            <div className="text-[#44FFFF] font-bold mb-3 text-xs uppercase tracking-wider opacity-70">あなたの情報</div>
-                            <div className="space-y-3">
-                                <div className={sideCard({ variant: 'cyan', size: 'sm' }).dataBlock()}>
-                                    <div className={sideCard().cardTitle()}>お気に入り</div>
-                                    <div className={sideCard({ size: 'lg' }).cardValue()}>{getHandDisplayWithEmoji(hostStats.realFavoriteHand as HandType)}</div>
-                                </div>
-                                <div className={sideCard({ variant: 'cyan', size: 'sm' }).dataBlock()}>
-                                    <div className={sideCard().cardTitle()}>変える確率</div>
-                                    <div className={sideCard({ size: 'lg' }).cardValueWithUnit()}>{hostStats.realChangeRate}%</div>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-                </div>
-            </div>
-        )
 
         return (
             <>

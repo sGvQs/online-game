@@ -11,6 +11,7 @@ interface Hand3DProps {
     revealed?: boolean
     size?: 'micro' | 'small' | 'medium' | 'large'
     isRotating?: boolean
+    personalColor?: string // NEW: 自分の色の場合はネオンカラー、そうでなければマットなクレヨン
 }
 
 /**
@@ -21,6 +22,7 @@ export function Hand3D({
     revealed = true,
     size = 'medium',
     isRotating = true,
+    personalColor,
 }: Hand3DProps) {
     const canvasHeight = size === 'micro' ? '100px' : size === 'small' ? '150px' : size === 'large' ? '400px' : '250px'
     const canvasWidth = size === 'micro' ? '100px' : '100%'
@@ -30,13 +32,13 @@ export function Hand3D({
                 <PerspectiveCamera makeDefault position={[0, 0, 6]} fov={40} />
 
                 {/* ライティング：面を際立たせる強い光 */}
-                <ambientLight intensity={0.4} />
-                <directionalLight position={[5, 5, 5]} intensity={1.2} />
+                <ambientLight intensity={personalColor ? 0.4 : 0.6} />
+                <directionalLight position={[5, 5, 5]} intensity={personalColor ? 3 : 1.2} />
                 <directionalLight position={[-5, -5, 2]} intensity={0.4} color="#aaccff" />
 
                 <group>
                     {revealed && handType && (
-                        <HandContainer handType={handType} isRotating={isRotating} />
+                        <HandContainer handType={handType} isRotating={isRotating} personalColor={personalColor} />
                     )}
                     {!revealed && <QuestionMark isRotating={isRotating} />}
                 </group>
@@ -50,7 +52,15 @@ export function Hand3D({
 /**
  * 手のコンテナ（ゆっくり反復アニメーション制御）
  */
-function HandContainer({ handType, isRotating }: { handType: HandType; isRotating: boolean }) {
+function HandContainer({
+    handType,
+    isRotating,
+    personalColor
+}: {
+    handType: HandType;
+    isRotating: boolean;
+    personalColor?: string
+}) {
     const groupRef = useRef<THREE.Group>(null!)
 
     useFrame((state) => {
@@ -71,9 +81,9 @@ function HandContainer({ handType, isRotating }: { handType: HandType; isRotatin
 
     return (
         <group ref={groupRef}>
-            {handType === HandType.ROCK && <Rock />}
-            {handType === HandType.SCISSORS && <Scissors />}
-            {handType === HandType.PAPER && <Paper />}
+            {handType === HandType.ROCK && <Rock color={personalColor} />}
+            {handType === HandType.SCISSORS && <Scissors color={personalColor} />}
+            {handType === HandType.PAPER && <Paper color={personalColor} />}
         </group>
     )
 }
@@ -82,14 +92,21 @@ function HandContainer({ handType, isRotating }: { handType: HandType; isRotatin
  * 共通マテリアル
  * flatShading: true でポリゴン感を強調
  */
-const PolygonMaterial = () => (
-    <meshStandardMaterial
-        color="#ffffff"
-        roughness={0.6}
-        metalness={0.2}
-        flatShading={true}
-    />
-)
+const PolygonMaterial = ({ color }: { color?: string }) => {
+    // 自分の色の場合はその色、そうでなければホストカラー（レッド）
+    const targetColor = color || "#FF4444"
+    const isNeon = true // クレヨンモードを廃止し、常にネオン
+    return (
+        <meshStandardMaterial
+            color={targetColor}
+            emissive={targetColor} // 常に発光させる
+            emissiveIntensity={0.3}
+            roughness={0.3}
+            metalness={0.4}
+            flatShading={true}
+        />
+    )
+}
 
 // 面取りの設定：半径を小さく、滑らかさを最低にして「角を削った」感を出す
 const bevelProps = {
@@ -100,12 +117,12 @@ const bevelProps = {
 /**
  * ROCK（グー）
  */
-function Rock() {
+function Rock({ color }: { color?: string }) {
     return (
         <group>
             {/* 手の甲 */}
             <RoundedBox args={[1.4, 1.2, 0.9]} {...bevelProps} position={[0, -0.1, 0]}>
-                <PolygonMaterial />
+                <PolygonMaterial color={color} />
             </RoundedBox>
             {/* 握った指 */}
             {[
@@ -115,12 +132,12 @@ function Rock() {
                 { x: 0.45, h: 0.7, z: 0.45 },
             ].map((f, i) => (
                 <RoundedBox key={i} args={[0.28, f.h, 0.5]} {...bevelProps} position={[f.x, 0.2, f.z]}>
-                    <PolygonMaterial />
+                    <PolygonMaterial color={color} />
                 </RoundedBox>
             ))}
             {/* 親指 */}
             <RoundedBox args={[0.4, 0.8, 0.5]} {...bevelProps} position={[-0.4, -0.1, 0.75]} rotation={[0, 0, -Math.PI / 2.2]}>
-                <PolygonMaterial />
+                <PolygonMaterial color={color} />
             </RoundedBox>
         </group>
     )
@@ -129,28 +146,28 @@ function Rock() {
 /**
  * SCISSORS（チョキ）
  */
-function Scissors() {
+function Scissors({ color }: { color?: string }) {
     return (
         <group>
             {/* 手のひらベース */}
             <RoundedBox args={[1.2, 1.0, 0.6]} {...bevelProps} position={[0, -0.3, 0]}>
-                <PolygonMaterial />
+                <PolygonMaterial color={color} />
             </RoundedBox>
             {/* 人差し指 */}
             <RoundedBox args={[0.3, 1.8, 0.3]} {...bevelProps} position={[-0.35, 0.8, 0]} rotation={[0, 0, 0.25]}>
-                <PolygonMaterial />
+                <PolygonMaterial color={color} />
             </RoundedBox>
             {/* 中指 */}
             <RoundedBox args={[0.3, 1.9, 0.3]} {...bevelProps} position={[0.35, 0.85, 0]} rotation={[0, 0, -0.25]}>
-                <PolygonMaterial />
+                <PolygonMaterial color={color} />
             </RoundedBox>
             {/* 握り込んだ指 */}
             <RoundedBox args={[0.7, 0.7, 0.45]} {...bevelProps} position={[0.2, -0.2, 0.4]}>
-                <PolygonMaterial />
+                <PolygonMaterial color={color} />
             </RoundedBox>
             {/* 親指 */}
             <RoundedBox args={[0.35, 0.8, 0.4]} {...bevelProps} position={[-0.5, -0.2, 0.5]} rotation={[0, 0, -Math.PI / 4]}>
-                <PolygonMaterial />
+                <PolygonMaterial color={color} />
             </RoundedBox>
         </group>
     )
@@ -159,7 +176,7 @@ function Scissors() {
 /**
  * PAPER（パー）
  */
-function Paper() {
+function Paper({ color }: { color?: string }) {
     const fingers = [
         { x: -0.6, y: 0.7, r: 0.3, h: 1.3 },
         { x: -0.2, y: 0.9, r: 0.1, h: 1.5 },
@@ -170,16 +187,16 @@ function Paper() {
         <group>
             {/* 手のひら */}
             <RoundedBox args={[1.5, 1.2, 0.3]} {...bevelProps} position={[0, -0.4, 0]}>
-                <PolygonMaterial />
+                <PolygonMaterial color={color} />
             </RoundedBox>
             {fingers.map((f, i) => (
                 <RoundedBox key={i} args={[0.3, f.h, 0.25]} {...bevelProps} position={[f.x, f.y, 0]} rotation={[0, 0, f.r]}>
-                    <PolygonMaterial />
+                    <PolygonMaterial color={color} />
                 </RoundedBox>
             ))}
             {/* 親指 */}
             <RoundedBox args={[0.3, 1.0, 0.25]} {...bevelProps} position={[-1.0, -0.2, 0.1]} rotation={[0, 0, Math.PI / 2.5]}>
-                <PolygonMaterial />
+                <PolygonMaterial color={color} />
             </RoundedBox>
         </group>
     )

@@ -29,7 +29,7 @@ export const prisma =
     globalForPrisma.prisma ||
     new PrismaClient({
         adapter,
-        // 必要に応じてログを出力
+        // Force refresh: 2026-02-21
         // log: ['query', 'info', 'warn', 'error'], 
     });
 

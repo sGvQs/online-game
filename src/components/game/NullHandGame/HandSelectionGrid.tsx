@@ -10,13 +10,15 @@ interface HandSelectionGridProps {
     onSelectHand: (hand: HandType) => void
     isProcessing?: boolean
     size?: 'small' | 'medium' | 'large'
+    personalColor?: string
 }
 
 export function HandSelectionGrid({
     selectedHand,
     onSelectHand,
     isProcessing = false,
-    size = 'small'
+    size = 'small',
+    personalColor
 }: HandSelectionGridProps) {
     const { play } = useSE()
     const styles = handSelectionGrid()
@@ -37,11 +39,18 @@ export function HandSelectionGrid({
                         disabled={isProcessing}
                     >
                         <div className={s.innerPad()}>
-                            <Hand3D handType={hand} revealed={true} size={size} />
+                            <Hand3D handType={hand} revealed={true} size={size} personalColor={personalColor} />
                         </div>
-                        <div className={s.label()}>
-                            {getHandDisplayWithEmoji(hand)}
-                        </div>
+
+                        {isSelected ? (
+                            <div className={s.label()}>
+                                YOUR CHOICE
+                            </div>
+                        ) : (
+                            <div className={s.label()}>
+                                {getHandDisplayWithEmoji(hand)}
+                            </div>
+                        )}
 
                         {/* Selection Indicator */}
                         {isSelected && (

@@ -1,16 +1,20 @@
-import { HandType, JankenEventWithGuests, MatchScoreWithUser, HostStats, FakeTarget, RoomUser } from '@/shared/types'
+import { HandType, JankenEventWithGuests, MatchScoreWithUser, HostStats } from '@/shared/types'
 import { Hand3D } from '../../Hand3D'
 import { nullHandGame } from '../../styles'
 import { cn } from '@/lib/utils'
-import { getHandDisplayWithEmoji, judgeHand } from '../../utils'
-import { LieRevealCard } from '../../LieRevealCard'
-import { SideHeader } from '../../common/SideHeader'
+import { judgeHand } from '../../utils'
+import { PhaseHeader } from '../../common/PhaseHeader'
+import { RewardSystem } from '../../common/RewardSystem'
 import { GameButton } from '../../common/GameButton'
 import { resultPhase } from './styles'
-import { sideCard } from '../phaseCard.styles'
+import type { RoomUserWithUser } from '@/shared/types'
 
 import { useState } from 'react'
 import { motion } from 'framer-motion'
+import { CurrentScores } from '../../common/CurrentScores'
+import { HandCard } from '../../common/HandCard'
+
+type RoomUser = RoomUserWithUser
 
 interface ResultPhaseProps {
     jankenEvent: JankenEventWithGuests | null
@@ -22,6 +26,7 @@ interface ResultPhaseProps {
     isCurrentHost: boolean
     hostStats: HostStats | null
     roomUsers: RoomUser[]
+    userColor?: string
 }
 
 export function ResultPhase({
@@ -33,11 +38,11 @@ export function ResultPhase({
     currentUserId,
     isCurrentHost,
     hostStats,
-    roomUsers
+    roomUsers,
+    userColor
 }: ResultPhaseProps) {
     const styles = nullHandGame()
     const rpStyles = resultPhase()
-    const [step, setStep] = useState<'RESULT' | 'REVEAL'>('RESULT')
 
     const currentUser = roomUsers.find(u => u.userId === currentUserId)
     const isReady = currentUser?.isReady ?? false
@@ -46,345 +51,300 @@ export function ResultPhase({
 
     if (!jankenEvent) return null
 
+    const hostHand = jankenEvent.finalHostHand as HandType
+    const hostChoice = jankenEvent.hostChoice
+    const realHand = jankenEvent.systemRealHand as HandType | null
+    const bluffHand = jankenEvent.systemBluffHand as HandType | null
+
+    const myHandData = jankenEvent.guestHands.find(gh => gh.userId === currentUserId)
+    const myHand = myHandData?.hand as HandType | undefined
+
+    // 決着状況の判定ロジックを共通化
+    const guestHands = jankenEvent.guestHands
+    const guestCount = guestHands.length
+    let hasGuestWin = false
+    let hasDraw = false
+    guestHands.forEach(gh => {
+        const res = judgeHand(hostHand, gh.hand as HandType)
+        if (res === 'GUEST_WIN') hasGuestWin = true
+        if (res === 'DRAW') hasDraw = true
+    })
+
+    const isNullHand = guestCount > 1 && !hasGuestWin && guestHands.every(gh => judgeHand(hostHand, gh.hand as HandType) === 'DRAW')
+    const isHostPerfectWin = guestCount > 1 && !isNullHand && !hasGuestWin && !hasDraw
+
+    // 共通のホスト統計表示コンポーネント（ChoicePhaseのスタイルを完全移植）
+    const HostStatsDisplay = () => hostStats && (
+        <div className="flex flex-col items-center mb-4 w-full h-12 justify-center">
+            <div className="flex justify-center items-center gap-2 text-gray-400 text-xs">
+                <div className={cn("w-2 h-2 rounded-full animate-pulse mr-2", isCurrentHost ? "bg-[#44FFFF]" : "bg-[#FF4444]")} />
+                {isCurrentHost ? "あなたは" : `${hostName}は`}過去に
+                <span className="text-[#FF4444] text-sm font-bold mx-1">
+                    {hostStats.reverseRate !== null ? 100 - hostStats.reverseRate : '???'}%
+                </span>
+                の確率で
+                <span className="text-[#44FFFF] text-sm font-bold ml-1 uppercase tracking-tighter">
+                    SYSTEM SELECTION
+                </span>
+                を選んでいましたが、このラウンドでは……
+            </div>
+        </div>
+    )
+
+    // 報酬フィードバック（個別の獲得スコア報告）
+    const RewardFeedback = () => {
+        let earnedPoints = 0
+        if (isCurrentHost) {
+            if (isNullHand) earnedPoints = 5
+            else if (isHostPerfectWin) earnedPoints = 3
+        } else if (myHand) {
+            const isMyWin = judgeHand(hostHand, myHand) === 'GUEST_WIN'
+            if (!isNullHand && isMyWin) earnedPoints = 3
+        }
+
+        return (
+            <div className="flex flex-col items-center mb-4 w-full h-8 justify-center mt-8">
+                <div className="flex justify-center items-center gap-2 text-gray-400 text-xs font-mono tracking-widest">
+                    <div className={cn("w-1.5 h-1.5 rounded-full animate-pulse mr-1", earnedPoints > 0 ? "bg-[#44FFFF]" : "bg-gray-600")} />
+
+                    {earnedPoints === 0 ? (
+                        <span>あなたはこのラウンドでなにも獲得できませんでした</span>
+
+                    ) : (
+                        <>
+                            <span>あなたはこのラウンドで</span>
+                            <span className={"font-bold text-[#44FFFF]"}>
+                                {earnedPoints}pt
+                            </span>
+                            <span>獲得しました</span>
+                        </>
+
+                    )}
+                </div>
+            </div>
+        )
+    }
+
+    const [showSystemSelection, setShowSystemSelection] = useState(false)
+
     const MainArea = () => {
-        // 現在のユーザーがゲストの場合、自分の手を取得
-        const myHandData = jankenEvent.guestHands.find(gh => gh.userId === currentUserId)
-        const myHand = myHandData?.hand as HandType | undefined
-        const hostHand = jankenEvent.finalHostHand as HandType
-
-        // ゲスト視点かつ自分の手がある場合、対決表示
-        if (myHand && currentUserId !== jankenEvent.currentHostId) {
-            const result = judgeHand(hostHand, myHand)
-            const isHostWin = result === 'HOST_WIN'
-            const isGuestWin = result === 'GUEST_WIN'
-            const isDraw = result === 'DRAW'
-
-            return (
-                <motion.div className={styles.mainArea()} layout transition={{ duration: 0.3 }}>
-                    {/* 結果画面（バトル） - STEP 1 */}
-                    {step === 'RESULT' && (
-                        <motion.div
-                            key="result"
-                            initial={{ opacity: 0, x: -20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: 20 }}
-                            transition={{ duration: 0.3 }}
-                            layout
-                            className="w-full"
-                        >
-                            <div className="flex justify-center items-center gap-8 mt-8">
-                                {/* ホスト */}
-                                <div className="flex flex-col items-center">
-                                    <div className={cn(rpStyles.playerName(), rpStyles.hostName())}>{hostName}</div>
-
-                                    {/* 勝敗バッジ */}
-                                    <div className="mb-4 h-8">
-                                        {isHostWin && <span className="bg-[#FF4444] text-black font-bold px-4 py-1 rounded">WIN</span>}
-                                        {isGuestWin && <span className="bg-gray-600 text-white font-bold px-4 py-1 rounded">LOSE</span>}
-                                        {isDraw && <span className="bg-gray-500 text-white font-bold px-4 py-1 rounded">DRAW</span>}
-                                    </div>
-
-                                    <div className={cn(rpStyles.handWrapper(), isHostWin || isDraw ? rpStyles.handWrapperWin() : rpStyles.handWrapperLose())}>
-                                        <Hand3D
-                                            handType={hostHand}
-                                            revealed={true}
-                                            size={isHostWin || isDraw ? "medium" : "small"}
-                                        />
-                                    </div>
-                                    <div className="text-center text-xl font-bold mt-2">
-                                        {getHandDisplayWithEmoji(hostHand)}
-                                    </div>
-                                </div>
-
-                                {/* VS */}
-                                <div className={rpStyles.vsText()}>VS</div>
-
-                                {/* 自分 */}
-                                <div className="flex flex-col items-center">
-                                    <div className={cn(rpStyles.playerName(), rpStyles.myselfName())}>自分</div>
-
-                                    {/* 勝敗バッジ */}
-                                    <div className="mb-4 h-8">
-                                        {isGuestWin && <span className="bg-[#44FFFF] text-black font-bold px-4 py-1 rounded">WIN</span>}
-                                        {isHostWin && <span className="bg-gray-600 text-white font-bold px-4 py-1 rounded">LOSE</span>}
-                                        {isDraw && <span className="bg-gray-500 text-white font-bold px-4 py-1 rounded">DRAW</span>}
-                                    </div>
-
-                                    <div className={cn(rpStyles.handWrapper(), isGuestWin || isDraw ? rpStyles.handWrapperWin() : rpStyles.handWrapperLose())}>
-                                        <Hand3D
-                                            handType={myHand}
-                                            revealed={true}
-                                            size={isGuestWin || isDraw ? "medium" : "small"}
-                                        />
-                                    </div>
-                                    <div className="text-center text-xl font-bold mt-2">
-                                        {getHandDisplayWithEmoji(myHand)}
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="text-center mt-12">
-                                <GameButton
-                                    onClick={() => setStep('REVEAL')}
-                                    disabled={isProcessing}
-                                >
-                                    NEXT
-                                </GameButton>
-                            </div>
-                        </motion.div>
-                    )}
-
-                    {/* ネタバラシ（嘘の公開） - STEP 2 */}
-                    {step === 'REVEAL' && (
-                        <motion.div
-                            key="reveal"
-                            initial={{ opacity: 0, x: 20 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            exit={{ opacity: 0, x: -20 }}
-                            transition={{ duration: 0.3 }}
-                            layout
-                            className="w-full"
-                        >
-                            <div className="text-center mb-6">
-                                <h3 className={rpStyles.revealTitle()}>
-                                    HOST LIED ABOUT
-                                </h3>
-                                <p className={rpStyles.revealSubtitle()}>ホストが仕掛けた「嘘」のおさらい</p>
-                            </div>
-
-                            {jankenEvent.fakeTarget === 'NONE' ? (
-                                <div className="text-center text-gray-400 italic">
-                                    今回、ホストは嘘をつきませんでした... (正直者です)
-                                </div>
-                            ) : (
-                                <LieRevealCard jankenEvent={jankenEvent} hostStats={hostStats} />
-                            )}
-
-                            <div className="flex justify-center gap-4 mt-12">
-                                <GameButton
-                                    variant="secondary"
-                                    onClick={() => setStep('RESULT')}
-                                >
-                                    BACK
-                                </GameButton>
-                                <GameButton
-                                    onClick={onNextRound}
-                                    disabled={isProcessing || isReady}
-                                >
-                                    {isReady ? `WAITING (${readyCount}/${totalCount})` : 'NEXT'}
-                                </GameButton>
-                            </div>
-                        </motion.div>
-                    )}
-                </motion.div >
-
-            )
-        }
-
-        // ホスト視点または観戦者（フォールバック）
-        // ホストの勝敗を計算
-        let hostStatus: 'WIN' | 'LOSE' | 'DRAW' = 'WIN'
-        let hasGuestWin = false
-        let hasDraw = false
-
-        jankenEvent.guestHands.forEach(gh => {
-            const res = judgeHand(hostHand, gh.hand as HandType)
-            if (res === 'GUEST_WIN') hasGuestWin = true
-            if (res === 'DRAW') hasDraw = true
-        })
-
-        if (hasGuestWin) {
-            hostStatus = 'LOSE'
-        } else if (hasDraw) {
-            hostStatus = 'DRAW'
-        } else {
-            hostStatus = 'WIN'
-        }
-
-        // 観戦者の場合は勝敗を表示しない（常にMedium）
-        const isSpectator = !isCurrentHost && !myHandData
-        const showResult = isCurrentHost // ホストのみ勝敗表示
-
-        // 観戦者ならサイズはmedium固定、ホストなら勝敗に応じて変更
-        const handSize = isSpectator ? 'medium' :
-            (hostStatus === 'LOSE' ? 'small' : 'medium')
+        const isHostDefault = hostChoice === 'STAY'
 
         return (
             <motion.div className={styles.mainArea()} layout transition={{ duration: 0.3 }}>
-                {/* 結果画面（バトル） - STEP 1 */}
-                {step === 'RESULT' && (
+                {!showSystemSelection ? (
                     <motion.div
-                        key="host-result"
-                        initial={{ opacity: 0, x: -20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        exit={{ opacity: 0, x: 20 }}
-                        transition={{ duration: 0.3 }}
-                        layout
-                        className="w-full"
-                    >
-                        <div className="flex justify-center mt-12">
-                            <div className="flex flex-col items-center">
-                                <div className={cn(rpStyles.playerName(), rpStyles.hostName(), "text-center mb-2")}>{hostName}</div>
-
-                                {/* ホスト用勝敗バッジ */}
-                                {showResult && (
-                                    <div className="mb-4 h-8">
-                                        {hostStatus === 'WIN' && <span className="bg-[#FF4444] text-black font-bold px-4 py-1 rounded">WIN</span>}
-                                        {hostStatus === 'LOSE' && <span className="bg-gray-600 text-white font-bold px-4 py-1 rounded">LOSE</span>}
-                                        {hostStatus === 'DRAW' && <span className="bg-gray-500 text-white font-bold px-4 py-1 rounded">DRAW</span>}
-                                    </div>
-                                )}
-
-                                <div className={cn(rpStyles.handWrapper(), isSpectator ? "w-64 mx-auto" : (hostStatus === 'LOSE' ? rpStyles.handWrapperLose() : rpStyles.handWrapperWin()))}>
-                                    <Hand3D
-                                        handType={hostHand}
-                                        revealed={true}
-                                        size={handSize}
-                                    />
-                                </div>
-                                <div className="text-center text-xl font-bold mt-2">
-                                    {getHandDisplayWithEmoji(hostHand)}
-                                </div>
-                            </div>
-                        </div>
-
-                        <div className="text-center mt-8">
-                            <GameButton
-                                onClick={() => setStep('REVEAL')}
-                                disabled={isProcessing}
-                            >
-                                NEXT
-                            </GameButton>
-                        </div>
-                    </motion.div>
-                )}
-
-                {/* ネタバラシ（ホスト視点） - STEP 2 */}
-                {step === 'REVEAL' && (
-                    <motion.div
-                        key="host-reveal"
+                        key="result-overview"
                         initial={{ opacity: 0, x: 20 }}
                         animate={{ opacity: 1, x: 0 }}
                         exit={{ opacity: 0, x: -20 }}
-                        transition={{ duration: 0.3 }}
-                        layout
-                        className="w-full"
+                        className="flex-1 flex flex-col w-full"
                     >
-                        <div className="text-center mb-6">
-                            <h3 className={rpStyles.revealTitle()}>
-                                YOU LIED ABOUT
-                            </h3>
-                            <p className={rpStyles.revealSubtitle()}>あなたのついた嘘の結果</p>
+                        <PhaseHeader
+                            engLabel="このラウンドの結果"
+                            title={
+                                (() => {
+                                    if (isNullHand) return "NULL HAND"
+                                    if (isHostPerfectWin) return "HOST PERFECT"
+
+                                    if (myHand && currentUserId !== jankenEvent.currentHostId) {
+                                        const result = judgeHand(hostHand, myHand)
+                                        return result === 'GUEST_WIN' ? "YOU WIN !!" : result === 'DRAW' ? "DRAW GAME" : "YOU LOSE..."
+                                    } else {
+                                        const isGuestWin = !isNullHand && hasGuestWin
+                                        if (isGuestWin) return "YOU LOSE..."
+                                        if (!isGuestWin && !hasDraw) return "GUEST WIN"
+                                        return "DRAW GAME"
+                                    }
+                                })()
+                            }
+                            subLabel={
+                                (isNullHand || isHostPerfectWin) && !isCurrentHost
+                                    ? `${hostName} は ${isNullHand ? 5 : 3}PT 獲得しました`
+                                    : ""
+                            }
+                            titleVariant={
+                                (isNullHand || isHostPerfectWin) && !isCurrentHost ? 'red' : 'cyan'
+                            }
+                            currentTurn={jankenEvent?.turnNumber}
+                            totalTurns={jankenEvent?.match.totalTurns}
+                        />
+
+                        <RewardFeedback />
+
+                        <div className="flex-1 flex flex-col items-center justify-center">
+                            {myHand && currentUserId !== jankenEvent.currentHostId ? (
+                                /* 対戦結果ビュー (GUEST) */
+                                <div className="flex items-center justify-center gap-12 mb-8">
+                                    <div className="flex flex-col items-center">
+                                        <div className={cn(rpStyles.playerName())} style={{ color: '#FF4444' }}>{hostName}</div>
+                                        <HandCard
+                                            handType={hostHand}
+                                            color="red"
+                                            size={"small"}
+                                            className="mt-4"
+                                        />
+                                    </div>
+
+                                    <div className="text-gray-800 font-black text-4xl italic px-4 translate-y-4">VS</div>
+
+                                    <div className="flex flex-col items-center">
+                                        <div style={{ color: userColor }} className={cn(rpStyles.playerName(), rpStyles.myselfName())}>YOU</div>
+                                        <HandCard
+                                            handType={myHand}
+                                            personalColor={userColor}
+                                            size={"small"}
+                                            className="mt-4"
+                                        />
+                                    </div>
+                                </div>
+                            ) : (
+                                /* ホスト/観戦者向け単一表示 */
+                                <div className="flex flex-col items-center">
+                                    <HandCard
+                                        handType={hostHand}
+                                        color={isCurrentHost ? 'cyan' : 'red'}
+                                        personalColor={isCurrentHost ? userColor : undefined}
+                                        size="medium"
+                                    />
+                                </div>
+                            )}
+                        </div>
+                    </motion.div>
+                ) : (
+                    /* システム選択 (答え合わせ) ビュー */
+                    <motion.div
+                        key="system-selection"
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: -20 }}
+                        className="flex-1 flex flex-col w-full"
+                    >
+                        <PhaseHeader
+                            engLabel="答え合わせ"
+                            title={isCurrentHost ? "あなたは何を選んだのか" : `${hostName}は何を選んだのか`}
+                            subLabel=""
+                            currentTurn={jankenEvent?.turnNumber}
+                            totalTurns={jankenEvent?.match.totalTurns}
+                        />
+
+                        <div className="mt-6">
+                            <HostStatsDisplay />
                         </div>
 
-                        {jankenEvent.fakeTarget === 'NONE' ? (
-                            <div className="text-center text-gray-400 italic">
-                                あなたは嘘をつきませんでした
-                            </div>
-                        ) : (
-                            <LieRevealCard jankenEvent={jankenEvent} hostStats={hostStats} />
-                        )}
+                        <div className="flex-1 flex flex-col items-center justify-center">
+                            {/* ChoicePhaseと共通の部品・レイアウト */}
+                            <div className="relative w-120 h-48 flex items-center justify-center">
+                                {/* 固定レイヤー：3Dの手 */}
+                                <div className="absolute inset-0 flex items-center justify-between pointer-events-none px-4">
+                                    {/* REAL (Left) */}
+                                    <div className="flex flex-col items-center gap-1 translate-y-2">
+                                        <div className="w-48 h-48 flex items-center justify-center">
+                                            {realHand && (
+                                                <Hand3D
+                                                    handType={realHand as HandType}
+                                                    revealed={true}
+                                                    size="small"
+                                                    personalColor={isCurrentHost ? userColor : "#FF4444"}
+                                                />
+                                            )}
+                                        </div>
+                                        <div className="h-6">
+                                            <p className="text-xs text-[#44FFFF] font-black tracking-widest text-center translate-y-2 px-3 py-2">
+                                                SYSTEM SELECTION
+                                            </p>
+                                        </div>
+                                    </div>
 
-                        <div className="flex justify-center gap-4 mt-8">
-                            <GameButton
-                                variant="secondary"
-                                onClick={() => setStep('RESULT')}
-                            >
-                                BACK
-                            </GameButton>
-                            <GameButton
-                                onClick={onNextRound}
-                                disabled={isProcessing || isReady}
-                            >
-                                {isReady ? `WAITING (${readyCount}/${totalCount})` : 'NEXT'}
-                            </GameButton>
+                                    {/* BLUFF (Right) */}
+                                    <div className="flex flex-col items-center gap-1 translate-y-2">
+                                        <div className="w-48 h-48 flex items-center justify-center">
+                                            {bluffHand && (
+                                                <Hand3D
+                                                    handType={bluffHand as HandType}
+                                                    revealed={true}
+                                                    size="small"
+                                                    personalColor={isCurrentHost ? userColor : "#FF4444"}
+                                                />
+                                            )}
+                                        </div>
+                                        <div className="h-6 mt-4" />
+                                    </div>
+                                </div>
+
+                                {/* 枠（CHOICEフレーム）レイヤー */}
+                                <div className="absolute inset-0 flex items-center justify-between px-4">
+                                    {/* Selection Frame */}
+                                    <div className={cn("flex flex-col items-center gap-1", isHostDefault ? "order-1" : "order-3")}>
+                                        <div
+                                            className="text-xs font-black tracking-[0.3em] mb-1"
+                                            style={{ color: isCurrentHost ? (userColor || '#FF4444') : '#FF4444' }}
+                                        >
+                                            {hostName}
+                                        </div>
+                                        <div
+                                            className="w-48 h-48 border-2"
+                                            style={{ borderColor: isCurrentHost ? (userColor || '#FF4444') : '#FF4444' }}
+                                        />
+                                        <div className="h-4" />
+                                    </div>
+
+                                    <div className="order-2 text-gray-500 font-black text-xl translate-y-4">OR</div>
+
+                                    {/* 空のプレースホルダー（反対側） */}
+                                    <div className={cn("flex flex-col items-center gap-1", isHostDefault ? "order-3" : "order-1")}>
+                                        <div className="w-48 h-48" />
+                                        <div className="h-4" />
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </motion.div>
                 )}
-            </motion.div >
 
+                <div className="flex flex-col items-center gap-4 pb-8">
+                    <div className="flex gap-6">
+                        <GameButton
+                            onClick={() => setShowSystemSelection(!showSystemSelection)}
+                            variant="secondary"
+                            className="min-w-[240px]"
+                        >
+                            {showSystemSelection ? 'VIEW RESULT' : 'VIEW ANSWER'}
+                        </GameButton>
+
+                        <GameButton
+                            onClick={onNextRound}
+                            disabled={isProcessing || isReady}
+                            variant="primary"
+                            className="min-w-[240px]"
+                        >
+                            {isReady
+                                ? `WAITING (${readyCount}/${totalCount})`
+                                : (jankenEvent?.turnNumber === jankenEvent?.match.totalTurns ? 'FINAL RESULT' : 'NEXT ROUND')}
+                        </GameButton>
+                    </div>
+                </div>
+            </motion.div>
         )
     }
 
     const SideArea = () => (
-        <motion.div
-            className={styles.sideArea()}
-            layout
-            transition={{ duration: 0.3 }}
-        >
-            <div className={sideCard({ variant: 'cyan', size: 'lg' }).card()}>
-                <SideHeader
-                    engLabel="ROUND RESULT"
-                    label="ラウンド結果"
-                    className="border-[#44FFFF]/30"
+        <motion.div className={styles.sideArea()} layout transition={{ duration: 0.3 }}>
+            <div className="flex flex-col gap-4 h-full">
+                {/* ラウンド結果カード（他フェーズと統一） */}
+                <CurrentScores
+                    currentScores={currentScores}
+                    currentUserId={currentUserId}
+                    hostId={jankenEvent?.currentHostId}
+                    size="md"
+                    userColor={userColor}
                 />
-
-                {currentScores.length > 0 && (
-                    <motion.div className="space-y-3" layout>
-                        {currentScores.map((score, index) => {
-                            const isMe = score.userId === currentUserId
-                            const isWinner = score.points > 0
-
-                            const userHandData = jankenEvent.guestHands.find(g => g.userId === score.userId)
-                            const handPlayed = userHandData?.hand as HandType | undefined
-
-                            const showHand = isCurrentHost && handPlayed
-
-                            return (
-                                <motion.div
-                                    key={score.userId}
-                                    layout
-                                    initial={{ opacity: 0, x: 20 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    transition={{ duration: 0.3, delay: index * 0.1 }}
-                                    className={cn(
-                                        "flex justify-between items-center p-4 rounded-lg transition-colors relative overflow-hidden border",
-                                        isWinner
-                                            ? "bg-black/30 border-[#FF4444]/20"
-                                            : "bg-black/30 border-[#44FFFF]/10",
-                                        isMe && !isWinner && "border-gray-600"
-                                    )}
-                                >
-                                    {isWinner && (
-                                        <div className="absolute left-0 top-0 bottom-0 w-1 bg-[#FF4444]" />
-                                    )}
-
-                                    <div className="flex flex-col gap-1 z-10 pl-2">
-                                        <div className="flex items-center gap-2">
-                                            <span className={cn("font-bold text-sm tracking-wide", isMe ? "text-white" : "text-gray-300")}>
-                                                {score.user.name}
-                                            </span>
-                                            {isMe && (
-                                                <span className={rpStyles.youBadge()}>YOU</span>
-                                            )}
-                                        </div>
-
-                                        {showHand && (
-                                            <div className="text-sm text-gray-500 flex items-center gap-2">
-                                                <span className="text-lg leading-none">{getHandDisplayWithEmoji(handPlayed)}</span>
-                                            </div>
-                                        )}
-                                    </div>
-
-                                    <div className="flex flex-col items-end z-10 pr-2">
-                                        <span className={cn("font-black font-mono text-xl", isWinner ? "text-[#FF4444]" : "text-gray-500")}>
-                                            {score.points > 0 ? `+${score.points}` : '0'}
-                                        </span>
-                                        <span className="text-[10px] text-gray-700 font-bold uppercase tracking-wider">PTS</span>
-                                    </div>
-                                </motion.div>
-                            )
-                        })}
-                    </motion.div>
-                )}
-
-                {/* Footer with game info */}
-                <div className={rpStyles.sideFooter()}>
-                    <div className={rpStyles.sideFooterContent()}>
-                        <span>Host: {hostName}</span>
-                        <span>Total: {currentScores.reduce((acc, curr) => acc + curr.points, 0)}</span>
-                    </div>
-                </div>
+                <RewardSystem
+                    guestCount={currentScores.length - 1}
+                    isHost={isCurrentHost}
+                    userColor={userColor}
+                    size="md"
+                />
             </div>
         </motion.div>
     )

@@ -1,11 +1,12 @@
 import { RoomWithUsersAndReadyStatus, UserRanking, HandType, RoomUserWithReadyStatus } from '@/shared/types'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { useState } from 'react'
 import { nullHandGame } from './styles'
 import { Hand3D } from './Hand3D'
 import { cn } from '@/lib/utils'
 import { NullHandLogo } from './NullHandLogo'
 import { useSE } from '@/hooks/useSE'
+import { RewardSystem } from './common/RewardSystem'
 
 interface TitleScreenProps {
     room: RoomWithUsersAndReadyStatus
@@ -17,7 +18,19 @@ interface TitleScreenProps {
     onToggleReady: () => void
     onStartGame: () => void
     onExit: () => void
+    onColorChange: (color: string) => void
+    userColor: string
+    currentUserId: string | null
 }
+
+export const NEON_PALETTE = [
+    '#00FF00', // Terminal Green
+    '#AA44FF', // Neon Purple
+    '#FF9900', // Cyber Orange
+    '#FF22CC', // Hot Magenta
+    '#FFFF00', // Electric Yellow
+    '#DDDDFF', // Ghost White
+]
 
 export function TitleScreen({
     room,
@@ -28,7 +41,10 @@ export function TitleScreen({
     initialRankings,
     onToggleReady,
     onStartGame,
-    onExit
+    onExit,
+    userColor,
+    onColorChange,
+    currentUserId,
 }: TitleScreenProps) {
     const styles = nullHandGame()
 
@@ -54,7 +70,7 @@ export function TitleScreen({
                     <div
                         className={cn(
                             styles.menuItem(),
-                            isReady && styles.menuItemReady()
+                            isReady ? "text-[#44FFFF] pointer-events-none" : "text-white opacity-80"
                         )}
                         onClick={() => {
                             play("select")
@@ -115,7 +131,16 @@ export function TitleScreen({
                             delay: 1
                         }}
                     />
-                    <NullHandLogo titleHand={titleHand} />
+                    <NullHandLogo
+                        titleHand={titleHand}
+                        userColor={userColor}
+                        onClick={() => {
+                            play("submit")
+                            const currentIndex = NEON_PALETTE.indexOf(userColor)
+                            const nextIndex = (currentIndex + 1) % NEON_PALETTE.length
+                            onColorChange(NEON_PALETTE[nextIndex])
+                        }}
+                    />
                 </motion.div>
 
                 {/* 下部: インフォメーション */}
@@ -140,7 +165,9 @@ export function TitleScreen({
                             }).map((u: RoomUserWithReadyStatus) => {
                                 const ranking = initialRankings.find(r => r.userId === u.userId)
                                 // ランキングが見つからない場合は未プレイ扱い
-                                const rankDisplay = ranking ? `世界順位:${ranking.rank}位 ${Math.floor(ranking.points)}pt` : '世界ランキング: 最下位 0pt'
+                                const rankDisplay = ranking ? `ランキング:${ranking.rank}位 ${Math.floor(ranking.points)}pt` : '世界ランキング: 最下位 0pt'
+
+                                const isMe = u.userId === currentUserId
 
                                 return (
                                     <div key={u.id} className={styles.playerItem()}>
@@ -148,11 +175,17 @@ export function TitleScreen({
                                             <span className={styles.rankingText()}>
                                                 {rankDisplay}
                                             </span>
-                                            <span className={u.isReady ? 'text-[#44FFFF]' : 'text-gray-500'}>
+                                            <span style={{
+                                                color: u.isReady
+                                                    ? (isMe ? userColor : '#44FFFF')
+                                                    : '#4b5563' // text-gray-600
+                                            }}>
                                                 {u.user?.name || '不明'}
                                             </span>
                                         </div>
-                                        <span className={u.isReady ? 'text-[#FF4444]' : 'text-gray-700'}>
+                                        <span style={{
+                                            color: u.isReady ? '#44FFFF' : '#374151' // シアン or text-gray-700
+                                        }} className="font-black text-sm">
                                             {u.isReady ? 'READY' : 'WAITING'}
                                         </span>
                                     </div>
@@ -202,7 +235,7 @@ export function TitleScreen({
                                         NULL HAND
                                     </h2>
                                     <div className="flex justify-center my-2">
-                                        <div className="w-24 h-24">
+                                        <div className="w-40 h-40">
                                             <Hand3D handType={HandType.ROCK} revealed={true} size={"small"} />
                                         </div>
                                     </div>
@@ -217,61 +250,54 @@ export function TitleScreen({
                                         👁️ 嘘を見抜け。心理を読め。
                                     </h2>
                                     <p className="text-xs italic text-gray-400">
-                                        ホストの「偽装工作」を暴き、じゃんけんで完全勝利せよ！
+                                        ホストの企みを見抜き、じゃんけんで完全勝利せよ！
                                     </p>
                                 </div>
 
                                 {/* ゲームの流れ */}
                                 <div className="space-y-3">
-                                    <h3 className="text-sm font-bold border-b border-[#FF4444] pb-1 text-white">
+                                    <h3 className="text-sm font-bold border-b border-[#FF4444] pb-1 text-white flex items-center gap-2">
+                                        <div className="w-1.5 h-1.5 bg-[#FF4444] rounded-full" />
                                         📋 ゲームの流れ
                                     </h3>
-                                    <ol className="space-y-3 text-xs pl-2 text-gray-300">
+                                    <ol className="space-y-3 text-[11px] pl-2 text-gray-400">
                                         <li className="flex items-start">
                                             <span className="font-bold mr-2 text-[#FF4444]">1.</span>
                                             <span>
-                                                <strong className="text-white">ホストの準備</strong><br />
-                                                ホストは自分の「手」と「嘘」を決定します。
+                                                <strong className="text-white">ホストの選択 (CHOICE)</strong><br />
+                                                ホストは提示された「SYSTEM SELECTION」かもう一つの手のどちらで勝負するかを裏で決断します。
                                             </span>
                                         </li>
                                         <li className="flex items-start">
                                             <span className="font-bold mr-2 text-[#FF4444]">2.</span>
                                             <span>
-                                                <strong className="text-white">ホストの情報公開</strong><br />
-                                                「設定した手」とホストのステータスが公開されます。<br />
-                                                <span className="text-[#FF4444] font-semibold">※ この中に嘘が含まれています</span>
+                                                <strong className="text-white">ゲストの予測 & 勝負 (BATTLE)</strong><br />
+                                                ゲストは統計情報を参考に、ホストの「意志」を読み合い、自分の手を選択します。
                                             </span>
                                         </li>
                                         <li className="flex items-start">
                                             <span className="font-bold mr-2 text-[#FF4444]">3.</span>
                                             <span>
-                                                <strong className="text-white">ホストの最終決定</strong><br />
-                                                ホストは勝負する手を決定します。
-                                            </span>
-                                        </li>
-                                        <li className="flex items-start">
-                                            <span className="font-bold mr-2 text-[#FF4444]">4.</span>
-                                            <span>
-                                                <strong className="text-white">決断の時！</strong><br />
-                                                嘘に惑わされず、勝てる手を選択！
+                                                <strong className="text-white">意志の開示 (RESULT)</strong><br />
+                                                ホストが実際にどちらの手を選んでいたのかが暴かれ、最終的な勝敗が確定します。
                                             </span>
                                         </li>
                                     </ol>
                                 </div>
 
-                                {/* 勝利条件 */}
-                                <div className="space-y-2">
-                                    <h3 className="text-sm font-bold border-b border-[#FF4444] pb-1 text-white">
-                                        🏆 勝利条件
+                                {/* ポイント配当 (REWARD SYSTEM) */}
+                                <div className="space-y-3">
+                                    <h3 className="text-sm font-bold border-b border-[#FF4444] pb-1 text-white flex items-center gap-2">
+                                        <div className="w-1.5 h-1.5 bg-[#FF4444] rounded-full" />
+                                        ■ REWARD SYSTEM / ポイント配当
                                     </h3>
-                                    <div className="border border-[#FF4444]/30 p-3 rounded bg-[#FF4444]/5">
-                                        <p className="text-xs font-bold text-white mb-2">
-                                            <span className="text-[#FF4444]">ゲスト</span>： ホストにじゃんけんで勝つ（+1点）
-                                        </p>
-                                        <p className="text-xs text-gray-400">
-                                            <span className="font-bold text-white">ホスト</span>： 全員に勝つ（+3点）<br />
-                                        </p>
-                                    </div>
+                                    <RewardSystem
+                                        guestCount={room.users.length - 1}
+                                        isHost={isHost}
+                                        userColor={userColor}
+                                        size="md"
+                                        showArrow={false}
+                                    />
                                 </div>
 
                                 {/* プレイのコツ */}
@@ -282,11 +308,15 @@ export function TitleScreen({
                                     <ul className="space-y-2 text-xs pl-2 text-gray-300">
                                         <li className="flex items-start">
                                             <span className="mr-2 text-[#FF4444]">•</span>
-                                            <span>「変える確率」や「お気に入り」からホストの心理を読み取ろう</span>
+                                            <span>「SYSTEM SELECTION」の確率からホストの心理を読み取ろう</span>
                                         </li>
                                         <li className="flex items-start">
                                             <span className="mr-2 text-[#FF4444]">•</span>
-                                            <span><span className="text-[#FF4444] font-semibold">裏の裏をかくか、素直に信じるか...</span>駆け引きが重要です</span>
+                                            <span><span className="text-[#FF4444] font-semibold">裏の裏をかくか、データを信じるか...</span>駆け引きが重要です</span>
+                                        </li>
+                                        <li className="flex items-start">
+                                            <span className="mr-2 text-[#FF4444]">•</span>
+                                            <span className="text-[#FF4444] font-semibold">ポイント配当も重要な情報です</span>
                                         </li>
                                     </ul>
                                 </div>

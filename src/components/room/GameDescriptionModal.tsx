@@ -4,6 +4,7 @@ import Image from 'next/image'
 import { RoomModal } from './RoomModal'
 import { Hand3D } from '../game/NullHandGame/Hand3D'
 import { HandType } from '@/shared/types'
+import { RewardSystem } from '../game/NullHandGame/common/RewardSystem'
 
 interface GameDescriptionModalProps {
     isOpen: boolean
@@ -157,136 +158,111 @@ export function GameDescriptionModal({ isOpen, onClose, gameType }: GameDescript
                 title="NULL HAND - ゲーム説明"
                 showCloseButton
             >
-                <div className="space-y-6">
-                    {/* タイトル部 */}
-                    <div className="bg-black border-2 border-[#FF4444] rounded p-6 text-center relative overflow-hidden group">
-                        <div className="absolute inset-0 bg-[#FF4444]/5 transition-colors pointer-events-none" />
-                        <h2 className="text-3xl font-black text-[#FF4444] tracking-[0.2em] mb-2 uppercase relative z-10">
-                            NULL HAND
-                        </h2>
-                        <Hand3D handType={HandType.ROCK} revealed={true} size={"small"} />
-                        <p className="text-[#FF4444]/80 text-xs font-mono tracking-wider relative z-10">
-                            PSYCHOLOGICAL ROCK-PAPER-SCISSORS
-                        </p>
-                    </div>
-
-                    {/* キャッチコピー */}
-                    <div className="text-center space-y-2">
-                        <h2 className="text-2xl font-bold" style={{ color: 'var(--brand-900)' }}>
-                            👁️ 嘘を見抜け。心理を読め。
-                        </h2>
-                        <p className="text-sm italic" style={{ color: 'var(--brand-700)' }}>
-                            ホストの「偽装工作」を暴き、じゃんけんで完全勝利せよ！
-                        </p>
-                    </div>
-
-                    {/* ゲームの流れ */}
-                    <div className="space-y-3">
-                        <h3 className="text-lg font-bold border-b-2 pb-1" style={{ color: 'var(--brand-900)', borderColor: 'var(--brand-500)' }}>
-                            📋 ゲームの流れ
-                        </h3>
-                        <ol className="space-y-2 text-sm pl-4" style={{ color: 'var(--brand-800)' }}>
-                            <li className="flex items-start">
-                                <span className="font-bold mr-2 min-w-[24px]" style={{ color: 'var(--brand-600)' }}>1.</span>
-                                <span>
-                                    <strong style={{ color: 'var(--brand-900)' }}>ホストの準備</strong> - ホストは自分の「手」と「嘘」を決定します。
-                                </span>
-                            </li>
-                            <li className="flex items-start">
-                                <span className="font-bold mr-2 min-w-[24px]" style={{ color: 'var(--brand-600)' }}>2.</span>
-                                <span>
-                                    <strong style={{ color: 'var(--brand-900)' }}>ホストの情報公開</strong> - 「設定した手」とホストのステータスが公開されます。<br />
-                                    <span className="text-red-400 text-xs font-semibold">※ この中に嘘が含まれています</span>
-                                </span>
-                            </li>
-                            <li className="flex items-start">
-                                <span className="font-bold mr-2 min-w-[24px]" style={{ color: 'var(--brand-600)' }}>3.</span>
-                                <span>
-                                    <strong style={{ color: 'var(--brand-900)' }}>ホストの最終決定</strong> - ホストは勝負する手を決定します。ホスト準備で「設定した手」から変えるか、そのまま戦うか
-                                </span>
-                            </li>
-                            <li className="flex items-start">
-                                <span className="font-bold mr-2 min-w-[24px]" style={{ color: 'var(--brand-600)' }}>4.</span>
-                                <span>
-                                    <strong style={{ color: 'var(--brand-900)' }}>ゲストの予想</strong> - リスクを冒してでも、ホストの手を読み切れ！
-                                </span>
-                            </li>
-                            <li className="flex items-start">
-                                <span className="font-bold mr-2 min-w-[24px]" style={{ color: 'var(--brand-600)' }}>5.</span>
-                                <span>
-                                    <strong style={{ color: 'var(--brand-900)' }}>決断の時！</strong> - 嘘に惑わされず、勝てる手を選択！
-                                </span>
-                            </li>
-                            <li className="flex items-start">
-                                <span className="font-bold mr-2 min-w-[24px]" style={{ color: 'var(--brand-600)' }}>6.</span>
-                                <span>
-                                    <strong className="text-green-400">勝者発表！</strong> - 心理戦を制したのは誰だ！？<br />
-                                    <span className="text-xs font-semibold">※ ホストは一人一回は必ず行います</span><br />
-                                    <span className="text-xs font-semibold">※ 全てのゲームが終わった時の総合点で勝者が決まります</span>
-                                </span>
-                            </li>
-                        </ol>
-                    </div>
-
-                    {/* 勝利条件 */}
-                    <div className="space-y-2">
-                        <h3 className="text-lg font-bold border-b-2 pb-1" style={{ color: 'var(--brand-900)', borderColor: 'var(--brand-500)' }}>
-                            🏆 勝利条件
-                        </h3>
-                        <div className="border-2 p-3 rounded" style={{ backgroundColor: 'rgba(129, 140, 248, 0.1)', borderColor: 'var(--brand-400)' }}>
-                            <p className="text-sm font-bold" style={{ color: 'var(--brand-900)' }}>
-                                <span className="text-base text-red-400">ゲスト</span>： ホストにじゃんけんで勝つ（+1点）
-                            </p>
-                            <p className="text-xs mt-2" style={{ color: 'var(--brand-800)' }}>
-                                <span className="font-bold text-base text-black">ホスト</span>： 全員に勝つ（+3点）<br />
-                                単なる運ゲーではありません。ホストの心理を読み、裏の裏をかくことが勝利への鍵です。
+                <div className="p-4 md:p-6 flex-1">
+                    <div className="space-y-6">
+                        {/* タイトル部 */}
+                        <div className="bg-black border border-[#FF4444] rounded p-4 text-center relative overflow-hidden group">
+                            <div className="absolute inset-0 bg-[#FF4444]/10 pointer-events-none" />
+                            <h2 className="text-2xl font-black text-[#FF4444] tracking-[0.2em] mb-2 uppercase relative z-10">
+                                NULL HAND
+                            </h2>
+                            <div className="flex justify-center my-2">
+                                <div className="w-40 h-40">
+                                    <Hand3D handType={HandType.ROCK} revealed={true} size={"small"} />
+                                </div>
+                            </div>
+                            <p className="text-[#FF4444]/80 text-[10px] font-mono tracking-wider relative z-10">
+                                PSYCHOLOGICAL ROCK-PAPER-SCISSORS
                             </p>
                         </div>
-                    </div>
 
-                    {/* プレイのコツ */}
-                    <div className="space-y-2">
-                        <h3 className="text-lg font-bold border-b-2 pb-1" style={{ color: 'var(--brand-900)', borderColor: 'var(--brand-500)' }}>
-                            💡 プレイのコツ
-                        </h3>
-                        <ul className="space-y-1 text-xs pl-4" style={{ color: 'var(--brand-800)' }}>
-                            <li className="flex items-start">
-                                <span className="mr-2">•</span>
-                                <span>「変える確率」や「お気に入り」からホストの心理を読み取ろう</span>
-                            </li>
-                            <li className="flex items-start">
-                                <span className="mr-2">•</span>
-                                <span>あえて正直に情報を出すホストもいます。疑心暗鬼になりすぎないように！</span>
-                            </li>
-                            <li className="flex items-start">
-                                <span className="mr-2">•</span>
-                                <span className="text-red-400 font-semibold">裏の裏をかくか、素直に信じるか...駆け引きが重要です</span>
-                            </li>
-                        </ul>
-                    </div>
+                        {/* キャッチコピー */}
+                        <div className="text-center space-y-2">
+                            <h2 className="text-xl font-bold text-white">
+                                👁️ 嘘を見抜け。心理を読め。
+                            </h2>
+                            <p className="text-xs italic text-gray-400">
+                                ホストの企みを見抜き、じゃんけんで完全勝利せよ！
+                            </p>
+                        </div>
 
-                    {/* 閉じるボタン */}
-                    <div className="flex justify-center pt-4">
-                        <button
-                            onClick={onClose}
-                            className="px-8 py-3 rounded-lg font-bold text-sm transition-all duration-200 border"
-                            style={{
-                                backgroundColor: 'var(--brand-400)',
-                                color: 'white',
-                                borderColor: 'var(--brand-500)',
-                            }}
-                            onMouseEnter={(e) => {
-                                e.currentTarget.style.backgroundColor = 'var(--brand-300)'
-                                e.currentTarget.style.boxShadow = '0 0 20px rgba(99, 102, 241, 0.5)'
-                            }}
-                            onMouseLeave={(e) => {
-                                e.currentTarget.style.backgroundColor = 'var(--brand-400)'
-                                e.currentTarget.style.boxShadow = 'none'
-                            }}
-                        >
-                            OK
-                        </button>
+                        {/* ゲームの流れ */}
+                        <div className="space-y-3">
+                            <h3 className="text-sm font-bold border-b border-[#FF4444] pb-1 text-white flex items-center gap-2">
+                                <div className="w-1.5 h-1.5 bg-[#FF4444] rounded-full" />
+                                📋 ゲームの流れ
+                            </h3>
+                            <ol className="space-y-3 text-[11px] pl-2 text-gray-400">
+                                <li className="flex items-start">
+                                    <span className="font-bold mr-2 text-[#FF4444]">1.</span>
+                                    <span>
+                                        <strong className="text-white">ホストの選択 (CHOICE)</strong><br />
+                                        ホストは提示された「SYSTEM SELECTION」かもう一つの手のどちらで勝負するかを裏で決断します。
+                                    </span>
+                                </li>
+                                <li className="flex items-start">
+                                    <span className="font-bold mr-2 text-[#FF4444]">2.</span>
+                                    <span>
+                                        <strong className="text-white">ゲストの予測 & 勝負 (BATTLE)</strong><br />
+                                        ゲストは統計情報を参考に、ホストの「意志」を読み合い、自分の手を選択します。
+                                    </span>
+                                </li>
+                                <li className="flex items-start">
+                                    <span className="font-bold mr-2 text-[#FF4444]">3.</span>
+                                    <span>
+                                        <strong className="text-white">意志の開示 (RESULT)</strong><br />
+                                        ホストが実際にどちらの手を選んでいたのかが暴かれ、最終的な勝敗が確定します。
+                                    </span>
+                                </li>
+                            </ol>
+                        </div>
+
+                        {/* ポイント配当 (REWARD SYSTEM) */}
+                        <div className="space-y-3">
+                            <h3 className="text-sm font-bold border-b border-[#FF4444] pb-1 text-white flex items-center gap-2">
+                                <div className="w-1.5 h-1.5 bg-[#FF4444] rounded-full" />
+                                ■ REWARD SYSTEM / ポイント配当
+                            </h3>
+                            <RewardSystem
+                                guestCount={3}
+                                isHost={false}
+                                userColor="#44FFFF"
+                                size="md"
+                                showArrow={false}
+                            />
+                        </div>
+
+                        {/* プレイのコツ */}
+                        <div className="space-y-2">
+                            <h3 className="text-sm font-bold border-b border-[#FF4444] pb-1 text-white">
+                                💡 プレイのコツ
+                            </h3>
+                            <ul className="space-y-2 text-xs pl-2 text-gray-300">
+                                <li className="flex items-start">
+                                    <span className="mr-2 text-[#FF4444]">•</span>
+                                    <span>「SYSTEM SELECTION」の確率からホストの心理を読み取ろう</span>
+                                </li>
+                                <li className="flex items-start">
+                                    <span className="mr-2 text-[#FF4444]">•</span>
+                                    <span><span className="text-[#FF4444] font-semibold">裏の裏をかくか、データを信じるか...</span>駆け引きが重要です</span>
+                                </li>
+                                <li className="flex items-start">
+                                    <span className="mr-2 text-[#FF4444]">•</span>
+                                    <span className="text-[#FF4444] font-semibold">ポイント配当も重要な情報です</span>
+                                </li>
+                            </ul>
+                        </div>
                     </div>
+                </div>
+
+                {/* 閉じるボタン */}
+                <div className="p-4 border-t border-[#FF4444]/30 flex justify-center">
+                    <button
+                        onClick={onClose}
+                        className="px-8 py-3 rounded font-bold text-sm transition-all duration-200 bg-[#FF4444] text-black hover:bg-[#FF8888] shadow-[0_0_15px_rgba(255,68,68,0.5)]"
+                    >
+                        OK
+                    </button>
                 </div>
             </RoomModal>
         )

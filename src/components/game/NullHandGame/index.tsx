@@ -3,17 +3,16 @@
 import { useNullHand } from '@/hooks/useNullHand'
 import { useGameRoom } from '@/hooks/useGameRoom'
 import { returnToRoom } from '@/server/actions/room'
-import { RoomWithUsersAndReadyStatus, HandType, FakeTarget, FakeDetails, UserRanking } from '@/shared/types'
+import { RoomWithUsersAndReadyStatus, HandType, HostChoice, UserRanking } from '@/shared/types'
 import { useState, useEffect } from 'react'
 import { AnimatePresence } from 'framer-motion'
 import { TitleScreen } from './TitleScreen'
 import { GameLayout } from './GameLayout'
-import { SetupPhase } from './phases/SetupPhase'
-import { ShowcasePhase } from './phases/ShowcasePhase'
-import { FinalDecisionPhase } from './phases/FinalDecisionPhase'
+import { ChoicePhase } from './phases/ChoicePhase'
 import { BattlePhase } from './phases/BattlePhase'
 import { ResultPhase } from './phases/ResultPhase'
 import { GameOverPhase } from './phases/GameOverPhase'
+import { DealPhase } from './phases/DealPhase' // Added DealPhase import
 import { OpeningSplash } from './OpeningSplash'
 
 interface NullHandGameProps {
@@ -46,9 +45,7 @@ export function NullHandGame({
         isProcessing,
         currentScores,
         handleStartGame,
-        handleSetInitialHand,
-        handleConfirmShowcase,
-        handleSetFinalHostHand,
+        handleSetHostChoice,
         handleSetGuestHand,
         handleNextRound,
         handleMarkNextRoundReady,
@@ -60,7 +57,7 @@ export function NullHandGame({
     // タイトル画面用の手のローテーション
     const [titleHand, setTitleHand] = useState<HandType>(HandType.ROCK)
     useEffect(() => {
-        if (phase !== 'TITLE' && phase !== 'SETUP') return
+        if (phase !== 'TITLE' && phase !== 'DEAL') return
         const hands = Object.values(HandType)
         let index = 0
         const interval = setInterval(() => {
@@ -71,44 +68,64 @@ export function NullHandGame({
     }, [phase])
 
     const [selectedHand, setSelectedHand] = useState<HandType | null>(null)
-    const [selectedFake, setSelectedFake] = useState<FakeTarget>('NONE')
-    const [fakeDetails, setFakeDetails] = useState<FakeDetails>({})
-    const [newRankings, setNewRankings] = useState<UserRanking[]>([])
+    const [localRankings, setLocalRankings] = useState<UserRanking[]>(initialRankings)
+    const [hasCalculatedScores, setHasCalculatedScores] = useState(false)
 
-    // GAME_OVER時に最新のランキングを取得
+    // INITIAL_RANKINGSが外部から更新された場合はローカルステートにも反映(再入室などを想定)
     useEffect(() => {
-        if (phase === 'GAME_OVER') {
-            const fetchRankings = async () => {
-                const userIds = room.users.map(u => u.userId)
-                try {
-                    // Server Actionをクライアントから呼び出す
-                    const { getNullHandRankings } = await import('@/server/actions/game/rankingActions')
-                    const rankings = await getNullHandRankings(userIds)
-                    setNewRankings(rankings)
-                } catch (e) {
-                    console.error('Failed to fetch rankings', e)
+        setLocalRankings(initialRankings)
+    }, [initialRankings])
+
+    // GAME_OVER時にローカルでスコアを合算してランキングをオプティミスティック更新する
+    useEffect(() => {
+        if (phase === 'GAME_OVER' && currentScores.length > 0 && !hasCalculatedScores) {
+            setHasCalculatedScores(true)
+
+            // 現在の localRankings に currentScores のポイントを足す
+            const updated = localRankings.map(ranking => {
+                const scoreAdd = currentScores.find(s => s.userId === ranking.userId)?.points || 0
+                return {
+                    ...ranking,
+                    points: ranking.points + scoreAdd
                 }
-            }
-            fetchRankings()
+            })
+
+            // 新しいポイントで降順ソート
+            updated.sort((a, b) => b.points - a.points)
+
+            // 順位（rank）の再計算
+            let currentRank = 1
+            let previousPoints = -1
+            let tieCount = 0
+
+            const reRanked = updated.map((ranking, index) => {
+                if (previousPoints !== ranking.points) {
+                    currentRank = index + 1
+                    tieCount = 0
+                    previousPoints = ranking.points
+                } else {
+                    tieCount++
+                }
+                return {
+                    ...ranking,
+                    rank: currentRank
+                }
+            })
+
+            // ステートを更新
+            setLocalRankings(reRanked)
         }
-    }, [phase, room.users])
+    }, [phase, currentScores, localRankings, hasCalculatedScores])
 
     const handleClose = async () => {
         await returnToRoom(roomId)
     }
 
-    const handleSetupSubmit = () => {
-        if (selectedHand) {
-            handleSetInitialHand(selectedHand, selectedFake, fakeDetails)
-        }
-    }
-
-    // フェーズが変わった際に選択状態をリセット
+    // フェーズが変わった際に選択状態とスコア計算フラグをリセット
     useEffect(() => {
-        if (phase === 'SETUP') {
+        if (phase === 'DEAL' || phase === 'CHOICE') {
             setSelectedHand(null)
-            setSelectedFake('NONE')
-            setFakeDetails({})
+            setHasCalculatedScores(false)
         }
     }, [phase])
 
@@ -123,9 +140,21 @@ export function NullHandGame({
     // ============================================
     const [showSplash, setShowSplash] = useState(true)
 
-    // ============================================
-    // RENDER (AnimatePresenceで遷移を管理)
-    // ============================================
+    // = :::::::::::::::::::::::::::::::::::::::::
+    // RENDER
+    // = :::::::::::::::::::::::::::::::::::::::::
+    const [userColor, setUserColor] = useState<string>('#00FF00')
+
+    useEffect(() => {
+        const savedColor = localStorage.getItem('nullhand_user_color')
+        if (savedColor) {
+            setUserColor(savedColor)
+        }
+    }, [])
+
+    useEffect(() => {
+        localStorage.setItem('nullhand_user_color', userColor)
+    }, [userColor])
 
     return (
         <>
@@ -135,6 +164,8 @@ export function NullHandGame({
                         key="splash"
                         onComplete={() => setShowSplash(false)}
                         titleHand={titleHand}
+                        userColor={userColor}
+                        onColorChange={setUserColor}
                     />
                 )}
                 {phase === 'TITLE' && !showSplash && (
@@ -145,54 +176,28 @@ export function NullHandGame({
                         isReady={isReady}
                         allUsersReady={allUsersReady}
                         titleHand={titleHand}
-                        initialRankings={initialRankings}
+                        initialRankings={localRankings} // 最新のローカルランキングを渡す
                         onToggleReady={toggleReady}
                         onStartGame={handleStartGame}
                         onExit={handleClose}
+                        userColor={userColor}
+                        onColorChange={setUserColor}
+                        currentUserId={currentUserId}
                     />
                 )}
                 {phase !== 'TITLE' && (
                     <GameLayout key="game" phase={phase} error={error} hostName={hostName}>
-                        {phase === 'SETUP' && (
-                            <SetupPhase
-                                isCurrentHost={isCurrentHost}
-                                titleHand={titleHand}
-                                hostStats={hostStats}
-                                selectedHand={selectedHand}
-                                selectedFake={selectedFake}
-                                fakeDetails={fakeDetails}
-                                isProcessing={isProcessing}
-                                onSelectHand={setSelectedHand}
-                                onSelectFake={setSelectedFake}
-                                onUpdateFakeDetails={setFakeDetails}
-                                onSubmit={handleSetupSubmit}
-                                hostName={hostName}
-                                onReselectHand={() => setSelectedHand(null)}
-                            />
-                        )}
-
-                        {phase === 'SHOWCASE' && (
-                            <ShowcasePhase
+                        {phase === 'CHOICE' && (
+                            <ChoicePhase
                                 jankenEvent={jankenEvent}
                                 hostStats={hostStats}
                                 isCurrentHost={isCurrentHost}
                                 isProcessing={isProcessing}
-                                onConfirm={handleConfirmShowcase}
+                                onChoice={handleSetHostChoice}
                                 hostName={hostName}
+                                currentScores={currentScores}
                                 currentUserId={currentUserId}
-                            />
-                        )}
-
-                        {phase === 'FINAL_DECISION' && (
-                            <FinalDecisionPhase
-                                jankenEvent={jankenEvent}
-                                hostStats={hostStats}
-                                isCurrentHost={isCurrentHost}
-                                selectedHand={selectedHand}
-                                isProcessing={isProcessing}
-                                onSelectHand={setSelectedHand}
-                                onSubmit={() => selectedHand && handleSetFinalHostHand(selectedHand)}
-                                hostName={hostName}
+                                userColor={userColor}
                             />
                         )}
 
@@ -206,6 +211,9 @@ export function NullHandGame({
                                 onSelectHand={setSelectedHand}
                                 onSubmit={() => selectedHand && handleSetGuestHand(selectedHand)}
                                 hostName={hostName}
+                                currentScores={currentScores}
+                                currentUserId={currentUserId}
+                                userColor={userColor}
                             />
                         )}
 
@@ -220,16 +228,19 @@ export function NullHandGame({
                                 isCurrentHost={isCurrentHost}
                                 hostStats={hostStats}
                                 roomUsers={room.users}
+                                userColor={userColor}
                             />
                         )}
 
                         {phase === 'GAME_OVER' && (
                             <GameOverPhase
                                 currentUserId={currentUserId}
-                                newRankings={newRankings}
-                                initialRankings={initialRankings}
+                                hostId={jankenEvent?.currentHostId}
+                                newRankings={localRankings} // サーバーからのフェッチではなくローカルで計算済みのものを渡す
+                                initialRankings={initialRankings} // GameOverPhaseで上昇分を見せるために、試合開始時の値も渡す
                                 currentScores={currentScores}
                                 onFinish={handleFinish}
+                                userColor={userColor}
                             />
                         )}
                     </GameLayout>

@@ -45,12 +45,12 @@ export type {
     MatchWithScores,
     MatchScoreWithUser,
     HostStats,
-    FakeDetails,
+    HostChoice,
     RoundResult,
     JankenPhase,
-    FakeTarget,
     UserRanking,
 } from './game';
 // enumは値としてexportが必要
 export { HandType } from './game';
+
 

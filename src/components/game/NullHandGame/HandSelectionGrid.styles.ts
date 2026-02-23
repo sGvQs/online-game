@@ -4,7 +4,7 @@ export const handSelectionGrid = tv({
     slots: {
         root: 'grid grid-cols-3 gap-8 w-full max-w-4xl px-8',
         button: [
-            'relative group aspect-square rounded-xl',
+            'relative group aspect-square',
             'transition-all duration-300',
             'bg-black/40 border-2 backdrop-blur-sm',
         ],
@@ -13,16 +13,16 @@ export const handSelectionGrid = tv({
             'absolute bottom-4 inset-x-0 text-center',
             'font-black text-xl tracking-[0.2em] transition-colors',
         ],
-        selectionRing: 'absolute inset-0 border-2 border-[#44FFFF] rounded-xl',
+        selectionRing: 'absolute inset-0 border-2 border-[#44FFFF]',
     },
     variants: {
         selected: {
             true: {
-                button: 'border-[#44FFFF] shadow-[0_0_30px_rgba(68,255,255,0.3)] bg-[#44FFFF]/5 scale-105 z-10',
+                button: 'border-[#44FFFF] shadow-[0_0_30px_rgba(68,255,255,0.3)] z-10',
                 label: 'text-[#44FFFF]',
             },
             false: {
-                button: 'border-gray-800 hover:border-gray-600 hover:bg-white/5',
+                button: 'border-gray-800 hover:border-gray-600',
                 label: 'text-gray-500 group-hover:text-gray-300',
             },
         },

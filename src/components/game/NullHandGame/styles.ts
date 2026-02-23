@@ -198,7 +198,7 @@ export const nullHandGame = tv({
             'border-[4px]',
             'border-[#FF4444]',
             'p-4', // 6 → 4
-            'min-h-[400px]', // 400px → 350px
+            'min-h-[600px]', // 400px → 350px
             'flex',
             'flex-col',
             'justify-between',

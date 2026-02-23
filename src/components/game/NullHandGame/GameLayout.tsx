@@ -17,15 +17,15 @@ export function GameLayout({ phase, error, children, mainArea, sideArea, hostNam
 
     const getPhaseText = (p: JankenPhase) => {
         switch (p) {
-            case 'SETUP': return `LIE HAND SELECTION`
-            case 'SHOWCASE': return `SHOW HAND`
-            case 'FINAL_DECISION': return `FINAL HAND SELECTION`
+            case 'DEAL': return `PREPARING`
+            case 'CHOICE': return `HOST CHOICE`
             case 'BATTLE': return `BATTLE`
             case 'RESULT': return 'RESULT'
             case 'GAME_OVER': return 'GAME OVER'
             default: return ''
         }
     }
+
 
     // If mainArea and sideArea are provided, use them in the grid.
     // Otherwise render children directly (for flexibility).

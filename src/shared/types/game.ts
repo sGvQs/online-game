@@ -80,6 +80,7 @@ export type MatchScore = Prisma.MatchScoreGetPayload<{}>;
 /** JankenEvent with GuestHands including User */
 export type JankenEventWithGuests = Prisma.JankenEventGetPayload<{
     include: {
+        match: true,
         guestHands: {
             include: {
                 user: true
@@ -109,37 +110,28 @@ export type MatchScoreWithUser = Prisma.MatchScoreGetPayload<{
     include: { user: true }
 }>;
 
-/** ホストの統計データ（本物と表示用） */
+/** ホストの統計データ（Binary Reverseシステム用） */
 export interface HostStats {
-    favoriteHand: HandType
-    changeRate: number  // 変える確率 (0-100)
-    totalGames: number
-    // 偽装前の本物のデータ（SETUP画面で表示用）
-    realFavoriteHand?: HandType
-    realChangeRate?: number
-}
-
-/** 偽装の詳細情報 */
-export interface FakeDetails {
-    fakeHandValue?: HandType | null
-    fakeChangeRateValue?: number | null
-    fakeFavoriteHandValue?: HandType | null
+    reverseRate: number | null  // REVERSE率 (0-100)、null = 初プレイヤー
+    totalHostCount: number      // ホストを担当した回数
 }
 
 /** ラウンド結果 */
 export interface RoundResult {
     hostId: string
     hostHand: HandType
+    hostChoice: HostChoice
     winners: Array<{
         userId: string
         userName: string
         hand: HandType
     }>
+    isNullHand: boolean
     hostWonAll: boolean
 }
 
 /** じゃんけんのフェーズ */
-export type JankenPhase = 'TITLE' | 'SETUP' | 'SHOWCASE' | 'FINAL_DECISION' | 'BATTLE' | 'RESULT' | 'GAME_OVER';
+export type JankenPhase = 'TITLE' | 'DEAL' | 'CHOICE' | 'BATTLE' | 'RESULT' | 'GAME_OVER';
 
 /** 手の種類 */
 export enum HandType {
@@ -148,9 +140,8 @@ export enum HandType {
     PAPER = 'PAPER',
 }
 
-/** 嘘の対象 */
-// ... existing types
-export type FakeTarget = 'NONE' | 'INITIAL_HAND' | 'CHANGE_RATE' | 'FAVORITE_HAND';
+/** ホストの選択（STAY: REALをそのまま / REVERSE: BLUFFに変更） */
+export type HostChoice = 'STAY' | 'REVERSE';
 
 export type UserRanking = {
     userId: string

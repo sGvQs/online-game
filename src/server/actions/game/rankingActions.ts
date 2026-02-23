@@ -5,8 +5,7 @@ import { UserRanking } from '@/shared/types/game'
 import { Prisma } from '@prisma/client'
 
 /**
- * 指定されたユーザーIDのランキング情報を取得する
- * ランキングは (勝利数 * 勝率) で計算されるポイントに基づく
+ * 指定されたユーザーIDの月間ランキング情報を取得する
  * 
  * @param userIds - ランキングを取得したいユーザーのIDリスト
  * @returns ユーザーごとのランキング情報
@@ -14,72 +13,67 @@ import { Prisma } from '@prisma/client'
 export async function getNullHandRankings(userIds: string[]): Promise<UserRanking[]> {
     if (userIds.length === 0) return []
 
-    // ポイント計算ロジック:
-    // Points = Wins * (Wins / TotalGames)
-    // 勝率 = Wins / TotalGames
+    const now = new Date()
+    const year = now.getFullYear()
+    const month = now.getMonth() + 1
 
-    // 注意: raw query なのでテーブル名やカラム名はDBの実際の名前を使用する
-    // JankenLog -> janken_logs
-    // User -> users
-    // userId -> user_id, isWinning -> is_winning
+    // 指定されたユーザーの月間ランキング情報を取得
+    const rankings = await prisma.monthlyRanking.findMany({
+        where: {
+            year,
+            month,
+        },
+        include: {
+            user: true
+        },
+        orderBy: {
+            totalPoints: 'desc'
+        }
+    })
 
-    const rankings = await prisma.$queryRaw<any[]>`
-        WITH UserStats AS (
-            SELECT
-                user_id,
-                COUNT(*) as total_games,
-                COUNT(CASE WHEN is_winning = true THEN 1 END) as wins
-            FROM janken_logs
-            GROUP BY user_id
-        ),
-        UserPoints AS (
-            SELECT
-                user_id,
-                wins,
-                total_games,
-                CASE
-                    WHEN total_games = 0 THEN 0
-                    ELSE (CAST(wins AS DOUBLE PRECISION) * (CAST(wins AS DOUBLE PRECISION) / total_games))
-                END as points,
-                CASE
-                    WHEN total_games = 0 THEN 0
-                    ELSE (CAST(wins AS DOUBLE PRECISION) / total_games)
-                END as win_rate
-            FROM UserStats
-        ),
-        RankedUsers AS (
-            SELECT
-                user_id,
-                wins,
-                total_games,
-                win_rate,
-                points,
-                RANK() OVER (ORDER BY points DESC) as rank
-            FROM UserPoints
-        )
-        SELECT
-            ru.user_id,
-            u.name,
-            ru.wins,
-            ru.total_games,
-            ru.win_rate,
-            ru.points,
-            ru.rank
-        FROM RankedUsers ru
-        JOIN users u ON ru.user_id = u.id
-        WHERE ru.user_id IN (${Prisma.join(userIds)})
-    `
+    // ランキングの順位を計算して、要求されたユーザーのみをフィルタリングして返す
+    // （同じポイントの場合は同順位にするため、ループで計算）
+    let currentRank = 1
+    let previousPoints = -1
+    let tieCount = 0
 
-    // BigInt等の変換が必要な場合があるが、このクエリの結果は通常の数値またはDouble
-    // rankはBigIntで返ってくる可能性がある
+    const rankedUsersMap = new Map<string, UserRanking>()
 
-    return rankings.map((r: any) => ({
-        userId: r.user_id,
-        name: r.name,
-        wins: Number(r.wins),
-        totalGames: Number(r.total_games),
-        winRate: Number(r.win_rate),
-        points: Number(r.points), // 小数点以下が含まれる可能性あり
-        rank: Number(r.rank)
-    }))
+    rankings.forEach((ranking, index) => {
+        if (previousPoints !== ranking.totalPoints) {
+            currentRank = index + 1
+            tieCount = 0
+            previousPoints = ranking.totalPoints
+        } else {
+            tieCount++
+        }
+
+        rankedUsersMap.set(ranking.userId, {
+            userId: ranking.userId,
+            name: ranking.user.name,
+            points: ranking.totalPoints,
+            rank: currentRank,
+            // 互換性のため残す
+            wins: 0,
+            totalGames: 0,
+            winRate: 0,
+        })
+    })
+
+    // 指定されたユーザーのリストに対して、ランキングがあればそれを返し、なければデフォルト（圏外: 0位, 0pt）を返す
+    return userIds.map(userId => {
+        const found = rankedUsersMap.get(userId)
+        if (found) return found
+
+        return {
+            userId,
+            name: 'Unknown', // 名前はフロントエンドで保持しているためダミーで可
+            points: 0,
+            rank: rankings.length + 1, // 現在の最下位より下（今回は一律で最下位の次とするか、0で圏外とする等）
+            wins: 0,
+            totalGames: 0,
+            winRate: 0,
+        }
+    })
 }
+
