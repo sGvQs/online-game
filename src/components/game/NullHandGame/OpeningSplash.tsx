@@ -1,10 +1,10 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { HandType } from '@/shared/types'
-import { Hand3D } from './Hand3D'
 import { nullHandGame } from './styles'
 import { NullHandLogo } from './NullHandLogo'
 import { useSE } from '@/hooks/useSE'
+import { NEON_PALETTE } from './TitleScreen'
 
 interface OpeningSplashProps {
     onComplete: () => void
@@ -19,12 +19,9 @@ export function OpeningSplash({ onComplete, titleHand, userColor, onColorChange 
     const styles = nullHandGame()
     const { play } = useSE()
 
-    // カラーパレット
-    const colors = ['#00FF00', '#44FFFF', '#FF00FF', '#FFFF00', '#FF4444', '#FFFFFF']
-
     const handleColorCycle = () => {
-        const nextIndex = (colors.indexOf(userColor) + 1) % colors.length
-        onColorChange(colors[nextIndex])
+        const nextIndex = (NEON_PALETTE.indexOf(userColor) + 1) % NEON_PALETTE.length
+        onColorChange(NEON_PALETTE[nextIndex])
         play('submit')
     }
 

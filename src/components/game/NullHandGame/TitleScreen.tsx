@@ -23,7 +23,7 @@ interface TitleScreenProps {
     currentUserId: string | null
 }
 
-const NEON_PALETTE = [
+export const NEON_PALETTE = [
     '#00FF00', // Terminal Green
     '#AA44FF', // Neon Purple
     '#FF9900', // Cyber Orange

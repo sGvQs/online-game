@@ -72,7 +72,7 @@ export function ResultPhase({
                 <span className="text-[#44FFFF] text-sm font-bold ml-1 uppercase tracking-tighter">
                     SYSTEM SELECTION
                 </span>
-                を選んでいました
+                を選んでいましたが、このラウンドでの選択は……
             </div>
         </div>
     )
@@ -280,7 +280,7 @@ export function ResultPhase({
                                             className="text-xs font-black tracking-[0.3em] mb-1"
                                             style={{ color: isCurrentHost ? (userColor || '#FF4444') : '#FF4444' }}
                                         >
-                                            CHOICE
+                                            {hostName}
                                         </div>
                                         <div
                                             className="w-48 h-48 border-2"

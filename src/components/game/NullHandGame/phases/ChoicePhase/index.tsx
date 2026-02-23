@@ -88,9 +88,9 @@ export function ChoicePhase({
     const MainArea = () => (
         <motion.div className={styles.mainArea()} layout transition={{ duration: 0.3 }}>
             <PhaseHeader
-                engLabel="HOST CHOICE"
-                title={isCurrentHost ? "どちらの手を出しますか？" : "ホストが考え中です..."}
-                subLabel={isCurrentHost ? "REAL: 手をそのまま出す / REVERSE: 裏をかく" : "しばらくお待ちください"}
+                engLabel={isCurrentHost ? "あなたはホストです" : "あなたはゲストです"}
+                title={isCurrentHost ? "勝負に出す手を選んでください" : "しばらくお待ちください..."}
+                subLabel={selectionStep < 4 ? "システムが選択肢を生成しています..." : (!isCurrentHost ? `${hostName}がホストです` : "")}
                 currentTurn={jankenEvent?.turnNumber}
                 totalTurns={jankenEvent?.match.totalTurns}
             />
