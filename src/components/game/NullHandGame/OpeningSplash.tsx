@@ -4,17 +4,29 @@ import { HandType } from '@/shared/types'
 import { Hand3D } from './Hand3D'
 import { nullHandGame } from './styles'
 import { NullHandLogo } from './NullHandLogo'
+import { useSE } from '@/hooks/useSE'
 
 interface OpeningSplashProps {
     onComplete: () => void
     titleHand: HandType
     userColor: string
+    onColorChange: (color: string) => void
 }
 
-export function OpeningSplash({ onComplete, titleHand, userColor }: OpeningSplashProps) {
+export function OpeningSplash({ onComplete, titleHand, userColor, onColorChange }: OpeningSplashProps) {
     const [progress, setProgress] = useState(0)
     const [isTransitioning, setIsTransitioning] = useState(false)
     const styles = nullHandGame()
+    const { play } = useSE()
+
+    // カラーパレット
+    const colors = ['#00FF00', '#44FFFF', '#FF00FF', '#FFFF00', '#FF4444', '#FFFFFF']
+
+    const handleColorCycle = () => {
+        const nextIndex = (colors.indexOf(userColor) + 1) % colors.length
+        onColorChange(colors[nextIndex])
+        play('submit')
+    }
 
     useEffect(() => {
         const duration = 10000 // 10秒
@@ -57,26 +69,33 @@ export function OpeningSplash({ onComplete, titleHand, userColor }: OpeningSplas
                     className={styles.visualBox()}
                     layoutId="main-box"
                 >
-                    <NullHandLogo titleHand={titleHand} userColor={userColor} showChangeButton={false} />
+                    <NullHandLogo
+                        titleHand={titleHand}
+                        userColor={userColor}
+                        onClick={handleColorCycle}
+                        showChangeButton={true}
+                    />
                 </motion.div>
 
-                {/* プログレスバー */}
-                <motion.div className="w-64 space-y-2"
-                    style={{ color: userColor }}
-                    exit={{ opacity: 0 }}
-                    animate={{ opacity: isTransitioning ? 0 : 1 }}
-                    transition={{ duration: 0.8, ease: "easeInOut" }}>
-                    <div className="flex justify-between text-xs font-bold tracking-widest">
-                        <span>LOADING SYSTEM...</span>
-                        <span>{Math.round(progress)}%</span>
-                    </div>
-                    <div className="h-1 bg-gray-900 w-full overflow-hidden">
-                        <motion.div
-                            className="h-full bg-white shadow-[0_0_10px_#44FFFF]"
-                            style={{ width: `${progress}%`, backgroundColor: userColor }}
-                        />
-                    </div>
-                </motion.div>
+                {/* プログレスバーエリア（固定高さでガタつきを防止） */}
+                <div className="h-16 flex flex-col justify-start">
+                    <motion.div className="w-64 space-y-2"
+                        style={{ color: userColor }}
+                        exit={{ opacity: 0 }}
+                        animate={{ opacity: isTransitioning ? 0 : 1 }}
+                        transition={{ duration: 0.8, ease: "easeInOut" }}>
+                        <div className="flex justify-between text-[10px] font-black tracking-widest opacity-80">
+                            <span>LOADING...</span>
+                            <span>{Math.round(progress)}%</span>
+                        </div>
+                        <div className="h-1 bg-gray-900 w-full overflow-hidden">
+                            <motion.div
+                                className="h-full shadow-[0_0_10px_currentColor]"
+                                style={{ width: `${progress}%`, backgroundColor: userColor }}
+                            />
+                        </div>
+                    </motion.div>
+                </div>
             </div>
         </motion.div>
 

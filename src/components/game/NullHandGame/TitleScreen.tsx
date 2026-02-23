@@ -133,7 +133,7 @@ export function TitleScreen({
                         titleHand={titleHand}
                         userColor={userColor}
                         onClick={() => {
-                            play("select")
+                            play("submit")
                             const currentIndex = NEON_PALETTE.indexOf(userColor)
                             const nextIndex = (currentIndex + 1) % NEON_PALETTE.length
                             onColorChange(NEON_PALETTE[nextIndex])

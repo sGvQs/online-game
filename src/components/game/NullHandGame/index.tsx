@@ -165,6 +165,7 @@ export function NullHandGame({
                         onComplete={() => setShowSplash(false)}
                         titleHand={titleHand}
                         userColor={userColor}
+                        onColorChange={setUserColor}
                     />
                 )}
                 {phase === 'TITLE' && !showSplash && (
