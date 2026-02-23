@@ -99,7 +99,6 @@ export function GameOverPhase({
             <CurrentScores
                 currentScores={currentScores}
                 currentUserId={currentUserId}
-                hostId={hostId}
                 label="最終スコア"
                 engLabel="FINAL SCORE"
                 size="lg"

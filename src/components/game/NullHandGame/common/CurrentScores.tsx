@@ -47,7 +47,7 @@ export function CurrentScores({
                                 <div className="text-[10px] font-black text-white w-4" style={{
                                     color: score.userId === currentUserId
                                         ? userColor
-                                        : score.userId === hostId
+                                        : (hostId && score.userId === hostId && currentUserId !== hostId)
                                             ? "#FF4444"
                                             : "#44FFFF"
                                 }}>
@@ -59,7 +59,7 @@ export function CurrentScores({
                                     style={{
                                         color: score.userId === currentUserId
                                             ? userColor
-                                            : score.userId === hostId
+                                            : (hostId && score.userId === hostId && currentUserId !== hostId)
                                                 ? "#FF4444"
                                                 : "#44FFFF"
                                     }}
@@ -71,7 +71,7 @@ export function CurrentScores({
                                 style={{
                                     color: score.userId === currentUserId
                                         ? userColor
-                                        : score.userId === hostId
+                                        : (hostId && score.userId === hostId && currentUserId !== hostId)
                                             ? "#FF4444"
                                             : "#44FFFF"
                                 }}
