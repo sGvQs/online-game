@@ -1,7 +1,6 @@
 import { JankenEventWithGuests, HostStats, HostChoice, HandType, MatchScoreWithUser } from '@/shared/types'
 import { Hand3D } from '../../Hand3D'
 import { nullHandGame } from '../../styles'
-import { getHandDisplayWithEmoji } from '../../utils'
 import { PhaseHeader } from '../../common/PhaseHeader'
 import { CurrentScores } from '../../common/CurrentScores'
 import { RewardSystem } from '../../common/RewardSystem'
@@ -60,7 +59,7 @@ export function ChoicePhase({
             const t = setTimeout(() => {
                 setSelectionStep(3)
                 play('submit')
-            }, 2000) // 6s: DEFAULT CHOICE ラベル点灯
+            }, 2000) // 6s: SYSTEM SELECTION ラベル点灯
             return () => clearTimeout(t)
         } else if (selectionStep === 3) {
             const t = setTimeout(() => {
@@ -88,9 +87,9 @@ export function ChoicePhase({
     const MainArea = () => (
         <motion.div className={styles.mainArea()} layout transition={{ duration: 0.3 }}>
             <PhaseHeader
-                engLabel={selectionStep < 4 ? "SYSTEM SELECTION" : (isCurrentHost ? "あなたはホストです" : "あなたはゲストです")}
-                title={selectionStep < 4 ? "システムが選択肢を生成しています..." : (isCurrentHost ? "勝負に出す手を選んでください" : "しばらくお待ちください...")}
-                subLabel={selectionStep < 4 ? "" : (!isCurrentHost ? `${hostName}がホストです` : "")}
+                engLabel={isCurrentHost ? "あなたはホストです" : "あなたはゲストです"}
+                title={isCurrentHost ? "勝負に出す手を選んでください" : "しばらくお待ちください..."}
+                subLabel={selectionStep < 4 ? "システムが選択肢を生成しています..." : (!isCurrentHost ? `${hostName}がホストです` : "")}
             />
 
             {/* ホストの統計情報 / 演出中のテキスト */}
@@ -119,7 +118,7 @@ export function ChoicePhase({
                                 {isCurrentHost ? "あなたは" : `${hostName}は`}過去に <span className="text-[#FF4444] text-sm font-bold">{hostStats.reverseRate !== null
                                     ? 100 - hostStats.reverseRate
                                     : '???'
-                                }%</span> の確率で <span className="text-[#44FFFF] text-sm font-bold"> DEFAULT CHOICE </span> を選んでいます
+                                }%</span> の確率で <span className="text-[#44FFFF] text-sm font-bold"> SYSTEM SELECTION </span> を選んでいます
                             </div>
                             {isCurrentHost ? (
                                 <p className="flex justify-center items-center gap-2 text-gray-400 animate-pulse text-xs">
@@ -159,7 +158,7 @@ export function ChoicePhase({
                                         exit={{ opacity: 0 }}
                                         className="text-xs text-[#44FFFF] font-black tracking-widest text-center translate-y-2 px-3 py-2"
                                     >
-                                        DEFAULT CHOICE
+                                        SYSTEM SELECTION
                                     </motion.p>
                                 )}
                             </div>

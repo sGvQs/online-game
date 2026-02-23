@@ -85,7 +85,7 @@ export function BattlePhase({
                                         {hostStats.reverseRate !== null ? 100 - hostStats.reverseRate : '???'}%
                                     </span>
                                     の確率で
-                                    <span className="text-[#44FFFF] text-sm font-bold ml-1">DEFAULT CHOICE</span>
+                                    <span className="text-[#44FFFF] text-sm font-bold ml-1">SYSTEM SELECTION</span>
                                     を選んでいます
                                 </span>
                             </div>
@@ -102,7 +102,7 @@ export function BattlePhase({
                                 <div className="w-32 h-32 flex items-center justify-center">
                                     {realHand && <Hand3D handType={realHand} revealed={true} size="small" />}
                                 </div>
-                                <p className="text-[10px] text-[#44FFFF] font-bold text-center -translate-y-8">DEFAULT CHOICE</p>
+                                <p className="text-[10px] text-[#44FFFF] font-bold text-center -translate-y-8">SYSTEM SELECTION</p>
                             </div>
                             <div className="flex flex-col items-center gap-1">
                                 <div className="w-32 h-32 flex items-center justify-center">
@@ -157,7 +157,7 @@ export function BattlePhase({
                         {hostStats && (
                             <div className="flex items-center leading-relaxed">
                                 <div className="w-2 h-2 bg-[#44FFFF] rounded-full animate-pulse mr-2 flex-shrink-0" />
-                                <span className="text-[#44FFFF] font-bold ml-1">DEFAULT CHOICEを選ぶ確率 </span>
+                                <span className="text-[#44FFFF] font-bold ml-1">SYSTEM SELECTIONを選ぶ確率 </span>
                                 <span className="text-white font-bold ml-1">
                                     :
                                 </span>
@@ -170,7 +170,7 @@ export function BattlePhase({
                         {realHand && (
                             <div className="flex items-center leading-relaxed">
                                 <div className="w-2 h-2 bg-[#44FFFF] rounded-full animate-pulse mr-2 flex-shrink-0" />
-                                <span className="text-[#44FFFF] font-bold ml-1">DEFAULT CHOICE </span>
+                                <span className="text-[#44FFFF] font-bold ml-1">SYSTEM SELECTION </span>
                                 <span className="text-white font-bold ml-1">
                                     : {getHandDisplayWithEmoji(realHand)}
                                 </span>

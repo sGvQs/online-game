@@ -70,7 +70,7 @@ export function ResultPhase({
                 </span>
                 の確率で
                 <span className="text-[#44FFFF] text-sm font-bold ml-1 uppercase tracking-tighter">
-                    DEFAULT CHOICE
+                    SYSTEM SELECTION
                 </span>
                 を選んでいました
             </div>
@@ -247,7 +247,7 @@ export function ResultPhase({
                                         </div>
                                         <div className="h-6">
                                             <p className="text-xs text-[#44FFFF] font-black tracking-widest text-center translate-y-2 px-3 py-2">
-                                                DEFAULT CHOICE
+                                                SYSTEM SELECTION
                                             </p>
                                         </div>
                                     </div>

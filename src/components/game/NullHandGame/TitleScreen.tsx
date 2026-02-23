@@ -1,5 +1,5 @@
 import { RoomWithUsersAndReadyStatus, UserRanking, HandType, RoomUserWithReadyStatus } from '@/shared/types'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { useState } from 'react'
 import { nullHandGame } from './styles'
 import { Hand3D } from './Hand3D'
@@ -255,7 +255,7 @@ export function TitleScreen({
                                             <span className="font-bold mr-2 text-[#FF4444]">1.</span>
                                             <span>
                                                 <strong className="text-white">ホストの選択 (CHOICE)</strong><br />
-                                                ホストは提示された「DEFAULT CHOICE」と「BLUFF」のどちらで勝負するかを裏で決断します。
+                                                ホストは提示された「SYSTEM SELECTION」と「BLUFF」のどちらで勝負するかを裏で決断します。
                                             </span>
                                         </li>
                                         <li className="flex items-start">
