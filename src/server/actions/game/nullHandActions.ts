@@ -164,9 +164,13 @@ export async function startJankenMatch(roomId: string) {
  * ホストの統計データを取得
  * JankenLogからホスト時のREVERSE回数を集計
  */
-export async function getHostStats(userId: string): Promise<HostStats> {
+export async function getHostStats(userId: string, excludeJankenEventId?: string): Promise<HostStats> {
     const logs = await prisma.jankenLog.findMany({
-        where: { userId, isHost: true },
+        where: {
+            userId,
+            isHost: true,
+            ...(excludeJankenEventId ? { jankenEventId: { not: excludeJankenEventId } } : {}),
+        },
         orderBy: { createdAt: 'desc' },
         take: 50,
     })
@@ -397,6 +401,7 @@ async function judgeRound(eventId: string) {
             isHost: true,
             hostChoice: hostChoice,
             matchId: event.matchId,
+            jankenEventId: event.id,
             isWinning: isNullHand || isHostPerfectWin,
         }
     })
@@ -409,6 +414,7 @@ async function judgeRound(eventId: string) {
                 userId: guestHand.userId,
                 isHost: false,
                 matchId: event.matchId,
+                jankenEventId: event.id,
                 isWinning: isGuestWin,
             }
         })
@@ -556,8 +562,10 @@ export async function getLatestJankenEventWithStats(
     if (!event) return null
 
     const needsStats = ['DEAL', 'CHOICE', 'BATTLE', 'RESULT'].includes(event.phase)
+    // RESULT フェーズでは現在のラウンド (JankenEvent) のログを除外して「このラウンド前」の統計を返す
+    const excludeJankenEventId = event.phase === 'RESULT' ? event.id : undefined
     const stats = needsStats
-        ? await getHostStats(event.currentHostId)
+        ? await getHostStats(event.currentHostId, excludeJankenEventId)
         : { reverseRate: null, totalHostCount: 0 }
 
     return { event, stats }
