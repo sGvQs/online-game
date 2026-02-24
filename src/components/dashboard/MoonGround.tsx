@@ -10,50 +10,31 @@ function seededRandom(seed: number) {
     }
 }
 
-/** 楕円のSVG path（中心・半径指定） */
-function ellipsePath(cx: number, cy: number, rx: number, ry: number) {
-    return `M ${cx - rx} ${cy} a ${rx} ${ry} 0 1 1 ${2 * rx} 0 a ${rx} ${ry} 0 1 1 ${-2 * rx} 0`
-}
-
-/**
- * 🌛風の影 - 大きい影楕円の内側に、小さい光の楕円が入り込んでC型の影に
- * 影＝内側の暗い部分、光＝外側の三日月（黒が囲まず、影が内側に）
- */
-function crescentPath(cx: number, cy: number, rx: number, ry: number) {
-    // 大きい影楕円（クレーター内の影の領域・右下寄り）
-    const shadowCx = cx + rx * 0.25
-    const shadowCy = cy + ry * 0.3
-    const shadowRx = rx * 0.85
-    const shadowRy = ry * 0.9
-    // 小さい光の楕円（左上から入り込む＝切り抜く部分）
-    const lightCx = cx - rx * 0.4
-    const lightCy = cy - ry * 0.35
-    const lightRx = rx * 0.55
-    const lightRy = ry * 0.6
-
-    const outer = ellipsePath(shadowCx, shadowCy, shadowRx, shadowRy)
-    const inner = ellipsePath(lightCx, lightCy, lightRx, lightRy)
-    return `${outer} ${inner}`
-}
-
-/** 月面のクラスター（クレーター風）を生成 - ランダムな大きさ・位置・小さめ多め */
-function generateClusters(seed: number, count: number) {
+/** 草の葉を生成 - 楕円の上縁に沿って配置 */
+function generateGrassBlades(seed: number, count: number) {
     const rnd = seededRandom(seed)
-    const clusters: { cx: number; cy: number; rx: number; ry: number }[] = []
+    const blades: { x: number; baseY: number; height: number; tilt: number }[] = []
+    const cx = 600
+    const rx = 950
+    const ry = 280
+    const cy = 420
 
     for (let i = 0; i < count; i++) {
-        const baseSize = 1.5 + rnd() * 6
-        clusters.push({
-            cx: 80 + rnd() * 1040,
-            cy: 150 + rnd() * 55,
-            rx: baseSize * (0.6 + rnd() * 0.6),
-            ry: baseSize * (0.25 + rnd() * 0.4),
+        const t = rnd()
+        const angle = Math.PI * 0.3 + t * Math.PI * 0.4
+        const ex = cx + rx * Math.cos(angle)
+        const ey = cy - ry * Math.sin(angle)
+        blades.push({
+            x: ex,
+            baseY: ey,
+            height: 4 + rnd() * 12,
+            tilt: (rnd() - 0.5) * 0.4,
         })
     }
-    return clusters
+    return blades
 }
 
-const CLUSTERS = generateClusters(420, 140)
+const GRASS_BLADES = generateGrassBlades(123, 120)
 
 export function MoonGround() {
     return (
@@ -65,8 +46,8 @@ export function MoonGround() {
             preserveAspectRatio="xMidYMax meet"
         >
             <defs>
-                {/* 微細なぼこぼこ＋うっすらグレインテクスチャ */}
-                <filter id="moonBumpyFilter" x="-15%" y="-15%" width="130%" height="130%">
+                {/* 地面の凹凸＋うっすらテクスチャ */}
+                <filter id="groundBumpyFilter" x="-15%" y="-15%" width="130%" height="130%">
                     <feTurbulence
                         type="fractalNoise"
                         baseFrequency="0.025 0.05"
@@ -77,91 +58,69 @@ export function MoonGround() {
                     <feDisplacementMap
                         in="SourceGraphic"
                         in2="noise"
-                        scale="8"
+                        scale="6"
                         xChannelSelector="R"
                         yChannelSelector="G"
                         result="bumpy"
                     />
                     <feTurbulence
                         type="fractalNoise"
-                        baseFrequency="0.06 0.1"
+                        baseFrequency="0.05 0.08"
                         numOctaves="3"
                         result="grain"
                         seed="42"
                     />
                     <feColorMatrix in="grain" type="saturate" values="0" result="grayGrain" />
                     <feComponentTransfer in="grayGrain" result="softGrain">
-                        <feFuncR type="linear" slope="0.25" intercept="0.5" />
-                        <feFuncG type="linear" slope="0.25" intercept="0.5" />
-                        <feFuncB type="linear" slope="0.25" intercept="0.5" />
-                        <feFuncA type="linear" slope="0.01" intercept="0.49" />
+                        <feFuncR type="linear" slope="0.2" intercept="0.5" />
+                        <feFuncG type="linear" slope="0.2" intercept="0.5" />
+                        <feFuncB type="linear" slope="0.2" intercept="0.5" />
+                        <feFuncA type="linear" slope="0.015" intercept="0.49" />
                     </feComponentTransfer>
                     <feBlend in="bumpy" in2="softGrain" mode="soft-light" result="withTexture" />
                 </filter>
-                <radialGradient id="moonGroundGradient" cx="50%" cy="100%" r="100%">
-                    <stop offset="0%" stopColor="#d8d0c4" />
-                    <stop offset="30%" stopColor="#c4b8a8" />
-                    <stop offset="55%" stopColor="#a89888" />
-                    <stop offset="80%" stopColor="#7a6a5e" />
-                    <stop offset="100%" stopColor="#5a4a42" />
-                </radialGradient>
-                <clipPath id="moonClip">
+                {/* 左暗め〜右明るめのグラデーション */}
+                <linearGradient id="groundGradient" x1="0%" y1="50%" x2="100%" y2="50%">
+                    <stop offset="0%" stopColor="#2a4020" />
+                    <stop offset="35%" stopColor="#3d6b2a" />
+                    <stop offset="65%" stopColor="#4d8a35" />
+                    <stop offset="100%" stopColor="#6fc04a" />
+                </linearGradient>
+                <clipPath id="groundClip">
                     <ellipse cx="600" cy="420" rx="950" ry="280" />
                 </clipPath>
-                {/* 凹み（クレーター）用 - 茶色系 */}
-                {CLUSTERS.map((c, i) => (
-                    <radialGradient
-                        key={`grad-${i}`}
-                        id={`craterGrad-${i}`}
-                        cx="50%"
-                        cy="55%"
-                        r="50%"
-                        fx="48%"
-                        fy="42%"
-                    >
-                        <stop offset="0%" stopColor="#2a2420" stopOpacity="0.85" />
-                        <stop offset="30%" stopColor="#3a342e" stopOpacity="0.6" />
-                        <stop offset="55%" stopColor="#4a443c" stopOpacity="0.35" />
-                        <stop offset="80%" stopColor="#6a6258" stopOpacity="0.12" />
-                        <stop offset="100%" stopColor="#8a8278" stopOpacity="0" />
-                    </radialGradient>
-                ))}
-                {CLUSTERS.map((c, i) => (
-                    <clipPath key={`clip-${i}`} id={`craterClip-${i}`}>
-                        <ellipse cx={c.cx} cy={c.cy} rx={c.rx} ry={c.ry} />
-                    </clipPath>
-                ))}
+                {/* 草のグラデーション（左暗め〜右明るめ） */}
+                <linearGradient id="grassGradient" x1="0%" y1="50%" x2="100%" y2="50%">
+                    <stop offset="0%" stopColor="#3a5c28" />
+                    <stop offset="50%" stopColor="#4d8a35" />
+                    <stop offset="100%" stopColor="#5da840" />
+                </linearGradient>
             </defs>
-            <g clipPath="url(#moonClip)">
+            <g
+                clipPath="url(#groundClip)"
+                style={{
+                    animation: 'moonScroll 240s ease-in-out infinite alternate',
+                }}
+            >
+                {/* 土・草地のベース */}
                 <ellipse
                     cx="600"
                     cy="420"
                     rx="950"
                     ry="280"
-                    fill="url(#moonGroundGradient)"
-                    filter="url(#moonBumpyFilter)"
+                    fill="url(#groundGradient)"
+                    filter="url(#groundBumpyFilter)"
                 />
-                {/* 凹んで見えるクラスター（クレーター風）+ C型の影で立体感 */}
-                {CLUSTERS.map((c, i) => (
-                    <g key={i}>
-                        <ellipse
-                            cx={c.cx}
-                            cy={c.cy}
-                            rx={c.rx}
-                            ry={c.ry}
-                            fill={`url(#craterGrad-${i})`}
+                {/* 草の葉 */}
+                <g fill="none" stroke="url(#grassGradient)" strokeWidth="0.8" strokeLinecap="round">
+                    {GRASS_BLADES.map((b, i) => (
+                        <path
+                            key={i}
+                            d={`M ${b.x} ${b.baseY} Q ${b.x + b.tilt * b.height * 3} ${b.baseY - b.height * 0.6} ${b.x + b.tilt * b.height} ${b.baseY - b.height}`}
+                            opacity={0.85}
                         />
-                        {/* 🌛風の影（クレーター内にクリップ） */}
-                        <g clipPath={`url(#craterClip-${i})`}>
-                            <path
-                                d={crescentPath(c.cx, c.cy, c.rx, c.ry)}
-                                fill="#1a1612"
-                                fillRule="evenodd"
-                                opacity={0.78}
-                            />
-                        </g>
-                    </g>
-                ))}
+                    ))}
+                </g>
             </g>
         </svg>
         <GroundSolaris />
