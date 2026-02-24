@@ -185,13 +185,13 @@ function UserCommentFormContent({
           value={comment}
           onChange={(e) => setComment(e.target.value)}
           placeholder="ゲーム終了後に勝ったら表示されるコメントを入力..."
-          maxLength={100}
+          maxLength={20}
           disabled={isPending}
           className="w-full bg-white/50 dark:bg-slate-900/50 border-brand-200 dark:border-brand-700 focus:border-brand-500 focus:ring-brand-500/20 dark:text-white placeholder:text-brand-400/50"
           autoFocus
         />
         <p className="text-xs text-brand-900 opacity-70">
-          {comment.length} / 100文字
+          {comment.length} / 20文字
         </p>
         <div className="flex gap-2 mt-1">
           <Button
