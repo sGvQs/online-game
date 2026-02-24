@@ -65,8 +65,8 @@ export function MoonGround() {
             preserveAspectRatio="xMidYMax meet"
         >
             <defs>
-                {/* 微細なぼこぼこテクスチャ用フィルター */}
-                <filter id="moonBumpyFilter" x="-12%" y="-12%" width="124%" height="124%">
+                {/* 微細なぼこぼこ＋うっすらグレインテクスチャ */}
+                <filter id="moonBumpyFilter" x="-15%" y="-15%" width="130%" height="130%">
                     <feTurbulence
                         type="fractalNoise"
                         baseFrequency="0.025 0.05"
@@ -80,19 +80,35 @@ export function MoonGround() {
                         scale="8"
                         xChannelSelector="R"
                         yChannelSelector="G"
+                        result="bumpy"
                     />
+                    <feTurbulence
+                        type="fractalNoise"
+                        baseFrequency="0.06 0.1"
+                        numOctaves="3"
+                        result="grain"
+                        seed="42"
+                    />
+                    <feColorMatrix in="grain" type="saturate" values="0" result="grayGrain" />
+                    <feComponentTransfer in="grayGrain" result="softGrain">
+                        <feFuncR type="linear" slope="0.25" intercept="0.5" />
+                        <feFuncG type="linear" slope="0.25" intercept="0.5" />
+                        <feFuncB type="linear" slope="0.25" intercept="0.5" />
+                        <feFuncA type="linear" slope="0.01" intercept="0.49" />
+                    </feComponentTransfer>
+                    <feBlend in="bumpy" in2="softGrain" mode="soft-light" result="withTexture" />
                 </filter>
                 <radialGradient id="moonGroundGradient" cx="50%" cy="100%" r="100%">
-                    <stop offset="0%" stopColor="#e2e8f0" />
-                    <stop offset="30%" stopColor="#cbd5e1" />
-                    <stop offset="55%" stopColor="#94a3b8" />
-                    <stop offset="80%" stopColor="#64748b" />
-                    <stop offset="100%" stopColor="#475569" />
+                    <stop offset="0%" stopColor="#d8d0c4" />
+                    <stop offset="30%" stopColor="#c4b8a8" />
+                    <stop offset="55%" stopColor="#a89888" />
+                    <stop offset="80%" stopColor="#7a6a5e" />
+                    <stop offset="100%" stopColor="#5a4a42" />
                 </radialGradient>
                 <clipPath id="moonClip">
                     <ellipse cx="600" cy="420" rx="950" ry="280" />
                 </clipPath>
-                {/* 凹み（クレーター）用 - 中心暗く・縁明るく */}
+                {/* 凹み（クレーター）用 - 茶色系 */}
                 {CLUSTERS.map((c, i) => (
                     <radialGradient
                         key={`grad-${i}`}
@@ -103,11 +119,11 @@ export function MoonGround() {
                         fx="48%"
                         fy="42%"
                     >
-                        <stop offset="0%" stopColor="#1e293b" stopOpacity="0.85" />
-                        <stop offset="30%" stopColor="#334155" stopOpacity="0.6" />
-                        <stop offset="55%" stopColor="#475569" stopOpacity="0.35" />
-                        <stop offset="80%" stopColor="#64748b" stopOpacity="0.12" />
-                        <stop offset="100%" stopColor="#94a3b8" stopOpacity="0" />
+                        <stop offset="0%" stopColor="#2a2420" stopOpacity="0.85" />
+                        <stop offset="30%" stopColor="#3a342e" stopOpacity="0.6" />
+                        <stop offset="55%" stopColor="#4a443c" stopOpacity="0.35" />
+                        <stop offset="80%" stopColor="#6a6258" stopOpacity="0.12" />
+                        <stop offset="100%" stopColor="#8a8278" stopOpacity="0" />
                     </radialGradient>
                 ))}
                 {CLUSTERS.map((c, i) => (
@@ -139,7 +155,7 @@ export function MoonGround() {
                         <g clipPath={`url(#craterClip-${i})`}>
                             <path
                                 d={crescentPath(c.cx, c.cy, c.rx, c.ry)}
-                                fill="#0f172a"
+                                fill="#1a1612"
                                 fillRule="evenodd"
                                 opacity={0.78}
                             />
