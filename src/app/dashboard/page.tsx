@@ -5,6 +5,7 @@ import { RoomList } from '@/components/room/RoomList'
 import { DashboardSidebar } from '@/components/dashboard/DashboardSidebar'
 import { LogoutButton } from '@/components/auth/LogoutButton'
 import { Boxes } from 'lucide-react'
+import { MoonGround } from '@/components/dashboard/MoonGround'
 
 export default async function DashboardPage() {
     const supabase = await createClient()
@@ -19,13 +20,15 @@ export default async function DashboardPage() {
     const rooms = await getRooms()
 
     return (
-        <div className="min-h-screen p-8 bg-transparent text-foreground">
+        <div className="min-h-screen p-8 pb-[calc(40vh+2rem)] bg-transparent text-foreground relative">
+            {/* 歩く用の地面 - 円形・月風・表面模様 */}
+            <MoonGround />
             <div className="max-w-7xl mx-auto space-y-8">
                 {/* Header Section */}
                 <header className="glass-card flex justify-between items-center p-6 rounded-2xl shadow-sm">
                     <div>
                         <h1 className="text-4xl font-black tracking-tight text-brand-900">
-                            ONLINE GAME STATION
+                            ZERO G GAMES
                         </h1>
                         <p className="text-brand-900 font-medium mt-1 opacity-80">
                             おかえりなさい、{dashboardUser.user.name}さん
