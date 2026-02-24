@@ -1,7 +1,7 @@
 'use client'
 
 import { Users } from 'lucide-react'
-import { RoomUserWithUser } from '@/shared/types'
+import { RoomUserWithUser, UserRanking } from '@/shared/types'
 import { MemberItem } from '../MemberItem'
 import { memberListCard } from '../MemberItem/styles'
 
@@ -9,6 +9,7 @@ const styles = memberListCard()
 
 interface MemberListViewProps {
     members: RoomUserWithUser[]
+    rankingsMap?: Map<string, UserRanking>
 }
 
 /**
@@ -16,7 +17,7 @@ interface MemberListViewProps {
  * 
  * 状態管理・リアルタイム購読は親コンポーネント（RoomPageClient）で行う
  */
-export function MemberListView({ members }: MemberListViewProps) {
+export function MemberListView({ members, rankingsMap }: MemberListViewProps) {
     return (
         <div className={styles.wrapper()}>
             <div className={styles.header()}>
@@ -31,7 +32,11 @@ export function MemberListView({ members }: MemberListViewProps) {
 
             <ul className={styles.list()}>
                 {members.map((member: RoomUserWithUser) => (
-                    <MemberItem key={member.id} member={member} />
+                    <MemberItem
+                        key={member.id}
+                        member={member}
+                        ranking={rankingsMap?.get(member.userId)}
+                    />
                 ))}
             </ul>
         </div>

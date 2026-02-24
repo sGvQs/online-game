@@ -1,17 +1,22 @@
-import { RoomUserWithUser } from '@/shared/types'
+import { RoomUserWithUser, UserRanking } from '@/shared/types'
 import { memberItem } from './styles'
 
 const styles = memberItem()
 
 interface MemberItemProps {
     member: RoomUserWithUser
+    ranking?: UserRanking
 }
 
 /**
  * MemberItem - メンバー情報を表示するPresentational Component
  * ロジックは持たず、Propsを受け取って表示するだけ
  */
-export function MemberItem({ member }: MemberItemProps) {
+export function MemberItem({ member, ranking }: MemberItemProps) {
+    const statusText = ranking
+        ? `${ranking.rank}位 ${ranking.points}pt`
+        : '参加中'
+
     return (
         <li className={styles.wrapper()}>
             <div className={styles.avatar()}>
@@ -22,7 +27,7 @@ export function MemberItem({ member }: MemberItemProps) {
                     {member.user.name}
                 </p>
                 <p className={styles.status()}>
-                    参加中
+                    {statusText}
                 </p>
             </div>
             <div className={styles.indicator()} />

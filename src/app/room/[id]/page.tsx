@@ -1,6 +1,6 @@
-import { createClient } from '@/server/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { getCurrentUser, getRoomWithUsers } from '@/server/actions'
+import { getNullHandRankings } from '@/server/actions/game/rankingActions'
 import { RoomPageClientWrapper } from '@/components/room/RoomPageClient'
 import { Button } from '@/components/ui/Button'
 import { leaveRoom } from '@/server/actions'
@@ -31,6 +31,10 @@ export default async function RoomPage({ params }: { params: { id: string } }) {
     if (room.activeGameType) {
         redirect(`/game/${room.id}/${room.activeGameType}`)
     }
+
+    // 参加者の月間ランキングを取得
+    const userIds = room.users.map((u) => u.userId)
+    const initialRankings = await getNullHandRankings(userIds)
 
     return (
         <div className="min-h-screen p-8 bg-transparent text-foreground">
@@ -70,6 +74,7 @@ export default async function RoomPage({ params }: { params: { id: string } }) {
                 <RoomPageClientWrapper
                     room={room}
                     initialMembers={room.users}
+                    initialRankings={initialRankings}
                     isHost={isHost}
                 />
             </div>

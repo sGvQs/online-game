@@ -4,7 +4,8 @@ import { createClient } from '@/utils/supabase/client'
 import { useEffect, useState, useTransition, useCallback, ReactNode } from 'react'
 import { useRouter } from 'next/navigation'
 import { getRoom, selectGame, getRoomUsers } from '@/server/actions/room'
-import { Room, RoomUserWithUser } from '@/shared/types'
+import { getNullHandRankings } from '@/server/actions/game/rankingActions'
+import { Room, RoomUserWithUser, UserRanking } from '@/shared/types'
 import { GameSelectionCard } from './GameSelectionCard'
 import { MemberListView } from './MemberList/MemberListView'
 import { GameDescriptionModal } from './GameDescriptionModal'
@@ -12,6 +13,7 @@ import { GameDescriptionModal } from './GameDescriptionModal'
 interface RoomPageClientProps {
     room: Room // 初期のデータの状態
     initialMembers: RoomUserWithUser[] // 初期のデータの状態
+    initialRankings: UserRanking[] // 参加者の月間ランキング
     isHost: boolean // 初期のデータの状態
     children?: ReactNode
 }
@@ -23,6 +25,7 @@ interface RoomPageClientProps {
 export function RoomPageClientWrapper({
     room,
     initialMembers,
+    initialRankings,
     isHost,
     children
 }: RoomPageClientProps) {
@@ -30,6 +33,11 @@ export function RoomPageClientWrapper({
     const supabase = createClient()
     const [isPending, startTransition] = useTransition() // 画面遷移中のローディング状態
     const [members, setMembers] = useState<RoomUserWithUser[]>(initialMembers) // 常に最新のメンバー情報を保持
+    const [rankingsMap, setRankingsMap] = useState<Map<string, UserRanking>>(() => {
+        const map = new Map<string, UserRanking>()
+        initialRankings.forEach((r) => map.set(r.userId, r))
+        return map
+    })
     const [showGameDescription, setShowGameDescription] = useState(false) // モーダル表示フラグ
     const [selectedGameType, setSelectedGameType] = useState<string>('') // モーダルで表示するゲームの種類
 
@@ -45,11 +53,15 @@ export function RoomPageClientWrapper({
         }
     }, [room.id, router])
 
-    // メンバー変更ハンドラー
+    // メンバー変更ハンドラー（メンバーとランキングを更新）
     const handleMemberChange = useCallback(async () => {
         try {
             const roomUsers = await getRoomUsers(room.id)
             setMembers(roomUsers)
+            const rankings = await getNullHandRankings(roomUsers.map((u) => u.userId))
+            const map = new Map<string, UserRanking>()
+            rankings.forEach((r) => map.set(r.userId, r))
+            setRankingsMap(map)
         } catch (error) {
             console.error('メンバー更新に失敗:', error)
         }
@@ -109,7 +121,7 @@ export function RoomPageClientWrapper({
 
                 {/* Sidebar / Members */}
                 <div className="lg:col-span-1">
-                    <MemberListView members={members} />
+                    <MemberListView members={members} rankingsMap={rankingsMap} />
                 </div>
             </div>
 
