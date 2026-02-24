@@ -52,8 +52,8 @@ const yuseiMagic = Yusei_Magic({
 });
 
 export const metadata: Metadata = {
-  title: "スペースゲーム",
-  description: "オンラインスペースゲーム",
+  title: "Zero G Games | Station Code 404: やる気が見つかりません。",
+  description: "さあ、人生の大事な時間を、無駄にする準備はできた？",
 };
 
 export default function RootLayout({
