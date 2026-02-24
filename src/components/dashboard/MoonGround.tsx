@@ -1,5 +1,7 @@
 'use client'
 
+import { GroundSolaris } from './GroundSolaris'
+
 /** シード付き擬似乱数（再現性あり） */
 function seededRandom(seed: number) {
     return () => {
@@ -55,6 +57,7 @@ const CLUSTERS = generateClusters(420, 140)
 
 export function MoonGround() {
     return (
+        <>
         <svg
             className="fixed left-0 right-0 bottom-0 w-full pointer-events-none"
             style={{ height: '30vh' }}
@@ -145,5 +148,7 @@ export function MoonGround() {
                 ))}
             </g>
         </svg>
+        <GroundSolaris />
+    </>
     )
 }

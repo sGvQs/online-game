@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useEffect } from 'react'
 import { StarfieldBackground } from '@/components/StarfieldBackground'
+import { FloatingHuman } from '@/components/FloatingHuman'
 
 type Theme = 'space'
 
@@ -26,6 +27,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     return (
         <ThemeContext.Provider value={{ theme, toggleTheme }}>
             <StarfieldBackground />
+            <FloatingHuman />
             {children}
         </ThemeContext.Provider>
     )
