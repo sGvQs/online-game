@@ -1,3 +1,4 @@
+import { Suspense } from 'react'
 import AuthForm from '@/components/auth/AuthForm'
 import { DashboardHeaderTitle } from '@/components/dashboard/DashboardHeaderTitle'
 import { LoginSusumCharacter } from '@/components/login/LoginSusumCharacter'
@@ -9,7 +10,9 @@ export default function LoginPage() {
                 <DashboardHeaderTitle/>
                 <AuthForm />
             </div>
-            <LoginSusumCharacter />
+            <Suspense fallback={null}>
+                <LoginSusumCharacter />
+            </Suspense>
         </div>
     )
 }

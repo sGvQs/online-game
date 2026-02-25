@@ -1,6 +1,7 @@
 'use client'
 
-import { useEffect, useLayoutEffect, useState } from 'react'
+import { useCallback, useEffect, useLayoutEffect, useState } from 'react'
+import { useSearchParams } from 'next/navigation'
 import { motion } from 'framer-motion'
 import Image from 'next/image'
 import { detectIncognito } from 'detectincognitojs'
@@ -48,8 +49,8 @@ const VISIT_1_PLUS_REAPPEAR_DELAY_SEC = 30
 const CHAR_INTERVAL_MS = 150
 /** 吸い込まれた後の「なんちゃって」メッセージ */
 const SUCKED_IN_AFTERMATH_MESSAGE = 'なんちゃって、てへ'
-/** 吸い込まれるアニメーションの発生確率（0-1） */
-const SUCKED_IN_PROBABILITY = 0.1
+/** 各パターンの発生確率（5パターン中1つなので0.2） */
+const PATTERN_PROBABILITY = 0.2
 /** 吸い込まれるアニメーションの所要時間（秒） */
 const SUCKED_IN_DURATION = 15
 
@@ -75,6 +76,81 @@ function incrementVisitCount(): void {
     if (typeof window === 'undefined') return
     const count = parseInt(sessionStorage.getItem(SESSION_KEY_LOGIN_VISIT_COUNT) ?? '0', 10)
     sessionStorage.setItem(SESSION_KEY_LOGIN_VISIT_COUNT, String(count + 1))
+}
+
+/**
+ * パターン構成（5種類）:
+ * 1. 左下から出てくる → 左に退場のみ
+ * 2. 下から出てくる → 下に退場のみ
+ * 3. 回転しながら喋ってる 左下=>右上
+ * 4. 回転しながら喋ってる 左上=>右下
+ * 5. なんちゃってパターン
+ */
+type EnterPattern = 'left' | 'bottom' | 'rotate-bl-tr' | 'rotate-tl-br' | 'nantechatte'
+
+/** 回転しながら喋る方向（2パターン・吸い込まれると同じく常に動き続ける） */
+type RotateFlowDirection = 'bl-tr' | 'tl-br'
+
+/** 回転しながら喋るアニメーションの所要時間（吸い込まれると同様） */
+const ROTATE_FLOW_DURATION = 30
+
+/** 回転しながら喋ってるアニメーション：常に動き続ける（吸い込まれると同じ動き） */
+function RotateWhileTalkingAnimation({
+    direction,
+    displayedText,
+    onComplete,
+}: {
+    direction: RotateFlowDirection
+    displayedText: string
+    onComplete: () => void
+}) {
+    useEffect(() => {
+        const timer = setTimeout(onComplete, ROTATE_FLOW_DURATION * 1000)
+        return () => clearTimeout(timer)
+    }, [onComplete])
+
+    /** 左下=>右上 / 左上=>右下（画面外から画面外へ流れ続ける） */
+    const positions = {
+        'bl-tr': { initial: { x: '-80vw', y: '50vh' }, animate: { x: '80vw', y: '-80vh' } },
+        'tl-br': { initial: { x: '-80vw', y: '-80vh' }, animate: { x: '80vw', y: '80vh' } },
+    } as const
+    const { initial, animate } = positions[direction]
+
+    return (
+        <motion.div
+            className="fixed left-1/2 top-1/2 z-40 pointer-events-none"
+            initial={initial}
+            animate={animate}
+            transition={{
+                duration: ROTATE_FLOW_DURATION,
+                ease: 'easeIn',
+            }}
+        >
+            <motion.div
+                className="flex items-end gap-2"
+                initial={{ rotate: 0 }}
+                animate={{ rotate: 720 }}
+                transition={{
+                    duration: ROTATE_FLOW_DURATION,
+                    ease: 'linear',
+                }}
+                style={{ transformOrigin: 'center center' }}
+            >
+                <div className="relative w-14 h-14 sm:w-16 sm:h-16 shrink-0">
+                    <Image
+                        src="/svg/charactor/susum.svg"
+                        alt="Susum"
+                        fill
+                        sizes="64px"
+                        className="object-contain"
+                    />
+                </div>
+                <div className="shrink-0 mb-1 px-2.5 py-1.5 rounded-xl border border-brand-200/20 bg-brand-300 text-white text-[10px] font-medium shadow-sm">
+                    <span className="font-mono">{displayedText}</span>
+                </div>
+            </motion.div>
+        </motion.div>
+    )
 }
 
 /** 吸い込まれるアニメーション：画面外右上→中央下へ回転しながら流れる */
@@ -125,27 +201,55 @@ function SuckedInAnimation({ onComplete }: { onComplete: () => void }) {
 }
 
 export function LoginSusumCharacter() {
+    const searchParams = useSearchParams()
+    const forceVisit1Plus = searchParams.get('flow') === '1'
+
     const [phase, setPhase] = useState<'entering' | 'idle' | 'exiting'>('entering')
     const [dialogueIndex, setDialogueIndex] = useState(0)
     const [dialogueMessages, setDialogueMessages] = useState<string[]>(DIALOGUE_MESSAGES_VISIT_0)
     const [displayedText, setDisplayedText] = useState('')
     const [isVisible, setIsVisible] = useState(true)
     const [repeatMessageSource, setRepeatMessageSource] = useState<'visit1plus' | 'returning' | null>(null)
-    const [enterDirection, setEnterDirection] = useState<'left' | 'bottom' | null>(null)
-    const [isSuckedInMode, setIsSuckedInMode] = useState<boolean | null>(null)
+    const [enterPattern, setEnterPattern] = useState<EnterPattern | null>(null)
+    const [enterFrom, setEnterFrom] = useState<'left' | 'bottom' | null>(null)
+    const [rotateFlowDirection, setRotateFlowDirection] = useState<RotateFlowDirection | null>(null)
     const [isSuckedInAftermath, setIsSuckedInAftermath] = useState(false)
 
-    // 描画前に方向を決定。低確率で吸い込まれるアニメーションに
-    useLayoutEffect(() => {
-        if (Math.random() < SUCKED_IN_PROBABILITY) {
-            setIsSuckedInMode(true)
+    const isInitialNantechatte = enterPattern === 'nantechatte' && !isSuckedInAftermath
+    const isRotatePattern = enterPattern === 'rotate-bl-tr' || enterPattern === 'rotate-tl-br'
+
+    // 描画前に4パターンから1つを選択
+    const pickPattern = useCallback(() => {
+        const roll = Math.random()
+        if (roll < PATTERN_PROBABILITY) {
+            setEnterPattern('left')
+            setEnterFrom('left')
+            setRotateFlowDirection(null)
+        } else if (roll < PATTERN_PROBABILITY * 2) {
+            setEnterPattern('bottom')
+            setEnterFrom('bottom')
+            setRotateFlowDirection(null)
+        } else if (roll < PATTERN_PROBABILITY * 3) {
+            setEnterPattern('rotate-bl-tr')
+            setEnterFrom('left')
+            setRotateFlowDirection('bl-tr')
+        } else if (roll < PATTERN_PROBABILITY * 4) {
+            setEnterPattern('rotate-tl-br')
+            setEnterFrom('left')
+            setRotateFlowDirection('tl-br')
         } else {
-            setEnterDirection(Math.random() < 0.5 ? 'left' : 'bottom')
+            setEnterPattern('nantechatte')
+            setEnterFrom(null)
+            setRotateFlowDirection(null)
         }
     }, [])
 
+    useLayoutEffect(() => {
+        pickPattern()
+    }, [pickPattern])
+
     useEffect(() => {
-        if (isSuckedInMode || isSuckedInAftermath) return
+        if (enterPattern === 'nantechatte' || isSuckedInAftermath) return
         const initMessages = async () => {
             const { isPrivate } = await detectIncognito()
             if (isPrivate) {
@@ -155,9 +259,11 @@ export function LoginSusumCharacter() {
                 markAsVisited()
                 incrementVisitCount()
                 // 2回目以降向け・ログイン済み向けは配列をそのまま使い、10秒ごとにランダム切り替え＋再登場ループ
-                if (messages === DIALOGUE_MESSAGES_VISIT_1_PLUS) {
-                    setDialogueMessages(messages)
-                    setDialogueIndex(Math.floor(Math.random() * messages.length))
+                // ?flow=1 で流れアニメーションをテスト可能
+                if (forceVisit1Plus || messages === DIALOGUE_MESSAGES_VISIT_1_PLUS) {
+                    const source = DIALOGUE_MESSAGES_VISIT_1_PLUS
+                    setDialogueMessages(source)
+                    setDialogueIndex(Math.floor(Math.random() * source.length))
                     setRepeatMessageSource('visit1plus')
                 } else if (messages === DIALOGUE_MESSAGES_RETURNING) {
                     setDialogueMessages(messages)
@@ -169,21 +275,21 @@ export function LoginSusumCharacter() {
             }
         }
         initMessages()
-    }, [isSuckedInMode, isSuckedInAftermath])
+    }, [enterPattern, isSuckedInAftermath, forceVisit1Plus])
 
 
     useEffect(() => {
-        if (isSuckedInMode || phase !== 'entering') return
+        if (isInitialNantechatte || isRotatePattern || phase !== 'entering') return
         // 入場完了 → 待機
         const enterTimer = setTimeout(() => {
             setPhase('idle')
         }, ENTER_DURATION * 1000)
 
         return () => clearTimeout(enterTimer)
-    }, [phase, isSuckedInMode])
+    }, [phase, isInitialNantechatte, isRotatePattern])
 
     useEffect(() => {
-        if (isSuckedInMode || phase !== 'idle') return
+        if (isInitialNantechatte || isRotatePattern || phase !== 'idle') return
 
         // 待機中にセリフを切り替え（10秒ごと・ランダムで100種類以上対応）
         const dialogueInterval = setInterval(() => {
@@ -191,11 +297,11 @@ export function LoginSusumCharacter() {
         }, 10000)
 
         return () => clearInterval(dialogueInterval)
-    }, [phase, dialogueMessages.length, isSuckedInMode])
+    }, [phase, dialogueMessages.length, isInitialNantechatte, isRotatePattern])
 
     // 一文字ずつ表示（喋るスピード感）
     useEffect(() => {
-        if (isSuckedInMode || phase !== 'idle') return
+        if (isInitialNantechatte || isRotatePattern || phase !== 'idle') return
 
         const fullText = dialogueMessages[Math.min(dialogueIndex, dialogueMessages.length - 1)] ?? ''
         setDisplayedText('')
@@ -211,55 +317,65 @@ export function LoginSusumCharacter() {
         }, CHAR_INTERVAL_MS)
 
         return () => clearInterval(typeInterval)
-    }, [phase, dialogueIndex, dialogueMessages, isSuckedInMode])
+    }, [phase, dialogueIndex, dialogueMessages, isInitialNantechatte, isRotatePattern])
 
     useEffect(() => {
-        if (isSuckedInMode || phase !== 'idle') return
+        if (isInitialNantechatte || isRotatePattern || phase !== 'idle') return
 
-        // 退場開始
+        // 退場開始（回転パターンは常に動き続けるためここには来ない）
         const exitTimer = setTimeout(() => {
             setPhase('exiting')
         }, (isSuckedInAftermath ? IDLE_DURATION_AFTERMATH : IDLE_DURATION) * 1000)
 
         return () => clearTimeout(exitTimer)
-    }, [phase, isSuckedInMode, isSuckedInAftermath])
+    }, [phase, isInitialNantechatte, isRotatePattern, isSuckedInAftermath])
+
+    const handleExitComplete = useCallback(() => {
+        setIsVisible(false)
+        setRotateFlowDirection(null)
+        if (repeatMessageSource) {
+            const source = repeatMessageSource === 'visit1plus' ? DIALOGUE_MESSAGES_VISIT_1_PLUS : DIALOGUE_MESSAGES_RETURNING
+            setTimeout(() => {
+                setDialogueMessages(source)
+                setDialogueIndex(Math.floor(Math.random() * source.length))
+                setDisplayedText('')
+                pickPattern()
+                setPhase('entering')
+                setIsVisible(true)
+            }, VISIT_1_PLUS_REAPPEAR_DELAY_SEC * 1000)
+        }
+    }, [repeatMessageSource, pickPattern])
 
     useEffect(() => {
-        if (isSuckedInMode || phase !== 'exiting') return
+        if (isInitialNantechatte || phase !== 'exiting' || rotateFlowDirection) return
 
-        let reappearTimer: ReturnType<typeof setTimeout> | null = null
+        // 通常退場（回転パターン以外）の完了後に非表示
+        const hideTimer = setTimeout(handleExitComplete, EXIT_DURATION * 1000)
 
-        // 退場アニメーション完了後に非表示
-        const hideTimer = setTimeout(() => {
-            setIsVisible(false)
-            if (repeatMessageSource) {
-                const source = repeatMessageSource === 'visit1plus' ? DIALOGUE_MESSAGES_VISIT_1_PLUS : DIALOGUE_MESSAGES_RETURNING
-                // 50秒後に再登場
-                reappearTimer = setTimeout(() => {
-                    setDialogueMessages(source)
-                    setDialogueIndex(Math.floor(Math.random() * source.length))
-                    setDisplayedText('')
-                    setEnterDirection(Math.random() < 0.5 ? 'left' : 'bottom') // 再登場時もランダム
-                    setPhase('entering')
-                    setIsVisible(true)
-                }, VISIT_1_PLUS_REAPPEAR_DELAY_SEC * 1000)
-            }
-        }, EXIT_DURATION * 1000)
+        return () => clearTimeout(hideTimer)
+    }, [phase, isInitialNantechatte, rotateFlowDirection, handleExitComplete])
 
-        return () => {
-            clearTimeout(hideTimer)
-            if (reappearTimer) clearTimeout(reappearTimer)
-        }
-    }, [phase, repeatMessageSource, isSuckedInMode])
+    // 回転しながら喋ってる（パターン3・4の退場）
+    // 回転しながら喋ってる（パターン3・4・常に動き続ける・吸い込まれると同じ）
+    if (rotateFlowDirection) {
+        const fullText = dialogueMessages[Math.min(dialogueIndex, dialogueMessages.length - 1)] ?? displayedText
+        return (
+            <RotateWhileTalkingAnimation
+                direction={rotateFlowDirection}
+                displayedText={fullText}
+                onComplete={handleExitComplete}
+            />
+        )
+    }
 
-    // 吸い込まれるアニメーション（低確率）→ 完了後に下からニョキ＋「なんちゃって、てへ」
-    if (isSuckedInMode) {
+    // なんちゃってパターン（パターン4・吸い込まれる→なんちゃって、てへ）
+    if (isInitialNantechatte) {
         return (
             <SuckedInAnimation
                 onComplete={() => {
-                    setIsSuckedInMode(false)
                     setIsSuckedInAftermath(true)
-                    setEnterDirection('bottom')
+                    setEnterPattern('bottom')
+                    setEnterFrom('bottom')
                     setDialogueMessages([SUCKED_IN_AFTERMATH_MESSAGE])
                     setDialogueIndex(0)
                     setDisplayedText('')
@@ -270,9 +386,9 @@ export function LoginSusumCharacter() {
         )
     }
 
-    if (!isVisible || enterDirection === null) return null
+    if (!isVisible || enterFrom === null) return null
 
-    const isFromBottom = enterDirection === 'bottom'
+    const isFromBottom = enterFrom === 'bottom'
     /** なんちゃって時：体が半分だけ出る（y: 50% = 自要素の半分上にずらして下半分を隠す） */
     const bottomIdleY = isSuckedInAftermath ? '40%' : 0
     const initialPos = isFromBottom
