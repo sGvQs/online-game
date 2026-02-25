@@ -58,26 +58,7 @@ export function DashboardSidebar({ initialComment, initialFaceIcon }: DashboardS
 
   return (
     <aside className="lg:col-span-1 space-y-6">
-      {/* ルーム作成セクション */}
-      <div className="glass-card p-6 rounded-2xl">
-        <h2 className="text-xl font-bold mb-4 text-brand-900 flex items-center gap-2">
-          <PackagePlus className="w-4 h-4" />
-          ルームを作成
-        </h2>
-        {!roomFormOpen ? (
-          <Button
-            onClick={handleRoomFormOpen}
-            className="w-full bg-brand-300 hover:bg-brand-400 text-white shadow-md hover:shadow-lg transition-all duration-300 gap-2"
-          >
-            <Plus className="w-5 h-5" />
-            新規ルーム
-          </Button>
-        ) : (
-          <CreateRoomFormContent onClose={handleRoomFormClose} />
-        )}
-      </div>
-
-      {/* 顔アイコン設定セクション */}
+     {/* 顔アイコン設定セクション */}
       <div className="glass-card p-6 rounded-2xl">
         <h2 className="text-xl font-bold mb-4 text-brand-900 flex items-center gap-2">
           <ScanFace className="w-4 h-4" />
@@ -112,7 +93,24 @@ export function DashboardSidebar({ initialComment, initialFaceIcon }: DashboardS
           />
         )}
       </div>
-
+      {/* ルーム作成セクション */}
+      <div className="glass-card p-6 rounded-2xl">
+        <h2 className="text-xl font-bold mb-4 text-brand-900 flex items-center gap-2">
+          <PackagePlus className="w-4 h-4" />
+          ルームを作成
+        </h2>
+        {!roomFormOpen ? (
+          <Button
+            onClick={handleRoomFormOpen}
+            className="w-full bg-brand-300 hover:bg-brand-400 text-white shadow-md hover:shadow-lg transition-all duration-300 gap-2"
+          >
+            <Plus className="w-5 h-5" />
+            新規ルーム
+          </Button>
+        ) : (
+          <CreateRoomFormContent onClose={handleRoomFormClose} />
+        )}
+      </div>
       {/* 煽りコメント設定セクション */}
       <div className="glass-card p-6 rounded-2xl">
         <h2 className="text-xl font-bold mb-4 text-brand-900 flex items-center gap-2">

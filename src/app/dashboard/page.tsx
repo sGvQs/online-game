@@ -28,7 +28,14 @@ export default async function DashboardPage() {
                 {/* Header Section */}
                 <header className="glass-card flex justify-between items-center p-6 rounded-2xl shadow-sm">
                     <div>
-                        <h1 className="text-4xl font-black tracking-tight text-brand-900">
+                        <h1 className="text-4xl font-black tracking-tight text-brand-900 flex items-center gap-4">
+                            <Image
+                                src="/icon.svg"
+                                alt=""
+                                width={40}
+                                height={40}
+                                className="shrink-0"
+                            />
                             ZERO G GAMES
                         </h1>
                         <p className="text-brand-900 font-medium mt-1 opacity-80">
