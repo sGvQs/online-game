@@ -9,6 +9,13 @@ export { getRoom, getRoomWithUsers, getRoomUsers } from './getRoom'
 // 作成・削除
 export { createRoom } from './createRoom'
 export { deleteRoom } from './deleteRoom'
+export { cleanupAbandonedRooms } from './cleanupAbandonedRooms'
+
+// ルーム削除通知
+export {
+    getUnreadRoomDeletedNotifications,
+    markRoomDeletedNotificationsAsRead,
+} from './roomDeletedNotifications'
 
 // 参加・退出
 export { joinRoom, leaveRoom } from './joinLeaveRoom'

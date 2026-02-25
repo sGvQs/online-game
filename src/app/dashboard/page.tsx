@@ -1,6 +1,11 @@
 import { createClient } from '@/server/lib/supabase/server'
 import { redirect } from 'next/navigation'
-import { getDashboardUser, getRooms } from '@/server/actions'
+import {
+    getDashboardUser,
+    getRooms,
+    cleanupAbandonedRooms,
+    getUnreadRoomDeletedNotifications,
+} from '@/server/actions'
 import { RoomList } from '@/components/room/RoomList'
 import { DashboardSidebar } from '@/components/dashboard/DashboardSidebar'
 import { LogoutButton } from '@/components/auth/LogoutButton'
@@ -9,6 +14,7 @@ import { Boxes } from 'lucide-react'
 import Image from 'next/image'
 import { DEFAULT_FACE_ICON, FACE_ICON_PATHS, FaceIcon } from '@/shared/constants/faceIcon'
 import { DashboardHeaderTitle } from '@/components/dashboard/DashboardHeaderTitle'
+import { DashboardComplaintWrapper } from '@/components/dashboard/DashboardComplaintWrapper'
 
 export default async function DashboardPage() {
     const supabase = await createClient()
@@ -16,17 +22,27 @@ export default async function DashboardPage() {
 
     if (!user) redirect('/')
 
+    // 放置ルームのクリーンアップ（ダッシュボード訪問者なら誰でも実行）
+    await cleanupAbandonedRooms()
+
     // Server Action経由でDB取得
     const dashboardUser = await getDashboardUser()
     if (!dashboardUser) return <div>User not found in DB</div>
 
     const rooms = await getRooms()
+    const roomDeletedNotifications = await getUnreadRoomDeletedNotifications()
     const initialFaceIcon: FaceIcon =
         (dashboardUser.user as { faceIcon?: FaceIcon }).faceIcon ?? DEFAULT_FACE_ICON
 
     return (
         <div className="min-h-screen p-8 bg-transparent text-foreground">
             <SetLoginFlag />
+            <DashboardComplaintWrapper
+                notifications={roomDeletedNotifications.map((n: { id: string; roomName: string }) => ({
+                    id: n.id,
+                    roomName: n.roomName,
+                }))}
+            />
             <div className="max-w-7xl mx-auto space-y-8">
                 {/* Header Section */}
                 <header className="glass-card flex justify-between items-center p-6 rounded-2xl shadow-sm">
