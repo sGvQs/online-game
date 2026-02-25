@@ -92,14 +92,14 @@ export function LoginSusumCharacter() {
                 const messages = getDialogueMessages()
                 markAsVisited()
                 incrementVisitCount()
-                // 2回目以降向け・ログイン済み向けはどれか1つだけランダムに表示し、50秒ごとに再登場を繰り返す
+                // 2回目以降向け・ログイン済み向けは配列をそのまま使い、10秒ごとにランダム切り替え＋再登場ループ
                 if (messages === DIALOGUE_MESSAGES_VISIT_1_PLUS) {
-                    const picked = messages[Math.floor(Math.random() * messages.length)]
-                    setDialogueMessages([picked])
+                    setDialogueMessages(messages)
+                    setDialogueIndex(Math.floor(Math.random() * messages.length))
                     setRepeatMessageSource('visit1plus')
                 } else if (messages === DIALOGUE_MESSAGES_RETURNING) {
-                    const picked = messages[Math.floor(Math.random() * messages.length)]
-                    setDialogueMessages([picked])
+                    setDialogueMessages(messages)
+                    setDialogueIndex(Math.floor(Math.random() * messages.length))
                     setRepeatMessageSource('returning')
                 } else {
                     setDialogueMessages(messages)
@@ -123,9 +123,9 @@ export function LoginSusumCharacter() {
     useEffect(() => {
         if (phase !== 'idle') return
 
-        // 待機中にセリフを切り替え（10秒ごと・2回目以降は1つだけなので切り替えなし）
+        // 待機中にセリフを切り替え（10秒ごと・ランダムで100種類以上対応）
         const dialogueInterval = setInterval(() => {
-            setDialogueIndex((prev) => (prev + 1) % dialogueMessages.length)
+            setDialogueIndex(Math.floor(Math.random() * dialogueMessages.length))
         }, 10000)
 
         return () => clearInterval(dialogueInterval)
@@ -174,8 +174,8 @@ export function LoginSusumCharacter() {
                 const source = repeatMessageSource === 'visit1plus' ? DIALOGUE_MESSAGES_VISIT_1_PLUS : DIALOGUE_MESSAGES_RETURNING
                 // 50秒後に再登場
                 reappearTimer = setTimeout(() => {
-                    const picked = source[Math.floor(Math.random() * source.length)]
-                    setDialogueMessages([picked])
+                    setDialogueMessages(source)
+                    setDialogueIndex(Math.floor(Math.random() * source.length))
                     setDisplayedText('')
                     setEnterDirection(Math.random() < 0.5 ? 'left' : 'bottom') // 再登場時もランダム
                     setPhase('entering')
