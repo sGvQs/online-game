@@ -1,10 +1,11 @@
 import AuthForm from '@/components/auth/AuthForm'
+import { DashboardHeaderTitle } from '@/components/dashboard/DashboardHeaderTitle'
 
 export default function LoginPage() {
     return (
         <div className="min-h-screen flex flex-col items-center justify-center p-8 bg-transparent">
-            <div className="w-full max-w-md">
-                <h1 className="text-3xl font-bold text-center mb-8 text-foreground text-glow">おかえりなさい</h1>
+            <div className="w-full max-w-md flex justify-center flex-col items-center gap-5">
+                <DashboardHeaderTitle/>
                 <AuthForm />
             </div>
         </div>
