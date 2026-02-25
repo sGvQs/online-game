@@ -13,7 +13,7 @@ export const memberItem = tv({
         ],
         avatar: [
             'w-10 h-10 rounded-full flex items-center justify-center',
-            'bg-brand-300 text-sm font-bold text-brand-700 shadow-inner',
+            'text-sm font-bold text-brand-700 shadow-inner',
         ],
         info: 'flex-1 min-w-0',
         name: 'text-sm font-semibold text-brand-900 truncate',

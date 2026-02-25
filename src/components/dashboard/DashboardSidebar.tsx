@@ -3,7 +3,7 @@
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import Image from 'next/image'
-import { PackagePlus, MessageSquare, Edit2, X, Check, Plus, Smile } from 'lucide-react'
+import { PackagePlus, MessageSquare, Edit2, X, Check, Plus, ScanFace } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { IconButton } from '@/components/ui/IconButton'
 import { Input } from '@/components/ui/Input'
@@ -80,27 +80,22 @@ export function DashboardSidebar({ initialComment, initialFaceIcon }: DashboardS
       {/* 顔アイコン設定セクション */}
       <div className="glass-card p-6 rounded-2xl">
         <h2 className="text-xl font-bold mb-4 text-brand-900 flex items-center gap-2">
-          <Smile className="w-4 h-4" />
+          <ScanFace className="w-4 h-4" />
           顔アイコン設定
         </h2>
         {!faceFormOpen ? (
-          <div className="space-y-3">
-            <div className="flex items-center gap-3 p-3 bg-white/10 rounded-lg border border-brand-200/30">
-              <div className="w-12 h-12 relative shrink-0">
-                <Image
-                  src={FACE_ICON_PATHS[currentFaceIcon]}
-                  alt="現在の顔"
-                  fill
-                  className="object-contain"
-                />
-              </div>
-              <p className="text-sm text-brand-900 opacity-90">
-                現在: {FACE_ICON_OPTIONS.find((o) => o.value === currentFaceIcon)?.label ?? '少年'}
-              </p>
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 relative shrink-0 rounded-full overflow-hidden">
+              <Image
+                src={FACE_ICON_PATHS[currentFaceIcon]}
+                alt="顔アイコン"
+                fill
+                className="object-contain"
+              />
             </div>
             <Button
               onClick={handleFaceFormOpen}
-              className="w-full bg-brand-300 hover:bg-brand-400 text-white shadow-md hover:shadow-lg transition-all duration-300 gap-2"
+              className="flex-1 bg-brand-300 hover:bg-brand-400 text-white shadow-md hover:shadow-lg transition-all duration-300 gap-2"
             >
               <Edit2 className="w-4 h-4" />
               変更
