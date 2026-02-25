@@ -31,13 +31,20 @@ export function MemberListView({ members, rankingsMap }: MemberListViewProps) {
             </div>
 
             <ul className={styles.list()}>
-                {members.map((member: RoomUserWithUser) => (
-                    <MemberItem
-                        key={member.id}
-                        member={member}
-                        ranking={rankingsMap?.get(member.userId)}
-                    />
-                ))}
+                {[...members]
+                    .sort((a, b) => {
+                        if (!rankingsMap) return 0
+                        const rankA = rankingsMap.get(a.userId)?.rank ?? Infinity
+                        const rankB = rankingsMap.get(b.userId)?.rank ?? Infinity
+                        return rankA - rankB
+                    })
+                    .map((member: RoomUserWithUser) => (
+                        <MemberItem
+                            key={member.id}
+                            member={member}
+                            ranking={rankingsMap?.get(member.userId)}
+                        />
+                    ))}
             </ul>
         </div>
     )

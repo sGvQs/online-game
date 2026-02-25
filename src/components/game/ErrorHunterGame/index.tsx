@@ -9,9 +9,10 @@ import { Win95Button } from '../Win95Button'
 import { Win95TitleBarButton } from '../Win95TitleBarButton'
 import { useSE } from '@/hooks/useSE'
 import Image from 'next/image'
+import { useEffect, useRef, useState } from 'react'
 import { RoomWithUsersAndReadyStatus, RoomUserWithReadyStatus, ErrorEventWithUser, RoomUser, UserRanking } from '@/shared/types'
 import { FACE_ICON_PATHS, DEFAULT_FACE_ICON } from '@/shared/constants/faceIcon'
-import { useEffect, useState } from 'react'
+import { getNullHandRankings } from '@/server/actions/game/rankingActions'
 import { cn } from '@/lib/utils'
 import { errorHunterGame } from './styles'
 
@@ -90,6 +91,24 @@ export function ErrorHunterGame({
     const [isInitializing, setIsInitializing] = useState(true)
     const [showDescription, setShowDescription] = useState(false)
     const { play } = useSE()
+
+    // ランキング表示用（RESULT→TITLE 戻り時に再取得して最新のポイントを反映）
+    const [rankings, setRankings] = useState<UserRanking[]>(initialRankings)
+    const prevPhaseRef = useRef(phase)
+
+    useEffect(() => {
+        setRankings(initialRankings)
+    }, [initialRankings])
+
+    useEffect(() => {
+        const prevPhase = prevPhaseRef.current
+        prevPhaseRef.current = phase
+
+        if (prevPhase === 'RESULT' && phase === 'TITLE') {
+            const userIds = room.users.map((u) => u.userId)
+            getNullHandRankings(userIds).then((fresh) => setRankings(fresh))
+        }
+    }, [phase, room.users])
 
     // Simulate initialization progress
     useEffect(() => {
@@ -174,8 +193,14 @@ export function ErrorHunterGame({
                                                         プレイヤー準備状況: {readyCount} / {totalUsers}
                                                     </p>
                                                     <div className={styles.playerListbox()}>
-                                                        {room.users.map((roomUser: RoomUserWithReadyStatus) => {
-                                                            const ranking = initialRankings.find((r) => r.userId === roomUser.userId)
+                                                        {[...room.users]
+                                                            .sort((a, b) => {
+                                                                const rankA = rankings.find((r) => r.userId === a.userId)?.rank ?? Infinity
+                                                                const rankB = rankings.find((r) => r.userId === b.userId)?.rank ?? Infinity
+                                                                return rankA - rankB
+                                                            })
+                                                            .map((roomUser: RoomUserWithReadyStatus) => {
+                                                            const ranking = rankings.find((r) => r.userId === roomUser.userId)
                                                             const faceIcon = roomUser.user?.faceIcon ?? DEFAULT_FACE_ICON
                                                             const faceIconPath = FACE_ICON_PATHS[faceIcon]
                                                             return (
