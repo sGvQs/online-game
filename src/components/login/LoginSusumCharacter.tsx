@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useLayoutEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import Image from 'next/image'
 import { detectIncognito } from 'detectincognitojs'
@@ -34,6 +34,7 @@ const DIALOGUE_MESSAGES_VISIT_1_PLUS = [
 const DIALOGUE_MESSAGES_RETURNING = [
     'おかえり',
     'ちーっす',
+    '最近どう？',
 ]
 
 const ENTER_DURATION = 1.5
@@ -75,6 +76,12 @@ export function LoginSusumCharacter() {
     const [displayedText, setDisplayedText] = useState('')
     const [isVisible, setIsVisible] = useState(true)
     const [repeatMessageSource, setRepeatMessageSource] = useState<'visit1plus' | 'returning' | null>(null)
+    const [enterDirection, setEnterDirection] = useState<'left' | 'bottom' | null>(null)
+
+    // 描画前に方向を決定（mount時に正しいinitialを適用するため）
+    useLayoutEffect(() => {
+        setEnterDirection(Math.random() < 0.5 ? 'left' : 'bottom')
+    }, [])
 
     useEffect(() => {
         const initMessages = async () => {
@@ -101,6 +108,7 @@ export function LoginSusumCharacter() {
         }
         initMessages()
     }, [])
+
 
     useEffect(() => {
         if (phase !== 'entering') return
@@ -169,6 +177,7 @@ export function LoginSusumCharacter() {
                     const picked = source[Math.floor(Math.random() * source.length)]
                     setDialogueMessages([picked])
                     setDisplayedText('')
+                    setEnterDirection(Math.random() < 0.5 ? 'left' : 'bottom') // 再登場時もランダム
                     setPhase('entering')
                     setIsVisible(true)
                 }, VISIT_1_PLUS_REAPPEAR_DELAY_SEC * 1000)
@@ -181,18 +190,27 @@ export function LoginSusumCharacter() {
         }
     }, [phase, repeatMessageSource])
 
-    if (!isVisible) return null
+    if (!isVisible || enterDirection === null) return null
+
+    const isFromBottom = enterDirection === 'bottom'
+    const initialPos = isFromBottom
+        ? { x: '-50%', y: '100%' }
+        : { x: '-100%', y: 0 }
+    const exitPos = isFromBottom
+        ? { x: '-50%', y: '100%' }
+        : { x: '-100%', y: 0 }
+    const idlePos = isFromBottom ? { x: '-50%', y: 0 } : { x: 0, y: 0 }
 
     return (
         <motion.div
-            className="fixed bottom-0 left-0 z-40 flex items-end pointer-events-none"
-            initial={{ x: '-100%' }}
+            className={`fixed bottom-0 z-40 flex items-end pointer-events-none ${isFromBottom ? 'left-1/2' : 'left-0'}`}
+            initial={initialPos}
             animate={
                 phase === 'entering'
-                    ? { x: 0 }
+                    ? idlePos
                     : phase === 'exiting'
-                      ? { x: '-100%' }
-                      : { x: 0 }
+                      ? exitPos
+                      : idlePos
             }
             transition={{
                 duration: phase === 'exiting' ? EXIT_DURATION : ENTER_DURATION,
@@ -200,7 +218,7 @@ export function LoginSusumCharacter() {
             }}
         >
             {/* キャラクターと吹き出しを横並び（絶対に被らない） */}
-            <div className="flex items-start gap-2">
+            <div className={`flex items-start gap-2 ${isFromBottom ? 'min-w-[280px]' : ''}`}>
                 {/* キャラクター */}
                 <div className="relative w-14 h-14 sm:w-16 sm:h-16 shrink-0">
                     <Image
@@ -213,10 +231,13 @@ export function LoginSusumCharacter() {
                     />
                 </div>
 
+                {/* 中央から登場時：吹き出しスペースを事前に確保してレイアウトシフトを防ぐ */}
+                {isFromBottom && phase !== 'idle' && <div className="min-w-[400px] shrink-0" aria-hidden />}
+
                 {/* チャット風吹き出し：SVGと被らないよう右側に配置、しっぽは口方向へ */}
                 {phase === 'idle' && (
                     <motion.div
-                        className="shrink-0 min-w-[80px] max-w-[240px] mt-2"
+                        className={`shrink-0 mt-2 ${isFromBottom ? 'w-[400px] min-w-[400px]' : 'min-w-[80px] max-w-[400px]'}`}
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ duration: 0.4, delay: 0.2 }}
