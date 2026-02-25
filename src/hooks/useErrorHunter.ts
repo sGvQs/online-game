@@ -89,6 +89,7 @@ export interface UseErrorHunterReturn {
     waitProgress: number
     winnerComment: string | null
     winnerName: string | null
+    winnerFaceIconPath: string | null
 }
 
 interface UseErrorHunterProps {
@@ -132,6 +133,7 @@ export function useErrorHunter({
     const [waitProgress, setWaitProgress] = useState(0)
     const [winnerComment, setWinnerComment] = useState<string | null>(null)
     const [winnerName, setWinnerName] = useState<string | null>(null)
+    const [winnerFaceIconPath, setWinnerFaceIconPath] = useState<string | null>(null)
 
     // state の最新値を ref に同期
     useEffect(() => {
@@ -264,6 +266,8 @@ export function useErrorHunter({
         setProgress(null)
         setPhase('TITLE')
         setWinnerComment(null)
+        setWinnerName(null)
+        setWinnerFaceIconPath(null)
         matchIdRef.current = null
         isSetupGameStatusRef.current = false
         closedEventIds.current.clear()
@@ -507,6 +511,7 @@ export function useErrorHunter({
                 const commentData = await getUserComment(payload.new.winner_id)
                 setWinnerComment(commentData?.comment || '私の勝ちです')
                 setWinnerName(commentData?.userName || '勝者')
+                setWinnerFaceIconPath(commentData?.faceIconPath || null)
                 play('tada')
                 setPhase('RESULT')
             })
@@ -547,6 +552,7 @@ export function useErrorHunter({
         handleFinish,
         waitProgress,
         winnerComment,
-        winnerName
+        winnerName,
+        winnerFaceIconPath,
     }
 }

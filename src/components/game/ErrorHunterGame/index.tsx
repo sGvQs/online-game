@@ -76,7 +76,8 @@ export function ErrorHunterGame({
         handleFinish,
         waitProgress,
         winnerComment,
-        winnerName
+        winnerName,
+        winnerFaceIconPath,
     } = useErrorHunter({ roomId, isHost, initialMatchId, currentUserId })
 
 
@@ -360,7 +361,8 @@ export function ErrorHunterGame({
                 >
                     <Win95Dialog
                         title="Result"
-                        icon="lose"
+                        icon={winnerFaceIconPath ? undefined : 'lose'}
+                        customIconSrc={winnerFaceIconPath ?? undefined}
                         buttons={[{
                             label: '終了',
                             onClick: handleFinish,

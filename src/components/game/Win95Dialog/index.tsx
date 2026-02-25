@@ -11,6 +11,8 @@ export type Win95IconType = 'error' | 'warning' | 'info' | 'question' | "lose"
 interface Win95DialogProps {
     title: string
     icon?: Win95IconType
+    /** カスタムアイコン（勝者の顔など）。指定時は icon より優先 */
+    customIconSrc?: string
     children: React.ReactNode
     buttons?: {
         label: string
@@ -81,6 +83,7 @@ function Win95Icon({ type }: { type: Win95IconType }) {
 export function Win95Dialog({
     title,
     icon,
+    customIconSrc,
     children,
     buttons,
     titlebarButtons,
@@ -106,7 +109,19 @@ export function Win95Dialog({
 
                 {/* Content */}
                 <div className={styles.content()}>
-                    {icon && <Win95Icon type={icon} />}
+                    {customIconSrc ? (
+                        <div className={styles.iconLose()}>
+                            <Image
+                                src={customIconSrc}
+                                alt=""
+                                width={48}
+                                height={48}
+                                className="object-contain"
+                            />
+                        </div>
+                    ) : icon ? (
+                        <Win95Icon type={icon} />
+                    ) : null}
                     <div className={styles.message()}>{children}</div>
                 </div>
 
