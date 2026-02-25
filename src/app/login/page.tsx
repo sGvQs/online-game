@@ -1,5 +1,6 @@
 import AuthForm from '@/components/auth/AuthForm'
 import { DashboardHeaderTitle } from '@/components/dashboard/DashboardHeaderTitle'
+import { LoginSusumCharacter } from '@/components/login/LoginSusumCharacter'
 
 export default function LoginPage() {
     return (
@@ -8,6 +9,7 @@ export default function LoginPage() {
                 <DashboardHeaderTitle/>
                 <AuthForm />
             </div>
+            <LoginSusumCharacter />
         </div>
     )
 }

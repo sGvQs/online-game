@@ -4,6 +4,7 @@ import { getDashboardUser, getRooms } from '@/server/actions'
 import { RoomList } from '@/components/room/RoomList'
 import { DashboardSidebar } from '@/components/dashboard/DashboardSidebar'
 import { LogoutButton } from '@/components/auth/LogoutButton'
+import { SetLoginFlag } from '@/components/auth/SetLoginFlag'
 import { Boxes } from 'lucide-react'
 import Image from 'next/image'
 import { DEFAULT_FACE_ICON, FACE_ICON_PATHS, FaceIcon } from '@/shared/constants/faceIcon'
@@ -25,6 +26,7 @@ export default async function DashboardPage() {
 
     return (
         <div className="min-h-screen p-8 bg-transparent text-foreground">
+            <SetLoginFlag />
             <div className="max-w-7xl mx-auto space-y-8">
                 {/* Header Section */}
                 <header className="glass-card flex justify-between items-center p-6 rounded-2xl shadow-sm">
