@@ -28,7 +28,28 @@ const DIALOGUE_MESSAGES_VISIT_0 = [
 const DIALOGUE_MESSAGES_VISIT_1_PLUS = [
     'どこかでみたことある顔だね、前世は恐竜だった？',
     'ログイン怖いわかるよ。僕だって知らない恐竜に話しかけられたら逃げるし。',
-    'まだログインしてないだね？君、慎重派だね。そんな奴も嫌いじゃないぜ',
+    'まだログインしてないだね？もしかして僕に会いにきてるだけかな？',
+    'あれ、デジャブ？君のその歩き方、絶滅した僕の親戚にそっくりだよ。',
+    'ログインボタンは噛んだりしないよ。僕のほうがよっぽど強そうな牙持ってるしね。',
+    '君がログインしない間に、僕の尻尾が3センチ伸びた気がする。時間は残酷だね。',
+    'もしかして、パスワード忘れた？大丈夫、僕だって自分の卵の場所をたまに忘れるから。',
+    'おっと、また会ったね。君の『ログインしない』っていう意志の強さ、化石級だよ。',
+    'パスワードを打ち込むのが面倒？わかるよ。僕も短い前足でキーボードを打つのは『キョウリュウ』（恐縮）しちゃうからね。',
+    'そんなに警戒しなくても、僕は君を食べたりしないよ。……今は、お腹いっぱいだしね。',
+    'ここに来るたびにログインをスルーするなんて、君は本当に『レイケツ』な人間だね。爬虫類の僕が言うのもなんだけど。',
+    'まだゲストのまま？君、もしかして絶滅危惧種の『シャイ・サウルス』だったりする？',
+    'ログインしないままの君を眺めてたら、僕の角が少し削れたよ。ストレスかな、老化かな。',
+    'ログインボタンが君を怖がってるよ。何度もクリック寸前で指を止めるからね。生殺しはよくないな。',
+    '君がログインを迷ってる間に、新しい化石が一つ見つかったらしいよ。時間は待ってくれないんだ。',
+    'まだゲストなんだね。……いいよ、ミステリアスな君も嫌いじゃない。ただ、僕の忍耐も絶滅寸前だけど。',
+    'ログインボタンを押すのがそんなに重労働？……僕が隕石を止めるよりは簡単だと思うんだけどな。',
+    '君のログイン履歴、砂漠みたいにカラカラだね。サボテンでも植えておこうか？',
+    'そんなに遠くから見てないでさ。ログインして、僕の懐（ふところ）までおいでよ。……噛まない保証はないけど。',
+    'ログインしないっていうポリシー、地層に刻んでおこうか。100万年後の誰かが感心してくれるかもね。',
+    'ログインボタンが君を怖がってるよ。何度もクリック寸前で指を止めるからね。生殺しはよくないな。',
+    'ログインボタンが君を怖がってるよ。何度もクリック寸前で指を止めるからね。生殺しはよくないな。',
+
+
 ]
 
 /** ログイン済み・おかえり向け */
@@ -218,6 +239,8 @@ export function LoginSusumCharacter() {
 
     const isInitialNantechatte = enterPattern === 'nantechatte' && !isSuckedInAftermath
     const isRotatePattern = enterPattern === 'rotate-bl-tr' || enterPattern === 'rotate-tl-br'
+    /** 左下・下から：文言1個のみ（切り替えなし） */
+    const isSimplePattern = enterPattern === 'left' || enterPattern === 'bottom'
 
     // 描画前に4パターンから1つを選択
     const pickPattern = useCallback(() => {
@@ -290,15 +313,15 @@ export function LoginSusumCharacter() {
     }, [phase, isInitialNantechatte, isRotatePattern])
 
     useEffect(() => {
-        if (isInitialNantechatte || isRotatePattern || phase !== 'idle') return
+        if (isInitialNantechatte || isRotatePattern || isSimplePattern || phase !== 'idle') return
 
-        // 待機中にセリフを切り替え（10秒ごと・ランダムで100種類以上対応）
+        // 待機中にセリフを切り替え（10秒ごと・visit1plus/returning向け）
         const dialogueInterval = setInterval(() => {
             setDialogueIndex(Math.floor(Math.random() * dialogueMessages.length))
         }, 10000)
 
         return () => clearInterval(dialogueInterval)
-    }, [phase, dialogueMessages.length, isInitialNantechatte, isRotatePattern])
+    }, [phase, dialogueMessages.length, isInitialNantechatte, isRotatePattern, isSimplePattern])
 
     // 一文字ずつ表示（喋るスピード感）
     useEffect(() => {
