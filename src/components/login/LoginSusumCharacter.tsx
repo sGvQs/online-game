@@ -39,13 +39,17 @@ const DIALOGUE_MESSAGES_RETURNING = [
 
 const ENTER_DURATION = 3
 const IDLE_DURATION = 20
+/** なんちゃってパターン時の待機時間（秒） */
+const IDLE_DURATION_AFTERMATH = 3
 const EXIT_DURATION = 3
 /** 2回目以降向け：退場後、再登場までの待機時間（秒） */
 const VISIT_1_PLUS_REAPPEAR_DELAY_SEC = 30
 /** 一文字表示の間隔（ms）喋るスピード感 */
 const CHAR_INTERVAL_MS = 150
+/** 吸い込まれた後の「なんちゃって」メッセージ */
+const SUCKED_IN_AFTERMATH_MESSAGE = 'なんちゃって、てへ'
 /** 吸い込まれるアニメーションの発生確率（0-1） */
-const SUCKED_IN_PROBABILITY =  1
+const SUCKED_IN_PROBABILITY = 0.1
 /** 吸い込まれるアニメーションの所要時間（秒） */
 const SUCKED_IN_DURATION = 15
 
@@ -84,9 +88,9 @@ function SuckedInAnimation({ onComplete }: { onComplete: () => void }) {
 
     return (
         <motion.div
-            className="fixed left-1/2 top-0 z-40 pointer-events-none"
-            initial={{ x: '100vw', y: '-110vh' }}
-            animate={{ x: '-50%', y: '110vh' }}
+            className="fixed left-1/2 top-0 z-0 pointer-events-none"
+            initial={{ x: '60vw', y: '-100vh' }}
+            animate={{ x: '-50%', y: '130vh' }}
             transition={{
                 duration: SUCKED_IN_DURATION,
                 ease: 'easeIn',
@@ -129,6 +133,7 @@ export function LoginSusumCharacter() {
     const [repeatMessageSource, setRepeatMessageSource] = useState<'visit1plus' | 'returning' | null>(null)
     const [enterDirection, setEnterDirection] = useState<'left' | 'bottom' | null>(null)
     const [isSuckedInMode, setIsSuckedInMode] = useState<boolean | null>(null)
+    const [isSuckedInAftermath, setIsSuckedInAftermath] = useState(false)
 
     // 描画前に方向を決定。低確率で吸い込まれるアニメーションに
     useLayoutEffect(() => {
@@ -140,7 +145,7 @@ export function LoginSusumCharacter() {
     }, [])
 
     useEffect(() => {
-        if (isSuckedInMode) return
+        if (isSuckedInMode || isSuckedInAftermath) return
         const initMessages = async () => {
             const { isPrivate } = await detectIncognito()
             if (isPrivate) {
@@ -164,7 +169,7 @@ export function LoginSusumCharacter() {
             }
         }
         initMessages()
-    }, [isSuckedInMode])
+    }, [isSuckedInMode, isSuckedInAftermath])
 
 
     useEffect(() => {
@@ -214,10 +219,10 @@ export function LoginSusumCharacter() {
         // 退場開始
         const exitTimer = setTimeout(() => {
             setPhase('exiting')
-        }, IDLE_DURATION * 1000)
+        }, (isSuckedInAftermath ? IDLE_DURATION_AFTERMATH : IDLE_DURATION) * 1000)
 
         return () => clearTimeout(exitTimer)
-    }, [phase, isSuckedInMode])
+    }, [phase, isSuckedInMode, isSuckedInAftermath])
 
     useEffect(() => {
         if (isSuckedInMode || phase !== 'exiting') return
@@ -247,11 +252,20 @@ export function LoginSusumCharacter() {
         }
     }, [phase, repeatMessageSource, isSuckedInMode])
 
-    // 吸い込まれるアニメーション（低確率・無条件）
+    // 吸い込まれるアニメーション（低確率）→ 完了後に下からニョキ＋「なんちゃって、てへ」
     if (isSuckedInMode) {
         return (
             <SuckedInAnimation
-                onComplete={() => setIsSuckedInMode(false)}
+                onComplete={() => {
+                    setIsSuckedInMode(false)
+                    setIsSuckedInAftermath(true)
+                    setEnterDirection('bottom')
+                    setDialogueMessages([SUCKED_IN_AFTERMATH_MESSAGE])
+                    setDialogueIndex(0)
+                    setDisplayedText('')
+                    setPhase('entering')
+                    setIsVisible(true)
+                }}
             />
         )
     }
@@ -259,13 +273,15 @@ export function LoginSusumCharacter() {
     if (!isVisible || enterDirection === null) return null
 
     const isFromBottom = enterDirection === 'bottom'
+    /** なんちゃって時：体が半分だけ出る（y: 50% = 自要素の半分上にずらして下半分を隠す） */
+    const bottomIdleY = isSuckedInAftermath ? '40%' : 0
     const initialPos = isFromBottom
         ? { x: '-50%', y: '100%' }
         : { x: '-100%', y: 0 }
     const exitPos = isFromBottom
         ? { x: '-50%', y: '100%' }
         : { x: '-100%', y: 0 }
-    const idlePos = isFromBottom ? { x: '-50%', y: 0 } : { x: 0, y: 0 }
+    const idlePos = isFromBottom ? { x: '-50%', y: bottomIdleY } : { x: 0, y: 0 }
 
     return (
         <motion.div
