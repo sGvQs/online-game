@@ -5,7 +5,8 @@ import { RoomList } from '@/components/room/RoomList'
 import { DashboardSidebar } from '@/components/dashboard/DashboardSidebar'
 import { LogoutButton } from '@/components/auth/LogoutButton'
 import { Boxes } from 'lucide-react'
-import { DEFAULT_FACE_ICON, FaceIcon } from '@/shared/constants/faceIcon'
+import Image from 'next/image'
+import { DEFAULT_FACE_ICON, FACE_ICON_PATHS, FaceIcon } from '@/shared/constants/faceIcon'
 
 export default async function DashboardPage() {
     const supabase = await createClient()
@@ -28,14 +29,21 @@ export default async function DashboardPage() {
                 <header className="glass-card flex justify-between items-center p-6 rounded-2xl shadow-sm">
                     <div>
                         <h1 className="text-4xl font-black tracking-tight text-brand-900">
-                            ONLINE GAME STATION
+                            ZERO G GAMES
                         </h1>
                         <p className="text-brand-900 font-medium mt-1 opacity-80">
                             おかえりなさい、{dashboardUser.user.name}さん
                         </p>
                     </div>
                     <div className="flex gap-4 items-center">
-                        <div className="bg-white/10 px-4 py-2 rounded-full text-sm font-medium text-foreground shadow-sm border border-brand-200/30">
+                        <div className="flex items-center gap-2 bg-white/10 px-4 py-2 rounded-full text-sm font-medium text-foreground shadow-sm border border-brand-200/30">
+                            <Image
+                                src={FACE_ICON_PATHS[initialFaceIcon]}
+                                alt=""
+                                width={24}
+                                height={24}
+                                className="shrink-0 rounded-full object-contain"
+                            />
                             {dashboardUser.email}
                         </div>
                         <LogoutButton />
