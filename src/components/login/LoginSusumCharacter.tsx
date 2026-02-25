@@ -25,10 +25,9 @@ const DIALOGUE_MESSAGES_VISIT_0 = [
 
 /** 2回目以降・まだログインしてない人（訪問1回以上） */
 const DIALOGUE_MESSAGES_VISIT_1_PLUS = [
-    'どこかでみたことある顔だね',
-    '友達は呼んできたかい？',
-    'ログイン怖いよね。わかるよ。。僕だって知らない恐竜に話しかけられたら逃げるし。。。',
-    'まだログインしてないだ？君、慎重派だね。そんな君でも楽しめると思うんだけどなぁ〜',
+    'どこかでみたことある顔だね、前世は恐竜だった？',
+    'ログイン怖いわかるよ。僕だって知らない恐竜に話しかけられたら逃げるし。',
+    'まだログインしてないだね？君、慎重派だね。そんな奴も嫌いじゃないぜ',
 ]
 
 /** ログイン済み・おかえり向け */
@@ -175,14 +174,14 @@ export function LoginSusumCharacter() {
             }}
         >
             {/* キャラクターと吹き出しを横並び（絶対に被らない） */}
-            <div className="flex items-start gap-4">
+            <div className="flex items-start gap-2">
                 {/* キャラクター */}
-                <div className="relative w-24 h-24 sm:w-32 sm:h-32 shrink-0">
+                <div className="relative w-14 h-14 sm:w-16 sm:h-16 shrink-0">
                     <Image
                         src="/svg/charactor/susum.svg"
                         alt="Susum"
                         fill
-                        sizes="128px"
+                        sizes="64px"
                         className="object-contain"
                         priority
                     />
@@ -191,21 +190,21 @@ export function LoginSusumCharacter() {
                 {/* チャット風吹き出し：SVGと被らないよう右側に配置、しっぽは口方向へ */}
                 {phase === 'idle' && (
                     <motion.div
-                        className="shrink-0 min-w-[140px] max-w-[400px] mt-4"
+                        className="shrink-0 min-w-[80px] max-w-[240px] mt-2"
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ duration: 0.4, delay: 0.2 }}
                     >
-                        <div className="relative px-4 py-3 rounded-2xl bg-linear-to-br from-foreground/98 to-foreground/90 text-background text-sm font-medium shadow-[0_4px_14px_rgba(0,0,0,0.15),inset_0_1px_0_rgba(255,255,255,0.1)] border border-background/30 backdrop-blur-sm">
+                        <div className="relative px-2.5 py-1.5 rounded-xl bg-linear-to-br from-foreground/98 to-foreground/90 text-background text-xs font-medium shadow-[0_2px_8px_rgba(0,0,0,0.12),inset_0_1px_0_rgba(255,255,255,0.08)] border border-background/30 backdrop-blur-sm">
                             <span className="font-mono tracking-wide">
                                 {displayedText}
                                 {displayedText.length < (dialogueMessages[Math.min(dialogueIndex, dialogueMessages.length - 1)] ?? '').length && (
-                                    <span className="inline-block w-0.5 h-4 ml-0.5 bg-current animate-pulse" aria-hidden />
+                                    <span className="inline-block w-0.5 h-3 ml-0.5 bg-current animate-pulse" aria-hidden />
                                 )}
                             </span>
                             {/* 口方向へのしっぽ（吹き出しの左からキャラへ向かう） */}
                             <div
-                                className="absolute -left-2 top-1/2 -translate-y-1/2 w-0 h-0 border-t-[6px] border-t-transparent border-b-[6px] border-b-transparent border-r-[8px] border-r-foreground/95"
+                                className="absolute -left-1.5 top-1/2 -translate-y-1/2 w-0 h-0 border-t-[4px] border-t-transparent border-b-[4px] border-b-transparent border-r-[6px] border-r-foreground/95"
                                 aria-hidden
                             />
                         </div>
