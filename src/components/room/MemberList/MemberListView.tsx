@@ -23,7 +23,7 @@ export function MemberListView({ members, rankingsMap }: MemberListViewProps) {
             <div className={styles.header()}>
                 <h3 className={styles.title()}>
                     <Users className="w-4 h-4" />
-                    参加者
+                    メンバー
                 </h3>
                 <span className={styles.count()}>
                     {members.length}

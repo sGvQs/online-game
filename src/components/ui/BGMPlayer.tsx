@@ -77,12 +77,14 @@ export default function BGMPlayer() {
         setTrackIndex((prev) => (prev + 1) % activeConfig.srcs.length);
     };
 
+    const isSingleTrack = activeConfig.srcs.length === 1;
+
     return (
         <div className="fixed bottom-6 right-6 z-50">
-            {/* loop属性を削除し、onEndedを追加 */}
             <audio
                 ref={audioRef}
-                onEnded={handleEnded}
+                loop={isSingleTrack}
+                onEnded={isSingleTrack ? undefined : handleEnded}
             />
             <button
                 onClick={() => {
