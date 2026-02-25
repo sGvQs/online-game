@@ -118,7 +118,7 @@ function RotateWhileTalkingAnimation({
 
     return (
         <motion.div
-            className="fixed left-1/2 top-1/2 z-40 pointer-events-none"
+            className="fixed left-1/2 top-1/2 z-0 pointer-events-none"
             initial={initial}
             animate={animate}
             transition={{
@@ -402,7 +402,7 @@ export function LoginSusumCharacter() {
 
     return (
         <motion.div
-            className={`fixed bottom-0 z-40 flex items-end pointer-events-none ${isFromBottom ? 'left-1/2' : 'left-0'}`}
+            className={`fixed bottom-0 z-0 flex items-end pointer-events-none ${isFromBottom ? 'left-1/2' : 'left-0'}`}
             initial={initialPos}
             animate={
                 phase === 'entering'

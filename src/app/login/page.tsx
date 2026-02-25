@@ -6,7 +6,7 @@ import { LoginSusumCharacter } from '@/components/login/LoginSusumCharacter'
 export default function LoginPage() {
     return (
         <div className="min-h-screen flex flex-col items-center justify-center p-8 bg-transparent">
-            <div className="w-full max-w-md flex justify-center flex-col items-center gap-5">
+            <div className="relative z-10 w-full max-w-md flex justify-center flex-col items-center gap-5">
                 <DashboardHeaderTitle/>
                 <AuthForm />
             </div>
