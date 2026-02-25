@@ -5,6 +5,7 @@ import { RoomList } from '@/components/room/RoomList'
 import { DashboardSidebar } from '@/components/dashboard/DashboardSidebar'
 import { LogoutButton } from '@/components/auth/LogoutButton'
 import { Boxes } from 'lucide-react'
+import { DEFAULT_FACE_ICON, FaceIcon } from '@/shared/constants/faceIcon'
 
 export default async function DashboardPage() {
     const supabase = await createClient()
@@ -17,6 +18,8 @@ export default async function DashboardPage() {
     if (!dashboardUser) return <div>User not found in DB</div>
 
     const rooms = await getRooms()
+    const initialFaceIcon: FaceIcon =
+        (dashboardUser.user as { faceIcon?: FaceIcon }).faceIcon ?? DEFAULT_FACE_ICON
 
     return (
         <div className="min-h-screen p-8 bg-transparent text-foreground">
@@ -42,7 +45,10 @@ export default async function DashboardPage() {
                 {/* Main Content Area */}
                 <main className="grid grid-cols-1 lg:grid-cols-4 gap-8">
                     {/* Sidebar / Actions */}
-                    <DashboardSidebar initialComment={dashboardUser.user.comment} />
+                    <DashboardSidebar
+                        initialComment={dashboardUser.user.comment}
+                        initialFaceIcon={initialFaceIcon}
+                    />
 
                     {/* Room List */}
                     <section className="lg:col-span-3">

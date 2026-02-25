@@ -6,11 +6,22 @@ datasource db {
   provider = "postgresql"
 }
 
+enum FaceIcon {
+  BOY_FACE
+  LADY_FACE
+  GRANPA_FACE
+  WHITE_FACE
+  BLACK_FACE
+  BROWN_FACE
+  BUG_FACE
+}
+
 model User {
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name      String
   email     String   @unique
   comment   String?
+  faceIcon  FaceIcon @default(BOY_FACE) @map("face_icon")
   createdAt DateTime @default(now()) @map("created_at")
 
   // リレーション名をキャメルケースに統一
