@@ -25,7 +25,6 @@ interface ResultPhaseProps {
     hostName: string
     currentUserId: string
     isCurrentHost: boolean
-    hostStats: HostStats | null
     roomUsers: RoomUser[]
     userColor?: string
 }
@@ -38,7 +37,6 @@ export function ResultPhase({
     hostName,
     currentUserId,
     isCurrentHost,
-    hostStats,
     roomUsers,
     userColor
 }: ResultPhaseProps) {
@@ -76,24 +74,6 @@ export function ResultPhase({
 
     const isNullHand = guestCount > 1 && !hasGuestWin && guestHands.every(gh => judgeHand(hostHand, gh.hand as HandType) === 'DRAW')
     const isHostPerfectWin = guestCount > 1 && !isNullHand && !hasGuestWin && !hasDraw
-
-    // 共通のホスト統計表示コンポーネント（ChoicePhaseのスタイルを完全移植）
-    const HostStatsDisplay = () => hostStats && (
-        <div className="flex flex-col items-center mb-4 w-full h-12 justify-center">
-            <div className="flex justify-center items-center gap-2 text-gray-400 text-xs">
-                <div className={cn("w-2 h-2 rounded-full animate-pulse mr-2", isCurrentHost ? "bg-[#44FFFF]" : "bg-[#FF4444]")} />
-                {isCurrentHost ? "あなたは" : `${hostName}は`}過去に
-                <span className="text-[#FF4444] text-sm font-bold mx-1">
-                    {hostStats.reverseRate !== null ? 100 - hostStats.reverseRate : '???'}%
-                </span>
-                の確率で
-                <span className="text-[#44FFFF] text-sm font-bold ml-1 uppercase tracking-tighter">
-                    SYSTEM SELECTION
-                </span>
-                を選んでいましたが、このラウンドでは……
-            </div>
-        </div>
-    )
 
     // 報酬フィードバック（個別の獲得スコア報告）
     const RewardFeedback = () => {
@@ -238,9 +218,6 @@ export function ResultPhase({
                             totalTurns={jankenEvent?.match.totalTurns}
                         />
 
-                        <div className="mt-6">
-                            <HostStatsDisplay />
-                        </div>
 
                         <div className="flex-1 flex flex-col items-center justify-center">
                             {/* ChoicePhaseと共通の部品・レイアウト */}

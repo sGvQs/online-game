@@ -39,7 +39,7 @@ export default async function DashboardPage() {
                             ZERO G GAMES
                         </h1>
                         <p className="text-brand-900 font-medium mt-1 opacity-80">
-                            おかえりなさい、{dashboardUser.user.name}さん
+                            Music By Dream or Real?
                         </p>
                     </div>
                     <div className="flex gap-4 items-center">

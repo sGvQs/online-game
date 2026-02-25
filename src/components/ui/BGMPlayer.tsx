@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { useSound } from '@/lib/sound-context';
+import { CircleDivide, Volume2, VolumeOff } from 'lucide-react'
+
 
 const BGM_CONFIG = {
     ERROR_HUNTER: {
@@ -17,12 +19,12 @@ const BGM_CONFIG = {
     },
     MAIN_SYSTEM: {
         check: (path: string) => path.includes('/dashboard') || path.includes('/room/'),
-        srcs: ['/music/default.mp3'], // 1曲のみの場合は1つだけ入れる
+        srcs: ['/music/title-sky.mp3','/music/title-sleep.mp2','/music/title-nigth.mp3'],
         label: 'default'
     },
     DEFAULT: {
         check: () => true,
-        srcs: ['/music/default.mp3'],
+        srcs: ['/music/title-sky.mp3','/music/title-sleep.mp2','/music/title-nigth.mp3'],
         label: 'default'
     }
 } as const;
@@ -95,9 +97,9 @@ export default function BGMPlayer() {
                     }
                     setIsPlaying(!isPlaying);
                 }}
-                className="w-12 h-12 bg-indigo-600 rounded-full shadow-lg text-white flex items-center justify-center"
+                className="w-12 h-12 rounded-full shadow-lg text-white flex items-center justify-center"
             >
-                {!isPlaying ? '🔇' : '🔊'}
+                {!isPlaying ? <VolumeOff/>: <Volume2/>}
             </button>
         </div>
     );

@@ -227,7 +227,6 @@ export function NullHandGame({
                                 hostName={hostName}
                                 currentUserId={currentUserId}
                                 isCurrentHost={isCurrentHost}
-                                hostStats={hostStats}
                                 roomUsers={room.users}
                                 userColor={userColor}
                             />
