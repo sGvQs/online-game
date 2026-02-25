@@ -7,6 +7,7 @@ import { LogoutButton } from '@/components/auth/LogoutButton'
 import { Boxes } from 'lucide-react'
 import Image from 'next/image'
 import { DEFAULT_FACE_ICON, FACE_ICON_PATHS, FaceIcon } from '@/shared/constants/faceIcon'
+import { DashboardHeaderTitle } from '@/components/dashboard/DashboardHeaderTitle'
 
 export default async function DashboardPage() {
     const supabase = await createClient()
@@ -28,16 +29,7 @@ export default async function DashboardPage() {
                 {/* Header Section */}
                 <header className="glass-card flex justify-between items-center p-6 rounded-2xl shadow-sm">
                     <div>
-                        <h1 className="text-4xl font-black tracking-tight text-brand-900 flex items-center gap-4">
-                            <Image
-                                src="/icon.svg"
-                                alt=""
-                                width={40}
-                                height={40}
-                                className="shrink-0"
-                            />
-                            ZERO G GAMES
-                        </h1>
+                        <DashboardHeaderTitle />
                         <p className="text-brand-900 font-medium mt-1 opacity-80">
                             Music By Dream or Real?
                         </p>

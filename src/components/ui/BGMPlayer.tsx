@@ -19,12 +19,12 @@ const BGM_CONFIG = {
     },
     MAIN_SYSTEM: {
         check: (path: string) => path.includes('/dashboard') || path.includes('/room/'),
-        srcs: ['/music/title-sleep.mp3','/music/title-sky.mp3','/music/title-nigth.mp3'],
+        srcs: ['/music/title-sleep.mp3','/music/title-sky.mp3','/music/title-night.mp3'],
         label: 'default'
     },
     DEFAULT: {
         check: () => true,
-        srcs: ['/music/title-sleep.mp3','/music/title-sky.mp3','/music/title-nigth.mp3'],
+        srcs: ['/music/title-sleep.mp3','/music/title-sky.mp3','/music/title-night.mp3'],
         label: 'default'
     }
 } as const;

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Zen_Maru_Gothic, DotGothic16, Kaisei_Opti, Yusei_Magic } from "next/font/google";
+import { Geist, Geist_Mono, Zen_Maru_Gothic, DotGothic16, Kaisei_Opti, Yusei_Magic, Honk, Coral_Pixels, Sixtyfour_Convergence, Bitcount_Grid_Double_Ink } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/lib/theme-context";
 import BGMPlayer from "@/components/ui/BGMPlayer";
@@ -51,6 +51,35 @@ const yuseiMagic = Yusei_Magic({
   fallback: ["sans-serif"],
 });
 
+const honk = Honk({
+  variable: "--font-honk",
+  subsets: ["latin"],
+  display: "swap",
+  fallback: ["sans-serif"],
+});
+
+const coralPixels = Coral_Pixels({
+  variable: "--font-coral-pixels",
+  subsets: ["latin"],
+  weight: "400",
+  display: "swap",
+  fallback: ["sans-serif"],
+});
+
+const sixtyfourConvergence = Sixtyfour_Convergence({
+  variable: "--font-sixtyfour-convergence",
+  subsets: ["latin"],
+  display: "swap",
+  fallback: ["sans-serif"],
+});
+
+const bitcountGridDoubleInk = Bitcount_Grid_Double_Ink({
+  variable: "--font-bitcount-grid-double-ink",
+  subsets: ["latin"],
+  display: "swap",
+  fallback: ["sans-serif"],
+});
+
 export const metadata: Metadata = {
   title: "Zero G Games | Station Code 404: やる気が見つかりません。",
   description: "さあ、人生の大事な時間を、無駄にする準備はできた？",
@@ -64,7 +93,7 @@ export default function RootLayout({
   return (
     <html lang="ja" suppressHydrationWarning>
       <body
-        className={`${dotGothic16.variable} ${yuseiMagic.variable} ${kaiseiOpti.variable} ${zenMaruGothic.variable} ${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${dotGothic16.variable} ${yuseiMagic.variable} ${kaiseiOpti.variable} ${zenMaruGothic.variable} ${geistSans.variable} ${geistMono.variable} ${honk.variable} ${coralPixels.variable} ${sixtyfourConvergence.variable} ${bitcountGridDoubleInk.variable} antialiased`}
         suppressHydrationWarning
       >
         <SoundProvider>
