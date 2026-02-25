@@ -33,10 +33,23 @@ model User {
   guestHands      GuestHand[]
   jankenLogs      JankenLog[]
   matchScores     MatchScore[]
-  monthlyRankings MonthlyRanking[]
-  pointLogs       PointLog[]
+  monthlyRankings           MonthlyRanking[]
+  pointLogs                 PointLog[]
+  roomDeletedNotifications RoomDeletedNotification[]
 
   @@map("users")
+}
+
+model RoomDeletedNotification {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  roomName  String   @map("room_name")
+  deletedAt DateTime @default(now()) @map("deleted_at")
+  isRead    Boolean  @default(false) @map("is_read")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("room_deleted_notifications")
 }
 
 enum RoomStatus {
