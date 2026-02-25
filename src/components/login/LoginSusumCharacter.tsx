@@ -92,7 +92,7 @@ type EnterPattern = 'left' | 'bottom' | 'rotate-bl-tr' | 'rotate-tl-br' | 'nante
 type RotateFlowDirection = 'bl-tr' | 'tl-br'
 
 /** 回転しながら喋るアニメーションの所要時間（吸い込まれると同様） */
-const ROTATE_FLOW_DURATION = 30
+const ROTATE_FLOW_DURATION = 60
 
 /** 回転しながら喋ってるアニメーション：常に動き続ける（吸い込まれると同じ動き） */
 function RotateWhileTalkingAnimation({
@@ -126,6 +126,7 @@ function RotateWhileTalkingAnimation({
                 ease: 'easeIn',
             }}
         >
+            {/* [svg][text] でSVGを左軸に回転 */}
             <motion.div
                 className="flex items-end gap-2"
                 initial={{ rotate: 0 }}
@@ -134,7 +135,7 @@ function RotateWhileTalkingAnimation({
                     duration: ROTATE_FLOW_DURATION,
                     ease: 'linear',
                 }}
-                style={{ transformOrigin: 'center center' }}
+                style={{ transformOrigin: 'left center' }}
             >
                 <div className="relative w-14 h-14 sm:w-16 sm:h-16 shrink-0">
                     <Image
@@ -172,7 +173,7 @@ function SuckedInAnimation({ onComplete }: { onComplete: () => void }) {
                 ease: 'easeIn',
             }}
         >
-            {/* SVGとチャットをくっつけて回転 */}
+            {/* [svg][text] でSVGを左軸に回転 */}
             <motion.div
                 className="flex items-end gap-2"
                 initial={{ rotate: 0 }}
@@ -181,7 +182,7 @@ function SuckedInAnimation({ onComplete }: { onComplete: () => void }) {
                     duration: SUCKED_IN_DURATION,
                     ease: 'linear',
                 }}
-                style={{ transformOrigin: 'center center' }}
+                style={{ transformOrigin: 'left center' }}
             >
                 <div className="relative w-14 h-14 sm:w-16 sm:h-16 shrink-0">
                     <Image
