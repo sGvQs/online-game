@@ -2,6 +2,7 @@ import { MatchScoreWithUser } from '@/shared/types'
 import { SideHeader } from './SideHeader'
 import { sideCard } from '../phases/phaseCard.styles'
 import { cn } from '@/lib/utils'
+import { PlayerFaceIcon } from './PlayerFaceIcon'
 
 interface CurrentScoresProps {
     currentScores: MatchScoreWithUser[]
@@ -53,6 +54,10 @@ export function CurrentScores({
                                 }}>
                                     {index + 1}
                                 </div>
+                                <PlayerFaceIcon
+                                    faceIcon={score.user.faceIcon}
+                                    size={size === 'lg' ? 'md' : 'sm'}
+                                />
                                 <div className={cn(
                                     "text-xs font-bold truncate text-gray-300",
                                 )}

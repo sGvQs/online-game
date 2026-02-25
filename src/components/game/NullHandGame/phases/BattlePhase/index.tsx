@@ -1,5 +1,6 @@
 import { HandType, JankenEventWithGuests, HostStats, MatchScoreWithUser } from '@/shared/types'
 import { Hand3D } from '../../Hand3D'
+import { PlayerFaceIcon } from '../../common/PlayerFaceIcon'
 import { nullHandGame } from '../../styles'
 import { getHandDisplayWithEmoji } from '../../utils'
 import { HandSelectionGrid } from '../../HandSelectionGrid'
@@ -19,6 +20,7 @@ interface BattlePhaseProps {
     onSelectHand: (hand: HandType) => void
     onSubmit: () => void
     hostName: string
+    hostFaceIcon?: import('@/shared/constants/faceIcon').FaceIcon | null
     currentScores: MatchScoreWithUser[]
     currentUserId: string
     userColor?: string
@@ -33,6 +35,7 @@ export function BattlePhase({
     onSelectHand,
     onSubmit,
     hostName,
+    hostFaceIcon,
     currentScores,
     currentUserId,
     userColor,
@@ -83,8 +86,8 @@ export function BattlePhase({
                 {hostStats && (
                     <div className="flex flex-col items-center mt-6 mb-2 w-full">
                         <div className="inline-flex flex-col items-start text-gray-400 text-xs text-left">
-                            <div className="flex items-center leading-relaxed">
-                                <div className="w-2 h-2 bg-[#FF4444] rounded-full animate-pulse mr-2 flex-shrink-0" />
+                            <div className="flex items-center gap-2 leading-relaxed">
+                                <PlayerFaceIcon faceIcon={hostFaceIcon} size="sm" />
                                 <span>
                                     {hostName}は過去に
                                     <span className="text-[#FF4444] text-sm font-bold mx-1">

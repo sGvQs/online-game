@@ -1,5 +1,6 @@
 import { JankenEventWithGuests, HostStats, HostChoice, HandType, MatchScoreWithUser } from '@/shared/types'
 import { Hand3D } from '../../Hand3D'
+import { PlayerFaceIcon } from '../../common/PlayerFaceIcon'
 import { nullHandGame } from '../../styles'
 import { PhaseHeader } from '../../common/PhaseHeader'
 import { CurrentScores } from '../../common/CurrentScores'
@@ -17,6 +18,7 @@ interface ChoicePhaseProps {
     isProcessing: boolean
     onChoice: (choice: HostChoice) => Promise<void>
     hostName: string
+    hostFaceIcon?: import('@/shared/constants/faceIcon').FaceIcon | null
     currentScores: MatchScoreWithUser[]
     currentUserId: string
     userColor?: string
@@ -29,6 +31,7 @@ export function ChoicePhase({
     isProcessing,
     onChoice,
     hostName,
+    hostFaceIcon,
     currentScores,
     currentUserId,
     userColor,
@@ -202,11 +205,14 @@ export function ChoicePhase({
                                     }
                                 }}
                             >
-                                <div
-                                    className="text-xs font-black tracking-[0.3em] mb-1"
-                                    style={{ color: isCurrentHost ? (userColor || '#FF4444') : '#FF4444' }}
-                                >
-                                    {hostName}
+                                <div className="flex items-end gap-2">
+                                    <PlayerFaceIcon faceIcon={hostFaceIcon} size="sm" />
+                                    <div
+                                        className="text-xs font-black tracking-[0.3em]"
+                                        style={{ color: isCurrentHost ? (userColor || '#FF4444') : '#FF4444' }}
+                                    >
+                                        {hostName}
+                                    </div>
                                 </div>
                                 <div
                                     className="w-48 h-48 border-2"

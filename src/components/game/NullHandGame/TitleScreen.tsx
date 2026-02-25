@@ -1,5 +1,6 @@
 import { RoomWithUsersAndReadyStatus, UserRanking, HandType, RoomUserWithReadyStatus } from '@/shared/types'
 import { motion } from 'framer-motion'
+import { PlayerFaceIcon } from './common/PlayerFaceIcon'
 import { useState } from 'react'
 import { nullHandGame } from './styles'
 import { Hand3D } from './Hand3D'
@@ -171,7 +172,11 @@ export function TitleScreen({
 
                                 return (
                                     <div key={u.id} className={styles.playerItem()}>
-                                        <div className="flex items-center">
+                                        <div className="flex items-center gap-2">
+                                            <PlayerFaceIcon
+                                                faceIcon={u.user?.faceIcon}
+                                                size="sm"
+                                            />
                                             <span className={styles.rankingText()}>
                                                 {rankDisplay}
                                             </span>

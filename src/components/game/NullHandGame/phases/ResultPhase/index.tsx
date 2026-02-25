@@ -1,5 +1,6 @@
 import { HandType, JankenEventWithGuests, MatchScoreWithUser, HostStats } from '@/shared/types'
 import { Hand3D } from '../../Hand3D'
+import { PlayerFaceIcon } from '../../common/PlayerFaceIcon'
 import { nullHandGame } from '../../styles'
 import { cn } from '@/lib/utils'
 import { judgeHand } from '../../utils'
@@ -58,6 +59,9 @@ export function ResultPhase({
 
     const myHandData = jankenEvent.guestHands.find(gh => gh.userId === currentUserId)
     const myHand = myHandData?.hand as HandType | undefined
+
+    const hostUser = roomUsers.find(u => u.userId === jankenEvent.currentHostId)
+    const currentUserData = roomUsers.find(u => u.userId === currentUserId)
 
     // 決着状況の判定ロジックを共通化
     const guestHands = jankenEvent.guestHands
@@ -177,7 +181,10 @@ export function ResultPhase({
                                 /* 対戦結果ビュー (GUEST) */
                                 <div className="flex items-center justify-center gap-12 mb-8">
                                     <div className="flex flex-col items-center">
-                                        <div className={cn(rpStyles.playerName())} style={{ color: '#FF4444' }}>{hostName}</div>
+                                        <div className="flex flex-col items-center gap-2">
+                                            <PlayerFaceIcon faceIcon={hostUser?.user?.faceIcon} size="lg" />
+                                            <div className={cn(rpStyles.playerName())} style={{ color: '#FF4444' }}>{hostName}</div>
+                                        </div>
                                         <HandCard
                                             handType={hostHand}
                                             color="red"
@@ -189,7 +196,10 @@ export function ResultPhase({
                                     <div className="text-gray-800 font-black text-4xl italic px-4 translate-y-4">VS</div>
 
                                     <div className="flex flex-col items-center">
-                                        <div style={{ color: userColor }} className={cn(rpStyles.playerName(), rpStyles.myselfName())}>YOU</div>
+                                        <div className="flex flex-col items-center gap-2">
+                                            <PlayerFaceIcon faceIcon={currentUserData?.user?.faceIcon} size="lg" />
+                                            <div style={{ color: userColor }} className={cn(rpStyles.playerName(), rpStyles.myselfName())}>YOU</div>
+                                        </div>
                                         <HandCard
                                             handType={myHand}
                                             personalColor={userColor}
@@ -276,11 +286,14 @@ export function ResultPhase({
                                 <div className="absolute inset-0 flex items-center justify-between px-4">
                                     {/* Selection Frame */}
                                     <div className={cn("flex flex-col items-center gap-1", isHostDefault ? "order-1" : "order-3")}>
-                                        <div
-                                            className="text-xs font-black tracking-[0.3em] mb-1"
-                                            style={{ color: isCurrentHost ? (userColor || '#FF4444') : '#FF4444' }}
-                                        >
-                                            {hostName}
+                                        <div className='flex items-end gap-2'>
+                                            <PlayerFaceIcon faceIcon={hostUser?.user?.faceIcon} size="sm" />
+                                            <div
+                                                className="text-xs font-black tracking-[0.3em]"
+                                                style={{ color: isCurrentHost ? (userColor || '#FF4444') : '#FF4444' }}
+                                            >
+                                                {hostName}
+                                            </div>
                                         </div>
                                         <div
                                             className="w-48 h-48 border-2"
