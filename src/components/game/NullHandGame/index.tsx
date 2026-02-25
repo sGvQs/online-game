@@ -12,7 +12,6 @@ import { ChoicePhase } from './phases/ChoicePhase'
 import { BattlePhase } from './phases/BattlePhase'
 import { ResultPhase } from './phases/ResultPhase'
 import { GameOverPhase } from './phases/GameOverPhase'
-import { DealPhase } from './phases/DealPhase' // Added DealPhase import
 import { OpeningSplash } from './OpeningSplash'
 
 interface NullHandGameProps {
@@ -195,6 +194,7 @@ export function NullHandGame({
                                 isProcessing={isProcessing}
                                 onChoice={handleSetHostChoice}
                                 hostName={hostName}
+                                hostFaceIcon={hostUser?.user?.faceIcon}
                                 currentScores={currentScores}
                                 currentUserId={currentUserId}
                                 userColor={userColor}
@@ -211,6 +211,7 @@ export function NullHandGame({
                                 onSelectHand={setSelectedHand}
                                 onSubmit={() => selectedHand && handleSetGuestHand(selectedHand)}
                                 hostName={hostName}
+                                hostFaceIcon={hostUser?.user?.faceIcon}
                                 currentScores={currentScores}
                                 currentUserId={currentUserId}
                                 userColor={userColor}
@@ -226,7 +227,6 @@ export function NullHandGame({
                                 hostName={hostName}
                                 currentUserId={currentUserId}
                                 isCurrentHost={isCurrentHost}
-                                hostStats={hostStats}
                                 roomUsers={room.users}
                                 userColor={userColor}
                             />

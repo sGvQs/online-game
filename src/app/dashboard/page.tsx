@@ -5,6 +5,8 @@ import { RoomList } from '@/components/room/RoomList'
 import { DashboardSidebar } from '@/components/dashboard/DashboardSidebar'
 import { LogoutButton } from '@/components/auth/LogoutButton'
 import { Boxes } from 'lucide-react'
+import Image from 'next/image'
+import { DEFAULT_FACE_ICON, FACE_ICON_PATHS, FaceIcon } from '@/shared/constants/faceIcon'
 
 export default async function DashboardPage() {
     const supabase = await createClient()
@@ -17,6 +19,8 @@ export default async function DashboardPage() {
     if (!dashboardUser) return <div>User not found in DB</div>
 
     const rooms = await getRooms()
+    const initialFaceIcon: FaceIcon =
+        (dashboardUser.user as { faceIcon?: FaceIcon }).faceIcon ?? DEFAULT_FACE_ICON
 
     return (
         <div className="min-h-screen p-8 bg-transparent text-foreground">
@@ -24,15 +28,29 @@ export default async function DashboardPage() {
                 {/* Header Section */}
                 <header className="glass-card flex justify-between items-center p-6 rounded-2xl shadow-sm">
                     <div>
-                        <h1 className="text-4xl font-black tracking-tight text-brand-900">
-                            ONLINE GAME STATION
+                        <h1 className="text-4xl font-black tracking-tight text-brand-900 flex items-center gap-4">
+                            <Image
+                                src="/icon.svg"
+                                alt=""
+                                width={40}
+                                height={40}
+                                className="shrink-0"
+                            />
+                            ZERO G GAMES
                         </h1>
                         <p className="text-brand-900 font-medium mt-1 opacity-80">
-                            おかえりなさい、{dashboardUser.user.name}さん
+                            Music By Dream or Real?
                         </p>
                     </div>
                     <div className="flex gap-4 items-center">
-                        <div className="bg-white/10 px-4 py-2 rounded-full text-sm font-medium text-foreground shadow-sm border border-brand-200/30">
+                        <div className="flex items-center gap-2 bg-white/10 px-4 py-2 rounded-full text-sm font-medium text-foreground shadow-sm border border-brand-200/30">
+                            <Image
+                                src={FACE_ICON_PATHS[initialFaceIcon]}
+                                alt=""
+                                width={24}
+                                height={24}
+                                className="shrink-0 rounded-full object-contain"
+                            />
                             {dashboardUser.email}
                         </div>
                         <LogoutButton />
@@ -42,7 +60,10 @@ export default async function DashboardPage() {
                 {/* Main Content Area */}
                 <main className="grid grid-cols-1 lg:grid-cols-4 gap-8">
                     {/* Sidebar / Actions */}
-                    <DashboardSidebar initialComment={dashboardUser.user.comment} />
+                    <DashboardSidebar
+                        initialComment={dashboardUser.user.comment}
+                        initialFaceIcon={initialFaceIcon}
+                    />
 
                     {/* Room List */}
                     <section className="lg:col-span-3">

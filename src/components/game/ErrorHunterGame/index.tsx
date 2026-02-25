@@ -8,8 +8,11 @@ import { Win95ProgressBar } from '../Win95ProgressBar'
 import { Win95Button } from '../Win95Button'
 import { Win95TitleBarButton } from '../Win95TitleBarButton'
 import { useSE } from '@/hooks/useSE'
-import { RoomWithUsersAndReadyStatus, RoomUserWithReadyStatus, ErrorEventWithUser, RoomUser } from '@/shared/types'
-import { useEffect, useState } from 'react'
+import Image from 'next/image'
+import { useEffect, useRef, useState } from 'react'
+import { RoomWithUsersAndReadyStatus, RoomUserWithReadyStatus, ErrorEventWithUser, RoomUser, UserRanking } from '@/shared/types'
+import { FACE_ICON_PATHS, DEFAULT_FACE_ICON } from '@/shared/constants/faceIcon'
+import { getNullHandRankings } from '@/server/actions/game/rankingActions'
 import { cn } from '@/lib/utils'
 import { errorHunterGame } from './styles'
 
@@ -19,6 +22,7 @@ interface ErrorHunterGameProps {
     roomId: string
     initialMatchId: string | null
     currentUserId: string
+    initialRankings?: UserRanking[]
 }
 
 /** ランダムなエラーメッセージ */
@@ -41,6 +45,7 @@ export function ErrorHunterGame({
     roomId, // クエリパラメーターからのroomID
     initialMatchId, // roomに紐ずくmatchID => 全員nullの可能性ある
     currentUserId, // 現在のユーザーID
+    initialRankings = [], // 参加者の月間ランキング
 }: ErrorHunterGameProps) {
     const styles = errorHunterGame()
 
@@ -76,7 +81,8 @@ export function ErrorHunterGame({
         handleFinish,
         waitProgress,
         winnerComment,
-        winnerName
+        winnerName,
+        winnerFaceIconPath,
     } = useErrorHunter({ roomId, isHost, initialMatchId, currentUserId })
 
 
@@ -85,6 +91,24 @@ export function ErrorHunterGame({
     const [isInitializing, setIsInitializing] = useState(true)
     const [showDescription, setShowDescription] = useState(false)
     const { play } = useSE()
+
+    // ランキング表示用（RESULT→TITLE 戻り時に再取得して最新のポイントを反映）
+    const [rankings, setRankings] = useState<UserRanking[]>(initialRankings)
+    const prevPhaseRef = useRef(phase)
+
+    useEffect(() => {
+        setRankings(initialRankings)
+    }, [initialRankings])
+
+    useEffect(() => {
+        const prevPhase = prevPhaseRef.current
+        prevPhaseRef.current = phase
+
+        if (prevPhase === 'RESULT' && phase === 'TITLE') {
+            const userIds = room.users.map((u) => u.userId)
+            getNullHandRankings(userIds).then((fresh) => setRankings(fresh))
+        }
+    }, [phase, room.users])
 
     // Simulate initialization progress
     useEffect(() => {
@@ -169,18 +193,41 @@ export function ErrorHunterGame({
                                                         プレイヤー準備状況: {readyCount} / {totalUsers}
                                                     </p>
                                                     <div className={styles.playerListbox()}>
-                                                        {room.users.map((roomUser: RoomUserWithReadyStatus) => (
-                                                            <div
-                                                                key={roomUser.id}
-                                                                className={styles.playerItem()}
-                                                            >
-                                                                <div className={roomUser.isReady ? styles.playerRadioReady() : styles.playerRadio()} />
-                                                                <span>
-                                                                    {roomUser.user?.name || 'Unknown'}
-                                                                    {roomUser.userId === currentUserId && ' (あなた)'}
-                                                                </span>
-                                                            </div>
-                                                        ))}
+                                                        {[...room.users]
+                                                            .sort((a, b) => {
+                                                                const rankA = rankings.find((r) => r.userId === a.userId)?.rank ?? Infinity
+                                                                const rankB = rankings.find((r) => r.userId === b.userId)?.rank ?? Infinity
+                                                                return rankA - rankB
+                                                            })
+                                                            .map((roomUser: RoomUserWithReadyStatus) => {
+                                                            const ranking = rankings.find((r) => r.userId === roomUser.userId)
+                                                            const faceIcon = roomUser.user?.faceIcon ?? DEFAULT_FACE_ICON
+                                                            const faceIconPath = FACE_ICON_PATHS[faceIcon]
+                                                            return (
+                                                                <div
+                                                                    key={roomUser.id}
+                                                                    className={cn(styles.playerItem(), 'gap-2')}
+                                                                >
+                                                                    <div className={roomUser.isReady ? styles.playerRadioReady() : styles.playerRadio()} />
+                                                                    <Image
+                                                                        src={faceIconPath}
+                                                                        alt=""
+                                                                        width={24}
+                                                                        height={24}
+                                                                        className="shrink-0 rounded-full object-contain"
+                                                                    />
+                                                                    <span>
+                                                                        {roomUser.user?.name || 'Unknown'}
+                                                                        {roomUser.userId === currentUserId && ' (あなた)'}
+                                                                    </span>
+                                                                    {ranking && (
+                                                                        <span className="text-[10px] text-gray-500 ml-auto">
+                                                                            {ranking.rank}位 {ranking.points}pt
+                                                                        </span>
+                                                                    )}
+                                                                </div>
+                                                            )
+                                                        })}
                                                     </div>
                                                 </div>
                                             </>
@@ -360,7 +407,8 @@ export function ErrorHunterGame({
                 >
                     <Win95Dialog
                         title="Result"
-                        icon="lose"
+                        icon={winnerFaceIconPath ? undefined : 'lose'}
+                        customIconSrc={winnerFaceIconPath ?? undefined}
                         buttons={[{
                             label: '終了',
                             onClick: handleFinish,

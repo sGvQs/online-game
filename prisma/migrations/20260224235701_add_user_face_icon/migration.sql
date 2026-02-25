@@ -1,0 +1,5 @@
+-- CreateEnum
+CREATE TYPE "FaceIcon" AS ENUM ('BOY_FACE', 'LADY_FACE', 'GRANPA_FACE', 'WHITE_FACE', 'BLACK_FACE', 'BROWN_FACE', 'BUG_FACE');
+
+-- AlterTable
+ALTER TABLE "users" ADD COLUMN     "face_icon" "FaceIcon" NOT NULL DEFAULT 'BOY_FACE';

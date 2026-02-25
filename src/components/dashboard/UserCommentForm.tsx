@@ -41,12 +41,12 @@ export function UserCommentForm({ initialComment }: UserCommentFormProps) {
           value={comment}
           onChange={(e) => setComment(e.target.value)}
           placeholder="ゲーム終了後に勝ったら表示されるコメントを入力..."
-          maxLength={100}
+          maxLength={20}
           disabled={isPending}
           className="w-full"
         />
         <p className="mt-1 text-xs text-brand-900 opacity-70">
-          {comment.length} / 100文字
+          {comment.length} / 20文字
         </p>
       </div>
 

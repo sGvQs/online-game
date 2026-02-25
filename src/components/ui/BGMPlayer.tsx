@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { useSound } from '@/lib/sound-context';
+import { CircleDivide, Volume2, VolumeOff } from 'lucide-react'
+
 
 const BGM_CONFIG = {
     ERROR_HUNTER: {
@@ -17,12 +19,12 @@ const BGM_CONFIG = {
     },
     MAIN_SYSTEM: {
         check: (path: string) => path.includes('/dashboard') || path.includes('/room/'),
-        srcs: ['/music/default.mp3'], // 1曲のみの場合は1つだけ入れる
+        srcs: ['/music/title-sleep.mp3','/music/title-sky.mp3','/music/title-nigth.mp3'],
         label: 'default'
     },
     DEFAULT: {
         check: () => true,
-        srcs: ['/music/default.mp3'],
+        srcs: ['/music/title-sleep.mp3','/music/title-sky.mp3','/music/title-nigth.mp3'],
         label: 'default'
     }
 } as const;
@@ -77,12 +79,14 @@ export default function BGMPlayer() {
         setTrackIndex((prev) => (prev + 1) % activeConfig.srcs.length);
     };
 
+    const isSingleTrack = activeConfig.srcs.length === 1;
+
     return (
         <div className="fixed bottom-6 right-6 z-50">
-            {/* loop属性を削除し、onEndedを追加 */}
             <audio
                 ref={audioRef}
-                onEnded={handleEnded}
+                loop={isSingleTrack}
+                onEnded={isSingleTrack ? undefined : handleEnded}
             />
             <button
                 onClick={() => {
@@ -93,9 +97,9 @@ export default function BGMPlayer() {
                     }
                     setIsPlaying(!isPlaying);
                 }}
-                className="w-12 h-12 bg-indigo-600 rounded-full shadow-lg text-white flex items-center justify-center"
+                className="w-12 h-12 rounded-full shadow-lg text-white flex items-center justify-center"
             >
-                {!isPlaying ? '🔇' : '🔊'}
+                {!isPlaying ? <VolumeOff/>: <Volume2/>}
             </button>
         </div>
     );

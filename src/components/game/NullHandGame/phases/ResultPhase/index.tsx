@@ -1,5 +1,6 @@
 import { HandType, JankenEventWithGuests, MatchScoreWithUser, HostStats } from '@/shared/types'
 import { Hand3D } from '../../Hand3D'
+import { PlayerFaceIcon } from '../../common/PlayerFaceIcon'
 import { nullHandGame } from '../../styles'
 import { cn } from '@/lib/utils'
 import { judgeHand } from '../../utils'
@@ -24,7 +25,6 @@ interface ResultPhaseProps {
     hostName: string
     currentUserId: string
     isCurrentHost: boolean
-    hostStats: HostStats | null
     roomUsers: RoomUser[]
     userColor?: string
 }
@@ -37,7 +37,6 @@ export function ResultPhase({
     hostName,
     currentUserId,
     isCurrentHost,
-    hostStats,
     roomUsers,
     userColor
 }: ResultPhaseProps) {
@@ -59,6 +58,9 @@ export function ResultPhase({
     const myHandData = jankenEvent.guestHands.find(gh => gh.userId === currentUserId)
     const myHand = myHandData?.hand as HandType | undefined
 
+    const hostUser = roomUsers.find(u => u.userId === jankenEvent.currentHostId)
+    const currentUserData = roomUsers.find(u => u.userId === currentUserId)
+
     // 決着状況の判定ロジックを共通化
     const guestHands = jankenEvent.guestHands
     const guestCount = guestHands.length
@@ -72,24 +74,6 @@ export function ResultPhase({
 
     const isNullHand = guestCount > 1 && !hasGuestWin && guestHands.every(gh => judgeHand(hostHand, gh.hand as HandType) === 'DRAW')
     const isHostPerfectWin = guestCount > 1 && !isNullHand && !hasGuestWin && !hasDraw
-
-    // 共通のホスト統計表示コンポーネント（ChoicePhaseのスタイルを完全移植）
-    const HostStatsDisplay = () => hostStats && (
-        <div className="flex flex-col items-center mb-4 w-full h-12 justify-center">
-            <div className="flex justify-center items-center gap-2 text-gray-400 text-xs">
-                <div className={cn("w-2 h-2 rounded-full animate-pulse mr-2", isCurrentHost ? "bg-[#44FFFF]" : "bg-[#FF4444]")} />
-                {isCurrentHost ? "あなたは" : `${hostName}は`}過去に
-                <span className="text-[#FF4444] text-sm font-bold mx-1">
-                    {hostStats.reverseRate !== null ? 100 - hostStats.reverseRate : '???'}%
-                </span>
-                の確率で
-                <span className="text-[#44FFFF] text-sm font-bold ml-1 uppercase tracking-tighter">
-                    SYSTEM SELECTION
-                </span>
-                を選んでいましたが、このラウンドでは……
-            </div>
-        </div>
-    )
 
     // 報酬フィードバック（個別の獲得スコア報告）
     const RewardFeedback = () => {
@@ -177,7 +161,10 @@ export function ResultPhase({
                                 /* 対戦結果ビュー (GUEST) */
                                 <div className="flex items-center justify-center gap-12 mb-8">
                                     <div className="flex flex-col items-center">
-                                        <div className={cn(rpStyles.playerName())} style={{ color: '#FF4444' }}>{hostName}</div>
+                                        <div className="flex flex-col items-center gap-2">
+                                            <PlayerFaceIcon faceIcon={hostUser?.user?.faceIcon} size="lg" />
+                                            <div className={cn(rpStyles.playerName())} style={{ color: '#FF4444' }}>{hostName}</div>
+                                        </div>
                                         <HandCard
                                             handType={hostHand}
                                             color="red"
@@ -189,7 +176,10 @@ export function ResultPhase({
                                     <div className="text-gray-800 font-black text-4xl italic px-4 translate-y-4">VS</div>
 
                                     <div className="flex flex-col items-center">
-                                        <div style={{ color: userColor }} className={cn(rpStyles.playerName(), rpStyles.myselfName())}>YOU</div>
+                                        <div className="flex flex-col items-center gap-2">
+                                            <PlayerFaceIcon faceIcon={currentUserData?.user?.faceIcon} size="lg" />
+                                            <div style={{ color: userColor }} className={cn(rpStyles.playerName(), rpStyles.myselfName())}>YOU</div>
+                                        </div>
                                         <HandCard
                                             handType={myHand}
                                             personalColor={userColor}
@@ -228,9 +218,6 @@ export function ResultPhase({
                             totalTurns={jankenEvent?.match.totalTurns}
                         />
 
-                        <div className="mt-6">
-                            <HostStatsDisplay />
-                        </div>
 
                         <div className="flex-1 flex flex-col items-center justify-center">
                             {/* ChoicePhaseと共通の部品・レイアウト */}
@@ -276,11 +263,14 @@ export function ResultPhase({
                                 <div className="absolute inset-0 flex items-center justify-between px-4">
                                     {/* Selection Frame */}
                                     <div className={cn("flex flex-col items-center gap-1", isHostDefault ? "order-1" : "order-3")}>
-                                        <div
-                                            className="text-xs font-black tracking-[0.3em] mb-1"
-                                            style={{ color: isCurrentHost ? (userColor || '#FF4444') : '#FF4444' }}
-                                        >
-                                            {hostName}
+                                        <div className='flex items-end gap-2'>
+                                            <PlayerFaceIcon faceIcon={hostUser?.user?.faceIcon} size="sm" />
+                                            <div
+                                                className="text-xs font-black tracking-[0.3em]"
+                                                style={{ color: isCurrentHost ? (userColor || '#FF4444') : '#FF4444' }}
+                                            >
+                                                {hostName}
+                                            </div>
                                         </div>
                                         <div
                                             className="w-48 h-48 border-2"

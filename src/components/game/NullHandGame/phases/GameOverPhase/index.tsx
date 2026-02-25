@@ -5,6 +5,7 @@ import { SideHeader } from '../../common/SideHeader'
 import { GameButton } from '../../common/GameButton'
 import { Hand3D } from '../../Hand3D'
 import { CurrentScores } from '../../common/CurrentScores'
+import { PlayerFaceIcon } from '../../common/PlayerFaceIcon'
 import { motion } from 'framer-motion'
 
 interface GameOverPhaseProps {
@@ -61,7 +62,13 @@ export function GameOverPhase({
                                     personalColor={userColor}
                                 />
                             </div>
-                            <div className="text-[#44FFFF] text-xl font-bold mb-2 tracking-widest">ランキング</div>
+                            <div className="flex justify-center items-end mb-2 gap-1">
+                                <PlayerFaceIcon
+                                    faceIcon={currentUserScore.user.faceIcon}
+                                    size="lg"
+                                />
+                                <div className="text-[#44FFFF] text-xl font-bold tracking-widest">のランキング</div>
+                            </div>
                             <div className="flex items-center justify-center gap-8 text-4xl font-mono font-bold">
                                 <span className="text-gray-500">{oldRank}位</span>
                                 <span className="text-white">→</span>
