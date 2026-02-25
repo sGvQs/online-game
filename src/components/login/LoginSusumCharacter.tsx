@@ -33,11 +33,14 @@ const DIALOGUE_MESSAGES_VISIT_1_PLUS = [
 /** ログイン済み・おかえり向け */
 const DIALOGUE_MESSAGES_RETURNING = [
     'おかえり',
+    'ちーっす',
 ]
 
 const ENTER_DURATION = 1.5
 const IDLE_DURATION = 10
 const EXIT_DURATION = 1.5
+/** 2回目以降向け：退場後、再登場までの待機時間（秒） */
+const VISIT_1_PLUS_REAPPEAR_DELAY_SEC = 20
 /** 一文字表示の間隔（ms）喋るスピード感 */
 const CHAR_INTERVAL_MS = 90
 
@@ -71,6 +74,7 @@ export function LoginSusumCharacter() {
     const [dialogueMessages, setDialogueMessages] = useState<string[]>(DIALOGUE_MESSAGES_VISIT_0)
     const [displayedText, setDisplayedText] = useState('')
     const [isVisible, setIsVisible] = useState(true)
+    const [repeatMessageSource, setRepeatMessageSource] = useState<'visit1plus' | 'returning' | null>(null)
 
     useEffect(() => {
         const initMessages = async () => {
@@ -81,10 +85,15 @@ export function LoginSusumCharacter() {
                 const messages = getDialogueMessages()
                 markAsVisited()
                 incrementVisitCount()
-                // 2回目以降向けはどれか1つだけランダムに表示
+                // 2回目以降向け・ログイン済み向けはどれか1つだけランダムに表示し、50秒ごとに再登場を繰り返す
                 if (messages === DIALOGUE_MESSAGES_VISIT_1_PLUS) {
                     const picked = messages[Math.floor(Math.random() * messages.length)]
                     setDialogueMessages([picked])
+                    setRepeatMessageSource('visit1plus')
+                } else if (messages === DIALOGUE_MESSAGES_RETURNING) {
+                    const picked = messages[Math.floor(Math.random() * messages.length)]
+                    setDialogueMessages([picked])
+                    setRepeatMessageSource('returning')
                 } else {
                     setDialogueMessages(messages)
                 }
@@ -94,13 +103,14 @@ export function LoginSusumCharacter() {
     }, [])
 
     useEffect(() => {
+        if (phase !== 'entering') return
         // 入場完了 → 待機
         const enterTimer = setTimeout(() => {
             setPhase('idle')
         }, ENTER_DURATION * 1000)
 
         return () => clearTimeout(enterTimer)
-    }, [])
+    }, [phase])
 
     useEffect(() => {
         if (phase !== 'idle') return
@@ -147,13 +157,29 @@ export function LoginSusumCharacter() {
     useEffect(() => {
         if (phase !== 'exiting') return
 
+        let reappearTimer: ReturnType<typeof setTimeout> | null = null
+
         // 退場アニメーション完了後に非表示
         const hideTimer = setTimeout(() => {
             setIsVisible(false)
+            if (repeatMessageSource) {
+                const source = repeatMessageSource === 'visit1plus' ? DIALOGUE_MESSAGES_VISIT_1_PLUS : DIALOGUE_MESSAGES_RETURNING
+                // 50秒後に再登場
+                reappearTimer = setTimeout(() => {
+                    const picked = source[Math.floor(Math.random() * source.length)]
+                    setDialogueMessages([picked])
+                    setDisplayedText('')
+                    setPhase('entering')
+                    setIsVisible(true)
+                }, VISIT_1_PLUS_REAPPEAR_DELAY_SEC * 1000)
+            }
         }, EXIT_DURATION * 1000)
 
-        return () => clearTimeout(hideTimer)
-    }, [phase])
+        return () => {
+            clearTimeout(hideTimer)
+            if (reappearTimer) clearTimeout(reappearTimer)
+        }
+    }, [phase, repeatMessageSource])
 
     if (!isVisible) return null
 
@@ -195,7 +221,7 @@ export function LoginSusumCharacter() {
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ duration: 0.4, delay: 0.2 }}
                     >
-                        <div className="relative px-2.5 py-1.5 rounded-xl bg-linear-to-br from-foreground/98 to-foreground/90 text-background text-xs font-medium shadow-[0_2px_8px_rgba(0,0,0,0.12),inset_0_1px_0_rgba(255,255,255,0.08)] border border-background/30 backdrop-blur-sm">
+                        <div className="relative px-2.5 py-1.5 rounded-xl border border-brand-200/20 bg-brand-300 text-white text-[10px] font-medium shadow-sm">
                             <span className="font-mono tracking-wide">
                                 {displayedText}
                                 {displayedText.length < (dialogueMessages[Math.min(dialogueIndex, dialogueMessages.length - 1)] ?? '').length && (
@@ -204,7 +230,7 @@ export function LoginSusumCharacter() {
                             </span>
                             {/* 口方向へのしっぽ（吹き出しの左からキャラへ向かう） */}
                             <div
-                                className="absolute -left-1.5 top-1/2 -translate-y-1/2 w-0 h-0 border-t-[4px] border-t-transparent border-b-[4px] border-b-transparent border-r-[6px] border-r-foreground/95"
+                                className="absolute -left-1.5 top-1/2 -translate-y-1/2 w-0 h-0 border-t-4 border-t-transparent border-b-4 border-b-transparent border-r-[6px] border-r-brand-300"
                                 aria-hidden
                             />
                         </div>
