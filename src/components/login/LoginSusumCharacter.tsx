@@ -43,7 +43,11 @@ const EXIT_DURATION = 3
 /** 2回目以降向け：退場後、再登場までの待機時間（秒） */
 const VISIT_1_PLUS_REAPPEAR_DELAY_SEC = 30
 /** 一文字表示の間隔（ms）喋るスピード感 */
-const CHAR_INTERVAL_MS = 200
+const CHAR_INTERVAL_MS = 150
+/** 吸い込まれるアニメーションの発生確率（0-1） */
+const SUCKED_IN_PROBABILITY =  1
+/** 吸い込まれるアニメーションの所要時間（秒） */
+const SUCKED_IN_DURATION = 15
 
 function getDialogueMessages(): string[] {
     if (typeof window === 'undefined') return DIALOGUE_MESSAGES_VISIT_0
@@ -69,6 +73,53 @@ function incrementVisitCount(): void {
     sessionStorage.setItem(SESSION_KEY_LOGIN_VISIT_COUNT, String(count + 1))
 }
 
+/** 吸い込まれるアニメーション：画面外右上→中央下へ回転しながら流れる */
+function SuckedInAnimation({ onComplete }: { onComplete: () => void }) {
+    const SUCKED_IN_MESSAGE = 'うぁー、吸い込まれるー'
+
+    useEffect(() => {
+        const timer = setTimeout(onComplete, SUCKED_IN_DURATION * 1000)
+        return () => clearTimeout(timer)
+    }, [onComplete])
+
+    return (
+        <motion.div
+            className="fixed left-1/2 top-0 z-40 pointer-events-none"
+            initial={{ x: '100vw', y: '-110vh' }}
+            animate={{ x: '-50%', y: '110vh' }}
+            transition={{
+                duration: SUCKED_IN_DURATION,
+                ease: 'easeIn',
+            }}
+        >
+            {/* SVGとチャットをくっつけて回転 */}
+            <motion.div
+                className="flex items-end gap-2"
+                initial={{ rotate: 0 }}
+                animate={{ rotate: 720 }}
+                transition={{
+                    duration: SUCKED_IN_DURATION,
+                    ease: 'linear',
+                }}
+                style={{ transformOrigin: 'center center' }}
+            >
+                <div className="relative w-14 h-14 sm:w-16 sm:h-16 shrink-0">
+                    <Image
+                        src="/svg/charactor/susum.svg"
+                        alt="Susum"
+                        fill
+                        sizes="64px"
+                        className="object-contain"
+                    />
+                </div>
+                <div className="shrink-0 mb-1 px-2.5 py-1.5 rounded-xl border border-brand-200/20 bg-brand-300 text-white text-[10px] font-medium shadow-sm">
+                    <span className="font-mono">{SUCKED_IN_MESSAGE}</span>
+                </div>
+            </motion.div>
+        </motion.div>
+    )
+}
+
 export function LoginSusumCharacter() {
     const [phase, setPhase] = useState<'entering' | 'idle' | 'exiting'>('entering')
     const [dialogueIndex, setDialogueIndex] = useState(0)
@@ -77,13 +128,19 @@ export function LoginSusumCharacter() {
     const [isVisible, setIsVisible] = useState(true)
     const [repeatMessageSource, setRepeatMessageSource] = useState<'visit1plus' | 'returning' | null>(null)
     const [enterDirection, setEnterDirection] = useState<'left' | 'bottom' | null>(null)
+    const [isSuckedInMode, setIsSuckedInMode] = useState<boolean | null>(null)
 
-    // 描画前に方向を決定（mount時に正しいinitialを適用するため）
+    // 描画前に方向を決定。低確率で吸い込まれるアニメーションに
     useLayoutEffect(() => {
-        setEnterDirection(Math.random() < 0.5 ? 'left' : 'bottom')
+        if (Math.random() < SUCKED_IN_PROBABILITY) {
+            setIsSuckedInMode(true)
+        } else {
+            setEnterDirection(Math.random() < 0.5 ? 'left' : 'bottom')
+        }
     }, [])
 
     useEffect(() => {
+        if (isSuckedInMode) return
         const initMessages = async () => {
             const { isPrivate } = await detectIncognito()
             if (isPrivate) {
@@ -107,21 +164,21 @@ export function LoginSusumCharacter() {
             }
         }
         initMessages()
-    }, [])
+    }, [isSuckedInMode])
 
 
     useEffect(() => {
-        if (phase !== 'entering') return
+        if (isSuckedInMode || phase !== 'entering') return
         // 入場完了 → 待機
         const enterTimer = setTimeout(() => {
             setPhase('idle')
         }, ENTER_DURATION * 1000)
 
         return () => clearTimeout(enterTimer)
-    }, [phase])
+    }, [phase, isSuckedInMode])
 
     useEffect(() => {
-        if (phase !== 'idle') return
+        if (isSuckedInMode || phase !== 'idle') return
 
         // 待機中にセリフを切り替え（10秒ごと・ランダムで100種類以上対応）
         const dialogueInterval = setInterval(() => {
@@ -129,11 +186,11 @@ export function LoginSusumCharacter() {
         }, 10000)
 
         return () => clearInterval(dialogueInterval)
-    }, [phase, dialogueMessages.length])
+    }, [phase, dialogueMessages.length, isSuckedInMode])
 
     // 一文字ずつ表示（喋るスピード感）
     useEffect(() => {
-        if (phase !== 'idle') return
+        if (isSuckedInMode || phase !== 'idle') return
 
         const fullText = dialogueMessages[Math.min(dialogueIndex, dialogueMessages.length - 1)] ?? ''
         setDisplayedText('')
@@ -149,21 +206,21 @@ export function LoginSusumCharacter() {
         }, CHAR_INTERVAL_MS)
 
         return () => clearInterval(typeInterval)
-    }, [phase, dialogueIndex, dialogueMessages])
+    }, [phase, dialogueIndex, dialogueMessages, isSuckedInMode])
 
     useEffect(() => {
-        if (phase !== 'idle') return
+        if (isSuckedInMode || phase !== 'idle') return
 
-        // 30秒後に退場開始
+        // 退場開始
         const exitTimer = setTimeout(() => {
             setPhase('exiting')
         }, IDLE_DURATION * 1000)
 
         return () => clearTimeout(exitTimer)
-    }, [phase])
+    }, [phase, isSuckedInMode])
 
     useEffect(() => {
-        if (phase !== 'exiting') return
+        if (isSuckedInMode || phase !== 'exiting') return
 
         let reappearTimer: ReturnType<typeof setTimeout> | null = null
 
@@ -188,7 +245,16 @@ export function LoginSusumCharacter() {
             clearTimeout(hideTimer)
             if (reappearTimer) clearTimeout(reappearTimer)
         }
-    }, [phase, repeatMessageSource])
+    }, [phase, repeatMessageSource, isSuckedInMode])
+
+    // 吸い込まれるアニメーション（低確率・無条件）
+    if (isSuckedInMode) {
+        return (
+            <SuckedInAnimation
+                onComplete={() => setIsSuckedInMode(false)}
+            />
+        )
+    }
 
     if (!isVisible || enterDirection === null) return null
 
