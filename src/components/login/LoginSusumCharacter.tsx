@@ -37,13 +37,13 @@ const DIALOGUE_MESSAGES_RETURNING = [
     '最近どう？',
 ]
 
-const ENTER_DURATION = 1.5
-const IDLE_DURATION = 10
-const EXIT_DURATION = 1.5
+const ENTER_DURATION = 3
+const IDLE_DURATION = 20
+const EXIT_DURATION = 3
 /** 2回目以降向け：退場後、再登場までの待機時間（秒） */
-const VISIT_1_PLUS_REAPPEAR_DELAY_SEC = 20
+const VISIT_1_PLUS_REAPPEAR_DELAY_SEC = 30
 /** 一文字表示の間隔（ms）喋るスピード感 */
-const CHAR_INTERVAL_MS = 90
+const CHAR_INTERVAL_MS = 200
 
 function getDialogueMessages(): string[] {
     if (typeof window === 'undefined') return DIALOGUE_MESSAGES_VISIT_0
