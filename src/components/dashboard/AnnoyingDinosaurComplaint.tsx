@@ -59,6 +59,7 @@ export function AnnoyingDinosaurComplaint({
     return (
         <motion.div
             className="fixed bottom-0 left-1/2 z-0 flex items-end pointer-events-none"
+            style={{ width: 'min(460px, 90vw)' }}
             initial={{ x: '-50%', y: '100%' }}
             animate={
                 phase === 'entering'
@@ -72,7 +73,7 @@ export function AnnoyingDinosaurComplaint({
                 ease: phase === 'exiting' ? 'easeIn' : 'easeOut',
             }}
         >
-            <div className="flex items-start gap-2 min-w-[280px]">
+            <div className="flex items-start gap-2 w-full">
                 <div className="relative w-14 h-14 sm:w-16 sm:h-16 shrink-0">
                     <Image
                         src="/svg/charactor/annoying-dinosaur.svg"
