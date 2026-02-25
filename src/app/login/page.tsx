@@ -1,7 +1,7 @@
 import { Suspense } from 'react'
 import AuthForm from '@/components/auth/AuthForm'
 import { DashboardHeaderTitle } from '@/components/dashboard/DashboardHeaderTitle'
-import { LoginSusumCharacter } from '@/components/login/LoginSusumCharacter'
+import { AnnoyingDinosaur } from '@/components/login/AnnoyingDinosaur'
 
 export default function LoginPage() {
     return (
@@ -11,7 +11,7 @@ export default function LoginPage() {
                 <AuthForm />
             </div>
             <Suspense fallback={null}>
-                <LoginSusumCharacter />
+                <AnnoyingDinosaur />
             </Suspense>
         </div>
     )

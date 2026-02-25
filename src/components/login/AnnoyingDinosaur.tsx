@@ -195,14 +195,14 @@ function RotateWhileTalkingAnimation({
             >
                 <div className="relative w-14 h-14 sm:w-16 sm:h-16 shrink-0">
                     <Image
-                        src="/svg/charactor/susum.svg"
+                        src="/svg/charactor/annoying-dinosaur.svg"
                         alt="Susum"
                         fill
                         sizes="64px"
                         className="object-contain"
                     />
                 </div>
-                <div className="shrink-0 mb-6 px-2.5 py-1.5 rounded-xl border border-brand-200/20 bg-brand-300 text-white text-[10px] font-medium shadow-sm max-w-[400px]">
+                <div className="shrink-0 mb-2 px-2.5 py-1.5 rounded-xl border border-brand-200/20 bg-brand-300 text-white text-[10px] font-medium shadow-sm max-w-[400px]">
                     <span className="font-mono">{displayedText}</span>
                 </div>
             </motion.div>
@@ -242,7 +242,7 @@ function SuckedInAnimation({ onComplete }: { onComplete: () => void }) {
             >
                 <div className="relative w-14 h-14 sm:w-16 sm:h-16 shrink-0">
                     <Image
-                        src="/svg/charactor/susum.svg"
+                        src="/svg/charactor/annoying-dinosaur.svg"
                         alt="Susum"
                         fill
                         sizes="64px"
@@ -257,7 +257,7 @@ function SuckedInAnimation({ onComplete }: { onComplete: () => void }) {
     )
 }
 
-export function LoginSusumCharacter() {
+export function AnnoyingDinosaur() {
     const searchParams = useSearchParams()
     const forceVisit1Plus = searchParams.get('flow') === '1'
 
@@ -481,7 +481,7 @@ export function LoginSusumCharacter() {
                 {/* キャラクター */}
                 <div className="relative w-14 h-14 sm:w-16 sm:h-16 shrink-0">
                     <Image
-                        src="/svg/charactor/susum.svg"
+                        src="/svg/charactor/annoying-dinosaur.svg"
                         alt="Susum"
                         fill
                         sizes="64px"
