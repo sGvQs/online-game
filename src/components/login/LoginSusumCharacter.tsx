@@ -89,14 +89,22 @@ const DIALOGUE_MESSAGES_RETURNING = [
 const ENTER_DURATION = 3
 const IDLE_DURATION = 20
 /** なんちゃってパターン時の待機時間（秒） */
-const IDLE_DURATION_AFTERMATH = 3
+const IDLE_DURATION_AFTERMATH = 10
 const EXIT_DURATION = 3
 /** 2回目以降向け：退場後、再登場までの待機時間（秒） */
-const VISIT_1_PLUS_REAPPEAR_DELAY_SEC = 30
+const VISIT_1_PLUS_REAPPEAR_DELAY_SEC = 10
 /** 一文字表示の間隔（ms）喋るスピード感 */
 const CHAR_INTERVAL_MS = 150
-/** 吸い込まれた後の「なんちゃって」メッセージ */
-const SUCKED_IN_AFTERMATH_MESSAGE = 'なんちゃって、てへ'
+/** 吸い込まれた後の「なんちゃって」メッセージ（ランダム） */
+const SUCKED_IN_AFTERMATH_MESSAGES = [
+    'なんちゃって。……君、本気で心配した？ 僕がこんな『プログラムの穴』くらいで絶滅するわけないじゃない。',
+    'なんちゃって。……重力ってやつ？ 人間が勝手に決めたルールに縛られるのは、僕のガラじゃないんだ。',
+    'なんちゃって。……下に美味しい獲物でもいるかと思ったけど、ただの真っ白な空間だった。……無駄足だったね。',
+    'なんちゃって。……地層の底まで旅してきたよ。君の悩みの種も、そこに埋めてきてあげようか？',
+    'なんちゃって。……驚いた？ 君たちが必死に守ってる『常識』なんて、僕にとってはただの冗談みたいなもんさ。',
+    'なんちゃって。……一瞬、君の視界から消えてあげたんだ。感謝してよ、少しは画面がスッキリしたでしょ？',
+
+]
 /** 各パターンの発生確率（5パターン中1つなので0.2） */
 const PATTERN_PROBABILITY = 0.2
 /** 吸い込まれるアニメーションの所要時間（秒） */
@@ -160,7 +168,7 @@ function RotateWhileTalkingAnimation({
     /** 左下=>右上 / 左上=>右下（画面外から画面外へ流れ続ける） */
     const positions = {
         'bl-tr': { initial: { x: '-80vw', y: '50vh' }, animate: { x: '80vw', y: '-80vh' } },
-        'tl-br': { initial: { x: '-80vw', y: '-80vh' }, animate: { x: '80vw', y: '80vh' } },
+        'tl-br': { initial: { x: '-80vw', y: '50vh' }, animate: { x: '80vw', y: '-150vh' } },
     } as const
     const { initial, animate } = positions[direction]
 
@@ -194,7 +202,7 @@ function RotateWhileTalkingAnimation({
                         className="object-contain"
                     />
                 </div>
-                <div className="shrink-0 mb-1 px-2.5 py-1.5 rounded-xl border border-brand-200/20 bg-brand-300 text-white text-[10px] font-medium shadow-sm">
+                <div className="shrink-0 mb-6 px-2.5 py-1.5 rounded-xl border border-brand-200/20 bg-brand-300 text-white text-[10px] font-medium shadow-sm max-w-[400px]">
                     <span className="font-mono">{displayedText}</span>
                 </div>
             </motion.div>
@@ -427,7 +435,9 @@ export function LoginSusumCharacter() {
                     setIsSuckedInAftermath(true)
                     setEnterPattern('bottom')
                     setEnterFrom('bottom')
-                    setDialogueMessages([SUCKED_IN_AFTERMATH_MESSAGE])
+                    setDialogueMessages([
+                        SUCKED_IN_AFTERMATH_MESSAGES[Math.floor(Math.random() * SUCKED_IN_AFTERMATH_MESSAGES.length)]!,
+                    ])
                     setDialogueIndex(0)
                     setDisplayedText('')
                     setPhase('entering')
@@ -441,7 +451,7 @@ export function LoginSusumCharacter() {
 
     const isFromBottom = enterFrom === 'bottom'
     /** なんちゃって時：体が半分だけ出る（y: 50% = 自要素の半分上にずらして下半分を隠す） */
-    const bottomIdleY = isSuckedInAftermath ? '40%' : 0
+    const bottomIdleY = isSuckedInAftermath ? '10%' : 0
     const initialPos = isFromBottom
         ? { x: '-50%', y: '100%' }
         : { x: '-100%', y: 0 }
