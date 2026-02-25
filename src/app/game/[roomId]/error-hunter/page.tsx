@@ -2,6 +2,7 @@ import { createClient } from '@/server/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { getCurrentUser } from '@/server/actions'
 import { getRoomWithReadyStatus } from '@/server/actions/room'
+import { getNullHandRankings } from '@/server/actions/game/rankingActions'
 import { ErrorHunterGame } from '@/components/game/ErrorHunterGame'
 import { cn } from '@/lib/utils'
 import { errorHunterGame } from '@/components/game/ErrorHunterGame/styles'
@@ -32,6 +33,10 @@ export default async function ErrorHunterPage({ params }: { params: { roomId: st
     // ユーザーがホストかチェック
     const isHost = room.createdBy === currentUser.user.id
 
+    // 参加者の月間ランキングを取得
+    const userIds = room.users.map((u) => u.userId)
+    const initialRankings = await getNullHandRankings(userIds)
+
     const styles = errorHunterGame()
 
     return (
@@ -45,6 +50,7 @@ export default async function ErrorHunterPage({ params }: { params: { roomId: st
                 roomId={roomId}
                 initialMatchId={room.currentMatchId}
                 currentUserId={currentUser.user.id}
+                initialRankings={initialRankings}
             />
         </div>
     )

@@ -134,8 +134,11 @@ export async function getMatchProgress(matchId: string) {
     }
 }
 
+const ERROR_HUNTER_WINNER_POINTS = 7
+
 /**
  * ゲーム終了: Match ステータスを更新し、最高スコアのプレイヤーを勝者に設定
+ * 勝者に +7pt を付与
  * 自動終了時またはホストが手動終了時に呼び出される
  */
 export async function finishGame(matchId: string, roomId: string) {
@@ -161,6 +164,41 @@ export async function finishGame(matchId: string, roomId: string) {
             maxScore = score
             winnerId = playerId
         }
+    }
+
+    const now = new Date()
+    const year = now.getFullYear()
+    const month = now.getMonth() + 1
+
+    // 勝者がいる場合、+7pt を付与
+    if (winnerId) {
+        await prisma.monthlyRanking.upsert({
+            where: {
+                userId_year_month: {
+                    userId: winnerId,
+                    year,
+                    month,
+                },
+            },
+            update: {
+                totalPoints: { increment: ERROR_HUNTER_WINNER_POINTS },
+            },
+            create: {
+                userId: winnerId,
+                year,
+                month,
+                totalPoints: ERROR_HUNTER_WINNER_POINTS,
+            },
+        })
+
+        await prisma.pointLog.create({
+            data: {
+                userId: winnerId,
+                amount: ERROR_HUNTER_WINNER_POINTS,
+                gameType: 'ERROR_HUNTER',
+                reason: 'MATCH_WIN',
+            },
+        })
     }
 
     // Match を終了
