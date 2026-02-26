@@ -34,7 +34,7 @@ export function DashboardHeaderTitle() {
         height={40}
         className="shrink-0"
       />
-      ZERO G GAMES
+      Pukapuka Space
     </h1>
   )
 }

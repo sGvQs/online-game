@@ -165,6 +165,31 @@ body {
   text-shadow: 0 0 10px rgba(129, 140, 248, 0.5);
 }
 
+/* 入力欄（ルーム名・プロフィール等）：ブラウザ（Arc等）による明るいスタイルを上書きし、黒系で統一 */
+.input-room-name,
+.input-dark {
+  background-color: #0f172a !important;
+  color: #f8fafc !important;
+  border-color: rgba(99, 102, 241, 0.4);
+}
+.input-room-name::placeholder,
+.input-dark::placeholder {
+  color: rgba(148, 163, 184, 0.7);
+}
+.input-room-name:-webkit-autofill,
+.input-room-name:-webkit-autofill:hover,
+.input-room-name:-webkit-autofill:focus,
+.input-room-name:-webkit-autofill:active,
+.input-dark:-webkit-autofill,
+.input-dark:-webkit-autofill:hover,
+.input-dark:-webkit-autofill:focus,
+.input-dark:-webkit-autofill:active {
+  -webkit-text-fill-color: #f8fafc !important;
+  -webkit-box-shadow: 0 0 0px 1000px #0f172a inset !important;
+  box-shadow: 0 0 0px 1000px #0f172a inset !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
 /* Custom animations for RoomModal and Win95 components */
 @keyframes fadeIn {
   from { 
