@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import Image from 'next/image'
+import { useSE } from '@/hooks/useSE'
 
 const ENTER_DURATION = 3
 const IDLE_DURATION = 8
@@ -19,14 +20,23 @@ export function AnnoyingDinosaurComplaint({
     message: string
     onComplete: () => void
 }) {
+    const { play } = useSE()
     const [phase, setPhase] = useState<'entering' | 'idle' | 'exiting'>('entering')
     const [displayedText, setDisplayedText] = useState('')
 
     useEffect(() => {
         if (phase !== 'idle') return
+
+        /** 音を出さない文字（句読点・記号など） */
+        const isSilentChar = (c: string) => /^[。、．，….\s「」『』（）]$/.test(c)
+
         let charIndex = 0
         const typeInterval = setInterval(() => {
             if (charIndex < message.length) {
+                const nextChar = message[charIndex]
+                if (nextChar && !isSilentChar(nextChar)) {
+                    play('dinosaur')
+                }
                 setDisplayedText(message.slice(0, charIndex + 1))
                 charIndex++
             } else {
@@ -34,7 +44,7 @@ export function AnnoyingDinosaurComplaint({
             }
         }, 150)
         return () => clearInterval(typeInterval)
-    }, [phase, message])
+    }, [phase, message, play])
 
     useEffect(() => {
         if (phase !== 'entering') return
