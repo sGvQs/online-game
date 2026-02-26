@@ -24,7 +24,7 @@ export const roomCard = tv({
         statusBadge: [
             'px-2 py-1 rounded-md text-xs font-medium',
         ],
-        statusLobby: 'bg-brand-100 dark:bg-brand-900/30 text-brand-700 dark:text-brand-300',
+        statusLobby: 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300',
         statusPlaying: 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300',
         actions: [
             'flex justify-between items-center pt-4 border-t border-brand-100/50 dark:border-brand-700/20',
