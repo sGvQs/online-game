@@ -37,12 +37,8 @@ export function DashboardHeaderProfile({
 
     return (
         <>
-            <button
-                type="button"
-                onClick={() => setModalOpen(true)}
-                className="flex items-center gap-3 bg-white/10 px-4 py-2 rounded-full text-sm font-medium text-foreground shadow-sm border border-brand-200/30 hover:bg-white/15 transition-colors cursor-pointer"
-            >
-                {/* 吹き出し（左）> アイコン・名前・順位・ポイント（右） */}
+            <div className="flex items-center gap-2">
+                {/* 吹き出し（外側に配置） */}
                 <div className="relative px-2.5 py-1 rounded-lg border border-brand-200/20 bg-brand-300 text-white text-[10px] font-medium shadow-sm max-w-[180px] shrink-0">
                     <span className="font-(--font-dot-gothic-16) tracking-wide line-clamp-2 text-left block">
                         {comment || '煽りコメントを設定'}
@@ -52,7 +48,17 @@ export function DashboardHeaderProfile({
                         aria-hidden
                     />
                 </div>
-                <div className="flex items-center gap-2 shrink-0">
+                {/* アイコン・名前・順位・ポイント（クリック可能、ホバー派手） */}
+                <button
+                    type="button"
+                    onClick={() => setModalOpen(true)}
+                    className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium text-foreground shrink-0
+                        bg-white/10 border border-brand-200/30
+                        hover:bg-brand-400/30 hover:border-brand-400/60
+                        hover:shadow-[0_0_20px_rgba(99,102,241,0.4)]
+                        active:scale-[0.98]
+                        transition-all duration-300 cursor-pointer"
+                >
                     <div className="relative w-8 h-8 rounded-full overflow-hidden">
                         <Image
                             src={FACE_ICON_PATHS[faceIcon]}
@@ -67,8 +73,8 @@ export function DashboardHeaderProfile({
                         {rank ? `${rank}位` : '圏外'}
                     </span>
                     <span className="opacity-70">{totalPoints}pt</span>
-                </div>
-            </button>
+                </button>
+            </div>
 
             <RoomModal
                 isOpen={modalOpen}
