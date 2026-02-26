@@ -57,7 +57,7 @@ export function DashboardSidebar({ initialComment, initialFaceIcon }: DashboardS
   }
 
   return (
-    <aside className="lg:col-span-1 space-y-6">
+    <aside className="xl:col-span-1 space-y-6">
      {/* 顔アイコン設定セクション */}
       <div className="glass-card p-6 rounded-2xl">
         <h2 className="text-xl font-bold mb-4 text-brand-900 flex items-center gap-2">

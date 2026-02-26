@@ -3,11 +3,10 @@
 import { createClient } from '@/utils/supabase/client'
 import { useEffect, useState } from 'react'
 import { joinRoom, deleteRoom, getRooms } from '@/server/actions/room'
-import { RoomCard, RoomListEmptyState } from './RoomCard'
-import { Room } from '@/shared/types'
+import { RoomCard, RoomListEmptyState, type RoomWithUsers } from './RoomCard'
 
-export function RoomList({ initialRooms, userId }: { initialRooms: Room[], userId: string }) {
-    const [rooms, setRooms] = useState<Room[]>(initialRooms)
+export function RoomList({ initialRooms, userId }: { initialRooms: RoomWithUsers[]; userId: string }) {
+    const [rooms, setRooms] = useState<RoomWithUsers[]>(initialRooms)
     const supabase = createClient()
 
     const fetchMessageData = async () => {
@@ -46,15 +45,15 @@ export function RoomList({ initialRooms, userId }: { initialRooms: Room[], userI
 
     if (rooms.length === 0) {
         return (
-            <div className="grid gap-6 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
+            <div className="grid gap-6 grid-cols-1">
                 <RoomListEmptyState />
             </div>
         )
     }
 
     return (
-        <div className="grid gap-6 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
-            {rooms.map((room: Room) => (
+        <div className="grid gap-2 grid-cols-1">
+            {rooms.map((room) => (
                 <RoomCard
                     key={room.id}
                     room={room}

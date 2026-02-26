@@ -19,7 +19,12 @@ import { DashboardHeaderTitle } from '@/components/dashboard/DashboardHeaderTitl
 import { DashboardComplaintWrapper } from '@/components/dashboard/DashboardComplaintWrapper'
 import { RankingCard } from '@/components/dashboard/RankingCard'
 
-export default async function DashboardPage() {
+export default async function DashboardPage({
+    searchParams,
+}: {
+    searchParams: Promise<{ error?: string }>
+}) {
+    const params = await searchParams
     const supabase = await createClient()
     const { data: { user } } = await supabase.auth.getUser()
 
@@ -51,6 +56,11 @@ export default async function DashboardPage() {
                 }))}
             />
             <div className="max-w-7xl mx-auto space-y-8">
+                {params.error === 'game_in_progress' && (
+                    <div className="rounded-lg bg-amber-100 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800 px-4 py-2 text-sm text-amber-800 dark:text-amber-200">
+                        ゲーム中は参加できません
+                    </div>
+                )}
                 {/* Header Section */}
                 <header className="glass-card flex justify-between items-center p-6 rounded-2xl shadow-sm">
                     <div>
@@ -89,14 +99,14 @@ export default async function DashboardPage() {
                     />
 
                     {/* 右: 既存のサイドバー + ルーム一覧 */}
-                    <div className="flex-1 min-w-0 grid grid-cols-1 lg:grid-cols-4 gap-8">
+                    <div className="flex-1 min-w-0 grid grid-cols-1 xl:grid-cols-3 gap-8">
                         <DashboardSidebar
                             initialComment={dashboardUser.user.comment}
                             initialFaceIcon={initialFaceIcon}
                         />
 
                         {/* Room List */}
-                        <section className="lg:col-span-3">
+                        <section className="xl:col-span-2">
                         <div className="flex items-center justify-between mb-3">
                             <h2 className="text-1xl font-bold text-brand-800 flex items-center gap-2">
                                 <Boxes className="w-4 h-4" />

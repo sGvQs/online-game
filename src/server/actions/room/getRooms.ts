@@ -7,7 +7,8 @@ import { prisma } from '@/server/lib/prisma'
  */
 export async function getRooms() {
     const rooms = await prisma.room.findMany({
-        orderBy: { createdAt: 'desc' }
+        include: { users: true },
+        orderBy: { createdAt: 'desc' },
     })
     return rooms
 }

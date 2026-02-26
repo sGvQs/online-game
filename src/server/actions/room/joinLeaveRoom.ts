@@ -11,6 +11,16 @@ import { getAuthenticatedUser } from '../_helpers/getAuthenticatedUser'
 export async function joinRoom(roomId: string) {
     const user = await getAuthenticatedUser()
 
+    const room = await prisma.room.findUnique({ where: { id: roomId } })
+    if (!room) {
+        revalidatePath('/dashboard')
+        redirect('/dashboard')
+    }
+    if (room.status === 'PLAYING') {
+        revalidatePath('/dashboard')
+        redirect('/dashboard?error=game_in_progress')
+    }
+
     const existingMembership = await prisma.roomUser.findFirst({
         where: {
             roomId,

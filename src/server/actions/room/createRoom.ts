@@ -17,12 +17,7 @@ export async function createRoom(formData: FormData) {
         data: {
             name,
             createdBy: user.id,
-            users: {
-                create: {
-                    userId: user.id
-                }
-            }
-        }
+        },
     })
 
     revalidatePath('/dashboard')
