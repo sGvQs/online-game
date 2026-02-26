@@ -33,7 +33,7 @@ export default async function RoomPage({ params }: { params: { id: string } }) {
     }
 
     // 参加者の月間ランキングを取得
-    const userIds = room.users.map((u) => u.userId)
+    const userIds = room.users.map((u: RoomUserWithReadyStatus) => u.userId)
     const initialRankings = await getNullHandRankings(userIds)
 
     return (
@@ -76,6 +76,7 @@ export default async function RoomPage({ params }: { params: { id: string } }) {
                     initialMembers={room.users}
                     initialRankings={initialRankings}
                     isHost={isHost}
+                    currentUserId={currentUser.user.id}
                 />
             </div>
         </div>
