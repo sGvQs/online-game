@@ -41,11 +41,13 @@ export const roomCard = tv({
 export const emptyState = tv({
     slots: {
         wrapper: [
-            'col-span-full py-24 text-center rounded-2xl backdrop-blur-sm',
+            'col-span-full py-24 rounded-2xl backdrop-blur-sm',
             'border border-dashed border-brand-200 dark:border-brand-800/30',
+            'flex flex-col items-center',
+            'bg-brand-100/50 dark:bg-brand-50/30',
         ],
-        icon: 'text-6xl mb-6 opacity-80 animate-bounce',
-        title: 'text-xl font-bold text-brand-400 mb-2',
-        description: 'text-brand-600 dark:text-brand-300 max-w-md mx-auto',
+        icon: 'mb-6 opacity-90 w-full flex justify-center [&_img]:mx-auto',
+        title: 'text-xl font-bold mb-2 w-full text-center',
+        description: 'max-w-md w-full text-center',
     },
 })

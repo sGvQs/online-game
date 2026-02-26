@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Zen_Maru_Gothic, DotGothic16, Kaisei_Opti, Yusei_Magic, Honk, Coral_Pixels, Sixtyfour_Convergence, Bitcount_Grid_Double_Ink } from "next/font/google";
+import { Geist, Geist_Mono, Zen_Maru_Gothic, DotGothic16, Kaisei_Opti, Yusei_Magic, Honk, Coral_Pixels, Sixtyfour_Convergence, Bitcount_Grid_Double_Ink, Rubik_Puddles, Cherry_Bomb_One } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/lib/theme-context";
 import BGMPlayer from "@/components/ui/BGMPlayer";
@@ -81,6 +81,22 @@ const bitcountGridDoubleInk = Bitcount_Grid_Double_Ink({
   fallback: ["sans-serif"],
 });
 
+const rubikPuddles = Rubik_Puddles({
+  variable: "--font-rubik-puddles",
+  subsets: ["latin"],
+  weight: "400",
+  display: "swap",
+  fallback: ["sans-serif"],
+});
+
+const cherryBombOne = Cherry_Bomb_One({
+  variable: "--font-cherry-bomb-one",
+  subsets: ["latin"],
+  weight: "400",
+  display: "swap",
+  fallback: ["sans-serif"],
+});
+
 export const metadata: Metadata = {
   title: "Pukapuka Space | ぷかぷか宇宙",
   description: "さあ、人生の大事な時間を、無駄にする準備はできた？ —— 名もなき恐竜より",
@@ -94,7 +110,7 @@ export default function RootLayout({
   return (
     <html lang="ja" suppressHydrationWarning>
       <body
-        className={`${dotGothic16.variable} ${yuseiMagic.variable} ${kaiseiOpti.variable} ${zenMaruGothic.variable} ${geistSans.variable} ${geistMono.variable} ${honk.variable} ${coralPixels.variable} ${sixtyfourConvergence.variable} ${bitcountGridDoubleInk.variable} antialiased`}
+        className={`${dotGothic16.variable} ${yuseiMagic.variable} ${kaiseiOpti.variable} ${zenMaruGothic.variable} ${geistSans.variable} ${geistMono.variable} ${honk.variable} ${coralPixels.variable} ${sixtyfourConvergence.variable} ${bitcountGridDoubleInk.variable} ${rubikPuddles.variable} ${cherryBombOne.variable} antialiased`}
         suppressHydrationWarning
       >
         <SoundProvider>
