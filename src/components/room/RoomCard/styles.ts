@@ -30,7 +30,7 @@ export const roomCard = tv({
             'flex justify-between items-center pt-4 border-t border-brand-100/50 dark:border-brand-700/20',
         ],
         joinButton: [
-            'bg-brand-600 dark:bg-brand-300 hover:bg-brand-400 text-white',
+            '!bg-brand-400 hover:!bg-brand-500 text-white',
             'shadow-md hover:shadow-brand-500/25 transition-all duration-200',
             'rounded-full px-4 h-8 text-xs font-semibold tracking-wide uppercase gap-1.5',
         ],
