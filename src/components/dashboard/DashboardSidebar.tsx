@@ -1,14 +1,25 @@
 'use client'
 
 import { useState } from 'react'
+import { createPortal } from 'react-dom'
 import { PackagePlus, X, Check, Plus } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { IconButton } from '@/components/ui/IconButton'
 import { Input } from '@/components/ui/Input'
 import { createRoom } from '@/server/actions/room'
+import { AnnoyingDinosaurComplaint } from './AnnoyingDinosaurComplaint'
+
+const CREATE_ROOM_MESSAGE =
+  'ルーム名を入れて作成ボタンを押すだけでOK！友達を招待してゲームを始めよう！'
 
 export function DashboardSidebar() {
   const [roomFormOpen, setRoomFormOpen] = useState(false)
+  const [dinosaurKey, setDinosaurKey] = useState(0)
+
+  const handleRoomFormOpen = () => {
+    setRoomFormOpen(true)
+    setDinosaurKey((k) => k + 1)
+  }
 
   return (
     <div className="glass-card p-6 rounded-2xl">
@@ -18,7 +29,7 @@ export function DashboardSidebar() {
       </h2>
       {!roomFormOpen ? (
         <Button
-          onClick={() => setRoomFormOpen(true)}
+          onClick={handleRoomFormOpen}
           className="w-full bg-brand-300 hover:bg-brand-400 text-white shadow-md hover:shadow-lg transition-all duration-300 gap-2"
         >
           <Plus className="w-5 h-5" />
@@ -27,6 +38,16 @@ export function DashboardSidebar() {
       ) : (
         <CreateRoomFormContent onClose={() => setRoomFormOpen(false)} />
       )}
+      {roomFormOpen &&
+        typeof document !== 'undefined' &&
+        createPortal(
+          <AnnoyingDinosaurComplaint
+            key={dinosaurKey}
+            message={CREATE_ROOM_MESSAGE}
+            onComplete={() => {}}
+          />,
+          document.body
+        )}
     </div>
   )
 }
@@ -64,11 +85,6 @@ function CreateRoomFormContent({ onClose }: { onClose: () => void }) {
           />
         </div>
       </form>
-      <div className="mt-6 pt-6 border-t border-brand-100">
-        <p className="text-xs text-brand-900 leading-relaxed">
-          新しいルームを作成して、友達とゲームを始めましょう。
-        </p>
-      </div>
     </div>
   )
 }

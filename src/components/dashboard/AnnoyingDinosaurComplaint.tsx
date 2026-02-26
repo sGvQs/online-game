@@ -12,13 +12,16 @@ const EXIT_DURATION = 3
 /**
  * ダッシュボード用：ルーム削除の文句を言いにくるAnnoyingDinosaur
  * 下から出てきて1つの文句を言い、退場する
+ * position: 'bottom' = 画面下中央, 'center' = 画面中央
  */
 export function AnnoyingDinosaurComplaint({
     message,
     onComplete,
+    position = 'bottom',
 }: {
     message: string
     onComplete: () => void
+    position?: 'bottom' | 'center'
 }) {
     const { play } = useSE()
     const [phase, setPhase] = useState<'entering' | 'idle' | 'exiting'>('entering')
@@ -66,17 +69,22 @@ export function AnnoyingDinosaurComplaint({
         return () => clearTimeout(t)
     }, [phase, onComplete])
 
+    const isCenter = position === 'center'
+    const initialY = '100%'
+    const idleY = isCenter ? '-50%' : 0
+    const exitY = '100%'
+
     return (
         <motion.div
-            className="fixed bottom-0 left-1/2 z-0 flex items-end pointer-events-none"
+            className={`fixed left-1/2 z-0 flex items-end pointer-events-none ${isCenter ? 'top-1/2' : 'bottom-0'}`}
             style={{ width: 'min(460px, 90vw)' }}
-            initial={{ x: '-50%', y: '100%' }}
+            initial={{ x: '-50%', y: initialY }}
             animate={
                 phase === 'entering'
-                    ? { x: '-50%', y: 0 }
+                    ? { x: '-50%', y: idleY }
                     : phase === 'exiting'
-                      ? { x: '-50%', y: '100%' }
-                      : { x: '-50%', y: 0 }
+                      ? { x: '-50%', y: exitY }
+                      : { x: '-50%', y: idleY }
             }
             transition={{
                 duration: phase === 'exiting' ? EXIT_DURATION : ENTER_DURATION,
