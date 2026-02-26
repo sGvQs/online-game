@@ -40,4 +40,5 @@ export {
     getMatchWithEvents,
     finishGame,
     getMonthlyRanking,
+    getTopRankings,
 } from './game'

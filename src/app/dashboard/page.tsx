@@ -6,6 +6,7 @@ import {
     cleanupAbandonedRooms,
     getUnreadRoomDeletedNotifications,
     getMonthlyRanking,
+    getTopRankings,
 } from '@/server/actions'
 import { RoomList } from '@/components/room/RoomList'
 import { DashboardSidebar } from '@/components/dashboard/DashboardSidebar'
@@ -16,6 +17,7 @@ import Image from 'next/image'
 import { DEFAULT_FACE_ICON, FACE_ICON_PATHS, FaceIcon } from '@/shared/constants/faceIcon'
 import { DashboardHeaderTitle } from '@/components/dashboard/DashboardHeaderTitle'
 import { DashboardComplaintWrapper } from '@/components/dashboard/DashboardComplaintWrapper'
+import { RankingCard } from '@/components/dashboard/RankingCard'
 
 export default async function DashboardPage() {
     const supabase = await createClient()
@@ -30,10 +32,11 @@ export default async function DashboardPage() {
     const dashboardUser = await getDashboardUser()
     if (!dashboardUser) return <div>User not found in DB</div>
 
-    const [rooms, roomDeletedNotifications, monthlyRanking] = await Promise.all([
+    const [rooms, roomDeletedNotifications, monthlyRanking, topRankings] = await Promise.all([
         getRooms(),
         getUnreadRoomDeletedNotifications(),
         getMonthlyRanking(dashboardUser.user.id),
+        getTopRankings(10),
     ])
     const initialFaceIcon: FaceIcon =
         (dashboardUser.user as { faceIcon?: FaceIcon }).faceIcon ?? DEFAULT_FACE_ICON
@@ -80,10 +83,16 @@ export default async function DashboardPage() {
                 {/* Main Content Area */}
                 <main className="grid grid-cols-1 lg:grid-cols-4 gap-8">
                     {/* Sidebar / Actions */}
-                    <DashboardSidebar
-                        initialComment={dashboardUser.user.comment}
-                        initialFaceIcon={initialFaceIcon}
-                    />
+                    <div className="lg:col-span-1 space-y-6">
+                        <RankingCard
+                            rankings={topRankings}
+                            currentUserId={dashboardUser.user.id}
+                        />
+                        <DashboardSidebar
+                            initialComment={dashboardUser.user.comment}
+                            initialFaceIcon={initialFaceIcon}
+                        />
+                    </div>
 
                     {/* Room List */}
                     <section className="lg:col-span-3">
