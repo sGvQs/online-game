@@ -13,9 +13,9 @@ import { DashboardSidebar } from '@/components/dashboard/DashboardSidebar'
 import { LogoutButton } from '@/components/auth/LogoutButton'
 import { SetLoginFlag } from '@/components/auth/SetLoginFlag'
 import { Boxes } from 'lucide-react'
-import Image from 'next/image'
-import { DEFAULT_FACE_ICON, FACE_ICON_PATHS, FaceIcon } from '@/shared/constants/faceIcon'
+import { DEFAULT_FACE_ICON, FaceIcon } from '@/shared/constants/faceIcon'
 import { DashboardHeaderTitle } from '@/components/dashboard/DashboardHeaderTitle'
+import { DashboardHeaderProfile } from '@/components/dashboard/DashboardHeaderProfile'
 import { DashboardComplaintWrapper } from '@/components/dashboard/DashboardComplaintWrapper'
 import { RankingCard } from '@/components/dashboard/RankingCard'
 
@@ -70,22 +70,13 @@ export default async function DashboardPage({
                         </p>
                     </div>
                     <div className="flex gap-4 items-center">
-                        <div className="flex items-center gap-3 bg-white/10 px-4 py-2 rounded-full text-sm font-medium text-foreground shadow-sm border border-brand-200/30">
-                            <Image
-                                src={FACE_ICON_PATHS[initialFaceIcon]}
-                                alt=""
-                                width={24}
-                                height={24}
-                                className="shrink-0 rounded-full object-contain"
-                            />
-                            <span>{dashboardUser.user.name}</span>
-                            <span className="opacity-70">
-                                {monthlyRanking?.rank ? `${monthlyRanking.rank}位` : '圏外'}
-                            </span>
-                            <span className="opacity-70">
-                                {monthlyRanking?.totalPoints ?? 0}pt
-                            </span>
-                        </div>
+                        <DashboardHeaderProfile
+                            name={dashboardUser.user.name}
+                            comment={dashboardUser.user.comment}
+                            faceIcon={initialFaceIcon}
+                            rank={monthlyRanking?.rank ?? null}
+                            totalPoints={monthlyRanking?.totalPoints ?? 0}
+                        />
                         <LogoutButton />
                     </div>
                 </header>
