@@ -25,6 +25,8 @@ export {
     startNextTurn,
     finishJanken,
     markNextRoundReady,
+    getMonthlyRanking,
 } from './nullHandActions'
+export { getTopRankings } from './rankingActions'
 
 

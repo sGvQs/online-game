@@ -4,6 +4,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/lib/theme-context";
 import BGMPlayer from "@/components/ui/BGMPlayer";
 import { SoundProvider } from "@/lib/sound-context";
+import { DebugComplaintKeyListener } from "@/components/dashboard/DebugComplaintKeyListener";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -98,6 +99,7 @@ export default function RootLayout({
       >
         <SoundProvider>
           <ThemeProvider>
+            <DebugComplaintKeyListener />
             {children}
             <BGMPlayer />
           </ThemeProvider>

@@ -1,11 +1,13 @@
-import { Room } from '@/shared/types'
+import type { Room, RoomUser } from '@/shared/types'
 import { Button } from '@/components/ui/Button'
 import { IconButton } from '@/components/ui/IconButton'
-import { Trash2, Play } from 'lucide-react'
+import { Trash2, Play, Users } from 'lucide-react'
 import { roomCard, emptyState } from './styles'
 
+export type RoomWithUsers = Room & { users: RoomUser[] }
+
 interface RoomCardProps {
-    room: Room
+    room: RoomWithUsers
     isOwner: boolean
     onJoin: () => void
     onDelete: () => void
@@ -19,42 +21,56 @@ const emptyStyles = emptyState()
  * ロジックは持たず、Propsを受け取って表示するだけ
  */
 export function RoomCard({ room, isOwner, onJoin, onDelete }: RoomCardProps) {
+    const isPlaying = room.status === 'PLAYING'
+    const participantCount = room.users?.length ?? 0
+
     return (
         <div className={styles.wrapper()}>
-            {/* Glow effect on hover */}
             <div className={styles.glowOverlay()} />
 
-            <div className={styles.header()}>
-                <h3 className={styles.title()}>
-                    {room.name}
-                </h3>
-                <div className={styles.dateWrapper()}>
-                    <span className={styles.dateBadge()}>
-                        {new Date(room.createdAt).toLocaleDateString('ja-JP')}
+            <div className={styles.main()}>
+                <h3 className={styles.title()}>{room.name}</h3>
+                <div className={styles.meta()}>
+                    <span
+                        className={`${styles.statusBadge()} ${
+                            isPlaying ? styles.statusPlaying() : styles.statusLobby()
+                        }`}
+                    >
+                        {isPlaying ? 'ゲーム中' : '待機中'}
+                    </span>
+                    <span className="flex items-center gap-0.5">
+                        <Users className="w-3 h-3" />
+                        {participantCount}人
                     </span>
                 </div>
             </div>
 
-            <div className={styles.footer()}>
-                <div className={styles.actions()}>
-                    {isOwner && (
-                        <form action={onDelete}>
-                            <IconButton
-                                type="submit"
-                                variant="danger"
-                                size="sm"
-                                icon={<Trash2 className="w-4 h-4" />}
-                                tooltip="削除"
-                            />
-                        </form>
-                    )}
-                    <form action={onJoin}>
-                        <Button size="sm" className={styles.joinButton()}>
-                            <Play className="w-3.5 h-3.5 fill-current" />
-                            参加
-                        </Button>
+            <div className={styles.actions()}>
+                {isOwner ? (
+                    <form action={onDelete}>
+                        <IconButton
+                            type="submit"
+                            variant="danger"
+                            size="sm"
+                            icon={<Trash2 className="w-4 h-4" />}
+                            tooltip="削除"
+                        />
                     </form>
-                </div>
+                ) : (
+                    <div />
+                )}
+                <form action={onJoin}>
+                    <Button
+                        type="submit"
+                        size="sm"
+                        disabled={isPlaying}
+                        title={isPlaying ? 'ゲーム中は参加できません' : undefined}
+                        className={`${styles.joinButton()} ${isPlaying ? styles.joinButtonDisabled() : ''}`}
+                    >
+                        <Play className="w-3 h-3 fill-current" />
+                        参加
+                    </Button>
+                </form>
             </div>
         </div>
     )

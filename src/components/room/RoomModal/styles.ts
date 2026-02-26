@@ -9,12 +9,12 @@ export const roomModal = tv({
     overlay: [
       'fixed inset-0',
       'bg-black/70',
-      'flex items-center justify-center',
-      'z-50',
+      'flex items-center justify-center p-4',
+      'z-[9999]',
       'animate-[fadeIn_0.2s_ease-out]',
     ],
     content: [
-      'w-[60vw] h-[60vh]',
+      'w-[min(60vw,600px)] h-[60vh] max-h-[calc(100vh-2rem)]',
       'bg-slate-800/95',
       'border border-solid border-[var(--brand-500)]',
       'rounded-2xl',

@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { roomModal } from './styles'
 
 interface RoomModalProps {
@@ -55,7 +56,7 @@ export function RoomModal({
 
     if (!isOpen) return null
 
-    return (
+    const modalContent = (
         <div className={styles.overlay()} onClick={onClose}>
             <div 
                 className={styles.content()} 
@@ -82,4 +83,8 @@ export function RoomModal({
             </div>
         </div>
     )
+
+    return typeof document !== 'undefined'
+        ? createPortal(modalContent, document.body)
+        : modalContent
 }

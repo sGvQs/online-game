@@ -2,6 +2,7 @@
 
 import { prisma } from '@/server/lib/prisma'
 import { createClient } from '@/server/lib/supabase/server'
+import { revalidatePath } from 'next/cache'
 
 /**
  * ダッシュボード用ユーザー情報取得
@@ -44,6 +45,7 @@ export async function updateName(newName: string) {
 
     await prisma.user.update({
         where: { id: idp.userId },
-        data: { name: newName }
+        data: { name: newName },
     })
+    revalidatePath('/dashboard')
 }

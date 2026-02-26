@@ -12,39 +12,58 @@ const EXIT_DURATION = 3
 /**
  * ダッシュボード用：ルーム削除の文句を言いにくるAnnoyingDinosaur
  * 下から出てきて1つの文句を言い、退場する
+ * position: 'bottom' = 画面下中央, 'center' = 画面中央
+ * typingMode: true のとき、吹き出しに message を表示しつつ textToType を onTypeIntoInput で一文字ずつ渡す
  */
 export function AnnoyingDinosaurComplaint({
     message,
     onComplete,
+    position = 'bottom',
+    triggerExit = false,
+    typingMode = false,
+    textToType,
+    onTypeIntoInput,
 }: {
     message: string
     onComplete: () => void
+    position?: 'bottom' | 'center'
+    /**  true で退場アニメーション（喋りながら下へフェードアウト）を開始 */
+    triggerExit?: boolean
+    typingMode?: boolean
+    textToType?: string
+    onTypeIntoInput?: (text: string) => void
 }) {
     const { play } = useSE()
     const [phase, setPhase] = useState<'entering' | 'idle' | 'exiting'>('entering')
     const [displayedText, setDisplayedText] = useState('')
 
     useEffect(() => {
+        // idle のときのみタイピング・音声を実行。exiting では停止（キャンセル時も音が出ないように）
         if (phase !== 'idle') return
 
         /** 音を出さない文字（句読点・記号など） */
         const isSilentChar = (c: string) => /^[。、．，….\s「」『』（）]$/.test(c)
 
-        let charIndex = 0
+        let speechIndex = displayedText.length
         const typeInterval = setInterval(() => {
-            if (charIndex < message.length) {
-                const nextChar = message[charIndex]
+            if (speechIndex < message.length) {
+                const nextChar = message[speechIndex]
                 if (nextChar && !isSilentChar(nextChar)) {
                     play('dinosaur')
                 }
-                setDisplayedText(message.slice(0, charIndex + 1))
-                charIndex++
-            } else {
-                clearInterval(typeInterval)
+                setDisplayedText(message.slice(0, speechIndex + 1))
+                speechIndex++
+            }
+            if (typingMode && textToType && onTypeIntoInput) {
+                const newText = textToType.slice(
+                    0,
+                    Math.min(speechIndex, textToType.length)
+                )
+                onTypeIntoInput(newText)
             }
         }, 150)
         return () => clearInterval(typeInterval)
-    }, [phase, message, play])
+    }, [phase, message, play, typingMode, textToType, onTypeIntoInput])
 
     useEffect(() => {
         if (phase !== 'entering') return
@@ -59,6 +78,12 @@ export function AnnoyingDinosaurComplaint({
     }, [phase])
 
     useEffect(() => {
+        if (triggerExit && (phase === 'entering' || phase === 'idle')) {
+            setPhase('exiting')
+        }
+    }, [triggerExit, phase])
+
+    useEffect(() => {
         if (phase !== 'exiting') return
         const t = setTimeout(() => {
             onComplete()
@@ -66,17 +91,22 @@ export function AnnoyingDinosaurComplaint({
         return () => clearTimeout(t)
     }, [phase, onComplete])
 
+    const isCenter = position === 'center'
+    const initialY = '100%'
+    const idleY = isCenter ? '-50%' : 0
+    const exitY = '100%'
+
     return (
         <motion.div
-            className="fixed bottom-0 left-1/2 z-0 flex items-end pointer-events-none"
+            className={`fixed left-1/2 z-0 flex items-end pointer-events-none ${isCenter ? 'top-1/2' : 'bottom-0'}`}
             style={{ width: 'min(460px, 90vw)' }}
-            initial={{ x: '-50%', y: '100%' }}
+            initial={{ x: '-50%', y: initialY }}
             animate={
                 phase === 'entering'
-                    ? { x: '-50%', y: 0 }
+                    ? { x: '-50%', y: idleY }
                     : phase === 'exiting'
-                      ? { x: '-50%', y: '100%' }
-                      : { x: '-50%', y: 0 }
+                      ? { x: '-50%', y: exitY }
+                      : { x: '-50%', y: idleY }
             }
             transition={{
                 duration: phase === 'exiting' ? EXIT_DURATION : ENTER_DURATION,
@@ -101,7 +131,7 @@ export function AnnoyingDinosaurComplaint({
                         transition={{ duration: 0.4, delay: 0.2 }}
                     >
                         <div className="relative px-2.5 py-1.5 rounded-xl border border-brand-200/20 bg-brand-300 text-white text-[10px] font-medium shadow-sm">
-                            <span className="font-mono tracking-wide">{displayedText}</span>
+                            <span className="font-(--font-dot-gothic-16) tracking-wide">{displayedText}</span>
                             <div
                                 className="absolute -left-1.5 top-1/2 -translate-y-1/2 w-0 h-0 border-t-4 border-t-transparent border-b-4 border-b-transparent border-r-[6px] border-r-brand-300"
                                 aria-hidden
