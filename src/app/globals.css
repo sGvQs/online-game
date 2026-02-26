@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+html {
+  background: #020617;
+}
+
 :root {
   /* Space Theme - Default */
   --background: #020617;
