@@ -5,6 +5,7 @@ import {
     getRooms,
     cleanupAbandonedRooms,
     getUnreadRoomDeletedNotifications,
+    getMonthlyRanking,
 } from '@/server/actions'
 import { RoomList } from '@/components/room/RoomList'
 import { DashboardSidebar } from '@/components/dashboard/DashboardSidebar'
@@ -29,8 +30,11 @@ export default async function DashboardPage() {
     const dashboardUser = await getDashboardUser()
     if (!dashboardUser) return <div>User not found in DB</div>
 
-    const rooms = await getRooms()
-    const roomDeletedNotifications = await getUnreadRoomDeletedNotifications()
+    const [rooms, roomDeletedNotifications, monthlyRanking] = await Promise.all([
+        getRooms(),
+        getUnreadRoomDeletedNotifications(),
+        getMonthlyRanking(dashboardUser.user.id),
+    ])
     const initialFaceIcon: FaceIcon =
         (dashboardUser.user as { faceIcon?: FaceIcon }).faceIcon ?? DEFAULT_FACE_ICON
 
@@ -53,7 +57,7 @@ export default async function DashboardPage() {
                         </p>
                     </div>
                     <div className="flex gap-4 items-center">
-                        <div className="flex items-center gap-2 bg-white/10 px-4 py-2 rounded-full text-sm font-medium text-foreground shadow-sm border border-brand-200/30">
+                        <div className="flex items-center gap-3 bg-white/10 px-4 py-2 rounded-full text-sm font-medium text-foreground shadow-sm border border-brand-200/30">
                             <Image
                                 src={FACE_ICON_PATHS[initialFaceIcon]}
                                 alt=""
@@ -61,7 +65,13 @@ export default async function DashboardPage() {
                                 height={24}
                                 className="shrink-0 rounded-full object-contain"
                             />
-                            {dashboardUser.email}
+                            <span>{dashboardUser.user.name}</span>
+                            <span className="opacity-70">
+                                {monthlyRanking?.rank ? `${monthlyRanking.rank}位` : '圏外'}
+                            </span>
+                            <span className="opacity-70">
+                                {monthlyRanking?.totalPoints ?? 0}pt
+                            </span>
                         </div>
                         <LogoutButton />
                     </div>

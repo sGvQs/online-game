@@ -39,4 +39,5 @@ export {
     clickError,
     getMatchWithEvents,
     finishGame,
+    getMonthlyRanking,
 } from './game'
