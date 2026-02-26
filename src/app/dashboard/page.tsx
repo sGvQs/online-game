@@ -83,21 +83,17 @@ export default async function DashboardPage({
 
                 {/* Main Content Area */}
                 <main className="flex flex-col lg:flex-row gap-6">
-                    {/* 左: コンパクトなランキング */}
-                    <RankingCard
-                        rankings={topRankings}
-                        currentUserId={dashboardUser.user.id}
-                    />
-
-                    {/* 右: 既存のサイドバー + ルーム一覧 */}
-                    <div className="flex-1 min-w-0 grid grid-cols-1 xl:grid-cols-3 gap-8">
-                        <DashboardSidebar
-                            initialComment={dashboardUser.user.comment}
-                            initialFaceIcon={initialFaceIcon}
+                    {/* 左: 順位（上） + ルーム作成（下）縦並び */}
+                    <div className="flex flex-col gap-6 lg:w-[220px] shrink-0">
+                        <RankingCard
+                            rankings={topRankings}
+                            currentUserId={dashboardUser.user.id}
                         />
+                        <DashboardSidebar />
+                    </div>
 
-                        {/* Room List */}
-                        <section className="xl:col-span-2">
+                    {/* 右: ルーム一覧 */}
+                    <section className="flex-1 min-w-0">
                         <div className="flex items-center justify-between mb-3">
                             <h2 className="text-1xl font-bold text-brand-800 flex items-center gap-2">
                                 <Boxes className="w-4 h-4" />
@@ -108,8 +104,7 @@ export default async function DashboardPage({
                             </span>
                         </div>
                         <RoomList initialRooms={rooms} userId={dashboardUser.user.id} />
-                        </section>
-                    </div>
+                    </section>
                 </main>
             </div>
         </div>
