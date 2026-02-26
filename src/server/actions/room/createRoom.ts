@@ -7,8 +7,11 @@ import { getAuthenticatedUser } from '../_helpers/getAuthenticatedUser'
 /**
  * 新しいルームを作成
  */
+const ROOM_NAME_MAX_LENGTH = 10
+
 export async function createRoom(formData: FormData) {
-    const name = formData.get('name') as string
+    const rawName = formData.get('name') as string
+    const name = rawName?.trim().slice(0, ROOM_NAME_MAX_LENGTH)
     if (!name) return
 
     const user = await getAuthenticatedUser()

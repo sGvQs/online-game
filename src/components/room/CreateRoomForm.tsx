@@ -34,8 +34,9 @@ export function CreateRoomForm() {
             }} className="flex flex-col gap-3">
                 <Input
                     name="name"
-                    placeholder="ルーム名を入力..."
+                    placeholder="ルーム名を入力...（10文字以内）"
                     required
+                    maxLength={10}
                     className="w-full bg-white/50 dark:bg-slate-900/50 border-brand-200 dark:border-brand-700 focus:border-brand-500 focus:ring-brand-500/20 dark:text-white placeholder:text-brand-400/50"
                     autoFocus
                 />
