@@ -82,8 +82,8 @@ const bitcountGridDoubleInk = Bitcount_Grid_Double_Ink({
 });
 
 export const metadata: Metadata = {
-  title: "Zero G Games | Station Code 404: やる気が見つかりません。",
-  description: "さあ、人生の大事な時間を、無駄にする準備はできた？",
+  title: "Pukapuka Space | ぷかぷか宇宙",
+  description: "さあ、人生の大事な時間を、無駄にする準備はできた？ —— 名もなき恐竜より",
 };
 
 export default function RootLayout({
