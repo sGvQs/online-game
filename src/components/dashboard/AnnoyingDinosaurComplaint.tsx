@@ -101,7 +101,7 @@ export function AnnoyingDinosaurComplaint({
                         transition={{ duration: 0.4, delay: 0.2 }}
                     >
                         <div className="relative px-2.5 py-1.5 rounded-xl border border-brand-200/20 bg-brand-300 text-white text-[10px] font-medium shadow-sm">
-                            <span className="font-mono tracking-wide">{displayedText}</span>
+                            <span className="font-(--font-dot-gothic-16) tracking-wide">{displayedText}</span>
                             <div
                                 className="absolute -left-1.5 top-1/2 -translate-y-1/2 w-0 h-0 border-t-4 border-t-transparent border-b-4 border-b-transparent border-r-[6px] border-r-brand-300"
                                 aria-hidden
