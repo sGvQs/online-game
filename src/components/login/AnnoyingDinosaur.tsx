@@ -75,10 +75,10 @@ const DIALOGUE_MESSAGES_RETURNING = [
 ]
 
 const ENTER_DURATION = 3
-const IDLE_DURATION = 20
+const IDLE_DURATION = 10
 /** なんちゃってパターン時の待機時間（秒） */
 const IDLE_DURATION_AFTERMATH = 10
-const EXIT_DURATION = 3
+const EXIT_DURATION = 5
 /** 2回目以降向け：退場後、再登場までの待機時間（秒） */
 const VISIT_1_PLUS_REAPPEAR_DELAY_SEC = 10
 /** 一文字表示の間隔（ms）喋るスピード感 */
@@ -489,10 +489,10 @@ export function AnnoyingDinosaur() {
                 </div>
 
                 {/* 中央から登場時：吹き出しスペースを事前に確保してレイアウトシフトを防ぐ */}
-                {isFromBottom && phase !== 'idle' && <div className="min-w-[400px] shrink-0" aria-hidden />}
+                {isFromBottom && phase === 'entering' && <div className="min-w-[400px] shrink-0" aria-hidden />}
 
                 {/* チャット風吹き出し：SVGと被らないよう右側に配置、しっぽは口方向へ */}
-                {phase === 'idle' && (
+                {phase !== 'entering' && (
                     <motion.div
                         className={`shrink-0 mt-2 ${isFromBottom ? 'w-[400px] min-w-[400px]' : 'min-w-[80px] max-w-[400px]'}`}
                         initial={{ opacity: 0, scale: 0.9 }}
