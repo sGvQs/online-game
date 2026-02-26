@@ -45,14 +45,14 @@ export function RoomList({ initialRooms, userId }: { initialRooms: RoomWithUsers
 
     if (rooms.length === 0) {
         return (
-            <div className="grid gap-6 grid-cols-1">
-                <RoomListEmptyState />
-            </div>
+        <div className="grid gap-6 grid-cols-1 md:grid-cols-2">
+            <RoomListEmptyState />
+        </div>
         )
     }
 
     return (
-        <div className="grid gap-2 grid-cols-1">
+        <div className="grid gap-6 grid-cols-1 md:grid-cols-2">
             {rooms.map((room) => (
                 <RoomCard
                     key={room.id}

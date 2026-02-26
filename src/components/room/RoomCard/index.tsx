@@ -46,7 +46,7 @@ export function RoomCard({ room, isOwner, onJoin, onDelete }: RoomCardProps) {
             </div>
 
             <div className={styles.actions()}>
-                {isOwner && (
+                {isOwner ? (
                     <form action={onDelete}>
                         <IconButton
                             type="submit"
@@ -56,6 +56,8 @@ export function RoomCard({ room, isOwner, onJoin, onDelete }: RoomCardProps) {
                             tooltip="削除"
                         />
                     </form>
+                ) : (
+                    <div />
                 )}
                 <form action={onJoin}>
                     <Button

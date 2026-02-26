@@ -7,7 +7,7 @@ import { tv } from 'tailwind-variants'
 export const roomCard = tv({
     slots: {
         wrapper: [
-            'glass-card rounded-lg px-4 py-3 flex items-center justify-between gap-3 group relative overflow-hidden',
+            'glass-card rounded-xl p-5 flex flex-col justify-between group h-full relative overflow-hidden',
             'border-t-2 border-t-brand-500/50 hover:border-t-brand-400',
             'transition-all duration-300',
         ],
@@ -15,22 +15,24 @@ export const roomCard = tv({
             'absolute inset-0 bg-brand-500/5 opacity-0',
             'group-hover:opacity-100 transition-opacity duration-300 pointer-events-none',
         ],
-        main: 'flex-1 min-w-0 flex flex-col gap-0.5',
+        main: 'flex-1 min-w-0 flex flex-col gap-2 mb-4',
         title: [
-            'text-sm font-bold text-brand-900 dark:text-brand-800 truncate',
+            'text-lg font-bold text-brand-900 dark:text-brand-800',
             'transition-colors group-hover:text-glow',
         ],
-        meta: 'flex items-center gap-2 text-xs text-brand-600 dark:text-brand-400',
+        meta: 'flex items-center gap-2 text-sm text-brand-600 dark:text-brand-400',
         statusBadge: [
-            'px-1.5 py-0.5 rounded text-[10px] font-medium',
+            'px-2 py-1 rounded-md text-xs font-medium',
         ],
         statusLobby: 'bg-brand-100 dark:bg-brand-900/30 text-brand-700 dark:text-brand-300',
         statusPlaying: 'bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300',
-        actions: 'flex gap-2 items-center shrink-0',
+        actions: [
+            'flex justify-between items-center pt-4 border-t border-brand-100/50 dark:border-brand-700/20',
+        ],
         joinButton: [
             'bg-brand-600 dark:bg-brand-300 hover:bg-brand-400 text-white',
             'shadow-md hover:shadow-brand-500/25 transition-all duration-200',
-            'rounded-full px-3 h-7 text-[10px] font-semibold tracking-wide uppercase gap-1',
+            'rounded-full px-4 h-8 text-xs font-semibold tracking-wide uppercase gap-1.5',
         ],
         joinButtonDisabled: 'opacity-50 cursor-not-allowed',
     },
