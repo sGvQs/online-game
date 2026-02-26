@@ -155,7 +155,7 @@ function ProfileEditForm({
                     placeholder="表示名を入力..."
                     maxLength={NAME_MAX_LENGTH}
                     disabled={isPending}
-                    className="w-full bg-white/50 dark:bg-slate-900/50 border-brand-200 dark:border-brand-700 focus:border-brand-500 focus:ring-brand-500/20 dark:text-white placeholder:text-brand-400/50"
+                    className="input-dark w-full border-brand-200 focus:border-brand-500 focus:ring-brand-500/20 focus:ring-2"
                 />
                 <p className="text-xs text-brand-500 opacity-90 mt-1">
                     {name.length} / {NAME_MAX_LENGTH}文字
@@ -205,7 +205,7 @@ function ProfileEditForm({
                     placeholder="ゲーム終了後に勝ったら表示されるコメントを入力..."
                     maxLength={COMMENT_MAX_LENGTH}
                     disabled={isPending}
-                    className="w-full bg-white/50 dark:bg-slate-900/50 border-brand-200 dark:border-brand-700 focus:border-brand-500 focus:ring-brand-500/20 dark:text-white placeholder:text-brand-400/50"
+                    className="input-dark w-full border-brand-200 focus:border-brand-500 focus:ring-brand-500/20 focus:ring-2"
                 />
                 <p className="text-xs text-brand-500 opacity-90 mt-1">
                     {comment.length} / {COMMENT_MAX_LENGTH}文字
