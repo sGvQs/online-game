@@ -21,7 +21,7 @@ export default async function RankingPage() {
                 <header className="glass-card flex justify-between items-center p-6 rounded-2xl shadow-sm">
                     <h1 className="text-2xl font-bold text-brand-900 flex items-center gap-2">
                         <Trophy className="w-6 h-6" />
-                        月間ランキング
+                        ランキング
                     </h1>
                     <Link
                         href="/dashboard"

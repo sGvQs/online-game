@@ -12,7 +12,7 @@ export function RankingCard({ rankings, currentUserId }: RankingCardProps) {
         <div className="glass-card p-5 rounded-2xl shrink-0 w-full self-start">
             <h2 className="text-lg font-bold mb-4 text-brand-900 flex items-center gap-2">
                 <Trophy className="w-5 h-5" />
-                月間
+                ランキング
             </h2>
             <ul className="space-y-1.5 mb-4 max-h-[280px] overflow-y-auto">
                 {rankings.map((r) => (
