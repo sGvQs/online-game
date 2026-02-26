@@ -13,18 +13,25 @@ const EXIT_DURATION = 3
  * ダッシュボード用：ルーム削除の文句を言いにくるAnnoyingDinosaur
  * 下から出てきて1つの文句を言い、退場する
  * position: 'bottom' = 画面下中央, 'center' = 画面中央
+ * typingMode: true のとき、吹き出しに message を表示しつつ textToType を onTypeIntoInput で一文字ずつ渡す
  */
 export function AnnoyingDinosaurComplaint({
     message,
     onComplete,
     position = 'bottom',
     triggerExit = false,
+    typingMode = false,
+    textToType,
+    onTypeIntoInput,
 }: {
     message: string
     onComplete: () => void
     position?: 'bottom' | 'center'
     /**  true で退場アニメーション（喋りながら下へフェードアウト）を開始 */
     triggerExit?: boolean
+    typingMode?: boolean
+    textToType?: string
+    onTypeIntoInput?: (text: string) => void
 }) {
     const { play } = useSE()
     const [phase, setPhase] = useState<'entering' | 'idle' | 'exiting'>('entering')
@@ -36,21 +43,26 @@ export function AnnoyingDinosaurComplaint({
         /** 音を出さない文字（句読点・記号など） */
         const isSilentChar = (c: string) => /^[。、．，….\s「」『』（）]$/.test(c)
 
-        let charIndex = displayedText.length
+        let speechIndex = displayedText.length
         const typeInterval = setInterval(() => {
-            if (charIndex < message.length) {
-                const nextChar = message[charIndex]
+            if (speechIndex < message.length) {
+                const nextChar = message[speechIndex]
                 if (nextChar && !isSilentChar(nextChar)) {
                     play('dinosaur')
                 }
-                setDisplayedText(message.slice(0, charIndex + 1))
-                charIndex++
-            } else {
-                clearInterval(typeInterval)
+                setDisplayedText(message.slice(0, speechIndex + 1))
+                speechIndex++
+            }
+            if (typingMode && textToType && onTypeIntoInput) {
+                const newText = textToType.slice(
+                    0,
+                    Math.min(speechIndex, textToType.length)
+                )
+                onTypeIntoInput(newText)
             }
         }, 150)
         return () => clearInterval(typeInterval)
-    }, [phase, message, play])
+    }, [phase, message, play, typingMode, textToType, onTypeIntoInput])
 
     useEffect(() => {
         if (phase !== 'entering') return

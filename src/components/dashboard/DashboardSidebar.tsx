@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useCallback, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { PackagePlus, X, Check, Plus } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
@@ -9,26 +9,47 @@ import { Input } from '@/components/ui/Input'
 import { createRoom } from '@/server/actions/room'
 import { AnnoyingDinosaurComplaint } from './AnnoyingDinosaurComplaint'
 import { getRandomCreateRoomMessage } from '@/shared/constants/createRoomMessages'
+import { getRandomDinosaurRoomName } from '@/shared/constants/dinosaurTypingRoomNames'
 
-export function DashboardSidebar() {
+const TYPING_MODE_MESSAGE = '君のために、文字を打ってあげるよ。毎度大変そうだからね。'
+
+export function DashboardSidebar({ isTop5User = false }: { isTop5User?: boolean }) {
   const [roomFormOpen, setRoomFormOpen] = useState(false)
   const [dinosaurKey, setDinosaurKey] = useState(0)
   const [dinosaurExiting, setDinosaurExiting] = useState(false)
+  const [typingMode, setTypingMode] = useState(false)
+  const [typingRoomName, setTypingRoomName] = useState<string | null>(null)
+  const [roomName, setRoomName] = useState('')
+  const typingModeFlipRef = useRef(false)
 
   const handleRoomFormOpen = () => {
     setRoomFormOpen(true)
     setDinosaurExiting(false)
     setDinosaurKey((k) => k + 1)
+    setRoomName('')
+    // 上位5位かつ50%の確率（クリックごとに交互）でのみタイピングモード
+    typingModeFlipRef.current = !typingModeFlipRef.current
+    const shouldTypingMode =
+      isTop5User && typingModeFlipRef.current
+    setTypingMode(shouldTypingMode)
+    setTypingRoomName(shouldTypingMode ? getRandomDinosaurRoomName() : null)
   }
 
   const handleCancel = () => {
     setRoomFormOpen(false)
     setDinosaurExiting(true)
+    setRoomName('')
+    setTypingMode(false)
+    setTypingRoomName(null)
   }
 
   const handleDinosaurComplete = () => {
     setDinosaurExiting(false)
   }
+
+  const handleTypeIntoInput = useCallback((text: string) => {
+    setRoomName(text)
+  }, [])
 
   const showDinosaur = roomFormOpen || dinosaurExiting
 
@@ -47,16 +68,23 @@ export function DashboardSidebar() {
           新規ルーム
         </Button>
       ) : (
-        <CreateRoomFormContent onClose={handleCancel} />
+        <CreateRoomFormContent
+          onClose={handleCancel}
+          roomName={typingMode ? roomName : undefined}
+          onRoomNameChange={typingMode ? setRoomName : undefined}
+        />
       )}
       {showDinosaur &&
         typeof document !== 'undefined' &&
         createPortal(
           <AnnoyingDinosaurComplaint
             key={dinosaurKey}
-            message={getRandomCreateRoomMessage()}
+            message={typingMode ? TYPING_MODE_MESSAGE : getRandomCreateRoomMessage()}
             onComplete={handleDinosaurComplete}
             triggerExit={dinosaurExiting}
+            typingMode={typingMode}
+            textToType={typingRoomName ?? undefined}
+            onTypeIntoInput={typingMode ? handleTypeIntoInput : undefined}
           />,
           document.body
         )}
@@ -64,7 +92,17 @@ export function DashboardSidebar() {
   )
 }
 
-function CreateRoomFormContent({ onClose }: { onClose: () => void }) {
+function CreateRoomFormContent({
+  onClose,
+  roomName,
+  onRoomNameChange,
+}: {
+  onClose: () => void
+  roomName?: string
+  onRoomNameChange?: (v: string) => void
+}) {
+  const isControlled = roomName !== undefined && onRoomNameChange !== undefined
+
   return (
     <div className="animate-in fade-in slide-in-from-top-2 duration-300">
       <h3 className="font-bold mb-3 text-sm text-brand-800 dark:text-brand-300 uppercase tracking-wider flex items-center gap-2">
@@ -80,6 +118,8 @@ function CreateRoomFormContent({ onClose }: { onClose: () => void }) {
           placeholder="ルーム名を入力...（10文字以内）"
           required
           maxLength={10}
+          value={isControlled ? roomName : undefined}
+          onChange={isControlled ? (e) => onRoomNameChange?.(e.target.value) : undefined}
           className="w-full bg-white/50 dark:bg-slate-900/50 border-brand-200 dark:border-brand-700 focus:border-brand-500 focus:ring-brand-500/20 dark:text-white placeholder:text-brand-400/50"
           autoFocus
         />

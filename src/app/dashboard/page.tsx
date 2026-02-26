@@ -89,7 +89,12 @@ export default async function DashboardPage({
                             rankings={topRankings}
                             currentUserId={dashboardUser.user.id}
                         />
-                        <DashboardSidebar />
+                        <DashboardSidebar
+                            isTop5User={topRankings.some(
+                                (r: { userId: string }) =>
+                                    r.userId === dashboardUser.user.id
+                            )}
+                        />
                     </div>
 
                     {/* 右: ルーム一覧 */}
