@@ -58,6 +58,7 @@ html {
   --font-zen-maru-gothic: var(--font-zen-maru-gothic), "Zen Maru Gothic", sans-serif;
   --font-dot-gothic-16: var(--font-dot-gothic-16), "DotGothic16", sans-serif;
   --font-yusei-magic: var(--font-yusei-magic), "Yusei Magic", sans-serif;
+  --font-cherry-bomb-one: var(--font-cherry-bomb-one), "Cherry Bomb One", sans-serif;
 
   /* Map brand colors */
   --color-brand-50: var(--brand-50);

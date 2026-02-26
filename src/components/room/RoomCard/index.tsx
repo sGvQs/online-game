@@ -1,4 +1,5 @@
 import type { Room, RoomUser } from '@/shared/types'
+import Image from 'next/image'
 import { Button } from '@/components/ui/Button'
 import { IconButton } from '@/components/ui/IconButton'
 import { Trash2, Play, Users } from 'lucide-react'
@@ -82,10 +83,26 @@ export function RoomCard({ room, isOwner, onJoin, onDelete }: RoomCardProps) {
 export function RoomListEmptyState() {
     return (
         <div className={emptyStyles.wrapper()}>
-            <div className={emptyStyles.icon()}>🎮</div>
-            <h3 className={emptyStyles.title()}>現在アクティブなルームはありません</h3>
-            <p className={emptyStyles.description()}>
-                まだルームが作成されていません。新しいゲームルームを作成して、最初のプレイヤーになりましょう！
+            <div className={emptyStyles.icon()}>
+                <Image
+                    src="/svg/object/games-control.svg"
+                    alt=""
+                    width={96}
+                    height={96}
+                    className="animate-bounce mx-auto"
+                />
+            </div>
+            <h3
+                className={emptyStyles.title()}
+                style={{ color: '#ffffff', fontFamily: 'var(--font-cherry-bomb-one)' }}
+            >
+                いまはだれもいないんだね。
+            </h3>
+            <p
+                className={emptyStyles.description()}
+                style={{ color: '#ffffff', fontFamily: 'var(--font-cherry-bomb-one)' }}
+            >
+               でもいいんだよ。きみがるーむつくると、みんなくるようになるからさ。
             </p>
         </div>
     )
