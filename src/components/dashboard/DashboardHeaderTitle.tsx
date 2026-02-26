@@ -1,31 +1,14 @@
 'use client'
 
-import { useEffect, useState } from 'react'
 import Image from 'next/image'
 
-const SIXTYFOUR_FONT = 'var(--font-sixtyfour-convergence)'
-
-const TITLE_FONTS = [
-  'var(--font-honk)',
-  'var(--font-coral-pixels)',
-  SIXTYFOUR_FONT,
-  'var(--font-bitcount-grid-double-ink)',
-] as const
+const RUBIK_PUDDLES_FONT = 'var(--font-rubik-puddles)'
 
 export function DashboardHeaderTitle() {
-  const [fontFamily, setFontFamily] = useState<string | null>(null)
-
-  useEffect(() => {
-    const randomIndex = Math.floor(Math.random() * TITLE_FONTS.length)
-    setFontFamily(TITLE_FONTS[randomIndex])
-  }, [])
-
-  const isSixtyfour = fontFamily === SIXTYFOUR_FONT
-
   return (
     <h1
-      className={`font-black tracking-tight text-brand-900 flex items-center gap-4 ${isSixtyfour ? 'text-2xl' : 'text-4xl'}`}
-      style={fontFamily ? { fontFamily } : undefined}
+      className="font-black tracking-tight text-brand-900 flex items-center gap-4 text-2xl"
+      style={{ fontFamily: RUBIK_PUDDLES_FONT }}
     >
       <Image
         src="/icon.svg"
@@ -34,7 +17,8 @@ export function DashboardHeaderTitle() {
         height={40}
         className="shrink-0"
       />
-      Pukapuka Space
+      <span>Pukapuka</span>
+      <span>Space</span>
     </h1>
   )
 }
