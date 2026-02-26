@@ -41,7 +41,7 @@ export default async function DashboardPage({
         getRooms(),
         getUnreadRoomDeletedNotifications(),
         getMonthlyRanking(dashboardUser.user.id),
-        getTopRankings(10),
+        getTopRankings(5),
     ])
     const initialFaceIcon: FaceIcon =
         (dashboardUser.user as { faceIcon?: FaceIcon }).faceIcon ?? DEFAULT_FACE_ICON
@@ -84,7 +84,7 @@ export default async function DashboardPage({
                 {/* Main Content Area */}
                 <main className="flex flex-col lg:flex-row gap-6">
                     {/* 左: 順位（上） + ルーム作成（下）縦並び */}
-                    <div className="flex flex-col gap-6 lg:w-[220px] shrink-0">
+                    <div className="flex flex-col gap-6 lg:w-[400px] shrink-0">
                         <RankingCard
                             rankings={topRankings}
                             currentUserId={dashboardUser.user.id}
