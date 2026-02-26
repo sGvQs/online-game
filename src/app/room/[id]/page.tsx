@@ -2,9 +2,9 @@ import { redirect } from 'next/navigation'
 import { getCurrentUser, getRoomWithUsers } from '@/server/actions'
 import { getNullHandRankings } from '@/server/actions/game/rankingActions'
 import { RoomPageClientWrapper } from '@/components/room/RoomPageClient'
-import { Button } from '@/components/ui/Button'
+import { IconButton } from '@/components/ui/IconButton'
 import { leaveRoom } from '@/server/actions'
-import { ChevronsRight, PersonStanding, House, Gamepad2 } from 'lucide-react'
+import { LogOut, Gamepad2 } from 'lucide-react'
 import { RoomUserWithReadyStatus } from '@/shared/types'
 
 export default async function RoomPage({ params }: { params: { id: string } }) {
@@ -58,11 +58,13 @@ export default async function RoomPage({ params }: { params: { id: string } }) {
                         </h1>
                     </div>
                     <form action={leaveRoom.bind(null, room.id)}>
-                        <Button variant="ghost" className="text-red-500 hover:bg-red-500/10 hover:text-red-400 font-medium transition-colors gap-1">
-                            <PersonStanding className="w-4 h-4" />
-                            <ChevronsRight className="w-4 h-4" />
-                            <House className="w-4 h-4" />
-                        </Button>
+                        <IconButton
+                            type="submit"
+                            variant="danger"
+                            size="sm"
+                            icon={<LogOut className="w-4 h-4" />}
+                            tooltip="ルーム退出"
+                        />
                     </form>
                 </header>
 

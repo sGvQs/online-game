@@ -52,7 +52,7 @@ export function DashboardHeaderProfile({
                 <button
                     type="button"
                     onClick={() => setModalOpen(true)}
-                    className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium text-foreground shrink-0
+                    className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium text-white shrink-0
                         bg-white/10 border border-brand-200/30
                         hover:bg-brand-400/30 hover:border-brand-400/60
                         hover:shadow-[0_0_20px_rgba(99,102,241,0.4)]
@@ -69,10 +69,10 @@ export function DashboardHeaderProfile({
                         />
                     </div>
                     <span>{name}</span>
-                    <span className="opacity-70">
+                    <span className="opacity-95">
                         {rank ? `${rank}位` : '圏外'}
                     </span>
-                    <span className="opacity-70">{totalPoints}pt</span>
+                    <span className="opacity-95">{totalPoints}pt</span>
                 </button>
             </div>
 
@@ -144,7 +144,7 @@ function ProfileEditForm({
         <form onSubmit={handleSubmit} className="space-y-6">
             {/* 名前 */}
             <div>
-                <h3 className="font-bold mb-2 text-sm text-brand-800 dark:text-brand-300 uppercase tracking-wider flex items-center gap-2">
+                <h3 className="font-bold mb-2 text-sm text-brand-500 uppercase tracking-wider flex items-center gap-2">
                     <User className="w-4 h-4" />
                     名前
                 </h3>
@@ -157,14 +157,14 @@ function ProfileEditForm({
                     disabled={isPending}
                     className="w-full bg-white/50 dark:bg-slate-900/50 border-brand-200 dark:border-brand-700 focus:border-brand-500 focus:ring-brand-500/20 dark:text-white placeholder:text-brand-400/50"
                 />
-                <p className="text-xs text-brand-900 dark:text-brand-300 opacity-70 mt-1">
+                <p className="text-xs text-brand-500 opacity-90 mt-1">
                     {name.length} / {NAME_MAX_LENGTH}文字
                 </p>
             </div>
 
             {/* 顔アイコン */}
             <div>
-                <h3 className="font-bold mb-2 text-sm text-brand-800 dark:text-brand-300 uppercase tracking-wider flex items-center gap-2">
+                <h3 className="font-bold mb-2 text-sm text-brand-500 uppercase tracking-wider flex items-center gap-2">
                     <ScanFace className="w-4 h-4" />
                     顔アイコン
                 </h3>
@@ -194,7 +194,7 @@ function ProfileEditForm({
 
             {/* 煽りコメント */}
             <div>
-                <h3 className="font-bold mb-2 text-sm text-brand-800 dark:text-brand-300 uppercase tracking-wider flex items-center gap-2">
+                <h3 className="font-bold mb-2 text-sm text-brand-500 uppercase tracking-wider flex items-center gap-2">
                     <MessageSquare className="w-4 h-4" />
                     煽りコメント
                 </h3>
@@ -207,7 +207,7 @@ function ProfileEditForm({
                     disabled={isPending}
                     className="w-full bg-white/50 dark:bg-slate-900/50 border-brand-200 dark:border-brand-700 focus:border-brand-500 focus:ring-brand-500/20 dark:text-white placeholder:text-brand-400/50"
                 />
-                <p className="text-xs text-brand-900 dark:text-brand-300 opacity-70 mt-1">
+                <p className="text-xs text-brand-500 opacity-90 mt-1">
                     {comment.length} / {COMMENT_MAX_LENGTH}文字
                 </p>
             </div>
@@ -217,7 +217,7 @@ function ProfileEditForm({
                 disabled={isPending || !hasChanges}
                 className="w-full bg-brand-300 hover:bg-brand-500 text-white gap-2"
             >
-                {isPending ? '保存中...' : success ? '保存しました！' : '一括保存'}
+                {isPending ? '保存中...' : success ? '保存しました！' : '保存'}
             </Button>
         </form>
     )
