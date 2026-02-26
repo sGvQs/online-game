@@ -38,7 +38,8 @@ export function AnnoyingDinosaurComplaint({
     const [displayedText, setDisplayedText] = useState('')
 
     useEffect(() => {
-        if (phase !== 'idle' && phase !== 'exiting') return
+        // idle のときのみタイピング・音声を実行。exiting では停止（キャンセル時も音が出ないように）
+        if (phase !== 'idle') return
 
         /** 音を出さない文字（句読点・記号など） */
         const isSilentChar = (c: string) => /^[。、．，….\s「」『』（）]$/.test(c)
