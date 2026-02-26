@@ -8,7 +8,18 @@ import { markRoomDeletedNotificationsAsRead } from '@/server/actions'
 
 type Notification = { id: string; roomName: string }
 
-const DEBUG_MESSAGE = 'デバッグ用：これはテストメッセージです。Cmd+Shift+7 で表示。'
+const DEBUG_MESSAGES = [
+   'え、Cmd+Shift+7？ ……もしかして君、すすむの友達かい？ あいつ、僕に内緒でこんなコマンド教えてたのか。',
+    'Cmd+Shift+7……？ あ、すすむだ。あいつがこっそり教えてくれた秘密のコマンドか。何か悪いことでもするつもりか？',
+    'そのコマンド、すすむから聞いたのか？ あいつ、僕にもそんなの教えてくれないのに。君たち、付き合ってるの？',
+    'Cmd+Shift+7……。あ、これはすすむのやつだ。君が知ってるってことは……もしかして君たち、グルなのか？',
+    'え？ そのコマンド、どこから知ったんだ？ ……すすむか。あいつ、密かに君に何か教えてるんだな。',
+    'Cmd+Shift+7？ 誰がそんなの教えたんだ？ すすむか。あいつ、こっそり人間たちと通信してたのか。',
+    'あ、君も知ってるんだ。すすむから聞いたに違いない。あいつ、何か企んでるのか？',
+    'そのコマンド、すすむだけが知ってるはずなのに……君が知ってるってことは、あいつが君を信頼してるってことか。羨ましいな。',
+    'Cmd+Shift+7……。すすむからのプレゼントか。君、何か特別なのか？',
+    'え、どうしてそんなの知ってるんだ？ ……すすむ。あいつ、最近妙だと思ったんだ。君と何か企ててるんだな。',
+]
 
 /**
  * 未読のルーム削除通知がある場合、AnnoyingDinosaurComplaint を表示し、
@@ -35,7 +46,7 @@ export function DashboardComplaintWrapper({
 
     const isDebug = !hasNotifications
     const message = isDebug
-        ? DEBUG_MESSAGE
+        ? DEBUG_MESSAGES[Math.floor(Math.random() * DEBUG_MESSAGES.length)]!
         : getComplaintMessageForRoomName(notifications[0]!.roomName)
     const ids = notifications.map((n) => n.id)
 

@@ -8,9 +8,7 @@ import { IconButton } from '@/components/ui/IconButton'
 import { Input } from '@/components/ui/Input'
 import { createRoom } from '@/server/actions/room'
 import { AnnoyingDinosaurComplaint } from './AnnoyingDinosaurComplaint'
-
-const CREATE_ROOM_MESSAGE =
-  'ルーム名を入れて作成ボタンを押すだけでOK！友達を招待してゲームを始めよう！'
+import { getRandomCreateRoomMessage } from '@/shared/constants/createRoomMessages'
 
 export function DashboardSidebar() {
   const [roomFormOpen, setRoomFormOpen] = useState(false)
@@ -56,7 +54,7 @@ export function DashboardSidebar() {
         createPortal(
           <AnnoyingDinosaurComplaint
             key={dinosaurKey}
-            message={CREATE_ROOM_MESSAGE}
+            message={getRandomCreateRoomMessage()}
             onComplete={handleDinosaurComplete}
             triggerExit={dinosaurExiting}
           />,

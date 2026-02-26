@@ -90,10 +90,10 @@ export function AnnoyingDinosaurComplaint({
             initial={{ x: '-50%', y: initialY }}
             animate={
                 phase === 'entering'
-                    ? { x: '-50%', y: idleY, opacity: 1 }
+                    ? { x: '-50%', y: idleY }
                     : phase === 'exiting'
-                      ? { x: '-50%', y: exitY, opacity: 1 }
-                      : { x: '-50%', y: idleY, opacity: 1 }
+                      ? { x: '-50%', y: exitY }
+                      : { x: '-50%', y: idleY }
             }
             transition={{
                 duration: phase === 'exiting' ? EXIT_DURATION : ENTER_DURATION,
