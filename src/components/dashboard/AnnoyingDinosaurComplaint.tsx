@@ -18,22 +18,25 @@ export function AnnoyingDinosaurComplaint({
     message,
     onComplete,
     position = 'bottom',
+    triggerExit = false,
 }: {
     message: string
     onComplete: () => void
     position?: 'bottom' | 'center'
+    /**  true で退場アニメーション（喋りながら下へフェードアウト）を開始 */
+    triggerExit?: boolean
 }) {
     const { play } = useSE()
     const [phase, setPhase] = useState<'entering' | 'idle' | 'exiting'>('entering')
     const [displayedText, setDisplayedText] = useState('')
 
     useEffect(() => {
-        if (phase !== 'idle') return
+        if (phase !== 'idle' && phase !== 'exiting') return
 
         /** 音を出さない文字（句読点・記号など） */
         const isSilentChar = (c: string) => /^[。、．，….\s「」『』（）]$/.test(c)
 
-        let charIndex = 0
+        let charIndex = displayedText.length
         const typeInterval = setInterval(() => {
             if (charIndex < message.length) {
                 const nextChar = message[charIndex]
@@ -62,6 +65,12 @@ export function AnnoyingDinosaurComplaint({
     }, [phase])
 
     useEffect(() => {
+        if (triggerExit && (phase === 'entering' || phase === 'idle')) {
+            setPhase('exiting')
+        }
+    }, [triggerExit, phase])
+
+    useEffect(() => {
         if (phase !== 'exiting') return
         const t = setTimeout(() => {
             onComplete()
@@ -81,10 +90,10 @@ export function AnnoyingDinosaurComplaint({
             initial={{ x: '-50%', y: initialY }}
             animate={
                 phase === 'entering'
-                    ? { x: '-50%', y: idleY }
+                    ? { x: '-50%', y: idleY, opacity: 1 }
                     : phase === 'exiting'
-                      ? { x: '-50%', y: exitY }
-                      : { x: '-50%', y: idleY }
+                      ? { x: '-50%', y: exitY, opacity: 1 }
+                      : { x: '-50%', y: idleY, opacity: 1 }
             }
             transition={{
                 duration: phase === 'exiting' ? EXIT_DURATION : ENTER_DURATION,

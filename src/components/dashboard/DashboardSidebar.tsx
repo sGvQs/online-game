@@ -15,11 +15,24 @@ const CREATE_ROOM_MESSAGE =
 export function DashboardSidebar() {
   const [roomFormOpen, setRoomFormOpen] = useState(false)
   const [dinosaurKey, setDinosaurKey] = useState(0)
+  const [dinosaurExiting, setDinosaurExiting] = useState(false)
 
   const handleRoomFormOpen = () => {
     setRoomFormOpen(true)
+    setDinosaurExiting(false)
     setDinosaurKey((k) => k + 1)
   }
+
+  const handleCancel = () => {
+    setRoomFormOpen(false)
+    setDinosaurExiting(true)
+  }
+
+  const handleDinosaurComplete = () => {
+    setDinosaurExiting(false)
+  }
+
+  const showDinosaur = roomFormOpen || dinosaurExiting
 
   return (
     <div className="glass-card p-6 rounded-2xl">
@@ -36,15 +49,16 @@ export function DashboardSidebar() {
           新規ルーム
         </Button>
       ) : (
-        <CreateRoomFormContent onClose={() => setRoomFormOpen(false)} />
+        <CreateRoomFormContent onClose={handleCancel} />
       )}
-      {roomFormOpen &&
+      {showDinosaur &&
         typeof document !== 'undefined' &&
         createPortal(
           <AnnoyingDinosaurComplaint
             key={dinosaurKey}
             message={CREATE_ROOM_MESSAGE}
-            onComplete={() => {}}
+            onComplete={handleDinosaurComplete}
+            triggerExit={dinosaurExiting}
           />,
           document.body
         )}
