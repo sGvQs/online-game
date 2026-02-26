@@ -1,8 +1,2 @@
-/*
-  Warnings:
-
-  - Added the required column `updated_at` to the `rooms` table without a default value. This is not possible if the table is not empty.
-
-*/
--- AlterTable
-ALTER TABLE "rooms" ADD COLUMN     "updated_at" TIMESTAMP(3) NOT NULL;
+-- AlterTable: updated_at を DEFAULT 付きで追加（既存行があっても適用可能）
+ALTER TABLE "rooms" ADD COLUMN IF NOT EXISTS "updated_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP;
