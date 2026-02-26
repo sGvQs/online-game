@@ -6,6 +6,7 @@ import { motion } from 'framer-motion'
 import Image from 'next/image'
 import { detectIncognito } from 'detectincognitojs'
 import { SESSION_KEY_HAS_LOGGED_IN, SESSION_KEY_LOGIN_VISIT_COUNT, LOCAL_KEY_HAS_VISITED } from '@/shared/constants/storage'
+import { useSE } from '@/hooks/useSE'
 
 /** キャッシュリセットしてきた人（初心者のフリ） */
 const DIALOGUE_MESSAGES_CACHE_RESET = [
@@ -344,6 +345,8 @@ export function AnnoyingDinosaur() {
         return () => clearInterval(dialogueInterval)
     }, [phase, dialogueMessages.length, isInitialNantechatte, isRotatePattern, isSimplePattern])
 
+
+    const { play } = useSE();
     // 一文字ずつ表示（喋るスピード感）
     useEffect(() => {
         if (isInitialNantechatte || isRotatePattern || phase !== 'idle') return
@@ -351,9 +354,16 @@ export function AnnoyingDinosaur() {
         const fullText = dialogueMessages[Math.min(dialogueIndex, dialogueMessages.length - 1)] ?? ''
         setDisplayedText('')
 
+        /** 音を出さない文字（句読点・記号など） */
+        const isSilentChar = (c: string) => /^[。、．，….\s「」『』（）]$/.test(c)
+
         let charIndex = 0
         const typeInterval = setInterval(() => {
             if (charIndex < fullText.length) {
+                const nextChar = fullText[charIndex]
+                if (nextChar && !isSilentChar(nextChar)) {
+                    play("dinosaur")
+                }
                 setDisplayedText(fullText.slice(0, charIndex + 1))
                 charIndex++
             } else {
