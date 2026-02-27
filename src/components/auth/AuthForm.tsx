@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { createClient } from '@/utils/supabase/client'
 import { useState } from 'react'
 import { Button } from '@/components/ui/Button'
@@ -57,7 +58,10 @@ export default function AuthForm() {
                 )}
             </Button>
             <p className="mt-4 text-xs text-center text-foreground opacity-70">
-                By continuing, you agree to our Terms of Service and Privacy Policy.
+                <Link href="/terms" className="underline hover:opacity-80 transition-opacity">利用規約</Link>
+                {' '}と{' '}
+                <Link href="/privacy" className="underline hover:opacity-80 transition-opacity">プライバシーポリシー</Link>
+                に同意の上、ご利用ください。
             </p>
         </Card>
     )
