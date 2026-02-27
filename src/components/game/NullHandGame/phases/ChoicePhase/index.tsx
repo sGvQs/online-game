@@ -19,6 +19,8 @@ interface ChoicePhaseProps {
     onChoice: (choice: HostChoice) => Promise<void>
     hostName: string
     hostFaceIcon?: import('@/shared/constants/faceIcon').FaceIcon | null
+    /** カスタムホストアイコン（恐竜など）。hostFaceIcon より優先 */
+    hostCustomIconSrc?: string | null
     currentScores: MatchScoreWithUser[]
     currentUserId: string
     userColor?: string
@@ -32,6 +34,7 @@ export function ChoicePhase({
     onChoice,
     hostName,
     hostFaceIcon,
+    hostCustomIconSrc,
     currentScores,
     currentUserId,
     userColor,
@@ -206,7 +209,7 @@ export function ChoicePhase({
                                 }}
                             >
                                 <div className="flex items-end gap-2">
-                                    <PlayerFaceIcon faceIcon={hostFaceIcon} size="sm" />
+                                    <PlayerFaceIcon faceIcon={hostFaceIcon} customSrc={hostCustomIconSrc} size="sm" />
                                     <div
                                         className="text-xs font-black tracking-[0.3em]"
                                         style={{ color: isCurrentHost ? (userColor || '#FF4444') : '#FF4444' }}

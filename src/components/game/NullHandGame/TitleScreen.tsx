@@ -211,7 +211,7 @@ export function TitleScreen({
                         ease: "easeOut",
                         delay: 1
                     }}
-                    className="col-span-1 md:col-span-2 bg-black flex items-center justify-center text-center w-full text-center pointer-events-none opacity-100">
+                    className="col-span-1 md:col-span-2 bg-black flex items-center justify-center text-center w-full pointer-events-none opacity-100">
                     <p className="text-[12px] text-white font-mono tracking-[0.2em] leading-relaxed uppercase drop-shadow-md">
                         Music by <span className="text-[#FF4444] font-bold">Dream or real?</span>
                     </p>

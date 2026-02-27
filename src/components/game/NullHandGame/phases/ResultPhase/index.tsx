@@ -55,7 +55,7 @@ export function ResultPhase({
     const realHand = jankenEvent.systemRealHand as HandType | null
     const bluffHand = jankenEvent.systemBluffHand as HandType | null
 
-    const myHandData = jankenEvent.guestHands.find(gh => gh.userId === currentUserId)
+    const myHandData = jankenEvent.guestHands.find((gh: (typeof jankenEvent.guestHands)[number]) => gh.userId === currentUserId)
     const myHand = myHandData?.hand as HandType | undefined
 
     const hostUser = roomUsers.find(u => u.userId === jankenEvent.currentHostId)
@@ -64,15 +64,16 @@ export function ResultPhase({
     // 決着状況の判定ロジックを共通化
     const guestHands = jankenEvent.guestHands
     const guestCount = guestHands.length
+    type GuestHandItem = (typeof guestHands)[number]
     let hasGuestWin = false
     let hasDraw = false
-    guestHands.forEach(gh => {
+    guestHands.forEach((gh: GuestHandItem) => {
         const res = judgeHand(hostHand, gh.hand as HandType)
         if (res === 'GUEST_WIN') hasGuestWin = true
         if (res === 'DRAW') hasDraw = true
     })
 
-    const isNullHand = guestCount > 1 && !hasGuestWin && guestHands.every(gh => judgeHand(hostHand, gh.hand as HandType) === 'DRAW')
+    const isNullHand = guestCount > 1 && !hasGuestWin && guestHands.every((gh: GuestHandItem) => judgeHand(hostHand, gh.hand as HandType) === 'DRAW')
     const isHostPerfectWin = guestCount > 1 && !isNullHand && !hasGuestWin && !hasDraw
 
     // 報酬フィードバック（個別の獲得スコア報告）

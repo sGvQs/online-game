@@ -9,8 +9,8 @@ export function LogoutButton() {
         <IconButton
             onClick={() => signOut()}
             variant="danger"
-            size="sm"
-            icon={<LogOut className="w-4 h-4" />}
+            size="md"
+            icon={<LogOut className="w-10 h-10" />}
             tooltip="ログアウト"
         />
     )

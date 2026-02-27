@@ -4,7 +4,7 @@ import { getNullHandRankings } from '@/server/actions/game/rankingActions'
 import { RoomPageClientWrapper } from '@/components/room/RoomPageClient'
 import { IconButton } from '@/components/ui/IconButton'
 import { leaveRoom } from '@/server/actions'
-import { LogOut, Gamepad2 } from 'lucide-react'
+import { Undo2, Gamepad2 } from 'lucide-react'
 import { RoomUserWithReadyStatus } from '@/shared/types'
 
 export default async function RoomPage({ params }: { params: { id: string } }) {
@@ -60,9 +60,9 @@ export default async function RoomPage({ params }: { params: { id: string } }) {
                     <form action={leaveRoom.bind(null, room.id)}>
                         <IconButton
                             type="submit"
-                            variant="danger"
-                            size="sm"
-                            icon={<LogOut className="w-4 h-4" />}
+                            variant="default"
+                            size="md"
+                            icon={<Undo2 className="w-10 h-10" />}
                             tooltip="ルーム退出"
                         />
                     </form>

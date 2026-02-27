@@ -8,10 +8,11 @@ import { IconButton } from '@/components/ui/IconButton'
 import { Input } from '@/components/ui/Input'
 import { createRoom } from '@/server/actions/room'
 import { AnnoyingDinosaurComplaint } from './AnnoyingDinosaurComplaint'
-import { getRandomCreateRoomMessage } from '@/shared/constants/createRoomMessages'
-import { getRandomDinosaurRoomName } from '@/shared/constants/dinosaurTypingRoomNames'
-
-const TYPING_MODE_MESSAGE = '君のために、文字を打ってあげるよ。毎度大変そうだからね。'
+import {
+    getRandomCreateRoomMessage,
+    getRandomDinosaurRoomName,
+    TYPING_MODE_MESSAGE,
+} from '@/shared/constants/dinosaurMessages'
 
 export function DashboardSidebar({ isTop5User = false }: { isTop5User?: boolean }) {
   const [roomFormOpen, setRoomFormOpen] = useState(false)
@@ -105,10 +106,10 @@ function CreateRoomFormContent({
 
   return (
     <div className="animate-in fade-in slide-in-from-top-2 duration-300">
-      <h3 className="font-bold mb-3 text-sm text-brand-800 dark:text-brand-300 uppercase tracking-wider flex items-center gap-2">
+      {/* <h3 className="font-bold mb-3 text-sm text-brand-800 dark:text-brand-300 uppercase tracking-wider flex items-center gap-2">
         <span className="w-2 h-2 rounded-full bg-brand-500 animate-pulse"></span>
         新しいルームの詳細
-      </h3>
+      </h3> */}
       <form action={async (formData) => {
         await createRoom(formData)
         onClose()
