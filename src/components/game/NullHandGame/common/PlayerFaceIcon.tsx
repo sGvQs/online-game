@@ -3,6 +3,8 @@ import { FACE_ICON_PATHS, DEFAULT_FACE_ICON, FaceIcon } from '@/shared/constants
 
 interface PlayerFaceIconProps {
     faceIcon?: FaceIcon | null
+    /** カスタムアイコン（恐竜など）。指定時は faceIcon より優先 */
+    customSrc?: string | null
     size?: 'sm' | 'md' | 'lg'
     className?: string
 }
@@ -13,9 +15,9 @@ const sizeMap = {
     lg: { w: 40, h: 40 },
 }
 
-export function PlayerFaceIcon({ faceIcon, size = 'md', className = '' }: PlayerFaceIconProps) {
+export function PlayerFaceIcon({ faceIcon, customSrc, size = 'md', className = '' }: PlayerFaceIconProps) {
     const icon = faceIcon ?? DEFAULT_FACE_ICON
-    const path = FACE_ICON_PATHS[icon]
+    const path = customSrc ?? FACE_ICON_PATHS[icon]
     const { w, h } = sizeMap[size]
 
     return (
