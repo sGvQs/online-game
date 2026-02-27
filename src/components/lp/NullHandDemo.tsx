@@ -302,18 +302,23 @@ export function NullHandDemo() {
                 )}
 
                 {demoPhase === 'battle' && (
-                    <BattlePhase
-                        jankenEvent={battleEvent}
-                        hostStats={mockHostStats}
-                        isCurrentHost={false}
-                        selectedHand={selectedHand}
-                        isProcessing={false}
-                        onSelectHand={setSelectedHand}
-                        onSubmit={handleBattle}
-                        hostName="開発者"
-                        currentScores={mockCurrentScores}
-                        currentUserId="lp-demo-guest"
-                    />
+                    // aspect-square なボタン内で Hand3D(150px固定高) がはみ出すため overflow-hidden でクリップ
+                    // [&_.aspect-square>.absolute.bottom-4] でグー/チョキ/パーのラベルを非表示
+                    <div className="contents [&_.aspect-square]:overflow-hidden [&_.aspect-square>.absolute.bottom-4]:hidden">
+                        <BattlePhase
+                            jankenEvent={battleEvent}
+                            hostStats={mockHostStats}
+                            isCurrentHost={false}
+                            selectedHand={selectedHand}
+                            isProcessing={false}
+                            onSelectHand={setSelectedHand}
+                            onSubmit={handleBattle}
+                            hostName="開発者"
+                            currentScores={mockCurrentScores}
+                            currentUserId="lp-demo-guest"
+                            userColor="#FFFFFF"
+                        />
+                    </div>
                 )}
 
                 {demoPhase === 'result' && resultEvent && (
@@ -326,6 +331,7 @@ export function NullHandDemo() {
                         currentUserId="lp-demo-guest"
                         isCurrentHost={false}
                         roomUsers={mockRoomUsers}
+                        userColor="#FFFFFF"
                     />
                 )}
             </div>
