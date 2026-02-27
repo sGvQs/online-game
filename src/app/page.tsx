@@ -59,6 +59,12 @@ export default function Home() {
                         </span>
                         <div className="h-px flex-1 bg-linear-to-r from-transparent via-brand-500/40 to-transparent" />
                     </div>
+                    <p
+                        className="text-center text-[11px] text-brand-700 mt-1"
+                        style={{ fontFamily: DOT_GOTHIC_FONT }}
+                    >
+                        各ゲームにはランキングがある。上を目指すもよし、友達と遊ぶもよし。
+                    </p>
                 </div>
 
                 {/* ゲーム紹介 */}
@@ -223,7 +229,11 @@ export default function Home() {
                             </svg>
                         </Link>
 
-                        <p className="mt-8 text-[11px] text-brand-700/60" style={{ fontFamily: DOT_GOTHIC_FONT }}>
+                        <p className="mt-6 text-[10px] text-brand-600" style={{ fontFamily: DOT_GOTHIC_FONT }}>
+                            ✦ アカウント登録 無料 ✦
+                        </p>
+
+                        <p className="mt-3 text-[11px] text-brand-700/60" style={{ fontFamily: DOT_GOTHIC_FONT }}>
                             <Link href="/terms" className="hover:text-brand-500 transition-colors">利用規約</Link>
                             {' '}·{' '}
                             <Link href="/privacy" className="hover:text-brand-500 transition-colors">プライバシーポリシー</Link>

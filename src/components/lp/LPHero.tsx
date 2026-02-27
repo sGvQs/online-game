@@ -8,15 +8,27 @@ const DOT_GOTHIC_FONT = 'var(--font-dot-gothic-16)'
 export function LPHero() {
     return (
         <section className="relative z-10 flex flex-col items-center justify-center pt-28 pb-20 px-8 text-center w-full max-w-5xl">
-            {/* バッジ行 */}
-            <div className="flex gap-3 mb-8 flex-wrap justify-center">
-                {['ONLINE', 'MULTIPLAYER', 'FREE'].map((tag) => (
-                    <span
-                        key={tag}
-                        className="px-3 py-1 rounded-full text-[10px] font-bold tracking-[0.2em] border border-brand-500/60 text-brand-500 bg-brand-500/10"
+            {/* スペックカード行 */}
+            <div className="flex gap-3 mb-10 flex-wrap justify-center">
+                {[
+                    { icon: '🌐', title: 'オンライン対戦', sub: '友達と宇宙で遊ぶ' },
+                    { icon: '🏆', title: 'ランキングあり', sub: '誰が一番強いか競え' },
+                    { icon: '✦',  title: '完全無料',       sub: 'いつでも始められる' },
+                ].map(({ icon, title, sub }) => (
+                    <div
+                        key={title}
+                        className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl transition-all duration-300 hover:scale-105"
+                        style={{
+                            background: 'rgba(129,140,248,0.06)',
+                            border: '1px solid rgba(129,140,248,0.2)',
+                        }}
                     >
-                        {tag}
-                    </span>
+                        <span className="text-base leading-none">{icon}</span>
+                        <div className="text-left">
+                            <p className="text-[11px] font-bold text-brand-400 tracking-wide" style={{ fontFamily: DOT_GOTHIC_FONT }}>{title}</p>
+                            <p className="text-[9px] text-brand-600 mt-0.5" style={{ fontFamily: DOT_GOTHIC_FONT }}>{sub}</p>
+                        </div>
+                    </div>
                 ))}
             </div>
 
@@ -56,7 +68,9 @@ export function LPHero() {
                 className="mt-8 text-brand-700 text-base md:text-lg max-w-md leading-relaxed"
                 style={{ fontFamily: DOT_GOTHIC_FONT }}
             >
-                さあ、人生の大事な時間を
+                さあ、宇宙の果てで
+                <span className="text-brand-400 font-bold">誰かと</span>
+                人生の大事な時間を
                 <br />
                 <span className="text-brand-500 font-bold">無駄にする</span>準備はできた？
             </p>
