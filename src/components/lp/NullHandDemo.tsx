@@ -7,18 +7,26 @@ import { BattlePhase } from '@/components/game/NullHandGame/phases/BattlePhase'
 import { ResultPhase } from '@/components/game/NullHandGame/phases/ResultPhase'
 import { HandType } from '@/shared/types'
 import { nullHandGame } from '@/components/game/NullHandGame/styles'
+import { judgeHand } from '@/components/game/NullHandGame/utils'
 import type { JankenEventWithGuests, HostStats, MatchScoreWithUser, RoomUserWithUser } from '@/shared/types'
 
-// 開発者は常に パー(PAPER) と チョキ(SCISSORS) の2択を持つ
+// 開発者の手の組み合わせ（3種類からランダムに選ぶ）
+const HAND_PAIRS: [HandType, HandType][] = [
+    [HandType.ROCK,    HandType.PAPER],
+    [HandType.ROCK,    HandType.SCISSORS],
+    [HandType.PAPER,   HandType.SCISSORS],
+]
+
 function createMockEvent(): JankenEventWithGuests {
+    const [real, bluff] = HAND_PAIRS[Math.floor(Math.random() * HAND_PAIRS.length)]!
     return {
         id: 'lp-demo-event',
         matchId: 'lp-demo-match',
         currentHostId: '2',
         turnNumber: 1,
         phase: 'CHOICE',
-        systemRealHand: HandType.PAPER,
-        systemBluffHand: HandType.SCISSORS,
+        systemRealHand: real,
+        systemBluffHand: bluff,
         hostChoice: null,
         finalHostHand: null,
         match: {
@@ -42,6 +50,7 @@ const mockHostStats: HostStats = {
 
 const INITIAL_SCORES: MatchScoreWithUser[] = [
     {
+        id: 'ms-1',
         userId: '1',
         points: 0,
         turnOrder: 0,
@@ -50,6 +59,7 @@ const INITIAL_SCORES: MatchScoreWithUser[] = [
         user: { id: '1', name: 'あなた', email: 'demo@example.com', comment: null, faceIcon: 'BOY_FACE', createdAt: new Date() },
     },
     {
+        id: 'ms-2',
         userId: '2',
         points: 300,
         turnOrder: 1,
@@ -58,6 +68,7 @@ const INITIAL_SCORES: MatchScoreWithUser[] = [
         user: { id: '2', name: '開発者', email: 'demo@example.com', comment: null, faceIcon: 'LADY_FACE', createdAt: new Date() },
     },
     {
+        id: 'ms-12',
         userId: '12',
         points: 0,
         turnOrder: 2,
@@ -124,24 +135,21 @@ const BATTLE_TRIGGER_MS = 12000
  * リザルト用 JankenEvent を組み立てる。
  *
  * ゲームロジック（LP デモ仕様）:
- *   開発者は常に パー(PAPER) と チョキ(SCISSORS) の2択を持つ。
+ *   開発者の持ち手は毎回ランダムな2択。
  *
- *   - グー (ROCK)  → 開発者が「持っていない手」= ゲストの勝ち
- *       finalHostHand = SCISSORS (チョキ負け) → judgeHand(SCISSORS, ROCK) = GUEST_WIN
- *
- *   - パー / チョキ → 開発者が「持っている手」= NULL HAND (開発者の勝ち)
- *       finalHostHand = userHand (同じ手でDRAW)
- *       guestCount > 1 かつ全員DRAW → isNullHand = true
+ *   - 開発者が持っていない手を選んだ → ゲストの勝ち（HOST_WIN になる手を finalHostHand に）
+ *   - 開発者が持っている手を選んだ  → NULL HAND（全員 DRAW、guestCount > 1 で判定）
  */
 function buildResultEvent(
     base: JankenEventWithGuests,
     userHand: HandType
 ): JankenEventWithGuests {
-    const isUserWin = userHand === HandType.ROCK
+    const devHands = [base.systemRealHand as HandType, base.systemBluffHand as HandType]
+    const isUserWin = !devHands.includes(userHand)
 
-    const finalHostHand = isUserWin
-        ? HandType.SCISSORS // チョキ はグーに負ける → GUEST_WIN
-        : userHand          // パー/チョキ → 同じ手でDRAW → NULL HAND
+    // ゲスト勝ち：開発者の手のうち userHand に負ける手を finalHostHand にする
+    const losingHostHand = devHands.find((h) => judgeHand(h, userHand) === 'HOST_WIN') ?? devHands[0]!
+    const finalHostHand = isUserWin ? losingHostHand : userHand // DRAW → NULL HAND
 
     const makeGuestHand = (userId: string, hand: HandType) =>
         ({
@@ -153,7 +161,7 @@ function buildResultEvent(
             user: mockRoomUsers.find((u) => u.userId === userId)?.user ?? null,
         }) as JankenEventWithGuests['guestHands'][number]
 
-    // NULL HAND 判定には guestCount > 1 が必要なので、パー/チョキ時は架空のゲストも追加
+    // NULL HAND 判定には guestCount > 1 が必要なので、負け時は架空のゲストも追加
     const guestHands = isUserWin
         ? [makeGuestHand('1', userHand)]
         : [
@@ -231,8 +239,9 @@ export function NullHandDemo() {
         if (!selectedHand) return
         const event = buildResultEvent(baseEvent, selectedHand)
 
-        // ポイント加算：グー → ユーザー +3、パー/チョキ → NULL HAND → 開発者 +5
-        const isUserWin = selectedHand === HandType.ROCK
+        // ポイント加算：開発者が持っていない手 → ユーザー +3、持っている手 → NULL HAND → 開発者 +5
+        const devHands = [baseEvent.systemRealHand as HandType, baseEvent.systemBluffHand as HandType]
+        const isUserWin = !devHands.includes(selectedHand)
         setScores((prev) =>
             prev.map((s) => {
                 if (isUserWin && s.userId === '1') {
