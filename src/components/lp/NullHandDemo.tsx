@@ -10,31 +10,17 @@ import { nullHandGame } from '@/components/game/NullHandGame/styles'
 import type { JankenEventWithGuests, HostStats, MatchScoreWithUser, RoomUserWithUser } from '@/shared/types'
 
 const DEVELOPER_ICON = '/svg/charactor/developer.svg'
-const ALL_HANDS = Object.values(HandType) as HandType[]
 
-function randomHand(): HandType {
-    return ALL_HANDS[Math.floor(Math.random() * ALL_HANDS.length)]!
-}
-
-function getBluffHand(realHand: HandType): HandType {
-    const map: Record<HandType, HandType> = {
-        [HandType.ROCK]: HandType.SCISSORS,
-        [HandType.SCISSORS]: HandType.PAPER,
-        [HandType.PAPER]: HandType.ROCK,
-    }
-    return map[realHand]
-}
-
-function createMockEvent(realHand?: HandType): JankenEventWithGuests {
-    const r = realHand ?? randomHand()
+// 開発者は常に パー(PAPER) と チョキ(SCISSORS) の2択を持つ
+function createMockEvent(): JankenEventWithGuests {
     return {
         id: 'lp-demo-event',
         matchId: 'lp-demo-match',
-        currentHostId: 'lp-demo-guest1',
+        currentHostId: '2',
         turnNumber: 1,
         phase: 'CHOICE',
-        systemRealHand: r,
-        systemBluffHand: getBluffHand(r),
+        systemRealHand: HandType.PAPER,
+        systemBluffHand: HandType.SCISSORS,
         hostChoice: null,
         finalHostHand: null,
         match: {
@@ -56,49 +42,49 @@ const mockHostStats: HostStats = {
     totalHostCount: 5,
 }
 
-const mockCurrentScores: MatchScoreWithUser[] = [
+const INITIAL_SCORES: MatchScoreWithUser[] = [
     {
-        userId: 'lp-demo-guest',
+        userId: '1',
         points: 0,
         turnOrder: 0,
         matchId: 'lp-demo-match',
         createdAt: new Date(),
         user: {
-            id: 'lp-demo-guest',
+            id: '1',
             name: 'あなた',
             email: 'demo@example.com',
             comment: null,
-            faceIcon: 'BOY_FACE',
+            faceIcon: 'BLACK_FACE',
             createdAt: new Date(),
         },
     },
     {
-        userId: 'lp-demo-guest1',
+        userId: '2',
         points: 300,
         turnOrder: 1,
         matchId: 'lp-demo-match',
         createdAt: new Date(),
         user: {
-            id: 'lp-demo-guest1',
+            id: '2',
             name: '開発者',
             email: 'demo@example.com',
             comment: null,
-            faceIcon: 'LADY_FACE',
+            faceIcon: 'BOY_FACE',
             createdAt: new Date(),
         },
     },
     {
-        userId: 'lp-demo-guest2',
+        userId: '3',
         points: 0,
         turnOrder: 0,
         matchId: 'lp-demo-match',
         createdAt: new Date(),
         user: {
-            id: 'lp-demo-guest2',
+            id: '3',
             name: 'あなたの友達',
             email: 'demo@example.com',
             comment: null,
-            faceIcon: 'BOY_FACE',
+            faceIcon: 'WHITE_FACE',
             createdAt: new Date(),
         },
     },
@@ -106,13 +92,13 @@ const mockCurrentScores: MatchScoreWithUser[] = [
 
 const mockRoomUsers: RoomUserWithUser[] = [
     {
-        userId: 'lp-demo-guest',
+        userId: '1',
         roomId: 'lp-demo-room',
         turnOrder: 0,
         isReady: false,
         createdAt: new Date(),
         user: {
-            id: 'lp-demo-guest',
+            id: '1',
             name: 'あなた',
             email: 'demo@example.com',
             comment: null,
@@ -121,13 +107,13 @@ const mockRoomUsers: RoomUserWithUser[] = [
         },
     },
     {
-        userId: 'lp-demo-guest1',
+        userId: '2',
         roomId: 'lp-demo-room',
         turnOrder: 1,
         isReady: false,
         createdAt: new Date(),
         user: {
-            id: 'lp-demo-guest1',
+            id: '2',
             name: '開発者',
             email: 'demo@example.com',
             comment: null,
@@ -136,13 +122,13 @@ const mockRoomUsers: RoomUserWithUser[] = [
         },
     },
     {
-        userId: 'lp-demo-guest2',
+        userId: '12',
         roomId: 'lp-demo-room',
         turnOrder: 2,
         isReady: false,
         createdAt: new Date(),
         user: {
-            id: 'lp-demo-guest2',
+            id: '12',
             name: 'あなたの友達',
             email: 'demo@example.com',
             comment: null,
@@ -164,17 +150,28 @@ const BATTLE_TRIGGER_MS = 12000
  *   - チョキ (SCISSORS) を出したとき → 開発者 PAPER = ユーザー勝ち (YOU WIN!!)
  *   - グー / パー を出したとき      → 開発者が同じ手 + ゲスト2人全員 DRAW = NULL HAND
  */
+/**
+ * リザルト用 JankenEvent を組み立てる。
+ *
+ * ゲームロジック（LP デモ仕様）:
+ *   開発者は常に パー(PAPER) と チョキ(SCISSORS) の2択を持つ。
+ *
+ *   - グー (ROCK)  → 開発者が「持っていない手」= ゲストの勝ち
+ *       finalHostHand = SCISSORS (チョキ負け) → judgeHand(SCISSORS, ROCK) = GUEST_WIN
+ *
+ *   - パー / チョキ → 開発者が「持っている手」= NULL HAND (開発者の勝ち)
+ *       finalHostHand = userHand (同じ手でDRAW)
+ *       guestCount > 1 かつ全員DRAW → isNullHand = true
+ */
 function buildResultEvent(
     base: JankenEventWithGuests,
     userHand: HandType
 ): JankenEventWithGuests {
-    const isScissors = userHand === HandType.SCISSORS
+    const isUserWin = userHand === HandType.ROCK
 
-    const finalHostHand = isScissors
-        ? HandType.PAPER // PAPER loses to SCISSORS → GUEST_WIN
-        : userHand       // same hand → DRAW for all → isNullHand = true
-
-    const hostChoice = isScissors ? 'STAY' : 'STAY'
+    const finalHostHand = isUserWin
+        ? HandType.SCISSORS // チョキ はグーに負ける → GUEST_WIN
+        : userHand          // パー/チョキ → 同じ手でDRAW → NULL HAND
 
     const makeGuestHand = (userId: string, hand: HandType) =>
         ({
@@ -186,18 +183,18 @@ function buildResultEvent(
             user: mockRoomUsers.find((u) => u.userId === userId)?.user ?? null,
         }) as JankenEventWithGuests['guestHands'][number]
 
-    // NULL HAND 判定には guestCount > 1 が必要なので、グー/パー時は架空のゲストも追加
-    const guestHands = isScissors
-        ? [makeGuestHand('lp-demo-guest', userHand)]
+    // NULL HAND 判定には guestCount > 1 が必要なので、パー/チョキ時は架空のゲストも追加
+    const guestHands = isUserWin
+        ? [makeGuestHand('1', userHand)]
         : [
-              makeGuestHand('lp-demo-guest', userHand),
-              makeGuestHand('lp-demo-guest2', userHand),
+              makeGuestHand('1', userHand),
+              makeGuestHand('12', userHand),
           ]
 
     return {
         ...base,
         finalHostHand,
-        hostChoice,
+        hostChoice: 'STAY',
         guestHands,
     }
 }
@@ -213,6 +210,7 @@ export function NullHandDemo() {
     const [baseEvent, setBaseEvent] = useState<JankenEventWithGuests>(() => createMockEvent())
     const [selectedHand, setSelectedHand] = useState<HandType | null>(null)
     const [resultEvent, setResultEvent] = useState<JankenEventWithGuests | null>(null)
+    const [scores, setScores] = useState<MatchScoreWithUser[]>(INITIAL_SCORES)
 
     // Battle 用 JankenEvent（finalHostHand なし・手の種類だけ表示）
     const battleEvent = useMemo<JankenEventWithGuests>(
@@ -262,6 +260,21 @@ export function NullHandDemo() {
     const handleBattle = useCallback(() => {
         if (!selectedHand) return
         const event = buildResultEvent(baseEvent, selectedHand)
+
+        // ポイント加算：グー → ユーザー +3、パー/チョキ → NULL HAND → 開発者 +5
+        const isUserWin = selectedHand === HandType.ROCK
+        setScores((prev) =>
+            prev.map((s) => {
+                if (isUserWin && s.userId === '1') {
+                    return { ...s, points: s.points + 3 }
+                }
+                if (!isUserWin && s.userId === '2') {
+                    return { ...s, points: s.points + 5 }
+                }
+                return s
+            })
+        )
+
         setResultEvent(event)
         setDemoPhase('result')
     }, [selectedHand, baseEvent])
@@ -296,8 +309,8 @@ export function NullHandDemo() {
                         onChoice={async () => {}}
                         hostName="開発者"
                         hostCustomIconSrc={DEVELOPER_ICON}
-                        currentScores={mockCurrentScores}
-                        currentUserId="lp-demo-guest"
+                        currentScores={scores}
+                        currentUserId="1"
                     />
                 )}
 
@@ -314,8 +327,8 @@ export function NullHandDemo() {
                             onSelectHand={setSelectedHand}
                             onSubmit={handleBattle}
                             hostName="開発者"
-                            currentScores={mockCurrentScores}
-                            currentUserId="lp-demo-guest"
+                            currentScores={scores}
+                            currentUserId="1"
                             userColor="#FFFFFF"
                         />
                     </div>
@@ -324,11 +337,11 @@ export function NullHandDemo() {
                 {demoPhase === 'result' && resultEvent && (
                     <ResultPhase
                         jankenEvent={resultEvent}
-                        currentScores={mockCurrentScores}
+                        currentScores={scores}
                         isProcessing={false}
                         onNextRound={handleRetry}
                         hostName="開発者"
-                        currentUserId="lp-demo-guest"
+                        currentUserId="1"
                         isCurrentHost={false}
                         roomUsers={mockRoomUsers}
                         userColor="#FFFFFF"
