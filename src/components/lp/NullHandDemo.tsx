@@ -61,7 +61,7 @@ const INITIAL_SCORES: MatchScoreWithUser[] = [
     {
         id: 'ms-2',
         userId: '2',
-        points: 300,
+        points: 0,
         turnOrder: 1,
         matchId: 'lp-demo-match',
         createdAt: new Date(),
@@ -147,8 +147,8 @@ function buildResultEvent(
     const devHands = [base.systemRealHand as HandType, base.systemBluffHand as HandType]
     const isUserWin = !devHands.includes(userHand)
 
-    // ゲスト勝ち：開発者の手のうち userHand に負ける手を finalHostHand にする
-    const losingHostHand = devHands.find((h) => judgeHand(h, userHand) === 'HOST_WIN') ?? devHands[0]!
+    // ゲスト勝ち：開発者の手のうち userHand に負ける手を finalHostHand にする（GUEST_WIN = ホスト負け）
+    const losingHostHand = devHands.find((h) => judgeHand(h, userHand) === 'GUEST_WIN') ?? devHands[0]!
     const finalHostHand = isUserWin ? losingHostHand : userHand // DRAW → NULL HAND
 
     const makeGuestHand = (userId: string, hand: HandType) =>
