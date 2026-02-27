@@ -7,14 +7,14 @@ import { HandType } from '@/shared/types'
 import { nullHandGame } from '@/components/game/NullHandGame/styles'
 import type { JankenEventWithGuests, HostStats, MatchScoreWithUser } from '@/shared/types'
 
-const DINOSAUR_ICON = '/svg/charactor/annoying-dinosaur.svg'
+const DINOSAUR_ICON = '/svg/charactor/developer.svg'
 
 /** LP用のモック JankenEvent（ゲスト視点・名もなき恐竜がホスト） */
 function createMockJankenEvent(): JankenEventWithGuests {
     return {
         id: 'lp-demo-event',
         matchId: 'lp-demo-match',
-        currentHostId: 'lp-demo-host',
+        currentHostId: 'lp-demo-guest1',
         turnNumber: 1,
         phase: 'CHOICE',
         systemRealHand: HandType.ROCK,
@@ -36,7 +36,7 @@ function createMockJankenEvent(): JankenEventWithGuests {
 }
 
 const mockHostStats: HostStats = {
-    reverseRate: 50,
+    reverseRate: 20,
     totalHostCount: 5,
 }
 
@@ -50,6 +50,36 @@ const mockCurrentScores: MatchScoreWithUser[] = [
         user: {
             id: 'lp-demo-guest',
             name: 'あなた',
+            email: 'demo@example.com',
+            comment: null,
+            faceIcon: 'BOY_FACE',
+            createdAt: new Date(),
+        },
+    },
+    {
+        userId: 'lp-demo-guest1',
+        points: 300,
+        turnOrder: 1,
+        matchId: 'lp-demo-match',
+        createdAt: new Date(),
+        user: {
+            id: 'lp-demo-guest',
+            name: '開発者',
+            email: 'demo@example.com',
+            comment: null,
+            faceIcon: 'LADY_FACE',
+            createdAt: new Date(),
+        },
+    },
+    {
+        userId: 'lp-demo-guest2',
+        points: 0,
+        turnOrder: 0,
+        matchId: 'lp-demo-match',
+        createdAt: new Date(),
+        user: {
+            id: 'lp-demo-guest',
+            name: 'あなたの友達',
             email: 'demo@example.com',
             comment: null,
             faceIcon: 'BOY_FACE',
@@ -76,7 +106,7 @@ export function NullHandDemo() {
                     isCurrentHost={false}
                     isProcessing={false}
                     onChoice={async () => {}}
-                    hostName="名もなき恐竜"
+                    hostName="開発者"
                     hostCustomIconSrc={DINOSAUR_ICON}
                     currentScores={mockCurrentScores}
                     currentUserId="lp-demo-guest"

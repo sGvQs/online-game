@@ -2,9 +2,11 @@
 
 import Link from 'next/link'
 import Image from 'next/image'
+import { Suspense } from 'react'
 import { LPHero } from '@/components/lp/LPHero'
 import { ErrorHunterDemo } from '@/components/lp/ErrorHunterDemo'
 import { NullHandDemo } from '@/components/lp/NullHandDemo'
+import { AnnoyingDinosaur } from '@/components/login/AnnoyingDinosaur'
 
 const RUBIK_PUDDLES_FONT = 'var(--font-rubik-puddles)'
 const DOT_GOTHIC_FONT = 'var(--font-dot-gothic-16)'
@@ -38,6 +40,9 @@ const GAMES = [
 export default function Home() {
     return (
         <main className="min-h-screen relative overflow-hidden">
+            <Suspense fallback={null}>
+                <AnnoyingDinosaur />
+            </Suspense>
             <div className="relative z-10 flex flex-col items-center">
                 {/* ヒーロー */}
                 <LPHero />
@@ -127,7 +132,7 @@ export default function Home() {
                                     >
                                         <div className="relative w-10 h-10">
                                             <Image
-                                                src="/svg/charactor/annoying-dinosaur.svg"
+                                                src="/svg/charactor/developer.svg"
                                                 alt=""
                                                 fill
                                                 className="object-contain"

@@ -4,7 +4,6 @@ import Link from 'next/link'
 import Image from 'next/image'
 
 const RUBIK_PUDDLES_FONT = 'var(--font-rubik-puddles)'
-const CHERRY_BOMB_FONT = 'var(--font-cherry-bomb-one)'
 const DOT_GOTHIC_FONT = 'var(--font-dot-gothic-16)'
 
 export function LPHero() {
@@ -79,34 +78,6 @@ export function LPHero() {
                     <Image src="/icon.svg" alt="" width={22} height={22} className="shrink-0 invert" />
                     ログインして始める
                 </Link>
-            </div>
-
-            {/* 恐竜の吹き出し */}
-            <div className="mt-14 flex items-center gap-4 max-w-sm">
-                <div
-                    className="relative w-16 h-16 shrink-0 rounded-full border-2 border-brand-500/40 bg-brand-500/10 flex items-center justify-center"
-                    style={{ boxShadow: '0 0 20px rgba(129,140,248,0.3)' }}
-                >
-                    <Image
-                        src="/svg/charactor/annoying-dinosaur.svg"
-                        alt=""
-                        width={48}
-                        height={48}
-                        className="object-contain"
-                    />
-                </div>
-                <div className="relative bg-brand-100/10 border border-brand-500/30 rounded-2xl rounded-tl-none px-5 py-3 text-left backdrop-blur-sm">
-                    {/* 吹き出しの矢印 */}
-                    <div className="absolute -left-2 top-3 w-0 h-0 border-t-8 border-t-transparent border-b-8 border-b-transparent border-r-8 border-r-brand-500/30" />
-                    <p
-                        className="text-sm text-brand-800 leading-relaxed"
-                        style={{ fontFamily: CHERRY_BOMB_FONT }}
-                    >
-                        やぁ。ここでまってたぞ。
-                        <br />
-                        ゲームであおうぜ。
-                    </p>
-                </div>
             </div>
 
             {/* スクロールインジケーター */}
