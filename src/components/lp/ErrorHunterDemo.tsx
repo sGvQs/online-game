@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useCallback, useEffect } from 'react'
+import { useSE } from '@/hooks/useSE'
 import { Win95Dialog } from '@/components/game/Win95Dialog'
 import { Win95TitleBarButton } from '@/components/game/Win95TitleBarButton'
 import { cn } from '@/lib/utils'
@@ -34,6 +35,7 @@ interface ErrorModalState {
 }
 
 export function ErrorHunterDemo() {
+    const { play } = useSE()
     const [phase, setPhase] = useState<'playing' | 'result'>('playing')
     const [errors, setErrors] = useState<ErrorModalState[]>([])
 
@@ -49,18 +51,23 @@ export function ErrorHunterDemo() {
         )
     }, [])
 
-    const closeError = useCallback((id: string) => {
-        setErrors((prev) => {
-            const next = prev.map((e) => (e.id === id ? { ...e, closed: true } : e))
-            const allClosed = next.every((e) => e.closed)
-            if (allClosed) {
-                setTimeout(() => setPhase('result'), 300)
-            }
-            return next
-        })
-    }, [])
+    const closeError = useCallback(
+        (id: string) => {
+            setErrors((prev) => {
+                const next = prev.map((e) => (e.id === id ? { ...e, closed: true } : e))
+                const allClosed = next.every((e) => e.closed)
+                if (allClosed) {
+                    play('tada')
+                    setTimeout(() => setPhase('result'), 300)
+                }
+                return next
+            })
+        },
+        [play]
+    )
 
     const endDemo = useCallback(() => {
+        play('error')
         setPhase('playing')
         setErrors(
             ERROR_POSITIONS.map((pos, i) => ({
@@ -71,25 +78,16 @@ export function ErrorHunterDemo() {
                 closed: false,
             }))
         )
-    }, [])
+    }, [play])
 
     return (
         <div
             className={cn(
                 'relative rounded-xl overflow-hidden border-2 border-brand-500/50',
                 'bg-[#008080] min-h-[400px]',
-                "font-['MS_Sans_Serif','Segoe_UI',Tahoma,sans-serif] text-xs",
-                'after:content-[""] after:absolute after:top-0 after:left-0 after:w-full after:h-full',
-                'after:bg-[repeating-linear-gradient(0deg,rgba(0,0,0,0.03)_0px,rgba(0,0,0,0.03)_1px,transparent_1px,transparent_2px)]',
-                'after:pointer-events-none'
+                "font-['MS_Sans_Serif','Segoe_UI',Tahoma,sans-serif] text-xs"
             )}
         >
-            {/* 星の装飾（他画面と同量・背景レイヤー） */}
-            <div className="absolute inset-0 pointer-events-none z-0">
-                <div className="absolute top-1/4 left-1/4 w-2 h-2 bg-white rounded-full opacity-80 animate-pulse" />
-                <div className="absolute top-1/3 right-1/3 w-1 h-1 bg-brand-400 rounded-full opacity-60" />
-                <div className="absolute bottom-1/4 left-1/2 w-1.5 h-1.5 bg-white rounded-full opacity-70 animate-pulse" style={{ animationDelay: '1s' }} />
-            </div>
             {/* Win95 デスクトップ上にエラーダイアログを配置 */}
             {phase === 'playing' &&
                 errors

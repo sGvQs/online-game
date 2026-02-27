@@ -11,14 +11,6 @@ const RUBIK_PUDDLES_FONT = 'var(--font-rubik-puddles)'
 export default function Home() {
     return (
         <main className="min-h-screen relative overflow-hidden">
-            {/* 宇宙背景 */}
-            <div className="fixed inset-0 pointer-events-none">
-                <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_0%,#1e1b4b_0%,#020617_60%)]" />
-                <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-brand-500/15 blur-[120px] rounded-full animate-pulse-slow" />
-                <div className="absolute top-1/4 left-1/4 w-2 h-2 bg-white rounded-full opacity-80 animate-pulse" />
-                <div className="absolute top-1/3 right-1/3 w-1 h-1 bg-brand-400 rounded-full opacity-60" />
-                <div className="absolute bottom-1/4 left-1/2 w-1.5 h-1.5 bg-white rounded-full opacity-70 animate-pulse" style={{ animationDelay: '1s' }} />
-            </div>
 
             <div className="relative z-10 flex flex-col items-center">
                 {/* ヒーロー */}
