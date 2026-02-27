@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useLayoutEffect, useState } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { useSearchParams, usePathname } from 'next/navigation'
 import { motion } from 'framer-motion'
 import Image from 'next/image'
 import { detectIncognito } from 'detectincognitojs'
@@ -11,12 +11,10 @@ import {
     DIALOGUE_MESSAGES_VISIT_0,
     DIALOGUE_MESSAGES_VISIT_1_PLUS,
     DIALOGUE_MESSAGES_RETURNING,
+    LP_DINOSAUR_MESSAGES,
 } from '@/shared/constants/dinosaurLoginMessages'
 import { SESSION_KEY_HAS_LOGGED_IN, SESSION_KEY_LOGIN_VISIT_COUNT, LOCAL_KEY_HAS_VISITED } from '@/shared/constants/storage'
 import { useSE } from '@/hooks/useSE'
-
-/** LP_DINOSAUR_MESSAGES は @/shared/constants/dinosaurLoginMessages から参照 */
-export { LP_DINOSAUR_MESSAGES } from '@/shared/constants/dinosaurLoginMessages'
 
 const ENTER_DURATION = 3
 const IDLE_DURATION = 10
@@ -191,15 +189,17 @@ function SuckedInAnimation({ onComplete }: { onComplete: () => void }) {
 }
 
 export function AnnoyingDinosaur() {
+    const pathname = usePathname()
     const searchParams = useSearchParams()
     const forceVisit1Plus = searchParams.get('flow') === '1'
+    const isLP = pathname === '/'
 
     const [phase, setPhase] = useState<'entering' | 'idle' | 'exiting'>('entering')
     const [dialogueIndex, setDialogueIndex] = useState(0)
     const [dialogueMessages, setDialogueMessages] = useState<string[]>(DIALOGUE_MESSAGES_VISIT_0)
     const [displayedText, setDisplayedText] = useState('')
     const [isVisible, setIsVisible] = useState(true)
-    const [repeatMessageSource, setRepeatMessageSource] = useState<'visit1plus' | 'returning' | null>(null)
+    const [repeatMessageSource, setRepeatMessageSource] = useState<'visit1plus' | 'returning' | 'lp' | null>(null)
     const [enterPattern, setEnterPattern] = useState<EnterPattern | null>(null)
     const [enterFrom, setEnterFrom] = useState<'left' | 'bottom' | null>(null)
     const [rotateFlowDirection, setRotateFlowDirection] = useState<RotateFlowDirection | null>(null)
@@ -243,6 +243,12 @@ export function AnnoyingDinosaur() {
     useEffect(() => {
         if (enterPattern === 'nantechatte' || isSuckedInAftermath) return
         const initMessages = async () => {
+            if (isLP) {
+                setDialogueMessages(LP_DINOSAUR_MESSAGES)
+                setDialogueIndex(Math.floor(Math.random() * LP_DINOSAUR_MESSAGES.length))
+                setRepeatMessageSource('lp')
+                return
+            }
             const { isPrivate } = await detectIncognito()
             if (isPrivate) {
                 setDialogueMessages(DIALOGUE_MESSAGES_INCOGNITO)
@@ -267,7 +273,7 @@ export function AnnoyingDinosaur() {
             }
         }
         initMessages()
-    }, [enterPattern, isSuckedInAftermath, forceVisit1Plus])
+    }, [enterPattern, isSuckedInAftermath, forceVisit1Plus, isLP])
 
 
     useEffect(() => {
@@ -335,7 +341,12 @@ export function AnnoyingDinosaur() {
         setIsVisible(false)
         setRotateFlowDirection(null)
         if (repeatMessageSource) {
-            const source = repeatMessageSource === 'visit1plus' ? DIALOGUE_MESSAGES_VISIT_1_PLUS : DIALOGUE_MESSAGES_RETURNING
+            const source =
+                repeatMessageSource === 'visit1plus'
+                    ? DIALOGUE_MESSAGES_VISIT_1_PLUS
+                    : repeatMessageSource === 'returning'
+                      ? DIALOGUE_MESSAGES_RETURNING
+                      : LP_DINOSAUR_MESSAGES
             setTimeout(() => {
                 setDialogueMessages(source)
                 setDialogueIndex(Math.floor(Math.random() * source.length))

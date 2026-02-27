@@ -179,7 +179,7 @@ export function ErrorHunterDemo() {
                                     marginTop: '12px',
                                 }}
                             >
-                                あなたの負けです
+                                もう一度エラーを出す
                             </p>
                         </div>
                     </Win95Dialog>
