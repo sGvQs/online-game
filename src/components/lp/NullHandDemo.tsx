@@ -157,6 +157,7 @@ function buildResultEvent(
             jankenEventId: base.id,
             userId,
             hand,
+            isConfirmed: true,
             createdAt: new Date(),
             user: mockRoomUsers.find((u) => u.userId === userId)?.user ?? null,
         }) as JankenEventWithGuests['guestHands'][number]
