@@ -89,20 +89,20 @@ export function RoomListEmptyState() {
                     alt=""
                     width={96}
                     height={96}
-                    className="animate-bounce mx-auto"
+                    className="mx-auto"
                 />
             </div>
             <h3
                 className={emptyStyles.title()}
                 style={{ color: '#ffffff', fontFamily: 'var(--font-cherry-bomb-one)' }}
             >
-                いまはだれもいないんだね。
+                いまはだれもあそんでないな。
             </h3>
             <p
                 className={emptyStyles.description()}
                 style={{ color: '#ffffff', fontFamily: 'var(--font-cherry-bomb-one)' }}
             >
-               でもいいんだよ。きみがるーむつくると、みんなくるようになるからさ。
+               でもいいんだよ。きみがるーむつくると、きっとみんなあつまってくるからさ。
             </p>
         </div>
     )
