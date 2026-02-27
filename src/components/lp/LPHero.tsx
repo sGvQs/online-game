@@ -1,7 +1,6 @@
 'use client'
 
 import Link from 'next/link'
-import Image from 'next/image'
 
 const RUBIK_PUDDLES_FONT = 'var(--font-rubik-puddles)'
 const DOT_GOTHIC_FONT = 'var(--font-dot-gothic-16)'
@@ -63,22 +62,30 @@ export function LPHero() {
             </p>
 
             {/* CTAボタン */}
-            <div className="mt-10 relative">
-                {/* グロー */}
-                <div className="absolute inset-0 rounded-xl bg-brand-400/40 blur-xl animate-pulse-slow" />
-                <Link
-                    href="/login"
-                    className="relative inline-flex items-center gap-3 px-12 py-5 rounded-xl font-bold text-lg transition-all text-white border-2 border-brand-400 hover:border-brand-300"
-                    style={{
-                        fontFamily: RUBIK_PUDDLES_FONT,
-                        background: 'linear-gradient(135deg, #6366f1, #818cf8)',
-                        boxShadow: '0 0 30px rgba(99,102,241,0.4), 0 4px 20px rgba(0,0,0,0.3)',
-                    }}
-                >
-                    <Image src="/icon.svg" alt="" width={22} height={22} className="shrink-0 invert" />
-                    ログインして始める
-                </Link>
-            </div>
+            <Link
+                href="/login"
+                className="mt-10 group relative inline-flex items-center gap-2.5 px-8 py-3.5 rounded-full text-sm font-semibold tracking-wider text-white transition-all duration-300 hover:scale-105"
+                style={{
+                    fontFamily: DOT_GOTHIC_FONT,
+                    background: 'linear-gradient(135deg, rgba(99,102,241,0.15), rgba(168,85,247,0.15))',
+                    border: '1px solid rgba(129,140,248,0.4)',
+                    boxShadow: '0 0 0 0 rgba(129,140,248,0), inset 0 1px 0 rgba(255,255,255,0.08)',
+                }}
+                onMouseEnter={e => {
+                    (e.currentTarget as HTMLAnchorElement).style.boxShadow = '0 0 24px rgba(129,140,248,0.25), inset 0 1px 0 rgba(255,255,255,0.08)'
+                    ;(e.currentTarget as HTMLAnchorElement).style.borderColor = 'rgba(129,140,248,0.7)'
+                }}
+                onMouseLeave={e => {
+                    (e.currentTarget as HTMLAnchorElement).style.boxShadow = '0 0 0 0 rgba(129,140,248,0), inset 0 1px 0 rgba(255,255,255,0.08)'
+                    ;(e.currentTarget as HTMLAnchorElement).style.borderColor = 'rgba(129,140,248,0.4)'
+                }}
+            >
+                <span className="w-1.5 h-1.5 rounded-full bg-brand-400 animate-pulse" />
+                ログインして始める
+                <svg className="w-3.5 h-3.5 opacity-50 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                </svg>
+            </Link>
 
             {/* スクロールインジケーター */}
             <div className="mt-16 flex flex-col items-center gap-2 opacity-60 animate-bounce">

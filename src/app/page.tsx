@@ -31,7 +31,7 @@ const GAMES = [
         tags: ['MIND', 'PSYCHOLOGY', 'BLUFF'],
         tagColor: '#818cf8',
         borderColor: '#818cf8',
-        description: 'ホストが選ぶREALかBLUFFか。ゲストはホストの心理を読んで勝負！名もなき恐竜が手を選んでいる様子を体験してみよう。',
+        description: 'ホストが出す手はSYSTEM SELECTIONかそれ以外か。開発者の持ち手を見抜いて勝負しよう。下のデモで今すぐ試せるぞ！',
         comment: 'ぼくのせんたく、あてられるかな？',
         Demo: NullHandDemo,
     },
@@ -160,83 +160,74 @@ export default function Home() {
                 </section>
 
                 {/* CTA */}
-                <section className="py-24 px-8 w-full max-w-3xl">
-                    <div className="relative rounded-3xl overflow-hidden">
-                        {/* 背景グロー */}
+                <section className="py-24 px-8 w-full max-w-2xl">
+                    <div className="relative text-center">
+                        {/* 背景の淡いオーロラ */}
                         <div
-                            className="absolute inset-0 opacity-30"
+                            className="absolute -inset-12 opacity-20 pointer-events-none"
                             style={{
-                                background: 'radial-gradient(ellipse at 50% 0%, rgba(129,140,248,0.5) 0%, transparent 70%)',
+                                background: 'radial-gradient(ellipse at 50% 60%, rgba(168,85,247,0.6) 0%, rgba(99,102,241,0.4) 40%, transparent 70%)',
+                                filter: 'blur(40px)',
                             }}
                         />
-                        <div
-                            className="glass-card relative p-12 text-center rounded-3xl"
+
+                        {/* 小さな星くずデコレーション */}
+                        <div className="absolute top-0 left-8 w-1 h-1 rounded-full bg-brand-400/60 animate-pulse" />
+                        <div className="absolute top-6 right-12 w-1.5 h-1.5 rounded-full bg-purple-400/50 animate-pulse" style={{ animationDelay: '0.7s' }} />
+                        <div className="absolute bottom-12 left-16 w-1 h-1 rounded-full bg-pink-400/50 animate-pulse" style={{ animationDelay: '1.3s' }} />
+
+                        <p
+                            className="text-brand-600 text-[10px] tracking-[0.4em] uppercase mb-6"
+                            style={{ fontFamily: DOT_GOTHIC_FONT }}
+                        >
+                            ✦ ready to play ✦
+                        </p>
+
+                        <h2
+                            className="text-5xl md:text-6xl leading-snug mb-2"
+                            style={{ fontFamily: CHERRY_BOMB_FONT }}
+                        >
+                            <span style={{
+                                background: 'linear-gradient(135deg, #e0e7ff, #a5b4fc, #c084fc)',
+                                WebkitBackgroundClip: 'text',
+                                WebkitTextFillColor: 'transparent',
+                                backgroundClip: 'text',
+                            }}>
+                                ゲームでまってるぜ。
+                            </span>
+                        </h2>
+
+
+                        <Link
+                            href="/login"
+                            className="group inline-flex items-center gap-2.5 px-8 py-3.5 rounded-full text-sm font-semibold tracking-wider text-white transition-all duration-300 hover:scale-105"
                             style={{
-                                border: '1px solid rgba(129,140,248,0.3)',
-                                boxShadow: '0 0 60px rgba(99,102,241,0.2), inset 0 1px 0 rgba(255,255,255,0.1)',
+                                fontFamily: DOT_GOTHIC_FONT,
+                                background: 'linear-gradient(135deg, rgba(99,102,241,0.15), rgba(168,85,247,0.15))',
+                                border: '1px solid rgba(129,140,248,0.4)',
+                                boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.08)',
+                            }}
+                            onMouseEnter={e => {
+                                (e.currentTarget as HTMLAnchorElement).style.boxShadow = '0 0 24px rgba(129,140,248,0.25), inset 0 1px 0 rgba(255,255,255,0.08)'
+                                ;(e.currentTarget as HTMLAnchorElement).style.borderColor = 'rgba(129,140,248,0.7)'
+                            }}
+                            onMouseLeave={e => {
+                                (e.currentTarget as HTMLAnchorElement).style.boxShadow = 'inset 0 1px 0 rgba(255,255,255,0.08)'
+                                ;(e.currentTarget as HTMLAnchorElement).style.borderColor = 'rgba(129,140,248,0.4)'
                             }}
                         >
-                            {/* コーナーデコレーション */}
-                            <div className="absolute top-4 left-4 w-6 h-6 border-t-2 border-l-2 border-brand-500/50 rounded-tl-md" />
-                            <div className="absolute top-4 right-4 w-6 h-6 border-t-2 border-r-2 border-brand-500/50 rounded-tr-md" />
-                            <div className="absolute bottom-4 left-4 w-6 h-6 border-b-2 border-l-2 border-brand-500/50 rounded-bl-md" />
-                            <div className="absolute bottom-4 right-4 w-6 h-6 border-b-2 border-r-2 border-brand-500/50 rounded-br-md" />
+                            <span className="w-1.5 h-1.5 rounded-full bg-brand-400 animate-pulse" />
+                            ログインして始める
+                            <svg className="w-3.5 h-3.5 opacity-50 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                            </svg>
+                        </Link>
 
-                            <p
-                                className="text-brand-600 text-xs tracking-[0.3em] uppercase mb-4"
-                                style={{ fontFamily: DOT_GOTHIC_FONT }}
-                            >
-                                READY TO PLAY?
-                            </p>
-                            <h2
-                                className="text-5xl md:text-6xl font-black mb-4"
-                                style={{
-                                    fontFamily: RUBIK_PUDDLES_FONT,
-                                    background: 'linear-gradient(135deg, #ffffff, #818cf8)',
-                                    WebkitBackgroundClip: 'text',
-                                    WebkitTextFillColor: 'transparent',
-                                    backgroundClip: 'text',
-                                }}
-                            >
-                                ゲームで
-                            </h2>
-                            <h2
-                                className="text-5xl md:text-6xl font-black mb-8"
-                                style={{
-                                    fontFamily: RUBIK_PUDDLES_FONT,
-                                    background: 'linear-gradient(135deg, #818cf8, #c084fc)',
-                                    WebkitBackgroundClip: 'text',
-                                    WebkitTextFillColor: 'transparent',
-                                    backgroundClip: 'text',
-                                }}
-                            >
-                                待ってるぜ。
-                            </h2>
-
-                            <div className="relative inline-block">
-                                <div
-                                    className="absolute inset-0 rounded-xl animate-pulse-slow"
-                                    style={{ background: 'rgba(99,102,241,0.4)', filter: 'blur(12px)' }}
-                                />
-                                <Link
-                                    href="/login"
-                                    className="relative inline-flex items-center gap-3 px-12 py-5 rounded-xl font-bold text-lg text-white border-2 border-brand-400 hover:border-brand-300 transition-all hover:scale-105"
-                                    style={{
-                                        fontFamily: RUBIK_PUDDLES_FONT,
-                                        background: 'linear-gradient(135deg, #6366f1, #818cf8)',
-                                        boxShadow: '0 0 30px rgba(99,102,241,0.4)',
-                                    }}
-                                >
-                                    ログインして始める
-                                </Link>
-                            </div>
-
-                            <p className="mt-8 text-xs text-brand-600">
-                                <Link href="/terms" className="underline hover:opacity-80 transition-opacity">利用規約</Link>
-                                {' '}・{' '}
-                                <Link href="/privacy" className="underline hover:opacity-80 transition-opacity">プライバシーポリシー</Link>
-                            </p>
-                        </div>
+                        <p className="mt-8 text-[11px] text-brand-700/60" style={{ fontFamily: DOT_GOTHIC_FONT }}>
+                            <Link href="/terms" className="hover:text-brand-500 transition-colors">利用規約</Link>
+                            {' '}·{' '}
+                            <Link href="/privacy" className="hover:text-brand-500 transition-colors">プライバシーポリシー</Link>
+                        </p>
                     </div>
                 </section>
 
