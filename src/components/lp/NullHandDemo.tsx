@@ -9,8 +9,6 @@ import { HandType } from '@/shared/types'
 import { nullHandGame } from '@/components/game/NullHandGame/styles'
 import type { JankenEventWithGuests, HostStats, MatchScoreWithUser, RoomUserWithUser } from '@/shared/types'
 
-const DEVELOPER_ICON = '/svg/charactor/developer.svg'
-
 // 開発者は常に パー(PAPER) と チョキ(SCISSORS) の2択を持つ
 function createMockEvent(): JankenEventWithGuests {
     return {
@@ -49,14 +47,7 @@ const INITIAL_SCORES: MatchScoreWithUser[] = [
         turnOrder: 0,
         matchId: 'lp-demo-match',
         createdAt: new Date(),
-        user: {
-            id: '1',
-            name: 'あなた',
-            email: 'demo@example.com',
-            comment: null,
-            faceIcon: 'BLACK_FACE',
-            createdAt: new Date(),
-        },
+        user: { id: '1', name: 'あなた', email: 'demo@example.com', comment: null, faceIcon: 'BOY_FACE', createdAt: new Date() },
     },
     {
         userId: '2',
@@ -64,29 +55,15 @@ const INITIAL_SCORES: MatchScoreWithUser[] = [
         turnOrder: 1,
         matchId: 'lp-demo-match',
         createdAt: new Date(),
-        user: {
-            id: '2',
-            name: '開発者',
-            email: 'demo@example.com',
-            comment: null,
-            faceIcon: 'BOY_FACE',
-            createdAt: new Date(),
-        },
+        user: { id: '2', name: '開発者', email: 'demo@example.com', comment: null, faceIcon: 'LADY_FACE', createdAt: new Date() },
     },
     {
-        userId: '3',
+        userId: '12',
         points: 0,
-        turnOrder: 0,
+        turnOrder: 2,
         matchId: 'lp-demo-match',
         createdAt: new Date(),
-        user: {
-            id: '3',
-            name: 'あなたの友達',
-            email: 'demo@example.com',
-            comment: null,
-            faceIcon: 'WHITE_FACE',
-            createdAt: new Date(),
-        },
+        user: { id: '12', name: 'あなたの友達', email: 'demo@example.com', comment: null, faceIcon: 'BOY_FACE', createdAt: new Date() },
     },
 ]
 
@@ -143,13 +120,6 @@ type DemoPhase = 'choice' | 'battle' | 'result'
 /** ChoicePhase 内部アニメーション完了まで約9秒 + 余裕を持って12秒 */
 const BATTLE_TRIGGER_MS = 12000
 
-/**
- * リザルト用 JankenEvent を組み立てる。
- *
- * ゲームロジック（LP デモ仕様）:
- *   - チョキ (SCISSORS) を出したとき → 開発者 PAPER = ユーザー勝ち (YOU WIN!!)
- *   - グー / パー を出したとき      → 開発者が同じ手 + ゲスト2人全員 DRAW = NULL HAND
- */
 /**
  * リザルト用 JankenEvent を組み立てる。
  *
@@ -308,9 +278,10 @@ export function NullHandDemo() {
                         isProcessing={false}
                         onChoice={async () => {}}
                         hostName="開発者"
-                        hostCustomIconSrc={DEVELOPER_ICON}
+                        hostFaceIcon="LADY_FACE"
                         currentScores={scores}
                         currentUserId="1"
+                        userColor="#FFFFFF"
                     />
                 )}
 
@@ -327,6 +298,7 @@ export function NullHandDemo() {
                             onSelectHand={setSelectedHand}
                             onSubmit={handleBattle}
                             hostName="開発者"
+                            hostFaceIcon="LADY_FACE"
                             currentScores={scores}
                             currentUserId="1"
                             userColor="#FFFFFF"
