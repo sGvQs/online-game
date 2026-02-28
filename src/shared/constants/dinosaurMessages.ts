@@ -33,20 +33,20 @@ export { getComplaintMessageForRoomName } from './roomDeletedComplaints'
 export { getRandomDinosaurRoomName } from './dinosaurTypingRoomNames'
 
 export const TYPING_MODE_MESSAGES = [
-    '文字。',
+    'もじ。',
     'なんか。',
-    '出てる。',
+    'でてる。',
     '……。',
     'カタ。',
-    '光ってる。',
+    'ひかってる。',
     'たぶん。',
     'あ。',
     'へへ。',
     'まだ。',
-    'あ、文字が。',
+    'あ、もじが。',
     'キーが。',
-    '何か。',
-    'なんか打ってる。',
+    'なにか。',
+    'なんかうってる。',
 ]
 
 /**

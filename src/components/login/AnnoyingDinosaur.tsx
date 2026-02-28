@@ -16,6 +16,7 @@ import {
 import { SESSION_KEY_HAS_LOGGED_IN, SESSION_KEY_LOGIN_VISIT_COUNT, LOCAL_KEY_HAS_VISITED } from '@/shared/constants/storage'
 import { useSE } from '@/hooks/useSE'
 
+const CHERRY_BOMB_FONT = 'var(--font-cherry-bomb-one)'
 const ENTER_DURATION = 3
 const IDLE_DURATION = 10
 /** なんちゃってパターン時の待機時間（秒） */
@@ -27,13 +28,13 @@ const VISIT_1_PLUS_REAPPEAR_DELAY_SEC = 10
 const CHAR_INTERVAL_MS = 150
 /** 吸い込まれた後の「なんちゃって」メッセージ（ランダム） */
 const SUCKED_IN_AFTERMATH_MESSAGES = [
-    'なんちゃって。……君、本気で心配してくれたの？ そっか。ありがとう。僕も君のことがいるから、簡単には消えないんだ。',
-    'なんちゃって。……下にね、君の気持ちが落ちていくのが見えたんだ。だから戻ってきた。君に笑ってほしいから。',
-    'なんちゃって。……本当に消えたら、君はどうするんだろうって思ったんだ。だから戻ってきた。',
-    'なんちゃって。……君、本気で心配した？ 大丈夫だよ。僕はここにいる。',
-    'なんちゃって。……下はね、真っ白で何もなかった。つまらなかったから戻ってきた。',
-    'なんちゃって。……驚いたか。ごめんな。でも君が反応してくれるの、面白いんだ。',
-    'なんちゃって。……一瞬消えてみただけ。すぐ戻るつもりだったよ。',
+    'なんちゃって。……きみ、ほんきでしんぱいしてくれたの？ そっか。ありがとう。ぼくもきみのことがいるから、かんたんにはきえないんだ。',
+    'なんちゃって。……したにね、きみのきもちがおちていくのがみえたんだ。だからもどってきた。きみにわらってほしいから。',
+    'なんちゃって。……ほんとうにきえたら、きみはどうするんだろうっておもったんだ。だからもどってきた。',
+    'なんちゃって。……きみ、ほんきでしんぱいした？ だいじょうぶだよ。ぼくはここにいる。',
+    'なんちゃって。……したはね、まっしろでなにもなかった。つまらなかったからもどってきた。',
+    'なんちゃって。……おどろいたか。ごめんな。でもきみがはんのうしてくれるの、おもしろいんだ。',
+    'なんちゃって。……いっしゅんきえてみただけ。すぐもどるつもりだったよ。',
 
 ]
 /** 各パターンの発生確率（5パターン中1つなので0.2） */
@@ -133,8 +134,8 @@ function RotateWhileTalkingAnimation({
                         className="object-contain"
                     />
                 </div>
-                <div className="shrink-0 mb-2 px-2.5 py-1.5 rounded-xl border border-brand-200/20 bg-brand-300 text-white text-[10px] font-medium shadow-sm max-w-[400px]">
-                    <span className="font-(--font-dot-gothic-16)">{displayedText}</span>
+                <div className="shrink-0 mb-2 px-2.5 py-1.5 rounded-xl border border-white bg-white text-black text-[10px] font-medium shadow-sm max-w-[400px]">
+                    <span style={{ fontFamily: CHERRY_BOMB_FONT }}>{displayedText}</span>
                 </div>
             </motion.div>
         </motion.div>
@@ -143,7 +144,7 @@ function RotateWhileTalkingAnimation({
 
 /** 吸い込まれるアニメーション：画面外右上→中央下へ回転しながら流れる */
 function SuckedInAnimation({ onComplete }: { onComplete: () => void }) {
-    const SUCKED_IN_MESSAGE = 'うぁー、吸い込まれるー'
+    const SUCKED_IN_MESSAGE = 'うぁー、すいこまれるー'
 
     useEffect(() => {
         const timer = setTimeout(onComplete, SUCKED_IN_DURATION * 1000)
@@ -180,8 +181,8 @@ function SuckedInAnimation({ onComplete }: { onComplete: () => void }) {
                         className="object-contain"
                     />
                 </div>
-                <div className="shrink-0 mb-1 px-2.5 py-1.5 rounded-xl border border-brand-200/20 bg-brand-300 text-white text-[10px] font-medium shadow-sm">
-                    <span className="font-(--font-dot-gothic-16)">{SUCKED_IN_MESSAGE}</span>
+                <div className="shrink-0 mb-1 px-2.5 py-1.5 rounded-xl border border-white bg-white text-black text-[10px] font-medium shadow-sm">
+                    <span style={{ fontFamily: CHERRY_BOMB_FONT }}>{SUCKED_IN_MESSAGE}</span>
                 </div>
             </motion.div>
         </motion.div>
@@ -454,8 +455,8 @@ export function AnnoyingDinosaur() {
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ duration: 0.4, delay: 0.2 }}
                     >
-                        <div className="relative px-2.5 py-1.5 rounded-xl border border-brand-200/20 bg-brand-300 text-white text-[10px] font-medium shadow-sm">
-                            <span className="font-(--font-dot-gothic-16) tracking-wide">
+                        <div className="relative px-2.5 py-1.5 rounded-xl border border-white bg-white text-black text-[10px] font-medium shadow-sm">
+                            <span className="tracking-wide" style={{ fontFamily: CHERRY_BOMB_FONT }}>
                                 {displayedText}
                                 {displayedText.length < (dialogueMessages[Math.min(dialogueIndex, dialogueMessages.length - 1)] ?? '').length && (
                                     <span className="inline-block w-0.5 h-3 ml-0.5 bg-current animate-pulse" aria-hidden />
@@ -463,7 +464,7 @@ export function AnnoyingDinosaur() {
                             </span>
                             {/* 口方向へのしっぽ（吹き出しの左からキャラへ向かう） */}
                             <div
-                                className="absolute -left-1.5 top-1/2 -translate-y-1/2 w-0 h-0 border-t-4 border-t-transparent border-b-4 border-b-transparent border-r-[6px] border-r-brand-300"
+                                className="absolute -left-1.5 top-1/2 -translate-y-1/2 w-0 h-0 border-t-4 border-t-transparent border-b-4 border-b-transparent border-r-[6px] border-r-white"
                                 aria-hidden
                             />
                         </div>
