@@ -43,7 +43,7 @@ const ASTEROID_HP: Record<Difficulty, number> = {
 }
 
 // ============================================
-// セリフデータ
+// セリフデータ（難易度によらず共通、配列からランダム選択）
 // ============================================
 
 export interface DialogueLine {
@@ -51,26 +51,23 @@ export interface DialogueLine {
     romaji: string
 }
 
-export const DIALOGUES: Record<Difficulty, DialogueLine[]> = {
-    EASY: [
-        { text: 'ひとつ', romaji: 'hitotsu' },
-        { text: 'ふたつ', romaji: 'futatsu' },
-        { text: 'せーの', romaji: 'seeno' },
-        { text: 'よかった', romaji: 'yokatta' },
-    ],
-    NORMAL: [
-        { text: '今まではひとりだった', romaji: 'imamadehahitoridatta' },
-        { text: 'でも今は、きみがいる', romaji: 'demoimahakimiiru' },
-        { text: '一緒に守ろう', romaji: 'issyonimamoro' },
-        { text: 'だから隕石なんてへっちゃら', romaji: 'dakarainsekiinanteheccyara' },
-    ],
-    HARD: [
-        { text: 'いっぱい来た', romaji: 'ippaikita' },
-        { text: 'でもだいじょうぶ', romaji: 'demodaijoubu' },
-        { text: 'きみがいるから', romaji: 'kimigarukaara' },
-        { text: 'もう一回', romaji: 'mouikkai' },
-    ],
-}
+export const DIALOGUES: DialogueLine[] = [
+    { text: 'ひとつ', romaji: 'hitotsu' },
+    { text: 'ふたつ', romaji: 'futatsu' },
+    { text: 'せーの', romaji: 'seeno' },
+    { text: 'よかった', romaji: 'yokatta' },
+    { text: '今まではひとりだった', romaji: 'imamadehahitoridatta' },
+    { text: 'でも今は、きみがいる', romaji: 'demoimahakimiiru' },
+    { text: '一緒に守ろう', romaji: 'issyonimamoro' },
+    { text: 'だから隕石なんてへっちゃら', romaji: 'dakarainsekiinanteheccyara' },
+    { text: 'いっぱい来た', romaji: 'ippaikita' },
+    { text: 'でもだいじょうぶ', romaji: 'demodaijoubu' },
+    { text: 'きみがいるから', romaji: 'kimigarukaara' },
+    { text: 'もう一回', romaji: 'mouikkai' },
+]
+
+const pickRandomDialogue = (): DialogueLine =>
+    DIALOGUES[Math.floor(Math.random() * DIALOGUES.length)]
 
 // ============================================
 // 隕石・弾の型
@@ -162,8 +159,10 @@ export function useStarShield({
     const [timer, setTimer] = useState(GAME_DURATION_SECONDS)
     const [score, setScore] = useState({ spawned: 0, destroyed: 0 })
 
-    // タイピング状態（Typist のみ）
-    const [dialogueIndex, setDialogueIndex] = useState(0)
+    // タイピング状態（Typist のみ）：配列からランダムに選択
+    const [currentLine, setCurrentLine] = useState<DialogueLine | null>(() =>
+        isShooter ? null : pickRandomDialogue()
+    )
     const [charIndex, setCharIndex] = useState(0)
 
     // Refs
@@ -173,8 +172,6 @@ export function useStarShield({
     const aimRef = useRef({ x: 0.5, y: 0.5 }) // 正規化座標 0-1
     const gameEndedRef = useRef(false)
     const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null)
-
-    const dialogues = DIALOGUES[difficulty]
 
     // ============================================
     // ゲーム終了処理
@@ -508,9 +505,10 @@ export function useStarShield({
         if (gameEndedRef.current) return
         if (e.key.length !== 1) return
 
-        const currentLine = dialogues[dialogueIndex % dialogues.length]
-        const expected = currentLine.romaji[charIndex]
+        const line = currentLine
+        if (!line) return
 
+        const expected = line.romaji[charIndex]
         if (e.key.toLowerCase() !== expected) return
 
         // fire broadcast を Shooter へ送信（破壊は弾が当たったときのみ Shooter でカウント）
@@ -521,13 +519,13 @@ export function useStarShield({
         })
 
         const nextChar = charIndex + 1
-        if (nextChar >= currentLine.romaji.length) {
-            setDialogueIndex((i) => i + 1)
+        if (nextChar >= line.romaji.length) {
+            setCurrentLine(pickRandomDialogue())
             setCharIndex(0)
         } else {
             setCharIndex(nextChar)
         }
-    }, [dialogues, dialogueIndex, charIndex])
+    }, [currentLine, charIndex])
 
     useEffect(() => {
         if (isShooter) return
@@ -543,7 +541,7 @@ export function useStarShield({
         aimRef,
         onMouseMove,
         dialogue: {
-            line: dialogues[dialogueIndex % dialogues.length],
+            line: currentLine ?? DIALOGUES[0],
             charIndex,
         },
     }

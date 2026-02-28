@@ -88,6 +88,54 @@ export async function getStarShieldMatchInfo(
     return { startedAt: match?.createdAt.getTime() ?? Date.now() }
 }
 
+/** リロード時に match ステータスを確認し、終了済みなら結果を返す */
+export async function getStarShieldMatchStatus(matchId: string): Promise<
+    | { status: 'playing'; startedAt: number }
+    | {
+          status: 'finished'
+          startedAt: number
+          result: 'CLEARED' | 'FAILED_CONTACT' | 'FAILED_TIMEOUT'
+          stats: { spawnedCount: number; destroyedCount: number; durationSeconds: number }
+      }
+    | { status: 'not_found' }
+> {
+    const tsm = await prisma.typingShootMatch.findUnique({
+        where: { matchId },
+    })
+
+    if (!tsm) {
+        const match = await prisma.match.findUnique({
+            where: { id: matchId },
+            select: { createdAt: true },
+        })
+        if (!match) return { status: 'not_found' }
+        return { status: 'playing', startedAt: match.createdAt.getTime() }
+    }
+
+    const startedAt = tsm.startedAt.getTime()
+
+    if (!tsm.endedAt) {
+        return { status: 'playing', startedAt }
+    }
+
+    const result: 'CLEARED' | 'FAILED_CONTACT' | 'FAILED_TIMEOUT' = tsm.isCleared
+        ? 'CLEARED'
+        : tsm.failureReason === 'FAILED_CONTACT'
+          ? 'FAILED_CONTACT'
+          : 'FAILED_TIMEOUT'
+
+    return {
+        status: 'finished',
+        startedAt,
+        result,
+        stats: {
+            spawnedCount: tsm.spawnedCount,
+            destroyedCount: tsm.destroyedCount,
+            durationSeconds: tsm.durationSeconds ?? 0,
+        },
+    }
+}
+
 interface SaveStarShieldResultData {
     spawnedCount: number
     destroyedCount: number

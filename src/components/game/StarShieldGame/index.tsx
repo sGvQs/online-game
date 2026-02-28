@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { useGameRoom } from '@/hooks/useGameRoom'
 import { returnToRoom, resetAllReady } from '@/server/actions/room'
-import { startStarShieldMatch, getStarShieldMatchInfo } from '@/server/actions/game'
+import { startStarShieldMatch, getStarShieldMatchStatus } from '@/server/actions/game'
 import { RoomWithUsersAndReadyStatus } from '@/shared/types'
 import { Difficulty, GameResult, GameStats } from '@/hooks/useStarShield'
 import { TitleScreen } from './TitleScreen'
@@ -44,18 +44,25 @@ export function StarShieldGame({
 
     const allUsersReady = room.users.length > 0 && room.users.every((u) => u.isReady)
 
-    // 非ホスト: Room.currentMatchId の変化を検知してゲーム開始
+    // 非ホスト + リロード時: Room.currentMatchId の変化を検知。match ステータスを確認し、終了済みなら RESULT へ
     useEffect(() => {
         if (phase !== 'TITLE') return
         if (!room.currentMatchId) return
         if (playedMatchIdsRef.current.has(room.currentMatchId)) return
 
         const newMatchId = room.currentMatchId
-        // startedAt をサーバーから取得してから PLAYING へ遷移
-        getStarShieldMatchInfo(newMatchId).then(({ startedAt: ts }) => {
-            setMatchId(newMatchId)
-            setStartedAt(ts)
-            setPhase('PLAYING')
+        getStarShieldMatchStatus(newMatchId).then((status) => {
+            if (status.status === 'finished') {
+                playedMatchIdsRef.current.add(newMatchId)
+                setGameResult(status.result)
+                setGameStats(status.stats)
+                setPhase('RESULT')
+            } else if (status.status === 'playing') {
+                setMatchId(newMatchId)
+                setStartedAt(status.startedAt)
+                setPhase('PLAYING')
+            }
+            // not_found の場合は何もしない（削除済みなど）
         })
     }, [room.currentMatchId, phase])
 

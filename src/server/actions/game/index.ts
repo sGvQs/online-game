@@ -34,6 +34,7 @@ export {
     startStarShieldMatch,
     saveStarShieldResult,
     getStarShieldMatchInfo,
+    getStarShieldMatchStatus,
 } from './starShieldActions'
 
 
