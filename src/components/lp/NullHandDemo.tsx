@@ -43,9 +43,20 @@ function createMockEvent(): JankenEventWithGuests {
     } as JankenEventWithGuests
 }
 
-const mockHostStats: HostStats = {
-    reverseRate: 20,
-    totalHostCount: 5,
+function getRandomReverseRate(): number {
+    return Math.floor(Math.random() * 21) + 60 // 60〜80
+}
+
+function useMockHostStats(): HostStats {
+    const [mounted, setMounted] = useState(false)
+    useEffect(() => setMounted(true), [])
+    return useMemo(
+        () => ({
+            reverseRate: mounted ? getRandomReverseRate() : 60,
+            totalHostCount: 5,
+        }),
+        [mounted]
+    )
 }
 
 const INITIAL_SCORES: MatchScoreWithUser[] = [
@@ -180,6 +191,7 @@ function buildResultEvent(
 
 export function NullHandDemo() {
     const styles = nullHandGame()
+    const mockHostStats = useMockHostStats()
     const sectionRef = useRef<HTMLDivElement>(null)
     const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
     const hasTriggeredRef = useRef(false)
