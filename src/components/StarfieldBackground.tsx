@@ -22,11 +22,11 @@ const PARTICLES_OPTIONS = {
                     move: {
                         enable: true,
                         speed: 0.3,
-                        direction: 'top-right',
+                        direction: 'top-right' as const,
                         random: false,
                         straight: true,
                         outModes: {
-                            default: 'out',
+                            default: 'out' as const,
                         },
                     },
                     number: {
@@ -42,7 +42,7 @@ const PARTICLES_OPTIONS = {
                         animation: {
                             enable: true,
                             speed: 0.1,
-                            startValue: 'random',
+                            startValue: 'random' as const,
                         },
                     },
                     shape: {
@@ -73,9 +73,11 @@ export const StarfieldBackground = memo(function StarfieldBackground() {
     useEffect(() => {
         initParticlesEngine(async (engine: Engine) => {
             await loadSlim(engine)
-        }).then(() => {
-            setInit(true)
         })
+            .then(() => setInit(true))
+            .catch((err) => {
+                console.error('[StarfieldBackground] initParticlesEngine failed:', err)
+            })
     }, [])
 
     if (!init) {
