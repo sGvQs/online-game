@@ -23,10 +23,10 @@ export const gameSelection = tv({
             'border-[#FF4444] bg-black hover:bg-[#1a0505] text-[#FF4444]',
             'shadow-[0_0_15px_rgba(255,68,68,0.2)] hover:shadow-[0_0_25px_rgba(255,68,68,0.4)]',
         ],
-        // Star Shield Theme (Deep Space: dark navy + cyan)
+        // Star Shield Theme（page.tsx の brand に合わせる）
         starShieldButton: [
-            'border-[#00CFFF] bg-[#050d1a] hover:bg-[#0a1e33] text-[#00CFFF]',
-            'shadow-[0_0_15px_rgba(0,207,255,0.2)] hover:shadow-[0_0_25px_rgba(0,207,255,0.4)]',
+            'border-brand-500/60 bg-brand-50/80 hover:bg-brand-100/80 text-brand-500',
+            'shadow-[0_0_15px_rgba(129,140,248,0.2)] hover:shadow-[0_0_25px_rgba(129,140,248,0.4)]',
         ],
         gameIcon: 'text-3xl relative z-10 group-hover:scale-110 transition-transform duration-300',
         gameInfo: 'flex flex-col relative z-10',
@@ -36,7 +36,7 @@ export const gameSelection = tv({
 
         // Background effects
         nullHandBg: 'absolute inset-0 bg-[#FF4444]/5 group-hover:bg-[#FF4444]/10 transition-colors',
-        starShieldBg: 'absolute inset-0 bg-[#00CFFF]/5 group-hover:bg-[#00CFFF]/10 transition-colors',
+        starShieldBg: 'absolute inset-0 bg-brand-500/5 group-hover:bg-brand-500/10 transition-colors',
     },
 })
 

@@ -19,7 +19,7 @@ const RESULT_CONFIG: Record<GameResult, {
     CLEARED: {
         title: 'CLEARED',
         subtitle: 'Mission Complete',
-        color: '#00CFFF',
+        color: '#818cf8',
         message: 'これで大丈夫。きみのおかげだ。へへ。',
     },
     FAILED_CONTACT: {
@@ -45,7 +45,7 @@ export function ResultScreen({ result, stats, onBackToTitle }: ResultScreenProps
     const seconds = stats.durationSeconds % 60
 
     return (
-        <div className="relative min-h-screen bg-[#020b18] overflow-hidden flex flex-col items-center justify-center">
+        <div className="relative min-h-screen overflow-hidden flex flex-col items-center justify-center">
             <StarfieldBackground />
 
             {/* グロー */}
@@ -78,7 +78,11 @@ export function ResultScreen({ result, stats, onBackToTitle }: ResultScreenProps
 
                 {/* 恐竜メッセージ */}
                 <motion.div
-                    className="border border-white/10 bg-black/50 rounded-lg px-8 py-5 max-w-md"
+                    className="rounded-xl px-8 py-5 max-w-md"
+                    style={{
+                        background: 'rgba(30,41,59,0.4)',
+                        border: '1px solid rgba(129,140,248,0.2)',
+                    }}
                     initial={{ opacity: 0, scale: 0.95 }}
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: 0.4, duration: 0.5 }}

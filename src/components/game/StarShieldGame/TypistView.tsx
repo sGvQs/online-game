@@ -26,16 +26,20 @@ function TypingDisplay({ line, charIndex }: { line: DialogueLine; charIndex: num
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3 }}
-                className="border border-[#00CFFF]/20 bg-black/60 rounded-lg px-8 py-4 max-w-lg w-full text-center"
+                className="rounded-xl px-8 py-4 max-w-lg w-full text-center"
+                style={{
+                    background: 'rgba(30,41,59,0.4)',
+                    border: '1px solid rgba(129,140,248,0.2)',
+                }}
             >
-                <div className="text-white/40 text-xs font-mono tracking-widest mb-2">DIALOGUE</div>
+                <div className="text-brand-500/60 text-xs tracking-widest mb-2">DIALOGUE</div>
                 <div className="text-white text-2xl font-bold tracking-wider">{line.text}</div>
             </motion.div>
 
             {/* ローマ字入力欄 */}
             <div className="font-mono text-3xl tracking-[0.25em] select-none">
                 <span className="text-white/20">{done}</span>
-                <span className="text-[#00CFFF] drop-shadow-[0_0_8px_rgba(0,207,255,0.9)] animate-pulse">
+                <span className="text-brand-500 drop-shadow-[0_0_8px_rgba(129,140,248,0.9)] animate-pulse">
                     {current}
                 </span>
                 <span className="text-white/50">{rest}</span>
@@ -44,7 +48,7 @@ function TypingDisplay({ line, charIndex }: { line: DialogueLine; charIndex: num
             {/* 進捗バー */}
             <div className="w-64 h-1 bg-white/10 rounded-full overflow-hidden">
                 <motion.div
-                    className="h-full bg-[#00CFFF]/60 rounded-full"
+                    className="h-full bg-brand-500/60 rounded-full"
                     animate={{
                         width: `${line.romaji.length > 0 ? (charIndex / line.romaji.length) * 100 : 0}%`
                     }}
@@ -80,7 +84,12 @@ export function TypistView({ dialogue, score }: TypistViewProps) {
 
             {/* グロー装飾 */}
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                <div className="w-[500px] h-[300px] rounded-full bg-[#00CFFF]/5 blur-3xl" />
+                <div
+                    className="w-[500px] h-[300px] rounded-full opacity-20 blur-3xl"
+                    style={{
+                        background: 'radial-gradient(ellipse at 50% 60%, rgba(168,85,247,0.6) 0%, rgba(99,102,241,0.4) 40%, transparent 70%)',
+                    }}
+                />
             </div>
 
             {/* 恐竜キャラクター */}
@@ -98,7 +107,7 @@ export function TypistView({ dialogue, score }: TypistViewProps) {
             </div>
 
             {/* ロール表示 */}
-            <div className="absolute bottom-8 left-1/2 -translate-x-1/2 text-[#00CFFF]/40 text-xs font-mono tracking-widest">
+            <div className="absolute bottom-8 left-1/2 -translate-x-1/2 text-brand-500/50 text-xs tracking-widest">
                 TYPIST MODE — type the romaji to fire
             </div>
         </div>

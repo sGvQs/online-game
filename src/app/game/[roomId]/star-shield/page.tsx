@@ -27,7 +27,7 @@ export default async function StarShieldPage({ params }: { params: { roomId: str
     const isHost = room.createdBy === currentUser.user.id
 
     return (
-        <div className="relative min-h-screen bg-black">
+        <div className="relative min-h-screen">
             <StarShieldGame
                 room={room}
                 isHost={isHost}

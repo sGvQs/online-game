@@ -9,7 +9,7 @@ const SCREEN_WIDTH = 1200
 
 interface ShooterViewProps {
     asteroids: Asteroid[]
-    aimRef: React.MutableRefObject<{ x: number; y: number }>
+    aimRef: React.RefObject<{ x: number; y: number }>
     onMouseMove: (e: React.MouseEvent<HTMLDivElement>) => void
 }
 
@@ -77,7 +77,7 @@ function ExplosionEffect({ asteroid }: { asteroid: Asteroid }) {
 }
 
 // 照準カーソル
-function Crosshair({ aimRef }: { aimRef: React.MutableRefObject<{ x: number; y: number }> }) {
+function Crosshair({ aimRef }: { aimRef: React.RefObject<{ x: number; y: number }> }) {
     const ref = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
@@ -100,12 +100,12 @@ function Crosshair({ aimRef }: { aimRef: React.MutableRefObject<{ x: number; y: 
             className="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-none z-20"
         >
             {/* 外周リング */}
-            <div className="absolute inset-0 w-12 h-12 -translate-x-1/2 -translate-y-1/2 rounded-full border border-[#00CFFF]/50" />
+            <div className="absolute inset-0 w-12 h-12 -translate-x-1/2 -translate-y-1/2 rounded-full border border-brand-500/50" />
             {/* 十字線 */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-px w-12 h-px bg-[#00CFFF]/70" />
-            <div className="absolute top-1/2 left-1/2 -translate-y-1/2 -translate-x-px w-px h-12 bg-[#00CFFF]/70" />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-px w-12 h-px bg-brand-500/70" />
+            <div className="absolute top-1/2 left-1/2 -translate-y-1/2 -translate-x-px w-px h-12 bg-brand-500/70" />
             {/* 中心点 */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-[#00CFFF]" />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-brand-500" />
         </div>
     )
 }
@@ -143,7 +143,7 @@ export function ShooterView({ asteroids, aimRef, onMouseMove }: ShooterViewProps
             <Crosshair aimRef={aimRef} />
 
             {/* ロール表示 */}
-            <div className="absolute bottom-8 left-1/2 -translate-x-1/2 text-[#00CFFF]/40 text-xs font-mono tracking-widest">
+            <div className="absolute bottom-8 left-1/2 -translate-x-1/2 text-brand-500/50 text-xs tracking-widest">
                 SHOOTER MODE — aim with mouse, fire when typist types
             </div>
         </div>
