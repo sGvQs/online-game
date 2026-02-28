@@ -36,7 +36,7 @@ const SPAWN_INTERVALS_MS: Record<Difficulty, number> = {
     HARD: Math.round(1000 / 1.5),
 }
 
-const ASTEROID_HP: Record<Difficulty, number> = {
+export const ASTEROID_HP: Record<Difficulty, number> = {
     EASY: 3,
     NORMAL: 6,
     HARD: 10,

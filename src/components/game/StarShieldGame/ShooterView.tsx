@@ -18,9 +18,10 @@ interface ShooterViewProps {
     bullets: Bullet[]
     aimRef: React.RefObject<{ x: number; y: number }>
     onMouseMove: (e: React.MouseEvent<HTMLDivElement>) => void
+    maxHp: number
 }
 
-function AsteroidCircle({ asteroid }: { asteroid: Asteroid }) {
+function AsteroidCircle({ asteroid, maxHp }: { asteroid: Asteroid; maxHp: number }) {
     const divRef = useRef<HTMLDivElement>(null)
 
     const update = useCallback(() => {
@@ -54,9 +55,12 @@ function AsteroidCircle({ asteroid }: { asteroid: Asteroid }) {
                     : { duration: 0.3, ease: 'easeOut' }
             }
         >
-            {/* HP表示（緑） */}
-            <div className="absolute -top-5 left-1/2 -translate-x-1/2 text-green-500 font-bold text-sm">
-                {asteroid.hp}
+            {/* HPバー（RPG風・数字なし） */}
+            <div className="absolute -top-4 left-1/2 -translate-x-1/2 w-8 h-1.5 rounded-full bg-stone-600/80 overflow-hidden">
+                <div
+                    className="h-full rounded-full bg-green-500 transition-[width] duration-150"
+                    style={{ width: `${Math.max(0, (asteroid.hp / maxHp) * 100)}%` }}
+                />
             </div>
             {/* 外側グロー */}
             <div className="absolute inset-0 rounded-full bg-orange-400/30 blur-md scale-150" />
@@ -197,7 +201,7 @@ function Dinosaur({ aimRef }: { aimRef: React.RefObject<{ x: number; y: number }
     )
 }
 
-export function ShooterView({ asteroids, bullets, aimRef, onMouseMove }: ShooterViewProps) {
+export function ShooterView({ asteroids, bullets, aimRef, onMouseMove, maxHp }: ShooterViewProps) {
     const activeAsteroids = asteroids.filter((a) => !a.destroyedAt)
     const destroyedAsteroids = asteroids.filter((a) => !!a.destroyedAt)
 
@@ -212,7 +216,7 @@ export function ShooterView({ asteroids, bullets, aimRef, onMouseMove }: Shooter
             {/* 隕石 */}
             <AnimatePresence>
                 {activeAsteroids.map((a) => (
-                    <AsteroidCircle key={a.id} asteroid={a} />
+                    <AsteroidCircle key={a.id} asteroid={a} maxHp={maxHp} />
                 ))}
             </AnimatePresence>
 

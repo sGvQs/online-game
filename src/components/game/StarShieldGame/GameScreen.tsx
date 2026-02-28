@@ -1,6 +1,6 @@
 'use client'
 
-import { useStarShield, Difficulty, GameResult, GameStats } from '@/hooks/useStarShield'
+import { useStarShield, Difficulty, GameResult, GameStats, ASTEROID_HP } from '@/hooks/useStarShield'
 import { ShooterView } from './ShooterView'
 import { TypistView } from './TypistView'
 
@@ -50,6 +50,7 @@ export function GameScreen({
                     bullets={bullets}
                     aimRef={aimRef}
                     onMouseMove={onMouseMove}
+                    maxHp={ASTEROID_HP[difficulty]}
                 />
             ) : (
                 <TypistView
