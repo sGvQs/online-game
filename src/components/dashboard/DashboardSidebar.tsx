@@ -11,7 +11,7 @@ import { AnnoyingDinosaurComplaint } from './AnnoyingDinosaurComplaint'
 import {
     getRandomCreateRoomMessage,
     getRandomDinosaurRoomName,
-    TYPING_MODE_MESSAGE,
+    getRandomTypingMessage,
 } from '@/shared/constants/dinosaurMessages'
 
 export function DashboardSidebar({ isTop5User = false }: { isTop5User?: boolean }) {
@@ -80,7 +80,7 @@ export function DashboardSidebar({ isTop5User = false }: { isTop5User?: boolean 
         createPortal(
           <AnnoyingDinosaurComplaint
             key={dinosaurKey}
-            message={typingMode ? TYPING_MODE_MESSAGE : getRandomCreateRoomMessage()}
+            message={typingMode ? getRandomTypingMessage() : getRandomCreateRoomMessage()}
             onComplete={handleDinosaurComplete}
             triggerExit={dinosaurExiting}
             typingMode={typingMode}

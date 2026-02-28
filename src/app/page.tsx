@@ -199,7 +199,7 @@ export default function Home() {
                                 WebkitTextFillColor: 'transparent',
                                 backgroundClip: 'text',
                             }}>
-                                ゲームでまってるぜ。
+                                ゲームでまってるぞ。
                             </span>
                         </h2>
 
