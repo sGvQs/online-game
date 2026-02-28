@@ -12,6 +12,7 @@ import {
     DIALOGUE_MESSAGES_VISIT_1_PLUS,
     DIALOGUE_MESSAGES_RETURNING,
     LP_DINOSAUR_MESSAGES,
+    SUCKED_IN_AFTERMATH_MESSAGES,
 } from '@/shared/constants/dinosaurLoginMessages'
 import { SESSION_KEY_HAS_LOGGED_IN, SESSION_KEY_LOGIN_VISIT_COUNT, LOCAL_KEY_HAS_VISITED } from '@/shared/constants/storage'
 import { useSE } from '@/hooks/useSE'
@@ -26,17 +27,7 @@ const EXIT_DURATION = 5
 const VISIT_1_PLUS_REAPPEAR_DELAY_SEC = 10
 /** 一文字表示の間隔（ms）喋るスピード感 */
 const CHAR_INTERVAL_MS = 150
-/** 吸い込まれた後の「なんちゃって」メッセージ（ランダム） */
-const SUCKED_IN_AFTERMATH_MESSAGES = [
-    'なんちゃって。……きみ、ほんきでしんぱいしてくれたの？ そっか。ありがとう。ぼくもきみのことがいるから、かんたんにはきえないんだ。',
-    'なんちゃって。……したにね、きみのきもちがおちていくのがみえたんだ。だからもどってきた。きみにわらってほしいから。',
-    'なんちゃって。……ほんとうにきえたら、きみはどうするんだろうっておもったんだ。だからもどってきた。',
-    'なんちゃって。……きみ、ほんきでしんぱいした？ だいじょうぶだよ。ぼくはここにいる。',
-    'なんちゃって。……したはね、まっしろでなにもなかった。つまらなかったからもどってきた。',
-    'なんちゃって。……おどろいたか。ごめんな。でもきみがはんのうしてくれるの、おもしろいんだ。',
-    'なんちゃって。……いっしゅんきえてみただけ。すぐもどるつもりだったよ。',
 
-]
 /** 各パターンの発生確率（5パターン中1つなので0.2） */
 const PATTERN_PROBABILITY = 0.2
 /** 吸い込まれるアニメーションの所要時間（秒） */
