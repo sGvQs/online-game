@@ -20,6 +20,7 @@ export function DashboardSidebar({ isTop5User = false }: { isTop5User?: boolean 
   const [dinosaurExiting, setDinosaurExiting] = useState(false)
   const [typingMode, setTypingMode] = useState(false)
   const [typingRoomName, setTypingRoomName] = useState<string | null>(null)
+  const [dinosaurMessage, setDinosaurMessage] = useState<string>('')
   const [roomName, setRoomName] = useState('')
   const typingModeFlipRef = useRef(false)
 
@@ -34,6 +35,7 @@ export function DashboardSidebar({ isTop5User = false }: { isTop5User?: boolean 
       isTop5User && typingModeFlipRef.current
     setTypingMode(shouldTypingMode)
     setTypingRoomName(shouldTypingMode ? getRandomDinosaurRoomName() : null)
+    setDinosaurMessage(shouldTypingMode ? getRandomTypingMessage() : getRandomCreateRoomMessage())
   }
 
   const handleCancel = () => {
@@ -80,7 +82,7 @@ export function DashboardSidebar({ isTop5User = false }: { isTop5User?: boolean 
         createPortal(
           <AnnoyingDinosaurComplaint
             key={dinosaurKey}
-            message={typingMode ? getRandomTypingMessage() : getRandomCreateRoomMessage()}
+            message={dinosaurMessage}
             onComplete={handleDinosaurComplete}
             triggerExit={dinosaurExiting}
             typingMode={typingMode}

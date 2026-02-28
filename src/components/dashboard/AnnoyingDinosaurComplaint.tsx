@@ -45,6 +45,7 @@ export function AnnoyingDinosaurComplaint({
         const isSilentChar = (c: string) => /^[。、．，….\s「」『』（）]$/.test(c)
 
         let speechIndex = displayedText.length
+        let typeIndex = 0
         const typeInterval = setInterval(() => {
             if (speechIndex < message.length) {
                 const nextChar = message[speechIndex]
@@ -54,11 +55,9 @@ export function AnnoyingDinosaurComplaint({
                 setDisplayedText(message.slice(0, speechIndex + 1))
                 speechIndex++
             }
-            if (typingMode && textToType && onTypeIntoInput) {
-                const newText = textToType.slice(
-                    0,
-                    Math.min(speechIndex, textToType.length)
-                )
+            if (typingMode && textToType && onTypeIntoInput && typeIndex < textToType.length) {
+                typeIndex++
+                const newText = textToType.slice(0, typeIndex)
                 onTypeIntoInput(newText)
             }
         }, 150)
