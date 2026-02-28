@@ -52,5 +52,9 @@ export async function returnToRoom(roomId: string) {
         }
     })
 
+    await prisma.match.deleteMany({
+        where: { roomId }
+    })
+
     revalidatePath(`/room/${roomId}`)
 }
