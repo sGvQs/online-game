@@ -25,7 +25,7 @@ const ASTEROID_DURATION_MS = 8000
 // 弾の設定（デバッグ用に BULLET_RADIUS を変数化）
 const BULLET_SPEED = 0.0008 // 正規化座標/ms（速すぎないように）
 // export const BULLET_RADIUS = 0.008 // デバッグ時は大きくできる
-export const BULLET_RADIUS = 0.008 // デバッグ時は大きくできる
+export const BULLET_RADIUS = 20 // デバッグ時は大きくできる
 export const ASTEROID_RADIUS = 0.02
 const DINO_HIT_RADIUS = 0.06
 const BULLET_MAX_AGE_MS = 3000
@@ -34,6 +34,12 @@ const SPAWN_INTERVALS_MS: Record<Difficulty, number> = {
     EASY: 2000,
     NORMAL: 1000,
     HARD: Math.round(1000 / 1.5),
+}
+
+const ASTEROID_HP: Record<Difficulty, number> = {
+    EASY: 3,
+    NORMAL: 6,
+    HARD: 10,
 }
 
 // ============================================
@@ -75,6 +81,7 @@ export interface Asteroid {
     spawnedAt: number
     spawnX: number // 0-1（スポーン時 X）
     spawnY: number // 0-1（スポーン時 Y）
+    hp: number // 現在HP（0で破壊）
     destroyedAt?: number
 }
 
@@ -340,6 +347,7 @@ export function useStarShield({
                 spawnedAt: Date.now(),
                 spawnX: SPAWN_X_MIN + Math.random() * (SPAWN_X_MAX - SPAWN_X_MIN),
                 spawnY: SPAWN_Y_MIN + Math.random() * (SPAWN_Y_MAX - SPAWN_Y_MIN),
+                hp: ASTEROID_HP[difficulty],
             }
             setAsteroids((prev) => {
                 const next = [...prev, asteroid]
@@ -360,9 +368,9 @@ export function useStarShield({
             const asts = asteroidsRef.current
             const bts = bulletsRef.current
 
-            // 弾 vs 隕石の当たり判定
+            // 弾 vs 隕石の当たり判定（1弾1ヒット、hp減算、hp<=0で破壊）
             const hitBulletIds = new Set<string>()
-            const hitAsteroidIds = new Set<string>()
+            const hitAsteroidIds = new Set<string>() // このフレームでヒットした隕石
             for (const bullet of bts) {
                 if (hitBulletIds.has(bullet.id)) continue
                 const bp = getBulletPosition(bullet, now)
@@ -373,32 +381,49 @@ export function useStarShield({
                     if (dist < ASTEROID_RADIUS + BULLET_RADIUS) {
                         hitBulletIds.add(bullet.id)
                         hitAsteroidIds.add(a.id)
-                        channelRef.current?.send({
-                            type: 'broadcast',
-                            event: 'asteroid_destroyed',
-                            payload: {},
-                        })
+                        break
                     }
                 }
             }
             if (hitAsteroidIds.size > 0) {
+                const hpUpdates = new Map<string, number>()
+                let destroyedCount = 0
+                for (const ast of asts) {
+                    if (hitAsteroidIds.has(ast.id)) {
+                        const newHp = ast.hp - 1
+                        hpUpdates.set(ast.id, newHp)
+                        if (newHp <= 0) destroyedCount++
+                    }
+                }
                 setAsteroids((prev) => {
-                    const next = prev.map((ast) =>
-                        hitAsteroidIds.has(ast.id) ? { ...ast, destroyedAt: now } : ast
-                    )
+                    const next = prev.map((ast) => {
+                        const newHp = hpUpdates.get(ast.id)
+                        if (newHp === undefined) return ast
+                        if (newHp <= 0) return { ...ast, hp: 0, destroyedAt: now }
+                        return { ...ast, hp: newHp }
+                    })
                     asteroidsRef.current = next
                     return next
                 })
+                for (let i = 0; i < destroyedCount; i++) {
+                    channelRef.current?.send({
+                        type: 'broadcast',
+                        event: 'asteroid_destroyed',
+                        payload: {},
+                    })
+                }
                 setBullets((prev) => {
                     const next = prev.filter((b) => !hitBulletIds.has(b.id))
                     bulletsRef.current = next
                     return next
                 })
-                setScore((prev) => {
-                    const next = { ...prev, destroyed: prev.destroyed + hitAsteroidIds.size }
-                    scoreRef.current = next
-                    return next
-                })
+                if (destroyedCount > 0) {
+                    setScore((prev) => {
+                        const next = { ...prev, destroyed: prev.destroyed + destroyedCount }
+                        scoreRef.current = next
+                        return next
+                    })
+                }
             }
 
             // 古い弾を削除
@@ -412,9 +437,15 @@ export function useStarShield({
                 })
             }
 
-            // 隕石 vs 恐竜の接触判定
+            // 隕石 vs 恐竜の接触判定（このフレームで破壊される隕石は除外）
+            const destroyedThisFrame = new Set(
+                [...hitAsteroidIds].filter((id) => {
+                    const a = asts.find((x) => x.id === id)
+                    return a && a.hp - 1 <= 0
+                })
+            )
             const contact = asts.find((a) => {
-                if (a.destroyedAt || hitAsteroidIds.has(a.id)) return false
+                if (a.destroyedAt || destroyedThisFrame.has(a.id)) return false
                 const ap = getAsteroidPosition(a, now)
                 const progress = (now - a.spawnedAt) / ASTEROID_DURATION_MS
                 if (progress >= 1) return true

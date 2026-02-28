@@ -54,6 +54,10 @@ function AsteroidCircle({ asteroid }: { asteroid: Asteroid }) {
                     : { duration: 0.3, ease: 'easeOut' }
             }
         >
+            {/* HP表示（緑） */}
+            <div className="absolute -top-5 left-1/2 -translate-x-1/2 text-green-500 font-bold text-sm">
+                {asteroid.hp}
+            </div>
             {/* 外側グロー */}
             <div className="absolute inset-0 rounded-full bg-orange-400/30 blur-md scale-150" />
             {/* 本体 */}
