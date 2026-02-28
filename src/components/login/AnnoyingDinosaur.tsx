@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useLayoutEffect, useState } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { useSearchParams, usePathname } from 'next/navigation'
 import { motion } from 'framer-motion'
 import Image from 'next/image'
 import { detectIncognito } from 'detectincognitojs'
@@ -11,13 +11,13 @@ import {
     DIALOGUE_MESSAGES_VISIT_0,
     DIALOGUE_MESSAGES_VISIT_1_PLUS,
     DIALOGUE_MESSAGES_RETURNING,
+    LP_DINOSAUR_MESSAGES,
+    SUCKED_IN_AFTERMATH_MESSAGES,
 } from '@/shared/constants/dinosaurLoginMessages'
 import { SESSION_KEY_HAS_LOGGED_IN, SESSION_KEY_LOGIN_VISIT_COUNT, LOCAL_KEY_HAS_VISITED } from '@/shared/constants/storage'
 import { useSE } from '@/hooks/useSE'
 
-/** LP_DINOSAUR_MESSAGES は @/shared/constants/dinosaurLoginMessages から参照 */
-export { LP_DINOSAUR_MESSAGES } from '@/shared/constants/dinosaurLoginMessages'
-
+const CHERRY_BOMB_FONT = 'var(--font-cherry-bomb-one)'
 const ENTER_DURATION = 3
 const IDLE_DURATION = 10
 /** なんちゃってパターン時の待機時間（秒） */
@@ -27,17 +27,7 @@ const EXIT_DURATION = 5
 const VISIT_1_PLUS_REAPPEAR_DELAY_SEC = 10
 /** 一文字表示の間隔（ms）喋るスピード感 */
 const CHAR_INTERVAL_MS = 150
-/** 吸い込まれた後の「なんちゃって」メッセージ（ランダム） */
-const SUCKED_IN_AFTERMATH_MESSAGES = [
-    'なんちゃって。……君、本気で心配してくれたの？ そっか。ありがとう。僕も君のことがいるから、簡単には消えないんだ。',
-    'なんちゃって。……下にね、君の気持ちが落ちていくのが見えたんだ。だから戻ってきた。君に笑ってほしいから。',
-    'なんちゃって。……本当に消えたら、君はどうするんだろうって思ったんだ。だから戻ってきた。',
-    'なんちゃって。……君、本気で心配した？ 大丈夫だよ。僕はここにいる。',
-    'なんちゃって。……下はね、真っ白で何もなかった。つまらなかったから戻ってきた。',
-    'なんちゃって。……驚いたか。ごめんな。でも君が反応してくれるの、面白いんだ。',
-    'なんちゃって。……一瞬消えてみただけ。すぐ戻るつもりだったよ。',
 
-]
 /** 各パターンの発生確率（5パターン中1つなので0.2） */
 const PATTERN_PROBABILITY = 0.2
 /** 吸い込まれるアニメーションの所要時間（秒） */
@@ -135,8 +125,8 @@ function RotateWhileTalkingAnimation({
                         className="object-contain"
                     />
                 </div>
-                <div className="shrink-0 mb-2 px-2.5 py-1.5 rounded-xl border border-brand-200/20 bg-brand-300 text-white text-[10px] font-medium shadow-sm max-w-[400px]">
-                    <span className="font-(--font-dot-gothic-16)">{displayedText}</span>
+                <div className="shrink-0 mb-2 px-2.5 py-1.5 rounded-xl border border-white bg-white text-black text-[10px] font-medium shadow-sm max-w-[400px]">
+                    <span style={{ fontFamily: CHERRY_BOMB_FONT }}>{displayedText}</span>
                 </div>
             </motion.div>
         </motion.div>
@@ -145,7 +135,7 @@ function RotateWhileTalkingAnimation({
 
 /** 吸い込まれるアニメーション：画面外右上→中央下へ回転しながら流れる */
 function SuckedInAnimation({ onComplete }: { onComplete: () => void }) {
-    const SUCKED_IN_MESSAGE = 'うぁー、吸い込まれるー'
+    const SUCKED_IN_MESSAGE = 'うぁー、すいこまれるー'
 
     useEffect(() => {
         const timer = setTimeout(onComplete, SUCKED_IN_DURATION * 1000)
@@ -182,8 +172,8 @@ function SuckedInAnimation({ onComplete }: { onComplete: () => void }) {
                         className="object-contain"
                     />
                 </div>
-                <div className="shrink-0 mb-1 px-2.5 py-1.5 rounded-xl border border-brand-200/20 bg-brand-300 text-white text-[10px] font-medium shadow-sm">
-                    <span className="font-(--font-dot-gothic-16)">{SUCKED_IN_MESSAGE}</span>
+                <div className="shrink-0 mb-1 px-2.5 py-1.5 rounded-xl border border-white bg-white text-black text-[10px] font-medium shadow-sm">
+                    <span style={{ fontFamily: CHERRY_BOMB_FONT }}>{SUCKED_IN_MESSAGE}</span>
                 </div>
             </motion.div>
         </motion.div>
@@ -191,15 +181,17 @@ function SuckedInAnimation({ onComplete }: { onComplete: () => void }) {
 }
 
 export function AnnoyingDinosaur() {
+    const pathname = usePathname()
     const searchParams = useSearchParams()
     const forceVisit1Plus = searchParams.get('flow') === '1'
+    const isLP = pathname === '/'
 
     const [phase, setPhase] = useState<'entering' | 'idle' | 'exiting'>('entering')
     const [dialogueIndex, setDialogueIndex] = useState(0)
     const [dialogueMessages, setDialogueMessages] = useState<string[]>(DIALOGUE_MESSAGES_VISIT_0)
     const [displayedText, setDisplayedText] = useState('')
     const [isVisible, setIsVisible] = useState(true)
-    const [repeatMessageSource, setRepeatMessageSource] = useState<'visit1plus' | 'returning' | null>(null)
+    const [repeatMessageSource, setRepeatMessageSource] = useState<'visit1plus' | 'returning' | 'lp' | null>(null)
     const [enterPattern, setEnterPattern] = useState<EnterPattern | null>(null)
     const [enterFrom, setEnterFrom] = useState<'left' | 'bottom' | null>(null)
     const [rotateFlowDirection, setRotateFlowDirection] = useState<RotateFlowDirection | null>(null)
@@ -243,6 +235,12 @@ export function AnnoyingDinosaur() {
     useEffect(() => {
         if (enterPattern === 'nantechatte' || isSuckedInAftermath) return
         const initMessages = async () => {
+            if (isLP) {
+                setDialogueMessages(LP_DINOSAUR_MESSAGES)
+                setDialogueIndex(Math.floor(Math.random() * LP_DINOSAUR_MESSAGES.length))
+                setRepeatMessageSource('lp')
+                return
+            }
             const { isPrivate } = await detectIncognito()
             if (isPrivate) {
                 setDialogueMessages(DIALOGUE_MESSAGES_INCOGNITO)
@@ -267,7 +265,7 @@ export function AnnoyingDinosaur() {
             }
         }
         initMessages()
-    }, [enterPattern, isSuckedInAftermath, forceVisit1Plus])
+    }, [enterPattern, isSuckedInAftermath, forceVisit1Plus, isLP])
 
 
     useEffect(() => {
@@ -335,7 +333,12 @@ export function AnnoyingDinosaur() {
         setIsVisible(false)
         setRotateFlowDirection(null)
         if (repeatMessageSource) {
-            const source = repeatMessageSource === 'visit1plus' ? DIALOGUE_MESSAGES_VISIT_1_PLUS : DIALOGUE_MESSAGES_RETURNING
+            const source =
+                repeatMessageSource === 'visit1plus'
+                    ? DIALOGUE_MESSAGES_VISIT_1_PLUS
+                    : repeatMessageSource === 'returning'
+                      ? DIALOGUE_MESSAGES_RETURNING
+                      : LP_DINOSAUR_MESSAGES
             setTimeout(() => {
                 setDialogueMessages(source)
                 setDialogueIndex(Math.floor(Math.random() * source.length))
@@ -433,18 +436,18 @@ export function AnnoyingDinosaur() {
                 </div>
 
                 {/* 中央から登場時：吹き出しスペースを事前に確保してレイアウトシフトを防ぐ */}
-                {isFromBottom && phase === 'entering' && <div className="min-w-[400px] shrink-0" aria-hidden />}
+                {isFromBottom && phase === 'entering' && <div className="min-w-[200px] shrink-0" aria-hidden />}
 
                 {/* チャット風吹き出し：SVGと被らないよう右側に配置、しっぽは口方向へ */}
                 {phase !== 'entering' && (
                     <motion.div
-                        className={`shrink-0 mt-2 ${isFromBottom ? 'w-[400px] min-w-[400px]' : 'min-w-[80px] max-w-[400px]'}`}
+                        className={`shrink-0 mt-2 ${isFromBottom ? 'w-[200px] min-w-[200px]' : 'min-w-[80px] max-w-[400px]'}`}
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ duration: 0.4, delay: 0.2 }}
                     >
-                        <div className="relative px-2.5 py-1.5 rounded-xl border border-brand-200/20 bg-brand-300 text-white text-[10px] font-medium shadow-sm">
-                            <span className="font-(--font-dot-gothic-16) tracking-wide">
+                        <div className="relative px-2.5 py-1.5 rounded-xl border border-white bg-white text-black text-[10px] font-medium shadow-sm">
+                            <span className="tracking-wide" style={{ fontFamily: CHERRY_BOMB_FONT }}>
                                 {displayedText}
                                 {displayedText.length < (dialogueMessages[Math.min(dialogueIndex, dialogueMessages.length - 1)] ?? '').length && (
                                     <span className="inline-block w-0.5 h-3 ml-0.5 bg-current animate-pulse" aria-hidden />
@@ -452,7 +455,7 @@ export function AnnoyingDinosaur() {
                             </span>
                             {/* 口方向へのしっぽ（吹き出しの左からキャラへ向かう） */}
                             <div
-                                className="absolute -left-1.5 top-1/2 -translate-y-1/2 w-0 h-0 border-t-4 border-t-transparent border-b-4 border-b-transparent border-r-[6px] border-r-brand-300"
+                                className="absolute -left-1.5 top-1/2 -translate-y-1/2 w-0 h-0 border-t-4 border-t-transparent border-b-4 border-b-transparent border-r-[6px] border-r-white"
                                 aria-hidden
                             />
                         </div>

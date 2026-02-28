@@ -18,9 +18,9 @@ const GAMES = [
         number: '01',
         title: 'ERROR HUNTER',
         tags: ['REFLEX', 'CLICK BATTLE', 'SPEED'],
-        tagColor: '#ef4444',
-        borderColor: '#ef4444',
-        description: 'エラーダイアログが出現したら、最速でクリック！反射神経が試される、スリル満点のクリックバトル！',
+        tagColor: '#14b8a6',
+        borderColor: '#14b8a6',
+        description: 'エラーダイアログ出現と同時に連打開始――最も多くクリックした者が7ptを掴み取り、さらにリザルトで自分の煽りコメントを敗者に叩きつけろ！',
         comment: 'エラーつぶしてみ、とぶぞ。',
         Demo: ErrorHunterDemo,
     },
@@ -29,9 +29,9 @@ const GAMES = [
         number: '02',
         title: 'NULL HAND',
         tags: ['MIND', 'PSYCHOLOGY', 'BLUFF'],
-        tagColor: '#818cf8',
-        borderColor: '#818cf8',
-        description: 'ホストが出す手はSYSTEM SELECTIONかそれ以外か。開発者の持ち手を見抜いて勝負しよう。下のデモで今すぐ試せるぞ！',
+        tagColor: '#ef4444',
+        borderColor: '#ef4444',
+        description: 'ホストが繰り出すのは「SYSTEM SELECTION」か、それともフェイクか――その一瞬を見抜いて勝利を掴め！下のデモでは開発者と対戦できるぞ。さあ挑戦してみよう…まあ、たぶん君が負けるけどね？',
         comment: 'ぼくのせんたく、あてられるかな？',
         Demo: NullHandDemo,
     },
@@ -59,6 +59,12 @@ export default function Home() {
                         </span>
                         <div className="h-px flex-1 bg-linear-to-r from-transparent via-brand-500/40 to-transparent" />
                     </div>
+                    <p
+                        className="text-center text-[11px] text-brand-700 mt-1"
+                        style={{ fontFamily: DOT_GOTHIC_FONT }}
+                    >
+                        各ゲームにはランキングがある。上を目指すもよし、友達と遊ぶもよし。
+                    </p>
                 </div>
 
                 {/* ゲーム紹介 */}
@@ -193,7 +199,7 @@ export default function Home() {
                                 WebkitTextFillColor: 'transparent',
                                 backgroundClip: 'text',
                             }}>
-                                ゲームでまってるぜ。
+                                ゲームでまってるぞ。
                             </span>
                         </h2>
 
@@ -223,7 +229,11 @@ export default function Home() {
                             </svg>
                         </Link>
 
-                        <p className="mt-8 text-[11px] text-brand-700/60" style={{ fontFamily: DOT_GOTHIC_FONT }}>
+                        <p className="mt-6 text-[10px] text-brand-600" style={{ fontFamily: DOT_GOTHIC_FONT }}>
+                            ✦ アカウント登録 無料 ✦
+                        </p>
+
+                        <p className="mt-3 text-[11px] text-brand-700/60" style={{ fontFamily: DOT_GOTHIC_FONT }}>
                             <Link href="/terms" className="hover:text-brand-500 transition-colors">利用規約</Link>
                             {' '}·{' '}
                             <Link href="/privacy" className="hover:text-brand-500 transition-colors">プライバシーポリシー</Link>

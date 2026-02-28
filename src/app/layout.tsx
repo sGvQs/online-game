@@ -5,6 +5,7 @@ import { ThemeProvider } from "@/lib/theme-context";
 import BGMPlayer from "@/components/ui/BGMPlayer";
 import { SoundProvider } from "@/lib/sound-context";
 import { DebugComplaintKeyListener } from "@/components/dashboard/DebugComplaintKeyListener";
+import { OldPCFloating } from "@/components/decorations/OldPCFloating";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -116,6 +117,7 @@ export default function RootLayout({
         <SoundProvider>
           <ThemeProvider>
             <DebugComplaintKeyListener />
+            <OldPCFloating />
             {children}
             <BGMPlayer />
           </ThemeProvider>

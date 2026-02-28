@@ -32,5 +32,28 @@ export { getComplaintMessageForRoomName } from './roomDeletedComplaints'
 // タイピングイベント用
 export { getRandomDinosaurRoomName } from './dinosaurTypingRoomNames'
 
-/** ルーム作成・タイピングモード時の固定メッセージ */
-export const TYPING_MODE_MESSAGE = '君のために、文字を打ってあげるよ。毎度大変そうだからね。'
+export const TYPING_MODE_MESSAGES = [
+    'もじ。',
+    'なんか。',
+    'でてる。',
+    '……。',
+    'カタ。',
+    'カタカタ。',
+    'ひかってる。',
+    'たぶん。',
+    'あ。',
+    'へへ。',
+    'まだ。',
+    'あ、もじが。',
+    'キーが。',
+    'なにか。',
+    'なんかうってる。',
+]
+
+/**
+ * 配列からメッセージをランダムに取得する
+ */
+export const getRandomTypingMessage = () => {
+    const randomIndex = Math.floor(Math.random() * TYPING_MODE_MESSAGES.length);
+    return TYPING_MODE_MESSAGES[randomIndex];
+};

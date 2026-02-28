@@ -5,6 +5,7 @@ import { motion } from 'framer-motion'
 import Image from 'next/image'
 import { useSE } from '@/hooks/useSE'
 
+const CHERRY_BOMB_FONT = 'var(--font-cherry-bomb-one)'
 const ENTER_DURATION = 3
 const IDLE_DURATION = 8
 const EXIT_DURATION = 3
@@ -45,6 +46,7 @@ export function AnnoyingDinosaurComplaint({
         const isSilentChar = (c: string) => /^[。、．，….\s「」『』（）]$/.test(c)
 
         let speechIndex = displayedText.length
+        let typeIndex = 0
         const typeInterval = setInterval(() => {
             if (speechIndex < message.length) {
                 const nextChar = message[speechIndex]
@@ -54,11 +56,9 @@ export function AnnoyingDinosaurComplaint({
                 setDisplayedText(message.slice(0, speechIndex + 1))
                 speechIndex++
             }
-            if (typingMode && textToType && onTypeIntoInput) {
-                const newText = textToType.slice(
-                    0,
-                    Math.min(speechIndex, textToType.length)
-                )
+            if (typingMode && textToType && onTypeIntoInput && typeIndex < textToType.length) {
+                typeIndex++
+                const newText = textToType.slice(0, typeIndex)
                 onTypeIntoInput(newText)
             }
         }, 150)
@@ -99,7 +99,7 @@ export function AnnoyingDinosaurComplaint({
     return (
         <motion.div
             className={`fixed left-1/2 z-0 flex items-end pointer-events-none ${isCenter ? 'top-1/2' : 'bottom-0'}`}
-            style={{ width: 'min(460px, 90vw)' }}
+            style={{ width: 'min(260px, 90vw)' }}
             initial={{ x: '-50%', y: initialY }}
             animate={
                 phase === 'entering'
@@ -125,15 +125,15 @@ export function AnnoyingDinosaurComplaint({
                 </div>
                 {phase !== 'entering' && (
                     <motion.div
-                        className="shrink-0 mt-2 w-full max-w-[400px]"
+                        className="shrink-0 mt-2 w-[200px]"
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ duration: 0.4, delay: 0.2 }}
                     >
-                        <div className="relative px-2.5 py-1.5 rounded-xl border border-brand-200/20 bg-brand-300 text-white text-[10px] font-medium shadow-sm">
-                            <span className="font-(--font-dot-gothic-16) tracking-wide">{displayedText}</span>
+                        <div className="relative px-2.5 py-1.5 rounded-xl border border-white bg-white text-black text-[10px] font-medium shadow-sm">
+                            <span className="tracking-wide" style={{ fontFamily: CHERRY_BOMB_FONT }}>{displayedText}</span>
                             <div
-                                className="absolute -left-1.5 top-1/2 -translate-y-1/2 w-0 h-0 border-t-4 border-t-transparent border-b-4 border-b-transparent border-r-[6px] border-r-brand-300"
+                                className="absolute -left-1.5 top-1/2 -translate-y-1/2 w-0 h-0 border-t-4 border-t-transparent border-b-4 border-b-transparent border-r-[6px] border-r-white"
                                 aria-hidden
                             />
                         </div>
