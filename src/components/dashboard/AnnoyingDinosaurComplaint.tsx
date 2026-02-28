@@ -99,7 +99,7 @@ export function AnnoyingDinosaurComplaint({
     return (
         <motion.div
             className={`fixed left-1/2 z-0 flex items-end pointer-events-none ${isCenter ? 'top-1/2' : 'bottom-0'}`}
-            style={{ width: 'min(460px, 90vw)' }}
+            style={{ width: 'min(260px, 90vw)' }}
             initial={{ x: '-50%', y: initialY }}
             animate={
                 phase === 'entering'
@@ -125,7 +125,7 @@ export function AnnoyingDinosaurComplaint({
                 </div>
                 {phase !== 'entering' && (
                     <motion.div
-                        className="shrink-0 mt-2 w-full max-w-[400px]"
+                        className="shrink-0 mt-2 w-[200px]"
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ duration: 0.4, delay: 0.2 }}

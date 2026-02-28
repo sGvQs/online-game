@@ -436,12 +436,12 @@ export function AnnoyingDinosaur() {
                 </div>
 
                 {/* 中央から登場時：吹き出しスペースを事前に確保してレイアウトシフトを防ぐ */}
-                {isFromBottom && phase === 'entering' && <div className="min-w-[400px] shrink-0" aria-hidden />}
+                {isFromBottom && phase === 'entering' && <div className="min-w-[200px] shrink-0" aria-hidden />}
 
                 {/* チャット風吹き出し：SVGと被らないよう右側に配置、しっぽは口方向へ */}
                 {phase !== 'entering' && (
                     <motion.div
-                        className={`shrink-0 mt-2 ${isFromBottom ? 'w-[400px] min-w-[400px]' : 'min-w-[80px] max-w-[400px]'}`}
+                        className={`shrink-0 mt-2 ${isFromBottom ? 'w-[200px] min-w-[200px]' : 'min-w-[80px] max-w-[400px]'}`}
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ duration: 0.4, delay: 0.2 }}
