@@ -23,6 +23,11 @@ export const gameSelection = tv({
             'border-[#FF4444] bg-black hover:bg-[#1a0505] text-[#FF4444]',
             'shadow-[0_0_15px_rgba(255,68,68,0.2)] hover:shadow-[0_0_25px_rgba(255,68,68,0.4)]',
         ],
+        // Star Shield Theme (Deep Space: dark navy + cyan)
+        starShieldButton: [
+            'border-[#00CFFF] bg-[#050d1a] hover:bg-[#0a1e33] text-[#00CFFF]',
+            'shadow-[0_0_15px_rgba(0,207,255,0.2)] hover:shadow-[0_0_25px_rgba(0,207,255,0.4)]',
+        ],
         gameIcon: 'text-3xl relative z-10 group-hover:scale-110 transition-transform duration-300',
         gameInfo: 'flex flex-col relative z-10',
         gameTitle: 'font-black text-xl tracking-widest',
@@ -31,6 +36,7 @@ export const gameSelection = tv({
 
         // Background effects
         nullHandBg: 'absolute inset-0 bg-[#FF4444]/5 group-hover:bg-[#FF4444]/10 transition-colors',
+        starShieldBg: 'absolute inset-0 bg-[#00CFFF]/5 group-hover:bg-[#00CFFF]/10 transition-colors',
     },
 })
 

@@ -29,4 +29,11 @@ export {
 } from './nullHandActions'
 export { getTopRankings } from './rankingActions'
 
+// STAR SHIELD
+export {
+    startStarShieldMatch,
+    saveStarShieldResult,
+    getStarShieldMatchInfo,
+} from './starShieldActions'
+
 

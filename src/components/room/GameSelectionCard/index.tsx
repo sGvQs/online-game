@@ -48,6 +48,20 @@ export function GameSelectionCard({ onSelectGame, isPending, isHost }: GameSelec
                         </div>
                     </div>
                 </Button>
+                <Button
+                    onClick={() => onSelectGame('star-shield')}
+                    disabled={isPending}
+                    className={styles.gameButton({ class: styles.starShieldButton() })}
+                >
+                    <div className={styles.starShieldBg()} />
+                    <span className={styles.gameIcon()}>🛡️</span>
+                    <div className={styles.gameInfo()}>
+                        <div className={styles.gameTitle()}>STAR SHIELD</div>
+                        <div className={styles.gameDescription()}>
+                            {isHost ? '2人で隕石を撃ち落とせ' : 'クリックでルールを表示'}
+                        </div>
+                    </div>
+                </Button>
             </div>
             {isPending && (
                 <div className={styles.loadingText()}>

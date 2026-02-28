@@ -1,0 +1,106 @@
+'use client'
+
+import { useEffect, useRef } from 'react'
+import { motion } from 'framer-motion'
+import { StarfieldBackground } from '@/components/StarfieldBackground'
+import { DialogueLine } from '@/hooks/useStarShield'
+
+interface TypistViewProps {
+    dialogue: {
+        line: DialogueLine
+        charIndex: number
+    }
+    score: { spawned: number; destroyed: number }
+}
+
+function TypingDisplay({ line, charIndex }: { line: DialogueLine; charIndex: number }) {
+    const done = line.romaji.slice(0, charIndex)
+    const current = line.romaji[charIndex] ?? ''
+    const rest = line.romaji.slice(charIndex + 1)
+
+    return (
+        <div className="flex flex-col items-center gap-6">
+            {/* セリフウィンドウ */}
+            <motion.div
+                key={line.text}
+                initial={{ opacity: 0, y: 8 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3 }}
+                className="border border-[#00CFFF]/20 bg-black/60 rounded-lg px-8 py-4 max-w-lg w-full text-center"
+            >
+                <div className="text-white/40 text-xs font-mono tracking-widest mb-2">DIALOGUE</div>
+                <div className="text-white text-2xl font-bold tracking-wider">{line.text}</div>
+            </motion.div>
+
+            {/* ローマ字入力欄 */}
+            <div className="font-mono text-3xl tracking-[0.25em] select-none">
+                <span className="text-white/20">{done}</span>
+                <span className="text-[#00CFFF] drop-shadow-[0_0_8px_rgba(0,207,255,0.9)] animate-pulse">
+                    {current}
+                </span>
+                <span className="text-white/50">{rest}</span>
+            </div>
+
+            {/* 進捗バー */}
+            <div className="w-64 h-1 bg-white/10 rounded-full overflow-hidden">
+                <motion.div
+                    className="h-full bg-[#00CFFF]/60 rounded-full"
+                    animate={{
+                        width: `${line.romaji.length > 0 ? (charIndex / line.romaji.length) * 100 : 0}%`
+                    }}
+                    transition={{ duration: 0.1 }}
+                />
+            </div>
+        </div>
+    )
+}
+
+export function TypistView({ dialogue, score }: TypistViewProps) {
+    // キーボード入力フォーカス用の隠し input
+    const inputRef = useRef<HTMLInputElement>(null)
+
+    useEffect(() => {
+        inputRef.current?.focus()
+    }, [])
+
+    return (
+        <div
+            className="absolute inset-0 overflow-hidden flex flex-col items-center justify-center gap-10"
+            onClick={() => inputRef.current?.focus()}
+        >
+            <StarfieldBackground />
+
+            {/* フォーカス用隠しinput（モバイル対応） */}
+            <input
+                ref={inputRef}
+                className="absolute opacity-0 w-0 h-0 pointer-events-none"
+                readOnly
+                aria-hidden="true"
+            />
+
+            {/* グロー装飾 */}
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <div className="w-[500px] h-[300px] rounded-full bg-[#00CFFF]/5 blur-3xl" />
+            </div>
+
+            {/* 恐竜キャラクター */}
+            <motion.div
+                className="text-7xl select-none relative z-10"
+                animate={{ y: [0, -6, 0] }}
+                transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
+            >
+                🦕
+            </motion.div>
+
+            {/* タイピング表示 */}
+            <div className="relative z-10 w-full max-w-xl px-6">
+                <TypingDisplay line={dialogue.line} charIndex={dialogue.charIndex} />
+            </div>
+
+            {/* ロール表示 */}
+            <div className="absolute bottom-8 left-1/2 -translate-x-1/2 text-[#00CFFF]/40 text-xs font-mono tracking-widest">
+                TYPIST MODE — type the romaji to fire
+            </div>
+        </div>
+    )
+}
