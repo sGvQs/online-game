@@ -16,7 +16,7 @@ const GAME_DURATION_SECONDS = 90
 // 座標系: ビューポート基準の正規化座標 (0-1)
 export const DINO_X = 0.08
 export const DINO_Y = 0.85
-const SPAWN_X_MIN = 0.35
+const SPAWN_X_MIN = 0.1
 const SPAWN_X_MAX = 0.65
 const SPAWN_Y_MIN = 0.02
 const SPAWN_Y_MAX = 0.15
@@ -184,9 +184,7 @@ export function useStarShield({
             durationSeconds,
         }
 
-        onGameEnd(result, stats)
-
-        // Shooter のみ DB 保存（postgres_changes で Typist へ通知される）
+        // Shooter: DB 保存を先に完了してから結果画面へ（returnToRoom による Match 削除との競合を防ぐ）
         if (isShooter) {
             try {
                 await saveStarShieldResult(matchId, {
@@ -195,12 +193,15 @@ export function useStarShield({
                     isCleared: result === 'CLEARED',
                     failureReason: result !== 'CLEARED' ? result : undefined,
                     durationSeconds: stats.durationSeconds,
+                    difficulty,
                 })
             } catch (e) {
                 console.error('結果保存失敗:', e)
             }
         }
-    }, [isShooter, matchId, startedAt, onGameEnd])
+
+        onGameEnd(result, stats)
+    }, [isShooter, matchId, startedAt, onGameEnd, difficulty])
 
     // ============================================
     // Supabase Realtime チャンネル

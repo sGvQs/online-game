@@ -94,6 +94,7 @@ interface SaveStarShieldResultData {
     isCleared: boolean
     failureReason?: string
     durationSeconds: number
+    difficulty?: Difficulty
 }
 
 /**
@@ -104,22 +105,51 @@ export async function saveStarShieldResult(
     matchId: string,
     data: SaveStarShieldResultData
 ): Promise<void> {
+    const existing = await prisma.typingShootMatch.findUnique({ where: { matchId } })
     const { spawnedCount, destroyedCount, isCleared, failureReason, durationSeconds } = data
-
     const accuracyRate = spawnedCount > 0 ? destroyedCount / spawnedCount : 0
+    const updateData = {
+        spawnedCount,
+        destroyedCount,
+        isCleared,
+        failureReason: failureReason ?? null,
+        accuracyRate,
+        durationSeconds,
+        endedAt: new Date(),
+    }
 
-    await prisma.typingShootMatch.update({
-        where: { matchId },
-        data: {
-            spawnedCount,
-            destroyedCount,
-            isCleared,
-            failureReason: failureReason ?? null,
-            accuracyRate,
-            durationSeconds,
-            endedAt: new Date(),
-        },
-    })
+    if (existing) {
+        await prisma.typingShootMatch.update({
+            where: { matchId },
+            data: updateData,
+        })
+    } else {
+        const match = await prisma.match.findUnique({
+            where: { id: matchId },
+            include: { room: { include: { users: true } } },
+        })
+        if (!match) {
+            console.warn('[saveStarShieldResult] Match not found (may have been deleted):', matchId)
+            return
+        }
+
+        const shooterId = match.room.createdBy
+        const typistUser = match.room.users.find((u) => u.userId !== shooterId)
+        if (!typistUser) throw new Error('Typist not found in room')
+
+        const diff = data.difficulty ?? 'NORMAL'
+        await prisma.typingShootMatch.create({
+            data: {
+                matchId,
+                shooterId,
+                typistId: typistUser.userId,
+                characterName: 'dinosaur',
+                difficulty: diff,
+                targetAsteroidCount: Math.floor(GAME_DURATION_SECONDS * SPAWN_RATES[diff]),
+                ...updateData,
+            },
+        })
+    }
 
     await prisma.match.update({
         where: { id: matchId },
