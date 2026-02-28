@@ -1,14 +1,21 @@
 'use client'
 
 import { useEffect, useRef, useCallback } from 'react'
+import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
-import { StarfieldBackground } from '@/components/StarfieldBackground'
-import { Asteroid, getAsteroidX } from '@/hooks/useStarShield'
-
-const SCREEN_WIDTH = 1200
+import {
+    Asteroid,
+    Bullet,
+    getAsteroidPosition,
+    getBulletPosition,
+    BULLET_RADIUS,
+    DINO_X,
+    DINO_Y,
+} from '@/hooks/useStarShield'
 
 interface ShooterViewProps {
     asteroids: Asteroid[]
+    bullets: Bullet[]
     aimRef: React.RefObject<{ x: number; y: number }>
     onMouseMove: (e: React.MouseEvent<HTMLDivElement>) => void
 }
@@ -18,9 +25,9 @@ function AsteroidCircle({ asteroid }: { asteroid: Asteroid }) {
 
     const update = useCallback(() => {
         if (!divRef.current) return
-        const x = getAsteroidX(asteroid, Date.now())
-        const pct = (x / SCREEN_WIDTH) * 100
-        divRef.current.style.left = `${pct}%`
+        const pos = getAsteroidPosition(asteroid, Date.now())
+        divRef.current.style.left = `${pos.x * 100}%`
+        divRef.current.style.top = `${pos.y * 100}%`
     }, [asteroid])
 
     useEffect(() => {
@@ -39,7 +46,6 @@ function AsteroidCircle({ asteroid }: { asteroid: Asteroid }) {
         <motion.div
             ref={divRef}
             className="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-none"
-            style={{ top: `${asteroid.y}%` }}
             animate={destroyed ? { scale: 0, opacity: 0 } : { scale: 1, opacity: 1 }}
             initial={{ scale: 0.5, opacity: 0 }}
             transition={
@@ -60,13 +66,51 @@ function AsteroidCircle({ asteroid }: { asteroid: Asteroid }) {
     )
 }
 
+function BulletCircle({ bullet }: { bullet: Bullet }) {
+    const divRef = useRef<HTMLDivElement>(null)
+
+    const update = useCallback(() => {
+        if (!divRef.current) return
+        const pos = getBulletPosition(bullet, Date.now())
+        divRef.current.style.left = `${pos.x * 100}%`
+        divRef.current.style.top = `${pos.y * 100}%`
+    }, [bullet])
+
+    useEffect(() => {
+        let rafId: number
+        const loop = () => {
+            update()
+            rafId = requestAnimationFrame(loop)
+        }
+        rafId = requestAnimationFrame(loop)
+        return () => cancelAnimationFrame(rafId)
+    }, [update])
+
+    // 弾のサイズは BULLET_RADIUS に基づく（デバッグ用に変数化済み）
+    const sizePx = Math.max(8, BULLET_RADIUS * 400)
+
+    return (
+        <div
+            ref={divRef}
+            className="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-none z-10"
+            style={{ width: sizePx, height: sizePx }}
+        >
+            <div className="w-full h-full rounded-full bg-brand-400 shadow-[0_0_8px_rgba(129,140,248,0.8)]" />
+        </div>
+    )
+}
+
 // 破壊エフェクト（パーティクル）
 function ExplosionEffect({ asteroid }: { asteroid: Asteroid }) {
     if (!asteroid.destroyedAt) return null
+    const pos = getAsteroidPosition(asteroid, asteroid.destroyedAt)
     return (
         <motion.div
             className="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-none"
-            style={{ top: `${asteroid.y}%`, left: `${(getAsteroidX(asteroid, asteroid.destroyedAt) / SCREEN_WIDTH) * 100}%` }}
+            style={{
+                left: `${pos.x * 100}%`,
+                top: `${pos.y * 100}%`,
+            }}
             initial={{ opacity: 1, scale: 0.5 }}
             animate={{ opacity: 0, scale: 3 }}
             transition={{ duration: 0.5, ease: 'easeOut' }}
@@ -76,7 +120,7 @@ function ExplosionEffect({ asteroid }: { asteroid: Asteroid }) {
     )
 }
 
-// 照準カーソル
+// 照準カーソル（正規化座標 0-1 を使用）
 function Crosshair({ aimRef }: { aimRef: React.RefObject<{ x: number; y: number }> }) {
     const ref = useRef<HTMLDivElement>(null)
 
@@ -84,9 +128,8 @@ function Crosshair({ aimRef }: { aimRef: React.RefObject<{ x: number; y: number 
         let rafId: number
         const loop = () => {
             if (ref.current) {
-                const pct = (aimRef.current.x / SCREEN_WIDTH) * 100
-                ref.current.style.left = `${pct}%`
-                ref.current.style.top = `${aimRef.current.y}px`
+                ref.current.style.left = `${aimRef.current.x * 100}%`
+                ref.current.style.top = `${aimRef.current.y * 100}%`
             }
             rafId = requestAnimationFrame(loop)
         }
@@ -110,7 +153,47 @@ function Crosshair({ aimRef }: { aimRef: React.RefObject<{ x: number; y: number 
     )
 }
 
-export function ShooterView({ asteroids, aimRef, onMouseMove }: ShooterViewProps) {
+// 恐竜（照準方向を向く）
+function Dinosaur({ aimRef }: { aimRef: React.RefObject<{ x: number; y: number }> }) {
+    const ref = useRef<HTMLDivElement>(null)
+
+    useEffect(() => {
+        let rafId: number
+        const loop = () => {
+            if (ref.current) {
+                const dx = aimRef.current.x - DINO_X
+                const dy = aimRef.current.y - DINO_Y
+                const angle = Math.atan2(dy, dx)
+                ref.current.style.transform = `translate(-50%, 50%) rotate(${angle}rad)`
+            }
+            rafId = requestAnimationFrame(loop)
+        }
+        rafId = requestAnimationFrame(loop)
+        return () => cancelAnimationFrame(rafId)
+    }, [aimRef])
+
+    return (
+        <div
+            ref={ref}
+            className="absolute z-10 pointer-events-none origin-center w-24 h-24"
+            style={{
+                left: `${DINO_X * 100}%`,
+                bottom: `${(1 - DINO_Y) * 100}%`,
+            }}
+        >
+            <div className="relative w-24 h-24">
+                <Image
+                    src="/svg/charactor/annoying-dinosaur.svg"
+                    alt="恐竜"
+                    fill
+                    className="object-contain drop-shadow-[0_2px_8px_rgba(0,0,0,0.4)]"
+                />
+            </div>
+        </div>
+    )
+}
+
+export function ShooterView({ asteroids, bullets, aimRef, onMouseMove }: ShooterViewProps) {
     const activeAsteroids = asteroids.filter((a) => !a.destroyedAt)
     const destroyedAsteroids = asteroids.filter((a) => !!a.destroyedAt)
 
@@ -119,11 +202,8 @@ export function ShooterView({ asteroids, aimRef, onMouseMove }: ShooterViewProps
             className="absolute inset-0 cursor-none overflow-hidden"
             onMouseMove={onMouseMove}
         >
-            <StarfieldBackground />
-
-            {/* 左端ライン（ゲームオーバーライン） */}
-            <div className="absolute left-0 top-0 bottom-0 w-px bg-red-500/30 z-10" />
-            <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-red-900/20 to-transparent z-10 pointer-events-none" />
+            {/* 恐竜（左下、照準を向く） */}
+            <Dinosaur aimRef={aimRef} />
 
             {/* 隕石 */}
             <AnimatePresence>
@@ -131,6 +211,11 @@ export function ShooterView({ asteroids, aimRef, onMouseMove }: ShooterViewProps
                     <AsteroidCircle key={a.id} asteroid={a} />
                 ))}
             </AnimatePresence>
+
+            {/* 弾 */}
+            {bullets.map((b) => (
+                <BulletCircle key={b.id} bullet={b} />
+            ))}
 
             {/* 破壊エフェクト */}
             <AnimatePresence>

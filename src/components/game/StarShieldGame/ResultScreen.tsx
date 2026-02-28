@@ -1,7 +1,7 @@
 'use client'
 
+import Image from 'next/image'
 import { motion } from 'framer-motion'
-import { StarfieldBackground } from '@/components/StarfieldBackground'
 import { GameResult, GameStats } from '@/hooks/useStarShield'
 
 interface ResultScreenProps {
@@ -46,8 +46,6 @@ export function ResultScreen({ result, stats, onBackToTitle }: ResultScreenProps
 
     return (
         <div className="relative min-h-screen overflow-hidden flex flex-col items-center justify-center">
-            <StarfieldBackground />
-
             {/* グロー */}
             <div
                 className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[300px] rounded-full blur-3xl pointer-events-none"
@@ -87,7 +85,14 @@ export function ResultScreen({ result, stats, onBackToTitle }: ResultScreenProps
                     animate={{ opacity: 1, scale: 1 }}
                     transition={{ delay: 0.4, duration: 0.5 }}
                 >
-                    <div className="text-4xl mb-3">🦕</div>
+                    <div className="relative w-14 h-14 mb-3 mx-auto">
+                        <Image
+                            src="/svg/charactor/annoying-dinosaur.svg"
+                            alt=""
+                            fill
+                            className="object-contain"
+                        />
+                    </div>
                     <div className="text-white/80 text-sm leading-relaxed">
                         {config.message}
                     </div>

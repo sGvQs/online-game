@@ -4,7 +4,6 @@ import { motion } from 'framer-motion'
 import { RoomWithUsersAndReadyStatus, RoomUserWithReadyStatus } from '@/shared/types'
 import { starShieldGame } from './styles'
 import { cn } from '@/lib/utils'
-import { StarfieldBackground } from '@/components/StarfieldBackground'
 
 const RUBIK_PUDDLES_FONT = 'var(--font-rubik-puddles)'
 const DOT_GOTHIC_FONT = 'var(--font-dot-gothic-16)'
@@ -50,8 +49,6 @@ export function TitleScreen({
 
     return (
         <div className={styles.container()}>
-            <StarfieldBackground />
-
             {/* グロー装飾（page.tsx のオーロラに合わせる） */}
             <div
                 className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] rounded-full opacity-20 pointer-events-none"

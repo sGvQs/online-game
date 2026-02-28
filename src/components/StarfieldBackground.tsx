@@ -1,29 +1,11 @@
 'use client'
 
-import { useCallback, useEffect, useState } from 'react'
+import { memo, useEffect, useState, useMemo } from 'react'
 import Particles, { initParticlesEngine } from '@tsparticles/react'
 import { loadSlim } from '@tsparticles/slim'
-import type { Engine, Container } from '@tsparticles/engine'
+import type { Engine } from '@tsparticles/engine'
 
-export function StarfieldBackground() {
-    const [init, setInit] = useState(false)
-
-    useEffect(() => {
-        initParticlesEngine(async (engine: Engine) => {
-            await loadSlim(engine)
-        }).then(() => {
-            setInit(true)
-        })
-    }, [])
-
-    if (!init) {
-        return null
-    }
-
-    return (
-        <Particles
-            id="tsparticles"
-            options={{
+const PARTICLES_OPTIONS = {
                 background: {
                     color: {
                         value: 'transparent',
@@ -80,7 +62,25 @@ export function StarfieldBackground() {
                     zIndex: '-1',
                     pointerEvents: 'none',
                 },
-            }}
-        />
-    )
-}
+            }
+
+export const StarfieldBackground = memo(function StarfieldBackground() {
+    const [init, setInit] = useState(false)
+
+    // options を安定な参照にすることで再レンダリング時にパーティクルが再初期化されない
+    const options = useMemo(() => PARTICLES_OPTIONS, [])
+
+    useEffect(() => {
+        initParticlesEngine(async (engine: Engine) => {
+            await loadSlim(engine)
+        }).then(() => {
+            setInit(true)
+        })
+    }, [])
+
+    if (!init) {
+        return null
+    }
+
+    return <Particles id="tsparticles" options={options} />
+})

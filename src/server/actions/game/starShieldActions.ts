@@ -21,7 +21,7 @@ const GAME_DURATION_SECONDS = 90
 export async function startStarShieldMatch(
     roomId: string,
     difficulty: Difficulty
-): Promise<{ matchId: string; shooterId: string; typistId: string }> {
+): Promise<{ matchId: string; startedAt: number; shooterId: string; typistId: string }> {
     const user = await getAuthenticatedUser()
 
     const room = await prisma.room.findUnique({

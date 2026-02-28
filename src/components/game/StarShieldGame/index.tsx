@@ -100,45 +100,40 @@ export function StarShieldGame({
         await returnToRoom(roomId)
     }, [roomId])
 
-    if (phase === 'TITLE') {
-        return (
-            <TitleScreen
-                room={room}
-                isHost={isHost}
-                isReady={isReady}
-                allUsersReady={allUsersReady}
-                difficulty={difficulty}
-                onToggleReady={toggleReady}
-                onStartGame={handleStartGame}
-                onExit={handleExit}
-                onDifficultyChange={setDifficulty}
-                currentUserId={currentUserId}
-            />
-        )
-    }
-
-    if (phase === 'PLAYING' && matchId && startedAt) {
-        return (
-            <GameScreen
-                matchId={matchId}
-                startedAt={startedAt}
-                isShooter={isHost}
-                difficulty={difficulty}
-                currentUserId={currentUserId}
-                onGameEnd={handleGameEnd}
-            />
-        )
-    }
-
-    if (phase === 'RESULT' && gameResult && gameStats) {
-        return (
-            <ResultScreen
-                result={gameResult}
-                stats={gameStats}
-                onBackToTitle={handleBackToTitle}
-            />
-        )
-    }
-
-    return null
+    // 背景は (play) layout で描画（room ⇔ game 遷移時もアンマウントされない）
+    return (
+        <div className="relative min-h-screen overflow-hidden">
+            {phase === 'TITLE' && (
+                <TitleScreen
+                    room={room}
+                    isHost={isHost}
+                    isReady={isReady}
+                    allUsersReady={allUsersReady}
+                    difficulty={difficulty}
+                    onToggleReady={toggleReady}
+                    onStartGame={handleStartGame}
+                    onExit={handleExit}
+                    onDifficultyChange={setDifficulty}
+                    currentUserId={currentUserId}
+                />
+            )}
+            {phase === 'PLAYING' && matchId && startedAt && (
+                <GameScreen
+                    matchId={matchId}
+                    startedAt={startedAt}
+                    isShooter={isHost}
+                    difficulty={difficulty}
+                    currentUserId={currentUserId}
+                    onGameEnd={handleGameEnd}
+                />
+            )}
+            {phase === 'RESULT' && gameResult && gameStats && (
+                <ResultScreen
+                    result={gameResult}
+                    stats={gameStats}
+                    onBackToTitle={handleBackToTitle}
+                />
+            )}
+        </div>
+    )
 }

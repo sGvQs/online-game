@@ -1,8 +1,8 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
+import Image from 'next/image'
 import { motion } from 'framer-motion'
-import { StarfieldBackground } from '@/components/StarfieldBackground'
 import { DialogueLine } from '@/hooks/useStarShield'
 
 interface TypistViewProps {
@@ -72,8 +72,6 @@ export function TypistView({ dialogue, score }: TypistViewProps) {
             className="absolute inset-0 overflow-hidden flex flex-col items-center justify-center gap-10"
             onClick={() => inputRef.current?.focus()}
         >
-            <StarfieldBackground />
-
             {/* フォーカス用隠しinput（モバイル対応） */}
             <input
                 ref={inputRef}
@@ -94,11 +92,16 @@ export function TypistView({ dialogue, score }: TypistViewProps) {
 
             {/* 恐竜キャラクター */}
             <motion.div
-                className="text-7xl select-none relative z-10"
+                className="relative z-10 w-16 h-16 md:w-20 md:h-20 select-none"
                 animate={{ y: [0, -6, 0] }}
                 transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
             >
-                🦕
+                <Image
+                    src="/svg/charactor/annoying-dinosaur.svg"
+                    alt=""
+                    fill
+                    className="object-contain"
+                />
             </motion.div>
 
             {/* タイピング表示 */}

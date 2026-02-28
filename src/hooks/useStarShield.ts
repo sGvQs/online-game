@@ -12,8 +12,23 @@ export type Difficulty = 'EASY' | 'NORMAL' | 'HARD'
 export type GameResult = 'CLEARED' | 'FAILED_CONTACT' | 'FAILED_TIMEOUT'
 
 const GAME_DURATION_SECONDS = 90
-const SCREEN_WIDTH = 1200
-const ASTEROID_SPEED_PX_PER_MS = 0.12
+
+// 座標系: ビューポート基準の正規化座標 (0-1)
+export const DINO_X = 0.08
+export const DINO_Y = 0.85
+const SPAWN_X_MIN = 0.35
+const SPAWN_X_MAX = 0.65
+const SPAWN_Y_MIN = 0.02
+const SPAWN_Y_MAX = 0.15
+const ASTEROID_DURATION_MS = 8000
+
+// 弾の設定（デバッグ用に BULLET_RADIUS を変数化）
+const BULLET_SPEED = 0.0008 // 正規化座標/ms（速すぎないように）
+// export const BULLET_RADIUS = 0.008 // デバッグ時は大きくできる
+export const BULLET_RADIUS = 0.008 // デバッグ時は大きくできる
+export const ASTEROID_RADIUS = 0.02
+const DINO_HIT_RADIUS = 0.06
+const BULLET_MAX_AGE_MS = 3000
 
 const SPAWN_INTERVALS_MS: Record<Difficulty, number> = {
     EASY: 2000,
@@ -52,23 +67,46 @@ export const DIALOGUES: Record<Difficulty, DialogueLine[]> = {
 }
 
 // ============================================
-// 隕石の型
+// 隕石・弾の型
 // ============================================
 
 export interface Asteroid {
     id: string
     spawnedAt: number
-    y: number // 0-100 (%)
+    spawnX: number // 0-1（スポーン時 X）
+    spawnY: number // 0-1（スポーン時 Y）
     destroyedAt?: number
+}
+
+export interface Bullet {
+    id: string
+    firedAt: number
+    startX: number
+    startY: number
+    dirX: number
+    dirY: number
 }
 
 // ============================================
 // 位置計算ユーティリティ
 // ============================================
 
-export function getAsteroidX(asteroid: Asteroid, now: number): number {
+export function getAsteroidPosition(asteroid: Asteroid, now: number): { x: number; y: number } {
     const elapsed = now - asteroid.spawnedAt
-    return SCREEN_WIDTH - elapsed * ASTEROID_SPEED_PX_PER_MS
+    const progress = Math.min(1, elapsed / ASTEROID_DURATION_MS)
+    return {
+        x: asteroid.spawnX + (DINO_X - asteroid.spawnX) * progress,
+        y: asteroid.spawnY + (DINO_Y - asteroid.spawnY) * progress,
+    }
+}
+
+export function getBulletPosition(bullet: Bullet, now: number): { x: number; y: number } {
+    const elapsed = now - bullet.firedAt
+    const dist = BULLET_SPEED * elapsed
+    return {
+        x: bullet.startX + bullet.dirX * dist,
+        y: bullet.startY + bullet.dirY * dist,
+    }
 }
 
 // ============================================
@@ -111,8 +149,9 @@ export function useStarShield({
     const supabase = useMemo(() => createClient(), [])
     const channelName = `star_shield_fire_${matchId}`
 
-    // ゲーム状態（Shooter のみ asteroids を管理、Typist は不要）
+    // ゲーム状態（Shooter のみ asteroids, bullets を管理、Typist は不要）
     const [asteroids, setAsteroids] = useState<Asteroid[]>([])
+    const [bullets, setBullets] = useState<Bullet[]>([])
     const [timer, setTimer] = useState(GAME_DURATION_SECONDS)
     const [score, setScore] = useState({ spawned: 0, destroyed: 0 })
 
@@ -122,8 +161,9 @@ export function useStarShield({
 
     // Refs
     const asteroidsRef = useRef<Asteroid[]>([])
+    const bulletsRef = useRef<Bullet[]>([])
     const scoreRef = useRef({ spawned: 0, destroyed: 0 })
-    const aimRef = useRef({ x: SCREEN_WIDTH / 2, y: 300 })
+    const aimRef = useRef({ x: 0.5, y: 0.5 }) // 正規化座標 0-1
     const gameEndedRef = useRef(false)
     const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null)
 
@@ -173,38 +213,37 @@ export function useStarShield({
         channelRef.current = channel
 
         channel
-            // Typist → Shooter: fire イベント（broadcast）
+            // Typist → Shooter: fire イベント（broadcast）→ 弾を生成
             .on('broadcast', { event: 'fire' }, () => {
                 if (!isShooter) return
-                const now = Date.now()
-                const active = asteroidsRef.current.filter((a) => !a.destroyedAt)
-                if (active.length === 0) return
 
                 const aim = aimRef.current
-                const screenH = typeof window !== 'undefined' ? window.innerHeight : 600
+                const dx = aim.x - DINO_X
+                const dy = aim.y - DINO_Y
+                const len = Math.hypot(dx, dy)
+                if (len < 0.001) return // 照準が恐竜にほぼ重なっている場合は弾を出さない
 
-                // 最近接隕石を破壊
-                let nearest = active[0]
-                let minDist = Infinity
-                for (const a of active) {
-                    const ax = getAsteroidX(a, now)
-                    const ay = (a.y / 100) * screenH
-                    const dist = Math.hypot(aim.x - ax, aim.y - ay)
-                    if (dist < minDist) {
-                        minDist = dist
-                        nearest = a
-                    }
+                const dirX = dx / len
+                const dirY = dy / len
+
+                const bullet: Bullet = {
+                    id: crypto.randomUUID(),
+                    firedAt: Date.now(),
+                    startX: DINO_X,
+                    startY: DINO_Y,
+                    dirX,
+                    dirY,
                 }
 
-                // ローカルで即座に破壊反映
-                const destroyedAt = now
-                setAsteroids((prev) => {
-                    const next = prev.map((a) =>
-                        a.id === nearest.id ? { ...a, destroyedAt } : a
-                    )
-                    asteroidsRef.current = next
+                setBullets((prev) => {
+                    const next = [...prev, bullet]
+                    bulletsRef.current = next
                     return next
                 })
+            })
+            // Typist: Shooter が隕石破壊したときに destroyed カウントを更新
+            .on('broadcast', { event: 'asteroid_destroyed' }, () => {
+                if (isShooter) return
                 setScore((prev) => {
                     const next = { ...prev, destroyed: prev.destroyed + 1 }
                     scoreRef.current = next
@@ -292,13 +331,14 @@ export function useStarShield({
         let spawnTimer: ReturnType<typeof setInterval> | null = null
         let rafId: number | null = null
 
-        // 隕石スポーン（Shooter ローカルのみ。Typist は隕石を表示しないため DB/broadcast 不要）
+        // 隕石スポーン（上中央ゾーンから恐竜方向へ）
         spawnTimer = setInterval(() => {
             if (gameEndedRef.current) return
             const asteroid: Asteroid = {
                 id: crypto.randomUUID(),
                 spawnedAt: Date.now(),
-                y: Math.random() * 80 + 10,
+                spawnX: SPAWN_X_MIN + Math.random() * (SPAWN_X_MAX - SPAWN_X_MIN),
+                spawnY: SPAWN_Y_MIN + Math.random() * (SPAWN_Y_MAX - SPAWN_Y_MIN),
             }
             setAsteroids((prev) => {
                 const next = [...prev, asteroid]
@@ -312,20 +352,82 @@ export function useStarShield({
             })
         }, spawnInterval)
 
-        // 接触判定ループ
-        const checkContact = () => {
+        // 弾・隕石の当たり判定 + 隕石→恐竜の接触判定ループ
+        const gameLoop = () => {
             if (gameEndedRef.current) return
             const now = Date.now()
-            const contact = asteroidsRef.current.find(
-                (a) => !a.destroyedAt && getAsteroidX(a, now) < 0
-            )
+            const asts = asteroidsRef.current
+            const bts = bulletsRef.current
+
+            // 弾 vs 隕石の当たり判定
+            const hitBulletIds = new Set<string>()
+            const hitAsteroidIds = new Set<string>()
+            for (const bullet of bts) {
+                if (hitBulletIds.has(bullet.id)) continue
+                const bp = getBulletPosition(bullet, now)
+                for (const a of asts) {
+                    if (a.destroyedAt || hitAsteroidIds.has(a.id)) continue
+                    const ap = getAsteroidPosition(a, now)
+                    const dist = Math.hypot(bp.x - ap.x, bp.y - ap.y)
+                    if (dist < ASTEROID_RADIUS + BULLET_RADIUS) {
+                        hitBulletIds.add(bullet.id)
+                        hitAsteroidIds.add(a.id)
+                        channelRef.current?.send({
+                            type: 'broadcast',
+                            event: 'asteroid_destroyed',
+                            payload: {},
+                        })
+                    }
+                }
+            }
+            if (hitAsteroidIds.size > 0) {
+                setAsteroids((prev) => {
+                    const next = prev.map((ast) =>
+                        hitAsteroidIds.has(ast.id) ? { ...ast, destroyedAt: now } : ast
+                    )
+                    asteroidsRef.current = next
+                    return next
+                })
+                setBullets((prev) => {
+                    const next = prev.filter((b) => !hitBulletIds.has(b.id))
+                    bulletsRef.current = next
+                    return next
+                })
+                setScore((prev) => {
+                    const next = { ...prev, destroyed: prev.destroyed + hitAsteroidIds.size }
+                    scoreRef.current = next
+                    return next
+                })
+            }
+
+            // 古い弾を削除
+            const toRemove = bts.filter((b) => now - b.firedAt > BULLET_MAX_AGE_MS)
+            if (toRemove.length > 0) {
+                const ids = new Set(toRemove.map((b) => b.id))
+                setBullets((prev) => {
+                    const next = prev.filter((b) => !ids.has(b.id))
+                    bulletsRef.current = next
+                    return next
+                })
+            }
+
+            // 隕石 vs 恐竜の接触判定
+            const contact = asts.find((a) => {
+                if (a.destroyedAt || hitAsteroidIds.has(a.id)) return false
+                const ap = getAsteroidPosition(a, now)
+                const progress = (now - a.spawnedAt) / ASTEROID_DURATION_MS
+                if (progress >= 1) return true
+                const dist = Math.hypot(ap.x - DINO_X, ap.y - DINO_Y)
+                return dist < DINO_HIT_RADIUS
+            })
             if (contact) {
                 endGame('FAILED_CONTACT')
                 return
             }
-            rafId = requestAnimationFrame(checkContact)
+
+            rafId = requestAnimationFrame(gameLoop)
         }
-        rafId = requestAnimationFrame(checkContact)
+        rafId = requestAnimationFrame(gameLoop)
 
         return () => {
             if (spawnTimer) clearInterval(spawnTimer)
@@ -361,8 +463,8 @@ export function useStarShield({
     const onMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
         const rect = e.currentTarget.getBoundingClientRect()
         aimRef.current = {
-            x: ((e.clientX - rect.left) / rect.width) * SCREEN_WIDTH,
-            y: e.clientY - rect.top,
+            x: (e.clientX - rect.left) / rect.width,
+            y: (e.clientY - rect.top) / rect.height,
         }
     }, [])
 
@@ -379,18 +481,11 @@ export function useStarShield({
 
         if (e.key.toLowerCase() !== expected) return
 
-        // fire broadcast を Shooter へ送信
+        // fire broadcast を Shooter へ送信（破壊は弾が当たったときのみ Shooter でカウント）
         channelRef.current?.send({
             type: 'broadcast',
             event: 'fire',
             payload: {},
-        })
-
-        // ローカルで destroyed カウントを増やす（近似値）
-        setScore((prev) => {
-            const next = { ...prev, destroyed: prev.destroyed + 1 }
-            scoreRef.current = next
-            return next
         })
 
         const nextChar = charIndex + 1
@@ -410,6 +505,7 @@ export function useStarShield({
 
     return {
         asteroids,
+        bullets,
         timer,
         score,
         aimRef,

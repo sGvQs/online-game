@@ -32,7 +32,7 @@ export function GameScreen({
     currentUserId,
     onGameEnd,
 }: GameScreenProps) {
-    const { asteroids, timer, score, aimRef, onMouseMove, dialogue } = useStarShield({
+    const { asteroids, bullets, timer, score, aimRef, onMouseMove, dialogue } = useStarShield({
         matchId,
         startedAt,
         isShooter,
@@ -47,6 +47,7 @@ export function GameScreen({
             {isShooter ? (
                 <ShooterView
                     asteroids={asteroids}
+                    bullets={bullets}
                     aimRef={aimRef}
                     onMouseMove={onMouseMove}
                 />
