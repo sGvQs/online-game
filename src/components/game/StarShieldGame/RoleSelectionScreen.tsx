@@ -1,9 +1,13 @@
 'use client'
 
+import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { RoomWithUsersAndReadyStatus, RoomUserWithReadyStatus } from '@/shared/types'
 import { cn } from '@/lib/utils'
 import { ProtectedStar } from './ProtectedStar'
+
+const SHOOTER_ICON = '/svg/object/target-circle.svg'
+const TYPIST_ICON = '/svg/object/keyboard.svg'
 
 const CHERRY_BOMB_FONT = 'var(--font-cherry-bomb-one)'
 const DOT_GOTHIC_FONT = 'var(--font-dot-gothic-16)'
@@ -34,7 +38,7 @@ const DIFFICULTY_META: Record<Difficulty, { label: string; rate: string; bg: str
 }
 
 const ROLE_META: Record<RoleChoice, {
-    emoji: string
+    iconSrc: string
     label: string
     description: string
     detail: string
@@ -44,7 +48,7 @@ const ROLE_META: Record<RoleChoice, {
     glow: string
 }> = {
     SHOOTER: {
-        emoji: '🎯',
+        iconSrc: SHOOTER_ICON,
         label: 'しゅーたー',
         description: 'カーソルをうごかして、いんせきをねらう',
         detail: 'たいぴすとがうった文字のぶんだけ、ねらったいんせきに弾がとぶよ。',
@@ -54,7 +58,7 @@ const ROLE_META: Record<RoleChoice, {
         glow: '0 0 14px rgba(251,191,36,0.3)',
     },
     TYPIST: {
-        emoji: '⌨️',
+        iconSrc: TYPIST_ICON,
         label: 'たいぴすと',
         description: 'キャラクターのセリフをタイピング',
         detail: '1文字うつごとに1発、しゅーたーのねらったいんせきに弾がとぶよ。',
@@ -112,22 +116,22 @@ export function RoleSelectionScreen({
                             WebkitTextFillColor: 'transparent',
                         }}
                     >
-                        むずかしさとろーるをきめよう。
+                        [むずかしさ]と[やくわり]をきめよう。
                     </h2>
-                    <p className="text-sm mt-1" style={{ fontFamily: CHERRY_BOMB_FONT, color: 'rgba(167,139,250,0.65)' }}>
-                        ちがうろーるしかえらべないよ。
-                    </p>
                 </motion.div>
 
                 {/* ── 2カラム: 難易度 + 役割説明 ── */}
                 <div className="grid grid-cols-[1fr_1fr] gap-5">
 
-                    {/* 難易度セレクター */}
+                    {/* 難易度セレクター（ホストのみ操作可） */}
                     <motion.div
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.5, delay: 0.1 }}
-                        className="rounded-2xl p-5 flex flex-col gap-3"
+                        className={cn(
+                            'rounded-2xl p-5 flex flex-col gap-3 transition-opacity',
+                            !isHost && 'opacity-70'
+                        )}
                         style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}
                     >
                         <p className="text-[11px]" style={{ fontFamily: CHERRY_BOMB_FONT, color: 'rgba(129,140,248,0.6)' }}>
@@ -142,7 +146,12 @@ export function RoleSelectionScreen({
                                         key={d}
                                         onClick={() => isHost && onDifficultyChange(d)}
                                         disabled={!isHost}
-                                        className="flex items-center gap-3 px-3 py-2 rounded-xl transition-all duration-200 disabled:cursor-default cursor-pointer"
+                                        className={cn(
+                                            'flex items-center gap-3 px-3 py-2 rounded-xl transition-all duration-200',
+                                            isHost
+                                                ? 'cursor-pointer hover:scale-[1.02] hover:brightness-110'
+                                                : 'cursor-default'
+                                        )}
                                         style={{
                                             fontFamily: CHERRY_BOMB_FONT,
                                             background: isActive ? meta.bg : 'transparent',
@@ -196,7 +205,7 @@ export function RoleSelectionScreen({
                                 <button
                                     key={r}
                                     onClick={() => onRoleChange(r)}
-                                    className="rounded-2xl p-4 text-left transition-all duration-200 flex-1"
+                                    className="rounded-2xl p-4 text-left transition-all duration-200 flex-1 cursor-pointer hover:scale-[1.02] hover:brightness-110 active:scale-[0.98]"
                                     style={{
                                         background: isSelected ? meta.bg : 'rgba(255,255,255,0.02)',
                                         border: `1.5px solid ${isSelected ? meta.border : 'rgba(255,255,255,0.07)'}`,
@@ -204,7 +213,15 @@ export function RoleSelectionScreen({
                                     }}
                                 >
                                     <div className="flex items-center gap-2 mb-1.5">
-                                        <span className="text-xl leading-none">{meta.emoji}</span>
+                                        <div className="relative w-6 h-6 shrink-0">
+                                            <Image
+                                                src={meta.iconSrc}
+                                                alt={meta.label}
+                                                fill
+                                                className="object-contain"
+                                                style={{ filter: isSelected ? undefined : 'opacity(0.35)' }}
+                                            />
+                                        </div>
                                         <span
                                             className="text-base font-bold"
                                             style={{ fontFamily: CHERRY_BOMB_FONT, color: isSelected ? meta.text : 'rgba(255,255,255,0.35)' }}
@@ -214,13 +231,13 @@ export function RoleSelectionScreen({
                                     </div>
                                     <p
                                         className="text-[11px] leading-snug mb-1"
-                                        style={{ fontFamily: CHERRY_BOMB_FONT, color: isSelected ? meta.text : 'rgba(255,255,255,0.25)' }}
+                                        style={{ fontFamily: DOT_GOTHIC_FONT, color: isSelected ? meta.text : 'rgba(255,255,255,0.25)' }}
                                     >
                                         {meta.description}
                                     </p>
                                     <p
                                         className="text-[10px] leading-relaxed"
-                                        style={{ fontFamily: CHERRY_BOMB_FONT, color: isSelected ? `${meta.text}99` : 'rgba(255,255,255,0.15)' }}
+                                        style={{ fontFamily: DOT_GOTHIC_FONT, color: isSelected ? `${meta.text}99` : 'rgba(255,255,255,0.15)' }}
                                     >
                                         {meta.detail}
                                     </p>
@@ -238,11 +255,15 @@ export function RoleSelectionScreen({
                     className="rounded-2xl px-5 py-4"
                     style={{ background: 'rgba(129,140,248,0.06)', border: '1px solid rgba(129,140,248,0.15)' }}
                 >
-                    {roleConflict && (
-                        <p className="text-sm mb-3" style={{ fontFamily: CHERRY_BOMB_FONT, color: 'rgba(248,113,113,0.95)' }}>
-                            ちがうろーるをえらんでね
-                        </p>
-                    )}
+                    <p
+                        className="text-sm mb-3 min-h-5"
+                        style={{
+                            fontFamily: CHERRY_BOMB_FONT,
+                            color: canProceed ? 'rgba(134,239,172,0.95)' : 'rgba(248,113,113,0.95)',
+                        }}
+                    >
+                        {canProceed ? 'じゅんびがととのったよ' : 'ちがうやくわりをえらんでね'}
+                    </p>
                     <div className="flex flex-col gap-3">
                         {room.users.map((u: RoomUserWithReadyStatus) => {
                             const isMe = u.userId === currentUserId
@@ -267,7 +288,7 @@ export function RoleSelectionScreen({
                                     </span>
                                     {roleMeta ? (
                                         <span
-                                            className="text-xs px-2 py-0.5 rounded-full shrink-0"
+                                            className="text-xs px-2 py-0.5 rounded-full shrink-0 flex items-center gap-1"
                                             style={{
                                                 fontFamily: CHERRY_BOMB_FONT,
                                                 color: roleMeta.text,
@@ -275,7 +296,15 @@ export function RoleSelectionScreen({
                                                 border: `1px solid ${roleMeta.border}`,
                                             }}
                                         >
-                                            {roleMeta.emoji} {roleMeta.label}
+                                            <span className="relative w-3.5 h-3.5 shrink-0 block">
+                                                <Image
+                                                    src={roleMeta.iconSrc}
+                                                    alt=""
+                                                    fill
+                                                    className="object-contain"
+                                                />
+                                            </span>
+                                            {roleMeta.label}
                                         </span>
                                     ) : (
                                         <span className="text-xs shrink-0" style={{ fontFamily: CHERRY_BOMB_FONT, color: 'rgba(255,255,255,0.2)' }}>
@@ -298,8 +327,8 @@ export function RoleSelectionScreen({
                     {isHost && (
                         <button
                             onClick={onBack}
-                            className="py-3 px-5 rounded-2xl border border-white/15 bg-white/4 text-white/40 hover:text-white/60 hover:border-white/25 transition-all shrink-0"
-                            style={{ fontFamily: CHERRY_BOMB_FONT, fontSize: '0.9rem' }}
+                            className="py-3 px-6 rounded-2xl border-2 border-red-500 bg-red-600/90 text-red-50 hover:bg-red-500 hover:border-red-400 hover:scale-105 active:scale-95 transition-all shrink-0 shadow-[0_0_20px_rgba(239,68,68,0.5)] cursor-pointer"
+                            style={{ fontFamily: CHERRY_BOMB_FONT, fontSize: '1rem' }}
                         >
                             ← もどる
                         </button>
@@ -311,12 +340,12 @@ export function RoleSelectionScreen({
                             className={cn(
                                 'flex-1 py-3 px-6 rounded-2xl font-bold transition-all',
                                 canProceed
-                                    ? 'bg-indigo-600/90 text-indigo-100 border border-indigo-500 hover:bg-indigo-500/90'
+                                    ? 'bg-indigo-600/90 text-indigo-100 border border-indigo-500 hover:bg-indigo-500/90 hover:scale-[1.02] active:scale-[0.98] cursor-pointer'
                                     : 'bg-gray-800/60 text-gray-500 border border-gray-700/50 cursor-not-allowed'
                             )}
                             style={{ fontFamily: CHERRY_BOMB_FONT }}
                         >
-                            {canProceed ? '🚀 げーむかいし' : '🔒 ろーるをきめてね'}
+                            {canProceed ? '🚀 げーむかいし' : '🔒 やくわりをきめてね'}
                         </button>
                     )}
                 </motion.div>
