@@ -160,7 +160,7 @@ export function StarShieldGame({
             if (status.status === 'finished') {
                 playedMatchIdsRef.current.add(newMatchId)
                 setGameResult(status.result)
-                setGameStats(status.stats)
+                setGameStats({ ...status.stats, fireCount: 0 }) // サーバーに保存しないので再入時は0
                 setPhase('RESULT')
             } else if (status.status === 'playing') {
                 setMatchId(newMatchId)

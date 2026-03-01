@@ -54,8 +54,7 @@ const RESULT_CONFIG: Record<
 const STAT_ITEMS = (
     destroyedCount: number,
     accuracy: number,
-    minutes: number,
-    seconds: number,
+    fireCount: number,
     color: string,
 ) => [
     {
@@ -71,9 +70,9 @@ const STAT_ITEMS = (
         color,
     },
     {
-        label: 'TIME',
-        value: `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`,
-        icon: null,
+        label: '送信文字数',
+        value: String(fireCount),
+        icon: ICONS.TYPIST,
         color,
     },
 ]
@@ -82,13 +81,11 @@ export function ResultScreen({ result, stats, difficulty, onBackToTitle }: Resul
     const config = RESULT_CONFIG[result]
     const accuracy =
         stats.spawnedCount > 0 ? Math.round((stats.destroyedCount / stats.spawnedCount) * 100) : 0
-    const minutes = Math.floor(stats.durationSeconds / 60)
-    const seconds = stats.durationSeconds % 60
     const diffMeta = DIFFICULTY_META[difficulty]
     const earnedPoints = result === 'CLEARED' ? diffMeta.rate : null
     const isCleared = result === 'CLEARED'
 
-    const statItems = STAT_ITEMS(stats.destroyedCount, accuracy, minutes, seconds, config.color)
+    const statItems = STAT_ITEMS(stats.destroyedCount, accuracy, stats.fireCount, config.color)
 
     return (
         <div className="relative min-h-screen overflow-hidden flex flex-col items-center justify-center">

@@ -374,6 +374,8 @@ export interface GameStats {
     spawnedCount: number
     destroyedCount: number
     durationSeconds: number
+    /** broadcast fire イベント数（送信文字数）フロント完結 */
+    fireCount: number
 }
 
 // typing_shoot_matches の postgres_changes ペイロード型（snake_case）
@@ -417,6 +419,7 @@ export function useStarShield({
     const asteroidsRef = useRef<Asteroid[]>([])
     const bulletsRef = useRef<Bullet[]>([])
     const scoreRef = useRef({ spawned: 0, destroyed: 0 })
+    const fireCountRef = useRef(0)
     const starHpRef = useRef(maxStarHp)
     const aimRef = useRef({ x: 0.5, y: 0.5 }) // 正規化座標 0-1
     const gameEndedRef = useRef(false)
@@ -443,6 +446,7 @@ export function useStarShield({
             spawnedCount: scoreRef.current.spawned,
             destroyedCount: scoreRef.current.destroyed,
             durationSeconds,
+            fireCount: fireCountRef.current,
         }
 
         // Shooter: DB 保存を先に完了してから結果画面へ（returnToRoom による Match 削除との競合を防ぐ）
@@ -475,8 +479,9 @@ export function useStarShield({
         channelRef.current = channel
 
         channel
-            // Typist → Shooter: fire イベント（broadcast）→ 弾を生成
+            // Typist → Shooter: fire イベント（broadcast）→ 弾を生成（送信文字数として両者でカウント）
             .on('broadcast', { event: 'fire' }, () => {
+                fireCountRef.current += 1
                 if (!isShooter) return
 
                 const aim = aimRef.current
@@ -540,6 +545,7 @@ export function useStarShield({
                         spawnedCount: row.spawned_count,
                         destroyedCount: row.destroyed_count,
                         durationSeconds: row.duration_seconds ?? 0,
+                        fireCount: fireCountRef.current,
                     }
                     if (gameEndedRef.current) return
                     gameEndedRef.current = true
@@ -797,6 +803,7 @@ export function useStarShield({
             event: 'fire',
             payload: {},
         })
+        fireCountRef.current += 1 // 送信者は自分の broadcast を受信しないため Typist 側でカウント
 
         setTypistFireCount((c) => c + 1)
 
