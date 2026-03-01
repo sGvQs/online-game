@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, useCallback, useMemo } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import { saveStarShieldResult } from '@/server/actions/game'
+import { STAR_TARGET_X, STAR_TARGET_Y, STAR_RADIUS } from '@/components/game/StarShieldGame/ProtectedStar'
 
 // ============================================
 // 定数・型
@@ -27,8 +28,10 @@ const BULLET_SPEED = 0.0008 // 正規化座標/ms（速すぎないように）
 // export const BULLET_RADIUS = 0.008 // デバッグ時は大きくできる
 export const BULLET_RADIUS = 0.001 // デバッグ時は大きくできる
 export const ASTEROID_RADIUS = 0.02
-const DINO_HIT_RADIUS = 0.06
 const BULLET_MAX_AGE_MS = 3000
+
+// 隕石の目標点のランダムオフセット（±）
+const STAR_TARGET_OFFSET = 0.04
 
 const SPAWN_INTERVALS_MS: Record<Difficulty, number> = {
     EASY: 500,
@@ -304,6 +307,8 @@ export interface Asteroid {
     spawnedAt: number
     spawnX: number // 0-1（スポーン時 X）
     spawnY: number // 0-1（スポーン時 Y）
+    targetX: number // 0-1（飛翔先 X、星中心+ランダム）
+    targetY: number // 0-1（飛翔先 Y、星中心+ランダム）
     hp: number // 現在HP（0で破壊）
     destroyedAt?: number
 }
@@ -325,8 +330,8 @@ export function getAsteroidPosition(asteroid: Asteroid, now: number): { x: numbe
     const elapsed = now - asteroid.spawnedAt
     const progress = Math.min(1, elapsed / ASTEROID_DURATION_MS)
     return {
-        x: asteroid.spawnX + (DINO_X - asteroid.spawnX) * progress,
-        y: asteroid.spawnY + (DINO_Y - asteroid.spawnY) * progress,
+        x: asteroid.spawnX + (asteroid.targetX - asteroid.spawnX) * progress,
+        y: asteroid.spawnY + (asteroid.targetY - asteroid.spawnY) * progress,
     }
 }
 
@@ -562,14 +567,18 @@ export function useStarShield({
         let spawnTimer: ReturnType<typeof setInterval> | null = null
         let rafId: number | null = null
 
-        // 隕石スポーン（上中央ゾーンから恐竜方向へ）
+        // 隕石スポーン（上中央ゾーンから星方向へ、目標は星中心+ランダムオフセット）
         spawnTimer = setInterval(() => {
             if (gameEndedRef.current) return
+            const targetX = STAR_TARGET_X + (Math.random() * 2 - 1) * STAR_TARGET_OFFSET
+            const targetY = STAR_TARGET_Y + (Math.random() * 2 - 1) * STAR_TARGET_OFFSET
             const asteroid: Asteroid = {
                 id: crypto.randomUUID(),
                 spawnedAt: Date.now(),
                 spawnX: SPAWN_X_MIN + Math.random() * (SPAWN_X_MAX - SPAWN_X_MIN),
                 spawnY: SPAWN_Y_MIN + Math.random() * (SPAWN_Y_MAX - SPAWN_Y_MIN),
+                targetX,
+                targetY,
                 hp: ASTEROID_HP[difficulty],
             }
             setAsteroids((prev) => {
@@ -660,7 +669,7 @@ export function useStarShield({
                 })
             }
 
-            // 隕石 vs 恐竜の接触判定（このフレームで破壊される隕石は除外）
+            // 隕石 vs 星の接触判定（このフレームで破壊される隕石は除外）
             const destroyedThisFrame = new Set(
                 [...hitAsteroidIds].filter((id) => {
                     const a = asts.find((x) => x.id === id)
@@ -672,8 +681,8 @@ export function useStarShield({
                 const ap = getAsteroidPosition(a, now)
                 const progress = (now - a.spawnedAt) / ASTEROID_DURATION_MS
                 if (progress >= 1) return true
-                const dist = Math.hypot(ap.x - DINO_X, ap.y - DINO_Y)
-                return dist < DINO_HIT_RADIUS
+                const dist = Math.hypot(ap.x - STAR_TARGET_X, ap.y - STAR_TARGET_Y)
+                return dist < STAR_RADIUS + ASTEROID_RADIUS
             })
             if (contact) {
                 endGame('FAILED_CONTACT')
