@@ -5,7 +5,7 @@ import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { DialogueLine } from '@/hooks/useStarShield'
 
-const CUTE_FONT = 'var(--font-yusei-magic)'
+const CUTE_FONT = 'var(--font-cherry-bomb-one)'
 
 interface TypistViewProps {
     dialogue: {
@@ -87,34 +87,63 @@ export function TypistView({ dialogue, score, starHp, maxStarHp }: TypistViewPro
             className="absolute inset-0 overflow-hidden flex flex-col items-center justify-center gap-10"
             onClick={() => inputRef.current?.focus()}
         >
-            {/* ほしのたいりょく（中央上・リッチHPバー） */}
-            <div className="absolute top-16 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-2">
-                <span
-                    className="text-sm text-brand-500/80"
-                    style={{ fontFamily: CUTE_FONT }}
-                >
-                    ほしのたいりょく
-                </span>
-                <div className="relative w-64 md:w-80 h-3 rounded-full bg-stone-600/80 overflow-hidden">
-                    {/* 緑: 現在HP（即時更新） */}
-                    <div
-                        className="absolute left-0 top-0 h-full bg-green-500 transition-all duration-150"
-                        style={{ width: `${Math.max(0, (starHp / maxStarHp) * 100)}%` }}
-                    />
-                    {/* 赤: 損傷部分（スーッと消える） */}
-                    {damageWidth > 0 && (
-                        <motion.div
-                            key={`dmg-${damageWidth}`}
-                            className="absolute top-0 h-full bg-red-500 z-10 origin-left"
-                            style={{
-                                left: `${Math.max(0, (starHp / maxStarHp) * 100)}%`,
-                            }}
-                            initial={{ width: `${damageWidth}%` }}
-                            animate={{ width: '0%' }}
-                            transition={{ duration: 0.6, ease: 'easeOut' }}
-                            onAnimationComplete={() => setDamageWidth(0)}
+            {/* ほしのたいりょく + 隕石破壊数（中央上） */}
+            <div className="absolute top-16 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-4">
+                {/* HPバー */}
+                <div className="flex flex-col items-center gap-2">
+                    <span
+                        className="text-sm text-brand-500/80"
+                        style={{ fontFamily: CUTE_FONT }}
+                    >
+                        ほしのたいりょく
+                    </span>
+                    <div className="relative w-64 md:w-80 h-3 rounded-full bg-stone-600/80 overflow-hidden">
+                        {/* 緑: 現在HP（即時更新） */}
+                        <div
+                            className="absolute left-0 top-0 h-full bg-green-500 transition-all duration-150"
+                            style={{ width: `${Math.max(0, (starHp / maxStarHp) * 100)}%` }}
                         />
-                    )}
+                        {/* 赤: 損傷部分（スーッと消える） */}
+                        {damageWidth > 0 && (
+                            <motion.div
+                                key={`dmg-${damageWidth}`}
+                                className="absolute top-0 h-full bg-red-500 z-10 origin-left"
+                                style={{
+                                    left: `${Math.max(0, (starHp / maxStarHp) * 100)}%`,
+                                }}
+                                initial={{ width: `${damageWidth}%` }}
+                                animate={{ width: '0%' }}
+                                transition={{ duration: 0.6, ease: 'easeOut' }}
+                                onAnimationComplete={() => setDamageWidth(0)}
+                            />
+                        )}
+                    </div>
+                </div>
+                {/* いんせきをかはいしたかず（HPの下に大きく） */}
+                <div className="flex flex-col items-center gap-2">
+                    <span
+                        className="text-base text-brand-500/80"
+                        style={{ fontFamily: CUTE_FONT }}
+                    >
+                        いんせきをかはいしたかず
+                    </span>
+                    <div className="flex items-center gap-3">
+                        <div className="relative w-10 h-10">
+                            <Image
+                                src="/svg/object/metor.svg"
+                                alt=""
+                                fill
+                                className="object-contain"
+                            />
+                        </div>
+                        <span className="text-white/60 text-2xl">×</span>
+                        <span
+                            className="text-brand-500 font-bold text-3xl tabular-nums"
+                            style={{ fontFamily: CUTE_FONT }}
+                        >
+                            {score.destroyed}
+                        </span>
+                    </div>
                 </div>
             </div>
 

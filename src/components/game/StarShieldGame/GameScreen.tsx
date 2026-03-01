@@ -81,12 +81,16 @@ export function GameScreen({
                         </span>
                     </div>
 
-                    {/* スコア */}
+                    {/* スコア（Shooter のみ、Typist は HP 下に表示） */}
                     <div className="flex items-center gap-2">
-                        <span className="text-brand-500 font-bold text-xl">{score.destroyed}</span>
-                        <span className="text-white/30 text-sm">/</span>
-                        <span className="text-white/50 text-sm">{score.spawned}</span>
-                        <span className="text-white/30 text-xs ml-1 tracking-widest">DESTROYED</span>
+                        {isShooter && (
+                            <>
+                                <span className="text-brand-500 font-bold text-xl">{score.destroyed}</span>
+                                <span className="text-white/30 text-sm">/</span>
+                                <span className="text-white/50 text-sm">{score.spawned}</span>
+                                <span className="text-white/30 text-xs ml-1 tracking-widest">DESTROYED</span>
+                            </>
+                        )}
                     </div>
 
                     {/* 難度 */}

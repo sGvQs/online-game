@@ -298,7 +298,7 @@ export function TitleScreen({
                                             <span
                                                 className="text-base flex-1 truncate"
                                                 style={{
-                                                    fontFamily: CHERRY_BOMB_FONT,
+                                                    fontFamily: DOT_GOTHIC_FONT,
                                                     color: isMe ? '#ffffff' : 'rgba(255,255,255,0.65)',
                                                 }}
                                             >
