@@ -42,9 +42,10 @@ export function ProtectedStar() {
             >
                 <defs>
                     <radialGradient id={glowId} cx="50%" cy="50%" r="50%">
-                        <stop offset="0%" stopColor="rgb(235,210,150)" />
-                        <stop offset="40%" stopColor="rgb(200,170,110)" />
-                        <stop offset="100%" stopColor="rgb(140,100,55)" />
+                        <stop offset="0%" stopColor="rgb(102,51,0)" />
+                        <stop offset="50%" stopColor="rgb(153,76,0)" />
+                        <stop offset="85%" stopColor="rgb(255,153,51)" />
+                        <stop offset="100%" stopColor="rgb(255,204,153)" />
                     </radialGradient>
                 </defs>
                 <circle
