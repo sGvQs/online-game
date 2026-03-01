@@ -1,10 +1,17 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import Image from 'next/image'
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import { RoomWithUsersAndReadyStatus, RoomUserWithReadyStatus } from '@/shared/types'
 import { cn } from '@/lib/utils'
 import { ProtectedStar } from './ProtectedStar'
+import { DINO_SPAWN, BULLET_COLOR } from '@/hooks/useStarShield'
+
+/** 口から画面右上へ飛ぶ角度（rad）0=右、π/2=上 */
+const BALL_ANGLE = Math.PI / 4
+/** 画面外まで飛ばす距離（px） */
+const BALL_DISTANCE = 2000
 
 const SHOOTER_ICON = '/svg/object/target-circle.svg'
 const TYPIST_ICON = '/svg/object/keyboard.svg'
@@ -49,9 +56,9 @@ const ROLE_META: Record<RoleChoice, {
 }> = {
     SHOOTER: {
         iconSrc: SHOOTER_ICON,
-        label: 'しゅーたー',
-        description: 'カーソルをうごかして、いんせきをねらう',
-        detail: 'たいぴすとがうった文字のぶんだけ、ねらったいんせきに弾がとぶよ。',
+        label: 'シューター',
+        description: 'カーソルを動かして、隕石を狙う。',
+        detail: 'たいぴすとが打った文字のぶんだけ、ねらった隕石に弾が飛ぶよ。',
         bg: 'rgba(251,191,36,0.08)',
         border: 'rgba(251,191,36,0.35)',
         text: '#fbbf24',
@@ -59,9 +66,9 @@ const ROLE_META: Record<RoleChoice, {
     },
     TYPIST: {
         iconSrc: TYPIST_ICON,
-        label: 'たいぴすと',
-        description: 'キャラクターのセリフをタイピング',
-        detail: '1文字うつごとに1発、しゅーたーのねらったいんせきに弾がとぶよ。',
+        label: 'タイピスト',
+        description: '名もなき恐竜のセリフをタイピング',
+        detail: '1文字うつごとに1発、シューターの狙った隕石に弾がとぶよ。',
         bg: 'rgba(129,140,248,0.08)',
         border: 'rgba(129,140,248,0.35)',
         text: '#818cf8',
@@ -73,7 +80,6 @@ export function RoleSelectionScreen({
     room,
     roleChoices,
     onRoleChange,
-    roleConflict,
     canProceed,
     onProceedToGame,
     onBack,
@@ -86,9 +92,81 @@ export function RoleSelectionScreen({
     const myRole = roleChoices[currentUserId]
     const activeDiffMeta = DIFFICULTY_META[difficulty]
 
+    const [balls, setBalls] = useState<{ id: number }[]>([])
+
+    useEffect(() => {
+        const spawn = () => {
+            setBalls((b) => [...b.slice(-3), { id: Date.now() + Math.random() }])
+        }
+        const schedule = () => {
+            spawn()
+            const delay = 1500 + Math.random() * 2500
+            return setTimeout(schedule, delay)
+        }
+        const t = schedule()
+        return () => clearTimeout(t)
+    }, [])
+
     return (
         <div className="relative min-h-screen overflow-hidden flex flex-col items-center justify-center">
             <ProtectedStar />
+
+            {/* 恐竜 */}
+            <div
+                className="absolute z-10 pointer-events-none w-28 h-28"
+                style={{
+                    left: `${DINO_SPAWN.left}%`,
+                    bottom: `${DINO_SPAWN.bottom}%`,
+                    transform: 'translate(-50%, 50%) rotate(-0.5rad)',
+                }}
+            >
+                <div className="relative w-full h-full">
+                    <Image
+                        src="/svg/charactor/annoying-dinosaur.svg"
+                        alt="恐竜"
+                        fill
+                        className="object-contain drop-shadow-[0_2px_12px_rgba(0,0,0,0.5)]"
+                    />
+                </div>
+            </div>
+
+            {/* 恐竜が吐く赤い球（口から画面外まで） */}
+            <div
+                className="absolute z-9 pointer-events-none"
+                style={{
+                    left: `${DINO_SPAWN.left}%`,
+                    bottom: `${DINO_SPAWN.bottom}%`,
+                    transform: 'translate(-50%, 50%)',
+                }}
+            >
+                <AnimatePresence>
+                    {balls.map((b) => (
+                        <motion.div
+                            key={b.id}
+                            className="absolute rounded-full"
+                            style={{
+                                width: 12,
+                                height: 12,
+                                left: 0,
+                                top: 0,
+                                backgroundColor: BULLET_COLOR,
+                                boxShadow: `0 0 8px ${BULLET_COLOR}99`,
+                            }}
+                            initial={{ x: 0, y: 0, opacity: 1, scale: 1 }}
+                            animate={{
+                                x: Math.cos(BALL_ANGLE) * BALL_DISTANCE,
+                                y: -Math.sin(BALL_ANGLE) * BALL_DISTANCE,
+                                opacity: 0.4,
+                                scale: 0.8,
+                            }}
+                            transition={{ duration: 1.8, ease: 'linear' }}
+                            onAnimationComplete={() => {
+                                setBalls((prev) => prev.filter((x) => x.id !== b.id))
+                            }}
+                        />
+                    ))}
+                </AnimatePresence>
+            </div>
 
             {/* 中央オーロラグロー */}
             <div
