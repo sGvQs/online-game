@@ -280,6 +280,7 @@ export function StarShieldGame({
                 <ResultScreen
                     result={gameResult}
                     stats={gameStats}
+                    difficulty={difficulty}
                     onBackToTitle={handleBackToTitle}
                 />
             )}
