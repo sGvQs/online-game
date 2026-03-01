@@ -408,7 +408,7 @@ export function RoleSelectionScreen({
                             className="py-3 px-6 rounded-2xl border-2 border-red-500 bg-red-600/90 text-red-50 hover:bg-red-500 hover:border-red-400 hover:scale-105 active:scale-95 transition-all shrink-0 shadow-[0_0_20px_rgba(239,68,68,0.5)] cursor-pointer"
                             style={{ fontFamily: CHERRY_BOMB_FONT, fontSize: '1rem' }}
                         >
-                            ← もどる
+                            ← EXIT
                         </button>
                     )}
                     {isHost && (
@@ -423,7 +423,7 @@ export function RoleSelectionScreen({
                             )}
                             style={{ fontFamily: CHERRY_BOMB_FONT }}
                         >
-                            {canProceed ? '🚀 げーむかいし' : '🔒 やくわりをきめてね'}
+                            {canProceed ? '🚀 START GAME' : '🔒 START GAME'}
                         </button>
                     )}
                 </motion.div>

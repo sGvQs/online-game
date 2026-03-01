@@ -204,7 +204,7 @@ export function TitleScreen({
 
                         {/* メニューボタン */}
                         <motion.div
-                            className="flex flex-col gap-2"
+                            className="flex flex-col gap-3"
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             transition={{ duration: 0.8, delay: 0.4 }}
@@ -219,7 +219,7 @@ export function TitleScreen({
                                 activeText="#e0e7ff"
                                 activeGlow="0 0 20px rgba(99,102,241,0.5)"
                             >
-                                {isReady ? '✓ Ready!' : '▶ Ready'}
+                                {isReady ? '✓ READY' : '▶ READY'}
                             </MenuButton>
 
                             {/* START */}
@@ -228,12 +228,12 @@ export function TitleScreen({
                                     onClick={() => canStart && onStartGame()}
                                     active={canStart}
                                     disabled={!canStart}
-                                    activeBg="rgba(109,40,217,0.92)"
-                                    activeBorder="#8b5cf6"
-                                    activeText="#ede9fe"
-                                    activeGlow="0 0 20px rgba(139,92,246,0.5)"
+                                    activeBg="rgba(79,70,229,0.9)"
+                                    activeBorder="#6366f1"
+                                    activeText="#e0e7ff"
+                                    activeGlow="0 0 20px rgba(99,102,241,0.5)"
                                 >
-                                    {canStart ? '🚀 Start Game!' : '🔒 Start Game'}
+                                    {canStart ? '🚀 START' : '🔒 START'}
                                 </MenuButton>
                             )}
 
@@ -249,7 +249,7 @@ export function TitleScreen({
                                     activeGlow="0 0 16px rgba(220,38,38,0.4)"
                                     isExit
                                 >
-                                    ← Exit
+                                    ← EXIT
                                 </MenuButton>
                             )}
                         </motion.div>
@@ -327,7 +327,7 @@ export function TitleScreen({
                                                         border: '1px solid rgba(129,140,248,0.4)',
                                                     }}
                                                 >
-                                                    Ready!
+                                                    READY
                                                 </span>
                                             ) : (
                                                 <span
@@ -396,16 +396,7 @@ export function TitleScreen({
     )
 }
 
-/* ── メニューボタンコンポーネント ── */
-const INACTIVE_BG = 'rgba(45,42,66,0.92)'
-const INACTIVE_BORDER = '#4a4a6a'
-const INACTIVE_TEXT = '#9ca3af'
-const HOVER_BG = 'rgba(61,58,82,0.92)'
-const EXIT_BG = 'rgba(127,29,29,0.92)'
-const EXIT_BORDER = '#991b1b'
-const EXIT_TEXT = '#fca5a5'
-const EXIT_HOVER_BG = 'rgba(153,27,27,0.92)'
-
+/* ── メニューボタンコンポーネント（RoleSelectionScreen にスタイルを揃える） ── */
 interface MenuButtonProps {
     children: React.ReactNode
     onClick: () => void
@@ -419,42 +410,43 @@ interface MenuButtonProps {
 }
 
 function MenuButton({ children, onClick, active, disabled, activeBg, activeBorder, activeText, activeGlow, isExit }: MenuButtonProps) {
-    const bg = active ? activeBg : (isExit ? EXIT_BG : INACTIVE_BG)
-    const border = active ? activeBorder : (isExit ? EXIT_BORDER : INACTIVE_BORDER)
-    const textColor = active ? activeText : (isExit ? EXIT_TEXT : INACTIVE_TEXT)
-    const hoverBg = isExit ? EXIT_HOVER_BG : HOVER_BG
+    const isDisabled = disabled && !isExit
 
     return (
         <button
             onClick={onClick}
-            disabled={disabled && !isExit}
+            disabled={isDisabled}
             className={cn(
-                'group relative flex items-center gap-2 px-4 py-2 rounded-xl text-left',
-                'transition-all duration-200 select-none',
-                disabled && !isExit ? 'opacity-30 cursor-not-allowed' : 'cursor-pointer',
+                'py-3 px-6 rounded-2xl font-bold text-left transition-all duration-200 select-none',
+                isDisabled
+                    ? 'opacity-30 cursor-not-allowed bg-gray-800/60 text-gray-500 border-2 border-gray-700/50'
+                    : 'cursor-pointer',
+                !isDisabled && !isExit && 'hover:scale-[1.02] hover:brightness-110 active:scale-[0.98]',
+                !isDisabled && isExit && 'hover:scale-105 hover:bg-red-500 hover:border-red-400 active:scale-95',
             )}
             style={{
                 fontFamily: CHERRY_BOMB_FONT,
-                fontSize: '1.1rem',
-                background: bg,
-                border: `1.5px solid ${border}`,
-                color: textColor,
-                boxShadow: active ? activeGlow : 'none',
-            }}
-            onMouseEnter={e => {
-                if (disabled && !isExit) return
-                const el = e.currentTarget as HTMLButtonElement
-                if (!active) {
-                    el.style.background = hoverBg
-                    el.style.borderColor = isExit ? '#dc2626' : '#6b6b8a'
-                    el.style.color = isExit ? '#fecaca' : '#d1d5db'
-                }
-            }}
-            onMouseLeave={e => {
-                const el = e.currentTarget as HTMLButtonElement
-                el.style.background = bg
-                el.style.borderColor = border
-                el.style.color = textColor
+                fontSize: '1rem',
+                ...(active
+                    ? {
+                          background: activeBg,
+                          border: `2px solid ${activeBorder}`,
+                          color: activeText,
+                          boxShadow: activeGlow,
+                      }
+                    : isExit
+                      ? {
+                            background: 'rgba(185,28,28,0.9)',
+                            border: '2px solid #dc2626',
+                            color: '#fecaca',
+                            boxShadow: '0 0 20px rgba(239,68,68,0.5)',
+                        }
+                      : {
+                            background: 'rgba(45,42,66,0.92)',
+                            border: '2px solid #4a4a6a',
+                            color: '#9ca3af',
+                            boxShadow: 'none',
+                        }),
             }}
         >
             {children}
