@@ -22,13 +22,16 @@ interface RoleSelectionScreenProps {
     onBack: () => void
     currentUserId: string
     difficulty: Difficulty
+    onDifficultyChange: (d: Difficulty) => void
     isHost: boolean
 }
 
-const DIFFICULTY_META: Record<Difficulty, { label: string; emoji: string }> = {
-    EASY: { label: 'かんたん', emoji: '🌿' },
-    NORMAL: { label: 'ふつう', emoji: '🌟' },
-    HARD: { label: 'むずかしい', emoji: '🔥' },
+const DIFFICULTIES: Difficulty[] = ['EASY', 'NORMAL', 'HARD']
+
+const DIFFICULTY_META: Record<Difficulty, { label: string; rate: string; bg: string; border: string; text: string; glow: string; emoji: string }> = {
+    EASY: { label: 'かんたん', rate: '+1pt', emoji: '🌿', bg: 'rgba(134,239,172,0.12)', border: 'rgba(134,239,172,0.5)', text: '#86efac', glow: '0 0 12px rgba(134,239,172,0.4)' },
+    NORMAL: { label: 'ふつう', rate: '+2pt', emoji: '🌟', bg: 'rgba(253,224,71,0.12)', border: 'rgba(253,224,71,0.5)', text: '#fde047', glow: '0 0 12px rgba(253,224,71,0.4)' },
+    HARD: { label: 'むずかしい', rate: '+3pt', emoji: '🔥', bg: 'rgba(248,113,113,0.12)', border: 'rgba(248,113,113,0.5)', text: '#f87171', glow: '0 0 12px rgba(248,113,113,0.4)' },
 }
 
 export function RoleSelectionScreen({
@@ -41,9 +44,9 @@ export function RoleSelectionScreen({
     onBack,
     currentUserId,
     difficulty,
+    onDifficultyChange,
     isHost,
 }: RoleSelectionScreenProps) {
-    const meta = DIFFICULTY_META[difficulty]
 
     return (
         <div className="relative min-h-screen overflow-hidden flex flex-col items-center justify-center">
@@ -85,16 +88,49 @@ export function RoleSelectionScreen({
                     </p>
                 </motion.div>
 
-                {/* 難易度表示 */}
+                {/* 難易度セレクター */}
                 <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ duration: 0.6, delay: 0.1 }}
-                    className="flex items-center gap-2"
-                    style={{ fontFamily: DOT_GOTHIC_FONT, color: 'rgba(192,132,252,0.8)' }}
                 >
-                    <span>{meta.emoji}</span>
-                    <span className="text-sm">難易度: {meta.label}</span>
+                    <p
+                        className="text-[10px] tracking-[0.4em] uppercase mb-3"
+                        style={{ fontFamily: DOT_GOTHIC_FONT, color: 'rgba(129,140,248,0.5)' }}
+                    >
+                        Difficulty
+                    </p>
+                    <div className="flex gap-2">
+                        {DIFFICULTIES.map((d) => {
+                            const meta = DIFFICULTY_META[d]
+                            const isActive = difficulty === d
+                            return (
+                                <button
+                                    key={d}
+                                    onClick={() => isHost && onDifficultyChange(d)}
+                                    disabled={!isHost}
+                                    className="flex flex-col items-center gap-0.5 px-4 py-2 rounded-2xl transition-all duration-200 cursor-pointer disabled:cursor-default w-[100px]"
+                                    style={{
+                                        fontFamily: CHERRY_BOMB_FONT,
+                                        background: isActive ? meta.bg : 'rgba(255,255,255,0.03)',
+                                        border: `1.5px solid ${isActive ? meta.border : 'rgba(255,255,255,0.1)'}`,
+                                        boxShadow: isActive ? meta.glow : 'none',
+                                        color: isActive ? meta.text : 'rgba(255,255,255,0.25)',
+                                        transform: isActive ? 'scale(1.05)' : 'scale(1)',
+                                    }}
+                                >
+                                    <span className="text-base leading-none">{meta.emoji}</span>
+                                    <span className="text-sm font-bold">{meta.label}</span>
+                                    <span className="text-[9px] opacity-70" style={{ fontFamily: DOT_GOTHIC_FONT }}>{meta.rate}</span>
+                                </button>
+                            )
+                        })}
+                    </div>
+                    {!isHost && (
+                        <p className="text-[10px] mt-2 text-white/20" style={{ fontFamily: DOT_GOTHIC_FONT }}>
+                            ホストが選択中…
+                        </p>
+                    )}
                 </motion.div>
 
                 {/* プレイヤー & 役職選択 */}

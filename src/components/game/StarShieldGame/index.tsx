@@ -244,11 +244,9 @@ export function StarShieldGame({
                     isReady={isReady}
                     allUsersReady={allUsersReady}
                     canStart={canStartLobby}
-                    difficulty={difficulty}
                     onToggleReady={toggleReady}
                     onStartGame={handleStartGame}
                     onExit={handleExit}
-                    onDifficultyChange={handleDifficultyChange}
                     currentUserId={currentUserId}
                     initialRankings={initialRankings}
                 />
@@ -264,6 +262,7 @@ export function StarShieldGame({
                     onBack={handleBackToLobby}
                     currentUserId={currentUserId}
                     difficulty={difficulty}
+                    onDifficultyChange={handleDifficultyChange}
                     isHost={isHost}
                 />
             )}

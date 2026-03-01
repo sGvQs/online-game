@@ -13,29 +13,17 @@ const CHERRY_BOMB_FONT = 'var(--font-cherry-bomb-one)'
 const RUBIK_PUDDLES_FONT = 'var(--font-rubik-puddles)'
 const DOT_GOTHIC_FONT = 'var(--font-dot-gothic-16)'
 
-type Difficulty = 'EASY' | 'NORMAL' | 'HARD'
-
 interface TitleScreenProps {
     room: RoomWithUsersAndReadyStatus
     isHost: boolean
     isReady: boolean
     allUsersReady: boolean
     canStart: boolean
-    difficulty: Difficulty
     onToggleReady: () => void
     onStartGame: () => void
     onExit: () => void
-    onDifficultyChange: (d: Difficulty) => void
     currentUserId: string
     initialRankings: UserRanking[]
-}
-
-const DIFFICULTIES: Difficulty[] = ['EASY', 'NORMAL', 'HARD']
-
-const DIFFICULTY_META: Record<Difficulty, { label: string; rate: string; bg: string; border: string; text: string; glow: string; emoji: string }> = {
-    EASY:   { label: 'かんたん',   rate: '+1pt', emoji: '🌿', bg: 'rgba(134,239,172,0.12)', border: 'rgba(134,239,172,0.5)', text: '#86efac', glow: '0 0 12px rgba(134,239,172,0.4)' },
-    NORMAL: { label: 'ふつう', rate: '+2pt',   emoji: '🌟', bg: 'rgba(253,224,71,0.12)',  border: 'rgba(253,224,71,0.5)',  text: '#fde047', glow: '0 0 12px rgba(253,224,71,0.4)'  },
-    HARD:   { label: 'むずかしい',   rate: '+3pt', emoji: '🔥', bg: 'rgba(248,113,113,0.12)', border: 'rgba(248,113,113,0.5)', text: '#f87171', glow: '0 0 12px rgba(248,113,113,0.4)' },
 }
 
 const HOW_TO_PLAY = [
@@ -56,11 +44,9 @@ export function TitleScreen({
     isReady,
     allUsersReady,
     canStart,
-    difficulty,
     onToggleReady,
     onStartGame,
     onExit,
-    onDifficultyChange,
     currentUserId,
     initialRankings,
 }: TitleScreenProps) {
@@ -156,7 +142,7 @@ export function TitleScreen({
                 {/* ── グリッド本体 ── */}
                 <div className="grid grid-cols-[1fr_auto_1fr] gap-10 items-start">
 
-                    {/* 左列：タイトル + メニュー + 難度 */}
+                    {/* 左列：タイトル + メニュー */}
                     <div className="flex flex-col gap-8">
 
                         {/* タイトルロゴ */}
@@ -264,50 +250,6 @@ export function TitleScreen({
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ duration: 0.8, delay: 0.6 }}
                     >
-                        {/* 難度セレクター */}
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            transition={{ duration: 0.8, delay: 0.7 }}
-                        >
-                            <p
-                                className="text-[10px] tracking-[0.4em] uppercase mb-3"
-                                style={{ fontFamily: DOT_GOTHIC_FONT, color: 'rgba(129,140,248,0.5)' }}
-                            >
-                                Difficulty
-                            </p>
-                            <div className="flex gap-2">
-                                {DIFFICULTIES.map((d) => {
-                                    const meta = DIFFICULTY_META[d]
-                                    const isActive = difficulty === d
-                                    return (
-                                        <button
-                                            key={d}
-                                            onClick={() => isHost && onDifficultyChange(d)}
-                                            disabled={!isHost}
-                                            className="flex flex-col items-center gap-0.5 px-4 py-2 rounded-2xl transition-all duration-200 cursor-pointer disabled:cursor-default w-[100px]"
-                                            style={{
-                                                fontFamily: CHERRY_BOMB_FONT,
-                                                background: isActive ? meta.bg : 'rgba(255,255,255,0.03)',
-                                                border: `1.5px solid ${isActive ? meta.border : 'rgba(255,255,255,0.1)'}`,
-                                                boxShadow: isActive ? meta.glow : 'none',
-                                                color: isActive ? meta.text : 'rgba(255,255,255,0.25)',
-                                                transform: isActive ? 'scale(1.05)' : 'scale(1)',
-                                            }}
-                                        >
-                                            <span className="text-base leading-none">{meta.emoji}</span>
-                                            <span className="text-sm font-bold">{meta.label}</span>
-                                            <span className="text-[9px] opacity-70" style={{ fontFamily: DOT_GOTHIC_FONT }}>{meta.rate}</span>
-                                        </button>
-                                    )
-                                })}
-                            </div>
-                            {!isHost && (
-                                <p className="text-[10px] mt-2 text-white/20" style={{ fontFamily: DOT_GOTHIC_FONT }}>
-                                    ホストが選択中…
-                                </p>
-                            )}
-                        </motion.div>
                         {/* プレイヤーパネル */}
                         <div
                             className="rounded-2xl p-5"
