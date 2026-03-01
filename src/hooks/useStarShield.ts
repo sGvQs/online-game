@@ -15,8 +15,13 @@ export type GameResult = 'CLEARED' | 'FAILED_CONTACT' | 'FAILED_TIMEOUT'
 const GAME_DURATION_SECONDS = 90
 
 // 座標系: ビューポート基準の正規化座標 (0-1)
-export const DINO_X = 0.1
-export const DINO_Y = 0.85
+/** 恐竜の位置（タイトル球スポーン・ゲーム内恐竜で共通） */
+export const DINO_SPAWN = { left: 10, bottom: 10 } as const // %
+export const DINO_X = DINO_SPAWN.left / 100
+export const DINO_Y = 1 - DINO_SPAWN.bottom / 100
+
+/** 弾・球の色 */
+export const BULLET_COLOR = '#ef4444'
 const SPAWN_X_MIN = 0.0   // 左
 const SPAWN_X_MAX = 1.0  // 右
 const SPAWN_Y_MIN = 0.1  // 下

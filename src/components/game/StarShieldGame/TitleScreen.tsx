@@ -1,10 +1,12 @@
 'use client'
 
-import { motion } from 'framer-motion'
+import { useState, useEffect } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import Image from 'next/image'
 import { RoomWithUsersAndReadyStatus, RoomUserWithReadyStatus } from '@/shared/types'
 import { cn } from '@/lib/utils'
 import { ProtectedStar } from './ProtectedStar'
+import { DINO_SPAWN, BULLET_COLOR } from '@/hooks/useStarShield'
 
 const CHERRY_BOMB_FONT = 'var(--font-cherry-bomb-one)'
 const RUBIK_PUDDLES_FONT = 'var(--font-rubik-puddles)'
@@ -40,6 +42,11 @@ const HOW_TO_PLAY = [
     { icon: '⏱️', text: '制限時間 90 秒' },
 ]
 
+/** 口から画面右上へ飛ぶ角度（rad）0=右、π/2=上 */
+const BALL_ANGLE = Math.PI / 4
+/** 画面外まで飛ばす距離（px） */
+const BALL_DISTANCE = 2000
+
 export function TitleScreen({
     room,
     isHost,
@@ -55,6 +62,22 @@ export function TitleScreen({
     const readyCount = room.users.filter((u: RoomUserWithReadyStatus) => u.isReady).length
     const totalUsers = room.users.length
 
+    const [balls, setBalls] = useState<{ id: number }[]>([])
+
+    useEffect(() => {
+        const spawn = () => {
+            setBalls(b => [...b.slice(-3), { id: Date.now() + Math.random() }])
+        }
+
+        const schedule = () => {
+            spawn()
+            const delay = 1500 + Math.random() * 2500
+            return setTimeout(schedule, delay)
+        }
+        const t = schedule()
+        return () => clearTimeout(t)
+    }, [])
+
     return (
         <div className="relative min-h-screen overflow-hidden flex flex-col items-center justify-center">
             {/* ── 背景装飾 ── */}
@@ -63,7 +86,11 @@ export function TitleScreen({
             {/* 恐竜 */}
             <div
                 className="absolute z-10 pointer-events-none w-28 h-28"
-                style={{ left: '10%', bottom: '14%', transform: 'translate(-50%, 50%) rotate(-0.5rad)' }}
+                style={{
+                    left: `${DINO_SPAWN.left}%`,
+                    bottom: `${DINO_SPAWN.bottom}%`,
+                    transform: 'translate(-50%, 50%) rotate(-0.5rad)',
+                }}
             >
                 <div className="relative w-full h-full">
                     <Image
@@ -73,6 +100,40 @@ export function TitleScreen({
                         className="object-contain drop-shadow-[0_2px_12px_rgba(0,0,0,0.5)]"
                     />
                 </div>
+            </div>
+
+            {/* 恐竜が吐く赤い球（口から画面外まで） */}
+            <div
+                className="absolute z-9 pointer-events-none"
+                style={{ left: `${DINO_SPAWN.left}%`, bottom: `${DINO_SPAWN.bottom}%`, transform: 'translate(-50%, 50%)' }}
+            >
+                <AnimatePresence>
+                    {balls.map((b) => (
+                        <motion.div
+                            key={b.id}
+                            className="absolute rounded-full"
+                            style={{
+                                width: 12,
+                                height: 12,
+                                left: 0,
+                                top: 0,
+                                backgroundColor: BULLET_COLOR,
+                                boxShadow: `0 0 8px ${BULLET_COLOR}99`,
+                            }}
+                            initial={{ x: 0, y: 0, opacity: 1, scale: 1 }}
+                            animate={{
+                                x: Math.cos(BALL_ANGLE) * BALL_DISTANCE,
+                                y: -Math.sin(BALL_ANGLE) * BALL_DISTANCE,
+                                opacity: 0.4,
+                                scale: 0.8,
+                            }}
+                            transition={{ duration: 1.8, ease: 'linear' }}
+                            onAnimationComplete={() => {
+                                setBalls(prev => prev.filter(x => x.id !== b.id))
+                            }}
+                        />
+                    ))}
+                </AnimatePresence>
             </div>
 
             {/* 中央オーロラグロー */}

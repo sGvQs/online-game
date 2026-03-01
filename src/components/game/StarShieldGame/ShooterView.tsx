@@ -9,6 +9,7 @@ import {
     getAsteroidPosition,
     getBulletPosition,
     BULLET_RADIUS,
+    BULLET_COLOR,
     DINO_X,
     DINO_Y,
 } from '@/hooks/useStarShield'
@@ -107,7 +108,13 @@ function BulletCircle({ bullet }: { bullet: Bullet }) {
             className="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-none z-10"
             style={{ width: sizePx, height: sizePx }}
         >
-            <div className="w-full h-full rounded-full bg-brand-400 shadow-[0_0_8px_rgba(129,140,248,0.8)]" />
+            <div
+                className="w-full h-full rounded-full"
+                style={{
+                    backgroundColor: BULLET_COLOR,
+                    boxShadow: `0 0 8px ${BULLET_COLOR}cc`,
+                }}
+            />
         </div>
     )
 }
