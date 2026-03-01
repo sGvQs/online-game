@@ -11,6 +11,8 @@ interface TypistViewProps {
         charIndex: number
     }
     score: { spawned: number; destroyed: number }
+    starHp: number
+    maxStarHp: number
 }
 
 function TypingDisplay({ line, charIndex }: { line: DialogueLine; charIndex: number }) {
@@ -59,7 +61,7 @@ function TypingDisplay({ line, charIndex }: { line: DialogueLine; charIndex: num
     )
 }
 
-export function TypistView({ dialogue, score }: TypistViewProps) {
+export function TypistView({ dialogue, score, starHp, maxStarHp }: TypistViewProps) {
     // キーボード入力フォーカス用の隠し input
     const inputRef = useRef<HTMLInputElement>(null)
 
@@ -72,6 +74,17 @@ export function TypistView({ dialogue, score }: TypistViewProps) {
             className="absolute inset-0 overflow-hidden flex flex-col items-center justify-center gap-10"
             onClick={() => inputRef.current?.focus()}
         >
+            {/* 星HP（中央上・隕石と同じプロセスバー風） */}
+            <div className="absolute top-16 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-1">
+                <span className="text-[10px] tracking-widest text-brand-500/60">STAR HP</span>
+                <div className="w-32 h-2 rounded-full bg-stone-600/80 overflow-hidden">
+                    <div
+                        className="h-full rounded-full bg-green-500 transition-[width] duration-150"
+                        style={{ width: `${Math.max(0, (starHp / maxStarHp) * 100)}%` }}
+                    />
+                </div>
+            </div>
+
             {/* フォーカス用隠しinput（モバイル対応） */}
             <input
                 ref={inputRef}

@@ -54,6 +54,12 @@ export const ASTEROID_HP: Record<Difficulty, number> = {
     HARD: 10,
 }
 
+export const STAR_HP: Record<Difficulty, number> = {
+    EASY: 10,
+    NORMAL: 8,
+    HARD: 6,
+}
+
 // ============================================
 // セリフデータ（難易度によらず共通、配列からランダム選択）
 // ============================================
@@ -320,6 +326,7 @@ export interface Asteroid {
     targetY: number // 0-1（飛翔先 Y、星中心+ランダム）
     hp: number // 現在HP（0で破壊）
     destroyedAt?: number
+    hasDamagedStar?: boolean // 星にダメージを与えたか
 }
 
 export interface Bullet {
@@ -398,6 +405,8 @@ export function useStarShield({
     const [bullets, setBullets] = useState<Bullet[]>([])
     const [timer, setTimer] = useState(GAME_DURATION_SECONDS)
     const [score, setScore] = useState({ spawned: 0, destroyed: 0 })
+    const maxStarHp = STAR_HP[difficulty]
+    const [starHp, setStarHp] = useState(maxStarHp)
 
     // タイピング状態（Typist のみ）：配列からランダムに選択
     const [currentLine, setCurrentLine] = useState<DialogueLine | null>(() =>
@@ -409,10 +418,15 @@ export function useStarShield({
     const asteroidsRef = useRef<Asteroid[]>([])
     const bulletsRef = useRef<Bullet[]>([])
     const scoreRef = useRef({ spawned: 0, destroyed: 0 })
+    const starHpRef = useRef(maxStarHp)
     const aimRef = useRef({ x: 0.5, y: 0.5 }) // 正規化座標 0-1
     const gameEndedRef = useRef(false)
     const contactPendingRef = useRef(false)
     const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null)
+
+    useEffect(() => {
+        starHpRef.current = starHp
+    }, [starHp])
 
     /** 隕石接触時の爆発位置・対象隕石ID（アニメ終了後に FAILED 遷移、対象隕石は非表示） */
     const [contactExplosion, setContactExplosion] = useState<{ x: number; y: number; asteroidId: string } | null>(null)
@@ -498,6 +512,11 @@ export function useStarShield({
                     scoreRef.current = next
                     return next
                 })
+            })
+            // Typist: 星HPの同期
+            .on('broadcast', { event: 'star_hp' }, ({ payload }: { payload: { starHp: number } }) => {
+                if (isShooter) return
+                setStarHp(payload.starHp)
             })
             // Typist 側: typing_shoot_matches の更新でゲーム終了を検知
             .on(
@@ -684,19 +703,38 @@ export function useStarShield({
                     return a && a.hp - 1 <= 0
                 })
             )
-            const contact = asts.find((a) => {
-                if (a.destroyedAt || destroyedThisFrame.has(a.id)) return false
+            const contacts = asts.filter((a) => {
+                if (a.destroyedAt || destroyedThisFrame.has(a.id) || a.hasDamagedStar) return false
                 const ap = getAsteroidPosition(a, now)
                 const progress = (now - a.spawnedAt) / ASTEROID_DURATION_MS
                 if (progress >= 1) return true
                 const dist = Math.hypot(ap.x - STAR_TARGET_X, ap.y - STAR_TARGET_Y)
                 return dist < STAR_RADIUS + ASTEROID_RADIUS
             })
-            if (contact && !contactPendingRef.current) {
-                contactPendingRef.current = true
-                const ap = getAsteroidPosition(contact, now)
-                setContactExplosion({ x: ap.x, y: ap.y, asteroidId: contact.id })
-                return
+            if (contacts.length > 0 && !contactPendingRef.current) {
+                const damage = contacts.length
+                const newStarHp = Math.max(0, starHpRef.current - damage)
+                starHpRef.current = newStarHp
+                setStarHp(newStarHp)
+                channelRef.current?.send({
+                    type: 'broadcast',
+                    event: 'star_hp',
+                    payload: { starHp: newStarHp },
+                })
+                setAsteroids((prev) => {
+                    const contactIds = new Set(contacts.map((c) => c.id))
+                    const next = prev.map((a) =>
+                        contactIds.has(a.id) ? { ...a, hasDamagedStar: true, destroyedAt: now } : a
+                    )
+                    asteroidsRef.current = next
+                    return next
+                })
+                if (newStarHp <= 0) {
+                    contactPendingRef.current = true
+                    const ap = getAsteroidPosition(contacts[0], now)
+                    setContactExplosion({ x: ap.x, y: ap.y, asteroidId: contacts[0].id })
+                    return
+                }
             }
 
             rafId = requestAnimationFrame(gameLoop)
@@ -787,6 +825,7 @@ export function useStarShield({
         bullets,
         timer,
         score,
+        starHp,
         aimRef,
         onMouseMove,
         dialogue: {

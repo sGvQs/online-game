@@ -178,10 +178,37 @@ function ContactExplosionEffect({ pos, onComplete }: { pos: { x: number; y: numb
     )
 }
 
-// 破壊エフェクト（パーティクル）
+// 破壊エフェクト（弾で破壊=オレンジリング、星接触=fire.svg）
 function ExplosionEffect({ asteroid }: { asteroid: Asteroid }) {
     if (!asteroid.destroyedAt) return null
     const pos = getAsteroidPosition(asteroid, asteroid.destroyedAt)
+    const isStarContact = !!asteroid.hasDamagedStar
+
+    if (isStarContact) {
+        return (
+            <motion.div
+                className="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+                style={{
+                    left: `${pos.x * 100}%`,
+                    top: `${pos.y * 100}%`,
+                }}
+                initial={{ opacity: 1, scale: 0.5 }}
+                animate={{ opacity: 0, scale: 2 }}
+                transition={{ duration: 0.7, ease: 'easeOut' }}
+            >
+                <div className="relative w-16 h-16">
+                    <Image
+                        src="/svg/object/fire.svg"
+                        alt=""
+                        fill
+                        className="object-contain drop-shadow-[0_0_20px_rgba(255,100,50,0.7)]"
+                        style={{ filter: 'brightness(1.2) saturate(1.3)' }}
+                    />
+                </div>
+            </motion.div>
+        )
+    }
+
     return (
         <motion.div
             className="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-none"

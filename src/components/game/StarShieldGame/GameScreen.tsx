@@ -1,6 +1,6 @@
 'use client'
 
-import { useStarShield, Difficulty, GameResult, GameStats, ASTEROID_HP } from '@/hooks/useStarShield'
+import { useStarShield, Difficulty, GameResult, GameStats, ASTEROID_HP, STAR_HP } from '@/hooks/useStarShield'
 import { ShooterView } from './ShooterView'
 import { TypistView } from './TypistView'
 
@@ -33,7 +33,7 @@ export function GameScreen({
     onGameEnd,
 }: GameScreenProps) {
     const isShooter = shooterId === currentUserId
-    const { asteroids, bullets, timer, score, aimRef, onMouseMove, dialogue, contactExplosion, completeContactFail } = useStarShield({
+    const { asteroids, bullets, timer, score, starHp, aimRef, onMouseMove, dialogue, contactExplosion, completeContactFail } = useStarShield({
         matchId,
         startedAt,
         isShooter,
@@ -59,6 +59,8 @@ export function GameScreen({
                 <TypistView
                     dialogue={dialogue}
                     score={score}
+                    starHp={starHp}
+                    maxStarHp={STAR_HP[difficulty]}
                 />
             )}
 
