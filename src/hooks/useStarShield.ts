@@ -411,7 +411,11 @@ export function useStarShield({
     const scoreRef = useRef({ spawned: 0, destroyed: 0 })
     const aimRef = useRef({ x: 0.5, y: 0.5 }) // 正規化座標 0-1
     const gameEndedRef = useRef(false)
+    const contactPendingRef = useRef(false)
     const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null)
+
+    /** 隕石接触時の爆発位置・対象隕石ID（アニメ終了後に FAILED 遷移、対象隕石は非表示） */
+    const [contactExplosion, setContactExplosion] = useState<{ x: number; y: number; asteroidId: string } | null>(null)
 
     // ============================================
     // ゲーム終了処理
@@ -578,7 +582,7 @@ export function useStarShield({
 
         // 隕石スポーン（上中央ゾーンから星方向へ、目標は星中心+ランダムオフセット）
         spawnTimer = setInterval(() => {
-            if (gameEndedRef.current) return
+            if (gameEndedRef.current || contactPendingRef.current) return
             const targetX = STAR_TARGET_X + (Math.random() * 2 - 1) * STAR_TARGET_OFFSET
             const targetY = STAR_TARGET_Y + (Math.random() * 2 - 1) * STAR_TARGET_OFFSET
             const asteroid: Asteroid = {
@@ -602,9 +606,9 @@ export function useStarShield({
             })
         }, spawnInterval)
 
-        // 弾・隕石の当たり判定 + 隕石→恐竜の接触判定ループ
+        // 弾・隕石の当たり判定 + 隕石→星の接触判定ループ
         const gameLoop = () => {
-            if (gameEndedRef.current) return
+            if (gameEndedRef.current || contactPendingRef.current) return
             const now = Date.now()
             const asts = asteroidsRef.current
             const bts = bulletsRef.current
@@ -693,8 +697,10 @@ export function useStarShield({
                 const dist = Math.hypot(ap.x - STAR_TARGET_X, ap.y - STAR_TARGET_Y)
                 return dist < STAR_RADIUS + ASTEROID_RADIUS
             })
-            if (contact) {
-                endGame('FAILED_CONTACT')
+            if (contact && !contactPendingRef.current) {
+                contactPendingRef.current = true
+                const ap = getAsteroidPosition(contact, now)
+                setContactExplosion({ x: ap.x, y: ap.y, asteroidId: contact.id })
                 return
             }
 
@@ -777,6 +783,12 @@ export function useStarShield({
         return () => window.removeEventListener('keydown', onKeyDown)
     }, [isShooter, onKeyDown])
 
+    /** 接触時の爆発アニメーション終了後に呼ぶ（FAILED_CONTACT へ遷移） */
+    const completeContactFail = useCallback(() => {
+        setContactExplosion(null)
+        endGame('FAILED_CONTACT')
+    }, [endGame])
+
     return {
         asteroids,
         bullets,
@@ -788,5 +800,7 @@ export function useStarShield({
             line: currentLine ?? DIALOGUES[0],
             charIndex,
         },
+        contactExplosion,
+        completeContactFail,
     }
 }

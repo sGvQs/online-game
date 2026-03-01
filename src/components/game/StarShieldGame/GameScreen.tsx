@@ -32,7 +32,7 @@ export function GameScreen({
     currentUserId,
     onGameEnd,
 }: GameScreenProps) {
-    const { asteroids, bullets, timer, score, aimRef, onMouseMove, dialogue } = useStarShield({
+    const { asteroids, bullets, timer, score, aimRef, onMouseMove, dialogue, contactExplosion, completeContactFail } = useStarShield({
         matchId,
         startedAt,
         isShooter,
@@ -51,6 +51,8 @@ export function GameScreen({
                     aimRef={aimRef}
                     onMouseMove={onMouseMove}
                     maxHp={ASTEROID_HP[difficulty]}
+                    contactExplosion={contactExplosion}
+                    onContactExplosionComplete={completeContactFail}
                 />
             ) : (
                 <TypistView

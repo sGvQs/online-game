@@ -21,6 +21,8 @@ interface ShooterViewProps {
     aimRef: React.RefObject<{ x: number; y: number }>
     onMouseMove: (e: React.MouseEvent<HTMLDivElement>) => void
     maxHp: number
+    contactExplosion: { x: number; y: number; asteroidId: string } | null
+    onContactExplosionComplete: () => void
 }
 
 function AsteroidCircle({ asteroid, maxHp }: { asteroid: Asteroid; maxHp: number }) {
@@ -119,6 +121,65 @@ function BulletCircle({ bullet }: { bullet: Bullet }) {
     )
 }
 
+/** 隕石接触時の爆発エフェクト（接触部で表示、終了後に FAILED 遷移） */
+function ContactExplosionEffect({ pos, onComplete }: { pos: { x: number; y: number }; onComplete: () => void }) {
+    return (
+        <motion.div
+            className="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-none z-30"
+            style={{ left: `${pos.x * 100}%`, top: `${pos.y * 100}%` }}
+            initial={{ opacity: 1, scale: 0.2 }}
+            animate={{ opacity: 0, scale: 5 }}
+            transition={{ duration: 1.2, ease: [0.25, 0.46, 0.45, 0.94] }}
+            onAnimationComplete={onComplete}
+        >
+            {/* 白コア（一瞬のフラッシュ） */}
+            <motion.div
+                className="absolute rounded-full bg-white"
+                style={{
+                    width: 24,
+                    height: 24,
+                    left: '50%',
+                    top: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    boxShadow: '0 0 40px 20px rgba(255,255,200,0.8)',
+                }}
+                initial={{ scale: 0.5, opacity: 1 }}
+                animate={{ scale: 2, opacity: 0 }}
+                transition={{ duration: 0.15 }}
+            />
+            {/* オレンジ火球 */}
+            <motion.div
+                className="absolute rounded-full"
+                style={{
+                    background: 'radial-gradient(circle, rgba(255,200,100,0.95) 0%, rgba(255,120,30,0.7) 30%, rgba(255,60,0,0.4) 60%, transparent 100%)',
+                    width: 100,
+                    height: 100,
+                    left: '50%',
+                    top: '50%',
+                    transform: 'translate(-50%, -50%)',
+                }}
+                initial={{ scale: 0.3, opacity: 1 }}
+                animate={{ scale: 4, opacity: 0 }}
+                transition={{ duration: 0.8 }}
+            />
+            {/* 外側衝撃波リング */}
+            <motion.div
+                className="absolute rounded-full border-4 border-orange-400"
+                style={{
+                    width: 50,
+                    height: 50,
+                    left: '50%',
+                    top: '50%',
+                    transform: 'translate(-50%, -50%)',
+                }}
+                initial={{ scale: 0.5, opacity: 1 }}
+                animate={{ scale: 6, opacity: 0 }}
+                transition={{ duration: 1 }}
+            />
+        </motion.div>
+    )
+}
+
 // 破壊エフェクト（パーティクル）
 function ExplosionEffect({ asteroid }: { asteroid: Asteroid }) {
     if (!asteroid.destroyedAt) return null
@@ -213,8 +274,18 @@ function Dinosaur({ aimRef }: { aimRef: React.RefObject<{ x: number; y: number }
     )
 }
 
-export function ShooterView({ asteroids, bullets, aimRef, onMouseMove, maxHp }: ShooterViewProps) {
-    const activeAsteroids = asteroids.filter((a) => !a.destroyedAt)
+export function ShooterView({
+    asteroids,
+    bullets,
+    aimRef,
+    onMouseMove,
+    maxHp,
+    contactExplosion,
+    onContactExplosionComplete,
+}: ShooterViewProps) {
+    const activeAsteroids = asteroids.filter(
+        (a) => !a.destroyedAt && a.id !== contactExplosion?.asteroidId
+    )
     const destroyedAsteroids = asteroids.filter((a) => !!a.destroyedAt)
 
     return (
@@ -245,6 +316,14 @@ export function ShooterView({ asteroids, bullets, aimRef, onMouseMove, maxHp }: 
                     <ExplosionEffect key={`exp-${a.id}`} asteroid={a} />
                 ))}
             </AnimatePresence>
+
+            {/* 接触時の爆発（終了後に FAILED 遷移） */}
+            {contactExplosion && (
+                <ContactExplosionEffect
+                    pos={{ x: contactExplosion.x, y: contactExplosion.y }}
+                    onComplete={onContactExplosionComplete}
+                />
+            )}
 
             {/* 照準 */}
             <Crosshair aimRef={aimRef} />
