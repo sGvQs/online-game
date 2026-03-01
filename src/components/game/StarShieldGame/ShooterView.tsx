@@ -121,15 +121,19 @@ function BulletCircle({ bullet }: { bullet: Bullet }) {
     )
 }
 
-/** 隕石接触時の爆発エフェクト（fire.svg を使用、終了後に FAILED 遷移） */
+/** 隕石接触時の爆発エフェクト（fire.svg、スーッと消える→FAILED 遷移） */
 const FIRE_SCALE_KEYFRAMES = [
     0.1, 0.5, 0.8, 0.9, 1, 0.9, // 初期フェーズ
-    1, 0.9, 1.1, 1, 1, 0.9, 1.1, 1, 1, 0.9, 1.1, 1, // ループ 1=>0.9=>1.1=>1 を3回
+    1, 0.9, 1.1, 1, 1, 0.9, 1.1, 1, 1, 0.9, 1.1, 1, 1.5, // ループ + フェード用に拡大
 ]
+// スケールは75%で完了、その後フェードアウト（25%）
 const FIRE_SCALE_TIMES: number[] = [
-    0, 0.07, 0.14, 0.21, 0.28, 0.35, // 0.1→0.5→0.8→0.9→1→0.9
-    0.42, 0.53, 0.64, 0.75, 0.81, 0.86, 0.92, 0.97, 1, 1, 1, 1, // ループ3回分
+    ...[0, 0.07, 0.14, 0.21, 0.28, 0.35, 0.42, 0.53, 0.64, 0.75, 0.81, 0.86, 0.92, 0.97].map((t) => t * 0.75),
+    0.75, 0.75, 0.75, 0.75, // ループ終了
+    1, // フェードアウト完了
 ]
+const FIRE_OPACITY_KEYFRAMES = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0]
+const CONTACT_EXPLOSION_DURATION = 1
 
 function ContactExplosionEffect({ pos, onComplete }: { pos: { x: number; y: number }; onComplete: () => void }) {
     return (
@@ -137,13 +141,16 @@ function ContactExplosionEffect({ pos, onComplete }: { pos: { x: number; y: numb
             className="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-none z-30"
             style={{ left: `${pos.x * 100}%`, top: `${pos.y * 100}%` }}
         >
-            {/* fire.svg（隕石直撃の炎表現: 0.1→0.5→0.8→0.9→1→0.9 のち 1→0.9→1.1→1 ループ） */}
+            {/* fire.svg（隕石直撃の炎→スーッとフェードアウト） */}
             <motion.div
                 className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24"
-                initial={{ scale: 0.1 }}
-                animate={{ scale: FIRE_SCALE_KEYFRAMES }}
+                initial={{ scale: 0.1, opacity: 1 }}
+                animate={{
+                    scale: FIRE_SCALE_KEYFRAMES,
+                    opacity: FIRE_OPACITY_KEYFRAMES,
+                }}
                 transition={{
-                    duration: 1.5,
+                    duration: CONTACT_EXPLOSION_DURATION,
                     times: FIRE_SCALE_TIMES,
                     ease: 'easeInOut',
                 }}

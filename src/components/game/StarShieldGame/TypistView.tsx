@@ -194,7 +194,7 @@ export function TypistView({ dialogue, score, starHp, maxStarHp, typistFireCount
             <TypistStar />
 
             {/* 1. 隕石の破壊したカズゾーン（上部） */}
-            <div className="w-full shrink-0 flex flex-col items-center gap-2 py-4 z-20">
+            <div className="w-full shrink-0 flex flex-col items-center gap-2 py-4 z-20 mt-10">
                 <span
                     className="text-base text-brand-500/80"
                     style={{ fontFamily: CUTE_FONT }}
