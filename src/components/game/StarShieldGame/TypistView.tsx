@@ -1,11 +1,52 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useId, useRef, useState } from 'react'
 import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { DialogueLine } from '@/hooks/useStarShield'
 
 const CUTE_FONT = 'var(--font-cherry-bomb-one)'
+
+/** TypistView 用の星ビジュアル（中央下5%、表示のみ） */
+function TypistStar() {
+    const id = useId()
+    const glowId = `typistStarGlow-${id}`
+    return (
+        <div
+            className="absolute pointer-events-none z-0 overflow-visible"
+            style={{
+                left: '50%',
+                bottom: '-25%',
+                transform: 'translate(-50%, 50%)',
+                width: '40vmax',
+                height: '40vmax',
+            }}
+        >
+            <svg
+                viewBox="0 0 100 100"
+                className="w-full h-full overflow-visible"
+                fill="none"
+                style={{ overflow: 'visible' }}
+            >
+                <defs>
+                    <radialGradient id={glowId} cx="50%" cy="50%" r="50%">
+                        <stop offset="0%" stopColor="rgb(102,51,0)" />
+                        <stop offset="50%" stopColor="rgb(153,76,0)" />
+                        <stop offset="85%" stopColor="rgb(255,153,51)" />
+                        <stop offset="100%" stopColor="rgb(255,204,153)" />
+                    </radialGradient>
+                </defs>
+                <circle
+                    cx="50"
+                    cy="50"
+                    r="48"
+                    fill={`url(#${glowId})`}
+                    style={{ filter: 'drop-shadow(0 0 50px rgba(180,150,90,0.5))' }}
+                />
+            </svg>
+        </div>
+    )
+}
 
 interface TypistViewProps {
     dialogue: {
@@ -84,69 +125,9 @@ export function TypistView({ dialogue, score, starHp, maxStarHp }: TypistViewPro
 
     return (
         <div
-            className="absolute inset-0 overflow-hidden flex flex-col items-center justify-center gap-10"
+            className="absolute inset-0 overflow-hidden flex flex-col items-center justify-start pt-16"
             onClick={() => inputRef.current?.focus()}
         >
-            {/* ほしのたいりょく + 隕石破壊数（中央上） */}
-            <div className="absolute top-16 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-4">
-                {/* HPバー */}
-                <div className="flex flex-col items-center gap-2">
-                    <span
-                        className="text-sm text-brand-500/80"
-                        style={{ fontFamily: CUTE_FONT }}
-                    >
-                        ほしのたいりょく
-                    </span>
-                    <div className="relative w-64 md:w-80 h-3 rounded-full bg-stone-600/80 overflow-hidden">
-                        {/* 緑: 現在HP（即時更新） */}
-                        <div
-                            className="absolute left-0 top-0 h-full bg-green-500 transition-all duration-150"
-                            style={{ width: `${Math.max(0, (starHp / maxStarHp) * 100)}%` }}
-                        />
-                        {/* 赤: 損傷部分（スーッと消える） */}
-                        {damageWidth > 0 && (
-                            <motion.div
-                                key={`dmg-${damageWidth}`}
-                                className="absolute top-0 h-full bg-red-500 z-10 origin-left"
-                                style={{
-                                    left: `${Math.max(0, (starHp / maxStarHp) * 100)}%`,
-                                }}
-                                initial={{ width: `${damageWidth}%` }}
-                                animate={{ width: '0%' }}
-                                transition={{ duration: 0.6, ease: 'easeOut' }}
-                                onAnimationComplete={() => setDamageWidth(0)}
-                            />
-                        )}
-                    </div>
-                </div>
-                {/* いんせきをかはいしたかず（HPの下に大きく） */}
-                <div className="flex flex-col items-center gap-2">
-                    <span
-                        className="text-base text-brand-500/80"
-                        style={{ fontFamily: CUTE_FONT }}
-                    >
-                        いんせきをかはいしたかず
-                    </span>
-                    <div className="flex items-center gap-3">
-                        <div className="relative w-10 h-10">
-                            <Image
-                                src="/svg/object/metor.svg"
-                                alt=""
-                                fill
-                                className="object-contain"
-                            />
-                        </div>
-                        <span className="text-white/60 text-2xl">×</span>
-                        <span
-                            className="text-brand-500 font-bold text-3xl tabular-nums"
-                            style={{ fontFamily: CUTE_FONT }}
-                        >
-                            {score.destroyed}
-                        </span>
-                    </div>
-                </div>
-            </div>
-
             {/* フォーカス用隠しinput（モバイル対応） */}
             <input
                 ref={inputRef}
@@ -165,27 +146,88 @@ export function TypistView({ dialogue, score, starHp, maxStarHp }: TypistViewPro
                 />
             </div>
 
-            {/* 恐竜キャラクター */}
-            <motion.div
-                className="relative z-10 w-16 h-16 md:w-20 md:h-20 select-none"
-                animate={{ y: [0, -6, 0] }}
-                transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
-            >
-                <Image
-                    src="/svg/charactor/annoying-dinosaur.svg"
-                    alt=""
-                    fill
-                    className="object-contain"
-                />
-            </motion.div>
+            {/* 4. 星（中央下5%） */}
+            <TypistStar />
 
-            {/* タイピング表示 */}
-            <div className="relative z-10 w-full max-w-xl px-6">
-                <TypingDisplay line={dialogue.line} charIndex={dialogue.charIndex} />
+            {/* 1. 隕石の破壊したカズゾーン（上部） */}
+            <div className="w-full shrink-0 flex flex-col items-center gap-2 py-4 z-20">
+                <span
+                    className="text-base text-brand-500/80"
+                    style={{ fontFamily: CUTE_FONT }}
+                >
+                    いんせきをかはいしたかず
+                </span>
+                <div className="flex items-center gap-3">
+                    <div className="relative w-10 h-10">
+                        <Image
+                            src="/svg/object/metor.svg"
+                            alt=""
+                            fill
+                            className="object-contain"
+                        />
+                    </div>
+                    <span className="text-white/60 text-2xl">×</span>
+                    <span
+                        className="text-brand-500 font-bold text-3xl tabular-nums"
+                        style={{ fontFamily: CUTE_FONT }}
+                    >
+                        {score.destroyed}
+                    </span>
+                </div>
+            </div>
+
+            {/* 2. タイピングゾーン（中央・恐竜+入力） */}
+            <div className="flex-1 min-h-0 w-full flex flex-col items-center justify-center px-6 z-10">
+                <motion.div
+                    className="w-16 h-16 md:w-20 md:h-20 select-none shrink-0 mb-4 relative"
+                    animate={{ y: [0, -6, 0] }}
+                    transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
+                >
+                    <Image
+                        src="/svg/charactor/annoying-dinosaur.svg"
+                        alt=""
+                        fill
+                        className="object-contain"
+                    />
+                </motion.div>
+                <div className="w-full max-w-xl">
+                    <TypingDisplay line={dialogue.line} charIndex={dialogue.charIndex} />
+                </div>
+            </div>
+
+            {/* 3. 星の体力ゾーン（中央下） */}
+            <div className="w-full shrink-0 flex flex-col items-center gap-2 py-4 z-20">
+                <span
+                    className="text-sm text-brand-500/80"
+                    style={{ fontFamily: CUTE_FONT }}
+                >
+                    ほしのたいりょく
+                </span>
+                <div className="relative w-64 md:w-80 h-3 rounded-full bg-stone-600/80 overflow-hidden">
+                    {/* 緑: 現在HP（即時更新） */}
+                    <div
+                        className="absolute left-0 top-0 h-full bg-green-500 transition-all duration-150"
+                        style={{ width: `${Math.max(0, (starHp / maxStarHp) * 100)}%` }}
+                    />
+                    {/* 赤: 損傷部分（スーッと消える） */}
+                    {damageWidth > 0 && (
+                        <motion.div
+                            key={`dmg-${damageWidth}`}
+                            className="absolute top-0 h-full bg-red-500 z-10 origin-left"
+                            style={{
+                                left: `${Math.max(0, (starHp / maxStarHp) * 100)}%`,
+                            }}
+                            initial={{ width: `${damageWidth}%` }}
+                            animate={{ width: '0%' }}
+                            transition={{ duration: 0.6, ease: 'easeOut' }}
+                            onAnimationComplete={() => setDamageWidth(0)}
+                        />
+                    )}
+                </div>
             </div>
 
             {/* ロール表示 */}
-            <div className="absolute bottom-8 left-1/2 -translate-x-1/2 text-brand-500/50 text-xs tracking-widest">
+            <div className="shrink-0 pb-8 text-brand-500/50 text-xs tracking-widest">
                 TYPIST MODE — type the romaji to fire
             </div>
         </div>
