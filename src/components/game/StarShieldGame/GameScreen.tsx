@@ -7,7 +7,7 @@ import { TypistView } from './TypistView'
 interface GameScreenProps {
     matchId: string
     startedAt: number
-    isShooter: boolean
+    shooterId: string
     difficulty: Difficulty
     currentUserId: string
     onGameEnd: (result: GameResult, stats: GameStats) => void
@@ -27,11 +27,12 @@ function TimerDisplay({ timer }: { timer: number }) {
 export function GameScreen({
     matchId,
     startedAt,
-    isShooter,
+    shooterId,
     difficulty,
     currentUserId,
     onGameEnd,
 }: GameScreenProps) {
+    const isShooter = shooterId === currentUserId
     const { asteroids, bullets, timer, score, aimRef, onMouseMove, dialogue, contactExplosion, completeContactFail } = useStarShield({
         matchId,
         startedAt,

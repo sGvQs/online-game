@@ -13,6 +13,7 @@ import { GameScreen } from './GameScreen'
 import { ResultScreen } from './ResultScreen'
 
 type GamePhase = 'TITLE' | 'PLAYING' | 'RESULT'
+type RoleChoice = 'SHOOTER' | 'TYPIST'
 
 interface StarShieldGameProps {
     room: RoomWithUsersAndReadyStatus
@@ -39,8 +40,37 @@ export function StarShieldGame({
     const [difficulty, setDifficulty] = useState<Difficulty>('NORMAL')
     const [matchId, setMatchId] = useState<string | null>(null)
     const [startedAt, setStartedAt] = useState<number | null>(null)
+    const [shooterId, setShooterId] = useState<string | null>(null)
     const [gameResult, setGameResult] = useState<GameResult | null>(null)
     const [gameStats, setGameStats] = useState<GameStats | null>(null)
+
+    const initialRoleChoices = useMemo(() => {
+        const users = room.users
+        if (users.length < 2) return {} as Record<string, RoleChoice>
+        const hostId = room.createdBy
+        const other = users.find((u) => u.userId !== hostId)
+        if (!other) return {} as Record<string, RoleChoice>
+        return { [hostId]: 'SHOOTER' as RoleChoice, [other.userId]: 'TYPIST' as RoleChoice }
+    }, [room.users, room.createdBy])
+
+    const [roleChoices, setRoleChoices] = useState<Record<string, RoleChoice>>(initialRoleChoices)
+
+    // 2人揃ったときに未選択のユーザーに初期値（ホスト=Shooter、他=Typist）を補完
+    useEffect(() => {
+        if (room.users.length !== 2) return
+        const hostId = room.createdBy
+        const other = room.users.find((u) => u.userId !== hostId)
+        if (!other) return
+        setRoleChoices((prev) => {
+            const missing = room.users.filter((u) => !(u.userId in prev))
+            if (missing.length === 0) return prev
+            const next = { ...prev }
+            for (const u of missing) {
+                next[u.userId] = u.userId === hostId ? 'SHOOTER' : 'TYPIST'
+            }
+            return next
+        })
+    }, [room.users, room.createdBy])
 
     // 既にプレイ済みの matchId を記録。タイトルに戻ったとき room.currentMatchId が
     // まだ DB に残っていても再度 PLAYING に遷移しないようにするため。
@@ -63,6 +93,11 @@ export function StarShieldGame({
                     setDifficulty(payload.difficulty)
                 }
             })
+            .on('broadcast', { event: 'role' }, ({ payload }: { payload: { userId: string; role: RoleChoice } }) => {
+                if (payload?.userId && payload?.role && ['SHOOTER', 'TYPIST'].includes(payload.role)) {
+                    setRoleChoices((prev) => ({ ...prev, [payload.userId]: payload.role }))
+                }
+            })
             .subscribe()
 
         return () => {
@@ -70,6 +105,27 @@ export function StarShieldGame({
             lobbyChannelRef.current = null
         }
     }, [phase, roomId, supabase])
+
+    // 役職変更（各自が選択、broadcast で共有）
+    const handleRoleChange = useCallback((role: RoleChoice) => {
+        setRoleChoices((prev) => ({ ...prev, [currentUserId]: role }))
+        lobbyChannelRef.current?.send({
+            type: 'broadcast',
+            event: 'role',
+            payload: { userId: currentUserId, role },
+        })
+    }, [currentUserId])
+
+    // 役職が被っているか（2人とも同じ役職を選んだ場合）
+    const roleConflict = useMemo(() => {
+        const users = room.users
+        if (users.length !== 2) return true
+        const choices = users.map((u) => roleChoices[u.userId]).filter(Boolean)
+        if (choices.length !== 2) return true
+        return choices[0] === choices[1]
+    }, [room.users, roleChoices])
+
+    const canStart = allUsersReady && !roleConflict
 
     // ホストが難易度を変更したときに state 更新 + broadcast
     const handleDifficultyChange = useCallback(
@@ -102,6 +158,7 @@ export function StarShieldGame({
             } else if (status.status === 'playing') {
                 setMatchId(newMatchId)
                 setStartedAt(status.startedAt)
+                setShooterId(status.shooterId)
                 setPhase('PLAYING')
             }
             // not_found の場合は何もしない（削除済みなど）
@@ -110,16 +167,23 @@ export function StarShieldGame({
 
     // ゲーム開始（ホストのみ）
     const handleStartGame = useCallback(async () => {
-        if (!allUsersReady) return
+        if (!canStart) return
+        const shooterIdFromRoles = room.users.find((u) => roleChoices[u.userId] === 'SHOOTER')?.userId
+        const typistIdFromRoles = room.users.find((u) => roleChoices[u.userId] === 'TYPIST')?.userId
+        if (!shooterIdFromRoles || !typistIdFromRoles) return
         try {
-            const { matchId: newMatchId, startedAt: ts } = await startStarShieldMatch(roomId, difficulty)
+            const { matchId: newMatchId, startedAt: ts, shooterId: sid } = await startStarShieldMatch(roomId, difficulty, {
+                shooterId: shooterIdFromRoles,
+                typistId: typistIdFromRoles,
+            })
             setMatchId(newMatchId)
             setStartedAt(ts)
+            setShooterId(sid)
             setPhase('PLAYING')
         } catch (e) {
             console.error('ゲーム開始失敗:', e)
         }
-    }, [allUsersReady, roomId, difficulty])
+    }, [canStart, room.users, roleChoices, roomId, difficulty])
 
     // ゲーム終了時
     const handleGameEnd = useCallback((result: GameResult, stats: GameStats) => {
@@ -134,6 +198,7 @@ export function StarShieldGame({
         if (matchId) playedMatchIdsRef.current.add(matchId)
         setMatchId(null)
         setStartedAt(null)
+        setShooterId(null)
         setGameResult(null)
         setGameStats(null)
         setPhase('TITLE')
@@ -158,6 +223,10 @@ export function StarShieldGame({
                     isHost={isHost}
                     isReady={isReady}
                     allUsersReady={allUsersReady}
+                    canStart={canStart}
+                    roleChoices={roleChoices}
+                    onRoleChange={handleRoleChange}
+                    roleConflict={roleConflict}
                     difficulty={difficulty}
                     onToggleReady={toggleReady}
                     onStartGame={handleStartGame}
@@ -167,11 +236,11 @@ export function StarShieldGame({
                     initialRankings={initialRankings}
                 />
             )}
-            {phase === 'PLAYING' && matchId && startedAt && (
+            {phase === 'PLAYING' && matchId && startedAt && shooterId && (
                 <GameScreen
                     matchId={matchId}
                     startedAt={startedAt}
-                    isShooter={isHost}
+                    shooterId={shooterId}
                     difficulty={difficulty}
                     currentUserId={currentUserId}
                     onGameEnd={handleGameEnd}

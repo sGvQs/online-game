@@ -20,7 +20,8 @@ const GAME_DURATION_SECONDS = 90
  */
 export async function startStarShieldMatch(
     roomId: string,
-    difficulty: Difficulty
+    difficulty: Difficulty,
+    roles: { shooterId: string; typistId: string }
 ): Promise<{ matchId: string; startedAt: number; shooterId: string; typistId: string }> {
     const user = await getAuthenticatedUser()
 
@@ -35,10 +36,14 @@ export async function startStarShieldMatch(
     if (room.createdBy !== user.id) throw new Error('ゲームを開始する権限がありません（ホストのみ）')
     if (room.users.length < 2) throw new Error('2人以上必要です')
 
-    const shooterId = room.createdBy
-    const typistUser = room.users.find((u) => u.userId !== shooterId)
-    if (!typistUser) throw new Error('タイピスト側のプレイヤーが見つかりません')
-    const typistId = typistUser.userId
+    const { shooterId, typistId } = roles
+    const userIds = new Set(room.users.map((u) => u.userId))
+    if (!userIds.has(shooterId) || !userIds.has(typistId)) {
+        throw new Error('指定されたプレイヤーがルームに含まれていません')
+    }
+    if (shooterId === typistId) {
+        throw new Error('Shooter と Typist は別のプレイヤーである必要があります')
+    }
 
     const spawnRate = SPAWN_RATES[difficulty]
     const targetAsteroidCount = Math.floor(GAME_DURATION_SECONDS * spawnRate)
@@ -90,10 +95,11 @@ export async function getStarShieldMatchInfo(
 
 /** リロード時に match ステータスを確認し、終了済みなら結果を返す */
 export async function getStarShieldMatchStatus(matchId: string): Promise<
-    | { status: 'playing'; startedAt: number }
+    | { status: 'playing'; startedAt: number; shooterId: string }
     | {
           status: 'finished'
           startedAt: number
+          shooterId: string
           result: 'CLEARED' | 'FAILED_CONTACT' | 'FAILED_TIMEOUT'
           stats: { spawnedCount: number; destroyedCount: number; durationSeconds: number }
       }
@@ -106,16 +112,20 @@ export async function getStarShieldMatchStatus(matchId: string): Promise<
     if (!tsm) {
         const match = await prisma.match.findUnique({
             where: { id: matchId },
-            select: { createdAt: true },
+            include: { room: true },
         })
         if (!match) return { status: 'not_found' }
-        return { status: 'playing', startedAt: match.createdAt.getTime() }
+        return {
+            status: 'playing',
+            startedAt: match.createdAt.getTime(),
+            shooterId: match.room.createdBy,
+        }
     }
 
     const startedAt = tsm.startedAt.getTime()
 
     if (!tsm.endedAt) {
-        return { status: 'playing', startedAt }
+        return { status: 'playing', startedAt, shooterId: tsm.shooterId }
     }
 
     const result: 'CLEARED' | 'FAILED_CONTACT' | 'FAILED_TIMEOUT' = tsm.isCleared
@@ -127,6 +137,7 @@ export async function getStarShieldMatchStatus(matchId: string): Promise<
     return {
         status: 'finished',
         startedAt,
+        shooterId: tsm.shooterId,
         result,
         stats: {
             spawnedCount: tsm.spawnedCount,
