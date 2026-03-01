@@ -32,12 +32,6 @@ const DIFFICULTY_META: Record<Difficulty, { label: string; rate: string; bg: str
     HARD:   { label: 'HARD',   rate: '1.5/s', emoji: '🔥', bg: 'rgba(248,113,113,0.12)', border: 'rgba(248,113,113,0.5)', text: '#f87171', glow: '0 0 12px rgba(248,113,113,0.4)' },
 }
 
-const SPEC_CHIPS = [
-    { icon: '🛸', title: '2 Player Co-op', sub: 'チームで守れ' },
-    { icon: '☄️', title: 'Meteor Defense', sub: '隕石を全部壊す' },
-    { icon: '⭐', title: 'Protect the Star', sub: '星に触れたらゲームオーバー' },
-]
-
 const HOW_TO_PLAY = [
     { icon: '🎯', text: 'Shooter がエイムして自動射撃' },
     { icon: '⌨️', text: 'Typist がタイプして弾を撃つ' },
@@ -92,31 +86,6 @@ export function TitleScreen({
             {/* ── メインコンテンツ ── */}
             <div className="relative z-10 w-full max-w-5xl mx-auto px-6 py-10 flex flex-col gap-8">
 
-                {/* スペックチップ行（LPHero 風） */}
-                <motion.div
-                    className="flex gap-3 flex-wrap justify-center"
-                    initial={{ opacity: 0, y: -16 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.6 }}
-                >
-                    {SPEC_CHIPS.map(({ icon, title, sub }) => (
-                        <div
-                            key={title}
-                            className="flex items-center gap-2.5 px-4 py-2.5 rounded-2xl"
-                            style={{
-                                background: 'rgba(129,140,248,0.07)',
-                                border: '1px solid rgba(129,140,248,0.22)',
-                            }}
-                        >
-                            <span className="text-base leading-none">{icon}</span>
-                            <div className="text-left">
-                                <p className="text-[11px] font-bold text-brand-400" style={{ fontFamily: DOT_GOTHIC_FONT }}>{title}</p>
-                                <p className="text-[9px] text-brand-600 mt-0.5" style={{ fontFamily: DOT_GOTHIC_FONT }}>{sub}</p>
-                            </div>
-                        </div>
-                    ))}
-                </motion.div>
-
                 {/* ── グリッド本体 ── */}
                 <div className="grid grid-cols-[1fr_auto_1fr] gap-10 items-start">
 
@@ -129,12 +98,6 @@ export function TitleScreen({
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.8, ease: 'easeOut' }}
                         >
-                            <p
-                                className="text-xs mb-3 tracking-[0.4em] uppercase"
-                                style={{ fontFamily: DOT_GOTHIC_FONT, color: 'rgba(192,132,252,0.7)' }}
-                            >
-                                2 Player Co-op Shooting
-                            </p>
                             <h1 className="leading-none select-none">
                                 <span
                                     className="block text-[5.5rem] font-black leading-none"
@@ -167,7 +130,7 @@ export function TitleScreen({
                                 className="text-sm mt-3"
                                 style={{ fontFamily: DOT_GOTHIC_FONT, color: 'rgba(167,139,250,0.7)' }}
                             >
-                                ☄️ 隕石から星を守りぬけ ⭐
+                                ☄️ 協力して隕石から星を守りぬけ ⭐
                             </p>
                         </motion.div>
 
@@ -219,7 +182,18 @@ export function TitleScreen({
                                 </MenuButton>
                             )}
                         </motion.div>
+                    </div>
 
+                    {/* 中央ディバイダー */}
+                    <div className="w-px self-stretch bg-linear-to-b from-transparent via-brand-500/30 to-transparent" />
+
+                    {/* 右列：プレイヤー + HOW TO PLAY */}
+                    <motion.div
+                        className="flex flex-col gap-6"
+                        initial={{ opacity: 0, x: 20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ duration: 0.8, delay: 0.6 }}
+                    >
                         {/* 難度セレクター */}
                         <motion.div
                             initial={{ opacity: 0 }}
@@ -264,18 +238,6 @@ export function TitleScreen({
                                 </p>
                             )}
                         </motion.div>
-                    </div>
-
-                    {/* 中央ディバイダー */}
-                    <div className="w-px self-stretch bg-linear-to-b from-transparent via-brand-500/30 to-transparent" />
-
-                    {/* 右列：プレイヤー + HOW TO PLAY */}
-                    <motion.div
-                        className="flex flex-col gap-6"
-                        initial={{ opacity: 0, x: 20 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 0.8, delay: 0.6 }}
-                    >
                         {/* プレイヤーパネル */}
                         <div
                             className="rounded-2xl p-5"
