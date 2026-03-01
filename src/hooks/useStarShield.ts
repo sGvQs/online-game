@@ -413,6 +413,8 @@ export function useStarShield({
         isShooter ? null : pickRandomDialogue()
     )
     const [charIndex, setCharIndex] = useState(0)
+    /** Typist の正解打鍵回数（発射エフェクト用・最後の1文字も含む） */
+    const [typistFireCount, setTypistFireCount] = useState(0)
 
     // Refs
     const asteroidsRef = useRef<Asteroid[]>([])
@@ -799,6 +801,8 @@ export function useStarShield({
             payload: {},
         })
 
+        setTypistFireCount((c) => c + 1)
+
         const nextChar = charIndex + 1
         if (nextChar >= line.romaji.length) {
             setCurrentLine(pickRandomDialogue())
@@ -832,6 +836,7 @@ export function useStarShield({
             line: currentLine ?? DIALOGUES[0],
             charIndex,
         },
+        typistFireCount,
         contactExplosion,
         completeContactFail,
     }

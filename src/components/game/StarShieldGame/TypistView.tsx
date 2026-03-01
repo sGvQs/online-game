@@ -2,10 +2,43 @@
 
 import { useEffect, useId, useRef, useState } from 'react'
 import Image from 'next/image'
-import { motion } from 'framer-motion'
-import { DialogueLine } from '@/hooks/useStarShield'
+import { AnimatePresence, motion } from 'framer-motion'
+import { BULLET_COLOR, DialogueLine } from '@/hooks/useStarShield'
 
 const CUTE_FONT = 'var(--font-cherry-bomb-one)'
+
+/** 恐竜の口（右端）から左へ発射する赤球 */
+function TypistBullet({
+    bulletColor,
+    onComplete,
+}: {
+    bulletColor: string
+    onComplete: () => void
+}) {
+    return (
+        <motion.div
+            className="absolute pointer-events-none z-20 rounded-full"
+            style={{
+                left: '100%',
+                top: '50%',
+                width: 12,
+                height: 12,
+                backgroundColor: bulletColor,
+                boxShadow: `0 0 8px ${bulletColor}cc`,
+            }}
+            initial={{ x: -6, y: '-50%' }}
+            animate={{
+                x: '100vw',
+                y: '-50%',
+            }}
+            transition={{
+                duration: 0.4,
+                ease: 'linear',
+            }}
+            onAnimationComplete={onComplete}
+        />
+    )
+}
 
 /** TypistView 用の星ビジュアル（中央下5%、表示のみ） */
 function TypistStar() {
@@ -56,6 +89,7 @@ interface TypistViewProps {
     score: { spawned: number; destroyed: number }
     starHp: number
     maxStarHp: number
+    typistFireCount: number
 }
 
 function TypingDisplay({ line, charIndex }: { line: DialogueLine; charIndex: number }) {
@@ -104,10 +138,12 @@ function TypingDisplay({ line, charIndex }: { line: DialogueLine; charIndex: num
     )
 }
 
-export function TypistView({ dialogue, score, starHp, maxStarHp }: TypistViewProps) {
+export function TypistView({ dialogue, score, starHp, maxStarHp, typistFireCount }: TypistViewProps) {
     const inputRef = useRef<HTMLInputElement>(null)
     const prevStarHpRef = useRef(maxStarHp)
+    const prevTypistFireCountRef = useRef(typistFireCount)
     const [damageWidth, setDamageWidth] = useState(0)
+    const [bullets, setBullets] = useState<{ id: string }[]>([])
 
     useEffect(() => {
         inputRef.current?.focus()
@@ -122,6 +158,14 @@ export function TypistView({ dialogue, score, starHp, maxStarHp }: TypistViewPro
         }
         prevStarHpRef.current = starHp
     }, [starHp, maxStarHp])
+
+    // タイピング成功時: 恐竜の口から赤球を左へ発射（typistFireCount の増加で検知、最後の1文字も含む）
+    useEffect(() => {
+        if (typistFireCount > prevTypistFireCountRef.current) {
+            setBullets((b) => [...b, { id: crypto.randomUUID() }])
+        }
+        prevTypistFireCountRef.current = typistFireCount
+    }, [typistFireCount])
 
     return (
         <div
@@ -178,18 +222,33 @@ export function TypistView({ dialogue, score, starHp, maxStarHp }: TypistViewPro
 
             {/* 2. タイピングゾーン（中央・恐竜+入力） */}
             <div className="flex-1 min-h-0 w-full flex flex-col items-center justify-center px-6 z-10">
-                <motion.div
-                    className="w-16 h-16 md:w-20 md:h-20 select-none shrink-0 mb-4 relative"
-                    animate={{ y: [0, -6, 0] }}
-                    transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
-                >
-                    <Image
-                        src="/svg/charactor/annoying-dinosaur.svg"
-                        alt=""
-                        fill
-                        className="object-contain"
-                    />
-                </motion.div>
+                {/* 恐竜 + 発射エフェクト（口から左へ赤球） */}
+                <div className="relative w-16 h-16 md:w-20 md:h-20 shrink-0 mb-4">
+                    <motion.div
+                        className="absolute inset-0 select-none"
+                        animate={{ y: [0, -6, 0] }}
+                        transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
+                    >
+                        <Image
+                            src="/svg/charactor/annoying-dinosaur.svg"
+                            alt=""
+                            fill
+                            className="object-contain"
+                        />
+                    </motion.div>
+                    {/* タイピング成功ごとに口（右端）から赤球を左へ発射 */}
+                    <AnimatePresence>
+                        {bullets.map(({ id }) => (
+                            <TypistBullet
+                                key={id}
+                                bulletColor={BULLET_COLOR}
+                                onComplete={() =>
+                                    setBullets((b) => b.filter((x) => x.id !== id))
+                                }
+                            />
+                        ))}
+                    </AnimatePresence>
+                </div>
                 <div className="w-full max-w-xl">
                     <TypingDisplay line={dialogue.line} charIndex={dialogue.charIndex} />
                 </div>

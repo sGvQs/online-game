@@ -33,7 +33,7 @@ export function GameScreen({
     onGameEnd,
 }: GameScreenProps) {
     const isShooter = shooterId === currentUserId
-    const { asteroids, bullets, timer, score, starHp, aimRef, onMouseMove, dialogue, contactExplosion, completeContactFail } = useStarShield({
+    const { asteroids, bullets, timer, score, starHp, aimRef, onMouseMove, dialogue, typistFireCount, contactExplosion, completeContactFail } = useStarShield({
         matchId,
         startedAt,
         isShooter,
@@ -61,6 +61,7 @@ export function GameScreen({
                     score={score}
                     starHp={starHp}
                     maxStarHp={STAR_HP[difficulty]}
+                    typistFireCount={typistFireCount}
                 />
             )}
 
