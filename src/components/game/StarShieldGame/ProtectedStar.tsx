@@ -13,8 +13,8 @@ export const STAR_POSITION = {
 // 当たり判定用（正規化座標 0-1、星の見えている部分の中心）
 export const STAR_TARGET_X = 0.03
 export const STAR_TARGET_Y = 0.92
-/** 星の半径（中心から表面まで）。隕石がこの表面に触れたらゲームオーバー */
-export const STAR_RADIUS = 0.35
+/** 星の半径（中心から表面まで）。隕石がこの表面に触れたらゲームオーバー。内側寄りにすると当たり判定が厳しくなる */
+export const STAR_RADIUS = 0.28
 
 /**
  * 守られる星（恐竜の背後・左下に巨大で配置、5〜10%程度のみ見える丸い星）
