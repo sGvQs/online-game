@@ -32,7 +32,7 @@ export const starShieldGame = tv({
         menuItemReady: 'text-brand-500 pointer-events-none drop-shadow-[0_0_10px_rgba(129,140,248,0.8)]',
         menuItemSelected: 'text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.6)]',
         menuItemDisabled: 'text-white/20 pointer-events-none cursor-not-allowed',
-        menuItemExit: 'text-[#FF6666]/70 hover:text-[#FF6666]',
+        menuItemExit: 'text-[#4ade80]/70 hover:text-[#4ade80]',
 
         // 難度セレクター
         difficultyWrapper: 'mt-8',

@@ -246,7 +246,7 @@ export function RoleSelectionScreen({
                     {isHost && (
                         <button
                             onClick={onBack}
-                            className="py-3 px-6 rounded-2xl border-2 border-red-500 bg-red-600/90 text-red-50 hover:bg-red-500 hover:border-red-400 hover:scale-105 active:scale-95 transition-all shrink-0 shadow-[0_0_20px_rgba(239,68,68,0.5)] cursor-pointer"
+                            className="py-3 px-6 rounded-2xl border-2 border-green-500 bg-green-600/90 text-green-50 hover:bg-green-500 hover:border-green-400 hover:scale-105 active:scale-95 transition-all shrink-0 shadow-[0_0_20px_rgba(34,197,94,0.5)] cursor-pointer"
                             style={{ fontFamily: FONTS.CHERRY_BOMB, fontSize: '1rem' }}
                         >
                             ← EXIT

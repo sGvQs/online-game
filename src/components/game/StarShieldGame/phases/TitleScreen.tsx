@@ -128,10 +128,10 @@ export function TitleScreen({
                                     onClick={onExit}
                                     active={false}
                                     disabled={false}
-                                    activeBg="rgba(185,28,28,0.92)"
-                                    activeBorder="#dc2626"
-                                    activeText="#fecaca"
-                                    activeGlow="0 0 16px rgba(220,38,38,0.4)"
+                                    activeBg="rgba(34,197,94,0.92)"
+                                    activeBorder="#22c55e"
+                                    activeText="#dcfce7"
+                                    activeGlow="0 0 16px rgba(34,197,94,0.4)"
                                     isExit
                                 >
                                     ← EXIT
@@ -263,7 +263,7 @@ function MenuButton({ children, onClick, active, disabled, activeBg, activeBorde
                 'py-3 px-6 rounded-2xl font-bold text-left transition-all duration-200 select-none',
                 isDisabled ? 'opacity-30 cursor-not-allowed bg-gray-800/60 text-gray-500 border-2 border-gray-700/50' : 'cursor-pointer',
                 !isDisabled && !isExit && 'hover:scale-[1.02] hover:brightness-110 active:scale-[0.98]',
-                !isDisabled && isExit && 'hover:scale-105 hover:bg-red-500 hover:border-red-400 active:scale-95',
+                !isDisabled && isExit && 'hover:scale-105 hover:bg-green-500 hover:border-green-400 active:scale-95',
             )}
             style={{
                 fontFamily: FONTS.CHERRY_BOMB,
@@ -271,7 +271,7 @@ function MenuButton({ children, onClick, active, disabled, activeBg, activeBorde
                 ...(active
                     ? { background: activeBg, border: `2px solid ${activeBorder}`, color: activeText, boxShadow: activeGlow }
                     : isExit
-                      ? { background: 'rgba(185,28,28,0.9)', border: '2px solid #dc2626', color: '#fecaca', boxShadow: '0 0 20px rgba(239,68,68,0.5)' }
+                      ? { background: 'rgba(34,197,94,0.9)', border: '2px solid #22c55e', color: '#dcfce7', boxShadow: '0 0 20px rgba(34,197,94,0.5)' }
                       : { background: 'rgba(45,42,66,0.92)', border: '2px solid #4a4a6a', color: '#9ca3af', boxShadow: 'none' }),
             }}
         >
