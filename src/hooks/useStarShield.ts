@@ -22,6 +22,10 @@ export const DINO_Y = 1 - DINO_SPAWN.bottom / 100
 
 /** 弾・球の色 */
 export const BULLET_COLOR = '#ef4444'
+
+/** 弾のスポーン位置オフセット（中心→口方向へ。正規化座標） */
+export const BULLET_SPAWN_OFFSET_X = 0.055
+export const BULLET_SPAWN_OFFSET_Y = 0.1
 const SPAWN_X_MIN = 0.0   // 左
 const SPAWN_X_MAX = 1.0  // 右
 const SPAWN_Y_MIN = 0.1  // 下
@@ -470,8 +474,8 @@ export function useStarShield({
                 const bullet: Bullet = {
                     id: crypto.randomUUID(),
                     firedAt: Date.now(),
-                    startX: DINO_X,
-                    startY: DINO_Y,
+                    startX: DINO_X + dirX * BULLET_SPAWN_OFFSET_X,
+                    startY: DINO_Y + dirY * BULLET_SPAWN_OFFSET_Y,
                     dirX,
                     dirY,
                 }
