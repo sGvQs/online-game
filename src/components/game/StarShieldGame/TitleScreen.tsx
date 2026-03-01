@@ -143,7 +143,7 @@ export function TitleScreen({
                 <div className="grid grid-cols-[1fr_auto_1fr] gap-10 items-start">
 
                     {/* 左列：タイトル + メニュー */}
-                    <div className="flex flex-col gap-8">
+                    <div className="flex flex-col gap-5">
 
                         {/* タイトルロゴ */}
                         <motion.div
@@ -189,7 +189,7 @@ export function TitleScreen({
 
                         {/* メニューボタン */}
                         <motion.div
-                            className="flex flex-col gap-3"
+                            className="flex flex-col gap-2"
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             transition={{ duration: 0.8, delay: 0.4 }}
@@ -408,13 +408,13 @@ function MenuButton({ children, onClick, active, disabled, activeBg, activeBorde
             onClick={onClick}
             disabled={disabled && !isExit}
             className={cn(
-                'group relative flex items-center gap-3 px-6 py-3.5 rounded-2xl text-left',
+                'group relative flex items-center gap-2 px-4 py-2 rounded-xl text-left',
                 'transition-all duration-200 select-none',
                 disabled && !isExit ? 'opacity-30 cursor-not-allowed' : 'cursor-pointer',
             )}
             style={{
                 fontFamily: CHERRY_BOMB_FONT,
-                fontSize: '1.6rem',
+                fontSize: '1.1rem',
                 background: bg,
                 border: `1.5px solid ${border}`,
                 color: textColor,
