@@ -14,7 +14,6 @@ const RUBIK_PUDDLES_FONT = 'var(--font-rubik-puddles)'
 const DOT_GOTHIC_FONT = 'var(--font-dot-gothic-16)'
 
 type Difficulty = 'EASY' | 'NORMAL' | 'HARD'
-type RoleChoice = 'SHOOTER' | 'TYPIST'
 
 interface TitleScreenProps {
     room: RoomWithUsersAndReadyStatus
@@ -22,9 +21,6 @@ interface TitleScreenProps {
     isReady: boolean
     allUsersReady: boolean
     canStart: boolean
-    roleChoices: Record<string, RoleChoice>
-    onRoleChange: (role: RoleChoice) => void
-    roleConflict: boolean
     difficulty: Difficulty
     onToggleReady: () => void
     onStartGame: () => void
@@ -60,9 +56,6 @@ export function TitleScreen({
     isReady,
     allUsersReady,
     canStart,
-    roleChoices,
-    onRoleChange,
-    roleConflict,
     difficulty,
     onToggleReady,
     onStartGame,
@@ -330,19 +323,9 @@ export function TitleScreen({
                                 Players {readyCount}/{totalUsers}
                             </p>
 
-                            {roleConflict && (
-                                <p
-                                    className="text-xs mb-2"
-                                    style={{ fontFamily: DOT_GOTHIC_FONT, color: 'rgba(248,113,113,0.9)' }}
-                                >
-                                    片方の役職を変更してください
-                                </p>
-                            )}
-
                             <div className="flex flex-col gap-3">
                                 {room.users.map((u: RoomUserWithReadyStatus) => {
                                     const isMe = u.userId === currentUserId
-                                    const myRole = roleChoices[u.userId]
                                     const ranking = initialRankings.find((r) => r.userId === u.userId)
                                     const rankDisplay = ranking
                                         ? `${ranking.rank}位 ${Math.floor(ranking.points)}pt`
@@ -369,33 +352,6 @@ export function TitleScreen({
                                                     </span>
                                                 )}
                                             </span>
-                                            {/* 役職選択（自分）or 表示（相手） */}
-                                            {isMe ? (
-                                                <div className="flex gap-1 shrink-0">
-                                                    {(['SHOOTER', 'TYPIST'] as const).map((r) => (
-                                                        <button
-                                                            key={r}
-                                                            onClick={() => onRoleChange(r)}
-                                                            className={cn(
-                                                                'px-2 py-0.5 rounded text-[10px] transition-colors',
-                                                                myRole === r
-                                                                    ? 'bg-brand-500/30 text-brand-400 border border-brand-500/50'
-                                                                    : 'bg-white/5 text-white/40 border border-white/10 hover:border-white/20'
-                                                            )}
-                                                            style={{ fontFamily: DOT_GOTHIC_FONT }}
-                                                        >
-                                                            {r === 'SHOOTER' ? '🎯' : '⌨️'}
-                                                        </button>
-                                                    ))}
-                                                </div>
-                                            ) : (
-                                                <span
-                                                    className="text-[10px] shrink-0"
-                                                    style={{ fontFamily: DOT_GOTHIC_FONT, color: 'rgba(192,132,252,0.7)' }}
-                                                >
-                                                    {myRole === 'SHOOTER' ? '🎯 Shooter' : myRole === 'TYPIST' ? '⌨️ Typist' : '---'}
-                                                </span>
-                                            )}
                                             {/* ランキング・pt */}
                                             <span
                                                 className="text-xs shrink-0 tabular-nums"

@@ -9,10 +9,11 @@ import { RoomWithUsersAndReadyStatus } from '@/shared/types'
 import type { UserRanking } from '@/shared/types/game'
 import { Difficulty, GameResult, GameStats } from '@/hooks/useStarShield'
 import { TitleScreen } from './TitleScreen'
+import { RoleSelectionScreen } from './RoleSelectionScreen'
 import { GameScreen } from './GameScreen'
 import { ResultScreen } from './ResultScreen'
 
-type GamePhase = 'TITLE' | 'PLAYING' | 'RESULT'
+type GamePhase = 'TITLE' | 'ROLE_SELECT' | 'PLAYING' | 'RESULT'
 type RoleChoice = 'SHOOTER' | 'TYPIST'
 
 interface StarShieldGameProps {
@@ -80,9 +81,9 @@ export function StarShieldGame({
     const supabase = useMemo(() => createClient(), [])
     const allUsersReady = room.users.length > 0 && room.users.every((u) => u.isReady)
 
-    // ロビー用 broadcast: 難易度を共有（ホストが変更時に broadcast、全員が受信して表示）
+    // ロビー用 broadcast: TITLE と ROLE_SELECT で channel を有効化
     useEffect(() => {
-        if (phase !== 'TITLE') return
+        if (phase !== 'TITLE' && phase !== 'ROLE_SELECT') return
 
         const channel = supabase.channel(`star_shield_lobby_${roomId}`)
         lobbyChannelRef.current = channel
@@ -97,6 +98,12 @@ export function StarShieldGame({
                 if (payload?.userId && payload?.role && ['SHOOTER', 'TYPIST'].includes(payload.role)) {
                     setRoleChoices((prev) => ({ ...prev, [payload.userId]: payload.role }))
                 }
+            })
+            .on('broadcast', { event: 'goToRoleSelect' }, () => {
+                setPhase('ROLE_SELECT')
+            })
+            .on('broadcast', { event: 'goToLobby' }, () => {
+                setPhase('TITLE')
             })
             .subscribe()
 
@@ -125,7 +132,7 @@ export function StarShieldGame({
         return choices[0] === choices[1]
     }, [room.users, roleChoices])
 
-    const canStart = allUsersReady && !roleConflict
+    const canStartLobby = allUsersReady
 
     // ホストが難易度を変更したときに state 更新 + broadcast
     const handleDifficultyChange = useCallback(
@@ -142,9 +149,9 @@ export function StarShieldGame({
         [isHost]
     )
 
-    // 非ホスト + リロード時: Room.currentMatchId の変化を検知。match ステータスを確認し、終了済みなら RESULT へ
+    // 非ホスト: Room.currentMatchId の変化を検知。match ステータスを確認し、終了済みなら RESULT、プレイ中なら PLAYING へ
     useEffect(() => {
-        if (phase !== 'TITLE') return
+        if (phase !== 'TITLE' && phase !== 'ROLE_SELECT') return
         if (!room.currentMatchId) return
         if (playedMatchIdsRef.current.has(room.currentMatchId)) return
 
@@ -165,9 +172,16 @@ export function StarShieldGame({
         })
     }, [room.currentMatchId, phase])
 
-    // ゲーム開始（ホストのみ）
-    const handleStartGame = useCallback(async () => {
-        if (!canStart) return
+    // ロビーから役職決定画面へ（ホストが START 押下時）
+    const handleStartGame = useCallback(() => {
+        if (!canStartLobby) return
+        lobbyChannelRef.current?.send({ type: 'broadcast', event: 'goToRoleSelect', payload: {} })
+        setPhase('ROLE_SELECT')
+    }, [canStartLobby])
+
+    // 役職決定後にゲーム開始（ホストのみ）
+    const handleProceedToGame = useCallback(async () => {
+        if (roleConflict) return
         const shooterIdFromRoles = room.users.find((u) => roleChoices[u.userId] === 'SHOOTER')?.userId
         const typistIdFromRoles = room.users.find((u) => roleChoices[u.userId] === 'TYPIST')?.userId
         if (!shooterIdFromRoles || !typistIdFromRoles) return
@@ -183,7 +197,13 @@ export function StarShieldGame({
         } catch (e) {
             console.error('ゲーム開始失敗:', e)
         }
-    }, [canStart, room.users, roleChoices, roomId, difficulty])
+    }, [roleConflict, room.users, roleChoices, roomId, difficulty])
+
+    // 役職決定画面からロビーへ戻る
+    const handleBackToLobby = useCallback(() => {
+        lobbyChannelRef.current?.send({ type: 'broadcast', event: 'goToLobby', payload: {} })
+        setPhase('TITLE')
+    }, [])
 
     // ゲーム終了時
     const handleGameEnd = useCallback((result: GameResult, stats: GameStats) => {
@@ -223,10 +243,7 @@ export function StarShieldGame({
                     isHost={isHost}
                     isReady={isReady}
                     allUsersReady={allUsersReady}
-                    canStart={canStart}
-                    roleChoices={roleChoices}
-                    onRoleChange={handleRoleChange}
-                    roleConflict={roleConflict}
+                    canStart={canStartLobby}
                     difficulty={difficulty}
                     onToggleReady={toggleReady}
                     onStartGame={handleStartGame}
@@ -234,6 +251,20 @@ export function StarShieldGame({
                     onDifficultyChange={handleDifficultyChange}
                     currentUserId={currentUserId}
                     initialRankings={initialRankings}
+                />
+            )}
+            {phase === 'ROLE_SELECT' && (
+                <RoleSelectionScreen
+                    room={room}
+                    roleChoices={roleChoices}
+                    onRoleChange={handleRoleChange}
+                    roleConflict={roleConflict}
+                    canProceed={!roleConflict}
+                    onProceedToGame={handleProceedToGame}
+                    onBack={handleBackToLobby}
+                    currentUserId={currentUserId}
+                    difficulty={difficulty}
+                    isHost={isHost}
                 />
             )}
             {phase === 'PLAYING' && matchId && startedAt && shooterId && (
