@@ -27,10 +27,10 @@ interface TitleScreenProps {
 }
 
 const HOW_TO_PLAY = [
-    { icon: '🎯', text: 'Shooter がエイムして自動射撃' },
-    { icon: '⌨️', text: 'Typist がタイプして弾を撃つ' },
-    { icon: '☄️', text: '成功: 90秒生き延びたらクリア' },
-    { icon: '💥', text: '失敗: 隕石に当たったらゲームオーバー' },
+    { iconSrc: '/svg/object/target-circle.svg', text: '「シューター」は照準を隕石に合わせてエイム。' },
+    { iconSrc: '/svg/object/keyboard.svg', text: '「タイピスト」はワードをタイプして弾を発射。' },
+    { iconSrc: '/svg/charactor/annoying-dinosaur.svg', text: '90秒間、隕石の猛攻から星を守り抜けばクリア！' },
+    { iconSrc: '/svg/object/fire.svg', text: '隕石が星に直撃するとゲームオーバー' },
 ]
 
 /** 口から画面右上へ飛ぶ角度（rad）0=右、π/2=上 */
@@ -180,10 +180,25 @@ export function TitleScreen({
                                 </span>
                             </h1>
                             <p
-                                className="text-sm mt-3"
+                                className="flex gap-2 text-sm mt-3"
                                 style={{ fontFamily: DOT_GOTHIC_FONT, color: 'rgba(167,139,250,0.7)' }}
                             >
-                                ☄️ 協力して隕石から星を守りぬけ ⭐
+                                <Image
+                                    src="/svg/object/target-circle.svg"
+                                    alt=""
+                                    width={18}
+                                    height={18}
+                                    className="shrink-0 opacity-80"
+                                />
+                                と
+                                <Image
+                                    src="/svg/object/keyboard.svg"
+                                    alt=""
+                                    width={18}
+                                    height={18}
+                                    className="shrink-0 opacity-80"
+                                />
+                                で役割分担して隕石から星を守りぬけ
                             </p>
                         </motion.div>
 
@@ -355,9 +370,15 @@ export function TitleScreen({
                                 How to Play
                             </p>
                             <div className="flex flex-col gap-2.5">
-                                {HOW_TO_PLAY.map(({ icon, text }) => (
+                                {HOW_TO_PLAY.map(({ iconSrc, text }) => (
                                     <div key={text} className="flex items-start gap-2.5">
-                                        <span className="text-sm leading-none mt-0.5 shrink-0">{icon}</span>
+                                        <Image
+                                            src={iconSrc}
+                                            alt=""
+                                            width={20}
+                                            height={20}
+                                            className="mt-0.5 shrink-0 opacity-90"
+                                        />
                                         <span
                                             className="text-xs leading-5"
                                             style={{ fontFamily: DOT_GOTHIC_FONT, color: 'rgba(203,213,225,0.7)' }}

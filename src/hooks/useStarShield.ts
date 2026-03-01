@@ -35,7 +35,7 @@ const ASTEROID_DURATION_MS = 8000
 // 弾の設定（デバッグ用に BULLET_RADIUS を変数化）
 const BULLET_SPEED = 0.0008 // 正規化座標/ms（速すぎないように）
 // export const BULLET_RADIUS = 0.008 // デバッグ時は大きくできる
-export const BULLET_RADIUS = 0.001 // デバッグ時は大きくできる
+export const BULLET_RADIUS = 1 // デバッグ時は大きくできる
 export const ASTEROID_RADIUS = 0.02
 const BULLET_MAX_AGE_MS = 3000
 
@@ -43,9 +43,9 @@ const BULLET_MAX_AGE_MS = 3000
 const STAR_TARGET_OFFSET = 0.04
 
 const SPAWN_INTERVALS_MS: Record<Difficulty, number> = {
-    EASY: 500,
-    NORMAL: 1000,
-    HARD: Math.round(1000 / 1.5),
+    EASY: 2000,
+    NORMAL: 1800,
+    HARD: 1500,
 }
 
 export const ASTEROID_HP: Record<Difficulty, number> = {
@@ -707,7 +707,6 @@ export function useStarShield({
             if (spawnTimer) clearInterval(spawnTimer)
             if (rafId) cancelAnimationFrame(rafId)
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [matchId, isShooter, difficulty])
 
     // ============================================
@@ -727,7 +726,6 @@ export function useStarShield({
         }, 500)
 
         return () => clearInterval(interval)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [matchId, isShooter, difficulty, startedAt])
 
     // ============================================
