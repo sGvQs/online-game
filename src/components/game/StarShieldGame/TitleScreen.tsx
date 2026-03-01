@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils'
 import { ProtectedStar } from './ProtectedStar'
 
 const CHERRY_BOMB_FONT = 'var(--font-cherry-bomb-one)'
+const RUBIK_PUDDLES_FONT = 'var(--font-rubik-puddles)'
 const DOT_GOTHIC_FONT = 'var(--font-dot-gothic-16)'
 
 type Difficulty = 'EASY' | 'NORMAL' | 'HARD'
@@ -27,9 +28,9 @@ interface TitleScreenProps {
 const DIFFICULTIES: Difficulty[] = ['EASY', 'NORMAL', 'HARD']
 
 const DIFFICULTY_META: Record<Difficulty, { label: string; rate: string; bg: string; border: string; text: string; glow: string; emoji: string }> = {
-    EASY:   { label: 'EASY',   rate: '0.5/s', emoji: '🌿', bg: 'rgba(134,239,172,0.12)', border: 'rgba(134,239,172,0.5)', text: '#86efac', glow: '0 0 12px rgba(134,239,172,0.4)' },
-    NORMAL: { label: 'NORMAL', rate: '1/s',   emoji: '🌟', bg: 'rgba(253,224,71,0.12)',  border: 'rgba(253,224,71,0.5)',  text: '#fde047', glow: '0 0 12px rgba(253,224,71,0.4)'  },
-    HARD:   { label: 'HARD',   rate: '1.5/s', emoji: '🔥', bg: 'rgba(248,113,113,0.12)', border: 'rgba(248,113,113,0.5)', text: '#f87171', glow: '0 0 12px rgba(248,113,113,0.4)' },
+    EASY:   { label: 'かんたん',   rate: '+1pt', emoji: '🌿', bg: 'rgba(134,239,172,0.12)', border: 'rgba(134,239,172,0.5)', text: '#86efac', glow: '0 0 12px rgba(134,239,172,0.4)' },
+    NORMAL: { label: 'ふつう', rate: '+2pt',   emoji: '🌟', bg: 'rgba(253,224,71,0.12)',  border: 'rgba(253,224,71,0.5)',  text: '#fde047', glow: '0 0 12px rgba(253,224,71,0.4)'  },
+    HARD:   { label: 'むずかしい',   rate: '+3pt', emoji: '🔥', bg: 'rgba(248,113,113,0.12)', border: 'rgba(248,113,113,0.5)', text: '#f87171', glow: '0 0 12px rgba(248,113,113,0.4)' },
 }
 
 const HOW_TO_PLAY = [
@@ -102,7 +103,7 @@ export function TitleScreen({
                                 <span
                                     className="block text-[5.5rem] font-black leading-none"
                                     style={{
-                                        fontFamily: CHERRY_BOMB_FONT,
+                                        fontFamily: RUBIK_PUDDLES_FONT,
                                         background: 'linear-gradient(135deg, #fff 0%, #c084fc 50%, #f472b6 100%)',
                                         WebkitBackgroundClip: 'text',
                                         WebkitTextFillColor: 'transparent',
@@ -110,12 +111,12 @@ export function TitleScreen({
                                         filter: 'drop-shadow(0 0 30px rgba(192,132,252,0.6))',
                                     }}
                                 >
-                                    Star
+                                    STAR
                                 </span>
                                 <span
                                     className="block text-[5.5rem] font-black leading-none -mt-2"
                                     style={{
-                                        fontFamily: CHERRY_BOMB_FONT,
+                                        fontFamily: RUBIK_PUDDLES_FONT,
                                         background: 'linear-gradient(135deg, #818cf8 0%, #c084fc 60%, #f472b6 100%)',
                                         WebkitBackgroundClip: 'text',
                                         WebkitTextFillColor: 'transparent',
@@ -123,7 +124,7 @@ export function TitleScreen({
                                         filter: 'drop-shadow(0 0 30px rgba(129,140,248,0.6))',
                                     }}
                                 >
-                                    Shield
+                                    SHIELD
                                 </span>
                             </h1>
                             <p
@@ -215,7 +216,7 @@ export function TitleScreen({
                                             key={d}
                                             onClick={() => isHost && onDifficultyChange(d)}
                                             disabled={!isHost}
-                                            className="flex flex-col items-center gap-0.5 px-4 py-2 rounded-2xl transition-all duration-200 cursor-pointer disabled:cursor-default"
+                                            className="flex flex-col items-center gap-0.5 px-4 py-2 rounded-2xl transition-all duration-200 cursor-pointer disabled:cursor-default w-[100px]"
                                             style={{
                                                 fontFamily: CHERRY_BOMB_FONT,
                                                 background: isActive ? meta.bg : 'rgba(255,255,255,0.03)',
@@ -227,7 +228,7 @@ export function TitleScreen({
                                         >
                                             <span className="text-base leading-none">{meta.emoji}</span>
                                             <span className="text-sm font-bold">{meta.label}</span>
-                                            <span className="text-[9px] opacity-70" style={{ fontFamily: DOT_GOTHIC_FONT }}>{meta.rate}/s</span>
+                                            <span className="text-[9px] opacity-70" style={{ fontFamily: DOT_GOTHIC_FONT }}>{meta.rate}</span>
                                         </button>
                                     )
                                 })}
@@ -267,7 +268,7 @@ export function TitleScreen({
                                             <span
                                                 className="text-base flex-1 truncate"
                                                 style={{
-                                                    fontFamily: CHERRY_BOMB_FONT,
+                                                    fontFamily: DOT_GOTHIC_FONT,
                                                     color: isMe ? '#ffffff' : 'rgba(255,255,255,0.65)',
                                                 }}
                                             >
