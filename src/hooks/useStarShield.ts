@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, useCallback, useMemo } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import { saveStarShieldResult } from '@/server/actions/game'
-import { STAR_TARGET_X, STAR_TARGET_Y, STAR_RADIUS } from '@/components/game/StarShieldGame/ProtectedStar'
+import { STAR_TARGET_X, STAR_TARGET_Y, STAR_RADIUS } from '@/components/game/StarShieldGame/phases/playing/ProtectedStar'
 
 // ============================================
 // 定数・型
@@ -15,13 +15,10 @@ export type GameResult = 'CLEARED' | 'FAILED_CONTACT' | 'FAILED_TIMEOUT'
 const GAME_DURATION_SECONDS = 90
 
 // 座標系: ビューポート基準の正規化座標 (0-1)
-/** 恐竜の位置（タイトル球スポーン・ゲーム内恐竜で共通） */
-export const DINO_SPAWN = { left: 10, bottom: 10 } as const // %
+import { DINO_SPAWN, BULLET_COLOR } from '@/components/game/StarShieldGame/constants'
+export { DINO_SPAWN, BULLET_COLOR }
 export const DINO_X = DINO_SPAWN.left / 100
 export const DINO_Y = 1 - DINO_SPAWN.bottom / 100
-
-/** 弾・球の色 */
-export const BULLET_COLOR = '#ef4444'
 
 /** 弾のスポーン位置オフセット（中心→口方向へ。正規化座標） */
 export const BULLET_SPAWN_OFFSET_X = 0.055

@@ -1,8 +1,9 @@
 'use client'
 
 import { useStarShield, Difficulty, GameResult, GameStats, ASTEROID_HP, STAR_HP } from '@/hooks/useStarShield'
-import { ShooterView } from './ShooterView'
-import { TypistView } from './TypistView'
+import { ShooterView } from './playing/ShooterView'
+import { TypistView } from './playing/TypistView'
+import { COLORS } from '../constants'
 
 interface GameScreenProps {
     matchId: string
@@ -24,27 +25,13 @@ function TimerDisplay({ timer }: { timer: number }) {
     )
 }
 
-export function GameScreen({
-    matchId,
-    startedAt,
-    shooterId,
-    difficulty,
-    currentUserId,
-    onGameEnd,
-}: GameScreenProps) {
+export function GameScreen({ matchId, startedAt, shooterId, difficulty, currentUserId, onGameEnd }: GameScreenProps) {
     const isShooter = shooterId === currentUserId
-    const { asteroids, bullets, timer, score, starHp, aimRef, onMouseMove, dialogue, typistFireCount, contactExplosion, completeContactFail } = useStarShield({
-        matchId,
-        startedAt,
-        isShooter,
-        difficulty,
-        currentUserId,
-        onGameEnd,
-    })
+    const { asteroids, bullets, timer, score, starHp, aimRef, onMouseMove, dialogue, typistFireCount, contactExplosion, completeContactFail } =
+        useStarShield({ matchId, startedAt, isShooter, difficulty, currentUserId, onGameEnd })
 
     return (
         <div className="relative min-h-screen overflow-hidden">
-            {/* ゲーム本体 */}
             {isShooter ? (
                 <ShooterView
                     asteroids={asteroids}
@@ -65,24 +52,17 @@ export function GameScreen({
                 />
             )}
 
-            {/* 共通 HUD（上部オーバーレイ） */}
             <div className="absolute top-0 left-0 right-0 z-30 pointer-events-none">
                 <div
                     className="flex items-center justify-between px-6 py-3 backdrop-blur-sm border-b"
-                    style={{
-                        background: 'rgba(30,41,59,0.4)',
-                        borderColor: 'rgba(129,140,248,0.2)',
-                    }}
+                    style={{ background: COLORS.GLASS_BG, borderColor: COLORS.GLASS_BORDER }}
                 >
-                    {/* タイマー */}
                     <div className="flex items-center gap-2">
                         <span className="text-brand-500/60 text-xs tracking-widest">TIME</span>
                         <span className="text-xl font-bold text-white">
                             <TimerDisplay timer={timer} />
                         </span>
                     </div>
-
-                    {/* スコア（Shooter のみ、Typist は HP 下に表示） */}
                     <div className="flex items-center gap-2">
                         {isShooter && (
                             <>
@@ -93,11 +73,7 @@ export function GameScreen({
                             </>
                         )}
                     </div>
-
-                    {/* 難度 */}
-                    <div className="text-xs tracking-widest text-brand-500/50">
-                        {difficulty}
-                    </div>
+                    <div className="text-xs tracking-widest text-brand-500/50">{difficulty}</div>
                 </div>
             </div>
         </div>

@@ -1,17 +1,13 @@
 'use client'
 
-import { useState, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import Image from 'next/image'
 import { RoomWithUsersAndReadyStatus, RoomUserWithReadyStatus } from '@/shared/types'
 import type { UserRanking } from '@/shared/types/game'
 import { cn } from '@/lib/utils'
-import { ProtectedStar } from './ProtectedStar'
-import { DINO_SPAWN, BULLET_COLOR } from '@/hooks/useStarShield'
-
-const CHERRY_BOMB_FONT = 'var(--font-cherry-bomb-one)'
-const RUBIK_PUDDLES_FONT = 'var(--font-rubik-puddles)'
-const DOT_GOTHIC_FONT = 'var(--font-dot-gothic-16)'
+import { ProtectedStar } from './playing/ProtectedStar'
+import { DinosaurWithBalls, AuroraGlow } from '../shared'
+import { FONTS, COLORS, ICONS } from '../constants'
 
 interface TitleScreenProps {
     room: RoomWithUsersAndReadyStatus
@@ -27,22 +23,16 @@ interface TitleScreenProps {
 }
 
 const HOW_TO_PLAY = [
-    { iconSrc: '/svg/object/target-circle.svg', text: '「シューター」は照準を隕石に合わせてエイム。' },
-    { iconSrc: '/svg/object/keyboard.svg', text: '「タイピスト」はワードをタイプして弾を発射。' },
-    { iconSrc: '/svg/charactor/annoying-dinosaur.svg', text: '90秒間、隕石の猛攻から星を守り抜けばクリア！' },
-    { iconSrc: '/svg/object/fire.svg', text: '隕石が星に直撃するとゲームオーバー' },
+    { iconSrc: ICONS.TARGET_CIRCLE, text: '「シューター」は照準を隕石に合わせてエイム。' },
+    { iconSrc: ICONS.TYPIST, text: '「タイピスト」はワードをタイプして弾を発射。' },
+    { iconSrc: ICONS.DINO, text: '90秒間、隕石の猛攻から星を守り抜けばクリア！' },
+    { iconSrc: ICONS.FIRE, text: '隕石が星に直撃するとゲームオーバー' },
 ]
-
-/** 口から画面右上へ飛ぶ角度（rad）0=右、π/2=上 */
-const BALL_ANGLE = Math.PI / 4
-/** 画面外まで飛ばす距離（px） */
-const BALL_DISTANCE = 2000
 
 export function TitleScreen({
     room,
     isHost,
     isReady,
-    allUsersReady,
     canStart,
     onToggleReady,
     onStartGame,
@@ -53,99 +43,15 @@ export function TitleScreen({
     const readyCount = room.users.filter((u: RoomUserWithReadyStatus) => u.isReady).length
     const totalUsers = room.users.length
 
-    const [balls, setBalls] = useState<{ id: number }[]>([])
-
-    useEffect(() => {
-        const spawn = () => {
-            setBalls(b => [...b.slice(-3), { id: Date.now() + Math.random() }])
-        }
-
-        const schedule = () => {
-            spawn()
-            const delay = 1500 + Math.random() * 2500
-            return setTimeout(schedule, delay)
-        }
-        const t = schedule()
-        return () => clearTimeout(t)
-    }, [])
-
     return (
         <div className="relative min-h-screen overflow-hidden flex flex-col items-center justify-center">
-            {/* ── 背景装飾 ── */}
             <ProtectedStar />
+            <DinosaurWithBalls size="w-28 h-28" />
+            <AuroraGlow width={700} height={350} opacity={0.25} blur={50} />
 
-            {/* 恐竜 */}
-            <div
-                className="absolute z-10 pointer-events-none w-28 h-28"
-                style={{
-                    left: `${DINO_SPAWN.left}%`,
-                    bottom: `${DINO_SPAWN.bottom}%`,
-                    transform: 'translate(-50%, 50%) rotate(-0.5rad)',
-                }}
-            >
-                <div className="relative w-full h-full">
-                    <Image
-                        src="/svg/charactor/annoying-dinosaur.svg"
-                        alt="恐竜"
-                        fill
-                        className="object-contain drop-shadow-[0_2px_12px_rgba(0,0,0,0.5)]"
-                    />
-                </div>
-            </div>
-
-            {/* 恐竜が吐く赤い球（口から画面外まで） */}
-            <div
-                className="absolute z-9 pointer-events-none"
-                style={{ left: `${DINO_SPAWN.left}%`, bottom: `${DINO_SPAWN.bottom}%`, transform: 'translate(-50%, 50%)' }}
-            >
-                <AnimatePresence>
-                    {balls.map((b) => (
-                        <motion.div
-                            key={b.id}
-                            className="absolute rounded-full"
-                            style={{
-                                width: 12,
-                                height: 12,
-                                left: 0,
-                                top: 0,
-                                backgroundColor: BULLET_COLOR,
-                                boxShadow: `0 0 8px ${BULLET_COLOR}99`,
-                            }}
-                            initial={{ x: 0, y: 0, opacity: 1, scale: 1 }}
-                            animate={{
-                                x: Math.cos(BALL_ANGLE) * BALL_DISTANCE,
-                                y: -Math.sin(BALL_ANGLE) * BALL_DISTANCE,
-                                opacity: 0.4,
-                                scale: 0.8,
-                            }}
-                            transition={{ duration: 1.8, ease: 'linear' }}
-                            onAnimationComplete={() => {
-                                setBalls(prev => prev.filter(x => x.id !== b.id))
-                            }}
-                        />
-                    ))}
-                </AnimatePresence>
-            </div>
-
-            {/* 中央オーロラグロー */}
-            <div
-                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[350px] rounded-full pointer-events-none opacity-25"
-                style={{
-                    background: 'radial-gradient(ellipse at 50% 60%, rgba(192,132,252,0.7) 0%, rgba(99,102,241,0.4) 40%, transparent 70%)',
-                    filter: 'blur(50px)',
-                }}
-            />
-
-            {/* ── メインコンテンツ ── */}
             <div className="relative z-10 w-full max-w-5xl mx-auto px-6 py-10 flex flex-col gap-8">
-
-                {/* ── グリッド本体 ── */}
                 <div className="grid grid-cols-[1fr_auto_1fr] gap-10 items-start">
-
-                    {/* 左列：タイトル + メニュー */}
                     <div className="flex flex-col gap-5">
-
-                        {/* タイトルロゴ */}
                         <motion.div
                             initial={{ opacity: 0, y: -20 }}
                             animate={{ opacity: 1, y: 0 }}
@@ -155,7 +61,7 @@ export function TitleScreen({
                                 <span
                                     className="block text-[5.5rem] font-black leading-none"
                                     style={{
-                                        fontFamily: RUBIK_PUDDLES_FONT,
+                                        fontFamily: FONTS.RUBIK_PUDDLES,
                                         background: 'linear-gradient(135deg, #fff 0%, #c084fc 50%, #f472b6 100%)',
                                         WebkitBackgroundClip: 'text',
                                         WebkitTextFillColor: 'transparent',
@@ -168,7 +74,7 @@ export function TitleScreen({
                                 <span
                                     className="block text-[5.5rem] font-black leading-none -mt-2"
                                     style={{
-                                        fontFamily: RUBIK_PUDDLES_FONT,
+                                        fontFamily: FONTS.RUBIK_PUDDLES,
                                         background: 'linear-gradient(135deg, #818cf8 0%, #c084fc 60%, #f472b6 100%)',
                                         WebkitBackgroundClip: 'text',
                                         WebkitTextFillColor: 'transparent',
@@ -179,37 +85,20 @@ export function TitleScreen({
                                     SHIELD
                                 </span>
                             </h1>
-                            <p
-                                className="flex gap-2 text-sm mt-3"
-                                style={{ fontFamily: DOT_GOTHIC_FONT, color: 'rgba(167,139,250,0.7)' }}
-                            >
-                                <Image
-                                    src="/svg/object/target-circle.svg"
-                                    alt=""
-                                    width={18}
-                                    height={18}
-                                    className="shrink-0 opacity-80"
-                                />
+                            <p className="flex gap-2 text-sm mt-3" style={{ fontFamily: FONTS.DOT_GOTHIC, color: COLORS.VIOLET_7 }}>
+                                <Image src={ICONS.TARGET_CIRCLE} alt="" width={18} height={18} className="shrink-0 opacity-80" />
                                 と
-                                <Image
-                                    src="/svg/object/keyboard.svg"
-                                    alt=""
-                                    width={18}
-                                    height={18}
-                                    className="shrink-0 opacity-80"
-                                />
+                                <Image src={ICONS.TYPIST} alt="" width={18} height={18} className="shrink-0 opacity-80" />
                                 で役割分担して隕石から星を守りぬけ
                             </p>
                         </motion.div>
 
-                        {/* メニューボタン */}
                         <motion.div
                             className="flex flex-col gap-3"
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             transition={{ duration: 0.8, delay: 0.4 }}
                         >
-                            {/* READY */}
                             <MenuButton
                                 onClick={() => !isReady && onToggleReady()}
                                 active={isReady}
@@ -221,8 +110,6 @@ export function TitleScreen({
                             >
                                 {isReady ? '✓ READY' : '▶ READY'}
                             </MenuButton>
-
-                            {/* START */}
                             {isHost && (
                                 <MenuButton
                                     onClick={() => canStart && onStartGame()}
@@ -236,8 +123,6 @@ export function TitleScreen({
                                     {canStart ? '🚀 START' : '🔒 START'}
                                 </MenuButton>
                             )}
-
-                            {/* EXIT */}
                             {isHost && (
                                 <MenuButton
                                     onClick={onExit}
@@ -255,85 +140,63 @@ export function TitleScreen({
                         </motion.div>
                     </div>
 
-                    {/* 中央ディバイダー */}
                     <div className="w-px self-stretch bg-linear-to-b from-transparent via-brand-500/30 to-transparent" />
 
-                    {/* 右列：プレイヤー + HOW TO PLAY */}
                     <motion.div
                         className="flex flex-col gap-6"
                         initial={{ opacity: 0, x: 20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ duration: 0.8, delay: 0.6 }}
                     >
-                        {/* プレイヤーパネル */}
                         <div
                             className="rounded-2xl p-5"
-                            style={{
-                                background: 'rgba(129,140,248,0.05)',
-                                border: '1px solid rgba(129,140,248,0.18)',
-                            }}
+                            style={{ background: COLORS.BRAND_05, border: `1px solid ${COLORS.BRAND_18}` }}
                         >
-                            <p
-                                className="text-[10px] tracking-[0.4em] uppercase mb-4"
-                                style={{ fontFamily: DOT_GOTHIC_FONT, color: 'rgba(129,140,248,0.6)' }}
-                            >
+                            <p className="text-[10px] tracking-[0.4em] uppercase mb-4" style={{ fontFamily: FONTS.DOT_GOTHIC, color: COLORS.BRAND_6 }}>
                                 Players {readyCount}/{totalUsers}
                             </p>
-
                             <div className="flex flex-col gap-3">
                                 {room.users.map((u: RoomUserWithReadyStatus) => {
                                     const isMe = u.userId === currentUserId
                                     const ranking = initialRankings.find((r) => r.userId === u.userId)
-                                    const rankDisplay = ranking
-                                        ? `${ranking.rank}位 ${Math.floor(ranking.points)}pt`
-                                        : '--- 0pt'
+                                    const rankDisplay = ranking ? `${ranking.rank}位 ${Math.floor(ranking.points)}pt` : '--- 0pt'
                                     return (
                                         <div key={u.id} className="flex items-center gap-3">
-                                            {/* アバタードット */}
                                             <div
                                                 className="w-2 h-2 rounded-full shrink-0 transition-colors duration-300"
-                                                style={{ backgroundColor: u.isReady ? '#818cf8' : 'rgba(255,255,255,0.15)' }}
+                                                style={{ backgroundColor: u.isReady ? '#818cf8' : COLORS.WHITE_15 }}
                                             />
-                                            {/* 名前 */}
                                             <span
                                                 className="text-base flex-1 truncate"
                                                 style={{
-                                                    fontFamily: DOT_GOTHIC_FONT,
+                                                    fontFamily: FONTS.DOT_GOTHIC,
                                                     color: isMe ? '#ffffff' : 'rgba(255,255,255,0.65)',
                                                 }}
                                             >
                                                 {u.user?.name ?? '...'}
                                                 {isMe && (
-                                                    <span className="text-xs text-brand-500/50 ml-1" style={{ fontFamily: DOT_GOTHIC_FONT }}>
+                                                    <span className="text-xs text-brand-500/50 ml-1" style={{ fontFamily: FONTS.DOT_GOTHIC }}>
                                                         (あなた)
                                                     </span>
                                                 )}
                                             </span>
-                                            {/* ランキング・pt */}
-                                            <span
-                                                className="text-xs shrink-0 tabular-nums"
-                                                style={{ fontFamily: DOT_GOTHIC_FONT, color: 'rgba(192,132,252,0.8)' }}
-                                            >
+                                            <span className="text-xs shrink-0 tabular-nums" style={{ fontFamily: FONTS.DOT_GOTHIC, color: COLORS.PURPLE_8 }}>
                                                 {rankDisplay}
                                             </span>
-                                            {/* READYバッジ */}
                                             {u.isReady ? (
                                                 <span
                                                     className="text-xs px-2 py-0.5 rounded-full"
                                                     style={{
-                                                        fontFamily: CHERRY_BOMB_FONT,
+                                                        fontFamily: FONTS.CHERRY_BOMB,
                                                         color: '#818cf8',
-                                                        background: 'rgba(129,140,248,0.15)',
-                                                        border: '1px solid rgba(129,140,248,0.4)',
+                                                        background: COLORS.BRAND_15,
+                                                        border: `1px solid ${COLORS.BRAND_4}`,
                                                     }}
                                                 >
                                                     READY
                                                 </span>
                                             ) : (
-                                                <span
-                                                    className="text-xs"
-                                                    style={{ fontFamily: DOT_GOTHIC_FONT, color: 'rgba(255,255,255,0.2)' }}
-                                                >
+                                                <span className="text-xs" style={{ fontFamily: FONTS.DOT_GOTHIC, color: COLORS.WHITE_2 }}>
                                                     ---
                                                 </span>
                                             )}
@@ -341,8 +204,6 @@ export function TitleScreen({
                                     )
                                 })}
                             </div>
-
-                            {/* Ready progress bar */}
                             <div className="mt-4 h-1 rounded-full overflow-hidden" style={{ background: 'rgba(255,255,255,0.06)' }}>
                                 <div
                                     className="h-full rounded-full transition-all duration-500"
@@ -355,34 +216,18 @@ export function TitleScreen({
                             </div>
                         </div>
 
-                        {/* HOW TO PLAY */}
                         <div
                             className="rounded-2xl p-5"
-                            style={{
-                                background: 'rgba(192,132,252,0.05)',
-                                border: '1px solid rgba(192,132,252,0.18)',
-                            }}
+                            style={{ background: COLORS.PURPLE_05, border: `1px solid ${COLORS.PURPLE_18}` }}
                         >
-                            <p
-                                className="text-[10px] tracking-[0.4em] uppercase mb-4"
-                                style={{ fontFamily: DOT_GOTHIC_FONT, color: 'rgba(192,132,252,0.6)' }}
-                            >
+                            <p className="text-[10px] tracking-[0.4em] uppercase mb-4" style={{ fontFamily: FONTS.DOT_GOTHIC, color: COLORS.PURPLE_6 }}>
                                 How to Play
                             </p>
                             <div className="flex flex-col gap-2.5">
                                 {HOW_TO_PLAY.map(({ iconSrc, text }) => (
                                     <div key={text} className="flex items-start gap-2.5">
-                                        <Image
-                                            src={iconSrc}
-                                            alt=""
-                                            width={20}
-                                            height={20}
-                                            className="mt-0.5 shrink-0 opacity-90"
-                                        />
-                                        <span
-                                            className="text-xs leading-5"
-                                            style={{ fontFamily: DOT_GOTHIC_FONT, color: 'rgba(203,213,225,0.7)' }}
-                                        >
+                                        <Image src={iconSrc} alt="" width={20} height={20} className="mt-0.5 shrink-0 opacity-90" />
+                                        <span className="text-xs leading-5" style={{ fontFamily: FONTS.DOT_GOTHIC, color: COLORS.SLATE_7 }}>
                                             {text}
                                         </span>
                                     </div>
@@ -396,7 +241,6 @@ export function TitleScreen({
     )
 }
 
-/* ── メニューボタンコンポーネント（RoleSelectionScreen にスタイルを揃える） ── */
 interface MenuButtonProps {
     children: React.ReactNode
     onClick: () => void
@@ -411,42 +255,24 @@ interface MenuButtonProps {
 
 function MenuButton({ children, onClick, active, disabled, activeBg, activeBorder, activeText, activeGlow, isExit }: MenuButtonProps) {
     const isDisabled = disabled && !isExit
-
     return (
         <button
             onClick={onClick}
             disabled={isDisabled}
             className={cn(
                 'py-3 px-6 rounded-2xl font-bold text-left transition-all duration-200 select-none',
-                isDisabled
-                    ? 'opacity-30 cursor-not-allowed bg-gray-800/60 text-gray-500 border-2 border-gray-700/50'
-                    : 'cursor-pointer',
+                isDisabled ? 'opacity-30 cursor-not-allowed bg-gray-800/60 text-gray-500 border-2 border-gray-700/50' : 'cursor-pointer',
                 !isDisabled && !isExit && 'hover:scale-[1.02] hover:brightness-110 active:scale-[0.98]',
                 !isDisabled && isExit && 'hover:scale-105 hover:bg-red-500 hover:border-red-400 active:scale-95',
             )}
             style={{
-                fontFamily: CHERRY_BOMB_FONT,
+                fontFamily: FONTS.CHERRY_BOMB,
                 fontSize: '1rem',
                 ...(active
-                    ? {
-                          background: activeBg,
-                          border: `2px solid ${activeBorder}`,
-                          color: activeText,
-                          boxShadow: activeGlow,
-                      }
+                    ? { background: activeBg, border: `2px solid ${activeBorder}`, color: activeText, boxShadow: activeGlow }
                     : isExit
-                      ? {
-                            background: 'rgba(185,28,28,0.9)',
-                            border: '2px solid #dc2626',
-                            color: '#fecaca',
-                            boxShadow: '0 0 20px rgba(239,68,68,0.5)',
-                        }
-                      : {
-                            background: 'rgba(45,42,66,0.92)',
-                            border: '2px solid #4a4a6a',
-                            color: '#9ca3af',
-                            boxShadow: 'none',
-                        }),
+                      ? { background: 'rgba(185,28,28,0.9)', border: '2px solid #dc2626', color: '#fecaca', boxShadow: '0 0 20px rgba(239,68,68,0.5)' }
+                      : { background: 'rgba(45,42,66,0.92)', border: '2px solid #4a4a6a', color: '#9ca3af', boxShadow: 'none' }),
             }}
         >
             {children}
