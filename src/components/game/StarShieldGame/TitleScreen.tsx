@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Image from 'next/image'
 import { RoomWithUsersAndReadyStatus, RoomUserWithReadyStatus } from '@/shared/types'
+import type { UserRanking } from '@/shared/types/game'
 import { cn } from '@/lib/utils'
 import { ProtectedStar } from './ProtectedStar'
 import { DINO_SPAWN, BULLET_COLOR } from '@/hooks/useStarShield'
@@ -25,6 +26,7 @@ interface TitleScreenProps {
     onExit: () => void
     onDifficultyChange: (d: Difficulty) => void
     currentUserId: string
+    initialRankings: UserRanking[]
 }
 
 const DIFFICULTIES: Difficulty[] = ['EASY', 'NORMAL', 'HARD']
@@ -58,6 +60,7 @@ export function TitleScreen({
     onExit,
     onDifficultyChange,
     currentUserId,
+    initialRankings,
 }: TitleScreenProps) {
     const readyCount = room.users.filter((u: RoomUserWithReadyStatus) => u.isReady).length
     const totalUsers = room.users.length
@@ -321,6 +324,10 @@ export function TitleScreen({
                             <div className="flex flex-col gap-3">
                                 {room.users.map((u: RoomUserWithReadyStatus) => {
                                     const isMe = u.userId === currentUserId
+                                    const ranking = initialRankings.find((r) => r.userId === u.userId)
+                                    const rankDisplay = ranking
+                                        ? `${ranking.rank}位 ${Math.floor(ranking.points)}pt`
+                                        : '--- 0pt'
                                     return (
                                         <div key={u.id} className="flex items-center gap-3">
                                             {/* アバタードット */}
@@ -332,7 +339,7 @@ export function TitleScreen({
                                             <span
                                                 className="text-base flex-1 truncate"
                                                 style={{
-                                                    fontFamily: DOT_GOTHIC_FONT,
+                                                    fontFamily: CHERRY_BOMB_FONT,
                                                     color: isMe ? '#ffffff' : 'rgba(255,255,255,0.65)',
                                                 }}
                                             >
@@ -342,6 +349,13 @@ export function TitleScreen({
                                                         (あなた)
                                                     </span>
                                                 )}
+                                            </span>
+                                            {/* ランキング・pt */}
+                                            <span
+                                                className="text-xs shrink-0 tabular-nums"
+                                                style={{ fontFamily: DOT_GOTHIC_FONT, color: 'rgba(192,132,252,0.8)' }}
+                                            >
+                                                {rankDisplay}
                                             </span>
                                             {/* READYバッジ */}
                                             {u.isReady ? (

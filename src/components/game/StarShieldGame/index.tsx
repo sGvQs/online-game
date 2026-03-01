@@ -6,6 +6,7 @@ import { useGameRoom } from '@/hooks/useGameRoom'
 import { returnToRoom, resetAllReady } from '@/server/actions/room'
 import { startStarShieldMatch, getStarShieldMatchStatus } from '@/server/actions/game'
 import { RoomWithUsersAndReadyStatus } from '@/shared/types'
+import type { UserRanking } from '@/shared/types/game'
 import { Difficulty, GameResult, GameStats } from '@/hooks/useStarShield'
 import { TitleScreen } from './TitleScreen'
 import { GameScreen } from './GameScreen'
@@ -18,6 +19,7 @@ interface StarShieldGameProps {
     isHost: boolean
     roomId: string
     currentUserId: string
+    initialRankings: UserRanking[]
 }
 
 export function StarShieldGame({
@@ -25,6 +27,7 @@ export function StarShieldGame({
     isHost,
     roomId,
     currentUserId,
+    initialRankings,
 }: StarShieldGameProps) {
     const { room, isReady, toggleReady } = useGameRoom({
         roomId,
@@ -161,6 +164,7 @@ export function StarShieldGame({
                     onExit={handleExit}
                     onDifficultyChange={handleDifficultyChange}
                     currentUserId={currentUserId}
+                    initialRankings={initialRankings}
                 />
             )}
             {phase === 'PLAYING' && matchId && startedAt && (

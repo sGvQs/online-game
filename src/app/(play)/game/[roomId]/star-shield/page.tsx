@@ -1,6 +1,7 @@
 import { redirect } from 'next/navigation'
 import { getCurrentUser } from '@/server/actions'
 import { getRoomWithReadyStatus } from '@/server/actions/room'
+import { getNullHandRankings } from '@/server/actions/game/rankingActions'
 import { RoomUserWithReadyStatus } from '@/shared/types'
 import { StarShieldGame } from '@/components/game/StarShieldGame'
 
@@ -25,6 +26,8 @@ export default async function StarShieldPage({ params }: { params: { roomId: str
     }
 
     const isHost = room.createdBy === currentUser.user.id
+    const userIds = room.users.map((u) => u.userId)
+    const initialRankings = await getNullHandRankings(userIds)
 
     return (
         <div className="relative min-h-screen">
@@ -33,6 +36,7 @@ export default async function StarShieldPage({ params }: { params: { roomId: str
                 isHost={isHost}
                 roomId={roomId}
                 currentUserId={currentUser.user.id}
+                initialRankings={initialRankings}
             />
         </div>
     )
