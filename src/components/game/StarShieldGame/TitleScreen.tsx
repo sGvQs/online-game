@@ -147,9 +147,10 @@ export function TitleScreen({
                                 onClick={() => !isReady && onToggleReady()}
                                 active={isReady}
                                 disabled={isReady}
-                                activeColor="rgba(129,140,248,1)"
-                                activeGlow="rgba(129,140,248,0.5)"
-                                activeBg="rgba(129,140,248,0.18)"
+                                activeBg="rgba(79,70,229,0.92)"
+                                activeBorder="#6366f1"
+                                activeText="#e0e7ff"
+                                activeGlow="0 0 20px rgba(99,102,241,0.5)"
                             >
                                 {isReady ? '✓ Ready!' : '▶ Ready'}
                             </MenuButton>
@@ -160,9 +161,10 @@ export function TitleScreen({
                                     onClick={() => allUsersReady && onStartGame()}
                                     active={allUsersReady}
                                     disabled={!allUsersReady}
-                                    activeColor="rgba(192,132,252,1)"
-                                    activeGlow="rgba(192,132,252,0.5)"
-                                    activeBg="rgba(192,132,252,0.18)"
+                                    activeBg="rgba(109,40,217,0.92)"
+                                    activeBorder="#8b5cf6"
+                                    activeText="#ede9fe"
+                                    activeGlow="0 0 20px rgba(139,92,246,0.5)"
                                 >
                                     {allUsersReady ? '🚀 Start Game!' : '🔒 Start Game'}
                                 </MenuButton>
@@ -174,9 +176,10 @@ export function TitleScreen({
                                     onClick={onExit}
                                     active={false}
                                     disabled={false}
-                                    activeColor="rgba(248,113,113,1)"
-                                    activeGlow="rgba(248,113,113,0.4)"
-                                    activeBg="rgba(248,113,113,0.12)"
+                                    activeBg="rgba(185,28,28,0.92)"
+                                    activeBorder="#dc2626"
+                                    activeText="#fecaca"
+                                    activeGlow="0 0 16px rgba(220,38,38,0.4)"
                                     isExit
                                 >
                                     ← Exit
@@ -354,20 +357,32 @@ export function TitleScreen({
 }
 
 /* ── メニューボタンコンポーネント ── */
+const INACTIVE_BG = 'rgba(45,42,66,0.92)'
+const INACTIVE_BORDER = '#4a4a6a'
+const INACTIVE_TEXT = '#9ca3af'
+const HOVER_BG = 'rgba(61,58,82,0.92)'
+const EXIT_BG = 'rgba(127,29,29,0.92)'
+const EXIT_BORDER = '#991b1b'
+const EXIT_TEXT = '#fca5a5'
+const EXIT_HOVER_BG = 'rgba(153,27,27,0.92)'
+
 interface MenuButtonProps {
     children: React.ReactNode
     onClick: () => void
     active: boolean
     disabled: boolean
-    activeColor: string
-    activeGlow: string
     activeBg: string
+    activeBorder: string
+    activeText: string
+    activeGlow: string
     isExit?: boolean
 }
 
-function MenuButton({ children, onClick, active, disabled, activeColor, activeGlow, activeBg, isExit }: MenuButtonProps) {
-    const baseColor = isExit ? 'rgba(248,113,113,0.5)' : 'rgba(255,255,255,0.35)'
-    const hoverBg = isExit ? 'rgba(248,113,113,0.08)' : 'rgba(255,255,255,0.04)'
+function MenuButton({ children, onClick, active, disabled, activeBg, activeBorder, activeText, activeGlow, isExit }: MenuButtonProps) {
+    const bg = active ? activeBg : (isExit ? EXIT_BG : INACTIVE_BG)
+    const border = active ? activeBorder : (isExit ? EXIT_BORDER : INACTIVE_BORDER)
+    const textColor = active ? activeText : (isExit ? EXIT_TEXT : INACTIVE_TEXT)
+    const hoverBg = isExit ? EXIT_HOVER_BG : HOVER_BG
 
     return (
         <button
@@ -381,23 +396,25 @@ function MenuButton({ children, onClick, active, disabled, activeColor, activeGl
             style={{
                 fontFamily: CHERRY_BOMB_FONT,
                 fontSize: '1.6rem',
-                background: active ? activeBg : 'rgba(255,255,255,0.03)',
-                border: `1.5px solid ${active ? activeColor : (isExit ? 'rgba(248,113,113,0.25)' : 'rgba(255,255,255,0.1)')}`,
-                color: active ? activeColor : baseColor,
-                boxShadow: active ? `0 0 16px ${activeGlow}` : 'none',
+                background: bg,
+                border: `1.5px solid ${border}`,
+                color: textColor,
+                boxShadow: active ? activeGlow : 'none',
             }}
             onMouseEnter={e => {
                 if (disabled && !isExit) return
                 const el = e.currentTarget as HTMLButtonElement
-                el.style.background = active ? activeBg : hoverBg
-                el.style.borderColor = active ? activeColor : (isExit ? 'rgba(248,113,113,0.5)' : 'rgba(255,255,255,0.2)')
-                el.style.color = active ? activeColor : (isExit ? 'rgba(248,113,113,0.9)' : 'rgba(255,255,255,0.8)')
+                if (!active) {
+                    el.style.background = hoverBg
+                    el.style.borderColor = isExit ? '#dc2626' : '#6b6b8a'
+                    el.style.color = isExit ? '#fecaca' : '#d1d5db'
+                }
             }}
             onMouseLeave={e => {
                 const el = e.currentTarget as HTMLButtonElement
-                el.style.background = active ? activeBg : 'rgba(255,255,255,0.03)'
-                el.style.borderColor = active ? activeColor : (isExit ? 'rgba(248,113,113,0.25)' : 'rgba(255,255,255,0.1)')
-                el.style.color = active ? activeColor : baseColor
+                el.style.background = bg
+                el.style.borderColor = border
+                el.style.color = textColor
             }}
         >
             {children}
