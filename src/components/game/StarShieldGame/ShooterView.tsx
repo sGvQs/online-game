@@ -12,6 +12,7 @@ import {
     DINO_X,
     DINO_Y,
 } from '@/hooks/useStarShield'
+import { ProtectedStar } from './ProtectedStar'
 
 interface ShooterViewProps {
     asteroids: Asteroid[]
@@ -214,6 +215,8 @@ export function ShooterView({ asteroids, bullets, aimRef, onMouseMove, maxHp }: 
             className="absolute inset-0 cursor-none overflow-hidden"
             onMouseMove={onMouseMove}
         >
+            {/* 守られる星（恐竜の背後・左下） */}
+            <ProtectedStar />
             {/* 恐竜（左下、照準を向く） */}
             <Dinosaur aimRef={aimRef} />
 

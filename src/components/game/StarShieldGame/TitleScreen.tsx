@@ -1,9 +1,11 @@
 'use client'
 
 import { motion } from 'framer-motion'
+import Image from 'next/image'
 import { RoomWithUsersAndReadyStatus, RoomUserWithReadyStatus } from '@/shared/types'
 import { starShieldGame } from './styles'
 import { cn } from '@/lib/utils'
+import { ProtectedStar } from './ProtectedStar'
 
 const RUBIK_PUDDLES_FONT = 'var(--font-rubik-puddles)'
 const DOT_GOTHIC_FONT = 'var(--font-dot-gothic-16)'
@@ -49,6 +51,26 @@ export function TitleScreen({
 
     return (
         <div className={styles.container()}>
+            {/* 守られる星 + 恐竜（左下・シューティング画面と同じ構図） */}
+            <ProtectedStar />
+            <div
+                className="absolute z-10 pointer-events-none origin-center w-24 h-24"
+                style={{
+                    left: '10%',
+                    bottom: '15%',
+                    transform: 'translate(-50%, 50%) rotate(-0.5rad)',
+                }}
+            >
+                <div className="relative w-full h-full">
+                    <Image
+                        src="/svg/charactor/annoying-dinosaur.svg"
+                        alt="恐竜"
+                        fill
+                        className="object-contain drop-shadow-[0_2px_8px_rgba(0,0,0,0.4)]"
+                    />
+                </div>
+            </div>
+
             {/* グロー装飾（page.tsx のオーロラに合わせる） */}
             <div
                 className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] rounded-full opacity-20 pointer-events-none"
