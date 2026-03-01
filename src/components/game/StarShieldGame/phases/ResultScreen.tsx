@@ -92,7 +92,7 @@ export function ResultScreen({ result, stats, difficulty, onBackToTitle }: Resul
                                 display: 'inline-block',
                             }}
                         >
-                            {earnedPoints} 獲得！
+                            {earnedPoints} かくとく！
                         </motion.p>
                     )}
                 </div>
