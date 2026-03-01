@@ -59,18 +59,30 @@ export function ResultScreen({ result, stats, onBackToTitle }: ResultScreenProps
                 transition={{ duration: 0.8, ease: 'easeOut' }}
             >
                 {/* 結果タイトル */}
-                <div>
-                    <div
-                        className="text-7xl font-black tracking-[0.15em] uppercase"
-                        style={{
-                            color: config.color,
-                            textShadow: `0 0 40px ${config.color}80`,
-                        }}
-                    >
-                        {config.title}
-                    </div>
-                    <div className="text-white/40 font-mono text-sm tracking-[0.4em] uppercase mt-1">
-                        {config.subtitle}
+                <div className="flex flex-col items-center gap-3">
+                    {result === 'FAILED_CONTACT' && (
+                        <div className="relative w-20 h-20 shrink-0">
+                            <Image
+                                src="/svg/object/fire.svg"
+                                alt=""
+                                fill
+                                className="object-contain drop-shadow-[0_0_25px_rgba(255,100,50,0.6)]"
+                            />
+                        </div>
+                    )}
+                    <div>
+                        <div
+                            className="text-7xl font-black tracking-[0.15em] uppercase"
+                            style={{
+                                color: config.color,
+                                textShadow: `0 0 40px ${config.color}80`,
+                            }}
+                        >
+                            {config.title}
+                        </div>
+                        <div className="text-white/40 font-mono text-sm tracking-[0.4em] uppercase mt-1">
+                            {config.subtitle}
+                        </div>
                     </div>
                 </div>
 

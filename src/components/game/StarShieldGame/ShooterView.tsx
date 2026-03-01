@@ -121,18 +121,45 @@ function BulletCircle({ bullet }: { bullet: Bullet }) {
     )
 }
 
-/** 隕石接触時の爆発エフェクト（接触部で表示、終了後に FAILED 遷移） */
+/** 隕石接触時の爆発エフェクト（fire.svg を使用、終了後に FAILED 遷移） */
+const FIRE_SCALE_KEYFRAMES = [
+    0.1, 0.5, 0.8, 0.9, 1, 0.9, // 初期フェーズ
+    1, 0.9, 1.1, 1, 1, 0.9, 1.1, 1, 1, 0.9, 1.1, 1, // ループ 1=>0.9=>1.1=>1 を3回
+]
+const FIRE_SCALE_TIMES: number[] = [
+    0, 0.07, 0.14, 0.21, 0.28, 0.35, // 0.1→0.5→0.8→0.9→1→0.9
+    0.42, 0.53, 0.64, 0.75, 0.81, 0.86, 0.92, 0.97, 1, 1, 1, 1, // ループ3回分
+]
+
 function ContactExplosionEffect({ pos, onComplete }: { pos: { x: number; y: number }; onComplete: () => void }) {
     return (
         <motion.div
             className="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-none z-30"
             style={{ left: `${pos.x * 100}%`, top: `${pos.y * 100}%` }}
-            initial={{ opacity: 1, scale: 0.2 }}
-            animate={{ opacity: 0, scale: 5 }}
-            transition={{ duration: 1.2, ease: [0.25, 0.46, 0.45, 0.94] }}
-            onAnimationComplete={onComplete}
         >
-            {/* 白コア（一瞬のフラッシュ） */}
+            {/* fire.svg（隕石直撃の炎表現: 0.1→0.5→0.8→0.9→1→0.9 のち 1→0.9→1.1→1 ループ） */}
+            <motion.div
+                className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24"
+                initial={{ scale: 0.1 }}
+                animate={{ scale: FIRE_SCALE_KEYFRAMES }}
+                transition={{
+                    duration: 1.5,
+                    times: FIRE_SCALE_TIMES,
+                    ease: 'easeInOut',
+                }}
+                onAnimationComplete={onComplete}
+            >
+                <div className="relative w-full h-full">
+                    <Image
+                        src="/svg/object/fire.svg"
+                        alt=""
+                        fill
+                        className="object-contain drop-shadow-[0_0_30px_rgba(255,100,50,0.8)]"
+                        style={{ filter: 'brightness(1.2) saturate(1.3)' }}
+                    />
+                </div>
+            </motion.div>
+            {/* 補助：白フラッシュ */}
             <motion.div
                 className="absolute rounded-full bg-white"
                 style={{
@@ -141,40 +168,11 @@ function ContactExplosionEffect({ pos, onComplete }: { pos: { x: number; y: numb
                     left: '50%',
                     top: '50%',
                     transform: 'translate(-50%, -50%)',
-                    boxShadow: '0 0 40px 20px rgba(255,255,200,0.8)',
+                    boxShadow: '0 0 40px 20px rgba(255,200,150,0.8)',
                 }}
                 initial={{ scale: 0.5, opacity: 1 }}
                 animate={{ scale: 2, opacity: 0 }}
-                transition={{ duration: 0.15 }}
-            />
-            {/* オレンジ火球 */}
-            <motion.div
-                className="absolute rounded-full"
-                style={{
-                    background: 'radial-gradient(circle, rgba(255,200,100,0.95) 0%, rgba(255,120,30,0.7) 30%, rgba(255,60,0,0.4) 60%, transparent 100%)',
-                    width: 100,
-                    height: 100,
-                    left: '50%',
-                    top: '50%',
-                    transform: 'translate(-50%, -50%)',
-                }}
-                initial={{ scale: 0.3, opacity: 1 }}
-                animate={{ scale: 4, opacity: 0 }}
-                transition={{ duration: 0.8 }}
-            />
-            {/* 外側衝撃波リング */}
-            <motion.div
-                className="absolute rounded-full border-4 border-orange-400"
-                style={{
-                    width: 50,
-                    height: 50,
-                    left: '50%',
-                    top: '50%',
-                    transform: 'translate(-50%, -50%)',
-                }}
-                initial={{ scale: 0.5, opacity: 1 }}
-                animate={{ scale: 6, opacity: 0 }}
-                transition={{ duration: 1 }}
+                transition={{ duration: 0.12 }}
             />
         </motion.div>
     )
