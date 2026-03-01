@@ -257,7 +257,7 @@ export function TypistView({ dialogue, score, starHp, maxStarHp, typistFireCount
             {/* 3. 星の体力ゾーン（中央下） */}
             <div className="w-full shrink-0 flex flex-col items-center gap-2 py-4 z-20">
                 <span
-                    className="text-sm text-brand-500/80"
+                    className="text-md text-white"
                     style={{ fontFamily: CUTE_FONT }}
                 >
                     ほしのたいりょく
