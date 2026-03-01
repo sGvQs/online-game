@@ -98,14 +98,14 @@ export function TypistView({ dialogue, score, starHp, maxStarHp }: TypistViewPro
                 <div className="relative w-64 md:w-80 h-3 rounded-full bg-stone-600/80 overflow-hidden">
                     {/* 緑: 現在HP（即時更新） */}
                     <div
-                        className="absolute left-0 top-0 h-full rounded-full bg-green-500 transition-[width] duration-150"
+                        className="absolute left-0 top-0 h-full bg-green-500 transition-all duration-150"
                         style={{ width: `${Math.max(0, (starHp / maxStarHp) * 100)}%` }}
                     />
                     {/* 赤: 損傷部分（スーッと消える） */}
                     {damageWidth > 0 && (
                         <motion.div
                             key={`dmg-${damageWidth}`}
-                            className="absolute top-0 h-full rounded-r-full bg-red-500 z-10 origin-left"
+                            className="absolute top-0 h-full bg-red-500 z-10 origin-left"
                             style={{
                                 left: `${Math.max(0, (starHp / maxStarHp) * 100)}%`,
                             }}
