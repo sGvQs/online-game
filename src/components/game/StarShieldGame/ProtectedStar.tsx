@@ -42,9 +42,9 @@ export function ProtectedStar() {
             >
                 <defs>
                     <radialGradient id={glowId} cx="50%" cy="50%" r="50%">
-                        <stop offset="0%" stopColor="rgba(255,230,150,0.95)" />
-                        <stop offset="60%" stopColor="rgba(255,200,100,0.7)" />
-                        <stop offset="100%" stopColor="rgba(255,180,80,0.3)" />
+                        <stop offset="0%" stopColor="rgb(235,210,150)" />
+                        <stop offset="40%" stopColor="rgb(200,170,110)" />
+                        <stop offset="100%" stopColor="rgb(140,100,55)" />
                     </radialGradient>
                 </defs>
                 <circle
@@ -52,7 +52,7 @@ export function ProtectedStar() {
                     cy="50"
                     r="48"
                     fill={`url(#${glowId})`}
-                    style={{ filter: 'drop-shadow(0 0 60px rgba(255,220,120,0.6))' }}
+                    style={{ filter: 'drop-shadow(0 0 50px rgba(180,150,90,0.5))' }}
                 />
             </svg>
         </div>
