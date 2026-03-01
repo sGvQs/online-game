@@ -64,11 +64,14 @@ function AsteroidCircle({ asteroid, maxHp }: { asteroid: Asteroid; maxHp: number
             </div>
             {/* 外側グロー */}
             <div className="absolute inset-0 rounded-full bg-orange-400/30 blur-md scale-150" />
-            {/* 本体 */}
-            <div className="relative w-10 h-10 rounded-full bg-gradient-to-br from-stone-400 via-stone-500 to-stone-700 border border-stone-300/40 shadow-[0_0_12px_rgba(251,146,60,0.6)]">
-                {/* クレーター */}
-                <div className="absolute top-2 left-3 w-2 h-2 rounded-full bg-stone-600/60" />
-                <div className="absolute bottom-2 right-2 w-1.5 h-1.5 rounded-full bg-stone-600/50" />
+            {/* 隕石（metor.svg） */}
+            <div className="relative w-12 h-12">
+                <Image
+                    src="/svg/object/metor.svg"
+                    alt="隕石"
+                    fill
+                    className="object-contain drop-shadow-[0_0_8px_rgba(251,146,60,0.5)]"
+                />
             </div>
         </motion.div>
     )
@@ -148,15 +151,16 @@ function Crosshair({ aimRef }: { aimRef: React.RefObject<{ x: number; y: number 
     return (
         <div
             ref={ref}
-            className="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-none z-20"
+            className="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-none z-20 w-12 h-12"
         >
-            {/* 外周リング */}
-            <div className="absolute inset-0 w-12 h-12 -translate-x-1/2 -translate-y-1/2 rounded-full border border-brand-500/50" />
-            {/* 十字線 */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-px w-12 h-px bg-brand-500/70" />
-            <div className="absolute top-1/2 left-1/2 -translate-y-1/2 -translate-x-px w-px h-12 bg-brand-500/70" />
-            {/* 中心点 */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-brand-500" />
+            <div className="relative w-full h-full">
+                <Image
+                    src="/svg/object/target-circle.svg"
+                    alt="照準"
+                    fill
+                    className="object-contain"
+                />
+            </div>
         </div>
     )
 }
