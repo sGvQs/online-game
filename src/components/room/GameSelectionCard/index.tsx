@@ -58,7 +58,7 @@ export function GameSelectionCard({ onSelectGame, isPending, isHost }: GameSelec
                     <div className={styles.gameInfo()}>
                         <div className={styles.gameTitle()}>STAR SHIELD</div>
                         <div className={styles.gameDescription()}>
-                            {isHost ? '2人で隕石を撃ち落とせ' : 'クリックでルールを表示'}
+                            {isHost ? '90秒生き延びて星を守れ' : 'クリックでルールを表示'}
                         </div>
                     </div>
                 </Button>

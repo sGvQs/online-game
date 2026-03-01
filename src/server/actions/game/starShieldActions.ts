@@ -11,6 +11,12 @@ const SPAWN_RATES: Record<Difficulty, number> = {
     HARD: 1.5,
 }
 
+const CLEAR_POINTS: Record<Difficulty, number> = {
+    EASY: 1,
+    NORMAL: 2,
+    HARD: 3,
+}
+
 const GAME_DURATION_SECONDS = 90
 
 /**
@@ -165,7 +171,7 @@ export async function saveStarShieldResult(
     data: SaveStarShieldResultData
 ): Promise<void> {
     const existing = await prisma.typingShootMatch.findUnique({ where: { matchId } })
-    const { spawnedCount, destroyedCount, isCleared, failureReason, durationSeconds } = data
+    const { spawnedCount, destroyedCount, isCleared, failureReason, durationSeconds, difficulty: dataDifficulty } = data
     const accuracyRate = spawnedCount > 0 ? destroyedCount / spawnedCount : 0
     const updateData = {
         spawnedCount,
@@ -177,7 +183,13 @@ export async function saveStarShieldResult(
         endedAt: new Date(),
     }
 
+    let shooterId: string
+    let typistId: string
+    const diff: Difficulty = (dataDifficulty ?? (existing?.difficulty as Difficulty) ?? 'NORMAL')
+
     if (existing) {
+        shooterId = existing.shooterId
+        typistId = existing.typistId
         await prisma.typingShootMatch.update({
             where: { matchId },
             data: updateData,
@@ -192,16 +204,16 @@ export async function saveStarShieldResult(
             return
         }
 
-        const shooterId = match.room.createdBy
+        shooterId = match.room.createdBy
         const typistUser = match.room.users.find((u) => u.userId !== shooterId)
         if (!typistUser) throw new Error('Typist not found in room')
+        typistId = typistUser.userId
 
-        const diff = data.difficulty ?? 'NORMAL'
         await prisma.typingShootMatch.create({
             data: {
                 matchId,
                 shooterId,
-                typistId: typistUser.userId,
+                typistId,
                 characterName: 'dinosaur',
                 difficulty: diff,
                 targetAsteroidCount: Math.floor(GAME_DURATION_SECONDS * SPAWN_RATES[diff]),
@@ -214,4 +226,39 @@ export async function saveStarShieldResult(
         where: { id: matchId },
         data: { status: 'FINISHED' },
     })
+
+    // 成功時: 両プレイヤーに難易度に応じた pt を加算
+    if (isCleared) {
+        const points = CLEAR_POINTS[diff]
+        const now = new Date()
+        const year = now.getFullYear()
+        const month = now.getMonth() + 1
+
+        for (const userId of [shooterId, typistId]) {
+            await prisma.monthlyRanking.upsert({
+                where: {
+                    userId_year_month: {
+                        userId,
+                        year,
+                        month,
+                    },
+                },
+                update: { totalPoints: { increment: points } },
+                create: {
+                    userId,
+                    year,
+                    month,
+                    totalPoints: points,
+                },
+            })
+            await prisma.pointLog.create({
+                data: {
+                    userId,
+                    amount: points,
+                    gameType: 'STAR_SHIELD',
+                    reason: 'CLEARED',
+                },
+            })
+        }
+    }
 }

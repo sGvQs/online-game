@@ -555,13 +555,8 @@ export function useStarShield({
                 clearInterval(interval)
                 if (!isShooter || gameEndedRef.current) return
 
-                // Shooter: タイムアップ時の判定
-                const remaining2 = asteroidsRef.current.filter((a) => !a.destroyedAt)
-                if (remaining2.length === 0 && scoreRef.current.spawned > 0) {
-                    endGame('CLEARED')
-                } else {
-                    endGame('FAILED_TIMEOUT')
-                }
+                // Shooter: タイムアップ = 生還（成功）
+                endGame('CLEARED')
             }
         }, 1000)
 

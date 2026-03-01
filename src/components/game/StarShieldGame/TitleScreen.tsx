@@ -29,8 +29,8 @@ interface TitleScreenProps {
 const HOW_TO_PLAY = [
     { icon: '🎯', text: 'Shooter がエイムして自動射撃' },
     { icon: '⌨️', text: 'Typist がタイプして弾を撃つ' },
-    { icon: '☄️', text: '隕石を全て破壊せよ' },
-    { icon: '⏱️', text: '制限時間 90 秒' },
+    { icon: '☄️', text: '成功: 90秒生き延びたらクリア' },
+    { icon: '💥', text: '失敗: 隕石に当たったらゲームオーバー' },
 ]
 
 /** 口から画面右上へ飛ぶ角度（rad）0=右、π/2=上 */
