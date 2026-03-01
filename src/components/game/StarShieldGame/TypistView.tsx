@@ -1,9 +1,11 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { DialogueLine } from '@/hooks/useStarShield'
+
+const CUTE_FONT = 'var(--font-yusei-magic)'
 
 interface TypistViewProps {
     dialogue: {
@@ -62,26 +64,57 @@ function TypingDisplay({ line, charIndex }: { line: DialogueLine; charIndex: num
 }
 
 export function TypistView({ dialogue, score, starHp, maxStarHp }: TypistViewProps) {
-    // キーボード入力フォーカス用の隠し input
     const inputRef = useRef<HTMLInputElement>(null)
+    const prevStarHpRef = useRef(maxStarHp)
+    const [damageWidth, setDamageWidth] = useState(0)
 
     useEffect(() => {
         inputRef.current?.focus()
     }, [])
+
+    // ダメージ検知: starHp が減少したら赤バー幅をセット、0 へアニメーション
+    useEffect(() => {
+        const prev = prevStarHpRef.current
+        if (starHp < prev && maxStarHp > 0) {
+            const lost = (prev - starHp) / maxStarHp * 100
+            setDamageWidth((w) => w + lost)
+        }
+        prevStarHpRef.current = starHp
+    }, [starHp, maxStarHp])
 
     return (
         <div
             className="absolute inset-0 overflow-hidden flex flex-col items-center justify-center gap-10"
             onClick={() => inputRef.current?.focus()}
         >
-            {/* 星HP（中央上・隕石と同じプロセスバー風） */}
-            <div className="absolute top-16 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-1">
-                <span className="text-[10px] tracking-widest text-brand-500/60">STAR HP</span>
-                <div className="w-32 h-2 rounded-full bg-stone-600/80 overflow-hidden">
+            {/* ほしのたいりょく（中央上・リッチHPバー） */}
+            <div className="absolute top-16 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center gap-2">
+                <span
+                    className="text-sm text-brand-500/80"
+                    style={{ fontFamily: CUTE_FONT }}
+                >
+                    ほしのたいりょく
+                </span>
+                <div className="relative w-64 md:w-80 h-3 rounded-full bg-stone-600/80 overflow-hidden">
+                    {/* 緑: 現在HP（即時更新） */}
                     <div
-                        className="h-full rounded-full bg-green-500 transition-[width] duration-150"
+                        className="absolute left-0 top-0 h-full rounded-full bg-green-500 transition-[width] duration-150"
                         style={{ width: `${Math.max(0, (starHp / maxStarHp) * 100)}%` }}
                     />
+                    {/* 赤: 損傷部分（スーッと消える） */}
+                    {damageWidth > 0 && (
+                        <motion.div
+                            key={`dmg-${damageWidth}`}
+                            className="absolute top-0 h-full rounded-r-full bg-red-500 z-10 origin-left"
+                            style={{
+                                left: `${Math.max(0, (starHp / maxStarHp) * 100)}%`,
+                            }}
+                            initial={{ width: `${damageWidth}%` }}
+                            animate={{ width: '0%' }}
+                            transition={{ duration: 0.6, ease: 'easeOut' }}
+                            onAnimationComplete={() => setDamageWidth(0)}
+                        />
+                    )}
                 </div>
             </div>
 
