@@ -331,7 +331,10 @@ export function RoleSelectionScreen({
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: 0.2 }}
                     className="rounded-2xl px-5 py-4"
-                    style={{ background: 'rgba(129,140,248,0.06)', border: '1px solid rgba(129,140,248,0.15)' }}
+                    style={{
+                        background: 'rgba(129,140,248,0.06)',
+                        border: canProceed ? '1px solid rgba(129,140,248,0.15)' : '1px solid rgba(248,113,113,0.4)',
+                    }}
                 >
                     <p
                         className="text-sm mb-3 min-h-5"
