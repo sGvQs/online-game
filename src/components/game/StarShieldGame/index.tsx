@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useEffect, useCallback, useRef } from 'react'
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
+import { createClient } from '@/utils/supabase/client'
 import { useGameRoom } from '@/hooks/useGameRoom'
 import { returnToRoom, resetAllReady } from '@/server/actions/room'
 import { startStarShieldMatch, getStarShieldMatchStatus } from '@/server/actions/game'
@@ -41,8 +42,46 @@ export function StarShieldGame({
     // 既にプレイ済みの matchId を記録。タイトルに戻ったとき room.currentMatchId が
     // まだ DB に残っていても再度 PLAYING に遷移しないようにするため。
     const playedMatchIdsRef = useRef<Set<string>>(new Set())
+    const lobbyChannelRef = useRef<ReturnType<ReturnType<typeof createClient>['channel']> | null>(null)
 
+    const supabase = useMemo(() => createClient(), [])
     const allUsersReady = room.users.length > 0 && room.users.every((u) => u.isReady)
+
+    // ロビー用 broadcast: 難易度を共有（ホストが変更時に broadcast、全員が受信して表示）
+    useEffect(() => {
+        if (phase !== 'TITLE') return
+
+        const channel = supabase.channel(`star_shield_lobby_${roomId}`)
+        lobbyChannelRef.current = channel
+
+        channel
+            .on('broadcast', { event: 'difficulty' }, ({ payload }: { payload: { difficulty: Difficulty } }) => {
+                if (payload?.difficulty && ['EASY', 'NORMAL', 'HARD'].includes(payload.difficulty)) {
+                    setDifficulty(payload.difficulty)
+                }
+            })
+            .subscribe()
+
+        return () => {
+            supabase.removeChannel(channel)
+            lobbyChannelRef.current = null
+        }
+    }, [phase, roomId, supabase])
+
+    // ホストが難易度を変更したときに state 更新 + broadcast
+    const handleDifficultyChange = useCallback(
+        (d: Difficulty) => {
+            setDifficulty(d)
+            if (isHost) {
+                lobbyChannelRef.current?.send({
+                    type: 'broadcast',
+                    event: 'difficulty',
+                    payload: { difficulty: d },
+                })
+            }
+        },
+        [isHost]
+    )
 
     // 非ホスト + リロード時: Room.currentMatchId の変化を検知。match ステータスを確認し、終了済みなら RESULT へ
     useEffect(() => {
@@ -120,7 +159,7 @@ export function StarShieldGame({
                     onToggleReady={toggleReady}
                     onStartGame={handleStartGame}
                     onExit={handleExit}
-                    onDifficultyChange={setDifficulty}
+                    onDifficultyChange={handleDifficultyChange}
                     currentUserId={currentUserId}
                 />
             )}

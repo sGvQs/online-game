@@ -167,7 +167,7 @@ export function TitleScreen({
                         <div className="text-brand-500/40 text-xs mt-2" style={{ fontFamily: DOT_GOTHIC_FONT }}>
                             {DIFFICULTY_LABELS[difficulty]} asteroids/sec
                             {!isHost && (
-                                <span className="ml-2 text-white/20">（ホストが変更）</span>
+                                <span className="ml-2 text-white/20">（ホストが選択中）</span>
                             )}
                         </div>
                     </motion.div>
