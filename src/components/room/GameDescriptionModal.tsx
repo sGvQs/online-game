@@ -232,7 +232,6 @@ export function GameDescriptionModal({ isOpen, onClose, gameType }: GameDescript
                                 ■ REWARD SYSTEM / ポイント配当
                             </h3>
                             <RewardSystem
-                                guestCount={3}
                                 isHost={false}
                                 userColor="#44FFFF"
                                 size="md"
