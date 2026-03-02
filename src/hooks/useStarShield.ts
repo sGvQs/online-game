@@ -70,16 +70,25 @@ export const STAR_HP: Record<Difficulty, number> = {
     EASY: 20,
     NORMAL: 18,
     HARD: 15,
-    HELL: 6,
+    HELL: 10,
 }
 
-/** 単語完了時の広範囲弾数（破壊なし。HELL は全破壊＋全方位弾で別扱い） */
+/** 単語完了時の広範囲弾数（破壊なし。HELL は全破壊＋照準方向に弾で別扱い） */
 const SPECIAL_SPREAD_BULLET_COUNT: Record<Difficulty, number> = {
     EASY: 12,
     NORMAL: 30,
     HARD: 60,
     HELL: 360,
 }
+
+/** EASY/NORMAL/HARD の必殺技の広がり角度（度） */
+const SPREAD_DEG_EASY_NORMAL_HARD = 12
+/** HELL 必殺技の広がり角度（度） */
+const HELL_SPECIAL_SPREAD_DEG = 150
+/** HELL 通常攻撃の弾数 */
+const HELL_NORMAL_BULLET_COUNT = 3
+/** HELL 通常攻撃の広がり角度（度） */
+const HELL_NORMAL_SPREAD_DEG = 3
 
 // ============================================
 // セリフデータ（難易度によらず共通、配列からランダム選択）
@@ -571,10 +580,20 @@ export function useStarShield({
                             })
                         }
 
-                        const HELL_BULLET_COUNT =  SPECIAL_SPREAD_BULLET_COUNT[difficulty]
+                        const hellBulletCount = SPECIAL_SPREAD_BULLET_COUNT[difficulty]
+                        const aim = aimRef.current
+                        const originY = DINO_Y + BULLET_ORIGIN_Y_OFFSET
+                        const dx = aim.x - DINO_X
+                        const dy = aim.y - originY
+                        const len = Math.hypot(dx, dy)
+                        const centerAngle = len >= 0.001 ? Math.atan2(dy, dx) : 0
+                        const hellSpreadRad = (HELL_SPECIAL_SPREAD_DEG * Math.PI) / 180
                         const newBullets: Bullet[] = []
-                        for (let i = 0; i < HELL_BULLET_COUNT; i++) {
-                            const angle = (2 * Math.PI * i) / HELL_BULLET_COUNT
+                        for (let i = 0; i < hellBulletCount; i++) {
+                            const angle =
+                                centerAngle -
+                                hellSpreadRad / 2 +
+                                (hellBulletCount > 1 ? (hellSpreadRad * i) / (hellBulletCount - 1) : 0)
                             const dirX = Math.cos(angle)
                             const dirY = Math.sin(angle)
                             newBullets.push({
@@ -592,14 +611,14 @@ export function useStarShield({
                             return next
                         })
                     } else {
-                        // EASY/NORMAL/HARD: 破壊なしで照準方向を中心に30度の範囲に弾を放出
+                        // EASY/NORMAL/HARD: 破壊なしで照準方向を中心に弾を放出
                         const aim = aimRef.current
                         const originY = DINO_Y + BULLET_ORIGIN_Y_OFFSET
                         const dx = aim.x - DINO_X
                         const dy = aim.y - originY
                         const len = Math.hypot(dx, dy)
                         const centerAngle = len >= 0.001 ? Math.atan2(dy, dx) : 0 // 照準方向（len小は右向き）
-                        const spreadRad = (30 * Math.PI) / 180 // 30度
+                        const spreadRad = (SPREAD_DEG_EASY_NORMAL_HARD * Math.PI) / 180
                         const count = SPECIAL_SPREAD_BULLET_COUNT[difficulty]
                         const newBullets: Bullet[] = []
                         for (let i = 0; i < count; i++) {
@@ -627,7 +646,7 @@ export function useStarShield({
                     return
                 }
 
-                // 通常の単弾生成
+                // 通常攻撃（HELL は 12 発を 30 度、その他は単弾）
                 const aim = aimRef.current
                 const originY = DINO_Y + BULLET_ORIGIN_Y_OFFSET
                 const dx = aim.x - DINO_X
@@ -635,23 +654,50 @@ export function useStarShield({
                 const len = Math.hypot(dx, dy)
                 if (len < 0.001) return // 照準が恐竜にほぼ重なっている場合は弾を出さない
 
+                const centerAngle = Math.atan2(dy, dx)
                 const dirX = dx / len
                 const dirY = dy / len
 
-                const bullet: Bullet = {
-                    id: crypto.randomUUID(),
-                    firedAt: now,
-                    startX: DINO_X + dirX * BULLET_SPAWN_OFFSET_X,
-                    startY: DINO_Y + dirY * BULLET_SPAWN_OFFSET_Y,
-                    dirX,
-                    dirY,
+                if (difficulty === 'HELL') {
+                    const spreadRad = (HELL_NORMAL_SPREAD_DEG * Math.PI) / 180
+                    const count = HELL_NORMAL_BULLET_COUNT
+                    const newBullets: Bullet[] = []
+                    for (let i = 0; i < count; i++) {
+                        const angle =
+                            centerAngle -
+                            spreadRad / 2 +
+                            (count > 1 ? (spreadRad * i) / (count - 1) : 0)
+                        const bDirX = Math.cos(angle)
+                        const bDirY = Math.sin(angle)
+                        newBullets.push({
+                            id: crypto.randomUUID(),
+                            firedAt: now,
+                            startX: DINO_X + bDirX * BULLET_SPAWN_OFFSET_X,
+                            startY: DINO_Y + bDirY * BULLET_SPAWN_OFFSET_Y,
+                            dirX: bDirX,
+                            dirY: bDirY,
+                        })
+                    }
+                    setBullets((prev) => {
+                        const next = [...prev, ...newBullets]
+                        bulletsRef.current = next
+                        return next
+                    })
+                } else {
+                    const bullet: Bullet = {
+                        id: crypto.randomUUID(),
+                        firedAt: now,
+                        startX: DINO_X + dirX * BULLET_SPAWN_OFFSET_X,
+                        startY: DINO_Y + dirY * BULLET_SPAWN_OFFSET_Y,
+                        dirX,
+                        dirY,
+                    }
+                    setBullets((prev) => {
+                        const next = [...prev, bullet]
+                        bulletsRef.current = next
+                        return next
+                    })
                 }
-
-                setBullets((prev) => {
-                    const next = [...prev, bullet]
-                    bulletsRef.current = next
-                    return next
-                })
             })
             // Typist: Shooter が隕石破壊したときに destroyed カウントを更新
             .on('broadcast', { event: 'asteroid_destroyed' }, () => {
