@@ -94,8 +94,8 @@ function BulletCircle({ bullet }: { bullet: Bullet }) {
 }
 
 const FIRE_SCALE_KEYFRAMES = [
-    0.1, 0.5, 0.8, 0.9, 1, 0.9,
-    1, 0.9, 1.1, 1, 1, 0.9, 1.1, 1, 1, 0.9, 1.1, 1, 1.5,
+    0.2, 1, 1.6, 1.8, 2, 1.8,
+    2, 1.8, 2.2, 2, 2, 1.8, 2.2, 2, 2, 1.8, 2.2, 2, 3, // 2倍サイズ
 ]
 const FIRE_SCALE_TIMES: number[] = [
     ...[0, 0.07, 0.14, 0.21, 0.28, 0.35, 0.42, 0.53, 0.64, 0.75, 0.81, 0.86, 0.92, 0.97].map((t) => t * 0.75),
@@ -112,7 +112,7 @@ function ContactExplosionEffect({ pos, onComplete }: { pos: { x: number; y: numb
             style={{ left: `${pos.x * 100}%`, top: `${pos.y * 100}%` }}
         >
             <motion.div
-                className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24"
+                className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-48 h-48"
                 initial={{ scale: 0.1, opacity: 1 }}
                 animate={{ scale: FIRE_SCALE_KEYFRAMES, opacity: FIRE_OPACITY_KEYFRAMES }}
                 transition={{ duration: CONTACT_EXPLOSION_DURATION, times: FIRE_SCALE_TIMES, ease: 'easeInOut' }}
@@ -131,15 +131,15 @@ function ContactExplosionEffect({ pos, onComplete }: { pos: { x: number; y: numb
             <motion.div
                 className="absolute rounded-full bg-white"
                 style={{
-                    width: 24,
-                    height: 24,
+                    width: 48,
+                    height: 48,
                     left: '50%',
                     top: '50%',
                     transform: 'translate(-50%, -50%)',
-                    boxShadow: '0 0 40px 20px rgba(255,200,150,0.8)',
+                    boxShadow: '0 0 80px 40px rgba(255,200,150,0.8)',
                 }}
                 initial={{ scale: 0.5, opacity: 1 }}
-                animate={{ scale: 2, opacity: 0 }}
+                animate={{ scale: 4, opacity: 0 }}
                 transition={{ duration: 0.12 }}
             />
         </motion.div>
@@ -156,10 +156,10 @@ function ExplosionEffect({ asteroid }: { asteroid: Asteroid }) {
                 className="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-none"
                 style={{ left: `${pos.x * 100}%`, top: `${pos.y * 100}%` }}
                 initial={{ opacity: 1, scale: 0.5 }}
-                animate={{ opacity: 0, scale: 2 }}
+                animate={{ opacity: 0, scale: 4 }}
                 transition={{ duration: 0.7, ease: 'easeOut' }}
             >
-                <div className="relative w-16 h-16">
+                <div className="relative w-32 h-32">
                     <Image
                         src={ICONS.FIRE}
                         alt=""
@@ -176,10 +176,10 @@ function ExplosionEffect({ asteroid }: { asteroid: Asteroid }) {
             className="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-none"
             style={{ left: `${pos.x * 100}%`, top: `${pos.y * 100}%` }}
             initial={{ opacity: 1, scale: 0.5 }}
-            animate={{ opacity: 0, scale: 3 }}
+            animate={{ opacity: 0, scale: 6 }}
             transition={{ duration: 0.5, ease: 'easeOut' }}
         >
-            <div className="w-10 h-10 rounded-full border-2 border-orange-400/80" />
+            <div className="w-20 h-20 rounded-full border-2 border-orange-400/80" />
         </motion.div>
     )
 }

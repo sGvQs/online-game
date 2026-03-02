@@ -49,7 +49,7 @@ export const ICONS = {
     DINO: '/svg/charactor/annoying-dinosaur.svg',
     SHOOTER: '/svg/object/target-circle.svg',
     TYPIST: '/svg/object/keyboard.svg',
-    FIRE: '/svg/object/fire.svg',
+    FIRE: '/svg/object/collision.svg',
     METOR: '/svg/object/metor.svg',
     TARGET_CIRCLE: '/svg/object/target-circle.svg',
 } as const
