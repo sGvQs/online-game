@@ -33,7 +33,7 @@ const ASTEROID_DURATION_MS = 8000
 // 弾の設定（デバッグ用に BULLET_RADIUS を変数化）
 const BULLET_SPEED = 0.0008 // 正規化座標/ms（速すぎないように）
 // export const BULLET_RADIUS = 0.008 // デバッグ時は大きくできる
-export const BULLET_RADIUS = 1 // デバッグ時は大きくできる
+export const BULLET_RADIUS = 0.008 // デバッグ時は大きくできる
 export const ASTEROID_RADIUS = 0.02
 const BULLET_MAX_AGE_MS = 3000
 
@@ -484,11 +484,67 @@ export function useStarShield({
 
         channel
             // Typist → Shooter: fire イベント（broadcast）→ 弾を生成（送信文字数として両者でカウント）
-            .on('broadcast', { event: 'fire' }, () => {
+            .on('broadcast', { event: 'fire' }, ({ payload }: { payload?: { special?: boolean } }) => {
                 fireCountRef.current += 1
                 playVoiceRef.current('shooting') // Shooter が fire を受信＝弾発射時
                 if (!isShooter) return
 
+                const now = Date.now()
+
+                if (payload?.special) {
+                    // 必殺技: 全隕石一斉破壊 ＋ 全方位に弾を放出
+                    const asts = asteroidsRef.current
+                    const toDestroy = asts.filter((a) => !a.destroyedAt)
+                    const destroyedCount = toDestroy.length
+
+                    if (toDestroy.length > 0) {
+                        setAsteroids((prev) => {
+                            const ids = new Set(toDestroy.map((a) => a.id))
+                            const next = prev.map((a) =>
+                                ids.has(a.id) ? { ...a, destroyedAt: now, hp: 0 } : a
+                            )
+                            asteroidsRef.current = next
+                            return next
+                        })
+                        for (let i = 0; i < destroyedCount; i++) {
+                            channelRef.current?.send({
+                                type: 'broadcast',
+                                event: 'asteroid_destroyed',
+                                payload: {},
+                            })
+                        }
+                        setScore((prev) => {
+                            const next = { ...prev, destroyed: prev.destroyed + destroyedCount }
+                            scoreRef.current = next
+                            return next
+                        })
+                    }
+
+                    // 全方位に36発の弾を生成
+                    const SPECIAL_BULLET_COUNT = 36
+                    const newBullets: Bullet[] = []
+                    for (let i = 0; i < SPECIAL_BULLET_COUNT; i++) {
+                        const angle = (2 * Math.PI * i) / SPECIAL_BULLET_COUNT
+                        const dirX = Math.cos(angle)
+                        const dirY = Math.sin(angle)
+                        newBullets.push({
+                            id: crypto.randomUUID(),
+                            firedAt: now,
+                            startX: DINO_X + dirX * BULLET_SPAWN_OFFSET_X,
+                            startY: DINO_Y + dirY * BULLET_SPAWN_OFFSET_Y,
+                            dirX,
+                            dirY,
+                        })
+                    }
+                    setBullets((prev) => {
+                        const next = [...prev, ...newBullets]
+                        bulletsRef.current = next
+                        return next
+                    })
+                    return
+                }
+
+                // 通常の単弾生成
                 const aim = aimRef.current
                 const dx = aim.x - DINO_X
                 const dy = aim.y - DINO_Y
@@ -500,7 +556,7 @@ export function useStarShield({
 
                 const bullet: Bullet = {
                     id: crypto.randomUUID(),
-                    firedAt: Date.now(),
+                    firedAt: now,
                     startX: DINO_X + dirX * BULLET_SPAWN_OFFSET_X,
                     startY: DINO_Y + dirY * BULLET_SPAWN_OFFSET_Y,
                     dirX,
@@ -804,19 +860,21 @@ export function useStarShield({
         const expected = line.romaji[charIndex]
         if (e.key.toLowerCase() !== expected) return
 
-        // fire broadcast を Shooter へ送信（破壊は弾が当たったときのみ Shooter でカウント）
+        const nextChar = charIndex + 1
+        const isLastChar = nextChar >= line.romaji.length
+
+        // fire broadcast を Shooter へ送信（最後の文字なら必殺技）
         channelRef.current?.send({
             type: 'broadcast',
             event: 'fire',
-            payload: {},
+            payload: { special: isLastChar },
         })
         fireCountRef.current += 1 // 送信者は自分の broadcast を受信しないため Typist 側でカウント
         playVoiceRef.current('shooting') // Typist がタイピング成功したタイミングで shooting SE
 
         setTypistFireCount((c) => c + 1)
 
-        const nextChar = charIndex + 1
-        if (nextChar >= line.romaji.length) {
+        if (isLastChar) {
             setCurrentLine(pickRandomDialogue())
             setCharIndex(0)
         } else {
