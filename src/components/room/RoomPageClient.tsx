@@ -10,6 +10,8 @@ import { Room, RoomUserWithUser, UserRanking } from '@/shared/types'
 import { GameSelectionCard } from './GameSelectionCard'
 import { MemberListView } from './MemberList/MemberListView'
 import { GameDescriptionModal } from './GameDescriptionModal'
+import { RoomModal } from './RoomModal'
+import { isPlayerCountValid, getPlayerRangeLabel } from '@/shared/constants/gamePlayerRequirements'
 import { AnnoyingDinosaurComplaint } from '@/components/dashboard/AnnoyingDinosaurComplaint'
 import {
     getRandomSelfEntryMessage,
@@ -48,6 +50,8 @@ export function RoomPageClientWrapper({
     })
     const [showGameDescription, setShowGameDescription] = useState(false) // モーダル表示フラグ
     const [selectedGameType, setSelectedGameType] = useState<string>('') // モーダルで表示するゲームの種類
+    const [showGameStartError, setShowGameStartError] = useState(false) // 人数エラーモーダル
+    const [gameStartErrorType, setGameStartErrorType] = useState<string>('')
     const [showDinosaur, setShowDinosaur] = useState(false)
     const [dinosaurKey, setDinosaurKey] = useState(0)
     const [dinosaurMessage, setDinosaurMessage] = useState('')
@@ -136,6 +140,12 @@ export function RoomPageClientWrapper({
 
     const handleSelectGame = (gameType: string) => {
         if (isHost) {
+            const memberCount = members.length
+            if (!isPlayerCountValid(gameType as 'error-hunter' | 'null-hand' | 'star-shield', memberCount)) {
+                setGameStartErrorType(gameType)
+                setShowGameStartError(true)
+                return
+            }
             startTransition(async () => {
                 await selectGame(room.id, gameType)
             })
@@ -182,6 +192,32 @@ export function RoomPageClientWrapper({
                 onClose={() => setShowGameDescription(false)}
                 gameType={selectedGameType}
             />
+
+            <RoomModal
+                isOpen={showGameStartError}
+                onClose={() => setShowGameStartError(false)}
+                title="ゲームを開始できません"
+                showCloseButton
+            >
+                <div className="p-6 space-y-4">
+                    <p className="text-brand-800">
+                        現在の参加者数（{members.length}人）では、このゲームをプレイできません。
+                    </p>
+                    <p className="text-sm text-brand-600">
+                        {gameStartErrorType === 'error-hunter' && `ERROR HUNTER は ${getPlayerRangeLabel('error-hunter')}でプレイできます。`}
+                        {gameStartErrorType === 'null-hand' && `NULL HAND は ${getPlayerRangeLabel('null-hand')}でプレイできます。`}
+                        {gameStartErrorType === 'star-shield' && 'STAR SHIELD は 2人のみでプレイできます。'}
+                    </p>
+                    <div className="flex justify-center pt-4">
+                        <button
+                            onClick={() => setShowGameStartError(false)}
+                            className="px-8 py-3 rounded-lg font-bold text-sm transition-all border bg-brand-500 text-white border-brand-600 hover:bg-brand-600"
+                        >
+                            OK
+                        </button>
+                    </div>
+                </div>
+            </RoomModal>
         </>
     )
 }
