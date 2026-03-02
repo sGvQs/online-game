@@ -1,5 +1,5 @@
 import Image from 'next/image'
-import { Gamepad2 } from 'lucide-react'
+import { Gamepad2, Users } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { getPlayerRangeLabel } from '@/shared/constants/gamePlayerRequirements'
 import { gameSelection, waitingCard } from './styles'
@@ -34,7 +34,12 @@ export function GameSelectionCard({ onSelectGame, isPending, isHost }: GameSelec
                     <div className={styles.gameInfo()}>
                         <div className={styles.gameTitle()}>ERROR HUNTER</div>
                         <div className={styles.gameDescription()}>
-                            {getPlayerRangeLabel('error-hunter')} · {isHost ? 'バグを見つけて潰せ！' : 'クリックでルールを表示'}
+                            <span className="inline-flex items-center gap-1">
+                                <Users className="w-3.5 h-3.5" />
+                                {getPlayerRangeLabel('error-hunter')}
+                            </span>
+                            {' · '}
+                            {isHost ? 'バグを見つけて潰せ！' : 'クリックでルールを表示'}
                         </div>
                     </div>
                 </Button>
@@ -50,7 +55,12 @@ export function GameSelectionCard({ onSelectGame, isPending, isHost }: GameSelec
                     <div className={styles.gameInfo()}>
                         <div className={styles.gameTitle()}>NULL HAND</div>
                         <div className={styles.gameDescription()}>
-                            {getPlayerRangeLabel('null-hand')} · {isHost ? '心理戦で相手を欺け' : 'クリックでルールを表示'}
+                            <span className="inline-flex items-center gap-1">
+                                <Users className="w-3.5 h-3.5" />
+                                {getPlayerRangeLabel('null-hand')}
+                            </span>
+                            {' · '}
+                            {isHost ? '心理戦で相手を欺け' : 'クリックでルールを表示'}
                         </div>
                     </div>
                 </Button>
@@ -66,7 +76,12 @@ export function GameSelectionCard({ onSelectGame, isPending, isHost }: GameSelec
                     <div className={styles.gameInfo()}>
                         <div className={styles.gameTitle()}>STAR SHIELD</div>
                         <div className={styles.gameDescription()}>
-                            {getPlayerRangeLabel('star-shield')} · {isHost ? '90秒生き延びて星を守れ' : 'クリックでルールを表示'}
+                            <span className="inline-flex items-center gap-1">
+                                <Users className="w-3.5 h-3.5" />
+                                {getPlayerRangeLabel('star-shield')}
+                            </span>
+                            {' · '}
+                            {isHost ? '90秒生き延びて星を守れ' : 'クリックでルールを表示'}
                         </div>
                     </div>
                 </Button>
