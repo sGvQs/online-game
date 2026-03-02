@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState, useCallback, useMemo } from 'react'
+import { useSE } from '@/hooks/useSE'
 import { createClient } from '@/utils/supabase/client'
 import { saveStarShieldResult } from '@/server/actions/game'
 import { STAR_TARGET_X, STAR_TARGET_Y, STAR_RADIUS } from '@/components/game/StarShieldGame/phases/playing/ProtectedStar'
@@ -398,6 +399,9 @@ export function useStarShield({
 }: UseStarShieldProps) {
     const supabase = useMemo(() => createClient(), [])
     const channelName = `star_shield_fire_${matchId}`
+    const { play } = useSE()
+    const playVoiceRef = useRef(play)
+    playVoiceRef.current = play
 
     // ゲーム状態（Shooter のみ asteroids, bullets を管理、Typist は不要）
     const [asteroids, setAsteroids] = useState<Asteroid[]>([])
@@ -482,6 +486,7 @@ export function useStarShield({
             // Typist → Shooter: fire イベント（broadcast）→ 弾を生成（送信文字数として両者でカウント）
             .on('broadcast', { event: 'fire' }, () => {
                 fireCountRef.current += 1
+                playVoiceRef.current('dinosaur') // Shooter が fire を受信したタイミングでボイス SE
                 if (!isShooter) return
 
                 const aim = aimRef.current
@@ -804,6 +809,7 @@ export function useStarShield({
             payload: {},
         })
         fireCountRef.current += 1 // 送信者は自分の broadcast を受信しないため Typist 側でカウント
+        playVoiceRef.current('dinosaur') // Typist がタイピング成功したタイミングでボイス SE
 
         setTypistFireCount((c) => c + 1)
 
