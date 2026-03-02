@@ -37,6 +37,7 @@ export function StarShieldGame({
         currentUserId,
     })
 
+    const PHASE_STORAGE_KEY = `star-shield-phase-${roomId}`
     const [phase, setPhase] = useState<GamePhase>('TITLE')
     const [difficulty, setDifficulty] = useState<Difficulty>('NORMAL')
     const [matchId, setMatchId] = useState<string | null>(null)
@@ -75,11 +76,53 @@ export function StarShieldGame({
 
     // 既にプレイ済みの matchId を記録。タイトルに戻ったとき room.currentMatchId が
     // まだ DB に残っていても再度 PLAYING に遷移しないようにするため。
-    const playedMatchIdsRef = useRef<Set<string>>(new Set())
+    // リロード時も保持するため sessionStorage に永続化（ROLE_SELECT リロードで RESULT に飛ぶのを防ぐ）
+    const STORAGE_KEY = `star-shield-played-${roomId}`
+    const initialPlayedMatchIds = useMemo(() => {
+        if (typeof window === 'undefined') return new Set<string>()
+        try {
+            const raw = sessionStorage.getItem(STORAGE_KEY)
+            return raw ? new Set<string>(JSON.parse(raw)) : new Set<string>()
+        } catch {
+            return new Set<string>()
+        }
+    }, [STORAGE_KEY])
+    const playedMatchIdsRef = useRef<Set<string>>(initialPlayedMatchIds)
+    const addPlayedMatchId = useCallback((id: string) => {
+        playedMatchIdsRef.current.add(id)
+        try {
+            sessionStorage.setItem(STORAGE_KEY, JSON.stringify([...playedMatchIdsRef.current]))
+        } catch {
+            /* ignore */
+        }
+    }, [roomId])
     const lobbyChannelRef = useRef<ReturnType<ReturnType<typeof createClient>['channel']> | null>(null)
 
     const supabase = useMemo(() => createClient(), [])
     const allUsersReady = room.users.length > 0 && room.users.every((u) => u.isReady)
+
+    // マウント後に sessionStorage から ROLE_SELECT を復元（SSR との hydration ミスマッチを防ぐためクライアント only）
+    useEffect(() => {
+        try {
+            const stored = sessionStorage.getItem(PHASE_STORAGE_KEY)
+            if (stored === 'ROLE_SELECT') setPhase('ROLE_SELECT')
+        } catch {
+            /* ignore */
+        }
+    }, []) // eslint-disable-line react-hooks/exhaustive-deps -- PHASE_STORAGE_KEY は roomId 依存でマウント時は不変
+
+    // phase を sessionStorage に永続化（ROLE_SELECT でリロードしても復元）
+    useEffect(() => {
+        try {
+            if (phase === 'TITLE' || phase === 'ROLE_SELECT') {
+                sessionStorage.setItem(PHASE_STORAGE_KEY, phase)
+            } else {
+                sessionStorage.removeItem(PHASE_STORAGE_KEY)
+            }
+        } catch {
+            /* ignore */
+        }
+    }, [phase, roomId])
 
     // ロビー用 broadcast: TITLE と ROLE_SELECT で channel を有効化
     useEffect(() => {
@@ -158,7 +201,7 @@ export function StarShieldGame({
         const newMatchId = room.currentMatchId
         getStarShieldMatchStatus(newMatchId).then((status) => {
             if (status.status === 'finished') {
-                playedMatchIdsRef.current.add(newMatchId)
+                addPlayedMatchId(newMatchId)
                 setGameResult(status.result)
                 setGameStats({ ...status.stats, fireCount: 0 }) // サーバーに保存しないので再入時は0
                 setPhase('RESULT')
@@ -170,7 +213,7 @@ export function StarShieldGame({
             }
             // not_found の場合は何もしない（削除済みなど）
         })
-    }, [room.currentMatchId, phase])
+    }, [room.currentMatchId, phase, addPlayedMatchId])
 
     // ロビーから役職決定画面へ（ホストが START 押下時）
     const handleStartGame = useCallback(() => {
@@ -215,7 +258,7 @@ export function StarShieldGame({
     // タイトルに戻る
     const handleBackToTitle = useCallback(async () => {
         // このマッチを「プレイ済み」に登録しておき、再び PLAYING へ遷移しないようにする
-        if (matchId) playedMatchIdsRef.current.add(matchId)
+        if (matchId) addPlayedMatchId(matchId)
         setMatchId(null)
         setStartedAt(null)
         setShooterId(null)
@@ -227,7 +270,7 @@ export function StarShieldGame({
         } catch (e) {
             console.error('READYリセット失敗:', e)
         }
-    }, [matchId, roomId])
+    }, [matchId, roomId, addPlayedMatchId])
 
     // ルームに戻る（ホストのみ）
     const handleExit = useCallback(async () => {

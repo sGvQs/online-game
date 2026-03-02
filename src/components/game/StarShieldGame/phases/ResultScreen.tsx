@@ -58,19 +58,19 @@ const STAT_ITEMS = (
     color: string,
 ) => [
     {
-        label: 'DESTROYED',
+        label: '壊した数',
         value: String(destroyedCount),
         icon: ICONS.METOR,
         color,
     },
     {
-        label: 'ACCURACY',
+        label: '正確性',
         value: `${accuracy}%`,
         icon: ICONS.TARGET_CIRCLE,
         color,
     },
     {
-        label: '送信文字数',
+        label: '文字数',
         value: String(fireCount),
         icon: ICONS.TYPIST,
         color,
