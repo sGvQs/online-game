@@ -4,7 +4,7 @@ import { createClient } from '@/utils/supabase/client'
 import { useEffect, useState, useTransition, useCallback, ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { useRouter } from 'next/navigation'
-import { getRoom, selectGame, getRoomUsers } from '@/server/actions/room'
+import { getRoom, selectGame, getRoomUsers, kickUserFromRoom } from '@/server/actions/room'
 import { getNullHandRankings } from '@/server/actions/game/rankingActions'
 import { Room, RoomUserWithUser, UserRanking } from '@/shared/types'
 import { GameSelectionCard } from './GameSelectionCard'
@@ -55,6 +55,7 @@ export function RoomPageClientWrapper({
     const [showDinosaur, setShowDinosaur] = useState(false)
     const [dinosaurKey, setDinosaurKey] = useState(0)
     const [dinosaurMessage, setDinosaurMessage] = useState('')
+    const [kickingUserId, setKickingUserId] = useState<string | null>(null)
 
     const triggerDinosaur = useCallback(
         (type: 'self' | 'other') => {
@@ -91,6 +92,12 @@ export function RoomPageClientWrapper({
         try {
             const roomUsers = await getRoomUsers(room.id)
             setMembers(roomUsers)
+            // 自分がメンバーに含まれていなければ追放されたのでダッシュボードへ
+            const isStillMember = roomUsers.some((u: RoomUserWithUser) => u.userId === currentUserId)
+            if (!isStillMember) {
+                router.push('/dashboard')
+                return
+            }
             const rankings = await getNullHandRankings(
                 roomUsers.map((u: RoomUserWithUser) => u.userId)
             )
@@ -100,7 +107,7 @@ export function RoomPageClientWrapper({
         } catch (error) {
             console.error('メンバー更新に失敗:', error)
         }
-    }, [room.id])
+    }, [room.id, currentUserId, router])
 
     useEffect(() => {
         const channel = supabase
@@ -137,6 +144,22 @@ export function RoomPageClientWrapper({
             supabase.removeChannel(channel)
         }
     }, [room.id, currentUserId, handleRoomChange, handleMemberChange, triggerDinosaur])
+
+    const handleKick = useCallback(
+        async (targetUserId: string) => {
+            if (!isHost) return
+            setKickingUserId(targetUserId)
+            try {
+                await kickUserFromRoom(room.id, targetUserId)
+                await handleMemberChange()
+            } catch (error) {
+                console.error('追放に失敗:', error)
+            } finally {
+                setKickingUserId(null)
+            }
+        },
+        [room.id, isHost, handleMemberChange]
+    )
 
     const handleSelectGame = (gameType: string) => {
         if (isHost) {
@@ -183,7 +206,15 @@ export function RoomPageClientWrapper({
 
                 {/* Sidebar / Members */}
                 <div className="lg:col-span-1">
-                    <MemberListView members={members} rankingsMap={rankingsMap} />
+                    <MemberListView
+                        members={members}
+                        rankingsMap={rankingsMap}
+                        isHost={isHost}
+                        currentUserId={currentUserId}
+                        roomCreatorId={room.createdBy}
+                        onKick={handleKick}
+                        kickingUserId={kickingUserId}
+                    />
                 </div>
             </div>
 

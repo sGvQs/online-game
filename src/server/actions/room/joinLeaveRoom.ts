@@ -57,3 +57,21 @@ export async function leaveRoom(roomId: string) {
     revalidatePath(`/room/${roomId}`)
     redirect('/dashboard')
 }
+
+/**
+ * ホストがゲストをルームから追放
+ */
+export async function kickUserFromRoom(roomId: string, targetUserId: string) {
+    const user = await getAuthenticatedUser()
+    const room = await prisma.room.findUnique({ where: { id: roomId } })
+    if (!room) throw new Error('Room not found')
+    if (room.createdBy !== user.id) throw new Error('Only host can kick')
+    if (room.createdBy === targetUserId) throw new Error('Cannot kick host')
+    if (room.status === 'PLAYING') throw new Error('Cannot kick during game')
+
+    await prisma.roomUser.deleteMany({
+        where: { roomId, userId: targetUserId },
+    })
+
+    revalidatePath(`/room/${roomId}`)
+}
