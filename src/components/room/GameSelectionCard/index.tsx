@@ -1,3 +1,4 @@
+import Image from 'next/image'
 import { Gamepad2 } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { gameSelection, waitingCard } from './styles'
@@ -26,7 +27,9 @@ export function GameSelectionCard({ onSelectGame, isPending, isHost }: GameSelec
                     disabled={isPending}
                     className={styles.gameButton({ class: styles.errorHunterButton() })}
                 >
-                    <span className={styles.gameIcon()}>👾</span>
+                    <span className={styles.gameIcon()}>
+                        <Image src="/svg/object/old-pc.svg" alt="" width={48} height={48} className="object-contain" />
+                    </span>
                     <div className={styles.gameInfo()}>
                         <div className={styles.gameTitle()}>ERROR HUNTER</div>
                         <div className={styles.gameDescription()}>
@@ -40,7 +43,9 @@ export function GameSelectionCard({ onSelectGame, isPending, isHost }: GameSelec
                     className={styles.gameButton({ class: styles.nullHandButton() })}
                 >
                     <div className={styles.nullHandBg()} />
-                    <span className={styles.gameIcon()}>🤏</span>
+                    <span className={styles.gameIcon()}>
+                        <Image src="/svg/object/null-hand.svg" alt="" width={48} height={48} className="object-contain" />
+                    </span>
                     <div className={styles.gameInfo()}>
                         <div className={styles.gameTitle()}>NULL HAND</div>
                         <div className={styles.gameDescription()}>
@@ -54,7 +59,9 @@ export function GameSelectionCard({ onSelectGame, isPending, isHost }: GameSelec
                     className={styles.gameButton({ class: styles.starShieldButton() })}
                 >
                     <div className={styles.starShieldBg()} />
-                    <span className={styles.gameIcon()}>🛡️</span>
+                    <span className={styles.gameIcon()}>
+                        <Image src="/svg/object/target-circle.svg" alt="" width={48} height={48} className="object-contain" />
+                    </span>
                     <div className={styles.gameInfo()}>
                         <div className={styles.gameTitle()}>STAR SHIELD</div>
                         <div className={styles.gameDescription()}>
