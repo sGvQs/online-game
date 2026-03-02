@@ -287,56 +287,56 @@ export function GameDescriptionModal({ isOpen, onClose, gameType }: GameDescript
                             <div className="relative z-10 grid grid-cols-2 gap-4">
                                 {/* タイピスト列 */}
                                 <div
-                                    className="rounded-lg p-4 flex flex-col gap-3"
+                                    className="rounded-lg p-5 flex flex-col gap-4 items-center"
                                     style={{ border: `1px solid ${ROLE_META.TYPIST.border}`, background: ROLE_META.TYPIST.bg }}
                                 >
                                     <h4 className="text-xs font-bold tracking-wider" style={{ color: ROLE_META.TYPIST.text }}>
                                         タイピスト
                                     </h4>
-                                    <div className="flex flex-wrap gap-2 items-center">
-                                        <div className="flex flex-col items-center gap-0.5">
-                                            <div className="relative w-10 h-10">
+                                    <div className="flex flex-col gap-4 w-full">
+                                        <div className="flex flex-row items-center gap-3 rounded-lg px-3 py-2 bg-white/5">
+                                            <div className="relative w-11 h-11 shrink-0">
                                                 <Image src={ICONS.TYPIST} alt="タイピング" fill className="object-contain" />
                                             </div>
-                                            <span className="text-xs font-mono text-brand-600">タイピング</span>
+                                            <span className="text-xs font-medium text-brand-600">タイピング</span>
                                         </div>
-                                        <div className="flex flex-col items-center gap-0.5">
-                                            <div className="relative flex items-center gap-1">
-                                                <div className="relative w-10 h-10">
+                                        <div className="flex flex-row items-center gap-3 rounded-lg px-3 py-2 bg-white/5">
+                                            <div className="relative flex items-center gap-1.5 shrink-0">
+                                                <div className="relative w-9 h-9">
                                                     <Image src={ICONS.DINO} alt="恐竜" fill className="object-contain" />
                                                 </div>
-                                                <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: BULLET_COLOR, boxShadow: `0 0 4px ${BULLET_COLOR}` }} />
+                                                <div className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: BULLET_COLOR, boxShadow: `0 0 4px ${BULLET_COLOR}` }} />
                                             </div>
-                                            <span className="text-xs font-mono text-brand-600">球を当てる</span>
+                                            <span className="text-xs font-medium text-brand-600">球を発射</span>
                                         </div>
                                     </div>
                                 </div>
                                 {/* シューター列 */}
                                 <div
-                                    className="rounded-lg p-4 flex flex-col gap-3"
+                                    className="rounded-lg p-5 flex flex-col gap-4 items-center"
                                     style={{ border: `1px solid ${ROLE_META.SHOOTER.border}`, background: ROLE_META.SHOOTER.bg }}
                                 >
                                     <h4 className="text-xs font-bold tracking-wider" style={{ color: ROLE_META.SHOOTER.text }}>
                                         シューター
                                     </h4>
-                                    <div className="flex flex-wrap gap-2 items-center">
-                                        <div className="flex flex-col items-center gap-0.5">
-                                            <div className="relative w-10 h-10">
+                                    <div className="flex flex-col gap-4 w-full">
+                                        <div className="flex flex-row items-center gap-3 rounded-lg px-3 py-2 bg-white/5">
+                                            <div className="relative w-11 h-11 shrink-0">
                                                 <Image src={ICONS.TARGET_CIRCLE} alt="エイム" fill className="object-contain" />
                                             </div>
-                                            <span className="text-xs font-mono text-brand-600">エイム</span>
+                                            <span className="text-xs font-medium text-brand-600">エイム</span>
                                         </div>
-                                        <div className="flex flex-col items-center gap-0.5">
-                                            <div className="relative flex items-center gap-1">
-                                                <div className="relative w-8 h-8">
+                                        <div className="flex flex-row items-center gap-3 rounded-lg px-3 py-2 bg-white/5">
+                                            <div className="relative flex items-center gap-1.5 shrink-0">
+                                                <div className="relative w-9 h-9">
                                                     <Image src={ICONS.DINO} alt="恐竜" fill className="object-contain" />
                                                 </div>
-                                                <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: BULLET_COLOR, boxShadow: `0 0 4px ${BULLET_COLOR}` }} />
-                                                <div className="relative w-8 h-8">
+                                                <div className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: BULLET_COLOR, boxShadow: `0 0 4px ${BULLET_COLOR}` }} />
+                                                <div className="relative w-9 h-9">
                                                     <Image src={ICONS.METOR} alt="隕石" fill className="object-contain" />
                                                 </div>
                                             </div>
-                                            <span className="text-xs font-mono text-brand-600">球を当てる</span>
+                                            <span className="text-xs font-medium text-brand-600">当てる</span>
                                         </div>
                                     </div>
                                 </div>
