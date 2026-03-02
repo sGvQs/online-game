@@ -10,7 +10,7 @@ import { STAR_TARGET_X, STAR_TARGET_Y, STAR_RADIUS } from '@/components/game/Sta
 // 定数・型
 // ============================================
 
-export type Difficulty = 'EASY' | 'NORMAL' | 'HARD'
+export type Difficulty = 'EASY' | 'NORMAL' | 'HARD' | 'HELL'
 export type GameResult = 'CLEARED' | 'FAILED_CONTACT' | 'FAILED_TIMEOUT'
 
 const GAME_DURATION_SECONDS = 90
@@ -45,6 +45,7 @@ const SPAWN_INTERVALS_MS: Record<Difficulty, number> = {
     EASY: 1000,
     NORMAL: 800,
     HARD: 500,
+    HELL: 350,
 }
 
 // 隕石のHP
@@ -52,6 +53,7 @@ export const ASTEROID_HP: Record<Difficulty, number> = {
     EASY: 3,
     NORMAL: 4,
     HARD: 5,
+    HELL: 6,
 }
 
 // 星のHP
@@ -59,6 +61,7 @@ export const STAR_HP: Record<Difficulty, number> = {
     EASY: 50,
     NORMAL: 50,
     HARD: 50,
+    HELL: 50,
 }
 
 // ============================================
@@ -494,7 +497,7 @@ export function useStarShield({
 
                 const now = Date.now()
 
-                if (payload?.special) {
+                if (payload?.special && difficulty === 'HELL') {
                     // 必殺技: 全隕石一斉破壊 ＋ 全方位に弾を放出
                     const asts = asteroidsRef.current
                     const toDestroy = asts.filter((a) => !a.destroyedAt)

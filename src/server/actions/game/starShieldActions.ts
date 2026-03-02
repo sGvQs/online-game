@@ -3,18 +3,20 @@
 import { prisma } from '@/server/lib/prisma'
 import { getAuthenticatedUser } from '../_helpers/getAuthenticatedUser'
 
-type Difficulty = 'EASY' | 'NORMAL' | 'HARD'
+type Difficulty = 'EASY' | 'NORMAL' | 'HARD' | 'HELL'
 
 const SPAWN_RATES: Record<Difficulty, number> = {
     EASY: 0.5,
     NORMAL: 1,
     HARD: 1.5,
+    HELL: 2,
 }
 
 const CLEAR_POINTS: Record<Difficulty, number> = {
     EASY: 1,
     NORMAL: 2,
     HARD: 3,
+    HELL: 4,
 }
 
 const GAME_DURATION_SECONDS = 90

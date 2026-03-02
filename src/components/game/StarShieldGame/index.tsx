@@ -133,7 +133,7 @@ export function StarShieldGame({
 
         channel
             .on('broadcast', { event: 'difficulty' }, ({ payload }: { payload: { difficulty: Difficulty } }) => {
-                if (payload?.difficulty && ['EASY', 'NORMAL', 'HARD'].includes(payload.difficulty)) {
+                if (payload?.difficulty && ['EASY', 'NORMAL', 'HARD', 'HELL'].includes(payload.difficulty)) {
                     setDifficulty(payload.difficulty)
                 }
             })
