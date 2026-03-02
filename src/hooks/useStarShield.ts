@@ -42,10 +42,10 @@ const STAR_TARGET_OFFSET = 0.04
 
 // 隕石のスーポーン時間
 const SPAWN_INTERVALS_MS: Record<Difficulty, number> = {
-    EASY: 1000,
-    NORMAL: 800,
-    HARD: 500,
-    HELL: 350,
+    EASY: 2000,
+    NORMAL: 1500,
+    HARD: 1000,
+    HELL: 200,
 }
 
 // 隕石のHP
@@ -58,10 +58,18 @@ export const ASTEROID_HP: Record<Difficulty, number> = {
 
 // 星のHP
 export const STAR_HP: Record<Difficulty, number> = {
-    EASY: 50,
-    NORMAL: 50,
-    HARD: 50,
-    HELL: 50,
+    EASY: 20,
+    NORMAL: 20,
+    HARD: 20,
+    HELL: 10,
+}
+
+/** 単語完了時の広範囲弾数（破壊なし。HELL は全破壊＋全方位弾で別扱い） */
+const SPECIAL_SPREAD_BULLET_COUNT: Record<Difficulty, number> = {
+    EASY: 12,
+    NORMAL: 30,
+    HARD: 60,
+    HELL: 360,
 }
 
 // ============================================
@@ -497,56 +505,88 @@ export function useStarShield({
 
                 const now = Date.now()
 
-                if (payload?.special && difficulty === 'HELL') {
-                    // 必殺技: 全隕石一斉破壊 ＋ 全方位に弾を放出
-                    const asts = asteroidsRef.current
-                    const toDestroy = asts.filter((a) => !a.destroyedAt)
-                    const destroyedCount = toDestroy.length
+                if (payload?.special) {
+                    if (difficulty === 'HELL') {
+                        // HELL 必殺技: 全隕石一斉破壊 ＋ 全方位に弾を放出
+                        const asts = asteroidsRef.current
+                        const toDestroy = asts.filter((a) => !a.destroyedAt)
+                        const destroyedCount = toDestroy.length
 
-                    if (toDestroy.length > 0) {
-                        setAsteroids((prev) => {
-                            const ids = new Set(toDestroy.map((a) => a.id))
-                            const next = prev.map((a) =>
-                                ids.has(a.id) ? { ...a, destroyedAt: now, hp: 0 } : a
-                            )
-                            asteroidsRef.current = next
-                            return next
-                        })
-                        for (let i = 0; i < destroyedCount; i++) {
-                            channelRef.current?.send({
-                                type: 'broadcast',
-                                event: 'asteroid_destroyed',
-                                payload: {},
+                        if (toDestroy.length > 0) {
+                            setAsteroids((prev) => {
+                                const ids = new Set(toDestroy.map((a) => a.id))
+                                const next = prev.map((a) =>
+                                    ids.has(a.id) ? { ...a, destroyedAt: now, hp: 0 } : a
+                                )
+                                asteroidsRef.current = next
+                                return next
+                            })
+                            for (let i = 0; i < destroyedCount; i++) {
+                                channelRef.current?.send({
+                                    type: 'broadcast',
+                                    event: 'asteroid_destroyed',
+                                    payload: {},
+                                })
+                            }
+                            setScore((prev) => {
+                                const next = { ...prev, destroyed: prev.destroyed + destroyedCount }
+                                scoreRef.current = next
+                                return next
                             })
                         }
-                        setScore((prev) => {
-                            const next = { ...prev, destroyed: prev.destroyed + destroyedCount }
-                            scoreRef.current = next
+
+                        const HELL_BULLET_COUNT =  SPECIAL_SPREAD_BULLET_COUNT[difficulty]
+                        const newBullets: Bullet[] = []
+                        for (let i = 0; i < HELL_BULLET_COUNT; i++) {
+                            const angle = (2 * Math.PI * i) / HELL_BULLET_COUNT
+                            const dirX = Math.cos(angle)
+                            const dirY = Math.sin(angle)
+                            newBullets.push({
+                                id: crypto.randomUUID(),
+                                firedAt: now,
+                                startX: DINO_X + dirX * BULLET_SPAWN_OFFSET_X,
+                                startY: DINO_Y + dirY * BULLET_SPAWN_OFFSET_Y,
+                                dirX,
+                                dirY,
+                            })
+                        }
+                        setBullets((prev) => {
+                            const next = [...prev, ...newBullets]
+                            bulletsRef.current = next
+                            return next
+                        })
+                    } else {
+                        // EASY/NORMAL/HARD: 破壊なしで照準方向を中心に30度の範囲に弾を放出
+                        const aim = aimRef.current
+                        const dx = aim.x - DINO_X
+                        const dy = aim.y - DINO_Y
+                        const len = Math.hypot(dx, dy)
+                        const centerAngle = len >= 0.001 ? Math.atan2(dy, dx) : 0 // 照準方向（len小は右向き）
+                        const spreadRad = (30 * Math.PI) / 180 // 30度
+                        const count = SPECIAL_SPREAD_BULLET_COUNT[difficulty]
+                        const newBullets: Bullet[] = []
+                        for (let i = 0; i < count; i++) {
+                            const angle =
+                                centerAngle -
+                                spreadRad / 2 +
+                                (count > 1 ? (spreadRad * i) / (count - 1) : 0)
+                            const dirX = Math.cos(angle)
+                            const dirY = Math.sin(angle)
+                            newBullets.push({
+                                id: crypto.randomUUID(),
+                                firedAt: now,
+                                startX: DINO_X + dirX * BULLET_SPAWN_OFFSET_X,
+                                startY: DINO_Y + dirY * BULLET_SPAWN_OFFSET_Y,
+                                dirX,
+                                dirY,
+                            })
+                        }
+                        setBullets((prev) => {
+                            const next = [...prev, ...newBullets]
+                            bulletsRef.current = next
                             return next
                         })
                     }
-
-                    // 全方位に36発の弾を生成
-                    const SPECIAL_BULLET_COUNT = 360
-                    const newBullets: Bullet[] = []
-                    for (let i = 0; i < SPECIAL_BULLET_COUNT; i++) {
-                        const angle = (2 * Math.PI * i) / SPECIAL_BULLET_COUNT
-                        const dirX = Math.cos(angle)
-                        const dirY = Math.sin(angle)
-                        newBullets.push({
-                            id: crypto.randomUUID(),
-                            firedAt: now,
-                            startX: DINO_X + dirX * BULLET_SPAWN_OFFSET_X,
-                            startY: DINO_Y + dirY * BULLET_SPAWN_OFFSET_Y,
-                            dirX,
-                            dirY,
-                        })
-                    }
-                    setBullets((prev) => {
-                        const next = [...prev, ...newBullets]
-                        bulletsRef.current = next
-                        return next
-                    })
                     return
                 }
 
