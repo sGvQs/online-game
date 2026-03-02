@@ -6,7 +6,7 @@ import { Hand3D } from '../game/NullHandGame/Hand3D'
 import { HandType } from '@/shared/types'
 import { RewardSystem } from '../game/NullHandGame/common/RewardSystem'
 import { StarVisual } from '../game/StarShieldGame/shared/StarVisual'
-import { ICONS, BULLET_COLOR } from '../game/StarShieldGame/constants'
+import { ICONS, BULLET_COLOR, ROLE_META } from '../game/StarShieldGame/constants'
 
 interface GameDescriptionModalProps {
     isOpen: boolean
@@ -281,37 +281,82 @@ export function GameDescriptionModal({ isOpen, onClose, gameType }: GameDescript
             >
                 <div className="p-4 md:p-6 flex-1">
                     <div className="space-y-6">
-                        {/* タイトル部：恐竜→球発射→隕石→破壊のビジュアル */}
-                        <div className="relative bg-brand-950/90 border border-brand-500/50 rounded-xl p-6 overflow-hidden min-h-[140px]">
+                        {/* タイトル部：タイピスト／シューターで2列分割 */}
+                        <div className="relative bg-brand-950/90 border border-brand-500/50 rounded-xl p-6 overflow-hidden">
                             <div className="absolute inset-0 bg-brand-500/5 pointer-events-none" />
-                            <div className="relative z-10 flex items-center justify-center gap-3 flex-wrap">
-                                <div className="flex flex-col items-center gap-1">
-                                    <div className="relative w-20 h-20">
-                                        <Image src={ICONS.DINO} alt="恐竜" fill className="object-contain drop-shadow-[0_0_12px_rgba(129,140,248,0.5)]" />
+                            <div className="relative z-10 grid grid-cols-2 gap-4">
+                                {/* タイピスト列 */}
+                                <div
+                                    className="rounded-lg p-4 flex flex-col gap-3"
+                                    style={{ border: `1px solid ${ROLE_META.TYPIST.border}`, background: ROLE_META.TYPIST.bg }}
+                                >
+                                    <h4 className="text-xs font-bold tracking-wider" style={{ color: ROLE_META.TYPIST.text }}>
+                                        タイピスト
+                                    </h4>
+                                    <div className="flex flex-wrap gap-2 items-center">
+                                        <div className="flex flex-col items-center gap-0.5">
+                                            <div className="relative w-10 h-10 overflow-visible">
+                                                <StarVisual position={{ left: '0', bottom: '0', width: '100%', height: '100%' }} />
+                                            </div>
+                                            <span className="text-[9px] font-mono opacity-80">HP管理</span>
+                                        </div>
+                                        <div className="flex flex-col items-center gap-0.5">
+                                            <div className="relative w-10 h-10">
+                                                <Image src={ICONS.TYPIST} alt="タイピング" fill className="object-contain" />
+                                            </div>
+                                            <span className="text-[9px] font-mono opacity-80">タイピング</span>
+                                        </div>
+                                        <div className="flex flex-col items-center gap-0.5">
+                                            <div className="relative w-10 h-10">
+                                                <Image src={ICONS.DINO} alt="恐竜" fill className="object-contain" />
+                                            </div>
+                                            <span className="text-[9px] font-mono opacity-80">恐竜</span>
+                                        </div>
+                                        <div className="flex flex-col items-center gap-0.5">
+                                            <div className="w-5 h-5 rounded-full" style={{ backgroundColor: BULLET_COLOR, boxShadow: `0 0 6px ${BULLET_COLOR}99` }} />
+                                            <span className="text-[9px] font-mono opacity-80">球発射</span>
+                                        </div>
                                     </div>
-                                    <span className="text-[10px] text-brand-400 font-mono">恐竜</span>
                                 </div>
-                                <span className="text-brand-500/60 text-xl">→</span>
-                                <div className="flex flex-col items-center gap-1">
-                                    <div className="w-5 h-5 rounded-full shadow-[0_0_8px_rgba(239,68,68,0.8)]" style={{ backgroundColor: BULLET_COLOR }} />
-                                    <span className="text-[10px] text-brand-400 font-mono">球を発射</span>
-                                </div>
-                                <span className="text-brand-500/60 text-xl">→</span>
-                                <div className="flex flex-col items-center gap-1">
-                                    <div className="relative w-12 h-12">
-                                        <Image src={ICONS.METOR} alt="隕石" fill className="object-contain drop-shadow-[0_0_8px_rgba(251,146,60,0.5)]" />
+                                {/* シューター列 */}
+                                <div
+                                    className="rounded-lg p-4 flex flex-col gap-3"
+                                    style={{ border: `1px solid ${ROLE_META.SHOOTER.border}`, background: ROLE_META.SHOOTER.bg }}
+                                >
+                                    <h4 className="text-xs font-bold tracking-wider" style={{ color: ROLE_META.SHOOTER.text }}>
+                                        シューター
+                                    </h4>
+                                    <div className="flex flex-wrap gap-2 items-center">
+                                        <div className="flex flex-col items-center gap-0.5">
+                                            <div className="relative w-10 h-10">
+                                                <Image src={ICONS.TARGET_CIRCLE} alt="エイム" fill className="object-contain" />
+                                            </div>
+                                            <span className="text-[9px] font-mono opacity-80">エイム</span>
+                                        </div>
+                                        <div className="flex flex-col items-center gap-0.5">
+                                            <div className="relative flex items-center justify-center w-12 h-10">
+                                                <div className="absolute right-0 w-6 h-6 rounded-full" style={{ backgroundColor: BULLET_COLOR, boxShadow: `0 0 4px ${BULLET_COLOR}` }} />
+                                                <div className="absolute left-0 w-8 h-8">
+                                                    <Image src={ICONS.METOR} alt="隕石" fill className="object-contain" />
+                                                </div>
+                                            </div>
+                                            <span className="text-[9px] font-mono opacity-80">球当てる</span>
+                                        </div>
+                                        <div className="flex flex-col items-center gap-0.5">
+                                            <div className="relative flex items-center gap-0.5 w-14 h-10">
+                                                <div className="relative w-8 h-8">
+                                                    <Image src={ICONS.METOR} alt="隕石" fill className="object-contain" />
+                                                </div>
+                                                <div className="relative w-6 h-6">
+                                                    <Image src={ICONS.FIRE} alt="破壊" fill className="object-contain" />
+                                                </div>
+                                            </div>
+                                            <span className="text-[9px] font-mono opacity-80">隕石破壊</span>
+                                        </div>
                                     </div>
-                                    <span className="text-[10px] text-brand-400 font-mono">隕石に当たる</span>
-                                </div>
-                                <span className="text-brand-500/60 text-xl">→</span>
-                                <div className="flex flex-col items-center gap-1">
-                                    <div className="relative w-12 h-12">
-                                        <Image src={ICONS.FIRE} alt="破壊" fill className="object-contain drop-shadow-[0_0_12px_rgba(255,100,50,0.6)]" />
-                                    </div>
-                                    <span className="text-[10px] text-brand-400 font-mono">破壊</span>
                                 </div>
                             </div>
-                            <div className="absolute -bottom-16 -right-16 w-48 h-48 opacity-30 pointer-events-none">
+                            <div className="absolute -bottom-16 -right-16 w-48 h-48 opacity-20 pointer-events-none">
                                 <StarVisual position={{ left: '0', bottom: '0', width: '100%', height: '100%' }} />
                             </div>
                         </div>
