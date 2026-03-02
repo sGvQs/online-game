@@ -40,22 +40,25 @@ const BULLET_MAX_AGE_MS = 3000
 // 隕石の目標点のランダムオフセット（±）
 const STAR_TARGET_OFFSET = 0.04
 
+// 隕石のスーポーン時間
 const SPAWN_INTERVALS_MS: Record<Difficulty, number> = {
-    EASY: 2000,
-    NORMAL: 1800,
-    HARD: 1500,
+    EASY: 1000,
+    NORMAL: 800,
+    HARD: 500,
 }
 
+// 隕石のHP
 export const ASTEROID_HP: Record<Difficulty, number> = {
     EASY: 3,
-    NORMAL: 6,
-    HARD: 10,
+    NORMAL: 4,
+    HARD: 5,
 }
 
+// 星のHP
 export const STAR_HP: Record<Difficulty, number> = {
-    EASY: 10,
-    NORMAL: 8,
-    HARD: 6,
+    EASY: 50,
+    NORMAL: 50,
+    HARD: 50,
 }
 
 // ============================================
@@ -521,7 +524,7 @@ export function useStarShield({
                     }
 
                     // 全方位に36発の弾を生成
-                    const SPECIAL_BULLET_COUNT = 36
+                    const SPECIAL_BULLET_COUNT = 360
                     const newBullets: Bullet[] = []
                     for (let i = 0; i < SPECIAL_BULLET_COUNT; i++) {
                         const angle = (2 * Math.PI * i) / SPECIAL_BULLET_COUNT
