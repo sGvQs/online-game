@@ -2,6 +2,8 @@
 
 import Image from 'next/image'
 import { RoomModal } from './RoomModal'
+import { Win95Dialog } from '../game/Win95Dialog'
+import { Win95TitleBarButton } from '../game/Win95TitleBarButton'
 import { Hand3D } from '../game/NullHandGame/Hand3D'
 import { HandType } from '@/shared/types'
 import { RewardSystem } from '../game/NullHandGame/common/RewardSystem'
@@ -31,15 +33,19 @@ export function GameDescriptionModal({ isOpen, onClose, gameType }: GameDescript
                 showCloseButton
             >
                 <div className="space-y-6">
-                    {/* タイトル画像 */}
-                    <div className="relative w-full h-120 rounded overflow-hidden border-2" style={{ backgroundColor: 'var(--brand-50)', borderColor: 'var(--brand-500)' }}>
-                        <Image
-                            src="/images/error-hunter-title.png"
-                            alt="ERROR HUNTER"
-                            fill
-                            className="object-cover"
-                            priority
-                        />
+                    {/* タイトル部: Win95 エラーダイアログ */}
+                    <div className="relative w-full min-h-[320px] flex items-center justify-center rounded overflow-hidden border-2 bg-[#008080]" style={{ borderColor: 'var(--brand-500)' }}>
+                        <div className="scale-75 origin-center">
+                            <Win95Dialog
+                                title="Error"
+                                icon="error"
+                                titlebarButtons={<Win95TitleBarButton>×</Win95TitleBarButton>}
+                            >
+                                <span className="text-black text-sm">
+                                    Windows Protection Error.<br />You need to restart your computer.
+                                </span>
+                            </Win95Dialog>
+                        </div>
                     </div>
 
                     {/* キャッチコピー */}
@@ -163,7 +169,7 @@ export function GameDescriptionModal({ isOpen, onClose, gameType }: GameDescript
                 <div className="p-4 md:p-6 flex-1">
                     <div className="space-y-6">
                         {/* タイトル部 */}
-                        <div className="bg-black border border-[#FF4444] rounded p-4 text-center relative overflow-hidden group">
+                        <div className="min-h-[320px] flex flex-col justify-center bg-black border border-[#FF4444] rounded p-4 text-center relative overflow-hidden group">
                             <div className="absolute inset-0 bg-[#FF4444]/10 pointer-events-none" />
                             <h2 className="text-2xl font-black text-[#FF4444] tracking-[0.2em] mb-2 uppercase relative z-10">
                                 NULL HAND
@@ -282,7 +288,7 @@ export function GameDescriptionModal({ isOpen, onClose, gameType }: GameDescript
                 <div className="p-4 md:p-6 flex-1">
                     <div className="space-y-6">
                         {/* タイトル部：タイピスト／シューターで2列分割 */}
-                        <div className="relative bg-brand-950/90 border border-brand-500/50 rounded-xl p-6 overflow-hidden">
+                        <div className="relative min-h-[320px] flex flex-col justify-center bg-brand-950/90 border border-brand-500/50 rounded-xl p-6 overflow-hidden">
                             <div className="absolute inset-0 bg-brand-500/5 pointer-events-none" />
                             <div className="relative z-10 grid grid-cols-2 gap-4">
                                 {/* タイピスト列 */}
