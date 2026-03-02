@@ -5,6 +5,8 @@ import { RoomModal } from './RoomModal'
 import { Hand3D } from '../game/NullHandGame/Hand3D'
 import { HandType } from '@/shared/types'
 import { RewardSystem } from '../game/NullHandGame/common/RewardSystem'
+import { StarVisual } from '../game/StarShieldGame/shared/StarVisual'
+import { ICONS, BULLET_COLOR } from '../game/StarShieldGame/constants'
 
 interface GameDescriptionModalProps {
     isOpen: boolean
@@ -260,6 +262,153 @@ export function GameDescriptionModal({ isOpen, onClose, gameType }: GameDescript
                     <button
                         onClick={onClose}
                         className="px-8 py-3 rounded font-bold text-sm transition-all duration-200 bg-[#FF4444] text-black hover:bg-[#FF8888] shadow-[0_0_15px_rgba(255,68,68,0.5)]"
+                    >
+                        OK
+                    </button>
+                </div>
+            </RoomModal>
+        )
+    }
+
+    // STAR SHIELD用の説明
+    if (gameType === 'star-shield') {
+        return (
+            <RoomModal
+                isOpen={isOpen}
+                onClose={onClose}
+                title="STAR SHIELD - ゲーム説明"
+                showCloseButton
+            >
+                <div className="p-4 md:p-6 flex-1">
+                    <div className="space-y-6">
+                        {/* タイトル部：恐竜→球発射→隕石→破壊のビジュアル */}
+                        <div className="relative bg-brand-950/90 border border-brand-500/50 rounded-xl p-6 overflow-hidden min-h-[140px]">
+                            <div className="absolute inset-0 bg-brand-500/5 pointer-events-none" />
+                            <div className="relative z-10 flex items-center justify-center gap-3 flex-wrap">
+                                <div className="flex flex-col items-center gap-1">
+                                    <div className="relative w-20 h-20">
+                                        <Image src={ICONS.DINO} alt="恐竜" fill className="object-contain drop-shadow-[0_0_12px_rgba(129,140,248,0.5)]" />
+                                    </div>
+                                    <span className="text-[10px] text-brand-400 font-mono">恐竜</span>
+                                </div>
+                                <span className="text-brand-500/60 text-xl">→</span>
+                                <div className="flex flex-col items-center gap-1">
+                                    <div className="w-5 h-5 rounded-full shadow-[0_0_8px_rgba(239,68,68,0.8)]" style={{ backgroundColor: BULLET_COLOR }} />
+                                    <span className="text-[10px] text-brand-400 font-mono">球を発射</span>
+                                </div>
+                                <span className="text-brand-500/60 text-xl">→</span>
+                                <div className="flex flex-col items-center gap-1">
+                                    <div className="relative w-12 h-12">
+                                        <Image src={ICONS.METOR} alt="隕石" fill className="object-contain drop-shadow-[0_0_8px_rgba(251,146,60,0.5)]" />
+                                    </div>
+                                    <span className="text-[10px] text-brand-400 font-mono">隕石に当たる</span>
+                                </div>
+                                <span className="text-brand-500/60 text-xl">→</span>
+                                <div className="flex flex-col items-center gap-1">
+                                    <div className="relative w-12 h-12">
+                                        <Image src={ICONS.FIRE} alt="破壊" fill className="object-contain drop-shadow-[0_0_12px_rgba(255,100,50,0.6)]" />
+                                    </div>
+                                    <span className="text-[10px] text-brand-400 font-mono">破壊</span>
+                                </div>
+                            </div>
+                            <div className="absolute -bottom-16 -right-16 w-48 h-48 opacity-30 pointer-events-none">
+                                <StarVisual position={{ left: '0', bottom: '0', width: '100%', height: '100%' }} />
+                            </div>
+                        </div>
+
+                        {/* キャッチコピー */}
+                        <div className="text-center space-y-2">
+                            <h2 className="text-xl font-bold text-white">
+                                90秒隕石から星を守れ
+                            </h2>
+                            <p className="text-xs italic text-brand-400">
+                                2人協力！タイピング × シューティングで星を守り抜け
+                            </p>
+                        </div>
+
+                        {/* ゲームの流れ */}
+                        <div className="space-y-3">
+                            <h3 className="text-sm font-bold border-b border-brand-500/60 pb-1 text-white flex items-center gap-2">
+                                <div className="w-1.5 h-1.5 bg-brand-500 rounded-full" />
+                                ゲームの流れ
+                            </h3>
+                            <ol className="space-y-3 text-[11px] pl-2 text-brand-300">
+                                <li className="flex items-start">
+                                    <span className="font-bold mr-2 text-brand-400">1.</span>
+                                    <span>
+                                        <strong className="text-white">役割選択</strong> - シューター（照準）とタイピスト（タイピング）の2役
+                                    </span>
+                                </li>
+                                <li className="flex items-start">
+                                    <span className="font-bold mr-2 text-brand-400">2.</span>
+                                    <span>
+                                        <strong className="text-white">タイピングで弾発射</strong> - タイピストが1文字打つごとに、シューターの照準方向へ弾が飛ぶ
+                                    </span>
+                                </li>
+                                <li className="flex items-start">
+                                    <span className="font-bold mr-2 text-brand-400">3.</span>
+                                    <span>
+                                        <strong className="text-white">隕石を破壊</strong> - 弾が隕石に当たるとダメージ。HP分当てると破壊
+                                    </span>
+                                </li>
+                                <li className="flex items-start">
+                                    <span className="font-bold mr-2 text-brand-400">4.</span>
+                                    <span>
+                                        <strong className="text-white">星を守る</strong> - 隕石が星に接触すると星のHP減少。90秒耐えればクリア！
+                                    </span>
+                                </li>
+                            </ol>
+                        </div>
+
+                        {/* 勝利・敗北条件 */}
+                        <div className="space-y-2">
+                            <h3 className="text-sm font-bold border-b border-brand-500/60 pb-1 text-white">
+                                勝利・敗北条件
+                            </h3>
+                            <div className="border border-brand-500/30 rounded-lg p-3 bg-brand-500/5 space-y-2 text-xs text-brand-200">
+                                <p><strong className="text-green-400">クリア</strong> - 90秒間、星のHPを保ちながら隕石を破壊し続ける</p>
+                                <p><strong className="text-red-400">ゲームオーバー</strong> - 隕石が星に直撃して星のHPが0になる</p>
+                            </div>
+                        </div>
+
+                        {/* 必殺技 */}
+                        <div className="space-y-2">
+                            <h3 className="text-sm font-bold border-b border-brand-500/60 pb-1 text-white">
+                                必殺技
+                            </h3>
+                            <p className="text-xs text-brand-300 pl-2">
+                                1単語（1行）を打ち終えた最後の文字で、広範囲に複数発の弾が飛ぶ。難易度HELLでは全隕石を一斉破壊する必殺技が発動！
+                            </p>
+                        </div>
+
+                        {/* プレイのコツ */}
+                        <div className="space-y-2">
+                            <h3 className="text-sm font-bold border-b border-brand-500/60 pb-1 text-white">
+                                プレイのコツ
+                            </h3>
+                            <ul className="space-y-2 text-xs pl-2 text-brand-300">
+                                <li className="flex items-start">
+                                    <span className="mr-2 text-brand-500">•</span>
+                                    <span>シューターは照準を隕石に合わせ、タイピストは正確にタイピング</span>
+                                </li>
+                                <li className="flex items-start">
+                                    <span className="mr-2 text-brand-500">•</span>
+                                    <span>単語完了時の必殺技でまとめて破壊しよう</span>
+                                </li>
+                                <li className="flex items-start">
+                                    <span className="mr-2 text-brand-500">•</span>
+                                    <span>2人で息を合わせてプレイすることが大切</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                {/* 閉じるボタン */}
+                <div className="p-4 border-t border-brand-500/30 flex justify-center">
+                    <button
+                        onClick={onClose}
+                        className="px-8 py-3 rounded font-bold text-sm transition-all duration-200 bg-brand-500 text-white hover:bg-brand-400 border border-brand-400 shadow-[0_0_15px_rgba(129,140,248,0.4)]"
                     >
                         OK
                     </button>
