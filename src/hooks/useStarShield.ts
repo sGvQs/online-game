@@ -486,7 +486,7 @@ export function useStarShield({
             // Typist → Shooter: fire イベント（broadcast）→ 弾を生成（送信文字数として両者でカウント）
             .on('broadcast', { event: 'fire' }, () => {
                 fireCountRef.current += 1
-                playVoiceRef.current('dinosaur') // Shooter が fire を受信したタイミングでボイス SE
+                playVoiceRef.current('shooting') // Shooter が fire を受信＝弾発射時
                 if (!isShooter) return
 
                 const aim = aimRef.current
@@ -525,6 +525,7 @@ export function useStarShield({
             // Typist: 星HPの同期
             .on('broadcast', { event: 'star_hp' }, ({ payload }: { payload: { starHp: number } }) => {
                 if (isShooter) return
+                playVoiceRef.current('star-damage')
                 setStarHp(payload.starHp)
             })
             // Typist 側: typing_shoot_matches の更新でゲーム終了を検知
@@ -722,6 +723,7 @@ export function useStarShield({
                 return dist < STAR_RADIUS + ASTEROID_RADIUS
             })
             if (contacts.length > 0 && !contactPendingRef.current) {
+                playVoiceRef.current('star-damage')
                 const damage = contacts.length
                 const newStarHp = Math.max(0, starHpRef.current - damage)
                 starHpRef.current = newStarHp
@@ -809,7 +811,7 @@ export function useStarShield({
             payload: {},
         })
         fireCountRef.current += 1 // 送信者は自分の broadcast を受信しないため Typist 側でカウント
-        playVoiceRef.current('dinosaur') // Typist がタイピング成功したタイミングでボイス SE
+        playVoiceRef.current('shooting') // Typist がタイピング成功したタイミングで shooting SE
 
         setTypistFireCount((c) => c + 1)
 
