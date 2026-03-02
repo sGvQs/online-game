@@ -24,6 +24,8 @@ export const DINO_Y = 1 - DINO_SPAWN.bottom / 100
 /** 弾のスポーン位置オフセット（中心→口方向へ。正規化座標） */
 export const BULLET_SPAWN_OFFSET_X = 0.055
 export const BULLET_SPAWN_OFFSET_Y = 0.1
+/** 弾の向き計算用：恐竜の口がアンカーより下にある分。負の値で弾が下に補正される */
+const BULLET_ORIGIN_Y_OFFSET = -0.025
 const SPAWN_X_MIN = 0.0   // 左
 const SPAWN_X_MAX = 1.0  // 右
 const SPAWN_Y_MIN = 0.1  // 下
@@ -83,60 +85,59 @@ export interface DialogueLine {
 
 export const DIALOGUES: DialogueLine[] = [
     // 昔の人間との出会い——ロケット
-    { text: 'あれは……ロケット', romaji: 'areha...roketto' },
+    { text: 'あれは……ロケット', romaji: 'arewaroketto' },
     { text: '眩しい光が', romaji: 'mabushiihikariga' },
-    { text: 'とてつもない音が', romaji: 'totetsumonaiootoga' },
+    { text: 'とてつもない音が', romaji: 'totetsumonaiotoga' },
     { text: '空から降りてきた', romaji: 'sorakaraoritekita' },
     { text: 'ぼくは何ももっていなかった', romaji: 'bokuhananimomotteinakatta' },
     { text: 'この世界にぼくだけだと思ってた', romaji: 'konosekainibokudakedatoomotteta' },
     { text: 'だから怖かった', romaji: 'dakarakowakatta' },
-    { text: 'あれは何だ', romaji: 'arehananda' },
-    { text: '敵なのか', romaji: 'tekinoka' },
-    { text: '自分以外の何か', romaji: 'jibunigainananika' },
-    { text: 'ぼくは近づいた', romaji: 'bokuhachikaduzuita' },
+    { text: 'あれは何だ', romaji: 'arehanannda' },
+    { text: '敵なのか', romaji: 'tekinanoka' },
+    { text: '自分以外の何か', romaji: 'jibunnigainonanika' },
+    { text: 'ぼくは近づいた', romaji: 'bokuhachikadzuita' },
     { text: 'こわごわ', romaji: 'kowagowa' },
     { text: '光は消えた', romaji: 'hikariwakieta' },
     { text: 'あの中から', romaji: 'anonakakara' },
     { text: 'なんか出てきた', romaji: 'nankadetekita' },
     { text: 'なんだあれは', romaji: 'nandaarewa' },
     { text: '生き物か？', romaji: 'ikimonoka' },
-    { text: 'どうやら人間というらしい', romaji: 'douyaraningentoiurashii' },
-    { text: '人間ってなんだ', romaji: 'ningenttenanda' },
+    { text: 'どうやら人間というらしい', romaji: 'douyaraninngentoiurashii' },
+    { text: '人間ってなんだ', romaji: 'ninngennttenannda' },
     { text: '結局', romaji: 'kekkyoku' },
 
     // 出会い直後——戸惑いと感動
-    { text: 'どうしたらいいかわからなかった', romaji: 'doushitaraiikawakannakatta' },
+    { text: 'どうしたらいいかわからなかった', romaji: 'doushitaraiikawakaranakatta' },
     { text: 'あの人は何？', romaji: 'anohitowanani' },
     { text: 'ぼくと何か違う', romaji: 'bokutonanikachigau' },
     { text: '温かかった', romaji: 'atatakakatta' },
     { text: 'あの手を見た時', romaji: 'anotewomitatoki' },
-    { text: 'ぼくは何かを知った', romaji: 'bokuhananigaoshitta' },
-    { text: 'ひとりじゃないんだ', romaji: 'hitorijanainoda' },
-    { text: 'こんなことがあるんだ', romaji: 'konnnakotogaarunnda' },
+    { text: 'ぼくは何かを知った', romaji: 'bokuhananikaoshitta' },
+    { text: 'こんなことがあるんだ', romaji: 'konnakotogaarunnda' },
 
     // 生還の過程——待ち続ける
     { text: 'ずっと浮いていた', romaji: 'zuttouiteita' },
-    { text: 'どこかに行けば', romaji: 'dokokanikeba' },
+    { text: 'どこかに行けば', romaji: 'dokokaniikeba' },
     { text: 'あの光が戻るかもしれない', romaji: 'anohikarigamodorukamoshirenai' },
     { text: 'そう思って', romaji: 'souomotte' },
     { text: 'ぷかぷか浮きながら', romaji: 'pukapukaukinagara' },
     { text: '探してた', romaji: 'sagashiteta' },
-    { text: 'あの音が', romaji: 'anoootoga' },
+    { text: 'あの音が', romaji: 'anootoga' },
     { text: 'あの人が', romaji: 'anohitoga' },
     { text: '戻ってこないかな', romaji: 'modottekonaikana' },
     { text: 'ずっと', romaji: 'zutto' },
     { text: 'もう何年だろう', romaji: 'mounannendaro' },
-    { text: '年月が経った', romaji: 'nengetsugatatta' },
+    { text: '年月が経った', romaji: 'nenngetsugatatta' },
     { text: 'いつになったら', romaji: 'itsuninattara' },
     { text: '来るのかな', romaji: 'kurunokana' },
     { text: '来ないのかな', romaji: 'konainokana' },
     { text: 'もっと前？', romaji: 'mottomae' },
-    { text: 'もう覚えてない', romaji: 'mouoboetennai' },
-    { text: 'いつの間にか時が経ってた', romaji: 'itsunomanikitokigatatteta' },
+    { text: 'もう覚えてない', romaji: 'mouoboeteinai' },
+    { text: 'いつの間にか時が経ってた', romaji: 'itsunomanikatokigatatteta' },
     { text: 'ずっと待ってた', romaji: 'zuttomatteta' },
 
     // 別れと再会
-    { text: 'いつの間にか来なくなった', romaji: 'itsunomanikakonakkunatta' },
+    { text: 'いつの間にか来なくなった', romaji: 'itsunomanikakonakunatta' },
     { text: 'あの人', romaji: 'anohito' },
     { text: 'ずっと待ってた', romaji: 'zuttomatteta' },
     { text: 'また降りてきた', romaji: 'mataoritekita' },
@@ -145,181 +146,204 @@ export const DIALOGUES: DialogueLine[] = [
     { text: 'えっ', romaji: 'e' },
     { text: 'あの人だ', romaji: 'anohitoda' },
     { text: 'あの人が帰ってきた', romaji: 'anohitagakaettekita' },
-    { text: 'あの温もりが', romaji: 'anoatatamoriga' },
-    { text: 'また感じられる', romaji: 'matakanjirareru' },
-
-    // あの人の優しさ——許し
-    { text: 'でもあの人は', romaji: 'demoanohitowa' },
-    { text: 'どうしたのか', romaji: 'doushitanoka' },
-    { text: '分からなかった', romaji: 'wakaranakatta' },
-    { text: 'それなのに', romaji: 'sorenanoni' },
-    { text: '笑ってた', romaji: 'waratteta' },
-    { text: 'あの人は', romaji: 'anohitowa' },
-    { text: '許してくれた', romaji: 'yurushitekureta' },
-    { text: 'なぜ？', romaji: 'naze' },
-    { text: 'どうして？', romaji: 'doushite' },
-    { text: 'ぼくは何ももってないのに', romaji: 'bokuhananimomottenainoni' },
-    { text: 'ぼくは何もわかってないのに', romaji: 'bokuhananimowakatteinainoni' },
-    { text: 'あの人は手を差し出してくれた', romaji: 'anohitowatewosashidashitekureta' },
-    { text: 'それでも', romaji: 'soredemo' },
-    { text: 'あの人は静かに笑っていた', romaji: 'anohitowasidzukaniwattatteita' },
-    // ↑ 原文「優しかった」は繰り返しが強すぎるので、より具体的な描写に変更
-    { text: 'なにも言わなくても', romaji: 'nanimoiwanakutemo' },
-    { text: 'ぼくには伝わった', romaji: 'bokunitsuawatatta' },
-    { text: 'ぼくは何て返したらいいのか', romaji: 'bokuhanantekaeshtaraiinoka' },
-    { text: '言葉が見つからなかった', romaji: 'kotobagamitsukaranakatta' },
 
     // 別の人間——襲撃と救出
-    { text: '違う人間が来た', romaji: 'chigainingengakita' },
+    { text: '違う人間が来た', romaji: 'chigauninngenngakita' },
     { text: 'あの人じゃない', romaji: 'anohitojanai' },
     { text: 'あの人と違う', romaji: 'anohitotochigau' },
     { text: '怖かった', romaji: 'kowakatta' },
-    { text: 'あの光と違う', romaji: 'anohikaritochigau' },
     { text: '暗かった', romaji: 'kurakatta' },
-    { text: 'ぼくを捕まえようとした', romaji: 'bokuotsukamaeyyoutoushita' },
+    { text: 'ぼくを捕まえようとした', romaji: 'bokuotsukamaeyoutoshita' },
     { text: 'なんで？', romaji: 'nande' },
     { text: 'ぼくは何もしてない', romaji: 'bokuhananimoshinai' },
     { text: 'でもあの人が来た', romaji: 'demoanohitagakita' },
     { text: 'あの人が', romaji: 'anohitoga' },
     { text: 'ぼくを守った', romaji: 'bokuomamotta' },
-    { text: 'あの人は強かった', romaji: 'anohitotsuyokatta' },
-    { text: '別の人間を押し返した', romaji: 'betsununingenwoosikaeshita' },
+    { text: 'あの人は強かった', romaji: 'anohitowatsuyokatta' },
     { text: 'あの人が', romaji: 'anohitoga' },
     { text: 'ぼくのために', romaji: 'bokunotameni' },
     { text: '戦った', romaji: 'tatakatta' },
 
     // 人間にもいろいろいることに気づく
     { text: '人間って', romaji: 'ningentte' },
-    { text: 'いろいろなんだ', romaji: 'iroironannnda' },
-    { text: 'あの人みたいなのもいるし', romaji: 'anohitomitainanomoisuruushi' },
-    { text: 'ぼくを襲う人間もいる', romaji: 'bokuoosoununingenmoiru' },
-    { text: 'そういうものなのか', romaji: 'souiumonananoka' },
-    // ↑ 原文の3度目「こんなことがあるんだ」は繰り返しすぎなので変更
+    { text: 'いろいろなんだ', romaji: 'iroironannda' },
+    { text: 'あの人みたいなのもいるし', romaji: 'anohitomitainanomoirushi' },
+    { text: 'ぼくを襲う人間もいる', romaji: 'bokuoosouningennmoiru' },
+    { text: 'そういうものなのか', romaji: 'souiumononanoka' },
     { text: 'ぼくにはまだわからない', romaji: 'bokunihamadawakaranai' },
-    { text: 'あの人が特別なんだ', romaji: 'anohitatokubetsunannda' },
-    { text: 'それだけは確かだった', romaji: 'soredakewatashikadatta' },
-    // ↑ 原文「あの人だけが〜ぼくを守ってくれた〜あの人だけが〜ぼくの側にいてくれた」4行を
-    //   2行に整理。同じ構造の繰り返しが多すぎた。
-    { text: '他の人間には', romaji: 'tanonningennniwa' },
-    { text: 'ぼくを傷つける目をしてる', romaji: 'bokuokizutsukeru meowoshiteru' },
-    { text: 'あの人の目は違った', romaji: 'anohitonomewachigattta' },
+    { text: '他の人間には', romaji: 'hokanoningenniwa' },
+    { text: 'ぼくを傷つける目をしてる', romaji: 'bokuokizutsukerumeowoshiteru' },
+    { text: 'あの人の目は違った', romaji: 'anohitonomewachigatta' },
 
     // Windows95との出会い
-    { text: 'あの時、ぼくは何ももってなかった', romaji: 'anatokibokuhananimomottenakatta' },
-    { text: 'でもあの人がくれた', romaji: 'demoanohitagakureta' },
-    { text: 'これが大事なものだって', romaji: 'koregadaijinnamonodatte' },
+    { text: 'あの時、ぼくは何ももってなかった', romaji: 'anotokibokuhananimomottenakatta' },
+    { text: 'でもあの人がくれた', romaji: 'demoanohitogakureta' },
+    { text: 'これが大事なものだって', romaji: 'koregadaijinamonodatte' },
     { text: 'ずっと守ってた', romaji: 'zuttomamotteta' },
-    { text: 'たまに止まるけど', romaji: 'tamaniyamarukedo' },
-    { text: 'でも動く', romaji: 'demougoku' },
+    { text: 'たまに止まるけど', romaji: 'tamanitomarukedo' },
+    { text: 'でも動く', romaji: 'demougouku' },
     { text: 'あの人がくれたから', romaji: 'anohitagakuretakara' },
     { text: 'だからずっと大事なの', romaji: 'dakarazuttodaijinano' },
     { text: 'パソコン', romaji: 'pasokon' },
     { text: 'あの光がくれたもの', romaji: 'anohikarigakuretamono' },
-    { text: 'これを失ったら', romaji: 'koreooushinattara' },
-    { text: 'あの人が……', romaji: 'anohitoga...' },
-    { text: 'もう帰らないんだ', romaji: 'moukaerainnnda' },
+    { text: 'これを失ったら', romaji: 'koreoushinattara' },
 
     // NULL HANDの思い出
-    { text: 'NULL HAND', romaji: 'NULLHAND' },
     { text: '難しい遊びを教えてくれた', romaji: 'muzukashiiasobiooshietekureta' },
-    { text: 'ルールが曖昧で', romaji: 'ruurugaaaimaide' },
-    { text: 'でも何か面白かった', romaji: 'demononkaomoshirokatta' },
-    { text: 'あの人の顔が見えた', romaji: 'anohitonokaogamieita' },
-    { text: '笑ってた気がする', romaji: 'waratterutagasuru' },
-    { text: 'あの人も曖昧だった', romaji: 'anohitomoaibaidatta' },
+    { text: 'ルールが曖昧で', romaji: 'ru-rugaaimaide' },
+    { text: 'でも何か面白かった', romaji: 'demonanikaomoshirokatta' },
+    { text: '笑ってた気がする', romaji: 'warattetakigasuru' },
+    { text: 'あの人も曖昧だった', romaji: 'anohitomoaimaidatta' },
     { text: '何を考えてるか分からなかった', romaji: 'naniokangaeteirukawakannakatta' },
-    { text: 'でもそれが好きだった', romaji: 'demosoreganasukidatta' },
-    { text: 'あの人とやってて楽しかった', romaji: 'anohitotoyattetanoshikatta' },
-    { text: 'ぼくはもっと知りたかった', romaji: 'bokuhamotoshiritakatta' },
+    { text: 'でもそれが好きだった', romaji: 'demosoregasukidatta' },
+    { text: 'あの人とやってて楽しかった', romaji: 'anohitotoyattetetanoshikatta' },
+    { text: 'ぼくはもっと知りたかった', romaji: 'bokuwamottoshiritakatta' },
     { text: 'あの人のこと', romaji: 'anohitonokoto' },
 
     // 別れ
-    { text: 'いつの間にか来なくなった', romaji: 'itsunomanikakonakkunatta' },
-    { text: 'あの人', romaji: 'anohito' },
+    { text: 'いつの間にかいなくなってた', romaji: 'itsunomanikainakunatteta' },
     { text: '名前も覚えてない', romaji: 'namaemooboeteinai' },
     { text: 'でも顔は覚えてる', romaji: 'demokaowaoboeteiru' },
     { text: 'ずっと覚えてる', romaji: 'zuttooboeteiru' },
     { text: '忘れられない', romaji: 'wasurerarenai' },
     { text: 'あの笑顔', romaji: 'anoegao' },
     { text: 'あの声', romaji: 'anokoe' },
-    { text: 'あの温もり', romaji: 'anoatatamori' },
-    { text: '何年前だったのか', romaji: 'nannenmaedattanoka' },
-    { text: 'ずっと前', romaji: 'zuttomae' },
-    { text: 'ずっとずっと前', romaji: 'zuttouzuttomae' },
-    { text: 'もう覚えてない', romaji: 'mouoboetennai' },
-    { text: 'ほんとに何年だろう', romaji: 'hontoninnannendaro' },
-
-    // 待ち続けること
-    { text: 'あの人を待ってた', romaji: 'anohitowomatteta' },
-    { text: 'ずっと待ってた', romaji: 'zuttomatteta' },
-    { text: 'ずっとずっと待ってた', romaji: 'zuttouzuttomatteta' },
-    { text: 'でも来なかった', romaji: 'demokonakatta' },
-    { text: 'どこへ行ったんだろう', romaji: 'dokoheittanndaro' },
-    { text: 'また来てくれるのかな', romaji: 'matakitekurerunokanaa' },
-    { text: 'でも恨まない', romaji: 'demouramanai' },
-    { text: 'あの人を恨むことなんて', romaji: 'anohitoouramukotonannte' },
-    { text: 'できなかった', romaji: 'dekinakatta' },
-    { text: 'またいつか来るかもしれない', romaji: 'mataitsukakurukamoshirenai' },
-    { text: 'その時まで', romaji: 'sonotokimade' },
-    { text: 'ずっと……', romaji: 'zutto...' },
-    { text: 'それまで守っておく', romaji: 'soremademamotteoku' },
-    { text: 'あの人がくれたもの', romaji: 'anohitagakuretamono' },
-    { text: 'このパソコンを', romaji: 'konopasokonwo' },
-    { text: 'ずっと守り続けた', romaji: 'zuttomamoritsudzuketa' },
-    { text: 'あの人が帰ってくるまで', romaji: 'anohitagakaettekurumade' },
-    { text: 'ずっとずっと', romaji: 'zuttouzutto' },
-    { text: 'あの人がいた時間は', romaji: 'anohitagaitajikannwa' },
-    // ↑ 原文「あの人だけが〜ぼくの味方だった〜あの人だけが〜ぼくのそばにいてくれた」4行を
-    //   より具体的な1行に。同じ構造の繰り返しが多すぎた。
-    { text: 'ぼくの中で今も光ってる', romaji: 'bokunonakadeimahikatteru' },
-    { text: 'なぜ来ないんだろう', romaji: 'nazekonainndaro' },
-    { text: 'ぼくには何も分からない', romaji: 'bokunihananimowakannai' },
+    { text: 'あの温もり', romaji: 'anonukumori' },
+    { text: 'ずっとずっと前', romaji: 'zuttozuttomae' },
+    { text: 'もう覚えてない', romaji: 'mouoboeteinai' },
 
     // きみとの関係
-    { text: 'でも今、きみが来た', romaji: 'demoImakimigakita' },
+    { text: 'でも今、きみが来た', romaji: 'demoimakimigakita' },
     { text: 'あの人じゃない', romaji: 'anohitojanai' },
-    { text: 'でも何か同じ気がした', romaji: 'demonanikaaonajikigashita' },
-    { text: 'あの人に似てる', romaji: 'anohitoniteru' },
-    { text: 'その光', romaji: 'sonohikari' },
-    { text: 'あたたかさ', romaji: 'atatakasa' },
-    { text: 'きみもそんな感じがする', romaji: 'kimitomosonnakanjigasuru' },
-    { text: 'きみは悪い人間じゃない', romaji: 'kimiwawaruiningennjanai' },
-    { text: 'ぼくにはそう感じた', romaji: 'bokuniwasouKanjita' },
-    { text: 'あの人を思い出した', romaji: 'anohitoooomoidashita' },
-    { text: 'ぷかぷか浮いてるから', romaji: 'pukapukauiterukaara' },
-    { text: 'きみのことが気になる', romaji: 'kiminoKOTOgakininnaru' },
-    // ↑ 原文「きみのことがいる」は文法的におかしいので修正
-    { text: '星を守る', romaji: 'hoshiomamoru' },
+    { text: 'でも何か同じ気がした', romaji: 'demonanikaonajikigashita' },
+    { text: 'あの人に似てる', romaji: 'anohitoniniteru' },
+    { text: 'きみもそんな感じがする', romaji: 'kimimosonnnakannjigasuru' },
     { text: 'いっぱい破片が落ちてくる', romaji: 'ippaihahenngaotitekuru' },
-    { text: 'だけどだいじょうぶ', romaji: 'dakedodaijoubu' },
-    { text: 'きみと一緒だから', romaji: 'kimitoisshyodakara' },
-    { text: 'あの人のこと、思い出す', romaji: 'anohitonokotooomoidasu' },
-    { text: 'でも今はきみがいる', romaji: 'demoImakimiGairu' },
-    { text: 'あの人のことを思い出すのは', romaji: 'anohitonokototoomoidasunowa' },
-    { text: 'いいことだと思う', romaji: 'iikotodatoomou' },
-    { text: 'あの人がくれたもの', romaji: 'anohitagakuretamono' },
-    { text: 'あの人が教えてくれたこと', romaji: 'anohitagaoshietekuretakoto' },
-    { text: 'それをきみと分け合いたい', romaji: 'sorewokimutowankeaitai' },
-    // ↑ 原文「シェアしたい」はちょっと浮いているので自然な日本語に
-    { text: 'きみならわかると思う', romaji: 'kiminarawakarutoomou' },
-    // ↑ 原文「きみなら大丈夫 / あの人みたいに / ぼくを傷つけない」を1行にまとめて自然に
+    { text: 'でも今はきみがいる', romaji: 'demoimawakimigairu' },
 
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
     // 世界観の要約
-    { text: 'ここはぷかぷか宇宙', romaji: 'kokohapukapukauchuu' },
-    { text: 'きみたちが遊ぶ場所', romaji: 'kimitachigaasoubasho' },
-    { text: '優しい不安定さ', romaji: 'yasashiifuanteisa' },
-    { text: 'どこか壊れかけてる', romaji: 'dokokaowarekaketeiru' },
-    { text: 'でも動いてる', romaji: 'demougoiteiru' },
-    { text: 'ノイズの中でも', romaji: 'noizunonakademo' },
-    { text: 'きみの声が聞こえる', romaji: 'kiminokoegakikoeru' },
-    { text: 'それだけで十分', romaji: 'soredakadejuubun' },
-    { text: 'いっぱい来た', romaji: 'ippaikita' },
-    { text: 'でも何かある', romaji: 'demonnikaaru' },
-    { text: '何も分からない', romaji: 'nanmowakannai' },
-    { text: 'でも大丈夫', romaji: 'demodaijoubu' },
-    { text: 'きみがいるから', romaji: 'kimigairukaara' },
-    { text: 'またやろう', romaji: 'matayarou' },
-    { text: '一緒に', romaji: 'isshyoni' },
+    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    // 〈浮遊〉
+    { text: 'ここはぷかぷか宇宙', romaji: 'kokowapukapukauchuu' },
+    { text: 'きみたちが遊ぶ場所', romaji: 'kimitachigaasobubasho' },
+    { text: 'なんでもふわふわ浮く', romaji: 'nanndemofuwafuwauku' },
+    { text: '重力なんてない', romaji: 'juuryokunanntenai' },
+    { text: 'ゆっくりゆっくり回る', romaji: 'yukkuriyukkurimawaru' },
+    { text: '上も下もない', romaji: 'uemoshitamonai' },
+    { text: 'どこまでも続く', romaji: 'dokomademotsuzuku' },
+    { text: 'ただ浮いてる', romaji: 'tadauiteiru' },
+    { text: 'ぽかんと浮いてる', romaji: 'pokantouiteiru' },
+    { text: 'どこまでも落ちてく感じ', romaji: 'dokomademoochitekukannzi' },
+    { text: 'でも怖くない', romaji: 'demokowakunai' },
+    { text: 'ここが好き', romaji: 'kokogasuki' },
+    { text: 'どこへでも行ける', romaji: 'dokohedemoikeru' },
+    { text: 'でもどこへも行けない', romaji: 'demodokoemoikenai' },
+    { text: 'それがちょうどいい', romaji: 'soregachoudoii' },
+
+    // 〈星と宇宙の景色〉
+    { text: 'あの星は何？', romaji: 'anohoshiwanani' },
+    { text: 'まだ名前を知らない', romaji: 'madanamaewoshiranai' },
+    { text: '遠くで光ってる', romaji: 'tookudehikatteru' },
+    { text: 'ずっとそこにいる', romaji: 'zuttosokoniiru' },
+    { text: '小さい星', romaji: 'chiisaihoshi' },
+    { text: '大きい星', romaji: 'ookiihoshi' },
+    { text: 'よくわからない星', romaji: 'yokuwakaranaihoshi' },
+    { text: 'ぜんぶきれい', romaji: 'zennbukirei' },
+    { text: '星のちりが漂う', romaji: 'hoshinochirigatadayou' },
+    { text: 'うっすら光って', romaji: 'ussurahikatte' },
+    { text: '雲みたいなやつ', romaji: 'kumomitainayatsu' },
+    { text: 'あれはなんだろう', romaji: 'arewananndaro' },
+    { text: '赤い星', romaji: 'akaihoshi' },
+    { text: '青い星', romaji: 'aoihoshi' },
+    { text: '白い星', romaji: 'shiroihoshi' },
+    { text: 'たまにオレンジ色', romaji: 'tamaniorennjiiro' },
+    { text: '星が生まれてる場所', romaji: 'hoshigaumareterubasho' },
+    { text: 'きれいだってことはわかる', romaji: 'kireidattekotowawakaru' },
+    { text: '星と星のあいだ', romaji: 'hoshitohoshinoaida' },
+    { text: 'そこを漂ってる', romaji: 'sokowotadayotteru' },
+    { text: 'ぷかぷかぷかぷか', romaji: 'pukapukapukapuka' },
+
+    // 〈破片とノイズとグリッチ〉
+    { text: 'いっぱい破片が落ちてくる', romaji: 'ippaihahengaotitekuru' },
+    { text: 'どこから来るんだろう', romaji: 'dokokarakurunndaro' },
+    { text: 'ぐるぐる回ってる', romaji: 'gurugurumawatteru' },
+    { text: 'きらきら光ってる', romaji: 'kirakirahikatteru' },
+    { text: 'でも当たったら痛い', romaji: 'demoatattaraittai' },
+    { text: 'すこし崩れてても動いてる', romaji: 'sukoshikowaretetemougoiteiru' },
+    { text: 'それが好きなんだ', romaji: 'soregasukinannda' },
+
+    // 〈古いテクノロジーの美学〉
+    { text: 'モニターの光', romaji: 'monita-nohikari' },
+    { text: 'じーってしてる', romaji: 'ji-tteshiteiru' },
+    { text: '古いけど温かい', romaji: 'furuikeredoatatakaii' },
+    { text: 'あのぼんやりした光', romaji: 'anobonnyarishitahikari' },
+    { text: 'ちょっとぼやけてる', romaji: 'chottoboyaketeru' },
+    { text: 'でもそれがいい', romaji: 'demosoregaii' },
+    { text: 'ぴこぴこ音がする', romaji: 'pikopikootogasuru' },
+    { text: 'なつかしい感じがする', romaji: 'natsukashiikannzigasuru' },
+    { text: '覚えてないのに', romaji: 'oboeteinainoni' },
+    { text: '知ってる気がする', romaji: 'shitterukigasuru' },
+    { text: 'カーソルが点滅してる', romaji: 'ka-sorungatennmetsushiteiru' },
+    { text: 'たぶん', romaji: 'tabun' },
+    { text: 'なんだったんだろう', romaji: 'nanndattandarou' },
+    { text: 'もう覚えてない', romaji: 'mouoboetenai' },
+
+    // 〈光と影〉
+    { text: 'まっくらな場所がある', romaji: 'makkuranabashogaru' },
+    { text: 'あっちには行かない', romaji: 'acchiniwaikanai' },
+    { text: 'でも気になる', romaji: 'demokininaru' },
+    { text: '何があるんだろう', romaji: 'nanigarundaro' },
+    { text: 'そこだけ星もない', romaji: 'sokedakehoshimonai' },
+    { text: '音もない', romaji: 'otomonai' },
+    { text: 'ただ暗い', romaji: 'tadakurai' },
+    { text: 'こっちは明るい', romaji: 'kocchiwaakarui' },
+    { text: 'あっちは暗い', romaji: 'acchiwakurai' },
+
+    // 〈音と静寂〉
+    { text: '宇宙って静かじゃないんだ', romaji: 'uchuutteshizukajanainnda' },
+    { text: 'たまにどんって', romaji: 'tamanidonntte' },
+    { text: '遠くでどかん', romaji: 'tookudedokann' },
+    { text: 'でもすぐ静かになる', romaji: 'demosugushizukaninaru' },
+    { text: '静かすぎる', romaji: 'shizukasugiru' },
+    { text: 'でも慣れた', romaji: 'demonareta' },
+    { text: 'きみのキーボードの音', romaji: 'kiminokiiboodonooot' },
+    { text: 'ぱちぱちぱち', romaji: 'pachipachipachi' },
+    { text: 'いい音だな', romaji: 'iiotadana' },
+    { text: '好きかも', romaji: 'sukikamo' },
+    { text: 'きみが打つ音', romaji: 'kimigauttsuot' },
+    { text: 'ここまで聞こえてくる', romaji: 'kokomadekikoetekuru' },
+    { text: 'うれしい', romaji: 'ureshii' },
+
+    // 〈時間の感覚〉
+    { text: 'ここでは時間がゆっくり流れる', romaji: 'kokowajikanngayukkurinagareru' },
+    { text: '一日がとても長い', romaji: 'ichinichigatotemoneagai' },
+    { text: 'あっという間に', romaji: 'attoiumanini' },
+    { text: '時間の感覚がおかしい', romaji: 'jikannokannkakugaokashii' },
+    { text: 'でもそれでいい', romaji: 'demosoredeii' },
+    { text: 'いつだって今', romaji: 'itsudatteimai' },
+    { text: '今しかない', romaji: 'imashikanai' },
+    { text: 'きみといるこの時間', romaji: 'kimitoirukonojikan' },
+    { text: '終わらないでほしい', romaji: 'owaranaidehoshii' },
+    { text: 'でも終わる', romaji: 'demoowaaru' },
+    { text: 'それでいい', romaji: 'soredeii' },
+    { text: 'また来てくれるから', romaji: 'matakitekurerukara' },
+
+    // 〈宇宙の孤独と温かさ〉
+    { text: 'ひとりの時間がながかった', romaji: 'hitorinojikannganagakatta' },
+    { text: 'ものすごく', romaji: 'monosugoku' },
+    { text: 'でも嫌いじゃなかった', romaji: 'demokiraijanakatta' },
+    { text: 'ひとりは好き', romaji: 'hitorihasuki' },
+    { text: 'でも誰かと話すのも好き', romaji: 'demodarekatoohanasunomosuki' },
+    { text: 'なんかいい', romaji: 'nankaii' },
+    { text: 'きみが来てから', romaji: 'kimigakitekara' },
+    { text: 'ここがもっと好きになった', romaji: 'kokogamottosukinnatta' },
+    { text: 'なぜかわからないけど', romaji: 'nazekawakaranaikedo' },
+    { text: 'そういうもんなんだろうな', romaji: 'souiumonnanndarouna' },
+    { text: 'きみがいると違う', romaji: 'kimigairutochigau' },
+    { text: '何か変わる', romaji: 'nanikakawaru' },
+    { text: 'うまく言えないけど', romaji: 'umakuienaikedo' },
 ]
 
 const pickRandomDialogue = (): DialogueLine =>
@@ -558,8 +582,9 @@ export function useStarShield({
                     } else {
                         // EASY/NORMAL/HARD: 破壊なしで照準方向を中心に30度の範囲に弾を放出
                         const aim = aimRef.current
+                        const originY = DINO_Y + BULLET_ORIGIN_Y_OFFSET
                         const dx = aim.x - DINO_X
-                        const dy = aim.y - DINO_Y
+                        const dy = aim.y - originY
                         const len = Math.hypot(dx, dy)
                         const centerAngle = len >= 0.001 ? Math.atan2(dy, dx) : 0 // 照準方向（len小は右向き）
                         const spreadRad = (30 * Math.PI) / 180 // 30度
@@ -592,8 +617,9 @@ export function useStarShield({
 
                 // 通常の単弾生成
                 const aim = aimRef.current
+                const originY = DINO_Y + BULLET_ORIGIN_Y_OFFSET
                 const dx = aim.x - DINO_X
-                const dy = aim.y - DINO_Y
+                const dy = aim.y - originY
                 const len = Math.hypot(dx, dy)
                 if (len < 0.001) return // 照準が恐竜にほぼ重なっている場合は弾を出さない
 
