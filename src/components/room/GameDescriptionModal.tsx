@@ -295,26 +295,19 @@ export function GameDescriptionModal({ isOpen, onClose, gameType }: GameDescript
                                     </h4>
                                     <div className="flex flex-wrap gap-2 items-center">
                                         <div className="flex flex-col items-center gap-0.5">
-                                            <div className="relative w-10 h-10 overflow-visible">
-                                                <StarVisual position={{ left: '0', bottom: '0', width: '100%', height: '100%' }} />
-                                            </div>
-                                            <span className="text-[9px] font-mono opacity-80">HP管理</span>
-                                        </div>
-                                        <div className="flex flex-col items-center gap-0.5">
                                             <div className="relative w-10 h-10">
                                                 <Image src={ICONS.TYPIST} alt="タイピング" fill className="object-contain" />
                                             </div>
-                                            <span className="text-[9px] font-mono opacity-80">タイピング</span>
+                                            <span className="text-xs font-mono text-brand-600">タイピング</span>
                                         </div>
                                         <div className="flex flex-col items-center gap-0.5">
-                                            <div className="relative w-10 h-10">
-                                                <Image src={ICONS.DINO} alt="恐竜" fill className="object-contain" />
+                                            <div className="relative flex items-center gap-1">
+                                                <div className="relative w-10 h-10">
+                                                    <Image src={ICONS.DINO} alt="恐竜" fill className="object-contain" />
+                                                </div>
+                                                <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: BULLET_COLOR, boxShadow: `0 0 4px ${BULLET_COLOR}` }} />
                                             </div>
-                                            <span className="text-[9px] font-mono opacity-80">恐竜</span>
-                                        </div>
-                                        <div className="flex flex-col items-center gap-0.5">
-                                            <div className="w-5 h-5 rounded-full" style={{ backgroundColor: BULLET_COLOR, boxShadow: `0 0 6px ${BULLET_COLOR}99` }} />
-                                            <span className="text-[9px] font-mono opacity-80">球発射</span>
+                                            <span className="text-xs font-mono text-brand-600">球を当てる</span>
                                         </div>
                                     </div>
                                 </div>
@@ -331,27 +324,19 @@ export function GameDescriptionModal({ isOpen, onClose, gameType }: GameDescript
                                             <div className="relative w-10 h-10">
                                                 <Image src={ICONS.TARGET_CIRCLE} alt="エイム" fill className="object-contain" />
                                             </div>
-                                            <span className="text-[9px] font-mono opacity-80">エイム</span>
+                                            <span className="text-xs font-mono text-brand-600">エイム</span>
                                         </div>
                                         <div className="flex flex-col items-center gap-0.5">
-                                            <div className="relative flex items-center justify-center w-12 h-10">
-                                                <div className="absolute right-0 w-6 h-6 rounded-full" style={{ backgroundColor: BULLET_COLOR, boxShadow: `0 0 4px ${BULLET_COLOR}` }} />
-                                                <div className="absolute left-0 w-8 h-8">
-                                                    <Image src={ICONS.METOR} alt="隕石" fill className="object-contain" />
+                                            <div className="relative flex items-center gap-1">
+                                                <div className="relative w-8 h-8">
+                                                    <Image src={ICONS.DINO} alt="恐竜" fill className="object-contain" />
                                                 </div>
-                                            </div>
-                                            <span className="text-[9px] font-mono opacity-80">球当てる</span>
-                                        </div>
-                                        <div className="flex flex-col items-center gap-0.5">
-                                            <div className="relative flex items-center gap-0.5 w-14 h-10">
+                                                <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: BULLET_COLOR, boxShadow: `0 0 4px ${BULLET_COLOR}` }} />
                                                 <div className="relative w-8 h-8">
                                                     <Image src={ICONS.METOR} alt="隕石" fill className="object-contain" />
                                                 </div>
-                                                <div className="relative w-6 h-6">
-                                                    <Image src={ICONS.FIRE} alt="破壊" fill className="object-contain" />
-                                                </div>
                                             </div>
-                                            <span className="text-[9px] font-mono opacity-80">隕石破壊</span>
+                                            <span className="text-xs font-mono text-brand-600">球を当てる</span>
                                         </div>
                                     </div>
                                 </div>
@@ -366,7 +351,7 @@ export function GameDescriptionModal({ isOpen, onClose, gameType }: GameDescript
                             <h2 className="text-xl font-bold text-white">
                                 90秒隕石から星を守れ
                             </h2>
-                            <p className="text-xs italic text-brand-400">
+                            <p className="text-xs italic text-brand-600">
                                 2人協力！タイピング × シューティングで星を守り抜け
                             </p>
                         </div>
@@ -377,27 +362,27 @@ export function GameDescriptionModal({ isOpen, onClose, gameType }: GameDescript
                                 <div className="w-1.5 h-1.5 bg-brand-500 rounded-full" />
                                 ゲームの流れ
                             </h3>
-                            <ol className="space-y-3 text-[11px] pl-2 text-brand-300">
+                            <ol className="space-y-3 text-[11px] pl-2 text-brand-600">
                                 <li className="flex items-start">
-                                    <span className="font-bold mr-2 text-brand-400">1.</span>
+                                    <span className="font-bold mr-2 text-brand-300">1.</span>
                                     <span>
                                         <strong className="text-white">役割選択</strong> - シューター（照準）とタイピスト（タイピング）の2役
                                     </span>
                                 </li>
                                 <li className="flex items-start">
-                                    <span className="font-bold mr-2 text-brand-400">2.</span>
+                                    <span className="font-bold mr-2 text-brand-300">2.</span>
                                     <span>
                                         <strong className="text-white">タイピングで弾発射</strong> - タイピストが1文字打つごとに、シューターの照準方向へ弾が飛ぶ
                                     </span>
                                 </li>
                                 <li className="flex items-start">
-                                    <span className="font-bold mr-2 text-brand-400">3.</span>
+                                    <span className="font-bold mr-2 text-brand-300">3.</span>
                                     <span>
                                         <strong className="text-white">隕石を破壊</strong> - 弾が隕石に当たるとダメージ。HP分当てると破壊
                                     </span>
                                 </li>
                                 <li className="flex items-start">
-                                    <span className="font-bold mr-2 text-brand-400">4.</span>
+                                    <span className="font-bold mr-2 text-brand-300">4.</span>
                                     <span>
                                         <strong className="text-white">星を守る</strong> - 隕石が星に接触すると星のHP減少。90秒耐えればクリア！
                                     </span>
@@ -410,7 +395,7 @@ export function GameDescriptionModal({ isOpen, onClose, gameType }: GameDescript
                             <h3 className="text-sm font-bold border-b border-brand-500/60 pb-1 text-white">
                                 勝利・敗北条件
                             </h3>
-                            <div className="border border-brand-500/30 rounded-lg p-3 bg-brand-500/5 space-y-2 text-xs text-brand-200">
+                            <div className="border border-brand-500/30 rounded-lg p-3 bg-brand-500/5 space-y-2 text-xs text-white/90">
                                 <p><strong className="text-green-400">クリア</strong> - 90秒間、星のHPを保ちながら隕石を破壊し続ける</p>
                                 <p><strong className="text-red-400">ゲームオーバー</strong> - 隕石が星に直撃して星のHPが0になる</p>
                             </div>
@@ -421,7 +406,7 @@ export function GameDescriptionModal({ isOpen, onClose, gameType }: GameDescript
                             <h3 className="text-sm font-bold border-b border-brand-500/60 pb-1 text-white">
                                 必殺技
                             </h3>
-                            <p className="text-xs text-brand-300 pl-2">
+                            <p className="text-xs text-brand-600 pl-2">
                                 1単語（1行）を打ち終えた最後の文字で、広範囲に複数発の弾が飛ぶ。難易度HELLでは全隕石を一斉破壊する必殺技が発動！
                             </p>
                         </div>
@@ -431,7 +416,7 @@ export function GameDescriptionModal({ isOpen, onClose, gameType }: GameDescript
                             <h3 className="text-sm font-bold border-b border-brand-500/60 pb-1 text-white">
                                 プレイのコツ
                             </h3>
-                            <ul className="space-y-2 text-xs pl-2 text-brand-300">
+                            <ul className="space-y-2 text-xs pl-2 text-brand-600">
                                 <li className="flex items-start">
                                     <span className="mr-2 text-brand-500">•</span>
                                     <span>シューターは照準を隕石に合わせ、タイピストは正確にタイピング</span>
