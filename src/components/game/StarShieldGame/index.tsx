@@ -317,6 +317,7 @@ export function StarShieldGame({
                     difficulty={difficulty}
                     currentUserId={currentUserId}
                     onGameEnd={handleGameEnd}
+                    playersTotalPoints={room.users.reduce((sum, u) => sum + (initialRankings.find((r) => r.userId === u.userId)?.points ?? 0), 0)}
                 />
             )}
             {phase === 'RESULT' && gameResult && gameStats && (

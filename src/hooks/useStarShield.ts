@@ -30,13 +30,14 @@ const SPAWN_X_MIN = 0.0   // 左
 const SPAWN_X_MAX = 1.0  // 右
 const SPAWN_Y_MIN = 0.1  // 下
 const SPAWN_Y_MAX = 0.1  //  上
-/** 隕石がスポーンから目標まで到達する時間（ms）。短いほど速い */
-const ASTEROID_DURATION_MS: Record<Difficulty, number> = {
+/** 隕石がスポーンから目標まで到達する時間（ms）。短いほど速い。HELL は playersTotalPoints で動的調整 */
+const ASTEROID_DURATION_MS: Record<Exclude<Difficulty, 'HELL'>, number> = {
     EASY: 8000,
     NORMAL: 7000,
     HARD: 6000,
-    HELL: 5500,
 }
+const HELL_ASTEROID_DURATION_BASE = 6000
+const HELL_ASTEROID_DURATION_MIN = 2000
 
 // 弾の設定（デバッグ用に BULLET_RADIUS を変数化）
 const BULLET_SPEED = 0.0008 // 正規化座標/ms（速すぎないように）
@@ -414,6 +415,8 @@ interface UseStarShieldProps {
     difficulty: Difficulty
     currentUserId: string
     onGameEnd: (result: GameResult, stats: GameStats) => void
+    /** HELL 難易度時、両プレイヤーの合計 pt で隕石速度を調整（6000 - totalPt） */
+    playersTotalPoints?: number
 }
 
 export interface GameStats {
@@ -441,6 +444,7 @@ export function useStarShield({
     isShooter,
     difficulty,
     onGameEnd,
+    playersTotalPoints = 0,
 }: UseStarShieldProps) {
     const supabase = useMemo(() => createClient(), [])
     const channelName = `star_shield_fire_${matchId}`
@@ -746,6 +750,10 @@ export function useStarShield({
             if (gameEndedRef.current || contactPendingRef.current) return
             const targetX = STAR_TARGET_X + (Math.random() * 2 - 1) * STAR_TARGET_OFFSET
             const targetY = STAR_TARGET_Y + (Math.random() * 2 - 1) * STAR_TARGET_OFFSET
+            const durationMs =
+                difficulty === 'HELL'
+                    ? Math.max(HELL_ASTEROID_DURATION_MIN, HELL_ASTEROID_DURATION_BASE - playersTotalPoints)
+                    : ASTEROID_DURATION_MS[difficulty]
             const asteroid: Asteroid = {
                 id: crypto.randomUUID(),
                 spawnedAt: Date.now(),
@@ -753,7 +761,7 @@ export function useStarShield({
                 spawnY: SPAWN_Y_MIN + Math.random() * (SPAWN_Y_MAX - SPAWN_Y_MIN),
                 targetX,
                 targetY,
-                durationMs: ASTEROID_DURATION_MS[difficulty],
+                durationMs,
                 hp: ASTEROID_HP[difficulty],
             }
             setAsteroids((prev) => {
@@ -894,7 +902,7 @@ export function useStarShield({
             if (spawnTimer) clearInterval(spawnTimer)
             if (rafId) cancelAnimationFrame(rafId)
         }
-    }, [matchId, isShooter, difficulty])
+    }, [matchId, isShooter, difficulty, playersTotalPoints])
 
     // ============================================
     // Typist のみ: スコア（spawned）をローカル計算

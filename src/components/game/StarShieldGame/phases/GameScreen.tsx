@@ -12,6 +12,7 @@ interface GameScreenProps {
     difficulty: Difficulty
     currentUserId: string
     onGameEnd: (result: GameResult, stats: GameStats) => void
+    playersTotalPoints: number
 }
 
 function TimerDisplay({ timer }: { timer: number }) {
@@ -25,10 +26,10 @@ function TimerDisplay({ timer }: { timer: number }) {
     )
 }
 
-export function GameScreen({ matchId, startedAt, shooterId, difficulty, currentUserId, onGameEnd }: GameScreenProps) {
+export function GameScreen({ matchId, startedAt, shooterId, difficulty, currentUserId, onGameEnd, playersTotalPoints }: GameScreenProps) {
     const isShooter = shooterId === currentUserId
     const { asteroids, bullets, timer, score, starHp, aimRef, onMouseMove, dialogue, typistFireCount, contactExplosion, completeContactFail } =
-        useStarShield({ matchId, startedAt, isShooter, difficulty, currentUserId, onGameEnd })
+        useStarShield({ matchId, startedAt, isShooter, difficulty, currentUserId, onGameEnd, playersTotalPoints })
 
     return (
         <div className="relative min-h-screen overflow-hidden">
