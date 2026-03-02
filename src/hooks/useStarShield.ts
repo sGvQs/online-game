@@ -30,7 +30,13 @@ const SPAWN_X_MIN = 0.0   // 左
 const SPAWN_X_MAX = 1.0  // 右
 const SPAWN_Y_MIN = 0.1  // 下
 const SPAWN_Y_MAX = 0.1  //  上
-const ASTEROID_DURATION_MS = 8000
+/** 隕石がスポーンから目標まで到達する時間（ms）。短いほど速い */
+const ASTEROID_DURATION_MS: Record<Difficulty, number> = {
+    EASY: 8000,
+    NORMAL: 7000,
+    HARD: 6000,
+    HELL: 5500,
+}
 
 // 弾の設定（デバッグ用に BULLET_RADIUS を変数化）
 const BULLET_SPEED = 0.0008 // 正規化座標/ms（速すぎないように）
@@ -61,9 +67,9 @@ export const ASTEROID_HP: Record<Difficulty, number> = {
 // 星のHP
 export const STAR_HP: Record<Difficulty, number> = {
     EASY: 20,
-    NORMAL: 20,
-    HARD: 20,
-    HELL: 10,
+    NORMAL: 18,
+    HARD: 15,
+    HELL: 6,
 }
 
 /** 単語完了時の広範囲弾数（破壊なし。HELL は全破壊＋全方位弾で別扱い） */
@@ -360,6 +366,7 @@ export interface Asteroid {
     spawnY: number // 0-1（スポーン時 Y）
     targetX: number // 0-1（飛翔先 X、星中心+ランダム）
     targetY: number // 0-1（飛翔先 Y、星中心+ランダム）
+    durationMs: number // スポーン→目標までの時間（ms）
     hp: number // 現在HP（0で破壊）
     destroyedAt?: number
     hasDamagedStar?: boolean // 星にダメージを与えたか
@@ -380,7 +387,7 @@ export interface Bullet {
 
 export function getAsteroidPosition(asteroid: Asteroid, now: number): { x: number; y: number } {
     const elapsed = now - asteroid.spawnedAt
-    const progress = Math.min(1, elapsed / ASTEROID_DURATION_MS)
+    const progress = Math.min(1, elapsed / asteroid.durationMs)
     return {
         x: asteroid.spawnX + (asteroid.targetX - asteroid.spawnX) * progress,
         y: asteroid.spawnY + (asteroid.targetY - asteroid.spawnY) * progress,
@@ -531,6 +538,7 @@ export function useStarShield({
 
                 if (payload?.special) {
                     if (difficulty === 'HELL') {
+                        playVoiceRef.current('star-damage')
                         // HELL 必殺技: 全隕石一斉破壊 ＋ 全方位に弾を放出
                         const asts = asteroidsRef.current
                         const toDestroy = asts.filter((a) => !a.destroyedAt)
@@ -745,6 +753,7 @@ export function useStarShield({
                 spawnY: SPAWN_Y_MIN + Math.random() * (SPAWN_Y_MAX - SPAWN_Y_MIN),
                 targetX,
                 targetY,
+                durationMs: ASTEROID_DURATION_MS[difficulty],
                 hp: ASTEROID_HP[difficulty],
             }
             setAsteroids((prev) => {
@@ -845,7 +854,7 @@ export function useStarShield({
             const contacts = asts.filter((a) => {
                 if (a.destroyedAt || destroyedThisFrame.has(a.id) || a.hasDamagedStar) return false
                 const ap = getAsteroidPosition(a, now)
-                const progress = (now - a.spawnedAt) / ASTEROID_DURATION_MS
+                const progress = (now - a.spawnedAt) / a.durationMs
                 if (progress >= 1) return true
                 const dist = Math.hypot(ap.x - STAR_TARGET_X, ap.y - STAR_TARGET_Y)
                 return dist < STAR_RADIUS + ASTEROID_RADIUS
