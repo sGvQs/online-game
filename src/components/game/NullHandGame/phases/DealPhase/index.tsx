@@ -159,7 +159,6 @@ export function DealPhase({
                     userColor={userColor}
                 />
                 <RewardSystem
-                    guestCount={currentScores.length - 1}
                     isHost={isCurrentHost}
                     userColor={userColor}
                     size="md"

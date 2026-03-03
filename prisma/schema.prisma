@@ -36,6 +36,10 @@ model User {
   monthlyRankings           MonthlyRanking[]
   pointLogs                 PointLog[]
   roomDeletedNotifications RoomDeletedNotification[]
+  typingShootShooterMatches TypingShootMatch[] @relation("TypingShootShooter")
+  typingShootTypistMatches  TypingShootMatch[] @relation("TypingShootTypist")
+  starShieldClearAsShooter  StarShieldClearRecord[] @relation("StarShieldClearShooter")
+  starShieldClearAsTypist   StarShieldClearRecord[] @relation("StarShieldClearTypist")
 
   @@map("users")
 }
@@ -125,12 +129,13 @@ model Match {
   currentTurnIndex Int      @default(1) @map("current_turn_index")
   totalTurns       Int      @default(1) @map("total_turns")
 
-  errorEvents  ErrorEvent[]
-  jankenEvents JankenEvent[]
-  jankenLogs   JankenLog[]
-  matchScores  MatchScore[]
-  room         Room          @relation(fields: [roomId], references: [id], onDelete: Cascade)
-  winner       User?         @relation(fields: [winnerId], references: [id])
+  errorEvents      ErrorEvent[]
+  jankenEvents     JankenEvent[]
+  jankenLogs       JankenLog[]
+  matchScores      MatchScore[]
+  typingShootMatch TypingShootMatch?
+  room             Room              @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  winner           User?             @relation(fields: [winnerId], references: [id])
 
   @@map("matches")
 }
@@ -239,4 +244,51 @@ model PointLog {
 
   @@index([userId, gameType])
   @@map("point_logs")
+}
+
+// -------------------------------------------------------------------------------------------------
+// STAR SHIELD ゲーム用モデル
+// -------------------------------------------------------------------------------------------------
+
+model TypingShootMatch {
+  id                  String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  matchId             String    @unique @map("match_id") @db.Uuid
+  shooterId           String    @map("shooter_id") @db.Uuid
+  typistId            String    @map("typist_id") @db.Uuid
+  characterName       String    @map("character_name")
+  difficulty          String    @default("NORMAL")
+  targetAsteroidCount Int       @default(0) @map("target_asteroid_count")
+  spawnedCount        Int       @default(0) @map("spawned_count")
+  destroyedCount      Int       @default(0) @map("destroyed_count")
+  startedAt           DateTime  @default(now()) @map("started_at")
+  endedAt             DateTime? @map("ended_at")
+  isCleared           Boolean   @default(false) @map("is_cleared")
+  failureReason       String?   @map("failure_reason")
+  accuracyRate        Float?    @map("accuracy_rate")
+  durationSeconds     Int?      @map("duration_seconds")
+
+  match   Match @relation(fields: [matchId], references: [id], onDelete: Cascade)
+  shooter User  @relation("TypingShootShooter", fields: [shooterId], references: [id])
+  typist  User  @relation("TypingShootTypist", fields: [typistId], references: [id])
+
+  @@index([shooterId, isCleared])
+  @@index([typistId, isCleared])
+  @@map("typing_shoot_matches")
+}
+
+// クリア記録（ランキング・HELL解放判定用）
+model StarShieldClearRecord {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  shooterId      String   @map("shooter_id") @db.Uuid
+  typistId       String   @map("typist_id") @db.Uuid
+  destroyedCount Int      @map("destroyed_count")
+  difficulty     String
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  shooter User @relation("StarShieldClearShooter", fields: [shooterId], references: [id])
+  typist  User @relation("StarShieldClearTypist", fields: [typistId], references: [id])
+
+  @@index([shooterId, typistId])
+  @@index([typistId, shooterId])
+  @@map("star_shield_clear_records")
 }

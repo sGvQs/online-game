@@ -4,12 +4,14 @@ import { createClient } from '@/utils/supabase/client'
 import { useEffect, useState, useTransition, useCallback, ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { useRouter } from 'next/navigation'
-import { getRoom, selectGame, getRoomUsers } from '@/server/actions/room'
+import { getRoom, selectGame, getRoomUsers, kickUserFromRoom } from '@/server/actions/room'
 import { getNullHandRankings } from '@/server/actions/game/rankingActions'
 import { Room, RoomUserWithUser, UserRanking } from '@/shared/types'
 import { GameSelectionCard } from './GameSelectionCard'
 import { MemberListView } from './MemberList/MemberListView'
 import { GameDescriptionModal } from './GameDescriptionModal'
+import { RoomModal } from './RoomModal'
+import { isPlayerCountValid, getPlayerRangeLabel } from '@/shared/constants/gamePlayerRequirements'
 import { AnnoyingDinosaurComplaint } from '@/components/dashboard/AnnoyingDinosaurComplaint'
 import {
     getRandomSelfEntryMessage,
@@ -48,9 +50,12 @@ export function RoomPageClientWrapper({
     })
     const [showGameDescription, setShowGameDescription] = useState(false) // モーダル表示フラグ
     const [selectedGameType, setSelectedGameType] = useState<string>('') // モーダルで表示するゲームの種類
+    const [showGameStartError, setShowGameStartError] = useState(false) // 人数エラーモーダル
+    const [gameStartErrorType, setGameStartErrorType] = useState<string>('')
     const [showDinosaur, setShowDinosaur] = useState(false)
     const [dinosaurKey, setDinosaurKey] = useState(0)
     const [dinosaurMessage, setDinosaurMessage] = useState('')
+    const [kickingUserId, setKickingUserId] = useState<string | null>(null)
 
     const triggerDinosaur = useCallback(
         (type: 'self' | 'other') => {
@@ -87,6 +92,12 @@ export function RoomPageClientWrapper({
         try {
             const roomUsers = await getRoomUsers(room.id)
             setMembers(roomUsers)
+            // 自分がメンバーに含まれていなければ追放されたのでダッシュボードへ
+            const isStillMember = roomUsers.some((u: RoomUserWithUser) => u.userId === currentUserId)
+            if (!isStillMember) {
+                router.push('/dashboard')
+                return
+            }
             const rankings = await getNullHandRankings(
                 roomUsers.map((u: RoomUserWithUser) => u.userId)
             )
@@ -96,7 +107,7 @@ export function RoomPageClientWrapper({
         } catch (error) {
             console.error('メンバー更新に失敗:', error)
         }
-    }, [room.id])
+    }, [room.id, currentUserId, router])
 
     useEffect(() => {
         const channel = supabase
@@ -134,8 +145,30 @@ export function RoomPageClientWrapper({
         }
     }, [room.id, currentUserId, handleRoomChange, handleMemberChange, triggerDinosaur])
 
+    const handleKick = useCallback(
+        async (targetUserId: string) => {
+            if (!isHost) return
+            setKickingUserId(targetUserId)
+            try {
+                await kickUserFromRoom(room.id, targetUserId)
+                await handleMemberChange()
+            } catch (error) {
+                console.error('追放に失敗:', error)
+            } finally {
+                setKickingUserId(null)
+            }
+        },
+        [room.id, isHost, handleMemberChange]
+    )
+
     const handleSelectGame = (gameType: string) => {
         if (isHost) {
+            const memberCount = members.length
+            if (!isPlayerCountValid(gameType as 'error-hunter' | 'null-hand' | 'star-shield', memberCount)) {
+                setGameStartErrorType(gameType)
+                setShowGameStartError(true)
+                return
+            }
             startTransition(async () => {
                 await selectGame(room.id, gameType)
             })
@@ -173,7 +206,15 @@ export function RoomPageClientWrapper({
 
                 {/* Sidebar / Members */}
                 <div className="lg:col-span-1">
-                    <MemberListView members={members} rankingsMap={rankingsMap} />
+                    <MemberListView
+                        members={members}
+                        rankingsMap={rankingsMap}
+                        isHost={isHost}
+                        currentUserId={currentUserId}
+                        roomCreatorId={room.createdBy}
+                        onKick={handleKick}
+                        kickingUserId={kickingUserId}
+                    />
                 </div>
             </div>
 
@@ -182,6 +223,32 @@ export function RoomPageClientWrapper({
                 onClose={() => setShowGameDescription(false)}
                 gameType={selectedGameType}
             />
+
+            <RoomModal
+                isOpen={showGameStartError}
+                onClose={() => setShowGameStartError(false)}
+                title="ゲームを開始できません"
+                showCloseButton
+            >
+                <div className="p-6 space-y-4">
+                    <p className="text-brand-800">
+                        現在の参加者数（{members.length}人）では、このゲームをプレイできません。
+                    </p>
+                    <p className="text-sm text-brand-600">
+                        {gameStartErrorType === 'error-hunter' && `ERROR HUNTER は ${getPlayerRangeLabel('error-hunter')}でプレイできます。`}
+                        {gameStartErrorType === 'null-hand' && `NULL HAND は ${getPlayerRangeLabel('null-hand')}でプレイできます。`}
+                        {gameStartErrorType === 'star-shield' && 'STAR SHIELD は 2人のみでプレイできます。'}
+                    </p>
+                    <div className="flex justify-center pt-4">
+                        <button
+                            onClick={() => setShowGameStartError(false)}
+                            className="px-8 py-3 rounded-lg font-bold text-sm transition-all border bg-brand-500 text-white border-brand-600 hover:bg-brand-600"
+                        >
+                            OK
+                        </button>
+                    </div>
+                </div>
+            </RoomModal>
         </>
     )
 }

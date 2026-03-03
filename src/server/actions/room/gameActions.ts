@@ -52,11 +52,9 @@ export async function returnToRoom(roomId: string) {
         }
     })
 
-    // 戻るタイミングで全てのゲームデータ削除
     await prisma.match.deleteMany({
-        where: { roomId: roomId }
-    });
+        where: { roomId }
+    })
 
-    return;
-
+    revalidatePath(`/room/${roomId}`)
 }

@@ -4,7 +4,6 @@ import { cn } from '@/lib/utils'
 import { motion } from 'framer-motion'
 
 interface RewardSystemProps {
-    guestCount: number
     isHost?: boolean
     userColor?: string
     variant?: 'cyan' | 'red'
@@ -13,7 +12,6 @@ interface RewardSystemProps {
 }
 
 export function RewardSystem({
-    guestCount,
     isHost = false,
     userColor = '#44FFFF',
     variant = 'red',
@@ -21,9 +19,9 @@ export function RewardSystem({
     showArrow = true,
 }: RewardSystemProps) {
     const rules = [
-        { title: 'NULL HAND', desc: '全員があいこ', show: guestCount >= 2, pts: '+5', target: 'HOST', color: '#FF4444' },
+        { title: 'NULL HAND', desc: '全員があいこ', show: true, pts: '+5', target: 'HOST', color: '#FF4444' },
         { title: 'GUEST WIN', desc: 'ホストに勝利', show: true, pts: '+3', target: 'GUEST', color: '#44FFFF' },
-        { title: 'HOST PERFECT', desc: 'ゲスト全員を撃破', show: guestCount >= 2, pts: '+3', target: 'HOST', color: '#FF4444' },
+        { title: 'HOST PERFECT', desc: 'ゲスト全員を撃破', show: true, pts: '+3', target: 'HOST', color: '#FF4444' },
     ]
 
     return (
