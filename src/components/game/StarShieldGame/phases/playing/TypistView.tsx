@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
 import { AnimatePresence, motion } from 'framer-motion'
-import { DialogueLine } from '@/hooks/useStarShield'
+import { DialogueLine, getRomaji } from '@/hooks/useStarShield'
 import { StarVisual, AuroraGlow } from '../../shared'
 import { FONTS, COLORS, ICONS, BULLET_COLOR, AURORA_GRADIENT_TYPIST } from '../../constants'
 
@@ -44,9 +44,10 @@ interface TypistViewProps {
 }
 
 function TypingDisplay({ line, charIndex }: { line: DialogueLine; charIndex: number }) {
-    const done = line.romaji.slice(0, charIndex)
-    const current = line.romaji[charIndex] ?? ''
-    const rest = line.romaji.slice(charIndex + 1)
+    const romaji = getRomaji(line.text)
+    const done = romaji.slice(0, charIndex)
+    const current = romaji[charIndex] ?? ''
+    const rest = romaji.slice(charIndex + 1)
     return (
         <div className="flex flex-col items-center gap-6">
             <motion.div
@@ -68,7 +69,7 @@ function TypingDisplay({ line, charIndex }: { line: DialogueLine; charIndex: num
             <div className="w-64 h-1 bg-white/10 rounded-full overflow-hidden">
                 <motion.div
                     className="h-full bg-brand-500/60 rounded-full"
-                    animate={{ width: `${line.romaji.length > 0 ? (charIndex / line.romaji.length) * 100 : 0}%` }}
+                    animate={{ width: `${romaji.length > 0 ? (charIndex / romaji.length) * 100 : 0}%` }}
                     transition={{ duration: 0.1 }}
                 />
             </div>
@@ -98,7 +99,8 @@ export function TypistView({ dialogue, score, starHp, maxStarHp, typistFireCount
 
     useEffect(() => {
         if (typistFireCount > prevTypistFireCountRef.current) {
-            setBullets((b) => [...b, { id: crypto.randomUUID() }])
+            const delta = typistFireCount - prevTypistFireCountRef.current
+            setBullets((b) => [...b, ...Array.from({ length: delta }, () => ({ id: crypto.randomUUID() }))])
         }
         prevTypistFireCountRef.current = typistFireCount
     }, [typistFireCount])

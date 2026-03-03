@@ -5,7 +5,7 @@ import { getNullHandRankings } from '@/server/actions/game/rankingActions'
 import { NullHandGame } from '@/components/game/NullHandGame'
 import { RoomUserWithReadyStatus } from '@/shared/types'
 
-export default async function NullHandPage({ params }: { params: { roomId: string } }) {
+export default async function NullHandPage({ params }: { params: Promise<{ roomId: string }> }) {
     const currentUser = await getCurrentUser()
     if (!currentUser) redirect('/')
 

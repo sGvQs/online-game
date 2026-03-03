@@ -5,7 +5,7 @@ import { getNullHandRankings } from '@/server/actions/game/rankingActions'
 import { RoomUserWithReadyStatus } from '@/shared/types'
 import { StarShieldGame } from '@/components/game/StarShieldGame'
 
-export default async function StarShieldPage({ params }: { params: { roomId: string } }) {
+export default async function StarShieldPage({ params }: { params: Promise<{ roomId: string }> }) {
     const currentUser = await getCurrentUser()
     if (!currentUser) redirect('/')
 
