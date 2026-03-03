@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import { useGameRoom } from '@/hooks/useGameRoom'
 import { returnToRoom, resetAllReady } from '@/server/actions/room'
-import { startStarShieldMatch, getStarShieldMatchStatus } from '@/server/actions/game'
+import { startStarShieldMatch, getStarShieldMatchStatus, isHellUnlocked } from '@/server/actions/game'
 import { RoomWithUsersAndReadyStatus } from '@/shared/types'
 import type { UserRanking } from '@/shared/types/game'
 import { Difficulty, GameResult, GameStats } from '@/hooks/useStarShield'
@@ -45,6 +45,7 @@ export function StarShieldGame({
     const [shooterId, setShooterId] = useState<string | null>(null)
     const [gameResult, setGameResult] = useState<GameResult | null>(null)
     const [gameStats, setGameStats] = useState<GameStats | null>(null)
+    const [hellUnlocked, setHellUnlocked] = useState(false)
 
     const initialRoleChoices = useMemo(() => {
         const users = room.users
@@ -174,6 +175,31 @@ export function StarShieldGame({
         if (choices.length !== 2) return true
         return choices[0] === choices[1]
     }, [room.users, roleChoices])
+
+    // 役職が揃ったときに HELL 解放状態を取得
+    const shooterIdForUnlock = room.users.find((u) => roleChoices[u.userId] === 'SHOOTER')?.userId
+    const typistIdForUnlock = room.users.find((u) => roleChoices[u.userId] === 'TYPIST')?.userId
+    useEffect(() => {
+        if (!shooterIdForUnlock || !typistIdForUnlock || roleConflict) {
+            setHellUnlocked(false)
+            return
+        }
+        isHellUnlocked(shooterIdForUnlock, typistIdForUnlock).then(setHellUnlocked)
+    }, [shooterIdForUnlock, typistIdForUnlock, roleConflict])
+
+    // HELL が未解放のときに HELL が選択されていたら NORMAL にリセット
+    useEffect(() => {
+        if (!hellUnlocked && difficulty === 'HELL') {
+            setDifficulty('NORMAL')
+            if (isHost) {
+                lobbyChannelRef.current?.send({
+                    type: 'broadcast',
+                    event: 'difficulty',
+                    payload: { difficulty: 'NORMAL' as const },
+                })
+            }
+        }
+    }, [hellUnlocked, difficulty, isHost])
 
     const canStartLobby = allUsersReady
 
@@ -307,6 +333,7 @@ export function StarShieldGame({
                     difficulty={difficulty}
                     onDifficultyChange={handleDifficultyChange}
                     isHost={isHost}
+                    isHellUnlocked={hellUnlocked}
                 />
             )}
             {phase === 'PLAYING' && matchId && startedAt && shooterId && (

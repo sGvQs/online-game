@@ -38,6 +38,8 @@ model User {
   roomDeletedNotifications RoomDeletedNotification[]
   typingShootShooterMatches TypingShootMatch[] @relation("TypingShootShooter")
   typingShootTypistMatches  TypingShootMatch[] @relation("TypingShootTypist")
+  starShieldClearAsShooter  StarShieldClearRecord[] @relation("StarShieldClearShooter")
+  starShieldClearAsTypist   StarShieldClearRecord[] @relation("StarShieldClearTypist")
 
   @@map("users")
 }
@@ -272,4 +274,21 @@ model TypingShootMatch {
   @@index([shooterId, isCleared])
   @@index([typistId, isCleared])
   @@map("typing_shoot_matches")
+}
+
+// クリア記録（ランキング・HELL解放判定用）
+model StarShieldClearRecord {
+  id             String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  shooterId      String   @map("shooter_id") @db.Uuid
+  typistId       String   @map("typist_id") @db.Uuid
+  destroyedCount Int      @map("destroyed_count")
+  difficulty     String
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  shooter User @relation("StarShieldClearShooter", fields: [shooterId], references: [id])
+  typist  User @relation("StarShieldClearTypist", fields: [typistId], references: [id])
+
+  @@index([shooterId, typistId])
+  @@index([typistId, shooterId])
+  @@map("star_shield_clear_records")
 }

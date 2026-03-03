@@ -35,6 +35,7 @@ export {
     saveStarShieldResult,
     getStarShieldMatchInfo,
     getStarShieldMatchStatus,
+    isHellUnlocked,
 } from './starShieldActions'
 
 

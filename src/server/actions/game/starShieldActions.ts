@@ -19,6 +19,8 @@ const CLEAR_POINTS: Record<Difficulty, number> = {
     HELL: 4,
 }
 
+const HELL_UNLOCK_THRESHOLD = 100
+
 const GAME_DURATION_SECONDS = 90
 
 /**
@@ -51,6 +53,13 @@ export async function startStarShieldMatch(
     }
     if (shooterId === typistId) {
         throw new Error('Shooter と Typist は別のプレイヤーである必要があります')
+    }
+
+    if (difficulty === 'HELL') {
+        const unlocked = await isHellUnlocked(shooterId, typistId)
+        if (!unlocked) {
+            throw new Error('HELL難易度は解放されていません（隕石破壊数200以上のクリアで解放）')
+        }
     }
 
     const spawnRate = SPAWN_RATES[difficulty]
@@ -229,8 +238,13 @@ export async function saveStarShieldResult(
         data: { status: 'FINISHED' },
     })
 
-    // 成功時: 両プレイヤーに難易度に応じた pt を加算
+    // 成功時: クリア記録を保存し、両プレイヤーに難易度に応じた pt を加算
     if (isCleared) {
+        await prisma.$executeRaw`
+            INSERT INTO star_shield_clear_records (shooter_id, typist_id, destroyed_count, difficulty)
+            VALUES (${shooterId}, ${typistId}, ${destroyedCount}, ${diff})
+        `
+
         const points = CLEAR_POINTS[diff]
         const now = new Date()
         const year = now.getFullYear()
@@ -263,4 +277,21 @@ export async function saveStarShieldResult(
             })
         }
     }
+}
+
+/**
+ * HELL 難易度が解放されているか（シューター＋タイピストのペアで隕石破壊数200以上の記録があるか）
+ */
+export async function isHellUnlocked(shooterId: string, typistId: string): Promise<boolean> {
+    // $queryRaw を使用（Prisma 7 + adapter 環境で starShieldClearRecord が undefined になる問題を回避）
+    const rows = await prisma.$queryRaw<unknown[]>`
+        SELECT 1 FROM star_shield_clear_records
+        WHERE destroyed_count >= ${HELL_UNLOCK_THRESHOLD}
+        AND (
+            (shooter_id = ${shooterId} AND typist_id = ${typistId})
+            OR (shooter_id = ${typistId} AND typist_id = ${shooterId})
+        )
+        LIMIT 1
+    `
+    return rows.length > 0
 }

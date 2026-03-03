@@ -28,6 +28,7 @@ interface RoleSelectionScreenProps {
     difficulty: Difficulty
     onDifficultyChange: (d: Difficulty) => void
     isHost: boolean
+    isHellUnlocked: boolean
 }
 
 export function RoleSelectionScreen({
@@ -41,6 +42,7 @@ export function RoleSelectionScreen({
     difficulty,
     onDifficultyChange,
     isHost,
+    isHellUnlocked,
 }: RoleSelectionScreenProps) {
     const myRole = roleChoices[currentUserId]
     const activeDiffMeta = DIFFICULTY_META[difficulty]
@@ -81,31 +83,42 @@ export function RoleSelectionScreen({
                             {DIFFICULTIES.map((d) => {
                                 const meta = DIFFICULTY_META[d]
                                 const isActive = difficulty === d
+                                const isHellLocked = d === 'HELL' && !isHellUnlocked
+                                const canSelect = isHost && (!isHellLocked || d !== 'HELL')
                                 return (
                                     <button
                                         key={d}
-                                        onClick={() => isHost && onDifficultyChange(d)}
-                                        disabled={!isHost}
+                                        onClick={() => canSelect && onDifficultyChange(d)}
+                                        disabled={!canSelect}
+                                        title={isHellLocked ? '隕石破壊数100以上のクリアで解放' : undefined}
                                         className={cn(
                                             'flex items-center gap-3 px-3 py-2 rounded-xl transition-all duration-200',
-                                            isHost ? 'cursor-pointer hover:scale-[1.02] hover:brightness-110' : 'cursor-default',
+                                            canSelect ? 'cursor-pointer hover:scale-[1.02] hover:brightness-110' : 'cursor-default',
                                         )}
                                         style={{
                                             fontFamily: FONTS.CHERRY_BOMB,
                                             background: isActive ? meta.bg : 'transparent',
                                             border: `1.5px solid ${isActive ? meta.border : 'rgba(255,255,255,0.07)'}`,
                                             boxShadow: isActive ? meta.glow : 'none',
-                                            color: isActive ? meta.text : COLORS.WHITE_2,
+                                            color: isActive ? meta.text : isHellLocked ? COLORS.WHITE_15 : COLORS.WHITE_2,
+                                            opacity: isHellLocked ? 0.5 : 1,
                                         }}
                                     >
                                         <span className="text-lg leading-none w-5 text-center shrink-0">{meta.emoji}</span>
                                         <span className="text-sm font-bold flex-1 text-left">{meta.label}</span>
-                                        <span
-                                            className="text-[10px] shrink-0 tabular-nums"
-                                            style={{ fontFamily: FONTS.DOT_GOTHIC, color: isActive ? meta.text : COLORS.WHITE_15 }}
-                                        >
-                                            {meta.rate}
-                                        </span>
+                                        {isHellLocked && (
+                                            <span className="text-[9px] shrink-0" style={{ fontFamily: FONTS.DOT_GOTHIC, color: COLORS.WHITE_15 }}>
+                                                解放条件
+                                            </span>
+                                        )}
+                                        {!isHellLocked && (
+                                            <span
+                                                className="text-[10px] shrink-0 tabular-nums"
+                                                style={{ fontFamily: FONTS.DOT_GOTHIC, color: isActive ? meta.text : COLORS.WHITE_15 }}
+                                            >
+                                                {meta.rate}
+                                            </span>
+                                        )}
                                     </button>
                                 )
                             })}

@@ -42,7 +42,7 @@ const HELL_ASTEROID_DURATION_MIN = 2000
 // 弾の設定（デバッグ用に BULLET_RADIUS を変数化）
 const BULLET_SPEED = 0.0008 // 正規化座標/ms（速すぎないように）
 // export const BULLET_RADIUS = 0.008 // デバッグ時は大きくできる
-export const BULLET_RADIUS = 0.008 // デバッグ時は大きくできる
+export const BULLET_RADIUS = 1 // デバッグ時は大きくできる
 export const ASTEROID_RADIUS = 0.02
 const BULLET_MAX_AGE_MS = 3000
 
@@ -53,7 +53,7 @@ const STAR_TARGET_OFFSET = 0.04
 const SPAWN_INTERVALS_MS: Record<Difficulty, number> = {
     EASY: 2000,
     NORMAL: 1500,
-    HARD: 1000,
+    HARD: 800,
     HELL: 200,
 }
 
