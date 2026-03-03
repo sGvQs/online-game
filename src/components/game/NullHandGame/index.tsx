@@ -13,6 +13,7 @@ import { BattlePhase } from './phases/BattlePhase'
 import { ResultPhase } from './phases/ResultPhase'
 import { GameOverPhase } from './phases/GameOverPhase'
 import { OpeningSplash } from './OpeningSplash'
+import { PresenceDuplicateWarning } from '@/components/common/PresenceDuplicateWarning'
 
 interface NullHandGameProps {
     room: RoomWithUsersAndReadyStatus
@@ -156,6 +157,7 @@ export function NullHandGame({
     }, [userColor])
 
     return (
+        <PresenceDuplicateWarning roomId={roomId} currentUserId={currentUserId}>
         <>
             <AnimatePresence mode="popLayout">
                 {phase === 'TITLE' && showSplash && (
@@ -247,5 +249,6 @@ export function NullHandGame({
                 )}
             </AnimatePresence>
         </>
+        </PresenceDuplicateWarning>
     )
 }
