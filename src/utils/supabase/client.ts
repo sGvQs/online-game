@@ -7,8 +7,26 @@ export function createClient() {
     if (!client) {
         client = createBrowserClient(
             process.env.NEXT_PUBLIC_SUPABASE_URL!,
-            process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+            process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+            {
+                realtime: {
+                    worker: true,
+                    heartbeatCallback: (status) => {
+                        if (status === 'disconnected' && client) {
+                            client.realtime.connect()
+                        }
+                    },
+                },
+            }
         )
+
+        if (typeof document !== 'undefined') {
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'visible' && client) {
+                    client.realtime.connect()
+                }
+            })
+        }
     }
     return client
 }
