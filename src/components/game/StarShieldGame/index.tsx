@@ -176,16 +176,17 @@ export function StarShieldGame({
         return choices[0] === choices[1]
     }, [room.users, roleChoices])
 
-    // 役職が揃ったときに HELL 解放状態を取得
+    // 役職が揃ったときに HELL 解放状態を取得（ROLE_SELECT に遷移するたびに再取得し、クリア直後も解放を反映）
     const shooterIdForUnlock = room.users.find((u) => roleChoices[u.userId] === 'SHOOTER')?.userId
     const typistIdForUnlock = room.users.find((u) => roleChoices[u.userId] === 'TYPIST')?.userId
     useEffect(() => {
+        if (phase !== 'ROLE_SELECT') return
         if (!shooterIdForUnlock || !typistIdForUnlock || roleConflict) {
             setHellUnlocked(false)
             return
         }
         isHellUnlocked(shooterIdForUnlock, typistIdForUnlock).then(setHellUnlocked)
-    }, [shooterIdForUnlock, typistIdForUnlock, roleConflict])
+    }, [phase, shooterIdForUnlock, typistIdForUnlock, roleConflict])
 
     // HELL が未解放のときに HELL が選択されていたら NORMAL にリセット
     useEffect(() => {
