@@ -15,6 +15,7 @@ import { FACE_ICON_PATHS, DEFAULT_FACE_ICON } from '@/shared/constants/faceIcon'
 import { getNullHandRankings } from '@/server/actions/game/rankingActions'
 import { cn } from '@/lib/utils'
 import { errorHunterGame } from './styles'
+import { PresenceDuplicateWarning } from '@/components/common/PresenceDuplicateWarning'
 
 interface ErrorHunterGameProps {
     room: RoomWithUsersAndReadyStatus
@@ -147,6 +148,7 @@ export function ErrorHunterGame({
     const allUsersReady = room.users.every((u: RoomUserWithReadyStatus) => u.isReady)
 
     return (
+        <PresenceDuplicateWarning roomId={roomId} currentUserId={currentUserId}>
         <div className={styles.container()}>
             {/* Initialization Dialog */}
             {isInitializing && (
@@ -457,5 +459,6 @@ export function ErrorHunterGame({
                 </div>
             )}
         </div>
+        </PresenceDuplicateWarning>
     )
 }

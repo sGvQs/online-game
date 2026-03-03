@@ -12,6 +12,7 @@ import { TitleScreen } from './phases/TitleScreen'
 import { RoleSelectionScreen } from './phases/RoleSelectionScreen'
 import { GameScreen } from './phases/GameScreen'
 import { ResultScreen } from './phases/ResultScreen'
+import { PresenceDuplicateWarning } from '@/components/common/PresenceDuplicateWarning'
 
 type GamePhase = 'TITLE' | 'ROLE_SELECT' | 'PLAYING' | 'RESULT'
 type RoleChoice = 'SHOOTER' | 'TYPIST'
@@ -306,6 +307,7 @@ export function StarShieldGame({
 
     // 背景は (play) layout で描画（room ⇔ game 遷移時もアンマウントされない）
     return (
+        <PresenceDuplicateWarning roomId={roomId} currentUserId={currentUserId}>
         <div className="relative min-h-screen overflow-hidden">
             {phase === 'TITLE' && (
                 <TitleScreen
@@ -357,5 +359,6 @@ export function StarShieldGame({
                 />
             )}
         </div>
+        </PresenceDuplicateWarning>
     )
 }
