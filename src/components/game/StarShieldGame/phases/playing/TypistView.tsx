@@ -99,7 +99,8 @@ export function TypistView({ dialogue, score, starHp, maxStarHp, typistFireCount
 
     useEffect(() => {
         if (typistFireCount > prevTypistFireCountRef.current) {
-            setBullets((b) => [...b, { id: crypto.randomUUID() }])
+            const delta = typistFireCount - prevTypistFireCountRef.current
+            setBullets((b) => [...b, ...Array.from({ length: delta }, () => ({ id: crypto.randomUUID() }))])
         }
         prevTypistFireCountRef.current = typistFireCount
     }, [typistFireCount])

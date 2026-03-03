@@ -440,16 +440,21 @@ export interface GameStats {
     fireCount: number
 }
 
-// typing_shoot_matches の postgres_changes ペイロード型（snake_case）
-interface TypingShootMatchRow {
-    match_id: string
-    ended_at: string | null
-    is_cleared: boolean
-    failure_reason: string | null
-    spawned_count: number
-    destroyed_count: number
-    duration_seconds: number | null
+/** game_state broadcast のペイロード（ホストが一元管理し Typist に通知） */
+interface GameStatePayload {
+    spawned: number
+    destroyed: number
+    fireCount: number
+    starHp: number
 }
+
+/** game_end broadcast のペイロード */
+interface GameEndPayload {
+    result: GameResult
+    stats: GameStats
+}
+
+const GAME_STATE_THROTTLE_MS = 100
 
 export function useStarShield({
     matchId,
@@ -491,10 +496,31 @@ export function useStarShield({
     const gameEndedRef = useRef(false)
     const contactPendingRef = useRef(false)
     const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null)
+    /** 時刻ズレ補正時のみセット。duration 計算で使用 */
+    const effectiveStartedAtRef = useRef<number | null>(null)
+    const lastGameStateSendRef = useRef(0)
 
     useEffect(() => {
         starHpRef.current = starHp
     }, [starHp])
+
+    /** Shooter: game_state を broadcast（スロットリング付き） */
+    const sendGameState = useCallback(() => {
+        if (!isShooter) return
+        const now = Date.now()
+        if (now - lastGameStateSendRef.current < GAME_STATE_THROTTLE_MS) return
+        lastGameStateSendRef.current = now
+        channelRef.current?.send({
+            type: 'broadcast',
+            event: 'game_state',
+            payload: {
+                spawned: scoreRef.current.spawned,
+                destroyed: scoreRef.current.destroyed,
+                fireCount: fireCountRef.current,
+                starHp: starHpRef.current,
+            } satisfies GameStatePayload,
+        })
+    }, [isShooter])
 
     /** 隕石接触時の爆発位置・対象隕石ID（アニメ終了後に FAILED 遷移、対象隕石は非表示） */
     const [contactExplosion, setContactExplosion] = useState<{ x: number; y: number; asteroidId: string } | null>(null)
@@ -507,7 +533,8 @@ export function useStarShield({
         if (gameEndedRef.current) return
         gameEndedRef.current = true
 
-        const durationSeconds = Math.round((Date.now() - startedAt) / 1000)
+        const baseStartedAt = effectiveStartedAtRef.current ?? startedAt
+        const durationSeconds = Math.round((Date.now() - baseStartedAt) / 1000)
         const stats: GameStats = {
             spawnedCount: scoreRef.current.spawned,
             destroyedCount: scoreRef.current.destroyed,
@@ -529,6 +556,12 @@ export function useStarShield({
             } catch (e) {
                 console.error('結果保存失敗:', e)
             }
+            // Typist へ game_end を broadcast（postgres_changes の代替）
+            channelRef.current?.send({
+                type: 'broadcast',
+                event: 'game_end',
+                payload: { result, stats } satisfies GameEndPayload,
+            })
         }
 
         onGameEnd(result, stats)
@@ -536,8 +569,7 @@ export function useStarShield({
 
     // ============================================
     // Supabase Realtime チャンネル
-    // broadcast: fire のみ
-    // postgres_changes: typing_shoot_matches のゲーム終了検知（Typist 用）
+    // broadcast: fire, game_state, game_end（postgres_changes 廃止、ホスト集中管理）
     // ============================================
 
     useEffect(() => {
@@ -549,6 +581,7 @@ export function useStarShield({
             .on('broadcast', { event: 'fire' }, ({ payload }: { payload?: { special?: boolean } }) => {
                 fireCountRef.current += 1
                 playVoiceRef.current('shooting') // Shooter が fire を受信＝弾発射時
+                if (isShooter) sendGameState()
                 if (!isShooter) return
 
                 const now = Date.now()
@@ -570,18 +603,12 @@ export function useStarShield({
                                 asteroidsRef.current = next
                                 return next
                             })
-                            for (let i = 0; i < destroyedCount; i++) {
-                                channelRef.current?.send({
-                                    type: 'broadcast',
-                                    event: 'asteroid_destroyed',
-                                    payload: {},
-                                })
-                            }
                             setScore((prev) => {
                                 const next = { ...prev, destroyed: prev.destroyed + destroyedCount }
                                 scoreRef.current = next
                                 return next
                             })
+                            sendGameState()
                         }
 
                         const hellBulletCount = SPECIAL_SPREAD_BULLET_COUNT[difficulty]
@@ -703,52 +730,29 @@ export function useStarShield({
                     })
                 }
             })
-            // Typist: Shooter が隕石破壊したときに destroyed カウントを更新
-            .on('broadcast', { event: 'asteroid_destroyed' }, () => {
-                if (isShooter) return
-                setScore((prev) => {
-                    const next = { ...prev, destroyed: prev.destroyed + 1 }
-                    scoreRef.current = next
-                    return next
-                })
-            })
-            // Typist: 星HPの同期
-            .on('broadcast', { event: 'star_hp' }, ({ payload }: { payload: { starHp: number } }) => {
-                if (isShooter) return
-                playVoiceRef.current('star-damage')
+            // Typist: ホストが一元管理する game_state を受信
+            .on('broadcast', { event: 'game_state' }, ({ payload }: { payload?: GameStatePayload }) => {
+                if (isShooter || !payload) return
+                if (payload.starHp < starHpRef.current) playVoiceRef.current('star-damage')
+                setScore({ spawned: payload.spawned, destroyed: payload.destroyed })
                 setStarHp(payload.starHp)
+                fireCountRef.current = payload.fireCount
+                setTypistFireCount(payload.fireCount)
             })
-            // Typist 側: typing_shoot_matches の更新でゲーム終了を検知
-            .on(
-                'postgres_changes',
-                {
-                    event: 'UPDATE',
-                    schema: 'public',
-                    table: 'typing_shoot_matches',
-                    filter: `match_id=eq.${matchId}`,
-                },
-                ({ new: row }: { new: TypingShootMatchRow }) => {
-                    if (isShooter) return  // Shooter はローカルで処理済み
-                    // フィルターが効かない場合の安全弁
-                    if (row.match_id !== matchId) return
-                    if (!row.ended_at) return
-                    const result: GameResult = row.is_cleared
-                        ? 'CLEARED'
-                        : row.failure_reason === 'FAILED_CONTACT'
-                        ? 'FAILED_CONTACT'
-                        : 'FAILED_TIMEOUT'
-                    const stats: GameStats = {
-                        spawnedCount: row.spawned_count,
-                        destroyedCount: row.destroyed_count,
-                        durationSeconds: row.duration_seconds ?? 0,
-                        fireCount: fireCountRef.current,
-                    }
-                    if (gameEndedRef.current) return
-                    gameEndedRef.current = true
-                    onGameEnd(result, stats)
-                }
-            )
+            // Typist: ホストが game_end を broadcast（postgres_changes の代替）
+            .on('broadcast', { event: 'game_end' }, ({ payload }: { payload?: GameEndPayload }) => {
+                if (isShooter || !payload) return
+                if (gameEndedRef.current) return
+                gameEndedRef.current = true
+                onGameEnd(payload.result, payload.stats)
+            })
             .subscribe()
+
+        // Shooter: 初回 game_state を送信（Typist の初期同期用）
+        if (isShooter) {
+            lastGameStateSendRef.current = 0
+            sendGameState()
+        }
 
         return () => {
             supabase.removeChannel(channel)
@@ -758,14 +762,25 @@ export function useStarShield({
 
     // ============================================
     // タイマー（startedAt ベースで両者独立計算）
+    // クライアント・サーバー時刻ズレ対策: 初回時点で remaining<=0 なら
+    // クライアント基準で開始時刻を補正し、即CLEARを防ぐ
     // ============================================
 
     useEffect(() => {
-        const calcRemaining = () =>
-            Math.max(0, GAME_DURATION_SECONDS - Math.floor((Date.now() - startedAt) / 1000))
+        effectiveStartedAtRef.current = null
 
-        // 初期値を設定
-        setTimer(calcRemaining())
+        const getBase = () => effectiveStartedAtRef.current ?? startedAt
+        const calcRemaining = () =>
+            Math.max(0, GAME_DURATION_SECONDS - Math.floor((Date.now() - getBase()) / 1000))
+
+        // 初回計算で既に残り時間が 0 以下の場合（時刻ズレ）→ クライアント基準で開始時刻を補正
+        let initialRemaining = calcRemaining()
+        if (initialRemaining <= 0) {
+            effectiveStartedAtRef.current = Date.now()
+            initialRemaining = GAME_DURATION_SECONDS
+        }
+
+        setTimer(initialRemaining)
 
         const interval = setInterval(() => {
             const remaining = calcRemaining()
@@ -824,6 +839,7 @@ export function useStarShield({
                 scoreRef.current = next
                 return next
             })
+            sendGameState()
         }, spawnInterval)
 
         // 弾・隕石の当たり判定 + 隕石→星の接触判定ループ
@@ -870,13 +886,6 @@ export function useStarShield({
                     asteroidsRef.current = next
                     return next
                 })
-                for (let i = 0; i < destroyedCount; i++) {
-                    channelRef.current?.send({
-                        type: 'broadcast',
-                        event: 'asteroid_destroyed',
-                        payload: {},
-                    })
-                }
                 setBullets((prev) => {
                     const next = prev.filter((b) => !hitBulletIds.has(b.id))
                     bulletsRef.current = next
@@ -888,6 +897,7 @@ export function useStarShield({
                         scoreRef.current = next
                         return next
                     })
+                    sendGameState()
                 }
             }
 
@@ -923,11 +933,8 @@ export function useStarShield({
                 const newStarHp = Math.max(0, starHpRef.current - damage)
                 starHpRef.current = newStarHp
                 setStarHp(newStarHp)
-                channelRef.current?.send({
-                    type: 'broadcast',
-                    event: 'star_hp',
-                    payload: { starHp: newStarHp },
-                })
+                lastGameStateSendRef.current = 0 // スロットルをリセットして即送信
+                sendGameState()
                 setAsteroids((prev) => {
                     const contactIds = new Set(contacts.map((c) => c.id))
                     const next = prev.map((a) =>
@@ -952,26 +959,7 @@ export function useStarShield({
             if (spawnTimer) clearInterval(spawnTimer)
             if (rafId) cancelAnimationFrame(rafId)
         }
-    }, [matchId, isShooter, difficulty, playersTotalPoints])
-
-    // ============================================
-    // Typist のみ: スコア（spawned）をローカル計算
-    // ============================================
-
-    useEffect(() => {
-        if (isShooter) return
-
-        const spawnIntervalSec = SPAWN_INTERVALS_MS[difficulty] / 1000
-
-        const interval = setInterval(() => {
-            if (gameEndedRef.current) return
-            const elapsed = (Date.now() - startedAt) / 1000
-            const spawned = Math.floor(elapsed / spawnIntervalSec)
-            setScore((prev) => ({ ...prev, spawned }))
-        }, 500)
-
-        return () => clearInterval(interval)
-    }, [matchId, isShooter, difficulty, startedAt])
+    }, [matchId, isShooter, difficulty, playersTotalPoints, sendGameState])
 
     // ============================================
     // マウス操作（Shooter）
@@ -1009,10 +997,8 @@ export function useStarShield({
             event: 'fire',
             payload: { special: isLastChar },
         })
-        fireCountRef.current += 1 // 送信者は自分の broadcast を受信しないため Typist 側でカウント
+        // fireCount は game_state で Shooter から受信して更新（送信者は自分の broadcast を受信しない）
         playVoiceRef.current('shooting') // Typist がタイピング成功したタイミングで shooting SE
-
-        setTypistFireCount((c) => c + 1)
 
         if (isLastChar) {
             setCurrentLine(pickRandomDialogue())
