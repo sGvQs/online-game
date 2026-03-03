@@ -7,7 +7,7 @@ import { leaveRoom } from '@/server/actions'
 import { Undo2, Gamepad2 } from 'lucide-react'
 import { RoomUserWithReadyStatus } from '@/shared/types'
 
-export default async function RoomPage({ params }: { params: { id: string } }) {
+export default async function RoomPage({ params }: { params: Promise<{ id: string }> }) {
     const currentUser = await getCurrentUser()
     if (!currentUser) redirect('/')
 

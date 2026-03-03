@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils'
 import { errorHunterGame } from '@/components/game/ErrorHunterGame/styles'
 import { RoomUserWithReadyStatus } from '@/shared/types'
 
-export default async function ErrorHunterPage({ params }: { params: { roomId: string } }) {
+export default async function ErrorHunterPage({ params }: { params: Promise<{ roomId: string }> }) {
     const currentUser = await getCurrentUser()
     if (!currentUser) redirect('/')
 
