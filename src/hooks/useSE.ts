@@ -1,7 +1,7 @@
 import { useSound } from '@/lib/sound-context';
 import { useCallback, useEffect, useRef } from 'react';
 
-type SEName = 'error' | 'chime' | 'tada' | 'select' | 'submit' | 'dinosaur';
+type SEName = 'error' | 'chime' | 'tada' | 'select' | 'submit' | 'dinosaur' | 'shooting' | 'star-damage';
 
 const DEFAULT_VOLUME = 0.1;
 const VOICE_VOLUME = 0.01;
@@ -34,6 +34,33 @@ function getNextDinosaurAudio(): HTMLAudioElement | null {
     return audio;
 }
 
+const SHOOTING_POOL_SIZE = 5;
+
+function getShootingPool(): HTMLAudioElement[] {
+    const url = '/se/shooting.mp3';
+    const pool: HTMLAudioElement[] = [];
+    for (let i = 0; i < SHOOTING_POOL_SIZE; i++) {
+        const audio = new Audio(url);
+        audio.volume = DEFAULT_VOLUME;
+        audio.preload = 'auto';
+        audio.load();
+        pool.push(audio);
+    }
+    return pool;
+}
+
+let shootingPool: HTMLAudioElement[] | null = null;
+let shootingPoolIndex = 0;
+
+function getNextShootingAudio(): HTMLAudioElement | null {
+    if (!shootingPool) {
+        shootingPool = getShootingPool();
+    }
+    const audio = shootingPool[shootingPoolIndex % SHOOTING_POOL_SIZE]!;
+    shootingPoolIndex++;
+    return audio;
+}
+
 export const useSE = () => {
     const { isPlaying } = useSound();
     const preloadStarted = useRef(false);
@@ -42,6 +69,7 @@ export const useSE = () => {
         if (preloadStarted.current) return;
         preloadStarted.current = true;
         if (!dinosaurPool) dinosaurPool = getDinosaurPool();
+        if (!shootingPool) shootingPool = getShootingPool();
     }, []);
 
     const play = useCallback((name: SEName) => {
@@ -53,11 +81,22 @@ export const useSE = () => {
             tada: '/se/tada-se.mp3',
             select: '/se/select-se.mp3',
             submit: '/se/submit-se.mp3',
-            dinosaur: '/se/dinosaur-voice.mp3'
+            dinosaur: '/se/dinosaur-voice.mp3',
+            shooting: '/se/shooting.mp3',
+            'star-damage': '/se/star-damage.mp3',
         };
 
         if (name === 'dinosaur') {
             const audio = getNextDinosaurAudio();
+            if (audio) {
+                audio.currentTime = 0;
+                audio.play().catch(() => {});
+            }
+            return;
+        }
+
+        if (name === 'shooting') {
+            const audio = getNextShootingAudio();
             if (audio) {
                 audio.currentTime = 0;
                 audio.play().catch(() => {});

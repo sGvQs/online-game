@@ -10,14 +10,27 @@ const styles = memberListCard()
 interface MemberListViewProps {
     members: RoomUserWithUser[]
     rankingsMap?: Map<string, UserRanking>
+    isHost?: boolean
+    currentUserId?: string
+    roomCreatorId?: string
+    onKick?: (userId: string) => void
+    kickingUserId?: string | null
 }
 
 /**
- * メンバーリスト表示コンポーネント（Presentational）
- * 
- * 状態管理・リアルタイム購読は親コンポーネント（RoomPageClient）で行う
+ * メンバーリスト表示コンポーネント
+ *
+ * ホストの場合はゲストに追放ボタンを表示
  */
-export function MemberListView({ members, rankingsMap }: MemberListViewProps) {
+export function MemberListView({
+    members,
+    rankingsMap,
+    isHost,
+    currentUserId,
+    roomCreatorId,
+    onKick,
+    kickingUserId,
+}: MemberListViewProps) {
     return (
         <div className={styles.wrapper()}>
             <div className={styles.header()}>
@@ -38,13 +51,25 @@ export function MemberListView({ members, rankingsMap }: MemberListViewProps) {
                         const rankB = rankingsMap.get(b.userId)?.rank ?? Infinity
                         return rankA - rankB
                     })
-                    .map((member: RoomUserWithUser) => (
-                        <MemberItem
-                            key={member.id}
-                            member={member}
-                            ranking={rankingsMap?.get(member.userId)}
-                        />
-                    ))}
+                    .map((member: RoomUserWithUser) => {
+                        const showKickButton = Boolean(
+                            isHost &&
+                            roomCreatorId &&
+                            currentUserId &&
+                            member.userId !== roomCreatorId &&
+                            member.userId !== currentUserId
+                        )
+                        return (
+                            <MemberItem
+                                key={member.id}
+                                member={member}
+                                ranking={rankingsMap?.get(member.userId)}
+                                showKickButton={showKickButton}
+                                onKick={showKickButton && onKick ? () => onKick(member.userId) : undefined}
+                                isKicking={kickingUserId === member.userId}
+                            />
+                        )
+                    })}
             </ul>
         </div>
     )

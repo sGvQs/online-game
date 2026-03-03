@@ -17,8 +17,8 @@ export {
     markRoomDeletedNotificationsAsRead,
 } from './roomDeletedNotifications'
 
-// 参加・退出
-export { joinRoom, leaveRoom } from './joinLeaveRoom'
+// 参加・退出・追放
+export { joinRoom, leaveRoom, kickUserFromRoom } from './joinLeaveRoom'
 
 // ゲーム関連
 export { selectGame, returnToRoom } from './gameActions'

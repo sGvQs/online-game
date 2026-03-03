@@ -19,8 +19,8 @@ export const memberItem = tv({
         name: 'text-sm font-semibold text-brand-900 truncate',
         status: 'text-[10px] text-brand-900 font-medium',
         indicator: [
-            'w-2 h-2 rounded-full bg-green-400',
-            'shadow-[0_0_8px_rgba(74,222,128,0.5)]',
+            'w-2 h-2 rounded-full bg-green-400 m-3',
+            'shadow-[0_0_8px_rgba(74,222,128,0.5)] animate-pulse',
         ],
     },
 })

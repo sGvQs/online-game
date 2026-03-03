@@ -1,26 +1,38 @@
 import Image from 'next/image'
+import { UserMinus } from 'lucide-react'
 import { RoomUserWithUser, UserRanking } from '@/shared/types'
 import { FACE_ICON_PATHS, DEFAULT_FACE_ICON } from '@/shared/constants/faceIcon'
 import { memberItem } from './styles'
+import { IconButton } from '@/components/ui/IconButton'
 
 const styles = memberItem()
 
 interface MemberItemProps {
     member: RoomUserWithUser
     ranking?: UserRanking
+    showKickButton?: boolean
+    onKick?: () => void
+    isKicking?: boolean
 }
 
 /**
  * MemberItem - メンバー情報を表示するPresentational Component
- * ロジックは持たず、Propsを受け取って表示するだけ
+ * ホスト時はゲストに追放ボタンを表示
  */
-export function MemberItem({ member, ranking }: MemberItemProps) {
+export function MemberItem({ member, ranking, showKickButton, onKick, isKicking }: MemberItemProps) {
     const statusText = ranking
         ? `${ranking.rank}位 ${ranking.points}pt`
         : '参加中'
 
     const faceIcon = member.user.faceIcon ?? DEFAULT_FACE_ICON
     const faceIconPath = FACE_ICON_PATHS[faceIcon]
+
+    const handleKickClick = () => {
+        if (!onKick) return
+        if (confirm(`${member.user.name} をルームから追放しますか？`)) {
+            onKick()
+        }
+    }
 
     return (
         <li className={styles.wrapper()}>
@@ -40,7 +52,18 @@ export function MemberItem({ member, ranking }: MemberItemProps) {
                     {statusText}
                 </p>
             </div>
-            <div className={styles.indicator()} />
+            {showKickButton ? (
+                <IconButton
+                    variant="danger"
+                    size="sm"
+                    icon={<UserMinus className="w-4 h-4" />}
+                    tooltip="ルームから追放"
+                    onClick={onKick}
+                    disabled={isKicking}
+                />
+            ):(
+                <div className={styles.indicator()} />
+            )}
         </li>
     )
 }
