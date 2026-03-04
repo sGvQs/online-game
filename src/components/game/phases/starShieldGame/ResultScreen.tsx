@@ -4,8 +4,9 @@ import Image from 'next/image'
 import { motion } from 'framer-motion'
 import type { GameResult, GameStats } from '@/types/starShieldGame'
 import { ProtectedStar } from './playing/protectedStar'
-import { AuroraGlow } from '@/components/game/common/starShield/AuroraGlow'
-import { FONTS, COLORS, ICONS, DIFFICULTY_META, type Difficulty } from '@/constants/starShieldGame/constants'
+import { AuroraGlow } from '@/components/game/common/starShield/auroraGlow'
+import { resultScreen } from './resultScreen.styles'
+import { ICONS, DIFFICULTY_META, type Difficulty } from '@/constants/starShieldGame/constants'
 
 interface ResultScreenProps {
     result: GameResult
@@ -86,6 +87,7 @@ export function ResultScreen({ result, stats, difficulty, onBackToTitle }: Resul
     const isCleared = result === 'CLEARED'
 
     const statItems = STAT_ITEMS(stats.destroyedCount, accuracy, stats.fireCount, config.color)
+    const styles = resultScreen()
 
     return (
         <div className="relative min-h-screen overflow-hidden flex flex-col items-center justify-center">
@@ -93,8 +95,8 @@ export function ResultScreen({ result, stats, difficulty, onBackToTitle }: Resul
 
             {/* background glow */}
             <div
-                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] rounded-full blur-[120px] pointer-events-none"
-                style={{ backgroundColor: isCleared ? 'rgba(129,140,248,0.12)' : 'rgba(239,68,68,0.08)' }}
+                className={styles.bgGlow()}
+                style={{ ['--result-bg-glow' as string]: isCleared ? 'rgba(129,140,248,0.12)' : 'rgba(239,68,68,0.08)' }}
             />
             <AuroraGlow
                 width={800}
@@ -127,19 +129,19 @@ export function ResultScreen({ result, stats, difficulty, onBackToTitle }: Resul
                     >
                         {isCleared ? (
                             <div className="relative w-24 h-24">
-                                <div
-                                    className="absolute inset-0 rounded-full blur-xl"
-                                    style={{ backgroundColor: 'rgba(129,140,248,0.35)' }}
-                                />
+                                <div className={styles.iconGlowCleared()} />
                                 <Image src={ICONS.TARGET_CIRCLE} alt="" fill className="object-contain relative z-10 drop-shadow-[0_0_20px_rgba(129,140,248,0.8)]" />
                             </div>
                         ) : (
-                            <div className="relative w-24 h-24">
-                                <div
-                                    className="absolute inset-0 rounded-full blur-xl"
-                                    style={{ backgroundColor: `${config.glowColor}` }}
-                                />
-                                <Image src={ICONS.FIRE} alt="" fill className="object-contain relative z-10" style={{ filter: `drop-shadow(0 0 20px ${config.color})` }} />
+                            <div
+                                className="relative w-24 h-24"
+                                style={{
+                                    ['--result-icon-glow' as string]: config.glowColor,
+                                    ['--result-icon-color' as string]: config.color,
+                                }}
+                            >
+                                <div className={styles.iconGlowFailed()} />
+                                <Image src={ICONS.FIRE} alt="" fill className={styles.iconImageFailed()} />
                             </div>
                         )}
                     </motion.div>
@@ -150,26 +152,13 @@ export function ResultScreen({ result, stats, difficulty, onBackToTitle }: Resul
                         initial={{ y: 20, opacity: 0 }}
                         animate={{ y: 0, opacity: 1 }}
                         transition={{ delay: 0.15, duration: 0.6, ease: 'easeOut' }}
+                        style={{
+                            ['--result-title-gradient' as string]: config.gradient,
+                            ['--result-title-glow' as string]: config.glowColor,
+                        }}
                     >
-                        <h1
-                            className="text-7xl font-black tracking-[0.12em] uppercase leading-none select-none"
-                            style={{
-                                fontFamily: FONTS.CHERRY_BOMB,
-                                background: config.gradient,
-                                WebkitBackgroundClip: 'text',
-                                WebkitTextFillColor: 'transparent',
-                                backgroundClip: 'text',
-                                filter: `drop-shadow(0 0 30px ${config.glowColor})`,
-                            }}
-                        >
-                            {config.title}
-                        </h1>
-                        <p
-                            className="text-xs tracking-[0.5em] uppercase mt-3"
-                            style={{ fontFamily: FONTS.DOT_GOTHIC, color: COLORS.WHITE_35 }}
-                        >
-                            {config.subtitle}
-                        </p>
+                        <h1 className={styles.title()}>{config.title}</h1>
+                        <p className={styles.subtitle()}>{config.subtitle}</p>
                     </motion.div>
 
                     {/* earned points badge */}
@@ -178,26 +167,17 @@ export function ResultScreen({ result, stats, difficulty, onBackToTitle }: Resul
                             initial={{ opacity: 0, scale: 0.85, y: 10 }}
                             animate={{ opacity: 1, scale: 1, y: 0 }}
                             transition={{ delay: 0.4, duration: 0.5, ease: [0.34, 1.56, 0.64, 1] }}
-                            className="flex items-center gap-2.5 px-6 py-2.5 rounded-2xl"
+                            className={styles.earnedBadge()}
                             style={{
-                                background: diffMeta.bg,
-                                border: `2px solid ${diffMeta.border}`,
-                                boxShadow: `${diffMeta.glow}, inset 0 1px 0 rgba(255,255,255,0.08)`,
+                                ['--earned-bg' as string]: diffMeta.bg,
+                                ['--earned-border' as string]: `2px solid ${diffMeta.border}`,
+                                ['--earned-glow' as string]: `${diffMeta.glow}, inset 0 1px 0 rgba(255,255,255,0.08)`,
+                                ['--earned-text' as string]: diffMeta.text,
                             }}
                         >
                             <span className="text-xl leading-none">{diffMeta.emoji}</span>
-                            <span
-                                className="text-2xl font-black tracking-wider"
-                                style={{ fontFamily: FONTS.CHERRY_BOMB, color: diffMeta.text }}
-                            >
-                                {earnedPoints}
-                            </span>
-                            <span
-                                className="text-xs"
-                                style={{ fontFamily: FONTS.DOT_GOTHIC, color: diffMeta.text, opacity: 0.7 }}
-                            >
-                                かくとく
-                            </span>
+                            <span className={styles.earnedValue()}>{earnedPoints}</span>
+                            <span className={styles.earnedSuffix()}>かくとく</span>
                         </motion.div>
                     )}
                 </div>
@@ -210,25 +190,18 @@ export function ResultScreen({ result, stats, difficulty, onBackToTitle }: Resul
                     transition={{ delay: 0.45, duration: 0.55 }}
                 >
                     <div
-                        className="rounded-2xl px-5 py-4 flex items-start gap-4"
+                        className={styles.dinoMessage()}
                         style={{
-                            background: 'rgba(30,41,59,0.55)',
-                            border: `1px solid ${isCleared ? COLORS.BRAND_18 : 'rgba(239,68,68,0.18)'}`,
-                            backdropFilter: 'blur(12px)',
-                            boxShadow: `inset 0 1px 0 rgba(255,255,255,0.05), 0 4px 24px rgba(0,0,0,0.3)`,
+                            ['--dino-message-border' as string]: isCleared
+                                ? '1px solid rgba(129,140,248,0.18)'
+                                : '1px solid rgba(239,68,68,0.18)',
                         }}
                     >
                         <div className="relative w-12 h-12 shrink-0 mt-0.5">
                             <Image src={ICONS.DINO} alt="" fill className="object-contain" />
                         </div>
-                        {/* speech bubble tail */}
                         <div className="flex-1">
-                            <p
-                                className="text-sm leading-relaxed"
-                                style={{ fontFamily: FONTS.DOT_GOTHIC, color: COLORS.SLATE_7 }}
-                            >
-                                {config.message}
-                            </p>
+                            <p className={styles.dinoMessageText()}>{config.message}</p>
                         </div>
                     </div>
                 </motion.div>
@@ -243,12 +216,10 @@ export function ResultScreen({ result, stats, difficulty, onBackToTitle }: Resul
                     {statItems.map(({ label, value, icon }, i) => (
                         <motion.div
                             key={label}
-                            className="flex flex-col items-center gap-2 rounded-2xl py-4 px-3"
+                            className={styles.statCard()}
                             style={{
-                                background: 'rgba(30,41,59,0.5)',
-                                border: `1px solid rgba(255,255,255,0.07)`,
-                                backdropFilter: 'blur(8px)',
-                                boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.05)',
+                                ['--stat-color' as string]: config.color,
+                                ['--stat-glow' as string]: config.glowColor,
                             }}
                             initial={{ opacity: 0, y: 12 }}
                             animate={{ opacity: 1, y: 0 }}
@@ -259,22 +230,8 @@ export function ResultScreen({ result, stats, difficulty, onBackToTitle }: Resul
                                     <Image src={icon} alt="" fill className="object-contain" />
                                 </div>
                             )}
-                            <div
-                                className="text-2xl font-black tabular-nums leading-none"
-                                style={{
-                                    fontFamily: FONTS.CHERRY_BOMB,
-                                    color: config.color,
-                                    textShadow: `0 0 12px ${config.glowColor}`,
-                                }}
-                            >
-                                {value}
-                            </div>
-                            <div
-                                className="text-[9px] tracking-[0.35em] uppercase"
-                                style={{ fontFamily: FONTS.DOT_GOTHIC, color: COLORS.WHITE_25 }}
-                            >
-                                {label}
-                            </div>
+                            <div className={styles.statValue()}>{value}</div>
+                            <div className={styles.statLabel()}>{label}</div>
                         </motion.div>
                     ))}
                 </motion.div>
@@ -285,11 +242,7 @@ export function ResultScreen({ result, stats, difficulty, onBackToTitle }: Resul
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.85, duration: 0.5 }}
                 >
-                    <button
-                        onClick={onBackToTitle}
-                        className="py-3 px-8 rounded-2xl border-2 border-green-500 bg-green-600/90 text-green-50 hover:bg-green-500 hover:border-green-400 hover:scale-105 active:scale-95 transition-all shadow-[0_0_20px_rgba(34,197,94,0.45)] cursor-pointer"
-                        style={{ fontFamily: FONTS.CHERRY_BOMB, fontSize: '1rem' }}
-                    >
+                    <button onClick={onBackToTitle} className={styles.backButton()}>
                         ▶ BACK TO TITLE
                     </button>
                 </motion.div>

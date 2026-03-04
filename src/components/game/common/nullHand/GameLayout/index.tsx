@@ -1,5 +1,5 @@
 import { ReactNode } from 'react'
-import { nullHandGame } from '@/components/game/layout/nullHandGame/styles'
+import { gameLayout } from './styles'
 import { JankenPhase } from '@/types'
 import { motion } from 'framer-motion'
 
@@ -13,7 +13,7 @@ interface GameLayoutProps {
 }
 
 export function GameLayout({ phase, error, children, mainArea, sideArea, hostName }: GameLayoutProps) {
-    const styles = nullHandGame()
+    const styles = gameLayout()
 
     const getPhaseText = (p: JankenPhase) => {
         switch (p) {

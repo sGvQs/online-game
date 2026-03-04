@@ -4,10 +4,10 @@ import Image from 'next/image'
 import { RoomModal } from './roomModal'
 import { Win95Dialog } from '../game/common/errorHunter/win95Dialog'
 import { Win95TitleBarButton } from '../game/common/errorHunter/win95TitleBarButton'
-import { Hand3D } from '../game/common/nullHand/Hand3D'
+import { Hand3D } from '../game/common/nullHand/hand3D'
 import { HandType } from '@/types'
-import { RewardSystem } from '../game/common/nullHand/RewardSystem'
-import { StarVisual } from '../game/common/starShield/StarVisual'
+import { RewardSystem } from '../game/common/nullHand/rewardSystem'
+import { StarVisual } from '../game/common/starShield/starVisual'
 import { ICONS, BULLET_COLOR, ROLE_META } from '@/constants/starShieldGame/constants'
 
 interface GameDescriptionModalProps {

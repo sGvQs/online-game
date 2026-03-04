@@ -1,6 +1,6 @@
 import { HandType } from '@/types'
-import { Hand3D } from '@/components/game/common/nullHand/Hand3D'
-import { nullHandGame } from '@/components/game/layout/nullHandGame/styles'
+import { Hand3D } from '@/components/game/common/nullHand/hand3D'
+import { nullHandLogo } from './styles'
 
 interface NullHandLogoProps {
     titleHand: HandType
@@ -10,11 +10,11 @@ interface NullHandLogoProps {
 }
 
 export function NullHandLogo({ titleHand, userColor, onClick, showChangeButton = true }: NullHandLogoProps) {
-    const styles = nullHandGame()
+    const styles = nullHandLogo()
 
     return (
-        <div className="text-center group">
-            <div style={{ color: userColor }} className={styles.logo()} >NULL HAND</div>
+        <div className="text-center group" style={userColor ? { ['--logo-color' as string]: userColor } : undefined}>
+            <div className={styles.logo()}>NULL HAND</div>
             <div
                 className="w-64 h-64 mx-auto cursor-pointer transition-transform active:scale-95"
                 onClick={onClick}

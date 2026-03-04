@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { HandType } from '@/types'
-import { nullHandGame } from '@/components/game/layout/nullHandGame/styles'
-import { NullHandLogo } from '@/components/game/common/nullHand/NullHandLogo'
+import { openingSplash } from './styles'
+import { NullHandLogo } from '@/components/game/common/nullHand/nullHandLogo'
 import { useSE } from '@/hooks/useSE'
 import { NEON_PALETTE } from '@/constants/nullHandGame'
 
@@ -16,7 +16,7 @@ interface OpeningSplashProps {
 export function OpeningSplash({ onComplete, titleHand, userColor, onColorChange }: OpeningSplashProps) {
     const [progress, setProgress] = useState(0)
     const [isTransitioning, setIsTransitioning] = useState(false)
-    const styles = nullHandGame()
+    const styles = openingSplash()
     const { play } = useSE()
 
     const handleColorCycle = () => {
@@ -76,20 +76,19 @@ export function OpeningSplash({ onComplete, titleHand, userColor, onColorChange 
 
                 {/* プログレスバーエリア（固定高さでガタつきを防止） */}
                 <div className="h-16 flex flex-col justify-start">
-                    <motion.div className="w-64 space-y-2"
-                        style={{ color: userColor }}
+                    <motion.div
+                        className={styles.progressArea()}
+                        style={{ ['--splash-color' as string]: userColor, ['--splash-progress' as string]: `${progress}%` }}
                         exit={{ opacity: 0 }}
                         animate={{ opacity: isTransitioning ? 0 : 1 }}
-                        transition={{ duration: 0.8, ease: "easeInOut" }}>
+                        transition={{ duration: 0.8, ease: "easeInOut" }}
+                    >
                         <div className="flex justify-between text-[10px] font-black tracking-widest opacity-80">
                             <span>LOADING...</span>
                             <span>{Math.round(progress)}%</span>
                         </div>
                         <div className="h-1 bg-gray-900 w-full overflow-hidden">
-                            <motion.div
-                                className="h-full shadow-[0_0_10px_currentColor]"
-                                style={{ width: `${progress}%`, backgroundColor: userColor }}
-                            />
+                            <motion.div className={styles.progressBar()} />
                         </div>
                     </motion.div>
                 </div>

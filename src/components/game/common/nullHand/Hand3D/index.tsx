@@ -5,6 +5,7 @@ import { Canvas, useFrame } from '@react-three/fiber'
 import { OrbitControls, PerspectiveCamera, RoundedBox } from '@react-three/drei'
 import * as THREE from 'three'
 import { HandType } from '@/types'
+import { hand3D } from './styles'
 
 interface Hand3DProps {
     handType: HandType | null
@@ -24,10 +25,9 @@ export function Hand3D({
     isRotating = true,
     personalColor,
 }: Hand3DProps) {
-    const canvasHeight = size === 'micro' ? '100px' : size === 'small' ? '150px' : size === 'large' ? '400px' : '250px'
-    const canvasWidth = size === 'micro' ? '100px' : '100%'
+    const styles = hand3D({ size })
     return (
-        <div style={{ width: canvasWidth, height: canvasHeight, background: '#000000' }}>
+        <div className={styles.canvasWrapper()}>
             <Canvas>
                 <PerspectiveCamera makeDefault position={[0, 0, 6]} fov={40} />
 

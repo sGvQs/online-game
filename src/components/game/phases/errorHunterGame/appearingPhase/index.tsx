@@ -2,7 +2,7 @@
 
 import { Win95Dialog } from '@/components/game/common/errorHunter/win95Dialog'
 import { Win95TitleBarButton } from '@/components/game/common/errorHunter/win95TitleBarButton'
-import { errorHunterGame } from '@/components/game/layout/errorHunterGame/styles'
+import { appearingPhase } from './styles'
 import type { ErrorEventWithUser } from '@/types'
 
 const ERROR_MESSAGES = ['Windows Protection Error.\nYou need to restart your computer.']
@@ -18,7 +18,7 @@ export interface AppearingPhaseProps {
 }
 
 export function AppearingPhase({ errorEvents, onCloseError, isProcessing }: AppearingPhaseProps) {
-    const styles = errorHunterGame()
+    const styles = appearingPhase()
     const unclosedEvents = errorEvents.filter((event: ErrorEventWithUser) => !event.closedAt)
 
     return (
@@ -30,9 +30,8 @@ export function AppearingPhase({ errorEvents, onCloseError, isProcessing }: Appe
                         key={event.id}
                         className={cn(styles.floatingDialog(), 'translate-x-[-50%] translate-y-[-50%]')}
                         style={{
-                            left: `${errorWithPosition.positionX}%`,
-                            top: `${errorWithPosition.positionY}%`,
-                            width: '400px',
+                            ['--dialog-left' as string]: `${errorWithPosition.positionX}%`,
+                            ['--dialog-top' as string]: `${errorWithPosition.positionY}%`,
                         }}
                     >
                         <Win95Dialog
@@ -49,7 +48,7 @@ export function AppearingPhase({ errorEvents, onCloseError, isProcessing }: Appe
                                 </Win95TitleBarButton>
                             }
                         >
-                            <p style={{ whiteSpace: 'pre-line', fontSize: '12px' }}>
+                            <p className={styles.errorMessage()}>
                                 {getRandomErrorMessage()}
                             </p>
                         </Win95Dialog>

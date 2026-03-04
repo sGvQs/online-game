@@ -2,7 +2,7 @@
 
 import Image from 'next/image'
 import { cn } from '@/lib/utils'
-import { errorHunterGame } from '@/components/game/layout/errorHunterGame/styles'
+import { titlePhase } from './styles'
 import { Win95Button } from '@/components/game/common/errorHunter/win95Button'
 import { Win95TitleBarButton } from '@/components/game/common/errorHunter/win95TitleBarButton'
 import { RoomUserWithReadyStatus, UserRanking } from '@/types'
@@ -55,7 +55,7 @@ export function TitlePhase({
     allUsersReady,
     isProcessing,
 }: TitlePhaseProps) {
-    const styles = errorHunterGame()
+    const styles = titlePhase()
     const readyCount = room.users.filter((u: RoomUserWithReadyStatus) => u.isReady).length
     const totalUsers = room.users.length
 
@@ -159,13 +159,9 @@ export function TitlePhase({
                             <div className={styles.buttonSpacer()} />
 
                             <Win95Button
-                                className={styles.panelButton()}
+                                className={cn(styles.panelButton(), isReady && '!bg-[#008000] !text-white')}
                                 onClick={onToggleReady}
                                 disabled={isTogglingReady}
-                                style={{
-                                    backgroundColor: isReady ? '#008000' : undefined,
-                                    color: isReady ? '#fff' : undefined,
-                                }}
                             >
                                 準備完了
                             </Win95Button>

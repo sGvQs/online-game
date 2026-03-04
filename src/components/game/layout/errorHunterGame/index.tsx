@@ -14,7 +14,7 @@ import { TitlePhase } from '@/components/game/phases/errorHunterGame/titlePhase'
 import { WaitingPhase } from '@/components/game/phases/errorHunterGame/waitingPhase'
 import { AppearingPhase } from '@/components/game/phases/errorHunterGame/appearingPhase'
 import { ResultPhase } from '@/components/game/phases/errorHunterGame/resultPhase'
-import { ProgressPanel } from '@/components/game/common/errorHunter/ProgressPanel'
+import { ProgressPanel } from '@/components/game/common/errorHunter/progressPanel'
 
 interface ErrorHunterGameProps {
     room: RoomWithUsersAndReadyStatus

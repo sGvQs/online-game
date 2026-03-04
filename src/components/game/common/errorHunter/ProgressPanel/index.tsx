@@ -2,6 +2,7 @@
 
 import { Win95Dialog } from '@/components/game/common/errorHunter/win95Dialog'
 import { Win95ProgressBar } from '@/components/game/common/errorHunter/win95ProgressBar'
+import { progressPanel } from './styles'
 import type { MatchProgress } from '@/types'
 import type { GamePhase } from '@/hooks/useErrorHunter'
 
@@ -12,27 +13,28 @@ export interface ProgressPanelProps {
 }
 
 export function ProgressPanel({ progress, userNameMap, phase }: ProgressPanelProps) {
+    const styles = progressPanel()
     return (
         <div className="fixed bottom-4 left-4 z-50">
             <Win95Dialog title="Progress">
-                <div style={{ minWidth: '380px' }}>
-                    <p style={{ color: '#000', marginBottom: '8px', fontSize: '12px' }}>
+                <div className={styles.inner()}>
+                    <p className={styles.remainingText()}>
                         残りのエラー: {progress.totalErrors - progress.closedErrors} / {progress.totalErrors}
                     </p>
                     <Win95ProgressBar
                         progress={(progress.closedErrors / progress.totalErrors) * 220}
                     />
-                    <div style={{ marginTop: '12px' }}>
-                        <p style={{ fontSize: '11px', fontWeight: 'bold', marginBottom: '4px', color: '#000' }}>
+                    <div className={styles.scoresSection()}>
+                        <p className={styles.scoresLabel()}>
                             スコア:
                         </p>
                         {Object.entries(progress.scores)
                             .sort(([, a], [, b]) => b - a)
                             .map(([userId, score], index) => (
-                                <p key={userId} style={{ fontSize: '11px', color: '#000', marginBottom: '2px' }}>
+                                <p key={userId} className={styles.scoreRow()}>
                                     {userNameMap.get(userId) || 'Unknown'}: {score}個{' '}
                                     {index === 0 && phase === 'RESULT' && (
-                                        <span style={{ color: 'blue', fontWeight: 'bold', marginLeft: '4px' }}>
+                                        <span className={styles.winnerBadge()}>
                                             👈 勝者
                                         </span>
                                     )}

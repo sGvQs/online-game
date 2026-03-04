@@ -5,9 +5,10 @@ import Image from 'next/image'
 import { AnimatePresence, motion } from 'framer-motion'
 import type { DialogueLine } from '@/constants/starShieldGame/dialogues'
 import { getRomaji } from '@/utils/starShieldGame/starShieldUtils'
-import { StarVisual } from '@/components/game/common/starShield/StarVisual'
-import { AuroraGlow } from '@/components/game/common/starShield/AuroraGlow'
-import { FONTS, COLORS, ICONS, BULLET_COLOR, AURORA_GRADIENT_TYPIST } from '@/constants/starShieldGame/constants'
+import { StarVisual } from '@/components/game/common/starShield/starVisual'
+import { AuroraGlow } from '@/components/game/common/starShield/auroraGlow'
+import { typistView } from './typistView.styles'
+import { ICONS, BULLET_COLOR, AURORA_GRADIENT_TYPIST } from '@/constants/starShieldGame/constants'
 
 const TYPIST_STAR_POSITION = {
     left: '50%',
@@ -18,16 +19,13 @@ const TYPIST_STAR_POSITION = {
 } as const
 
 function TypistBullet({ bulletColor, onComplete }: { bulletColor: string; onComplete: () => void }) {
+    const styles = typistView()
     return (
         <motion.div
-            className="absolute pointer-events-none z-20 rounded-full"
+            className={styles.bullet()}
             style={{
-                left: '100%',
-                top: '50%',
-                width: 12,
-                height: 12,
-                backgroundColor: bulletColor,
-                boxShadow: `0 0 8px ${bulletColor}cc`,
+                ['--bullet-color' as string]: bulletColor,
+                ['--bullet-shadow' as string]: `${bulletColor}cc`,
             }}
             initial={{ x: -6, y: '-50%' }}
             animate={{ x: '100vw', y: '-50%' }}
@@ -50,6 +48,7 @@ function TypingDisplay({ line, charIndex }: { line: DialogueLine; charIndex: num
     const done = romaji.slice(0, charIndex)
     const current = romaji[charIndex] ?? ''
     const rest = romaji.slice(charIndex + 1)
+    const styles = typistView()
     return (
         <div className="flex flex-col items-center gap-6">
             <motion.div
@@ -57,8 +56,7 @@ function TypingDisplay({ line, charIndex }: { line: DialogueLine; charIndex: num
                 initial={{ opacity: 0, y: 8 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3 }}
-                className="rounded-xl px-8 py-4 max-w-lg w-full text-center"
-                style={{ background: COLORS.GLASS_BG, border: `1px solid ${COLORS.GLASS_BORDER}` }}
+                className={styles.dialogueCard()}
             >
                 <div className="text-brand-500/60 text-xs tracking-widest mb-2">DIALOGUE</div>
                 <div className="text-white text-2xl font-bold tracking-wider">{line.text}</div>
@@ -117,17 +115,13 @@ export function TypistView({ dialogue, score, starHp, maxStarHp, typistFireCount
             <StarVisual position={TYPIST_STAR_POSITION} />
 
             <div className="w-full shrink-0 flex flex-col items-center gap-2 py-4 z-20 mt-10">
-                <span className="text-base text-brand-500/80" style={{ fontFamily: FONTS.CHERRY_BOMB }}>
-                    いんせきをかはいしたかず
-                </span>
+                <span className={typistView().scoreLabel()}>いんせきをかはいしたかず</span>
                 <div className="flex items-center gap-3">
                     <div className="relative w-10 h-10">
                         <Image src={ICONS.METOR} alt="" fill className="object-contain" />
                     </div>
                     <span className="text-white/60 text-2xl">×</span>
-                    <span className="text-brand-500 font-bold text-3xl tabular-nums" style={{ fontFamily: FONTS.CHERRY_BOMB }}>
-                        {score.destroyed}
-                    </span>
+                    <span className={typistView().scoreValue()}>{score.destroyed}</span>
                 </div>
             </div>
 
@@ -152,19 +146,17 @@ export function TypistView({ dialogue, score, starHp, maxStarHp, typistFireCount
             </div>
 
             <div className="w-full shrink-0 flex flex-col items-center gap-2 py-4 z-20">
-                <span className="text-md text-white" style={{ fontFamily: FONTS.CHERRY_BOMB }}>
-                    ほしのたいりょく
-                </span>
+                <span className={typistView().hpLabel()}>ほしのたいりょく</span>
                 <div className="relative w-64 md:w-80 h-3 rounded-full bg-stone-600/80 overflow-hidden">
                     <div
-                        className="absolute left-0 top-0 h-full bg-green-500 transition-all duration-150"
-                        style={{ width: `${Math.max(0, (starHp / maxStarHp) * 100)}%` }}
+                        className={typistView().hpBar()}
+                        style={{ ['--hp-pct' as string]: `${Math.max(0, (starHp / maxStarHp) * 100)}%` }}
                     />
                     {damageWidth > 0 && (
                         <motion.div
                             key={`dmg-${damageWidth}`}
-                            className="absolute top-0 h-full bg-red-500 z-10 origin-left"
-                            style={{ left: `${Math.max(0, (starHp / maxStarHp) * 100)}%` }}
+                            className={typistView().damageFlash()}
+                            style={{ ['--hp-pct' as string]: `${Math.max(0, (starHp / maxStarHp) * 100)}%` }}
                             initial={{ width: `${damageWidth}%` }}
                             animate={{ width: '0%' }}
                             transition={{ duration: 0.6, ease: 'easeOut' }}

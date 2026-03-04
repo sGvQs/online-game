@@ -1,6 +1,8 @@
 'use client'
 
+import { auroraGlow } from './styles'
 import { AURORA_GRADIENT_DEFAULT } from '@/constants/starShieldGame/constants'
+import { cn } from '@/lib/utils'
 
 interface AuroraGlowProps {
     width?: number | string
@@ -19,15 +21,16 @@ export function AuroraGlow({
     gradient = AURORA_GRADIENT_DEFAULT,
     className = '',
 }: AuroraGlowProps) {
+    const styles = auroraGlow()
     return (
         <div
-            className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full pointer-events-none ${className}`}
+            className={cn(styles.root(), className)}
             style={{
-                width: typeof width === 'number' ? `${width}px` : width,
-                height: typeof height === 'number' ? `${height}px` : height,
-                opacity,
-                filter: `blur(${blur}px)`,
-                background: gradient,
+                ['--aurora-width' as string]: typeof width === 'number' ? `${width}px` : width,
+                ['--aurora-height' as string]: typeof height === 'number' ? `${height}px` : height,
+                ['--aurora-opacity' as string]: String(opacity),
+                ['--aurora-filter' as string]: `blur(${blur}px)`,
+                ['--aurora-bg' as string]: gradient,
             }}
         />
     )

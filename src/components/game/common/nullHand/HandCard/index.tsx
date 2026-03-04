@@ -1,5 +1,5 @@
 import { HandType } from '@/types'
-import { Hand3D } from '@/components/game/common/nullHand/Hand3D'
+import { Hand3D } from '@/components/game/common/nullHand/hand3D'
 import { handCard } from './styles'
 import { cn } from '@/lib/utils'
 

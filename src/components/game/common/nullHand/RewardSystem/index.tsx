@@ -1,5 +1,5 @@
-import { SideHeader } from '@/components/game/common/nullHand/SideHeader'
-import { sideCard } from '@/components/game/phases/nullHandGame/phaseCard.styles'
+import { SideHeader } from '@/components/game/common/nullHand/sideHeader'
+import { rewardSystem } from './styles'
 import { cn } from '@/lib/utils'
 import { motion } from 'framer-motion'
 
@@ -25,7 +25,7 @@ export function RewardSystem({
     ]
 
     return (
-        <div className={sideCard({ variant, size }).card()}>
+        <div className={rewardSystem({ variant, size }).card()}>
             <SideHeader
                 engLabel="REWARD SYSTEM"
                 label="ポイント配当"
@@ -38,17 +38,18 @@ export function RewardSystem({
                     const isMyTarget = (isHost && item.target === 'HOST') || (!isHost && item.target === 'GUEST');
 
                     return item.show && (
-                        <div key={item.title} className={cn(
-                            "group relative transition-opacity duration-300",
-                            !isMyTarget && item.target !== 'ALL' ? "opacity-70" : "opacity-100"
-                        )}>
+                        <div
+                            key={item.title}
+                            className={cn(
+                                "group relative transition-opacity duration-300",
+                                !isMyTarget && item.target !== 'ALL' ? "opacity-70" : "opacity-100"
+                            )}
+                            style={{ ['--rule-color' as string]: item.color }}
+                        >
                             <div className="flex items-center justify-between mb-1">
                                 <div className="flex items-center gap-2">
                                     <div className="relative w-1 h-3">
-                                        <div
-                                            className="absolute inset-0 rounded-full shadow-[0_0_8px_rgba(0,0,0,0.5)]"
-                                            style={{ backgroundColor: item.color }}
-                                        />
+                                        <div className={rewardSystem().ruleDot()} />
                                         {showArrow && isMyTarget && (
                                             <motion.div
                                                 initial={{ opacity: 0, x: -5 }}
@@ -63,8 +64,8 @@ export function RewardSystem({
                                                         ease: "easeInOut"
                                                     }
                                                 }}
-                                                className="absolute top-1/2 -translate-y-1/2 text-[10px] font-bold -translate-x-1/2"
-                                                style={{ color: userColor }}
+                                                className={rewardSystem().ruleArrow()}
+                                                style={{ ['--rule-color' as string]: userColor }}
                                             >
                                                 ▶
                                             </motion.div>
@@ -87,7 +88,7 @@ export function RewardSystem({
                                     )}>
                                         {item.target}
                                     </span>
-                                    <span className="text-xs font-black font-mono tabular-nums" style={{ color: item.color }}>
+                                    <span className={rewardSystem().rulePts()}>
                                         {item.pts}<span className="text-[8px] ml-0.5 opacity-70">PT</span>
                                     </span>
                                 </div>

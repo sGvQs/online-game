@@ -6,13 +6,13 @@ import { returnToRoom } from '@/server/actions/room'
 import { RoomWithUsersAndReadyStatus, HandType, HostChoice, UserRanking } from '@/types'
 import { useState, useEffect } from 'react'
 import { AnimatePresence } from 'framer-motion'
-import { TitleScreen } from '@/components/game/common/nullHand/TitleScreen'
-import { GameLayout } from '@/components/game/common/nullHand/GameLayout'
+import { TitleScreen } from '@/components/game/common/nullHand/titleScreen'
+import { GameLayout } from '@/components/game/common/nullHand/gameLayout'
 import { ChoicePhase } from '@/components/game/phases/nullHandGame/choicePhase'
 import { BattlePhase } from '@/components/game/phases/nullHandGame/battlePhase'
 import { ResultPhase } from '@/components/game/phases/nullHandGame/resultPhase'
 import { GameOverPhase } from '@/components/game/phases/nullHandGame/gameOverPhase'
-import { OpeningSplash } from '@/components/game/common/nullHand/OpeningSplash'
+import { OpeningSplash } from '@/components/game/common/nullHand/openingSplash'
 
 interface NullHandGameProps {
     room: RoomWithUsersAndReadyStatus

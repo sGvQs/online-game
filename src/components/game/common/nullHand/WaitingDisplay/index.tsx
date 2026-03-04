@@ -1,5 +1,5 @@
 import { HandType } from '@/types'
-import { Hand3D } from '@/components/game/common/nullHand/Hand3D'
+import { Hand3D } from '@/components/game/common/nullHand/hand3D'
 import { cn } from '@/lib/utils'
 import { useEffect, useState } from 'react'
 import { waitingDisplay } from './styles'

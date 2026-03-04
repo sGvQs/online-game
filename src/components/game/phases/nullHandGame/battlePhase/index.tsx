@@ -1,13 +1,13 @@
 import { HandType, JankenEventWithGuests, HostStats, MatchScoreWithUser } from '@/types'
-import { Hand3D } from '@/components/game/common/nullHand/Hand3D'
-import { PlayerFaceIcon } from '@/components/game/common/nullHand/PlayerFaceIcon'
-import { nullHandGame } from '@/components/game/layout/nullHandGame/styles'
+import { Hand3D } from '@/components/game/common/nullHand/hand3D'
+import { PlayerFaceIcon } from '@/components/game/common/nullHand/playerFaceIcon'
+import { battlePhase } from './styles'
 import { getHandDisplayWithEmoji } from '@/utils/nullHandGame/utils'
-import { HandSelectionGrid } from '@/components/game/common/nullHand/HandSelectionGrid'
-import { PhaseHeader } from '@/components/game/common/nullHand/PhaseHeader'
-import { CurrentScores } from '@/components/game/common/nullHand/CurrentScores'
-import { RewardSystem } from '@/components/game/common/nullHand/RewardSystem'
-import { GameButton } from '@/components/game/common/nullHand/GameButton'
+import { HandSelectionGrid } from '@/components/game/common/nullHand/handSelectionGrid'
+import { PhaseHeader } from '@/components/game/common/nullHand/phaseHeader'
+import { CurrentScores } from '@/components/game/common/nullHand/currentScores'
+import { RewardSystem } from '@/components/game/common/nullHand/rewardSystem'
+import { GameButton } from '@/components/game/common/nullHand/gameButton'
 import { motion } from 'framer-motion'
 import { cn } from '@/lib/utils'
 
@@ -40,7 +40,7 @@ export function BattlePhase({
     currentUserId,
     userColor,
 }: BattlePhaseProps) {
-    const styles = nullHandGame()
+    const styles = battlePhase()
 
     if (!jankenEvent) return null
 

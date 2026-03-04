@@ -1,19 +1,18 @@
 import { HandType, JankenEventWithGuests, MatchScoreWithUser, HostStats } from '@/types'
-import { Hand3D } from '@/components/game/common/nullHand/Hand3D'
-import { PlayerFaceIcon } from '@/components/game/common/nullHand/PlayerFaceIcon'
-import { nullHandGame } from '@/components/game/layout/nullHandGame/styles'
+import { Hand3D } from '@/components/game/common/nullHand/hand3D'
+import { PlayerFaceIcon } from '@/components/game/common/nullHand/playerFaceIcon'
 import { cn } from '@/lib/utils'
 import { judgeHand } from '@/utils/nullHandGame/utils'
-import { PhaseHeader } from '@/components/game/common/nullHand/PhaseHeader'
-import { RewardSystem } from '@/components/game/common/nullHand/RewardSystem'
-import { GameButton } from '@/components/game/common/nullHand/GameButton'
+import { PhaseHeader } from '@/components/game/common/nullHand/phaseHeader'
+import { RewardSystem } from '@/components/game/common/nullHand/rewardSystem'
+import { GameButton } from '@/components/game/common/nullHand/gameButton'
 import { resultPhase } from './styles'
 import type { RoomUserWithUser } from '@/types'
 
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { CurrentScores } from '@/components/game/common/nullHand/CurrentScores'
-import { HandCard } from '@/components/game/common/nullHand/HandCard'
+import { CurrentScores } from '@/components/game/common/nullHand/currentScores'
+import { HandCard } from '@/components/game/common/nullHand/handCard'
 
 type RoomUser = RoomUserWithUser
 
@@ -40,8 +39,7 @@ export function ResultPhase({
     roomUsers,
     userColor
 }: ResultPhaseProps) {
-    const styles = nullHandGame()
-    const rpStyles = resultPhase()
+    const styles = resultPhase()
 
     const currentUser = roomUsers.find(u => u.userId === currentUserId)
     const isReady = currentUser?.isReady ?? false
@@ -164,7 +162,7 @@ export function ResultPhase({
                                     <div className="flex flex-col items-center">
                                         <div className="flex flex-col items-center gap-2">
                                             <PlayerFaceIcon faceIcon={hostUser?.user?.faceIcon} size="lg" />
-                                            <div className={cn(rpStyles.playerName())} style={{ color: '#FF4444' }}>{hostName}</div>
+                                            <div className={cn(styles.playerName(), 'text-[#FF4444]')}>{hostName}</div>
                                         </div>
                                         <HandCard
                                             handType={hostHand}
@@ -179,7 +177,7 @@ export function ResultPhase({
                                     <div className="flex flex-col items-center">
                                         <div className="flex flex-col items-center gap-2">
                                             <PlayerFaceIcon faceIcon={currentUserData?.user?.faceIcon} size="lg" />
-                                            <div style={{ color: userColor }} className={cn(rpStyles.playerName(), rpStyles.myselfName())}>YOU</div>
+                                            <div className={cn(styles.playerName(), styles.myselfName())} style={{ ['--result-user-color' as string]: userColor }}>YOU</div>
                                         </div>
                                         <HandCard
                                             handType={myHand}
@@ -267,15 +265,15 @@ export function ResultPhase({
                                         <div className='flex items-end gap-2'>
                                             <PlayerFaceIcon faceIcon={hostUser?.user?.faceIcon} size="sm" />
                                             <div
-                                                className="text-xs font-black tracking-[0.3em]"
-                                                style={{ color: isCurrentHost ? (userColor || '#FF4444') : '#FF4444' }}
+                                                className="text-xs font-black tracking-[0.3em] [color:var(--result-choice-color)]"
+                                                style={{ ['--result-choice-color' as string]: isCurrentHost ? (userColor || '#FF4444') : '#FF4444' }}
                                             >
                                                 {hostName}
                                             </div>
                                         </div>
                                         <div
-                                            className="w-48 h-48 border-2"
-                                            style={{ borderColor: isCurrentHost ? (userColor || '#FF4444') : '#FF4444' }}
+                                            className="w-48 h-48 border-2 [border-color:var(--result-choice-color)]"
+                                            style={{ ['--result-choice-color' as string]: isCurrentHost ? (userColor || '#FF4444') : '#FF4444' }}
                                         />
                                         <div className="h-4" />
                                     </div>

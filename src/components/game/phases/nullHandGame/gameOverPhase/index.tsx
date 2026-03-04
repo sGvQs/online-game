@@ -1,11 +1,11 @@
 import { MatchScoreWithUser, UserRanking, HandType } from '@/types'
-import { nullHandGame } from '@/components/game/layout/nullHandGame/styles'
+import { gameOverPhase } from './styles'
 import { cn } from '@/lib/utils'
-import { SideHeader } from '@/components/game/common/nullHand/SideHeader'
-import { GameButton } from '@/components/game/common/nullHand/GameButton'
-import { Hand3D } from '@/components/game/common/nullHand/Hand3D'
-import { CurrentScores } from '@/components/game/common/nullHand/CurrentScores'
-import { PlayerFaceIcon } from '@/components/game/common/nullHand/PlayerFaceIcon'
+import { SideHeader } from '@/components/game/common/nullHand/sideHeader'
+import { GameButton } from '@/components/game/common/nullHand/gameButton'
+import { Hand3D } from '@/components/game/common/nullHand/hand3D'
+import { CurrentScores } from '@/components/game/common/nullHand/currentScores'
+import { PlayerFaceIcon } from '@/components/game/common/nullHand/playerFaceIcon'
 import { motion } from 'framer-motion'
 
 interface GameOverPhaseProps {
@@ -27,7 +27,7 @@ export function GameOverPhase({
     userColor,
     hostId,
 }: GameOverPhaseProps) {
-    const styles = nullHandGame()
+    const styles = gameOverPhase()
 
     const MainArea = () => (
         <div className={styles.mainArea()}>

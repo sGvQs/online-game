@@ -1,13 +1,13 @@
 import { RoomWithUsersAndReadyStatus, UserRanking, HandType, RoomUserWithReadyStatus } from '@/types'
 import { motion } from 'framer-motion'
-import { PlayerFaceIcon } from '@/components/game/common/nullHand/PlayerFaceIcon'
+import { PlayerFaceIcon } from '@/components/game/common/nullHand/playerFaceIcon'
 import { useState } from 'react'
-import { nullHandGame } from '@/components/game/layout/nullHandGame/styles'
-import { Hand3D } from '@/components/game/common/nullHand/Hand3D'
+import { titleScreen } from './styles'
+import { Hand3D } from '@/components/game/common/nullHand/hand3D'
 import { cn } from '@/lib/utils'
-import { NullHandLogo } from '@/components/game/common/nullHand/NullHandLogo'
+import { NullHandLogo } from '@/components/game/common/nullHand/nullHandLogo'
 import { useSE } from '@/hooks/useSE'
-import { RewardSystem } from '@/components/game/common/nullHand/RewardSystem'
+import { RewardSystem } from '@/components/game/common/nullHand/rewardSystem'
 import { NEON_PALETTE } from '@/constants/nullHandGame'
 
 interface TitleScreenProps {
@@ -39,7 +39,7 @@ export function TitleScreen({
     onColorChange,
     currentUserId,
 }: TitleScreenProps) {
-    const styles = nullHandGame()
+    const styles = titleScreen()
 
     const readyCount = room.users.filter((u: RoomUserWithReadyStatus) => u.isReady).length
     const totalUsers = room.users.length
@@ -163,7 +163,14 @@ export function TitleScreen({
                                 const isMe = u.userId === currentUserId
 
                                 return (
-                                    <div key={u.id} className={styles.playerItem()}>
+                                    <div
+                                        key={u.id}
+                                        className={styles.playerItem()}
+                                        style={{
+                                            ['--player-name-color' as string]: u.isReady ? (isMe ? userColor : '#44FFFF') : '#4b5563',
+                                            ['--player-status-color' as string]: u.isReady ? '#44FFFF' : '#374151',
+                                        }}
+                                    >
                                         <div className="flex items-center gap-2">
                                             <PlayerFaceIcon
                                                 faceIcon={u.user?.faceIcon}
@@ -172,17 +179,11 @@ export function TitleScreen({
                                             <span className={styles.rankingText()}>
                                                 {rankDisplay}
                                             </span>
-                                            <span style={{
-                                                color: u.isReady
-                                                    ? (isMe ? userColor : '#44FFFF')
-                                                    : '#4b5563' // text-gray-600
-                                            }}>
+                                            <span className={styles.playerName()}>
                                                 {u.user?.name || '不明'}
                                             </span>
                                         </div>
-                                        <span style={{
-                                            color: u.isReady ? '#44FFFF' : '#374151' // シアン or text-gray-700
-                                        }} className="font-black text-sm">
+                                        <span className={styles.playerStatus()}>
                                             {u.isReady ? 'READY' : 'WAITING'}
                                         </span>
                                     </div>
@@ -223,7 +224,7 @@ export function TitleScreen({
                         exit={{ opacity: 0, scale: 0.95 }}
                         className="relative w-full max-w-2xl max-h-[90vh] bg-black border border-[#FF4444] rounded-lg overflow-hidden flex flex-col shadow-[0_0_30px_rgba(255,68,68,0.3)]"
                     >
-                        <div className="overflow-y-auto p-6 custom-scrollbar flex-1" style={{ scrollbarWidth: 'thin', scrollbarColor: '#FF4444 #000' }}>
+                        <div className={styles.aboutScrollArea()}>
                             <div className="space-y-6">
                                 {/* タイトル部 */}
                                 <div className="bg-black border border-[#FF4444] rounded p-4 text-center relative overflow-hidden group">

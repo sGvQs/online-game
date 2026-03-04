@@ -1,15 +1,15 @@
 import { JankenEventWithGuests, HostStats, HostChoice, HandType, MatchScoreWithUser } from '@/types'
-import { Hand3D } from '@/components/game/common/nullHand/Hand3D'
-import { PlayerFaceIcon } from '@/components/game/common/nullHand/PlayerFaceIcon'
-import { nullHandGame } from '@/components/game/layout/nullHandGame/styles'
-import { PhaseHeader } from '@/components/game/common/nullHand/PhaseHeader'
-import { CurrentScores } from '@/components/game/common/nullHand/CurrentScores'
-import { RewardSystem } from '@/components/game/common/nullHand/RewardSystem'
+import { Hand3D } from '@/components/game/common/nullHand/hand3D'
+import { PlayerFaceIcon } from '@/components/game/common/nullHand/playerFaceIcon'
+import { choicePhase } from './styles'
+import { PhaseHeader } from '@/components/game/common/nullHand/phaseHeader'
+import { CurrentScores } from '@/components/game/common/nullHand/currentScores'
+import { RewardSystem } from '@/components/game/common/nullHand/rewardSystem'
 import { motion } from 'framer-motion'
 import { useSE } from '@/hooks/useSE'
 import { useState, useEffect } from 'react'
 import { cn } from '@/lib/utils'
-import { GameButton } from '@/components/game/common/nullHand/GameButton'
+import { GameButton } from '@/components/game/common/nullHand/gameButton'
 
 interface ChoicePhaseProps {
     jankenEvent: JankenEventWithGuests | null
@@ -39,7 +39,7 @@ export function ChoicePhase({
     currentUserId,
     userColor,
 }: ChoicePhaseProps) {
-    const styles = nullHandGame()
+    const styles = choicePhase()
     const { play } = useSE()
 
     // CHOICEとBLUFFの枠を入れ替えるためのアニメーション状態
@@ -199,8 +199,7 @@ export function ChoicePhase({
                                 layout
                                 layoutId="hand-slot-left-frame"
                                 transition={{ duration: 0.8, type: 'spring', bounce: 0.4 }}
-                                style={{ order: isSwapped ? 3 : 1 }}
-                                className="flex flex-col items-center gap-1 cursor-pointer"
+                                className={cn("flex flex-col items-center gap-1 cursor-pointer", isSwapped ? 'order-3' : 'order-1')}
                                 onClick={() => {
                                     if (isCurrentHost && !isProcessing) {
                                         play('select')
@@ -211,15 +210,15 @@ export function ChoicePhase({
                                 <div className="flex items-end gap-2">
                                     <PlayerFaceIcon faceIcon={hostFaceIcon} customSrc={hostCustomIconSrc} size="sm" />
                                     <div
-                                        className="text-xs font-black tracking-[0.3em]"
-                                        style={{ color: isCurrentHost ? (userColor || '#FF4444') : '#FF4444' }}
+                                        className="text-xs font-black tracking-[0.3em] [color:var(--choice-color)]"
+                                        style={{ ['--choice-color' as string]: isCurrentHost ? (userColor || '#FF4444') : '#FF4444' }}
                                     >
                                         {hostName}
                                     </div>
                                 </div>
                                 <div
-                                    className="w-48 h-48 border-2"
-                                    style={{ borderColor: isCurrentHost ? (userColor || '#FF4444') : '#FF4444' }}
+                                    className="w-48 h-48 border-2 [border-color:var(--choice-color)]"
+                                    style={{ ['--choice-color' as string]: isCurrentHost ? (userColor || '#FF4444') : '#FF4444' }}
                                 />
                                 <div className="h-4" />
                             </motion.div>
@@ -229,8 +228,7 @@ export function ChoicePhase({
                                 layout
                                 layoutId="hand-slot-right-frame"
                                 transition={{ duration: 0.8, type: 'spring', bounce: 0.4 }}
-                                style={{ order: isSwapped ? 1 : 3 }}
-                                className="flex flex-col items-center gap-1 cursor-pointer"
+                                className={cn("flex flex-col items-center gap-1 cursor-pointer", isSwapped ? 'order-1' : 'order-3')}
                                 onClick={() => {
                                     if (isCurrentHost && !isProcessing) {
                                         play('select')

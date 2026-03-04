@@ -3,7 +3,7 @@
 ## ファイル・ディレクトリ名
 
 - **先頭は小文字**: ファイル名・ディレクトリ名は camelCase とし、先頭を小文字にする
-- 例: `button.tsx`, `gameScreen.tsx`, `starShieldGame/`, `nullHandGame/`, `Hand3D/`（common 内）
+- 例: `button.tsx`, `gameScreen.tsx`, `starShieldGame/`, `nullHandGame/`, `hand3D/`（common 内）
 - 例外: `README.md` 等の慣例的に大文字のものはそのまま
 
 ## ディレクトリ構造
@@ -31,7 +31,16 @@ game/ 直下は役割ディレクトリのみ:
 - **layout**: app から呼ばれる orchestrator は `game/layout/{gameName}/` に配置
 - **phases**: フェーズ画面は `game/phases/{gameName}/` に集約
 - **common**: 共有コンポーネントは `game/common/` に配置
-  - ゲーム固有: `common/{gameName}/`（例: `common/nullHand/Hand3D/`, `common/starShield/StarVisual/`, `common/errorHunter/win95Dialog/`）
+  - ゲーム固有: `common/{gameName}/`（例: `common/nullHand/hand3D/`, `common/starShield/starVisual/`, `common/errorHunter/win95Dialog/`）
+
+## スタイル
+
+- **ローカル styles のみ**: game 配下の各コンポーネントは、自フォルダ内の `styles.ts` のみを参照する
+- **遠隔参照禁止**: 他コンポーネント・他ディレクトリの styles を import しない
+- **必須**: 各コンポーネントフォルダには `styles.ts` を配置する（tailwind-variants の tv を使用）
+- **インライン style 禁止**: `style={{ color: 'red' }}` 等の直接スタイル指定は禁止
+- **例外**: props/state 由来の動的値を CSS に渡す場合のみ、CSS カスタムプロパティの形で許可: `style={{ ['--user-color']: userColor }}`。値の注入のみ可、その他のプロパティ指定は禁止
+- **移行先**: 静的スタイルは className および styles.ts の tv で記述。動的値は CSS 変数で受け取り、styles.ts で `var(--xxx)` を用いる
 
 ## 定数とユーティリティの配置
 

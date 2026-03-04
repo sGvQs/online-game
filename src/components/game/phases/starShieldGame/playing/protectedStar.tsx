@@ -1,6 +1,6 @@
 'use client'
 
-import { StarVisual } from '@/components/game/common/starShield/StarVisual'
+import { StarVisual } from '@/components/game/common/starShield/starVisual'
 
 export const STAR_POSITION = {
     left: '-45%',

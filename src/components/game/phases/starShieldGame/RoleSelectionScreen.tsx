@@ -5,17 +5,10 @@ import { motion } from 'framer-motion'
 import { RoomWithUsersAndReadyStatus, RoomUserWithReadyStatus } from '@/types'
 import { cn } from '@/lib/utils'
 import { ProtectedStar } from './playing/protectedStar'
-import { DinosaurWithBalls } from '@/components/game/common/starShield/DinosaurWithBalls'
-import { AuroraGlow } from '@/components/game/common/starShield/AuroraGlow'
-import {
-    FONTS,
-    COLORS,
-    DIFFICULTIES,
-    DIFFICULTY_META,
-    ROLE_META,
-    type Difficulty,
-    type RoleChoice,
-} from '@/constants/starShieldGame/constants'
+import { DinosaurWithBalls } from '@/components/game/common/starShield/dinosaurWithBalls'
+import { AuroraGlow } from '@/components/game/common/starShield/auroraGlow'
+import { roleSelectionScreen } from './roleSelectionScreen.styles'
+import { COLORS, DIFFICULTIES, DIFFICULTY_META, ROLE_META, type Difficulty, type RoleChoice } from '@/constants/starShieldGame/constants'
 
 interface RoleSelectionScreenProps {
     room: RoomWithUsersAndReadyStatus
@@ -47,6 +40,7 @@ export function RoleSelectionScreen({
 }: RoleSelectionScreenProps) {
     const myRole = roleChoices[currentUserId]
     const activeDiffMeta = DIFFICULTY_META[difficulty]
+    const styles = roleSelectionScreen()
 
     return (
         <div className="relative min-h-screen overflow-hidden flex flex-col items-center justify-center">
@@ -56,17 +50,7 @@ export function RoleSelectionScreen({
 
             <div className="relative z-10 w-full max-w-2xl mx-auto px-6 py-10 flex flex-col gap-7">
                 <motion.div initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-                    <h2
-                        className="text-4xl font-black leading-snug"
-                        style={{
-                            fontFamily: FONTS.CHERRY_BOMB,
-                            background: 'linear-gradient(135deg, #c084fc 0%, #f472b6 100%)',
-                            WebkitBackgroundClip: 'text',
-                            WebkitTextFillColor: 'transparent',
-                        }}
-                    >
-                        [むずかしさ]と[やくわり]をきめよう。
-                    </h2>
+                    <h2 className={styles.sectionTitle()}>[むずかしさ]と[やくわり]をきめよう。</h2>
                 </motion.div>
 
                 <div className="grid grid-cols-[1fr_1fr] gap-5">
@@ -74,12 +58,9 @@ export function RoleSelectionScreen({
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.5, delay: 0.1 }}
-                        className={cn('rounded-2xl p-5 flex flex-col gap-3 transition-opacity', !isHost && 'opacity-70')}
-                        style={{ background: COLORS.WHITE_03, border: `1px solid ${COLORS.WHITE_08}` }}
+                        className={cn(styles.difficultyCard(), !isHost && 'opacity-70')}
                     >
-                        <p className="text-[11px]" style={{ fontFamily: FONTS.CHERRY_BOMB, color: COLORS.BRAND_6 }}>
-                            むずかしさ
-                        </p>
+                        <p className={styles.difficultyCardTitle()}>むずかしさ</p>
                         <div className="flex flex-col gap-2">
                             {DIFFICULTIES.map((d) => {
                                 const meta = DIFFICULTY_META[d]
@@ -93,45 +74,33 @@ export function RoleSelectionScreen({
                                         disabled={!canSelect}
                                         title={isHellLocked ? '隕石破壊数100以上のクリアで解放' : undefined}
                                         className={cn(
-                                            'flex items-center gap-3 px-3 py-2 rounded-xl transition-all duration-200',
+                                            styles.difficultyButton(),
                                             canSelect ? 'cursor-pointer hover:scale-[1.02] hover:brightness-110' : 'cursor-default',
+                                            isHellLocked && 'opacity-50',
                                         )}
                                         style={{
-                                            fontFamily: FONTS.CHERRY_BOMB,
-                                            background: isActive ? meta.bg : 'transparent',
-                                            border: `1.5px solid ${isActive ? meta.border : 'rgba(255,255,255,0.07)'}`,
-                                            boxShadow: isActive ? meta.glow : 'none',
-                                            color: isActive ? meta.text : isHellLocked ? COLORS.WHITE_15 : COLORS.WHITE_2,
-                                            opacity: isHellLocked ? 0.5 : 1,
+                                            ['--diff-bg' as string]: isActive ? meta.bg : 'transparent',
+                                            ['--diff-border' as string]: isActive ? `1.5px solid ${meta.border}` : '1.5px solid rgba(255,255,255,0.07)',
+                                            ['--diff-glow' as string]: isActive ? meta.glow : 'none',
+                                            ['--diff-color' as string]: isActive ? meta.text : isHellLocked ? COLORS.WHITE_15 : COLORS.WHITE_2,
+                                            ['--diff-rate-color' as string]: isActive ? meta.text : COLORS.WHITE_15,
                                         }}
                                     >
                                         <span className="text-lg leading-none w-5 text-center shrink-0">{meta.emoji}</span>
                                         <span className="text-sm font-bold flex-1 text-left">{meta.label}</span>
-                                        {isHellLocked && (
-                                            <span className="text-[9px] shrink-0" style={{ fontFamily: FONTS.DOT_GOTHIC, color: COLORS.WHITE_15 }}>
-                                                解放条件
-                                            </span>
-                                        )}
-                                        {!isHellLocked && (
-                                            <span
-                                                className="text-[10px] shrink-0 tabular-nums"
-                                                style={{ fontFamily: FONTS.DOT_GOTHIC, color: isActive ? meta.text : COLORS.WHITE_15 }}
-                                            >
-                                                {meta.rate}
-                                            </span>
-                                        )}
+                                        {isHellLocked && <span className={styles.hellLockLabel()}>解放条件</span>}
+                                        {!isHellLocked && <span className={styles.rateLabel()}>{meta.rate}</span>}
                                     </button>
                                 )
                             })}
                         </div>
-                        <p className="text-[10px] leading-relaxed mt-1" style={{ fontFamily: FONTS.CHERRY_BOMB, color: activeDiffMeta.text, opacity: 0.7 }}>
+                        <p
+                            className={styles.successHint()}
+                            style={{ ['--diff-hint-color' as string]: activeDiffMeta.text }}
+                        >
                             せいこうしたとき {activeDiffMeta.rate} もらえるよ。
                         </p>
-                        {!isHost && (
-                            <p className="text-[10px] mt-1" style={{ fontFamily: FONTS.CHERRY_BOMB, color: COLORS.WHITE_15 }}>
-                                ほすとがせんたくちゅう…
-                            </p>
-                        )}
+                        {!isHost && <p className={styles.hostWaiting()}>ほすとがせんたくちゅう…</p>}
                     </motion.div>
 
                     <motion.div
@@ -147,42 +116,25 @@ export function RoleSelectionScreen({
                                 <button
                                     key={r}
                                     onClick={() => onRoleChange(r)}
-                                    className="rounded-2xl p-4 text-left transition-all duration-200 flex-1 cursor-pointer hover:scale-[1.02] hover:brightness-110 active:scale-[0.98]"
+                                    className={styles.roleButton()}
                                     style={{
-                                        background: isSelected ? meta.bg : 'rgba(255,255,255,0.02)',
-                                        border: `1.5px solid ${isSelected ? meta.border : 'rgba(255,255,255,0.07)'}`,
-                                        boxShadow: isSelected ? meta.glow : 'none',
+                                        ['--role-bg' as string]: isSelected ? meta.bg : 'rgba(255,255,255,0.02)',
+                                        ['--role-border' as string]: isSelected ? `1.5px solid ${meta.border}` : '1.5px solid rgba(255,255,255,0.07)',
+                                        ['--role-glow' as string]: isSelected ? meta.glow : 'none',
+                                        ['--role-icon-filter' as string]: isSelected ? 'none' : 'opacity(0.35)',
+                                        ['--role-title-color' as string]: isSelected ? meta.text : COLORS.WHITE_35,
+                                        ['--role-desc-color' as string]: isSelected ? meta.text : COLORS.WHITE_25,
+                                        ['--role-detail-color' as string]: isSelected ? `${meta.text}99` : COLORS.WHITE_15,
                                     }}
                                 >
                                     <div className="flex items-center gap-2 mb-1.5">
                                         <div className="relative w-6 h-6 shrink-0">
-                                            <Image
-                                                src={meta.iconSrc}
-                                                alt={meta.label}
-                                                fill
-                                                className="object-contain"
-                                                style={{ filter: isSelected ? undefined : 'opacity(0.35)' }}
-                                            />
+                                            <Image src={meta.iconSrc} alt={meta.label} fill className={styles.roleIcon()} />
                                         </div>
-                                        <span
-                                            className="text-base font-bold"
-                                            style={{ fontFamily: FONTS.CHERRY_BOMB, color: isSelected ? meta.text : COLORS.WHITE_35 }}
-                                        >
-                                            {meta.label}
-                                        </span>
+                                        <span className={styles.roleTitle()}>{meta.label}</span>
                                     </div>
-                                    <p
-                                        className="text-[11px] leading-snug mb-1"
-                                        style={{ fontFamily: FONTS.DOT_GOTHIC, color: isSelected ? meta.text : COLORS.WHITE_25 }}
-                                    >
-                                        {meta.description}
-                                    </p>
-                                    <p
-                                        className="text-[10px] leading-relaxed"
-                                        style={{ fontFamily: FONTS.DOT_GOTHIC, color: isSelected ? `${meta.text}99` : COLORS.WHITE_15 }}
-                                    >
-                                        {meta.detail}
-                                    </p>
+                                    <p className={styles.roleDescription()}>{meta.description}</p>
+                                    <p className={styles.roleDetail()}>{meta.detail}</p>
                                 </button>
                             )
                         })}
@@ -193,19 +145,14 @@ export function RoleSelectionScreen({
                     initial={{ opacity: 0, y: 8 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: 0.2 }}
-                    className="rounded-2xl px-5 py-4"
+                    className={styles.statusPanel()}
                     style={{
-                        background: COLORS.BRAND_06,
-                        border: canProceed ? `1px solid rgba(129,140,248,0.15)` : '1px solid rgba(248,113,113,0.4)',
+                        ['--status-panel-bg' as string]: COLORS.BRAND_06,
+                        ['--status-panel-border' as string]: canProceed ? '1px solid rgba(129,140,248,0.15)' : '1px solid rgba(248,113,113,0.4)',
+                        ['--status-message-color' as string]: canProceed ? 'rgba(134,239,172,0.95)' : 'rgba(248,113,113,0.95)',
                     }}
                 >
-                    <p
-                        className="text-sm mb-3 min-h-5"
-                        style={{
-                            fontFamily: FONTS.CHERRY_BOMB,
-                            color: canProceed ? 'rgba(134,239,172,0.95)' : 'rgba(248,113,113,0.95)',
-                        }}
-                    >
+                    <p className={styles.statusMessage()}>
                         {canProceed ? 'じゅんびがととのったよ' : 'ちがうやくわりをえらんでね'}
                     </p>
                     <div className="flex flex-col gap-3">
@@ -214,41 +161,35 @@ export function RoleSelectionScreen({
                             const role = roleChoices[u.userId]
                             const roleMeta = role ? ROLE_META[role] : null
                             return (
-                                <div key={u.id} className="flex items-center gap-3">
-                                    <div
-                                        className="w-2 h-2 rounded-full shrink-0"
-                                        style={{ backgroundColor: roleMeta ? roleMeta.text : COLORS.WHITE_15 }}
-                                    />
-                                    <span
-                                        className="text-sm flex-1 truncate"
-                                        style={{ fontFamily: FONTS.DOT_GOTHIC, color: isMe ? '#ffffff' : COLORS.WHITE_5 }}
-                                    >
+                                <div
+                                    key={u.id}
+                                    className="flex items-center gap-3"
+                                    style={{
+                                        ['--status-dot-color' as string]: roleMeta ? roleMeta.text : COLORS.WHITE_15,
+                                        ['--player-name-color' as string]: isMe ? '#ffffff' : COLORS.WHITE_5,
+                                        ...(roleMeta
+                                            ? {
+                                                  ['--badge-color' as string]: roleMeta.text,
+                                                  ['--badge-bg' as string]: roleMeta.bg,
+                                                  ['--badge-border' as string]: `1px solid ${roleMeta.border}`,
+                                              }
+                                            : {}),
+                                    }}
+                                >
+                                    <div className={styles.statusDot()} />
+                                    <span className={styles.playerName()}>
                                         {u.user?.name ?? '...'}
-                                        {isMe && (
-                                            <span className="text-xs ml-1" style={{ fontFamily: FONTS.DOT_GOTHIC, color: COLORS.BRAND_5 }}>
-                                                (あなた)
-                                            </span>
-                                        )}
+                                        {isMe && <span className={styles.playerNameSuffix()}>(あなた)</span>}
                                     </span>
                                     {roleMeta ? (
-                                        <span
-                                            className="text-xs px-2 py-0.5 rounded-full shrink-0 flex items-center gap-1"
-                                            style={{
-                                                fontFamily: FONTS.CHERRY_BOMB,
-                                                color: roleMeta.text,
-                                                background: roleMeta.bg,
-                                                border: `1px solid ${roleMeta.border}`,
-                                            }}
-                                        >
+                                        <span className={styles.roleBadge()}>
                                             <span className="relative w-3.5 h-3.5 shrink-0 block">
                                                 <Image src={roleMeta.iconSrc} alt="" fill className="object-contain" />
                                             </span>
                                             {roleMeta.label}
                                         </span>
                                     ) : (
-                                        <span className="text-xs shrink-0" style={{ fontFamily: FONTS.CHERRY_BOMB, color: COLORS.WHITE_2 }}>
-                                            せんたくちゅう…
-                                        </span>
+                                        <span className={styles.selectingLabel()}>せんたくちゅう…</span>
                                     )}
                                 </div>
                             )
@@ -258,11 +199,7 @@ export function RoleSelectionScreen({
 
                 <motion.div className="flex gap-3" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5, delay: 0.25 }}>
                     {isHost && (
-                        <button
-                            onClick={onBack}
-                            className="py-3 px-6 rounded-2xl border-2 border-green-500 bg-green-600/90 text-green-50 hover:bg-green-500 hover:border-green-400 hover:scale-105 active:scale-95 transition-all shrink-0 shadow-[0_0_20px_rgba(34,197,94,0.5)] cursor-pointer"
-                            style={{ fontFamily: FONTS.CHERRY_BOMB, fontSize: '1rem' }}
-                        >
+                        <button onClick={onBack} className={styles.exitButton()}>
                             ← EXIT
                         </button>
                     )}
@@ -271,12 +208,9 @@ export function RoleSelectionScreen({
                             onClick={() => canProceed && onProceedToGame()}
                             disabled={!canProceed}
                             className={cn(
-                                'flex-1 py-3 px-6 rounded-2xl font-bold transition-all',
-                                canProceed
-                                    ? 'bg-indigo-600/90 text-indigo-100 border border-indigo-500 hover:bg-indigo-500/90 hover:scale-[1.02] active:scale-[0.98] cursor-pointer'
-                                    : 'bg-gray-800/60 text-gray-500 border border-gray-700/50 cursor-not-allowed',
+                                styles.startButton(),
+                                canProceed ? styles.startButtonEnabled() : styles.startButtonDisabled(),
                             )}
-                            style={{ fontFamily: FONTS.CHERRY_BOMB }}
                         >
                             {canProceed ? '🚀 START GAME' : '🔒 START GAME'}
                         </button>

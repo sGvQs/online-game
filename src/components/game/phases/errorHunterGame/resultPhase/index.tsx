@@ -1,6 +1,7 @@
 'use client'
 
 import { Win95Dialog } from '@/components/game/common/errorHunter/win95Dialog'
+import { resultPhase } from './styles'
 import type { MatchWithErrorEventsAndUsers } from '@/types'
 
 export interface ResultPhaseProps {
@@ -20,11 +21,9 @@ export function ResultPhase({
     currentUserId,
     onFinish,
 }: ResultPhaseProps) {
+    const styles = resultPhase()
     return (
-        <div
-            className="fixed inset-0 flex items-center justify-center z-50"
-            style={{ backgroundColor: 'rgba(0, 0, 0, 0.3)' }}
-        >
+        <div className={styles.overlay()}>
             <Win95Dialog
                 title="Result"
                 icon={winnerFaceIconPath ? undefined : 'lose'}
@@ -35,41 +34,21 @@ export function ResultPhase({
                     primary: true,
                 }]}
             >
-                <div style={{ minWidth: '350px' }}>
-                    <div style={{ marginBottom: '12px', marginLeft: '24px' }}>
-                        <p
-                            style={{
-                                fontSize: '12px',
-                                fontWeight: 'normal',
-                                color: '#000',
-                                marginBottom: '4px',
-                                padding: '4px',
-                                backgroundColor: 'transparent',
-                                borderRadius: '2px',
-                            }}
-                        >
+                <div className={styles.inner()}>
+                    <div className={styles.headerSection()}>
+                        <p className={styles.commentLabel()}>
                             {match?.winnerId === currentUserId ? `${winnerName}さんから皆さんへのコメント` : `${winnerName}さんからのコメント`}
                         </p>
-                        <p
-                            style={{
-                                fontSize: '14px',
-                                fontWeight: 'bold',
-                                color: '#000080',
-                                marginBottom: '4px',
-                                padding: '4px',
-                                backgroundColor: '#e0e0e0',
-                                borderRadius: '2px',
-                            }}
-                        >
+                        <p className={styles.commentText()}>
                             {winnerComment || '私の勝ちです'}
                         </p>
                     </div>
                     {match?.winnerId === currentUserId ? (
-                        <p style={{ fontSize: '12px', color: '#000080', marginLeft: '24px', marginTop: '12px' }}>
+                        <p className={styles.resultText()}>
                             あなたの勝ちです
                         </p>
                     ) : (
-                        <p style={{ fontSize: '12px', color: '#000080', marginLeft: '24px', marginTop: '12px' }}>
+                        <p className={styles.resultText()}>
                             あなたの負けです
                         </p>
                     )}

@@ -1,11 +1,8 @@
-import { createClient } from '@/server/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import { getCurrentUser } from '@/server/actions'
 import { getRoomWithReadyStatus } from '@/server/actions/room'
 import { getNullHandRankings } from '@/server/actions/game/rankingActions'
 import { ErrorHunterGame } from '@/components/game/layout/errorHunterGame'
-import { cn } from '@/lib/utils'
-import { errorHunterGame } from '@/components/game/layout/errorHunterGame/styles'
 import { RoomUserWithReadyStatus } from '@/types'
 
 export default async function ErrorHunterPage({ params }: { params: Promise<{ roomId: string }> }) {
@@ -37,21 +34,14 @@ export default async function ErrorHunterPage({ params }: { params: Promise<{ ro
     const userIds = room.users.map((u) => u.userId)
     const initialRankings = await getNullHandRankings(userIds)
 
-    const styles = errorHunterGame()
-
     return (
-        <div className={cn(
-            styles.container(),
-            "relative"
-        )}>
-            <ErrorHunterGame
-                room={room}
-                isHost={isHost}
-                roomId={roomId}
-                initialMatchId={room.currentMatchId}
-                currentUserId={currentUser.user.id}
-                initialRankings={initialRankings}
-            />
-        </div>
+        <ErrorHunterGame
+            room={room}
+            isHost={isHost}
+            roomId={roomId}
+            initialMatchId={room.currentMatchId}
+            currentUserId={currentUser.user.id}
+            initialRankings={initialRankings}
+        />
     )
 }

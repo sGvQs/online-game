@@ -1,7 +1,9 @@
 'use client'
 
 import { useId } from 'react'
+import { starVisual } from './styles'
 import { STAR_GRADIENT_STOPS, STAR_GLOW_FILTER } from '@/constants/starShieldGame/constants'
+import { cn } from '@/lib/utils'
 
 export interface StarPosition {
     left: string
@@ -19,24 +21,20 @@ interface StarVisualProps {
 export function StarVisual({ position, className = '' }: StarVisualProps) {
     const id = useId()
     const glowId = `starGlow-${id}`
+    const styles = starVisual()
 
     return (
         <div
-            className={`absolute pointer-events-none z-0 overflow-visible ${className}`}
+            className={cn(styles.root(), className)}
             style={{
-                left: position.left,
-                bottom: position.bottom,
-                width: position.width,
-                height: position.height,
-                transform: position.transform,
+                ['--star-left' as string]: position.left,
+                ['--star-bottom' as string]: position.bottom,
+                ['--star-width' as string]: position.width,
+                ['--star-height' as string]: position.height,
+                ['--star-transform' as string]: position.transform ?? 'none',
             }}
         >
-            <svg
-                viewBox="0 0 100 100"
-                className="w-full h-full overflow-visible"
-                fill="none"
-                style={{ overflow: 'visible' }}
-            >
+            <svg viewBox="0 0 100 100" className={styles.svg()} fill="none">
                 <defs>
                     <radialGradient id={glowId} cx="50%" cy="50%" r="50%">
                         {STAR_GRADIENT_STOPS.map(({ offset, color }) => (
@@ -49,7 +47,8 @@ export function StarVisual({ position, className = '' }: StarVisualProps) {
                     cy="50"
                     r="48"
                     fill={`url(#${glowId})`}
-                    style={{ filter: STAR_GLOW_FILTER }}
+                    className={styles.circle()}
+                    style={{ ['--star-glow-filter' as string]: STAR_GLOW_FILTER }}
                 />
             </svg>
         </div>

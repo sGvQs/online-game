@@ -1,8 +1,8 @@
 import { MatchScoreWithUser } from '@/types'
-import { SideHeader } from '@/components/game/common/nullHand/SideHeader'
-import { sideCard } from '@/components/game/phases/nullHandGame/phaseCard.styles'
+import { SideHeader } from '@/components/game/common/nullHand/sideHeader'
+import { currentScores as currentScoresStyles } from './styles'
 import { cn } from '@/lib/utils'
-import { PlayerFaceIcon } from '@/components/game/common/nullHand/PlayerFaceIcon'
+import { PlayerFaceIcon } from '@/components/game/common/nullHand/playerFaceIcon'
 
 interface CurrentScoresProps {
     currentScores: MatchScoreWithUser[]
@@ -13,6 +13,19 @@ interface CurrentScoresProps {
     variant?: 'cyan' | 'red'
     size?: 'sm' | 'md' | 'lg'
     userColor?: string
+}
+
+function getRowColor(
+    score: MatchScoreWithUser,
+    currentUserId: string,
+    hostId: string | undefined,
+    userColor: string | undefined
+) {
+    return score.userId === currentUserId
+        ? userColor ?? '#44FFFF'
+        : hostId && score.userId === hostId && currentUserId !== hostId
+            ? '#FF4444'
+            : '#44FFFF'
 }
 
 export function CurrentScores({
@@ -26,7 +39,7 @@ export function CurrentScores({
     userColor
 }: CurrentScoresProps) {
     return (
-        <div className={sideCard({ variant, size }).card() + " flex-1 overflow-hidden flex flex-col"}>
+        <div className={currentScoresStyles({ variant, size }).card() + " flex-1 overflow-hidden flex flex-col"}>
             <SideHeader
                 engLabel={engLabel}
                 label={label}
@@ -43,45 +56,23 @@ export function CurrentScores({
                                     ? "bg-[#44FFFF]/10 border-[#44FFFF]/30"
                                     : "bg-black/20 border-white/5"
                             )}
+                            style={{ ['--row-color' as string]: getRowColor(score, currentUserId, hostId, userColor) }}
                         >
                             <div className="flex items-center gap-2 min-w-0">
-                                <div className="text-[10px] font-black text-white w-4" style={{
-                                    color: score.userId === currentUserId
-                                        ? userColor
-                                        : (hostId && score.userId === hostId && currentUserId !== hostId)
-                                            ? "#FF4444"
-                                            : "#44FFFF"
-                                }}>
+                                <div className={cn(currentScoresStyles().indexNumber(), 'text-[color:var(--row-color)]')}>
                                     {index + 1}
                                 </div>
                                 <PlayerFaceIcon
                                     faceIcon={score.user.faceIcon}
                                     size={size === 'lg' ? 'md' : 'sm'}
                                 />
-                                <div className={cn(
-                                    "text-xs font-bold truncate text-gray-300",
-                                )}
-                                    style={{
-                                        color: score.userId === currentUserId
-                                            ? userColor
-                                            : (hostId && score.userId === hostId && currentUserId !== hostId)
-                                                ? "#FF4444"
-                                                : "#44FFFF"
-                                    }}
-                                >
+                                <div className={cn(currentScoresStyles().playerName(), 'text-[color:var(--row-color)]')}>
                                     {score.user.name}
                                 </div>
                             </div>
-                            <div className="text-sm font-black tabular-nums"
-                                style={{
-                                    color: score.userId === currentUserId
-                                        ? userColor
-                                        : (hostId && score.userId === hostId && currentUserId !== hostId)
-                                            ? "#FF4444"
-                                            : "#44FFFF"
-                                }}
-                            >
-                                {score.points}<span className="text-[10px] ml-1">pt</span>
+                            <div className={cn(currentScoresStyles().points(), 'text-[color:var(--row-color)]')}>
+                                <span>{score.points}</span>
+                                <span className="text-xs ml-1">pt</span>
                             </div>
                         </div>
                     ))

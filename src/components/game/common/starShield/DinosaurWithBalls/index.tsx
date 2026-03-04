@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import { AnimatePresence, motion } from 'framer-motion'
+import { dinosaurWithBalls } from './styles'
 import {
     BALL_ANGLE,
     BALL_DISTANCE,
@@ -13,6 +14,7 @@ import {
     BULLET_COLOR,
     ICONS,
 } from '@/constants/starShieldGame/constants'
+import { cn } from '@/lib/utils'
 
 interface DinosaurWithBallsProps {
     ballColor?: string
@@ -32,6 +34,7 @@ export function DinosaurWithBalls({
     className = '',
 }: DinosaurWithBallsProps) {
     const [balls, setBalls] = useState<{ id: number }[]>([])
+    const styles = dinosaurWithBalls()
 
     useEffect(() => {
         const spawn = () => {
@@ -46,17 +49,21 @@ export function DinosaurWithBalls({
         return () => clearTimeout(t)
     }, [])
 
+    const dinoVars = {
+        ['--dino-left' as string]: `${DINO_SPAWN.left}%`,
+        ['--dino-bottom' as string]: `${DINO_SPAWN.bottom}%`,
+        ['--dino-transform' as string]: `translate(-50%, 50%) rotate(${rotate})`,
+    }
+    const ballVars = {
+        ['--ball-size' as string]: `${BALL_SIZE}px`,
+        ['--ball-color' as string]: ballColor,
+        ['--ball-shadow' as string]: `0 0 8px ${ballColor}99`,
+    }
+
     return (
         <>
             {/* 恐竜 */}
-            <div
-                className={`absolute z-10 pointer-events-none ${size} ${className}`}
-                style={{
-                    left: `${DINO_SPAWN.left}%`,
-                    bottom: `${DINO_SPAWN.bottom}%`,
-                    transform: `translate(-50%, 50%) rotate(${rotate})`,
-                }}
-            >
+            <div className={cn(styles.dinoWrapper(), size, className)} style={dinoVars}>
                 <div className="relative w-full h-full">
                     <Image
                         src={ICONS.DINO}
@@ -68,27 +75,13 @@ export function DinosaurWithBalls({
             </div>
 
             {/* 恐竜が吐く赤い球（口から画面外まで） */}
-            <div
-                className="absolute z-[9] pointer-events-none"
-                style={{
-                    left: `${DINO_SPAWN.left}%`,
-                    bottom: `${DINO_SPAWN.bottom}%`,
-                    transform: 'translate(-50%, 50%)',
-                }}
-            >
+            <div className={styles.ballsWrapper()} style={dinoVars}>
                 <AnimatePresence>
                     {balls.map((b) => (
                         <motion.div
                             key={b.id}
-                            className="absolute rounded-full"
-                            style={{
-                                width: BALL_SIZE,
-                                height: BALL_SIZE,
-                                left: 0,
-                                top: 0,
-                                backgroundColor: ballColor,
-                                boxShadow: `0 0 8px ${ballColor}99`,
-                            }}
+                            className={styles.ball()}
+                            style={ballVars}
                             initial={{ x: 0, y: 0, opacity: 1, scale: 1 }}
                             animate={{
                                 x: Math.cos(angle) * distance,

@@ -1,22 +1,17 @@
 'use client'
 
-import { GLASS_CARD_STYLE } from '@/constants/starShieldGame/constants'
+import { glassCard } from './styles'
+import { cn } from '@/lib/utils'
 
 interface GlassCardProps {
     children: React.ReactNode
     className?: string
-    style?: React.CSSProperties
 }
 
-export function GlassCard({ children, className = '', style }: GlassCardProps) {
+export function GlassCard({ children, className = '' }: GlassCardProps) {
+    const styles = glassCard()
     return (
-        <div
-            className={className}
-            style={{
-                ...GLASS_CARD_STYLE,
-                ...style,
-            }}
-        >
+        <div className={cn(styles.root(), className)}>
             {children}
         </div>
     )

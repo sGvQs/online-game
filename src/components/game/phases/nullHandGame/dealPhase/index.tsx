@@ -1,12 +1,12 @@
 import { JankenEventWithGuests, HandType, MatchScoreWithUser } from '@/types'
-import { Hand3D } from '@/components/game/common/nullHand/Hand3D'
-import { nullHandGame } from '@/components/game/layout/nullHandGame/styles'
+import { Hand3D } from '@/components/game/common/nullHand/hand3D'
+import { dealPhase } from './styles'
 import { getHandDisplayWithEmoji } from '@/utils/nullHandGame/utils'
-import { PhaseHeader } from '@/components/game/common/nullHand/PhaseHeader'
-import { CurrentScores } from '@/components/game/common/nullHand/CurrentScores'
-import { RewardSystem } from '@/components/game/common/nullHand/RewardSystem'
-import { WaitingDisplay } from '@/components/game/common/nullHand/WaitingDisplay'
-import { GameButton } from '@/components/game/common/nullHand/GameButton'
+import { PhaseHeader } from '@/components/game/common/nullHand/phaseHeader'
+import { CurrentScores } from '@/components/game/common/nullHand/currentScores'
+import { RewardSystem } from '@/components/game/common/nullHand/rewardSystem'
+import { WaitingDisplay } from '@/components/game/common/nullHand/waitingDisplay'
+import { GameButton } from '@/components/game/common/nullHand/gameButton'
 import { motion } from 'framer-motion'
 import { useSE } from '@/hooks/useSE'
 
@@ -33,7 +33,7 @@ export function DealPhase({
     currentUserId,
     userColor,
 }: DealPhaseProps) {
-    const styles = nullHandGame()
+    const styles = dealPhase()
     const { play } = useSE()
 
     const systemHandsRevealed = !!jankenEvent?.systemRealHand
