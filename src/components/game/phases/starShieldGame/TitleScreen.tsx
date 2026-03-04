@@ -6,8 +6,8 @@ import { RoomWithUsersAndReadyStatus, RoomUserWithReadyStatus } from '@/types'
 import type { UserRanking } from '@/types'
 import { cn } from '@/lib/utils'
 import { ProtectedStar } from './playing/protectedStar'
-import { DinosaurWithBalls, AuroraGlow } from '../shared'
-import { FONTS, COLORS, ICONS } from '../constants'
+import { DinosaurWithBalls, AuroraGlow } from '@/components/game/starShieldGame/shared'
+import { FONTS, COLORS, ICONS } from '@/components/game/starShieldGame/constants'
 
 interface TitleScreenProps {
     room: RoomWithUsersAndReadyStatus

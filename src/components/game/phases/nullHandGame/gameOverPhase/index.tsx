@@ -1,11 +1,11 @@
 import { MatchScoreWithUser, UserRanking, HandType } from '@/types'
-import { nullHandGame } from '../../styles'
+import { nullHandGame } from '@/components/game/nullHandGame/styles'
 import { cn } from '@/lib/utils'
-import { SideHeader } from '../../common/sideHeader'
-import { GameButton } from '../../common/gameButton'
-import { Hand3D } from '../../hand3D'
-import { CurrentScores } from '../../common/currentScores'
-import { PlayerFaceIcon } from '../../common/playerFaceIcon'
+import { SideHeader } from '@/components/game/nullHandGame/common/SideHeader'
+import { GameButton } from '@/components/game/nullHandGame/common/GameButton'
+import { Hand3D } from '@/components/game/nullHandGame/Hand3D'
+import { CurrentScores } from '@/components/game/nullHandGame/common/CurrentScores'
+import { PlayerFaceIcon } from '@/components/game/nullHandGame/common/PlayerFaceIcon'
 import { motion } from 'framer-motion'
 
 interface GameOverPhaseProps {

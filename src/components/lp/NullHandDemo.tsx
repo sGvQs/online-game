@@ -2,9 +2,9 @@
 
 import { useState, useCallback, useEffect, useRef, useMemo } from 'react'
 import { cn } from '@/lib/utils'
-import { ChoicePhase } from '@/components/game/nullHandGame/phases/choicePhase'
-import { BattlePhase } from '@/components/game/nullHandGame/phases/battlePhase'
-import { ResultPhase } from '@/components/game/nullHandGame/phases/resultPhase'
+import { ChoicePhase } from '@/components/game/phases/nullHandGame/choicePhase'
+import { BattlePhase } from '@/components/game/phases/nullHandGame/battlePhase'
+import { ResultPhase } from '@/components/game/phases/nullHandGame/resultPhase'
 import { HandType } from '@/types'
 import { nullHandGame } from '@/components/game/nullHandGame/styles'
 import { judgeHand } from '@/components/game/nullHandGame/utils'

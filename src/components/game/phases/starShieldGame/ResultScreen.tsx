@@ -4,8 +4,8 @@ import Image from 'next/image'
 import { motion } from 'framer-motion'
 import type { GameResult, GameStats } from '@/types/starShieldGame'
 import { ProtectedStar } from './playing/protectedStar'
-import { AuroraGlow } from '../shared'
-import { FONTS, COLORS, ICONS, DIFFICULTY_META, type Difficulty } from '../constants'
+import { AuroraGlow } from '@/components/game/starShieldGame/shared'
+import { FONTS, COLORS, ICONS, DIFFICULTY_META, type Difficulty } from '@/components/game/starShieldGame/constants'
 
 interface ResultScreenProps {
     result: GameResult

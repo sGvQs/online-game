@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, useCallback, useMemo } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import { useSE } from '@/hooks/useSE'
 import { saveStarShieldResult } from '@/server/actions/game'
-import { STAR_TARGET_X, STAR_TARGET_Y, STAR_RADIUS } from '@/components/game/starShieldGame/phases/playing/protectedStar'
+import { STAR_TARGET_X, STAR_TARGET_Y, STAR_RADIUS } from '@/components/game/phases/starShieldGame/playing/protectedStar'
 import {
     GAME_DURATION_SECONDS,
     GAME_STATE_THROTTLE_MS,

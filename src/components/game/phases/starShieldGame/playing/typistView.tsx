@@ -5,8 +5,8 @@ import Image from 'next/image'
 import { AnimatePresence, motion } from 'framer-motion'
 import type { DialogueLine } from '@/constants/starShieldGame/dialogues'
 import { getRomaji } from '@/utils/starShieldGame/starShieldUtils'
-import { StarVisual, AuroraGlow } from '../../shared'
-import { FONTS, COLORS, ICONS, BULLET_COLOR, AURORA_GRADIENT_TYPIST } from '../../constants'
+import { StarVisual, AuroraGlow } from '@/components/game/starShieldGame/shared'
+import { FONTS, COLORS, ICONS, BULLET_COLOR, AURORA_GRADIENT_TYPIST } from '@/components/game/starShieldGame/constants'
 
 const TYPIST_STAR_POSITION = {
     left: '50%',

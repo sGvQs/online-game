@@ -5,7 +5,7 @@ import { motion } from 'framer-motion'
 import { RoomWithUsersAndReadyStatus, RoomUserWithReadyStatus } from '@/types'
 import { cn } from '@/lib/utils'
 import { ProtectedStar } from './playing/protectedStar'
-import { DinosaurWithBalls, AuroraGlow } from '../shared'
+import { DinosaurWithBalls, AuroraGlow } from '@/components/game/starShieldGame/shared'
 import {
     FONTS,
     COLORS,
@@ -14,7 +14,7 @@ import {
     ROLE_META,
     type Difficulty,
     type RoleChoice,
-} from '../constants'
+} from '@/components/game/starShieldGame/constants'
 
 interface RoleSelectionScreenProps {
     room: RoomWithUsersAndReadyStatus
