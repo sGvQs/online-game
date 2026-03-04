@@ -31,7 +31,7 @@ function TimerDisplay({ timer }: { timer: number }) {
 
 export function GameScreen({ matchId, startedAt, shooterId, difficulty, currentUserId, onGameEnd, playersTotalPoints, typistTechnique }: GameScreenProps) {
     const isShooter = shooterId === currentUserId
-    const { asteroids, bullets, timer, score, starHp, aimRef, onMouseMove, dialogue, typistFireCount, contactExplosion, completeContactFail } =
+    const { asteroids, bullets, timer, score, starHp, aimRef, onMouseMove, dialogue, typistFireCount, contactExplosion, completeContactFail, chainHits, clearChainHits } =
         useStarShield({ matchId, startedAt, isShooter, difficulty, currentUserId, onGameEnd, playersTotalPoints, selectedTechnique: typistTechnique })
 
     return (
@@ -45,6 +45,8 @@ export function GameScreen({ matchId, startedAt, shooterId, difficulty, currentU
                     maxHp={ASTEROID_HP[difficulty]}
                     contactExplosion={contactExplosion}
                     onContactExplosionComplete={completeContactFail}
+                    chainHits={chainHits}
+                    onChainHitsComplete={clearChainHits}
                 />
             ) : (
                 <TypistView

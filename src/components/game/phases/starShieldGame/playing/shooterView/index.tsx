@@ -19,6 +19,12 @@ interface ShooterViewProps {
     maxHp: number
     contactExplosion: { x: number; y: number; asteroidId: string } | null
     onContactExplosionComplete: () => void
+    chainHits?: {
+        primaryPos: { x: number; y: number }
+        targets: { pos: { x: number; y: number }; asteroidId: string }[]
+        color: string
+    } | null
+    onChainHitsComplete?: () => void
 }
 
 function AsteroidCircle({ asteroid, maxHp }: { asteroid: Asteroid; maxHp: number }) {
@@ -92,6 +98,63 @@ function BulletCircle({ bullet }: { bullet: Bullet }) {
         >
             <div className={styles.bulletInner()} />
         </div>
+    )
+}
+
+const CHAIN_PROJECTILE_DURATION = 0.22
+
+function ChainProjectile({
+    from,
+    to,
+    color,
+}: {
+    from: { x: number; y: number }
+    to: { x: number; y: number }
+    color: string
+}) {
+    const styles = shooterView()
+    return (
+        <motion.div
+            className={styles.chainProjectile()}
+            style={{ ['--chain-color' as string]: color }}
+            initial={{
+                left: `${from.x * 100}%`,
+                top: `${from.y * 100}%`,
+                opacity: 1,
+            }}
+            animate={{
+                left: `${to.x * 100}%`,
+                top: `${to.y * 100}%`,
+                opacity: 0.3,
+            }}
+            transition={{ duration: CHAIN_PROJECTILE_DURATION, ease: 'easeOut' }}
+        />
+    )
+}
+
+function ChainHitsEffect({
+    chainHits,
+    onComplete,
+}: {
+    chainHits: { primaryPos: { x: number; y: number }; targets: { pos: { x: number; y: number }; asteroidId: string }[]; color: string }
+    onComplete: () => void
+}) {
+    useEffect(() => {
+        const t = setTimeout(onComplete, (CHAIN_PROJECTILE_DURATION * 1000) + 50)
+        return () => clearTimeout(t)
+    }, [onComplete])
+
+    return (
+        <>
+            {chainHits.targets.map((t, i) => (
+                <ChainProjectile
+                    key={`${t.asteroidId}-${i}`}
+                    from={chainHits.primaryPos}
+                    to={t.pos}
+                    color={chainHits.color}
+                />
+            ))}
+        </>
     )
 }
 
@@ -237,6 +300,8 @@ export function ShooterView({
     maxHp,
     contactExplosion,
     onContactExplosionComplete,
+    chainHits,
+    onChainHitsComplete,
 }: ShooterViewProps) {
     const activeAsteroids = asteroids.filter((a) => !a.destroyedAt && a.id !== contactExplosion?.asteroidId)
     const destroyedAsteroids = asteroids.filter((a) => !!a.destroyedAt)
@@ -262,6 +327,9 @@ export function ShooterView({
                     pos={{ x: contactExplosion.x, y: contactExplosion.y }}
                     onComplete={onContactExplosionComplete}
                 />
+            )}
+            {chainHits && onChainHitsComplete && (
+                <ChainHitsEffect chainHits={chainHits} onComplete={onChainHitsComplete} />
             )}
             <Crosshair aimRef={aimRef} />
             <div className="absolute bottom-8 left-1/2 -translate-x-1/2 text-brand-500/50 text-xs tracking-widest">

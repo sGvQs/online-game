@@ -19,10 +19,16 @@ export interface TechniqueConfig {
     piercing?: boolean
     /** ヒット時に隕石を減速させる */
     slowOnHit?: boolean
-    /** 範囲攻撃の半径（正規化座標）。周囲の隕石にも小ダメージ */
-    rangeRadius?: number
-    /** 範囲攻撃の追加ダメージ */
-    rangeDamage?: number
+    /** 連鎖攻撃の波及半径（正規化座標） */
+    chainRadius?: number
+    /** Level 1: 弾が当たった隕石から波及する隕石数 */
+    chainLevel1Count?: number
+    /** Level 1 のダメージ */
+    chainLevel1Damage?: number
+    /** Level 2: 各 Level 1 隕石から波及する隕石数 */
+    chainLevel2Count?: number
+    /** Level 2 のダメージ */
+    chainLevel2Damage?: number
 }
 
 export const TECHNIQUES: Record<TechniqueId, TechniqueConfig> = {
@@ -57,8 +63,11 @@ export const TECHNIQUES: Record<TechniqueId, TechniqueConfig> = {
         damage: 1,
         speed: 1,
         color: '#f97316',
-        rangeRadius: 0.06,
-        rangeDamage: 0.5,
+        chainRadius: 0.10,
+        chainLevel1Count: 2,
+        chainLevel1Damage: 1,
+        chainLevel2Count: 4,
+        chainLevel2Damage: 0.5,
     },
 }
 

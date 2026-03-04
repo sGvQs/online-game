@@ -12,5 +12,6 @@ export const shooterView = tv({
         explosionEffect: 'absolute -translate-x-1/2 -translate-y-1/2 pointer-events-none [left:var(--exp-left)] [top:var(--exp-top)]',
         explosionSmall: 'object-contain drop-shadow-[0_0_20px_rgba(255,100,50,0.7)] [filter:brightness(1.2)_saturate(1.3)]',
         dino: 'absolute z-10 pointer-events-none origin-center w-24 h-24 [left:var(--dino-left)] [bottom:var(--dino-bottom)]',
+        chainProjectile: 'absolute -translate-x-1/2 -translate-y-1/2 pointer-events-none z-20 w-3 h-3 rounded-full [background-color:var(--chain-color,#f97316)] [box-shadow:0_0_6px_var(--chain-color,#f97316cc)]',
     },
 })

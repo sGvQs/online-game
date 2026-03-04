@@ -124,6 +124,12 @@ export function useStarShield({
 
     /** 隕石接触時の爆発位置・対象隕石ID（アニメ終了後に FAILED 遷移、対象隕石は非表示） */
     const [contactExplosion, setContactExplosion] = useState<{ x: number; y: number; asteroidId: string } | null>(null)
+    /** オレンジ連鎖時: 弾が当たった隕石から波及先への玉の表示用 */
+    const [chainHits, setChainHits] = useState<{
+        primaryPos: { x: number; y: number }
+        targets: { pos: { x: number; y: number }; asteroidId: string }[]
+        color: string
+    } | null>(null)
 
     // ============================================
     // ゲーム終了処理
@@ -324,7 +330,7 @@ export function useStarShield({
                         bulletsRef.current = next
                         return next
                     })
-                } else if (difficulty === 'HELL') {
+                } else if (difficulty === 'HELL' && !tech) {
                     const spreadRad = (HELL_NORMAL_SPREAD_DEG * Math.PI) / 180
                     const count = HELL_NORMAL_BULLET_COUNT
                     const newBullets: Bullet[] = []
@@ -502,17 +508,45 @@ export function useStarShield({
                         slowAsteroidData.set(a.id, { progressAtSlow })
                     }
 
-                    if (tech?.rangeRadius && tech.rangeDamage !== undefined) {
-                        for (const other of asts) {
-                            if (other.id === a.id || other.destroyedAt) continue
-                            const op = getAsteroidPosition(other, now)
-                            const rangeDist = Math.hypot(ap.x - op.x, ap.y - op.y)
-                            if (rangeDist <= tech.rangeRadius) {
-                                const otherHp = hpUpdates.get(other.id) ?? other.hp
-                                const rangeNewHp = Math.max(0, otherHp - tech.rangeDamage)
-                                hpUpdates.set(other.id, rangeNewHp)
-                                if (rangeNewHp <= 0) destroyedCount++
+                    if (tech?.chainLevel1Count !== undefined && tech.chainRadius !== undefined) {
+                        const chainHitIds = new Set<string>([a.id])
+                        const applyChainDamage = (astId: string, dmg: number) => {
+                            const cur = hpUpdates.get(astId) ?? asts.find((x) => x.id === astId)?.hp ?? 0
+                            const next = Math.max(0, cur - dmg)
+                            hpUpdates.set(astId, next)
+                            if (next <= 0) destroyedCount++
+                            chainHitIds.add(astId)
+                        }
+                        const findNearest = (centerPos: { x: number; y: number }, limit: number, radius: number) => {
+                            const withDist = asts
+                                .filter((o) => !o.destroyedAt && !chainHitIds.has(o.id))
+                                .map((o) => ({ ast: o, pos: getAsteroidPosition(o, now) }))
+                                .map(({ ast, pos }) => ({ ast, dist: Math.hypot(centerPos.x - pos.x, centerPos.y - pos.y) }))
+                                .filter(({ dist }) => dist <= radius)
+                                .sort((x, y) => x.dist - y.dist)
+                            return withDist.slice(0, limit).map(({ ast }) => ast)
+                        }
+                        const l1 = findNearest(ap, tech.chainLevel1Count, tech.chainRadius)
+                        if (process.env.NODE_ENV === 'development') {
+                            console.log('[orange chain] L1 targets:', l1.length)
+                        }
+                        const chainTargets: { pos: { x: number; y: number }; asteroidId: string }[] = []
+                        for (const t1 of l1) {
+                            const t1Pos = getAsteroidPosition(t1, now)
+                            chainTargets.push({ pos: t1Pos, asteroidId: t1.id })
+                            applyChainDamage(t1.id, tech.chainLevel1Damage ?? 0)
+                            const l2 = findNearest(t1Pos, tech.chainLevel2Count ?? 0, tech.chainRadius)
+                            for (const t2 of l2) {
+                                chainTargets.push({ pos: getAsteroidPosition(t2, now), asteroidId: t2.id })
+                                applyChainDamage(t2.id, tech.chainLevel2Damage ?? 0)
                             }
+                        }
+                        if (chainTargets.length > 0) {
+                            setChainHits({
+                                primaryPos: ap,
+                                targets: chainTargets,
+                                color: tech.color ?? '#f97316',
+                            })
                         }
                     }
 
@@ -640,7 +674,7 @@ export function useStarShield({
         const isLastChar = nextChar >= romaji.length
 
         const payload: { special: boolean; technique?: string } = { special: isLastChar }
-        if (selectedTechnique) payload.technique = selectedTechnique
+        payload.technique = selectedTechnique ?? 'blue'
         channelRef.current?.send({
             type: 'broadcast',
             event: 'fire',
@@ -667,6 +701,10 @@ export function useStarShield({
         endGame('FAILED_CONTACT')
     }, [endGame])
 
+    const clearChainHits = useCallback(() => {
+        setChainHits(null)
+    }, [])
+
     return {
         asteroids,
         bullets,
@@ -682,5 +720,7 @@ export function useStarShield({
         typistFireCount,
         contactExplosion,
         completeContactFail,
+        chainHits,
+        clearChainHits,
     }
 }
