@@ -240,13 +240,9 @@ export async function saveStarShieldResult(
         data: { status: 'FINISHED' },
     })
 
-    // 成功時: クリア記録を保存し、両プレイヤーに難易度に応じた pt を加算
+    // 成功時: 両プレイヤーに難易度に応じた pt を加算し、クリア記録を保存
+    // ※ポイント付与を先に行う（star_shield_clear_records が未作成の環境でもポイントは付与される）
     if (isCleared) {
-        await prisma.$executeRaw`
-            INSERT INTO star_shield_clear_records (shooter_id, typist_id, destroyed_count, difficulty)
-            VALUES (${shooterId}, ${typistId}, ${destroyedCount}, ${diff})
-        `
-
         const points = CLEAR_POINTS[diff]
         const now = new Date()
         const year = now.getFullYear()
@@ -277,6 +273,16 @@ export async function saveStarShieldResult(
                     reason: 'CLEARED',
                 },
             })
+        }
+
+        // クリア記録（HELL解放判定用）。テーブル未作成時はエラーを握りつぶす
+        try {
+            await prisma.$executeRaw`
+                INSERT INTO star_shield_clear_records (shooter_id, typist_id, destroyed_count, difficulty)
+                VALUES (${shooterId}, ${typistId}, ${destroyedCount}, ${diff})
+            `
+        } catch (e) {
+            console.warn('[saveStarShieldResult] star_shield_clear_records への保存に失敗（マイグレーション未適用の可能性）:', e)
         }
     }
 }
