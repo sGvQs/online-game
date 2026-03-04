@@ -17,6 +17,7 @@ import {
     getRandomSelfEntryMessage,
     getRandomOtherJoinMessage,
 } from '@/constants/room/roomEntryMessages'
+import { PresenceDuplicateWarning } from '@/components/common/PresenceDuplicateWarning'
 
 interface RoomPageClientProps {
     room: Room // 初期のデータの状態
@@ -179,6 +180,7 @@ export function RoomPageClientWrapper({
     }
 
     return (
+        <PresenceDuplicateWarning roomId={room.id} currentUserId={currentUserId}>
         <>
             {showDinosaur &&
                 typeof document !== 'undefined' &&
@@ -250,5 +252,6 @@ export function RoomPageClientWrapper({
                 </div>
             </RoomModal>
         </>
+        </PresenceDuplicateWarning>
     )
 }

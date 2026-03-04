@@ -6,13 +6,14 @@ import { returnToRoom } from '@/server/actions/room'
 import { RoomWithUsersAndReadyStatus, HandType, HostChoice, UserRanking } from '@/types'
 import { useState, useEffect } from 'react'
 import { AnimatePresence } from 'framer-motion'
-import { TitleScreen } from '@/components/game/common/nullHand/titleScreen'
-import { GameLayout } from '@/components/game/common/nullHand/gameLayout'
+import { TitleScreen } from '@/components/game/common/nullHand/TitleScreen'
+import { GameLayout } from '@/components/game/common/nullHand/GameLayout'
 import { ChoicePhase } from '@/components/game/phases/nullHandGame/choicePhase'
 import { BattlePhase } from '@/components/game/phases/nullHandGame/battlePhase'
 import { ResultPhase } from '@/components/game/phases/nullHandGame/resultPhase'
 import { GameOverPhase } from '@/components/game/phases/nullHandGame/gameOverPhase'
-import { OpeningSplash } from '@/components/game/common/nullHand/openingSplash'
+import { OpeningSplash } from '@/components/game/common/nullHand/OpeningSplash'
+import { PresenceDuplicateWarning } from '@/components/common/PresenceDuplicateWarning'
 
 interface NullHandGameProps {
     room: RoomWithUsersAndReadyStatus
@@ -156,6 +157,7 @@ export function NullHandGame({
     }, [userColor])
 
     return (
+        <PresenceDuplicateWarning roomId={roomId} currentUserId={currentUserId}>
         <>
             <AnimatePresence mode="popLayout">
                 {phase === 'TITLE' && showSplash && (
@@ -247,5 +249,6 @@ export function NullHandGame({
                 )}
             </AnimatePresence>
         </>
+        </PresenceDuplicateWarning>
     )
 }

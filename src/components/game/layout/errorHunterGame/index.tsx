@@ -15,6 +15,7 @@ import { WaitingPhase } from '@/components/game/phases/errorHunterGame/waitingPh
 import { AppearingPhase } from '@/components/game/phases/errorHunterGame/appearingPhase'
 import { ResultPhase } from '@/components/game/phases/errorHunterGame/resultPhase'
 import { ProgressPanel } from '@/components/game/common/errorHunter/progressPanel'
+import { PresenceDuplicateWarning } from '@/components/common/PresenceDuplicateWarning'
 
 interface ErrorHunterGameProps {
     room: RoomWithUsersAndReadyStatus
@@ -112,6 +113,7 @@ export function ErrorHunterGame({
     const allUsersReady = room.users.every((u: RoomUserWithReadyStatus) => u.isReady)
 
     return (
+        <PresenceDuplicateWarning roomId={roomId} currentUserId={currentUserId}>
         <div className={styles.container()}>
             {/* Initialization Dialog */}
             {isInitializing && (
@@ -174,5 +176,6 @@ export function ErrorHunterGame({
                 />
             )}
         </div>
+        </PresenceDuplicateWarning>
     )
 }
