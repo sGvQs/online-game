@@ -1,5 +1,5 @@
 import { HandType } from '@/types'
-import { Hand3D } from './hand3D'
+import { Hand3D } from './Hand3D'
 import { nullHandGame } from './styles'
 
 interface NullHandLogoProps {
