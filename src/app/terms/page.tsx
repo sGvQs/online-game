@@ -1,5 +1,5 @@
 import type { Metadata } from 'next'
-import { LegalPageLayout } from '@/components/legal/LegalPageLayout'
+import { LegalPageLayout } from '@/components/legal/legalPageLayout'
 
 export const metadata: Metadata = {
     title: '利用規約 | Pukapuka Space',

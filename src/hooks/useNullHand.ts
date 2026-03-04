@@ -19,7 +19,7 @@ import type {
     HandType,
     HostChoice,
     MatchScoreWithUser,
-} from '@/shared/types'
+} from '@/types'
 import { useSE } from './useSE'
 
 // ============================================

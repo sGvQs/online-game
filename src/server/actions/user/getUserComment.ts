@@ -1,7 +1,7 @@
 'use server'
 
 import { prisma } from '@/server/lib/prisma'
-import { FACE_ICON_PATHS, DEFAULT_FACE_ICON } from '@/shared/constants/faceIcon'
+import { FACE_ICON_PATHS, DEFAULT_FACE_ICON } from '@/constants/common/faceIcon'
 
 interface GetUserCommentReturnValue {
     comment: string

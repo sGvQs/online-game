@@ -8,16 +8,16 @@ import {
     getMonthlyRanking,
     getTopRankings,
 } from '@/server/actions'
-import { RoomList } from '@/components/room/RoomList'
-import { DashboardSidebar } from '@/components/dashboard/DashboardSidebar'
-import { LogoutButton } from '@/components/auth/LogoutButton'
-import { SetLoginFlag } from '@/components/auth/SetLoginFlag'
+import { RoomList } from '@/components/room/roomList'
+import { DashboardSidebar } from '@/components/dashboard/dashboardSidebar'
+import { LogoutButton } from '@/components/auth/logoutButton'
+import { SetLoginFlag } from '@/components/auth/setLoginFlag'
 import { Boxes } from 'lucide-react'
-import { DEFAULT_FACE_ICON, FaceIcon } from '@/shared/constants/faceIcon'
-import { DashboardHeaderTitle } from '@/components/dashboard/DashboardHeaderTitle'
-import { DashboardHeaderProfile } from '@/components/dashboard/DashboardHeaderProfile'
-import { DashboardComplaintWrapper } from '@/components/dashboard/DashboardComplaintWrapper'
-import { RankingCard } from '@/components/dashboard/RankingCard'
+import { DEFAULT_FACE_ICON, FaceIcon } from '@/constants/common/faceIcon'
+import { DashboardHeaderTitle } from '@/components/dashboard/dashboardHeaderTitle'
+import { DashboardHeaderProfile } from '@/components/dashboard/dashboardHeaderProfile'
+import { DashboardComplaintWrapper } from '@/components/dashboard/dashboardComplaintWrapper'
+import { RankingCard } from '@/components/dashboard/rankingCard'
 
 export default async function DashboardPage({
     searchParams,

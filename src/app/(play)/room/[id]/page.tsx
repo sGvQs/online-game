@@ -1,11 +1,11 @@
 import { redirect } from 'next/navigation'
 import { getCurrentUser, getRoomWithUsers } from '@/server/actions'
 import { getNullHandRankings } from '@/server/actions/game/rankingActions'
-import { RoomPageClientWrapper } from '@/components/room/RoomPageClient'
-import { IconButton } from '@/components/ui/IconButton'
+import { RoomPageClientWrapper } from '@/components/room/roomPageClient'
+import { IconButton } from '@/components/ui/iconButton'
 import { leaveRoom } from '@/server/actions'
 import { Undo2, Gamepad2 } from 'lucide-react'
-import { RoomUserWithReadyStatus } from '@/shared/types'
+import { RoomUserWithReadyStatus } from '@/types'
 
 export default async function RoomPage({ params }: { params: Promise<{ id: string }> }) {
     const currentUser = await getCurrentUser()

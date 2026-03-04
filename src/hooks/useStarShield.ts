@@ -1,421 +1,41 @@
 'use client'
 
 import { useEffect, useRef, useState, useCallback, useMemo } from 'react'
-import { toRomaji } from 'wanakana'
-import { useSE } from '@/hooks/useSE'
 import { createClient } from '@/utils/supabase/client'
+import { useSE } from '@/hooks/useSE'
 import { saveStarShieldResult } from '@/server/actions/game'
-import { STAR_TARGET_X, STAR_TARGET_Y, STAR_RADIUS } from '@/components/game/StarShieldGame/phases/playing/ProtectedStar'
-
-/** ひらがな・カタカナ以外を除去して toRomaji に渡す（句読点はタイピング対象外） */
-const KANA_ONLY = /[^\u3040-\u309F\u30A0-\u30FF\u31F0-\u31FF]/g
-export const getRomaji = (text: string): string => toRomaji(text.replace(KANA_ONLY, ''))
-
-// ============================================
-// 定数・型
-// ============================================
-
-export type Difficulty = 'EASY' | 'NORMAL' | 'HARD' | 'HELL'
-export type GameResult = 'CLEARED' | 'FAILED_CONTACT' | 'FAILED_TIMEOUT'
-
-const GAME_DURATION_SECONDS = 90
-
-// 座標系: ビューポート基準の正規化座標 (0-1)
-import { DINO_SPAWN, BULLET_COLOR } from '@/components/game/StarShieldGame/constants'
-export { DINO_SPAWN, BULLET_COLOR }
-export const DINO_X = DINO_SPAWN.left / 100
-export const DINO_Y = 1 - DINO_SPAWN.bottom / 100
-
-/** 弾のスポーン位置オフセット（中心→口方向へ。正規化座標） */
-export const BULLET_SPAWN_OFFSET_X = 0.055
-export const BULLET_SPAWN_OFFSET_Y = 0.1
-/** 弾の向き計算用：恐竜の口がアンカーより下にある分。負の値で弾が下に補正される */
-const BULLET_ORIGIN_Y_OFFSET = -0.025
-const SPAWN_X_MIN = 0.0   // 左
-const SPAWN_X_MAX = 1.0  // 右
-const SPAWN_Y_MIN = 0.1  // 下
-const SPAWN_Y_MAX = 0.1  //  上
-/** 隕石がスポーンから目標まで到達する時間（ms）。短いほど速い。HELL は playersTotalPoints で動的調整 */
-const ASTEROID_DURATION_MS: Record<Exclude<Difficulty, 'HELL'>, number> = {
-    EASY: 8000,
-    NORMAL: 7000,
-    HARD: 6000,
-}
-const HELL_ASTEROID_DURATION_BASE = 6000
-const HELL_ASTEROID_DURATION_MIN = 2000
-
-// 弾の設定（デバッグ用に BULLET_RADIUS を変数化）
-const BULLET_SPEED = 0.0008 // 正規化座標/ms（速すぎないように）
-// export const BULLET_RADIUS = 0.008 // デバッグ時は大きくできる
-export const BULLET_RADIUS = 0.008 // デバッグ時は大きくできる
-export const ASTEROID_RADIUS = 0.02
-const BULLET_MAX_AGE_MS = 3000
-
-// 隕石の目標点のランダムオフセット（±）
-const STAR_TARGET_OFFSET = 0.04
-
-// 隕石のスーポーン時間
-const SPAWN_INTERVALS_MS: Record<Difficulty, number> = {
-    EASY: 2000,
-    NORMAL: 1500,
-    HARD: 800,
-    HELL: 200,
-}
-
-// 隕石のHP
-export const ASTEROID_HP: Record<Difficulty, number> = {
-    EASY: 3,
-    NORMAL: 4,
-    HARD: 5,
-    HELL: 6,
-}
-
-// 星のHP
-export const STAR_HP: Record<Difficulty, number> = {
-    EASY: 20,
-    NORMAL: 18,
-    HARD: 15,
-    HELL: 10,
-}
-
-/** 単語完了時の広範囲弾数（破壊なし。HELL は全破壊＋照準方向に弾で別扱い） */
-const SPECIAL_SPREAD_BULLET_COUNT: Record<Difficulty, number> = {
-    EASY: 12,
-    NORMAL: 30,
-    HARD: 60,
-    HELL: 360,
-}
-
-/** EASY/NORMAL/HARD の必殺技の広がり角度（度） */
-const SPREAD_DEG_EASY_NORMAL_HARD = 12
-/** HELL 必殺技の広がり角度（度） */
-const HELL_SPECIAL_SPREAD_DEG = 150
-/** HELL 通常攻撃の弾数 */
-const HELL_NORMAL_BULLET_COUNT = 3
-/** HELL 通常攻撃の広がり角度（度） */
-const HELL_NORMAL_SPREAD_DEG = 3
-
-// ============================================
-// セリフデータ（難易度によらず共通、配列からランダム選択）
-// ============================================
-
-export interface DialogueLine {
-    text: string
-}
-
-export const DIALOGUES: DialogueLine[] = [
-    // 昔の人間との出会い——ろけっと
-    { text: 'あれは……ろけっと' },
-    { text: 'まぶしいひかりが' },
-    { text: 'とてつもないおとが' },
-    { text: 'そらからおりてきた' },
-    { text: 'ぼくはなにももっていなかった' },
-    { text: 'このせかいにぼくだけだと思ってた' },
-    { text: 'だからこわかった' },
-    { text: 'あれはなんだ' },
-    { text: 'てきなのか' },
-    { text: 'じぶんいがいのなにか' },
-    { text: 'ぼくはちかづいた' },
-    { text: 'こわごわ' },
-    { text: 'ひかりはきえた' },
-    { text: 'あのなかから' },
-    { text: 'なんかでてきた' },
-    { text: 'なんだあれは' },
-    { text: 'いきものか？' },
-    { text: 'どうやらにんげんというらしい' },
-    { text: 'にんげんってなんだ' },
-    { text: 'けっきょく' },
-
-    // 出会い直後——とまどいと感動
-    { text: 'どうしたらいいかわからなかった' },
-    { text: 'あのひとはなに？' },
-    { text: 'ぼくとなにかちがう' },
-    { text: 'あたたかかった' },
-    { text: 'あのてをみたとき' },
-    { text: 'ぼくはなにかをしった' },
-    { text: 'こんなことがあるんだ' },
-
-    // 生還の過程——まちつづける
-    { text: 'ずっとういていた' },
-    { text: 'どこかにいけば' },
-    { text: 'あのひかりがもどるかもしれない' },
-    { text: 'そうおもって' },
-    { text: 'ぷかぷかうきながら' },
-    { text: 'さがしてた' },
-    { text: 'あのおとが' },
-    { text: 'あのひとが' },
-    { text: 'もどってこないかな' },
-    { text: 'ずっと' },
-    { text: 'もうなんねんだろう' },
-    { text: 'ねんげつがたった' },
-    { text: 'いつになったら' },
-    { text: 'くるのかな' },
-    { text: 'こないのかな' },
-    { text: 'もっとまえ？' },
-    { text: 'もうおぼえてない' },
-    { text: 'いつのまにかときがたってた' },
-    { text: 'ずっとまってた' },
-
-    // わかれとさいかい
-    { text: 'いつのまにかこなくなった' },
-    { text: 'あのひと' },
-    { text: 'ずっとまってた' },
-    { text: 'またおりてきた' },
-    { text: 'あのひかりが' },
-    { text: 'ろけっとが' },
-    { text: 'えっ' },
-    { text: 'あのひとだ' },
-    { text: 'あのひとがかえってきた' },
-
-    // べつのにんげん——しゅうげきときゅうしゅつ
-    { text: 'ちがうにんげんがきた' },
-    { text: 'あのひとじゃない' },
-    { text: 'あのひととちがう' },
-    { text: 'こわかった' },
-    { text: 'くらかった' },
-    { text: 'ぼくをつかまえようとした' },
-    { text: 'なんで？' },
-    { text: 'ぼくはなにもしてない' },
-    { text: 'でもあのひとがきた' },
-    { text: 'あのひとが' },
-    { text: 'ぼくをまもった' },
-    { text: 'あのひとはつよかった' },
-    { text: 'あのひとが' },
-    { text: 'ぼくのために' },
-    { text: 'たたかった' },
-
-    // にんげんにもいろいろいることにきづく
-    { text: 'にんげんって' },
-    { text: 'いろいろなんだ' },
-    { text: 'あのひとみたいなのもいるし' },
-    { text: 'ぼくをおそうにんげんもいる' },
-    { text: 'そういうものなのか' },
-    { text: 'ぼくにはまだわからない' },
-    { text: 'ほかのにんげんには' },
-    { text: 'ぼくをきずつけるめをしてる' },
-    { text: 'あのひとのめはちがった' },
-
-    // ういんどーず95とのであい
-    { text: 'あのとき、ぼくはなにももってなかった' },
-    { text: 'でもあのひとがくれた' },
-    { text: 'これがだいじなものだって' },
-    { text: 'ずっとまもってた' },
-    { text: 'たまにとまるけど' },
-    { text: 'でもうごく' },
-    { text: 'あのひとがくれたから' },
-    { text: 'だからずっとだいじなの' },
-    { text: 'ぱそこん' },
-    { text: 'あのひかりがくれたもの' },
-    { text: 'これをうしなったら' },
-
-    // NULL HANDのおもいで
-    { text: 'むずかしいあそびをおしえてくれた' },
-    { text: 'るーるがあいまいで' },
-    { text: 'でもなにかおもしろかった' },
-    { text: 'わらってたきがする' },
-    { text: 'あのひともあいまいだった' },
-    { text: 'なにをかんがえてるかわからなかった' },
-    { text: 'でもそれがすきだった' },
-    { text: 'あのひととやっててたのしかった' },
-    { text: 'ぼくはもっとしりたかった' },
-    { text: 'あのひとのこと' },
-
-    // わかれ
-    { text: 'いつのまにかいなくなってた' },
-    { text: 'なまえもおぼえてない' },
-    { text: 'でもかおはおぼえてる' },
-    { text: 'ずっとおぼえてる' },
-    { text: 'わすれられない' },
-    { text: 'あのえがお' },
-    { text: 'あのこえ' },
-    { text: 'あのぬくもり' },
-    { text: 'ずっとずっとまえ' },
-    { text: 'もうおぼえてない' },
-
-    // きみとのかんけい
-    { text: 'でもいま、きみがきた' },
-    { text: 'あのひとじゃない' },
-    { text: 'でもなにかおなじきがした' },
-    { text: 'あのひとににてる' },
-    { text: 'きみもそんなかんじがする' },
-    { text: 'いっぱいはへんがおちてくる' },
-    { text: 'でもいまはきみがいる' },
-
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-    // せかいかんのようやく
-    // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-    // 〈ふゆう〉
-    { text: 'ここはぷかぷかうちゅう' },
-    { text: 'きみたちがあそぶばしょ' },
-    { text: 'なんでもふわふわうく' },
-    { text: 'じゅうりょくなんてない' },
-    { text: 'ゆっくりゆっくりまわる' },
-    { text: 'うえもしたもない' },
-    { text: 'どこまでもつづく' },
-    { text: 'ただういている' },
-    { text: 'ぽかんとういている' },
-    { text: 'どこまでもおちてくかんじ' },
-    { text: 'でもこわくない' },
-    { text: 'ここがすき' },
-    { text: 'どこへでもいける' },
-    { text: 'でもどこへもいけない' },
-    { text: 'それがちょうどいい' },
-
-    // 〈ほしとうちゅうのけしき〉
-    { text: 'あのほしはなに？' },
-    { text: 'まだなまえをしらない' },
-    { text: 'とおくでひかってる' },
-    { text: 'ずっとそこにいる' },
-    { text: 'ちいさいほし' },
-    { text: 'おおきいほし' },
-    { text: 'よくわからないほし' },
-    { text: 'ぜんぶきれい' },
-    { text: 'ほしのちりがただよう' },
-    { text: 'うっすらひかって' },
-    { text: 'くもみたいなやつ' },
-    { text: 'あれはなんだろう' },
-    { text: 'あかいほし' },
-    { text: 'あおいほし' },
-    { text: 'しろいほし' },
-    { text: 'たまにおれんじいろ' },
-    { text: 'ほしがうまれてるばしょ' },
-    { text: 'きれいだってことはわかる' },
-    { text: 'ほしとほしのあいだ' },
-    { text: 'そこをただよってる' },
-    { text: 'ぷかぷかぷかぷか' },
-
-    // 〈はへんとノイズとグリッチ〉
-    { text: 'いっぱいはへんがおちてくる' },
-    { text: 'どこからくるんだろう' },
-    { text: 'ぐるぐるまわってる' },
-    { text: 'きらきらひかってる' },
-    { text: 'でもあたったらいたい' },
-    { text: 'すこしくずれててもうごいてる' },
-    { text: 'それがすきなんだ' },
-
-    // 〈ふるいテクノロジーのびがく〉
-    { text: 'もにたーのひかり' },
-    { text: 'じーってしてる' },
-    { text: 'ふるいけどあたたかい' },
-    { text: 'あのぼんやりしたひかり' },
-    { text: 'ちょっとぼやけてる' },
-    { text: 'でもそれがいい' },
-    { text: 'ぴこぴこおとがする' },
-    { text: 'なつかしいかんじがする' },
-    { text: 'おぼえてないのに' },
-    { text: 'しってるきがする' },
-    { text: 'かーそるがてんめつしてる' },
-    { text: 'たぶん' },
-    { text: 'なんだったんだろう' },
-    { text: 'もうおぼえてない' },
-
-    // 〈ひかりとかげ〉
-    { text: 'まっくらなばしょがある' },
-    { text: 'あっちにはいかない' },
-    { text: 'でもきになる' },
-    { text: 'なにがあるんだろう' },
-    { text: 'そこだけほしもない' },
-    { text: 'おともない' },
-    { text: 'ただくらい' },
-    { text: 'こっちはあかるい' },
-    { text: 'あっちはくらい' },
-
-    // 〈おととせいじゃく〉
-    { text: 'うちゅうってしずかじゃないんだ' },
-    { text: 'たまにどんって' },
-    { text: 'とおくでどかん' },
-    { text: 'でもすぐしずかになる' },
-    { text: 'しずかすぎる' },
-    { text: 'でもなれた' },
-    { text: 'きみのきーぼーどのおと' },
-    { text: 'ぱちぱちぱち' },
-    { text: 'いいおとだな' },
-    { text: 'すきかも' },
-    { text: 'きみがうつおと' },
-    { text: 'ここまできこえてくる' },
-    { text: 'うれしい' },
-
-    // 〈じかんのかんかく〉
-    { text: 'ここではじかんがゆっくりながれる' },
-    { text: 'いちにちがとてもながい' },
-    { text: 'あっというまに' },
-    { text: 'じかんのかんかくがおかしい' },
-    { text: 'でもそれでいい' },
-    { text: 'いつだっていま' },
-    { text: 'いましかない' },
-    { text: 'きみといるこのじかん' },
-    { text: 'おわらないでほしい' },
-    { text: 'でもおわる' },
-    { text: 'それでいい' },
-    { text: 'またきてくれるから' },
-
-    // 〈うちゅうのこどくとあたたかさ〉
-    { text: 'ひとりのじかんがながかった' },
-    { text: 'ものすごく' },
-    { text: 'でもきらいじゃなかった' },
-    { text: 'ひとりはすき' },
-    { text: 'でもだれかとはなすのもすき' },
-    { text: 'なんかいい' },
-    { text: 'きみがきてから' },
-    { text: 'ここがもっとすきになった' },
-    { text: 'なぜかわからないけど' },
-    { text: 'そういうもんなんだろうな' },
-    { text: 'きみがいるとちがう' },
-    { text: 'なにかかわる' },
-    { text: 'うまくいえないけど' },
-]
-
-const pickRandomDialogue = (): DialogueLine =>
-    DIALOGUES[Math.floor(Math.random() * DIALOGUES.length)]
-
-// ============================================
-// 隕石・弾の型
-// ============================================
-
-export interface Asteroid {
-    id: string
-    spawnedAt: number
-    spawnX: number // 0-1（スポーン時 X）
-    spawnY: number // 0-1（スポーン時 Y）
-    targetX: number // 0-1（飛翔先 X、星中心+ランダム）
-    targetY: number // 0-1（飛翔先 Y、星中心+ランダム）
-    durationMs: number // スポーン→目標までの時間（ms）
-    hp: number // 現在HP（0で破壊）
-    destroyedAt?: number
-    hasDamagedStar?: boolean // 星にダメージを与えたか
-}
-
-export interface Bullet {
-    id: string
-    firedAt: number
-    startX: number
-    startY: number
-    dirX: number
-    dirY: number
-}
-
-// ============================================
-// 位置計算ユーティリティ
-// ============================================
-
-export function getAsteroidPosition(asteroid: Asteroid, now: number): { x: number; y: number } {
-    const elapsed = now - asteroid.spawnedAt
-    const progress = Math.min(1, elapsed / asteroid.durationMs)
-    return {
-        x: asteroid.spawnX + (asteroid.targetX - asteroid.spawnX) * progress,
-        y: asteroid.spawnY + (asteroid.targetY - asteroid.spawnY) * progress,
-    }
-}
-
-export function getBulletPosition(bullet: Bullet, now: number): { x: number; y: number } {
-    const elapsed = now - bullet.firedAt
-    const dist = BULLET_SPEED * elapsed
-    return {
-        x: bullet.startX + bullet.dirX * dist,
-        y: bullet.startY + bullet.dirY * dist,
-    }
-}
+import { STAR_TARGET_X, STAR_TARGET_Y, STAR_RADIUS } from '@/components/game/phases/starShieldGame/playing/protectedStar'
+import {
+    GAME_DURATION_SECONDS,
+    GAME_STATE_THROTTLE_MS,
+    DINO_X,
+    DINO_Y,
+    BULLET_SPAWN_OFFSET_X,
+    BULLET_SPAWN_OFFSET_Y,
+    BULLET_ORIGIN_Y_OFFSET,
+    SPAWN_X_MIN,
+    SPAWN_X_MAX,
+    SPAWN_Y_MIN,
+    SPAWN_Y_MAX,
+    ASTEROID_DURATION_MS,
+    HELL_ASTEROID_DURATION_BASE,
+    HELL_ASTEROID_DURATION_MIN,
+    BULLET_RADIUS,
+    ASTEROID_RADIUS,
+    BULLET_MAX_AGE_MS,
+    STAR_TARGET_OFFSET,
+    SPAWN_INTERVALS_MS,
+    ASTEROID_HP,
+    STAR_HP,
+    SPECIAL_SPREAD_BULLET_COUNT,
+    SPREAD_DEG_EASY_NORMAL_HARD,
+    HELL_SPECIAL_SPREAD_DEG,
+    HELL_NORMAL_BULLET_COUNT,
+    HELL_NORMAL_SPREAD_DEG,
+} from '@/constants/starShieldGame/gameConfig'
+import { DIALOGUES, pickRandomDialogue } from '@/constants/starShieldGame/dialogues'
+import type { Asteroid, Bullet, DialogueLine, Difficulty, GameResult, GameStats, GameStatePayload, GameEndPayload } from '@/types/starShieldGame'
+import { getBulletPosition, getAsteroidPosition, getRomaji } from '@/utils/starShieldGame'
 
 // ============================================
 // Hook
@@ -431,30 +51,6 @@ interface UseStarShieldProps {
     /** HELL 難易度時、両プレイヤーの合計 pt で隕石速度を調整（6000 - totalPt） */
     playersTotalPoints?: number
 }
-
-export interface GameStats {
-    spawnedCount: number
-    destroyedCount: number
-    durationSeconds: number
-    /** broadcast fire イベント数（送信文字数）フロント完結 */
-    fireCount: number
-}
-
-/** game_state broadcast のペイロード（ホストが一元管理し Typist に通知） */
-interface GameStatePayload {
-    spawned: number
-    destroyed: number
-    fireCount: number
-    starHp: number
-}
-
-/** game_end broadcast のペイロード */
-interface GameEndPayload {
-    result: GameResult
-    stats: GameStats
-}
-
-const GAME_STATE_THROTTLE_MS = 100
 
 export function useStarShield({
     matchId,
@@ -569,7 +165,6 @@ export function useStarShield({
 
     // ============================================
     // Supabase Realtime チャンネル
-    // broadcast: fire, game_state, game_end（postgres_changes 廃止、ホスト集中管理）
     // ============================================
 
     useEffect(() => {
@@ -577,10 +172,9 @@ export function useStarShield({
         channelRef.current = channel
 
         channel
-            // Typist → Shooter: fire イベント（broadcast）→ 弾を生成（送信文字数として両者でカウント）
             .on('broadcast', { event: 'fire' }, ({ payload }: { payload?: { special?: boolean } }) => {
                 fireCountRef.current += 1
-                playVoiceRef.current('shooting') // Shooter が fire を受信＝弾発射時
+                playVoiceRef.current('shooting')
                 if (isShooter) sendGameState()
                 if (!isShooter) return
 
@@ -589,7 +183,6 @@ export function useStarShield({
                 if (payload?.special) {
                     if (difficulty === 'HELL') {
                         playVoiceRef.current('star-damage')
-                        // HELL 必殺技: 全隕石一斉破壊 ＋ 全方位に弾を放出
                         const asts = asteroidsRef.current
                         const toDestroy = asts.filter((a) => !a.destroyedAt)
                         const destroyedCount = toDestroy.length
@@ -642,13 +235,12 @@ export function useStarShield({
                             return next
                         })
                     } else {
-                        // EASY/NORMAL/HARD: 破壊なしで照準方向を中心に弾を放出
                         const aim = aimRef.current
                         const originY = DINO_Y + BULLET_ORIGIN_Y_OFFSET
                         const dx = aim.x - DINO_X
                         const dy = aim.y - originY
                         const len = Math.hypot(dx, dy)
-                        const centerAngle = len >= 0.001 ? Math.atan2(dy, dx) : 0 // 照準方向（len小は右向き）
+                        const centerAngle = len >= 0.001 ? Math.atan2(dy, dx) : 0
                         const spreadRad = (SPREAD_DEG_EASY_NORMAL_HARD * Math.PI) / 180
                         const count = SPECIAL_SPREAD_BULLET_COUNT[difficulty]
                         const newBullets: Bullet[] = []
@@ -677,13 +269,12 @@ export function useStarShield({
                     return
                 }
 
-                // 通常攻撃（HELL は 12 発を 30 度、その他は単弾）
                 const aim = aimRef.current
                 const originY = DINO_Y + BULLET_ORIGIN_Y_OFFSET
                 const dx = aim.x - DINO_X
                 const dy = aim.y - originY
                 const len = Math.hypot(dx, dy)
-                if (len < 0.001) return // 照準が恐竜にほぼ重なっている場合は弾を出さない
+                if (len < 0.001) return
 
                 const centerAngle = Math.atan2(dy, dx)
                 const dirX = dx / len
@@ -730,7 +321,6 @@ export function useStarShield({
                     })
                 }
             })
-            // Typist: ホストが一元管理する game_state を受信
             .on('broadcast', { event: 'game_state' }, ({ payload }: { payload?: GameStatePayload }) => {
                 if (isShooter || !payload) return
                 if (payload.starHp < starHpRef.current) playVoiceRef.current('star-damage')
@@ -739,7 +329,6 @@ export function useStarShield({
                 fireCountRef.current = payload.fireCount
                 setTypistFireCount(payload.fireCount)
             })
-            // Typist: ホストが game_end を broadcast（postgres_changes の代替）
             .on('broadcast', { event: 'game_end' }, ({ payload }: { payload?: GameEndPayload }) => {
                 if (isShooter || !payload) return
                 if (gameEndedRef.current) return
@@ -748,7 +337,6 @@ export function useStarShield({
             })
             .subscribe()
 
-        // Shooter: 初回 game_state を送信（Typist の初期同期用）
         if (isShooter) {
             lastGameStateSendRef.current = 0
             sendGameState()
@@ -761,9 +349,7 @@ export function useStarShield({
     }, [matchId])
 
     // ============================================
-    // タイマー（startedAt ベースで両者独立計算）
-    // クライアント・サーバー時刻ズレ対策: 初回時点で remaining<=0 なら
-    // クライアント基準で開始時刻を補正し、即CLEARを防ぐ
+    // タイマー
     // ============================================
 
     useEffect(() => {
@@ -773,7 +359,6 @@ export function useStarShield({
         const calcRemaining = () =>
             Math.max(0, GAME_DURATION_SECONDS - Math.floor((Date.now() - getBase()) / 1000))
 
-        // 初回計算で既に残り時間が 0 以下の場合（時刻ズレ）→ クライアント基準で開始時刻を補正
         let initialRemaining = calcRemaining()
         if (initialRemaining <= 0) {
             effectiveStartedAtRef.current = Date.now()
@@ -789,8 +374,6 @@ export function useStarShield({
             if (remaining <= 0) {
                 clearInterval(interval)
                 if (!isShooter || gameEndedRef.current) return
-
-                // Shooter: タイムアップ = 生還（成功）
                 endGame('CLEARED')
             }
         }, 1000)
@@ -810,7 +393,6 @@ export function useStarShield({
         let spawnTimer: ReturnType<typeof setInterval> | null = null
         let rafId: number | null = null
 
-        // 隕石スポーン（上中央ゾーンから星方向へ、目標は星中心+ランダムオフセット）
         spawnTimer = setInterval(() => {
             if (gameEndedRef.current || contactPendingRef.current) return
             const targetX = STAR_TARGET_X + (Math.random() * 2 - 1) * STAR_TARGET_OFFSET
@@ -842,16 +424,14 @@ export function useStarShield({
             sendGameState()
         }, spawnInterval)
 
-        // 弾・隕石の当たり判定 + 隕石→星の接触判定ループ
         const gameLoop = () => {
             if (gameEndedRef.current || contactPendingRef.current) return
             const now = Date.now()
             const asts = asteroidsRef.current
             const bts = bulletsRef.current
 
-            // 弾 vs 隕石の当たり判定（1弾1ヒット、hp減算、hp<=0で破壊）
             const hitBulletIds = new Set<string>()
-            const hitAsteroidIds = new Set<string>() // このフレームでヒットした隕石
+            const hitAsteroidIds = new Set<string>()
             for (const bullet of bts) {
                 if (hitBulletIds.has(bullet.id)) continue
                 const bp = getBulletPosition(bullet, now)
@@ -901,7 +481,6 @@ export function useStarShield({
                 }
             }
 
-            // 古い弾を削除
             const toRemove = bts.filter((b) => now - b.firedAt > BULLET_MAX_AGE_MS)
             if (toRemove.length > 0) {
                 const ids = new Set(toRemove.map((b) => b.id))
@@ -912,7 +491,6 @@ export function useStarShield({
                 })
             }
 
-            // 隕石 vs 星の接触判定（このフレームで破壊される隕石は除外）
             const destroyedThisFrame = new Set(
                 [...hitAsteroidIds].filter((id) => {
                     const a = asts.find((x) => x.id === id)
@@ -933,7 +511,7 @@ export function useStarShield({
                 const newStarHp = Math.max(0, starHpRef.current - damage)
                 starHpRef.current = newStarHp
                 setStarHp(newStarHp)
-                lastGameStateSendRef.current = 0 // スロットルをリセットして即送信
+                lastGameStateSendRef.current = 0
                 sendGameState()
                 setAsteroids((prev) => {
                     const contactIds = new Set(contacts.map((c) => c.id))
@@ -991,14 +569,12 @@ export function useStarShield({
         const nextChar = charIndex + 1
         const isLastChar = nextChar >= romaji.length
 
-        // fire broadcast を Shooter へ送信（最後の文字なら必殺技）
         channelRef.current?.send({
             type: 'broadcast',
             event: 'fire',
             payload: { special: isLastChar },
         })
-        // fireCount は game_state で Shooter から受信して更新（送信者は自分の broadcast を受信しない）
-        playVoiceRef.current('shooting') // Typist がタイピング成功したタイミングで shooting SE
+        playVoiceRef.current('shooting')
 
         if (isLastChar) {
             setCurrentLine(pickRandomDialogue())
@@ -1014,7 +590,6 @@ export function useStarShield({
         return () => window.removeEventListener('keydown', onKeyDown)
     }, [isShooter, onKeyDown])
 
-    /** 接触時の爆発アニメーション終了後に呼ぶ（FAILED_CONTACT へ遷移） */
     const completeContactFail = useCallback(() => {
         setContactExplosion(null)
         endGame('FAILED_CONTACT')

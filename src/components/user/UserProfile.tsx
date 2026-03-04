@@ -2,9 +2,9 @@
 import { createClient } from '@/utils/supabase/client'
 import { useEffect, useState } from 'react'
 import { updateName } from '@/server/actions/user'
-import { IconButton } from '@/components/ui/IconButton'
-import { Input } from '@/components/ui/Input'
-import { Card } from '@/components/ui/Card'
+import { IconButton } from '@/components/ui/iconButton'
+import { Input } from '@/components/ui/input'
+import { Card } from '@/components/ui/card'
 import { Check } from 'lucide-react'
 
 export default function UserProfile({ initialData }: { initialData: any }) {

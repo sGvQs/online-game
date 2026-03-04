@@ -1,8 +1,8 @@
 import { Suspense } from 'react'
 import Link from 'next/link'
-import AuthForm from '@/components/auth/AuthForm'
-import { DashboardHeaderTitle } from '@/components/dashboard/DashboardHeaderTitle'
-import { AnnoyingDinosaur } from '@/components/login/AnnoyingDinosaur'
+import AuthForm from '@/components/auth/authForm'
+import { DashboardHeaderTitle } from '@/components/dashboard/dashboardHeaderTitle'
+import { AnnoyingDinosaur } from '@/components/login/annoyingDinosaur'
 
 const DOT_GOTHIC_FONT = 'var(--font-dot-gothic-16)'
 const RUBIK_PUDDLES_FONT = 'var(--font-rubik-puddles)'

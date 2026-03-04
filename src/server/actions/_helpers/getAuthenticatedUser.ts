@@ -1,6 +1,6 @@
 import { prisma } from '@/server/lib/prisma'
 import { createClient } from '@/server/lib/supabase/server'
-import { User } from '@/shared/types'
+import { User } from '@/types'
 
 /**
  * 認証済みユーザーを取得する内部ヘルパー

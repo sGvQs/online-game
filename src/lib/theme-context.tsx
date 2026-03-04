@@ -1,7 +1,7 @@
 'use client'
 
 import React, { createContext, useContext, useEffect } from 'react'
-import { StarfieldBackground } from '@/components/StarfieldBackground'
+import { StarfieldBackground } from '@/components/starfieldBackground'
 
 type Theme = 'space'
 

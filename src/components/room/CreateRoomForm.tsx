@@ -1,9 +1,9 @@
 'use client'
 
 import { createRoom } from '@/server/actions/room'
-import { Button } from '@/components/ui/Button'
-import { IconButton } from '@/components/ui/IconButton'
-import { Input } from '@/components/ui/Input'
+import { Button } from '@/components/ui/button'
+import { IconButton } from '@/components/ui/iconButton'
+import { Input } from '@/components/ui/input'
 import { useState } from 'react'
 import { Plus, X, Check } from 'lucide-react'
 

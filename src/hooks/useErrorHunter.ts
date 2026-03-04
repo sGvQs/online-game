@@ -10,7 +10,7 @@ import {
     checkAutoFinish,
 } from '@/server/actions/game'
 import { resetAllReady } from '@/server/actions/room'
-import type { MatchWithErrorEventsAndUsers, MatchProgress, ErrorEventWithUser } from '@/shared/types'
+import type { MatchWithErrorEventsAndUsers, MatchProgress, ErrorEventWithUser } from '@/types'
 import { getUserComment } from '@/server/actions/user/getUserComment'
 import { useSE } from './useSE'
 

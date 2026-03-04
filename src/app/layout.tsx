@@ -2,10 +2,10 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, Zen_Maru_Gothic, DotGothic16, Kaisei_Opti, Yusei_Magic, Honk, Coral_Pixels, Sixtyfour_Convergence, Bitcount_Grid_Double_Ink, Rubik_Puddles, Cherry_Bomb_One } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/lib/theme-context";
-import BGMPlayer from "@/components/ui/BGMPlayer";
+import BGMPlayer from "@/components/ui/bGMPlayer";
 import { SoundProvider } from "@/lib/sound-context";
-import { DebugComplaintKeyListener } from "@/components/dashboard/DebugComplaintKeyListener";
-import { OldPCFloating } from "@/components/decorations/OldPCFloating";
+import { DebugComplaintKeyListener } from "@/components/dashboard/debugComplaintKeyListener";
+import { OldPCFloating } from "@/components/decorations/oldPCFloating";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

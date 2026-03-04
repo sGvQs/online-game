@@ -2,8 +2,8 @@ import { redirect } from 'next/navigation'
 import { getCurrentUser } from '@/server/actions'
 import { getRoomWithReadyStatus } from '@/server/actions/room'
 import { getNullHandRankings } from '@/server/actions/game/rankingActions'
-import { NullHandGame } from '@/components/game/NullHandGame'
-import { RoomUserWithReadyStatus } from '@/shared/types'
+import { NullHandGame } from '@/components/game/layout/nullHandGame'
+import { RoomUserWithReadyStatus } from '@/types'
 
 export default async function NullHandPage({ params }: { params: Promise<{ roomId: string }> }) {
     const currentUser = await getCurrentUser()
