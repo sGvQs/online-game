@@ -32,7 +32,7 @@ const zenMaruGothic = Zen_Maru_Gothic({
 
 const dotGothic16 = DotGothic16({
   variable: "--font-dot-gothic-16",
-  subsets: ["latin", "japanese"],
+  subsets: ["latin"],
   weight: "400",
   display: "swap",
   fallback: ["sans-serif"],
