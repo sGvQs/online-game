@@ -6,13 +6,13 @@ import { returnToRoom } from '@/server/actions/room'
 import { RoomWithUsersAndReadyStatus, HandType, HostChoice, UserRanking } from '@/types'
 import { useState, useEffect } from 'react'
 import { AnimatePresence } from 'framer-motion'
-import { TitleScreen } from './TitleScreen'
-import { GameLayout } from './GameLayout'
+import { TitleScreen } from './titleScreen'
+import { GameLayout } from './gameLayout'
 import { ChoicePhase } from '../phases/nullHandGame/choicePhase'
 import { BattlePhase } from '../phases/nullHandGame/battlePhase'
 import { ResultPhase } from '../phases/nullHandGame/resultPhase'
 import { GameOverPhase } from '../phases/nullHandGame/gameOverPhase'
-import { OpeningSplash } from './OpeningSplash'
+import { OpeningSplash } from './openingSplash'
 
 interface NullHandGameProps {
     room: RoomWithUsersAndReadyStatus

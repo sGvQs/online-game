@@ -1,13 +1,13 @@
 import { RoomWithUsersAndReadyStatus, UserRanking, HandType, RoomUserWithReadyStatus } from '@/types'
 import { motion } from 'framer-motion'
-import { PlayerFaceIcon } from './PlayerFaceIcon'
+import { PlayerFaceIcon } from './playerFaceIcon'
 import { useState } from 'react'
 import { nullHandGame } from './styles'
-import { Hand3D } from './Hand3D'
+import { Hand3D } from './hand3D'
 import { cn } from '@/lib/utils'
-import { NullHandLogo } from './NullHandLogo'
+import { NullHandLogo } from './nullHandLogo'
 import { useSE } from '@/hooks/useSE'
-import { RewardSystem } from './RewardSystem'
+import { RewardSystem } from './rewardSystem'
 
 interface TitleScreenProps {
     room: RoomWithUsersAndReadyStatus

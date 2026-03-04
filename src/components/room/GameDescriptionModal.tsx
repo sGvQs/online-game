@@ -6,7 +6,7 @@ import { Win95Dialog } from '../game/win95Dialog'
 import { Win95TitleBarButton } from '../game/win95TitleBarButton'
 import { Hand3D } from '../game/nullHandGame/hand3D'
 import { HandType } from '@/types'
-import { RewardSystem } from '../game/nullHandGame/RewardSystem'
+import { RewardSystem } from '../game/nullHandGame/rewardSystem'
 import { StarVisual } from '../game/starShieldGame/shared'
 import { ICONS, BULLET_COLOR, ROLE_META } from '../game/starShieldGame/constants'
 

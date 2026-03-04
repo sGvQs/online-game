@@ -1,4 +1,4 @@
-export { DinosaurWithBalls } from './DinosaurWithBalls'
-export { StarVisual, type StarPosition } from './StarVisual'
-export { AuroraGlow } from './AuroraGlow'
-export { GlassCard } from './GlassCard'
+export { DinosaurWithBalls } from './dinosaurWithBalls'
+export { StarVisual, type StarPosition } from './starVisual'
+export { AuroraGlow } from './auroraGlow'
+export { GlassCard } from './glassCard'
