@@ -7,7 +7,7 @@ import type { Asteroid, Bullet } from '@/types/starShieldGame'
 import { getAsteroidPosition, getBulletPosition } from '@/utils/starShieldGame/starShieldUtils'
 import { BULLET_RADIUS, DINO_X, DINO_Y } from '@/constants/starShieldGame/gameConfig'
 import { ProtectedStar } from './protectedStar'
-import { BULLET_COLOR, ICONS } from '@/components/game/starShieldGame/constants'
+import { BULLET_COLOR, ICONS } from '@/constants/starShieldGame/constants'
 
 interface ShooterViewProps {
     asteroids: Asteroid[]

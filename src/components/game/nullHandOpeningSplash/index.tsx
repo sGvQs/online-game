@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { HandType } from '@/types'
-import { nullHandGame } from './styles'
-import { NullHandLogo } from './nullHandLogo'
+import { nullHandGame } from '@/components/game/nullHandGame/styles'
+import { NullHandLogo } from '@/components/game/nullHandNullHandLogo'
 import { useSE } from '@/hooks/useSE'
-import { NEON_PALETTE } from './titleScreen'
+import { NEON_PALETTE } from '@/constants/nullHandGame'
 
 interface OpeningSplashProps {
     onComplete: () => void
@@ -95,8 +95,5 @@ export function OpeningSplash({ onComplete, titleHand, userColor, onColorChange 
                 </div>
             </div>
         </motion.div>
-
-
-
     )
 }

@@ -12,7 +12,7 @@ import {
     DINO_SPAWN,
     BULLET_COLOR,
     ICONS,
-} from './constants'
+} from '@/constants/starShieldGame/constants'
 
 interface DinosaurWithBallsProps {
     ballColor?: string

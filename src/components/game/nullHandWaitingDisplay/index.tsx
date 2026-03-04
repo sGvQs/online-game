@@ -1,8 +1,8 @@
 import { HandType } from '@/types'
-import { Hand3D } from './hand3D'
+import { Hand3D } from '@/components/game/nullHandHand3D'
 import { cn } from '@/lib/utils'
 import { useEffect, useState } from 'react'
-import { waitingDisplay } from './waitingDisplay.styles'
+import { waitingDisplay } from './styles'
 
 interface WaitingDisplayProps {
     engLabel?: string

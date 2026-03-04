@@ -5,7 +5,7 @@ import type { Difficulty, GameResult, GameStats } from '@/types/starShieldGame'
 import { ASTEROID_HP, STAR_HP } from '@/constants/starShieldGame/gameConfig'
 import { ShooterView } from './playing/shooterView'
 import { TypistView } from './playing/typistView'
-import { COLORS } from '@/components/game/starShieldGame/constants'
+import { COLORS } from '@/constants/starShieldGame/constants'
 
 interface GameScreenProps {
     matchId: string

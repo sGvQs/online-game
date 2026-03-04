@@ -3,7 +3,7 @@
  */
 
 import type { Difficulty } from '@/types/starShieldGame'
-import { DINO_SPAWN } from '@/components/game/starShieldGame/constants'
+import { DINO_SPAWN } from './constants'
 
 // ========== 基本 ==========
 export const GAME_DURATION_SECONDS = 90

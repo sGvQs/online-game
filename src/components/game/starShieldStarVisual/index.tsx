@@ -1,7 +1,7 @@
 'use client'
 
 import { useId } from 'react'
-import { STAR_GRADIENT_STOPS, STAR_GLOW_FILTER } from './constants'
+import { STAR_GRADIENT_STOPS, STAR_GLOW_FILTER } from '@/constants/starShieldGame/constants'
 
 export interface StarPosition {
     left: string

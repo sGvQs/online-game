@@ -1,6 +1,6 @@
 'use client'
 
-import { GLASS_CARD_STYLE } from './constants'
+import { GLASS_CARD_STYLE } from '@/constants/starShieldGame/constants'
 
 interface GlassCardProps {
     children: React.ReactNode

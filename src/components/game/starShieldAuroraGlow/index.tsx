@@ -1,6 +1,6 @@
 'use client'
 
-import { AURORA_GRADIENT_DEFAULT } from './constants'
+import { AURORA_GRADIENT_DEFAULT } from '@/constants/starShieldGame/constants'
 
 interface AuroraGlowProps {
     width?: number | string

@@ -20,3 +20,15 @@
 ## コンポーネント名
 
 - コンポーネント自体（`export function Button`）は PascalCase のまま
+
+## コンポーネント配置
+
+- ゲームコンポーネントは win95Button と同様に、`components/game/{gamePrefix}{ComponentName}/` 形式で game/ 直下に配置する
+- ゲーム本体フォルダ（例: nullHandGame）には `index.tsx` と `styles.ts` のみを置き、そのゲーム専用の子コンポーネントは game/ 直下の兄弟フォルダとして外出しする
+- 例: `nullHandGame/`（index.tsx, styles.ts）, `nullHandHand3D/`, `nullHandCurrentScores/` など
+
+## 定数とユーティリティの配置
+
+- ゲーム固有の定数は `src/constants/{gameName}/` に配置する（例: `src/constants/nullHandGame/`）
+- ゲーム固有のユーティリティは `src/utils/{gameName}/` に配置する（例: `src/utils/nullHandGame/`）
+- コンポーネントフォルダ内に constants.ts や utils.ts を置かない

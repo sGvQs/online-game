@@ -1,4 +1,4 @@
-import { sideHeader } from './sideHeader.styles'
+import { sideHeader } from './styles'
 import { cn } from '@/lib/utils'
 
 interface SideHeaderProps {

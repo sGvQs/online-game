@@ -1,13 +1,14 @@
 import { RoomWithUsersAndReadyStatus, UserRanking, HandType, RoomUserWithReadyStatus } from '@/types'
 import { motion } from 'framer-motion'
-import { PlayerFaceIcon } from './playerFaceIcon'
+import { PlayerFaceIcon } from '@/components/game/nullHandPlayerFaceIcon'
 import { useState } from 'react'
-import { nullHandGame } from './styles'
-import { Hand3D } from './hand3D'
+import { nullHandGame } from '@/components/game/nullHandGame/styles'
+import { Hand3D } from '@/components/game/nullHandHand3D'
 import { cn } from '@/lib/utils'
-import { NullHandLogo } from './nullHandLogo'
+import { NullHandLogo } from '@/components/game/nullHandNullHandLogo'
 import { useSE } from '@/hooks/useSE'
-import { RewardSystem } from './rewardSystem'
+import { RewardSystem } from '@/components/game/nullHandRewardSystem'
+import { NEON_PALETTE } from '@/constants/nullHandGame'
 
 interface TitleScreenProps {
     room: RoomWithUsersAndReadyStatus
@@ -23,15 +24,6 @@ interface TitleScreenProps {
     userColor: string
     currentUserId: string | null
 }
-
-export const NEON_PALETTE = [
-    '#00FF00', // Terminal Green
-    '#AA44FF', // Neon Purple
-    '#FF9900', // Cyber Orange
-    '#FF22CC', // Hot Magenta
-    '#FFFF00', // Electric Yellow
-    '#DDDDFF', // Ghost White
-]
 
 export function TitleScreen({
     room,

@@ -1,9 +1,9 @@
 import { HandType } from '@/types'
-import { Hand3D } from './hand3D'
+import { Hand3D } from '@/components/game/nullHandHand3D'
 import { motion } from 'framer-motion'
-import { getHandDisplayWithEmoji } from './utils'
+import { getHandDisplayWithEmoji } from '@/utils/nullHandGame/utils'
 import { useSE } from '@/hooks/useSE'
-import { handSelectionGrid } from './handSelectionGrid.styles'
+import { handSelectionGrid } from './styles'
 
 interface HandSelectionGridProps {
     selectedHand: HandType | null
