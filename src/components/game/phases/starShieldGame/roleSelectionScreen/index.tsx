@@ -9,11 +9,14 @@ import { DinosaurWithBalls } from '@/components/game/common/starShield/dinosaurW
 import { AuroraGlow } from '@/components/game/common/starShield/auroraGlow'
 import { roleSelectionScreen } from './styles'
 import { COLORS, DIFFICULTIES, DIFFICULTY_META, ROLE_META, type Difficulty, type RoleChoice } from '@/constants/starShieldGame/constants'
+import { TECHNIQUES, TECHNIQUE_IDS, type TechniqueId } from '@/constants/starShieldGame/techniques'
 
 interface RoleSelectionScreenProps {
     room: RoomWithUsersAndReadyStatus
     roleChoices: Record<string, RoleChoice>
     onRoleChange: (role: RoleChoice) => void
+    techniqueChoices: Record<string, TechniqueId | null>
+    onTechniqueChange: (technique: TechniqueId | null) => void
     roleConflict: boolean
     canProceed: boolean
     onProceedToGame: () => void
@@ -29,6 +32,8 @@ export function RoleSelectionScreen({
     room,
     roleChoices,
     onRoleChange,
+    techniqueChoices,
+    onTechniqueChange,
     canProceed,
     onProceedToGame,
     onBack,
@@ -140,6 +145,49 @@ export function RoleSelectionScreen({
                         })}
                     </motion.div>
                 </div>
+
+                <motion.div
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 0.18 }}
+                    className="rounded-2xl p-5 flex flex-col gap-3 bg-white/[0.03] border border-white/[0.08]"
+                >
+                    <p className={styles.difficultyCardTitle()}>わざ（タイピストのみ）</p>
+                    <div className="flex flex-wrap gap-2">
+                        <button
+                            onClick={() => onTechniqueChange(null)}
+                            className={cn(
+                                'px-3 py-2 rounded-xl text-xs transition-all border',
+                                !techniqueChoices[currentUserId]
+                                    ? 'bg-brand-500/20 border-brand-500/50 text-brand-300'
+                                    : 'bg-white/[0.02] border-white/10 text-white/50 hover:border-white/20'
+                            )}
+                        >
+                            ふつう
+                        </button>
+                        {TECHNIQUE_IDS.map((tid) => {
+                            const tech = TECHNIQUES[tid]
+                            const isActive = techniqueChoices[currentUserId] === tid
+                            return (
+                                <button
+                                    key={tid}
+                                    onClick={() => onTechniqueChange(tid)}
+                                    className={cn(
+                                        'px-3 py-2 rounded-xl text-xs transition-all border flex items-center gap-1.5',
+                                        isActive ? 'border-current' : 'bg-white/[0.02] border-white/10 text-white/50 hover:border-white/20'
+                                    )}
+                                    style={isActive ? { color: tech.color, borderColor: tech.color, backgroundColor: `${tech.color}20` } : undefined}
+                                >
+                                    <span
+                                        className="w-2 h-2 rounded-full shrink-0"
+                                        style={{ backgroundColor: tech.color }}
+                                    />
+                                    {tech.label}
+                                </button>
+                            )
+                        })}
+                    </div>
+                </motion.div>
 
                 <motion.div
                     initial={{ opacity: 0, y: 8 }}

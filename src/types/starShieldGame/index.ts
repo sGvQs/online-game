@@ -27,6 +27,8 @@ export interface Asteroid {
     hp: number // 現在HP（0で破壊）
     destroyedAt?: number
     hasDamagedStar?: boolean // 星にダメージを与えたか
+    /** 減速効果（1=通常、0.5=半分の速さ）。青い球ヒット時に付与 */
+    speedMultiplier?: number
 }
 
 export interface Bullet {
@@ -36,6 +38,20 @@ export interface Bullet {
     startY: number
     dirX: number
     dirY: number
+    /** ダメージ量（未指定時1） */
+    damage?: number
+    /** 弾速倍率（未指定時1） */
+    speed?: number
+    /** 描画用: 技の識別子 */
+    technique?: string
+    /** 貫通弾（当たっても消えない） */
+    piercing?: boolean
+}
+
+/** fire broadcast のペイロード（Typist が送信） */
+export interface FirePayload {
+    special?: boolean
+    technique?: string
 }
 
 /** game_state broadcast のペイロード（ホストが一元管理し Typist に通知） */

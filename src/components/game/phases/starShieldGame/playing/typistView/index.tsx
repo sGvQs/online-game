@@ -8,7 +8,9 @@ import { getRomaji } from '@/utils/starShieldGame'
 import { StarVisual } from '@/components/game/common/starShield/starVisual'
 import { AuroraGlow } from '@/components/game/common/starShield/auroraGlow'
 import { typistView } from './styles'
-import { ICONS, BULLET_COLOR, AURORA_GRADIENT_TYPIST } from '@/constants/starShieldGame/constants'
+import { ICONS, AURORA_GRADIENT_TYPIST } from '@/constants/starShieldGame/constants'
+import { DEFAULT_BULLET_COLOR, TECHNIQUES } from '@/constants/starShieldGame/techniques'
+import type { TechniqueId } from '@/constants/starShieldGame/techniques'
 
 const TYPIST_STAR_POSITION = {
     left: '50%',
@@ -41,6 +43,7 @@ interface TypistViewProps {
     starHp: number
     maxStarHp: number
     typistFireCount: number
+    selectedTechnique?: TechniqueId | null
 }
 
 function TypingDisplay({ line, charIndex }: { line: DialogueLine; charIndex: number }) {
@@ -77,12 +80,12 @@ function TypingDisplay({ line, charIndex }: { line: DialogueLine; charIndex: num
     )
 }
 
-export function TypistView({ dialogue, score, starHp, maxStarHp, typistFireCount }: TypistViewProps) {
+export function TypistView({ dialogue, score, starHp, maxStarHp, typistFireCount, selectedTechnique }: TypistViewProps) {
     const inputRef = useRef<HTMLInputElement>(null)
     const prevStarHpRef = useRef(maxStarHp)
     const prevTypistFireCountRef = useRef(typistFireCount)
     const [damageWidth, setDamageWidth] = useState(0)
-    const [bullets, setBullets] = useState<{ id: string }[]>([])
+    const [bullets, setBullets] = useState<{ id: string; color: string }[]>([])
 
     useEffect(() => {
         inputRef.current?.focus()
@@ -97,13 +100,15 @@ export function TypistView({ dialogue, score, starHp, maxStarHp, typistFireCount
         prevStarHpRef.current = starHp
     }, [starHp, maxStarHp])
 
+    const bulletColor = selectedTechnique && selectedTechnique in TECHNIQUES ? TECHNIQUES[selectedTechnique].color : DEFAULT_BULLET_COLOR
+
     useEffect(() => {
         if (typistFireCount > prevTypistFireCountRef.current) {
             const delta = typistFireCount - prevTypistFireCountRef.current
-            setBullets((b) => [...b, ...Array.from({ length: delta }, () => ({ id: crypto.randomUUID() }))])
+            setBullets((b) => [...b, ...Array.from({ length: delta }, () => ({ id: crypto.randomUUID(), color: bulletColor }))])
         }
         prevTypistFireCountRef.current = typistFireCount
-    }, [typistFireCount])
+    }, [typistFireCount, bulletColor])
 
     return (
         <div
@@ -135,8 +140,8 @@ export function TypistView({ dialogue, score, starHp, maxStarHp, typistFireCount
                         <Image src={ICONS.DINO} alt="" fill className="object-contain" />
                     </motion.div>
                     <AnimatePresence>
-                        {bullets.map(({ id }) => (
-                            <TypistBullet key={id} bulletColor={BULLET_COLOR} onComplete={() => setBullets((b) => b.filter((x) => x.id !== id))} />
+                        {bullets.map(({ id, color }) => (
+                            <TypistBullet key={id} bulletColor={color} onComplete={() => setBullets((b) => b.filter((x) => x.id !== id))} />
                         ))}
                     </AnimatePresence>
                 </div>

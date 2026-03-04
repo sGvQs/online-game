@@ -8,6 +8,7 @@ import { startStarShieldMatch, getStarShieldMatchStatus, isHellUnlocked } from '
 import { RoomWithUsersAndReadyStatus } from '@/types'
 import type { UserRanking } from '@/types'
 import type { Difficulty, GameResult, GameStats } from '@/types/starShieldGame'
+import type { TechniqueId } from '@/constants/starShieldGame/techniques'
 import { TitleScreen } from '@/components/game/phases/starShieldGame/titleScreen'
 import { RoleSelectionScreen } from '@/components/game/phases/starShieldGame/roleSelectionScreen'
 import { GameScreen } from '@/components/game/phases/starShieldGame/gameScreen'
@@ -58,6 +59,7 @@ export function StarShieldGame({
     }, [room.users, room.createdBy])
 
     const [roleChoices, setRoleChoices] = useState<Record<string, RoleChoice>>(initialRoleChoices)
+    const [techniqueChoices, setTechniqueChoices] = useState<Record<string, TechniqueId | null>>({})
 
     // 2人揃ったときに未選択のユーザーに初期値（ホスト=Shooter、他=Typist）を補完
     useEffect(() => {
@@ -144,6 +146,11 @@ export function StarShieldGame({
                     setRoleChoices((prev) => ({ ...prev, [payload.userId]: payload.role }))
                 }
             })
+            .on('broadcast', { event: 'technique' }, ({ payload }: { payload: { userId: string; technique: TechniqueId | null } }) => {
+                if (payload?.userId !== undefined) {
+                    setTechniqueChoices((prev) => ({ ...prev, [payload.userId]: payload.technique }))
+                }
+            })
             .on('broadcast', { event: 'goToRoleSelect' }, () => {
                 setPhase('ROLE_SELECT')
             })
@@ -165,6 +172,16 @@ export function StarShieldGame({
             type: 'broadcast',
             event: 'role',
             payload: { userId: currentUserId, role },
+        })
+    }, [currentUserId])
+
+    // 技変更（Typist 用、broadcast で共有）
+    const handleTechniqueChange = useCallback((technique: TechniqueId | null) => {
+        setTechniqueChoices((prev) => ({ ...prev, [currentUserId]: technique }))
+        lobbyChannelRef.current?.send({
+            type: 'broadcast',
+            event: 'technique',
+            payload: { userId: currentUserId, technique },
         })
     }, [currentUserId])
 
@@ -328,6 +345,8 @@ export function StarShieldGame({
                     room={room}
                     roleChoices={roleChoices}
                     onRoleChange={handleRoleChange}
+                    techniqueChoices={techniqueChoices}
+                    onTechniqueChange={handleTechniqueChange}
                     roleConflict={roleConflict}
                     canProceed={!roleConflict}
                     onProceedToGame={handleProceedToGame}
@@ -348,6 +367,10 @@ export function StarShieldGame({
                     currentUserId={currentUserId}
                     onGameEnd={handleGameEnd}
                     playersTotalPoints={room.users.reduce((sum, u) => sum + (initialRankings.find((r) => r.userId === u.userId)?.points ?? 0), 0)}
+                    typistTechnique={((): TechniqueId | null => {
+                        const typist = room.users.find((u) => roleChoices[u.userId] === 'TYPIST')
+                        return typist ? (techniqueChoices[typist.userId] ?? null) : null
+                    })()}
                 />
             )}
             {phase === 'RESULT' && gameResult && gameStats && (

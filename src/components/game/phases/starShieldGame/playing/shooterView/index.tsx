@@ -7,6 +7,7 @@ import type { Asteroid, Bullet } from '@/types/starShieldGame'
 import { getAsteroidPosition, getBulletPosition } from '@/utils/starShieldGame'
 import { shooterView } from './styles'
 import { BULLET_RADIUS, DINO_X, DINO_Y } from '@/constants/starShieldGame/gameConfig'
+import { DEFAULT_BULLET_COLOR, TECHNIQUES } from '@/constants/starShieldGame/techniques'
 import { ProtectedStar } from '../protectedStar'
 import { ICONS } from '@/constants/starShieldGame/constants'
 
@@ -78,12 +79,16 @@ function BulletCircle({ bullet }: { bullet: Bullet }) {
         return () => cancelAnimationFrame(rafId)
     }, [update])
     const sizePx = Math.max(8, BULLET_RADIUS * 400)
+    const bulletColor = bullet.technique && bullet.technique in TECHNIQUES ? TECHNIQUES[bullet.technique as keyof typeof TECHNIQUES].color : DEFAULT_BULLET_COLOR
     const styles = shooterView()
     return (
         <div
             ref={divRef}
             className={styles.bulletCircle()}
-            style={{ ['--bullet-size' as string]: `${sizePx}px` }}
+            style={{
+                ['--bullet-size' as string]: `${sizePx}px`,
+                ['--bullet-color' as string]: bulletColor,
+            }}
         >
             <div className={styles.bulletInner()} />
         </div>

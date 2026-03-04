@@ -34,6 +34,7 @@ import {
     HELL_NORMAL_SPREAD_DEG,
 } from '@/constants/starShieldGame/gameConfig'
 import { DIALOGUES, pickRandomDialogue } from '@/constants/starShieldGame/dialogues'
+import { TECHNIQUES, type TechniqueId } from '@/constants/starShieldGame/techniques'
 import type { Asteroid, Bullet, DialogueLine, Difficulty, GameResult, GameStats, GameStatePayload, GameEndPayload } from '@/types/starShieldGame'
 import { getBulletPosition, getAsteroidPosition, getRomaji } from '@/utils/starShieldGame'
 
@@ -50,6 +51,8 @@ interface UseStarShieldProps {
     onGameEnd: (result: GameResult, stats: GameStats) => void
     /** HELL 難易度時、両プレイヤーの合計 pt で隕石速度を調整（6000 - totalPt） */
     playersTotalPoints?: number
+    /** Typist が選択した技（役割選択画面で選択、demo なので全て選べる） */
+    selectedTechnique?: TechniqueId | null
 }
 
 export function useStarShield({
@@ -59,6 +62,7 @@ export function useStarShield({
     difficulty,
     onGameEnd,
     playersTotalPoints = 0,
+    selectedTechnique = null,
 }: UseStarShieldProps) {
     const supabase = useMemo(() => createClient(), [])
     const channelName = `star_shield_fire_${matchId}`
@@ -172,7 +176,7 @@ export function useStarShield({
         channelRef.current = channel
 
         channel
-            .on('broadcast', { event: 'fire' }, ({ payload }: { payload?: { special?: boolean } }) => {
+            .on('broadcast', { event: 'fire' }, ({ payload }: { payload?: { special?: boolean; technique?: string } }) => {
                 fireCountRef.current += 1
                 playVoiceRef.current('shooting')
                 if (isShooter) sendGameState()
@@ -280,7 +284,47 @@ export function useStarShield({
                 const dirX = dx / len
                 const dirY = dy / len
 
-                if (difficulty === 'HELL') {
+                const techId = payload?.technique as TechniqueId | undefined
+                const tech = techId && techId in TECHNIQUES ? TECHNIQUES[techId] : null
+
+                const createBullet = (o: { dirX: number; dirY: number; startX: number; startY: number }) => {
+                    const base: Bullet = {
+                        id: crypto.randomUUID(),
+                        firedAt: now,
+                        startX: o.startX,
+                        startY: o.startY,
+                        dirX: o.dirX,
+                        dirY: o.dirY,
+                    }
+                    if (tech) {
+                        return {
+                            ...base,
+                            damage: tech.damage,
+                            speed: tech.speed,
+                            technique: tech.id,
+                            piercing: tech.piercing,
+                        }
+                    }
+                    return base
+                }
+
+                if (tech?.count && tech.count > 1) {
+                    const verticalOffset = tech.verticalOffset ?? 0
+                    const newBullets: Bullet[] = []
+                    for (let i = 0; i < tech.count; i++) {
+                        const offsetDist = i * verticalOffset
+                        const startX = DINO_X + dirX * BULLET_SPAWN_OFFSET_X + dirX * offsetDist
+                        const startY = DINO_Y + dirY * BULLET_SPAWN_OFFSET_Y + dirY * offsetDist
+                        newBullets.push(
+                            createBullet({ dirX, dirY, startX, startY })
+                        )
+                    }
+                    setBullets((prev) => {
+                        const next = [...prev, ...newBullets]
+                        bulletsRef.current = next
+                        return next
+                    })
+                } else if (difficulty === 'HELL') {
                     const spreadRad = (HELL_NORMAL_SPREAD_DEG * Math.PI) / 180
                     const count = HELL_NORMAL_BULLET_COUNT
                     const newBullets: Bullet[] = []
@@ -291,14 +335,14 @@ export function useStarShield({
                             (count > 1 ? (spreadRad * i) / (count - 1) : 0)
                         const bDirX = Math.cos(angle)
                         const bDirY = Math.sin(angle)
-                        newBullets.push({
-                            id: crypto.randomUUID(),
-                            firedAt: now,
-                            startX: DINO_X + bDirX * BULLET_SPAWN_OFFSET_X,
-                            startY: DINO_Y + bDirY * BULLET_SPAWN_OFFSET_Y,
-                            dirX: bDirX,
-                            dirY: bDirY,
-                        })
+                        newBullets.push(
+                            createBullet({
+                                dirX: bDirX,
+                                dirY: bDirY,
+                                startX: DINO_X + bDirX * BULLET_SPAWN_OFFSET_X,
+                                startY: DINO_Y + bDirY * BULLET_SPAWN_OFFSET_Y,
+                            })
+                        )
                     }
                     setBullets((prev) => {
                         const next = [...prev, ...newBullets]
@@ -306,14 +350,12 @@ export function useStarShield({
                         return next
                     })
                 } else {
-                    const bullet: Bullet = {
-                        id: crypto.randomUUID(),
-                        firedAt: now,
-                        startX: DINO_X + dirX * BULLET_SPAWN_OFFSET_X,
-                        startY: DINO_Y + dirY * BULLET_SPAWN_OFFSET_Y,
+                    const bullet = createBullet({
                         dirX,
                         dirY,
-                    }
+                        startX: DINO_X + dirX * BULLET_SPAWN_OFFSET_X,
+                        startY: DINO_Y + dirY * BULLET_SPAWN_OFFSET_Y,
+                    })
                     setBullets((prev) => {
                         const next = [...prev, bullet]
                         bulletsRef.current = next
@@ -431,37 +473,60 @@ export function useStarShield({
             const bts = bulletsRef.current
 
             const hitBulletIds = new Set<string>()
-            const hitAsteroidIds = new Set<string>()
+            const hpUpdates = new Map<string, number>()
+            const slowAsteroidIds = new Set<string>()
+            let destroyedCount = 0
+
             for (const bullet of bts) {
                 if (hitBulletIds.has(bullet.id)) continue
                 const bp = getBulletPosition(bullet, now)
+                const damage = bullet.damage ?? 1
+                const tech = bullet.technique && bullet.technique in TECHNIQUES ? TECHNIQUES[bullet.technique as TechniqueId] : null
+
                 for (const a of asts) {
-                    if (a.destroyedAt || hitAsteroidIds.has(a.id)) continue
+                    if (a.destroyedAt || (hpUpdates.has(a.id) && (hpUpdates.get(a.id) ?? 0) <= 0)) continue
                     const ap = getAsteroidPosition(a, now)
                     const dist = Math.hypot(bp.x - ap.x, bp.y - ap.y)
-                    if (dist < ASTEROID_RADIUS + BULLET_RADIUS) {
+                    if (dist >= ASTEROID_RADIUS + BULLET_RADIUS) continue
+
+                    const currentHp = hpUpdates.get(a.id) ?? a.hp
+                    const newHp = Math.max(0, currentHp - damage)
+
+                    if (damage <= 0) continue
+
+                    hpUpdates.set(a.id, newHp)
+                    if (newHp <= 0) destroyedCount++
+
+                    if (tech?.slowOnHit) slowAsteroidIds.add(a.id)
+
+                    if (tech?.rangeRadius && tech.rangeDamage !== undefined) {
+                        for (const other of asts) {
+                            if (other.id === a.id || other.destroyedAt) continue
+                            const op = getAsteroidPosition(other, now)
+                            const rangeDist = Math.hypot(ap.x - op.x, ap.y - op.y)
+                            if (rangeDist <= tech.rangeRadius) {
+                                const otherHp = hpUpdates.get(other.id) ?? other.hp
+                                const rangeNewHp = Math.max(0, otherHp - tech.rangeDamage)
+                                hpUpdates.set(other.id, rangeNewHp)
+                                if (rangeNewHp <= 0) destroyedCount++
+                            }
+                        }
+                    }
+
+                    if (!bullet.piercing) {
                         hitBulletIds.add(bullet.id)
-                        hitAsteroidIds.add(a.id)
                         break
                     }
                 }
             }
-            if (hitAsteroidIds.size > 0) {
-                const hpUpdates = new Map<string, number>()
-                let destroyedCount = 0
-                for (const ast of asts) {
-                    if (hitAsteroidIds.has(ast.id)) {
-                        const newHp = ast.hp - 1
-                        hpUpdates.set(ast.id, newHp)
-                        if (newHp <= 0) destroyedCount++
-                    }
-                }
+
+            if (hpUpdates.size > 0) {
                 setAsteroids((prev) => {
                     const next = prev.map((ast) => {
                         const newHp = hpUpdates.get(ast.id)
                         if (newHp === undefined) return ast
-                        if (newHp <= 0) return { ...ast, hp: 0, destroyedAt: now }
-                        return { ...ast, hp: newHp }
+                        const base = newHp <= 0 ? { ...ast, hp: 0, destroyedAt: now } : { ...ast, hp: newHp }
+                        return slowAsteroidIds.has(ast.id) ? { ...base, speedMultiplier: 0.5 } : base
                     })
                     asteroidsRef.current = next
                     return next
@@ -492,10 +557,9 @@ export function useStarShield({
             }
 
             const destroyedThisFrame = new Set(
-                [...hitAsteroidIds].filter((id) => {
-                    const a = asts.find((x) => x.id === id)
-                    return a && a.hp - 1 <= 0
-                })
+                [...hpUpdates.entries()]
+                    .filter(([, newHp]) => newHp <= 0)
+                    .map(([id]) => id)
             )
             const contacts = asts.filter((a) => {
                 if (a.destroyedAt || destroyedThisFrame.has(a.id) || a.hasDamagedStar) return false
@@ -569,10 +633,12 @@ export function useStarShield({
         const nextChar = charIndex + 1
         const isLastChar = nextChar >= romaji.length
 
+        const payload: { special: boolean; technique?: string } = { special: isLastChar }
+        if (selectedTechnique) payload.technique = selectedTechnique
         channelRef.current?.send({
             type: 'broadcast',
             event: 'fire',
-            payload: { special: isLastChar },
+            payload,
         })
         playVoiceRef.current('shooting')
 
@@ -582,7 +648,7 @@ export function useStarShield({
         } else {
             setCharIndex(nextChar)
         }
-    }, [currentLine, charIndex])
+    }, [currentLine, charIndex, selectedTechnique])
 
     useEffect(() => {
         if (isShooter) return

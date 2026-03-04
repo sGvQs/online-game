@@ -13,7 +13,9 @@ export const getRomaji = (text: string): string => toRomaji(text.replace(KANA_ON
 
 export function getAsteroidPosition(asteroid: Asteroid, now: number): { x: number; y: number } {
     const elapsed = now - asteroid.spawnedAt
-    const progress = Math.min(1, elapsed / asteroid.durationMs)
+    const mult = asteroid.speedMultiplier ?? 1
+    const effectiveDuration = asteroid.durationMs / mult
+    const progress = Math.min(1, elapsed / effectiveDuration)
     return {
         x: asteroid.spawnX + (asteroid.targetX - asteroid.spawnX) * progress,
         y: asteroid.spawnY + (asteroid.targetY - asteroid.spawnY) * progress,
@@ -22,7 +24,8 @@ export function getAsteroidPosition(asteroid: Asteroid, now: number): { x: numbe
 
 export function getBulletPosition(bullet: Bullet, now: number): { x: number; y: number } {
     const elapsed = now - bullet.firedAt
-    const dist = BULLET_SPEED * elapsed
+    const speedMult = bullet.speed ?? 1
+    const dist = BULLET_SPEED * speedMult * elapsed
     return {
         x: bullet.startX + bullet.dirX * dist,
         y: bullet.startY + bullet.dirY * dist,
