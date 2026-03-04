@@ -43,7 +43,7 @@ interface TypistViewProps {
     starHp: number
     maxStarHp: number
     typistFireCount: number
-    selectedTechnique?: TechniqueId | null
+    selectedNormalAttack?: TechniqueId | null
 }
 
 function TypingDisplay({ line, charIndex }: { line: DialogueLine; charIndex: number }) {
@@ -80,7 +80,7 @@ function TypingDisplay({ line, charIndex }: { line: DialogueLine; charIndex: num
     )
 }
 
-export function TypistView({ dialogue, score, starHp, maxStarHp, typistFireCount, selectedTechnique }: TypistViewProps) {
+export function TypistView({ dialogue, score, starHp, maxStarHp, typistFireCount, selectedNormalAttack }: TypistViewProps) {
     const inputRef = useRef<HTMLInputElement>(null)
     const prevStarHpRef = useRef(maxStarHp)
     const prevTypistFireCountRef = useRef(typistFireCount)
@@ -100,7 +100,10 @@ export function TypistView({ dialogue, score, starHp, maxStarHp, typistFireCount
         prevStarHpRef.current = starHp
     }, [starHp, maxStarHp])
 
-    const bulletColor = selectedTechnique && selectedTechnique in TECHNIQUES ? TECHNIQUES[selectedTechnique].color : DEFAULT_BULLET_COLOR
+    const bulletColor =
+        selectedNormalAttack && selectedNormalAttack in TECHNIQUES
+            ? TECHNIQUES[selectedNormalAttack].color
+            : DEFAULT_BULLET_COLOR
 
     useEffect(() => {
         if (typistFireCount > prevTypistFireCountRef.current) {

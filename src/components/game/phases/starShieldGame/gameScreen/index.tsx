@@ -3,6 +3,7 @@
 import { useStarShield } from '@/hooks/useStarShield'
 import type { Difficulty, GameResult, GameStats } from '@/types/starShieldGame'
 import type { TechniqueId } from '@/constants/starShieldGame/techniques'
+import type { SpecialAttackChoice } from '@/utils/starShieldGame'
 import { ASTEROID_HP, STAR_HP } from '@/constants/starShieldGame/gameConfig'
 import { ShooterView } from '../playing/shooterView'
 import { TypistView } from '../playing/typistView'
@@ -15,7 +16,9 @@ interface GameScreenProps {
     currentUserId: string
     onGameEnd: (result: GameResult, stats: GameStats) => void
     playersTotalPoints: number
-    typistTechnique?: TechniqueId | null
+    typistNormalAttack?: TechniqueId | null
+    typistSpecialAttack?: SpecialAttackChoice
+    autoAimNearest?: boolean
 }
 
 function TimerDisplay({ timer }: { timer: number }) {
@@ -29,10 +32,10 @@ function TimerDisplay({ timer }: { timer: number }) {
     )
 }
 
-export function GameScreen({ matchId, startedAt, shooterId, difficulty, currentUserId, onGameEnd, playersTotalPoints, typistTechnique }: GameScreenProps) {
+export function GameScreen({ matchId, startedAt, shooterId, difficulty, currentUserId, onGameEnd, playersTotalPoints, typistNormalAttack, typistSpecialAttack = 'spread', autoAimNearest = false }: GameScreenProps) {
     const isShooter = shooterId === currentUserId
-    const { asteroids, bullets, timer, score, starHp, aimRef, onMouseMove, autoAimNearest, setAutoAimNearest, dialogue, typistFireCount, contactExplosion, completeContactFail, chainHits, clearChainHits } =
-        useStarShield({ matchId, startedAt, isShooter, difficulty, currentUserId, onGameEnd, playersTotalPoints, selectedTechnique: typistTechnique })
+    const { asteroids, bullets, timer, score, starHp, aimRef, onMouseMove, dialogue, typistFireCount, contactExplosion, completeContactFail, chainHits, clearChainHits } =
+        useStarShield({ matchId, startedAt, isShooter, difficulty, currentUserId, onGameEnd, playersTotalPoints, selectedNormalAttack: typistNormalAttack, selectedSpecialAttack: typistSpecialAttack, autoAimNearest })
 
     return (
         <div className="relative min-h-screen overflow-hidden">
@@ -47,8 +50,6 @@ export function GameScreen({ matchId, startedAt, shooterId, difficulty, currentU
                     onContactExplosionComplete={completeContactFail}
                     chainHits={chainHits}
                     onChainHitsComplete={clearChainHits}
-                    autoAimNearest={autoAimNearest}
-                    onToggleAutoAim={() => setAutoAimNearest((prev) => !prev)}
                 />
             ) : (
                 <TypistView
@@ -57,7 +58,7 @@ export function GameScreen({ matchId, startedAt, shooterId, difficulty, currentU
                     starHp={starHp}
                     maxStarHp={STAR_HP[difficulty]}
                     typistFireCount={typistFireCount}
-                    selectedTechnique={typistTechnique}
+                    selectedNormalAttack={typistNormalAttack}
                 />
             )}
 

@@ -9,14 +9,18 @@ import { DinosaurWithBalls } from '@/components/game/common/starShield/dinosaurW
 import { AuroraGlow } from '@/components/game/common/starShield/auroraGlow'
 import { roleSelectionScreen } from './styles'
 import { COLORS, DIFFICULTIES, DIFFICULTY_META, ROLE_META, type Difficulty, type RoleChoice } from '@/constants/starShieldGame/constants'
-import { TECHNIQUES, TECHNIQUE_IDS, type TechniqueId } from '@/constants/starShieldGame/techniques'
+import { TECHNIQUES, type TechniqueId } from '@/constants/starShieldGame/techniques'
+import { getDebugNormalAttacks } from '@/utils/starShieldGame'
+import type { SpecialAttackChoice } from '@/utils/starShieldGame'
 
 interface RoleSelectionScreenProps {
     room: RoomWithUsersAndReadyStatus
     roleChoices: Record<string, RoleChoice>
     onRoleChange: (role: RoleChoice) => void
-    techniqueChoices: Record<string, TechniqueId | null>
-    onTechniqueChange: (technique: TechniqueId | null) => void
+    normalAttackChoices: Record<string, TechniqueId | null>
+    onNormalAttackChange: (normal: TechniqueId | null) => void
+    specialAttackChoices: Record<string, SpecialAttackChoice>
+    onSpecialAttackChange: (special: SpecialAttackChoice) => void
     roleConflict: boolean
     canProceed: boolean
     onProceedToGame: () => void
@@ -26,14 +30,18 @@ interface RoleSelectionScreenProps {
     onDifficultyChange: (d: Difficulty) => void
     isHost: boolean
     isHellUnlocked: boolean
+    autoAimNearest?: boolean
+    onToggleAutoAim?: () => void
 }
 
 export function RoleSelectionScreen({
     room,
     roleChoices,
     onRoleChange,
-    techniqueChoices,
-    onTechniqueChange,
+    normalAttackChoices,
+    onNormalAttackChange,
+    specialAttackChoices,
+    onSpecialAttackChange,
     canProceed,
     onProceedToGame,
     onBack,
@@ -42,10 +50,13 @@ export function RoleSelectionScreen({
     onDifficultyChange,
     isHost,
     isHellUnlocked,
+    autoAimNearest = false,
+    onToggleAutoAim,
 }: RoleSelectionScreenProps) {
     const myRole = roleChoices[currentUserId]
     const activeDiffMeta = DIFFICULTY_META[difficulty]
     const styles = roleSelectionScreen()
+    const debugNormalAttacks = getDebugNormalAttacks()
 
     return (
         <div className="relative min-h-screen overflow-hidden flex flex-col items-center justify-center">
@@ -152,28 +163,32 @@ export function RoleSelectionScreen({
                     transition={{ duration: 0.5, delay: 0.18 }}
                     className={cn('rounded-2xl p-5 flex flex-col gap-3 bg-white/[0.03] border border-white/[0.08]', !isHost && 'opacity-70')}
                 >
-                    <p className={styles.difficultyCardTitle()}>わざ（ホスト・デバッグ用）</p>
+                    <p className={styles.difficultyCardTitle()}>[通常攻撃]（デバッグ）</p>
                     <div className="flex flex-wrap gap-2">
-                        <button
-                            onClick={() => isHost && onTechniqueChange(null)}
-                            disabled={!isHost}
-                            className={cn(
-                                'px-3 py-2 rounded-xl text-xs transition-all border',
-                                !techniqueChoices[room.createdBy]
-                                    ? 'bg-brand-500/20 border-brand-500/50 text-brand-300'
-                                    : 'bg-white/[0.02] border-white/10 text-white/50 hover:border-white/20',
-                                !isHost && 'cursor-default'
-                            )}
-                        >
-                            ふつう
-                        </button>
-                        {TECHNIQUE_IDS.map((tid) => {
+                        {debugNormalAttacks.map((tid) => {
+                            if (tid === null) {
+                                const isActive = normalAttackChoices[room.createdBy] === null
+                                return (
+                                    <button
+                                        key="normal"
+                                        onClick={() => isHost && onNormalAttackChange(null)}
+                                        disabled={!isHost}
+                                        className={cn(
+                                            'px-3 py-2 rounded-xl text-xs transition-all border',
+                                            isActive ? 'bg-brand-500/20 border-brand-500/50 text-brand-300' : 'bg-white/[0.02] border-white/10 text-white/50 hover:border-white/20',
+                                            !isHost && 'cursor-default'
+                                        )}
+                                    >
+                                        ふつう
+                                    </button>
+                                )
+                            }
                             const tech = TECHNIQUES[tid]
-                            const isActive = techniqueChoices[room.createdBy] === tid
+                            const isActive = normalAttackChoices[room.createdBy] === tid
                             return (
                                 <button
                                     key={tid}
-                                    onClick={() => isHost && onTechniqueChange(tid)}
+                                    onClick={() => isHost && onNormalAttackChange(tid)}
                                     disabled={!isHost}
                                     className={cn(
                                         'px-3 py-2 rounded-xl text-xs transition-all border flex items-center gap-1.5',
@@ -192,6 +207,68 @@ export function RoleSelectionScreen({
                         })}
                     </div>
                 </motion.div>
+
+                <motion.div
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 0.185 }}
+                    className={cn('rounded-2xl p-5 flex flex-col gap-3 bg-white/[0.03] border border-white/[0.08]', !isHost && 'opacity-70')}
+                >
+                    <p className={styles.difficultyCardTitle()}>[必殺技]（デバッグ）</p>
+                    <div className="flex flex-wrap gap-2">
+                        <button
+                            onClick={() => isHost && onSpecialAttackChange('spread')}
+                            disabled={!isHost}
+                            className={cn(
+                                'px-3 py-2 rounded-xl text-xs transition-all border',
+                                specialAttackChoices[room.createdBy] === 'spread'
+                                    ? 'bg-brand-500/20 border-brand-500/50 text-brand-300'
+                                    : 'bg-white/[0.02] border-white/10 text-white/50 hover:border-white/20',
+                                !isHost && 'cursor-default'
+                            )}
+                        >
+                            ふつう（広範囲弾）
+                        </button>
+                        <button
+                            onClick={() => isHost && onSpecialAttackChange('all_destruction')}
+                            disabled={!isHost}
+                            className={cn(
+                                'px-3 py-2 rounded-xl text-xs transition-all border flex items-center gap-1.5',
+                                specialAttackChoices[room.createdBy] === 'all_destruction'
+                                    ? 'border-red-500 bg-red-500/20 text-red-400'
+                                    : 'bg-white/[0.02] border-white/10 text-white/50 hover:border-white/20',
+                                !isHost && 'cursor-default'
+                            )}
+                        >
+                            <span className="w-2 h-2 rounded-full shrink-0 bg-red-500" />
+                            全部破壊
+                        </button>
+                    </div>
+                </motion.div>
+
+                {onToggleAutoAim && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 8 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.5, delay: 0.19 }}
+                        className={cn('rounded-2xl p-4 flex items-center gap-3 bg-white/[0.03] border border-white/[0.08]', !isHost && 'opacity-70')}
+                    >
+                        <label
+                            htmlFor="auto-aim-debug"
+                            className="flex items-center gap-2 cursor-pointer select-none"
+                        >
+                            <input
+                                id="auto-aim-debug"
+                                type="checkbox"
+                                checked={autoAimNearest}
+                                onChange={onToggleAutoAim}
+                                disabled={!isHost}
+                                className="w-3.5 h-3.5 rounded border-white/30 bg-white/5 accent-brand-500 disabled:cursor-default"
+                            />
+                            <span className="text-brand-500/60 text-xs">オートエイム（デバッグ）</span>
+                        </label>
+                    </motion.div>
+                )}
 
                 <motion.div
                     initial={{ opacity: 0, y: 8 }}

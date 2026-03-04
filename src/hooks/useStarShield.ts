@@ -35,8 +35,9 @@ import {
 } from '@/constants/starShieldGame/gameConfig'
 import { DIALOGUES, pickRandomDialogue } from '@/constants/starShieldGame/dialogues'
 import { TECHNIQUES, type TechniqueId } from '@/constants/starShieldGame/techniques'
+import type { SpecialAttackChoice } from '@/utils/starShieldGame'
 import type { Asteroid, Bullet, DialogueLine, Difficulty, GameResult, GameStats, GameStatePayload, GameEndPayload } from '@/types/starShieldGame'
-import { getBulletPosition, getAsteroidPosition, getRomaji } from '@/utils/starShieldGame'
+import { getBulletPosition, getAsteroidPosition, getRomaji, findNearestAsteroidPosition } from '@/utils/starShieldGame'
 
 // ============================================
 // Hook
@@ -51,8 +52,12 @@ interface UseStarShieldProps {
     onGameEnd: (result: GameResult, stats: GameStats) => void
     /** HELL 難易度時、両プレイヤーの合計 pt で隕石速度を調整（6000 - totalPt） */
     playersTotalPoints?: number
-    /** Typist が選択した技（役割選択画面で選択、demo なので全て選べる） */
-    selectedTechnique?: TechniqueId | null
+    /** Typist が選択した通常攻撃（1文字打鍵ごと） */
+    selectedNormalAttack?: TechniqueId | null
+    /** Typist が選択した必殺技（単語完了時） */
+    selectedSpecialAttack?: SpecialAttackChoice
+    /** デバッグ: 発射時に最も近い隕石を照準にする（準備画面で設定） */
+    autoAimNearest?: boolean
 }
 
 export function useStarShield({
@@ -62,7 +67,9 @@ export function useStarShield({
     difficulty,
     onGameEnd,
     playersTotalPoints = 0,
-    selectedTechnique = null,
+    selectedNormalAttack = null,
+    selectedSpecialAttack = 'spread',
+    autoAimNearest = false,
 }: UseStarShieldProps) {
     const supabase = useMemo(() => createClient(), [])
     const channelName = `star_shield_fire_${matchId}`
@@ -93,8 +100,7 @@ export function useStarShield({
     const fireCountRef = useRef(0)
     const starHpRef = useRef(maxStarHp)
     const aimRef = useRef({ x: 0.5, y: 0.5 }) // 正規化座標 0-1
-    const [autoAimNearest, setAutoAimNearest] = useState(false)
-    const autoAimNearestRef = useRef(false)
+    const autoAimNearestRef = useRef(autoAimNearest)
     const gameEndedRef = useRef(false)
     const contactPendingRef = useRef(false)
     const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null)
@@ -188,7 +194,7 @@ export function useStarShield({
         channelRef.current = channel
 
         channel
-            .on('broadcast', { event: 'fire' }, ({ payload }: { payload?: { special?: boolean; technique?: string } }) => {
+            .on('broadcast', { event: 'fire' }, ({ payload }: { payload?: { special?: boolean; technique?: string; specialAttack?: SpecialAttackChoice } }) => {
                 fireCountRef.current += 1
                 playVoiceRef.current('shooting')
                 if (isShooter) sendGameState()
@@ -197,22 +203,15 @@ export function useStarShield({
                 const now = Date.now()
 
                 if (autoAimNearestRef.current) {
-                    const asts = asteroidsRef.current.filter((a) => !a.destroyedAt)
-                    if (asts.length > 0) {
-                        const nearest = asts.reduce(
-                            (best, a) => {
-                                const pos = getAsteroidPosition(a, now)
-                                const d = Math.hypot(pos.x - DINO_X, pos.y - DINO_Y)
-                                return d < best.dist ? { ast: a, pos, dist: d } : best
-                            },
-                            { ast: asts[0], pos: getAsteroidPosition(asts[0], now), dist: Infinity }
-                        )
-                        aimRef.current = { x: nearest.pos.x, y: nearest.pos.y }
+                    const nearestPos = findNearestAsteroidPosition(asteroidsRef.current, DINO_X, DINO_Y, now)
+                    if (nearestPos) {
+                        aimRef.current = { x: nearestPos.x, y: nearestPos.y }
                     }
                 }
 
                 if (payload?.special) {
-                    if (difficulty === 'HELL') {
+                    const useAllDestruction = payload?.specialAttack === 'all_destruction'
+                    if (useAllDestruction) {
                         playVoiceRef.current('star-damage')
                         const asts = asteroidsRef.current
                         const toDestroy = asts.filter((a) => !a.destroyedAt)
@@ -694,8 +693,9 @@ export function useStarShield({
         const nextChar = charIndex + 1
         const isLastChar = nextChar >= romaji.length
 
-        const payload: { special: boolean; technique?: string } = { special: isLastChar }
-        payload.technique = selectedTechnique ?? 'blue'
+        const payload: { special: boolean; technique?: string; specialAttack?: SpecialAttackChoice } = { special: isLastChar }
+        if (selectedNormalAttack != null) payload.technique = selectedNormalAttack
+        if (isLastChar) payload.specialAttack = selectedSpecialAttack
         channelRef.current?.send({
             type: 'broadcast',
             event: 'fire',
@@ -709,7 +709,7 @@ export function useStarShield({
         } else {
             setCharIndex(nextChar)
         }
-    }, [currentLine, charIndex, selectedTechnique])
+    }, [currentLine, charIndex, selectedNormalAttack, selectedSpecialAttack])
 
     useEffect(() => {
         if (isShooter) return
@@ -734,8 +734,6 @@ export function useStarShield({
         starHp,
         aimRef,
         onMouseMove,
-        autoAimNearest,
-        setAutoAimNearest,
         dialogue: {
             line: currentLine ?? DIALOGUES[0],
             charIndex,

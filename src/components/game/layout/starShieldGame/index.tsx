@@ -9,6 +9,7 @@ import { RoomWithUsersAndReadyStatus } from '@/types'
 import type { UserRanking } from '@/types'
 import type { Difficulty, GameResult, GameStats } from '@/types/starShieldGame'
 import type { TechniqueId } from '@/constants/starShieldGame/techniques'
+import type { SpecialAttackChoice } from '@/utils/starShieldGame'
 import { TitleScreen } from '@/components/game/phases/starShieldGame/titleScreen'
 import { RoleSelectionScreen } from '@/components/game/phases/starShieldGame/roleSelectionScreen'
 import { GameScreen } from '@/components/game/phases/starShieldGame/gameScreen'
@@ -59,7 +60,9 @@ export function StarShieldGame({
     }, [room.users, room.createdBy])
 
     const [roleChoices, setRoleChoices] = useState<Record<string, RoleChoice>>(initialRoleChoices)
-    const [techniqueChoices, setTechniqueChoices] = useState<Record<string, TechniqueId | null>>({})
+    const [normalAttackChoices, setNormalAttackChoices] = useState<Record<string, TechniqueId | null>>({})
+    const [specialAttackChoices, setSpecialAttackChoices] = useState<Record<string, SpecialAttackChoice>>({})
+    const [autoAimNearest, setAutoAimNearest] = useState(false)
 
     // 2人揃ったときに未選択のユーザーに初期値（ホスト=Shooter、他=Typist）を補完
     useEffect(() => {
@@ -146,9 +149,10 @@ export function StarShieldGame({
                     setRoleChoices((prev) => ({ ...prev, [payload.userId]: payload.role }))
                 }
             })
-            .on('broadcast', { event: 'technique' }, ({ payload }: { payload: { userId: string; technique: TechniqueId | null } }) => {
+            .on('broadcast', { event: 'technique' }, ({ payload }: { payload: { userId: string; normal: TechniqueId | null; special: SpecialAttackChoice } }) => {
                 if (payload?.userId !== undefined) {
-                    setTechniqueChoices((prev) => ({ ...prev, [payload.userId]: payload.technique }))
+                    if (payload.normal !== undefined) setNormalAttackChoices((prev) => ({ ...prev, [payload.userId]: payload.normal }))
+                    if (payload.special !== undefined) setSpecialAttackChoices((prev) => ({ ...prev, [payload.userId]: payload.special }))
                 }
             })
             .on('broadcast', { event: 'goToRoleSelect' }, () => {
@@ -175,15 +179,25 @@ export function StarShieldGame({
         })
     }, [currentUserId])
 
-    // 技変更（Typist 用、broadcast で共有）
-    const handleTechniqueChange = useCallback((technique: TechniqueId | null) => {
-        setTechniqueChoices((prev) => ({ ...prev, [currentUserId]: technique }))
+    // 通常攻撃変更（Typist 用、broadcast で共有）
+    const handleNormalAttackChange = useCallback((normal: TechniqueId | null) => {
+        setNormalAttackChoices((prev) => ({ ...prev, [currentUserId]: normal }))
         lobbyChannelRef.current?.send({
             type: 'broadcast',
             event: 'technique',
-            payload: { userId: currentUserId, technique },
+            payload: { userId: currentUserId, normal, special: specialAttackChoices[currentUserId] ?? 'spread' },
         })
-    }, [currentUserId])
+    }, [currentUserId, specialAttackChoices])
+
+    // 必殺技変更（Typist 用、broadcast で共有）
+    const handleSpecialAttackChange = useCallback((special: SpecialAttackChoice) => {
+        setSpecialAttackChoices((prev) => ({ ...prev, [currentUserId]: special }))
+        lobbyChannelRef.current?.send({
+            type: 'broadcast',
+            event: 'technique',
+            payload: { userId: currentUserId, normal: normalAttackChoices[currentUserId] ?? null, special },
+        })
+    }, [currentUserId, normalAttackChoices])
 
     // 役職が被っているか（2人とも同じ役職を選んだ場合）
     const roleConflict = useMemo(() => {
@@ -345,8 +359,10 @@ export function StarShieldGame({
                     room={room}
                     roleChoices={roleChoices}
                     onRoleChange={handleRoleChange}
-                    techniqueChoices={techniqueChoices}
-                    onTechniqueChange={handleTechniqueChange}
+                    normalAttackChoices={normalAttackChoices}
+                    onNormalAttackChange={handleNormalAttackChange}
+                    specialAttackChoices={specialAttackChoices}
+                    onSpecialAttackChange={handleSpecialAttackChange}
                     roleConflict={roleConflict}
                     canProceed={!roleConflict}
                     onProceedToGame={handleProceedToGame}
@@ -356,6 +372,8 @@ export function StarShieldGame({
                     onDifficultyChange={handleDifficultyChange}
                     isHost={isHost}
                     isHellUnlocked={hellUnlocked}
+                    autoAimNearest={autoAimNearest}
+                    onToggleAutoAim={() => setAutoAimNearest((prev) => !prev)}
                 />
             )}
             {phase === 'PLAYING' && matchId && startedAt && shooterId && (
@@ -367,7 +385,9 @@ export function StarShieldGame({
                     currentUserId={currentUserId}
                     onGameEnd={handleGameEnd}
                     playersTotalPoints={room.users.reduce((sum, u) => sum + (initialRankings.find((r) => r.userId === u.userId)?.points ?? 0), 0)}
-                    typistTechnique={techniqueChoices[room.createdBy] ?? null}
+                    typistNormalAttack={normalAttackChoices[room.users.find((u) => u.userId !== shooterId)?.userId ?? ''] ?? null}
+                    typistSpecialAttack={specialAttackChoices[room.users.find((u) => u.userId !== shooterId)?.userId ?? ''] ?? 'spread'}
+                    autoAimNearest={autoAimNearest}
                 />
             )}
             {phase === 'RESULT' && gameResult && gameStats && (
