@@ -35,7 +35,7 @@ import {
 } from '@/constants/starShieldGame/gameConfig'
 import { DIALOGUES, pickRandomDialogue } from '@/constants/starShieldGame/dialogues'
 import type { Asteroid, Bullet, DialogueLine, Difficulty, GameResult, GameStats, GameStatePayload, GameEndPayload } from '@/types/starShieldGame'
-import { getBulletPosition, getAsteroidPosition, getRomaji } from '@/utils/starShieldGame/starShieldUtils'
+import { getBulletPosition, getAsteroidPosition, getRomaji } from '@/utils/starShieldGame'
 
 // ============================================
 // Hook

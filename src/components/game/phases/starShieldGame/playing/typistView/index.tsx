@@ -4,10 +4,10 @@ import { useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
 import { AnimatePresence, motion } from 'framer-motion'
 import type { DialogueLine } from '@/constants/starShieldGame/dialogues'
-import { getRomaji } from '@/utils/starShieldGame/starShieldUtils'
+import { getRomaji } from '@/utils/starShieldGame'
 import { StarVisual } from '@/components/game/common/starShield/starVisual'
 import { AuroraGlow } from '@/components/game/common/starShield/auroraGlow'
-import { typistView } from './typistView.styles'
+import { typistView } from './styles'
 import { ICONS, BULLET_COLOR, AURORA_GRADIENT_TYPIST } from '@/constants/starShieldGame/constants'
 
 const TYPIST_STAR_POSITION = {

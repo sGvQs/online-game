@@ -7,7 +7,7 @@ import { BattlePhase } from '@/components/game/phases/nullHandGame/battlePhase'
 import { ResultPhase } from '@/components/game/phases/nullHandGame/resultPhase'
 import { HandType } from '@/types'
 import { nullHandDemo } from './styles'
-import { judgeHand } from '@/utils/nullHandGame/utils'
+import { judgeHand } from '@/utils/nullHandGame'
 import type { JankenEventWithGuests, HostStats, MatchScoreWithUser, RoomUserWithUser } from '@/types'
 
 // 開発者の手の組み合わせ（3種類からランダムに選ぶ）

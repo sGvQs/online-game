@@ -3,9 +3,9 @@
 import Image from 'next/image'
 import { motion } from 'framer-motion'
 import type { GameResult, GameStats } from '@/types/starShieldGame'
-import { ProtectedStar } from './playing/protectedStar'
+import { ProtectedStar } from '../playing/protectedStar'
 import { AuroraGlow } from '@/components/game/common/starShield/auroraGlow'
-import { resultScreen } from './resultScreen.styles'
+import { resultScreen } from './styles'
 import { ICONS, DIFFICULTY_META, type Difficulty } from '@/constants/starShieldGame/constants'
 
 interface ResultScreenProps {

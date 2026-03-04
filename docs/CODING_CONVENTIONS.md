@@ -2,6 +2,7 @@
 
 ## ファイル・ディレクトリ名
 
+- **画面コンポーネントは index.tsx と styles.ts**: 画面に関するファイルは、`index.tsx`（コンポーネント）と `styles.ts`（スタイル）に統一する。ユニーク性はディレクトリ名で保つ（例: `currentScores/index.tsx`, `currentScores/styles.ts`）
 - **先頭は小文字**: ファイル名・ディレクトリ名は camelCase とし、先頭を小文字にする
 - 例: `button.tsx`, `gameScreen.tsx`, `starShieldGame/`, `nullHandGame/`, `hand3D/`（common 内）
 - 例外: `README.md` 等の慣例的に大文字のものはそのまま

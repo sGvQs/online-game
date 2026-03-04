@@ -4,10 +4,10 @@ import { useEffect, useRef, useCallback } from 'react'
 import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
 import type { Asteroid, Bullet } from '@/types/starShieldGame'
-import { getAsteroidPosition, getBulletPosition } from '@/utils/starShieldGame/starShieldUtils'
-import { shooterView } from './shooterView.styles'
+import { getAsteroidPosition, getBulletPosition } from '@/utils/starShieldGame'
+import { shooterView } from './styles'
 import { BULLET_RADIUS, DINO_X, DINO_Y } from '@/constants/starShieldGame/gameConfig'
-import { ProtectedStar } from './protectedStar'
+import { ProtectedStar } from '../protectedStar'
 import { ICONS } from '@/constants/starShieldGame/constants'
 
 interface ShooterViewProps {

@@ -5,10 +5,10 @@ import Image from 'next/image'
 import { RoomWithUsersAndReadyStatus, RoomUserWithReadyStatus } from '@/types'
 import type { UserRanking } from '@/types'
 import { cn } from '@/lib/utils'
-import { ProtectedStar } from './playing/protectedStar'
+import { ProtectedStar } from '../playing/protectedStar'
 import { DinosaurWithBalls } from '@/components/game/common/starShield/dinosaurWithBalls'
 import { AuroraGlow } from '@/components/game/common/starShield/auroraGlow'
-import { titleScreen } from './titleScreen.styles'
+import { titleScreen } from './styles'
 import { ICONS } from '@/constants/starShieldGame/constants'
 
 interface TitleScreenProps {

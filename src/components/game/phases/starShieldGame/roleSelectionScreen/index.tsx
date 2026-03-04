@@ -4,10 +4,10 @@ import Image from 'next/image'
 import { motion } from 'framer-motion'
 import { RoomWithUsersAndReadyStatus, RoomUserWithReadyStatus } from '@/types'
 import { cn } from '@/lib/utils'
-import { ProtectedStar } from './playing/protectedStar'
+import { ProtectedStar } from '../playing/protectedStar'
 import { DinosaurWithBalls } from '@/components/game/common/starShield/dinosaurWithBalls'
 import { AuroraGlow } from '@/components/game/common/starShield/auroraGlow'
-import { roleSelectionScreen } from './roleSelectionScreen.styles'
+import { roleSelectionScreen } from './styles'
 import { COLORS, DIFFICULTIES, DIFFICULTY_META, ROLE_META, type Difficulty, type RoleChoice } from '@/constants/starShieldGame/constants'
 
 interface RoleSelectionScreenProps {

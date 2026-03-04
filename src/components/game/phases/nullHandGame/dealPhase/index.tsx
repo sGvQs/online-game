@@ -1,7 +1,7 @@
 import { JankenEventWithGuests, HandType, MatchScoreWithUser } from '@/types'
 import { Hand3D } from '@/components/game/common/nullHand/hand3D'
 import { dealPhase } from './styles'
-import { getHandDisplayWithEmoji } from '@/utils/nullHandGame/utils'
+import { getHandDisplayWithEmoji } from '@/utils/nullHandGame'
 import { PhaseHeader } from '@/components/game/common/nullHand/phaseHeader'
 import { CurrentScores } from '@/components/game/common/nullHand/currentScores'
 import { RewardSystem } from '@/components/game/common/nullHand/rewardSystem'

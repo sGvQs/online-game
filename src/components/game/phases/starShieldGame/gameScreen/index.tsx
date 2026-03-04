@@ -3,8 +3,8 @@
 import { useStarShield } from '@/hooks/useStarShield'
 import type { Difficulty, GameResult, GameStats } from '@/types/starShieldGame'
 import { ASTEROID_HP, STAR_HP } from '@/constants/starShieldGame/gameConfig'
-import { ShooterView } from './playing/shooterView'
-import { TypistView } from './playing/typistView'
+import { ShooterView } from '../playing/shooterView'
+import { TypistView } from '../playing/typistView'
 
 interface GameScreenProps {
     matchId: string
