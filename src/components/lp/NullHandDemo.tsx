@@ -6,7 +6,7 @@ import { ChoicePhase } from '@/components/game/phases/nullHandGame/choicePhase'
 import { BattlePhase } from '@/components/game/phases/nullHandGame/battlePhase'
 import { ResultPhase } from '@/components/game/phases/nullHandGame/resultPhase'
 import { HandType } from '@/types'
-import { nullHandGame } from '@/components/game/nullHandGame/styles'
+import { nullHandGame } from '@/components/game/layout/nullHandGame/styles'
 import { judgeHand } from '@/utils/nullHandGame/utils'
 import type { JankenEventWithGuests, HostStats, MatchScoreWithUser, RoomUserWithUser } from '@/types'
 

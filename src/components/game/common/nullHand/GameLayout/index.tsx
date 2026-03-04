@@ -1,5 +1,5 @@
 import { ReactNode } from 'react'
-import { nullHandGame } from '@/components/game/nullHandGame/styles'
+import { nullHandGame } from '@/components/game/layout/nullHandGame/styles'
 import { JankenPhase } from '@/types'
 import { motion } from 'framer-motion'
 

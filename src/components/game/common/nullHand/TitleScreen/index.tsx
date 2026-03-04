@@ -1,13 +1,13 @@
 import { RoomWithUsersAndReadyStatus, UserRanking, HandType, RoomUserWithReadyStatus } from '@/types'
 import { motion } from 'framer-motion'
-import { PlayerFaceIcon } from '@/components/game/nullHandPlayerFaceIcon'
+import { PlayerFaceIcon } from '@/components/game/common/nullHand/PlayerFaceIcon'
 import { useState } from 'react'
-import { nullHandGame } from '@/components/game/nullHandGame/styles'
-import { Hand3D } from '@/components/game/nullHandHand3D'
+import { nullHandGame } from '@/components/game/layout/nullHandGame/styles'
+import { Hand3D } from '@/components/game/common/nullHand/Hand3D'
 import { cn } from '@/lib/utils'
-import { NullHandLogo } from '@/components/game/nullHandNullHandLogo'
+import { NullHandLogo } from '@/components/game/common/nullHand/NullHandLogo'
 import { useSE } from '@/hooks/useSE'
-import { RewardSystem } from '@/components/game/nullHandRewardSystem'
+import { RewardSystem } from '@/components/game/common/nullHand/RewardSystem'
 import { NEON_PALETTE } from '@/constants/nullHandGame'
 
 interface TitleScreenProps {

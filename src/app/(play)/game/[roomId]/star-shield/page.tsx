@@ -3,7 +3,7 @@ import { getCurrentUser } from '@/server/actions'
 import { getRoomWithReadyStatus } from '@/server/actions/room'
 import { getNullHandRankings } from '@/server/actions/game/rankingActions'
 import { RoomUserWithReadyStatus } from '@/types'
-import { StarShieldGame } from '@/components/game/starShieldGame'
+import { StarShieldGame } from '@/components/game/layout/starShieldGame'
 
 export default async function StarShieldPage({ params }: { params: Promise<{ roomId: string }> }) {
     const currentUser = await getCurrentUser()

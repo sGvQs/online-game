@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { HandType } from '@/types'
-import { nullHandGame } from '@/components/game/nullHandGame/styles'
-import { NullHandLogo } from '@/components/game/nullHandNullHandLogo'
+import { nullHandGame } from '@/components/game/layout/nullHandGame/styles'
+import { NullHandLogo } from '@/components/game/common/nullHand/NullHandLogo'
 import { useSE } from '@/hooks/useSE'
 import { NEON_PALETTE } from '@/constants/nullHandGame'
 

@@ -1,6 +1,6 @@
 import { HandType } from '@/types'
-import { Hand3D } from '@/components/game/nullHandHand3D'
-import { nullHandGame } from '@/components/game/nullHandGame/styles'
+import { Hand3D } from '@/components/game/common/nullHand/Hand3D'
+import { nullHandGame } from '@/components/game/layout/nullHandGame/styles'
 
 interface NullHandLogoProps {
     titleHand: HandType

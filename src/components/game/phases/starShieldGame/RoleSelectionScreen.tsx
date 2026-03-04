@@ -5,8 +5,8 @@ import { motion } from 'framer-motion'
 import { RoomWithUsersAndReadyStatus, RoomUserWithReadyStatus } from '@/types'
 import { cn } from '@/lib/utils'
 import { ProtectedStar } from './playing/protectedStar'
-import { DinosaurWithBalls } from '@/components/game/starShieldDinosaurWithBalls'
-import { AuroraGlow } from '@/components/game/starShieldAuroraGlow'
+import { DinosaurWithBalls } from '@/components/game/common/starShield/DinosaurWithBalls'
+import { AuroraGlow } from '@/components/game/common/starShield/AuroraGlow'
 import {
     FONTS,
     COLORS,

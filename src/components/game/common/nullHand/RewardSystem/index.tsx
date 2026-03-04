@@ -1,4 +1,4 @@
-import { SideHeader } from '@/components/game/nullHandSideHeader'
+import { SideHeader } from '@/components/game/common/nullHand/SideHeader'
 import { sideCard } from '@/components/game/phases/nullHandGame/phaseCard.styles'
 import { cn } from '@/lib/utils'
 import { motion } from 'framer-motion'

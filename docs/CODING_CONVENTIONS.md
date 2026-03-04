@@ -3,13 +3,18 @@
 ## ファイル・ディレクトリ名
 
 - **先頭は小文字**: ファイル名・ディレクトリ名は camelCase とし、先頭を小文字にする
-- 例: `button.tsx`, `gameScreen.tsx`, `starShieldGame/`, `nullHandGame/`
+- 例: `button.tsx`, `gameScreen.tsx`, `starShieldGame/`, `nullHandGame/`, `Hand3D/`（common 内）
 - 例外: `README.md` 等の慣例的に大文字のものはそのまま
 
 ## ディレクトリ構造
 
-- **phases**: ゲームフェーズは `components/game/phases/{gameName}/` に集約
-- **shared / common の廃止**: 共通コンポーネントは親ディレクトリにフラット配置
+game/ 直下は役割ディレクトリのみ:
+
+- **layout/** : app から呼ばれる orchestrator。hooks と連携し phase を切り替える。配置: `layout/{gameName}/`
+- **phases/** : 各 phase の UI。配置: `phases/{gameName}/`
+- **common/** : 上記以外（ゲーム固有の共有コンポーネント）
+  - `common/{gameName}/`: ゲーム固有の共有UI
+  - `common/errorHunter/`: Win95 風 UI（win95Button, win95Dialog 等）と ProgressPanel
 - **Prisma 型**: `types/prisma/` に集約（game, room, user）
 
 ## インポート
@@ -23,9 +28,10 @@
 
 ## コンポーネント配置
 
-- ゲームコンポーネントは win95Button と同様に、`components/game/{gamePrefix}{ComponentName}/` 形式で game/ 直下に配置する
-- ゲーム本体フォルダ（例: nullHandGame）には `index.tsx` と `styles.ts` のみを置き、そのゲーム専用の子コンポーネントは game/ 直下の兄弟フォルダとして外出しする
-- 例: `nullHandGame/`（index.tsx, styles.ts）, `nullHandHand3D/`, `nullHandCurrentScores/` など
+- **layout**: app から呼ばれる orchestrator は `game/layout/{gameName}/` に配置
+- **phases**: フェーズ画面は `game/phases/{gameName}/` に集約
+- **common**: 共有コンポーネントは `game/common/` に配置
+  - ゲーム固有: `common/{gameName}/`（例: `common/nullHand/Hand3D/`, `common/starShield/StarVisual/`, `common/errorHunter/win95Dialog/`）
 
 ## 定数とユーティリティの配置
 

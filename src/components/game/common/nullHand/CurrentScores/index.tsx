@@ -1,8 +1,8 @@
 import { MatchScoreWithUser } from '@/types'
-import { SideHeader } from '@/components/game/nullHandSideHeader'
+import { SideHeader } from '@/components/game/common/nullHand/SideHeader'
 import { sideCard } from '@/components/game/phases/nullHandGame/phaseCard.styles'
 import { cn } from '@/lib/utils'
-import { PlayerFaceIcon } from '@/components/game/nullHandPlayerFaceIcon'
+import { PlayerFaceIcon } from '@/components/game/common/nullHand/PlayerFaceIcon'
 
 interface CurrentScoresProps {
     currentScores: MatchScoreWithUser[]

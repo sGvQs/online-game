@@ -5,8 +5,8 @@ import Image from 'next/image'
 import { AnimatePresence, motion } from 'framer-motion'
 import type { DialogueLine } from '@/constants/starShieldGame/dialogues'
 import { getRomaji } from '@/utils/starShieldGame/starShieldUtils'
-import { StarVisual } from '@/components/game/starShieldStarVisual'
-import { AuroraGlow } from '@/components/game/starShieldAuroraGlow'
+import { StarVisual } from '@/components/game/common/starShield/StarVisual'
+import { AuroraGlow } from '@/components/game/common/starShield/AuroraGlow'
 import { FONTS, COLORS, ICONS, BULLET_COLOR, AURORA_GRADIENT_TYPIST } from '@/constants/starShieldGame/constants'
 
 const TYPIST_STAR_POSITION = {
