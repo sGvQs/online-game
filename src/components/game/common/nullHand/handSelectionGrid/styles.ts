@@ -8,7 +8,7 @@ export const handSelectionGrid = tv({
             'transition-all duration-300',
             'bg-black/40 border-2 backdrop-blur-sm',
         ],
-        innerPad: 'absolute inset-0 p-4',
+        innerPad: 'absolute inset-0 p-4 flex items-center justify-center',
         label: [
             'absolute bottom-4 inset-x-0 text-center',
             'font-black text-xl tracking-[0.2em] transition-colors',

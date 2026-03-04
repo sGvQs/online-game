@@ -153,7 +153,7 @@ export function ResultScreen({ result, stats, difficulty, onBackToTitle }: Resul
                         animate={{ y: 0, opacity: 1 }}
                         transition={{ delay: 0.15, duration: 0.6, ease: 'easeOut' }}
                         style={{
-                            ['--result-title-gradient' as string]: config.gradient,
+                            ['--result-title-color' as string]: config.color,
                             ['--result-title-glow' as string]: config.glowColor,
                         }}
                     >

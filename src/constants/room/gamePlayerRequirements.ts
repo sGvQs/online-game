@@ -1,7 +1,8 @@
 /** ゲームタイプごとのプレイ可能人数 */
 export const GAME_PLAYER_REQUIREMENTS = {
     'error-hunter': { min: 2, max: 8 },
-    'null-hand': { min: 3, max: 8 },
+    // TODO: 一時的に2人でもプレイ可能に。元: min: 3
+    'null-hand': { min: 2, max: 8 },
     'star-shield': { min: 2, max: 2 },
 } as const
 
