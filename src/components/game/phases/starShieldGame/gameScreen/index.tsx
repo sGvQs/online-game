@@ -31,7 +31,7 @@ function TimerDisplay({ timer }: { timer: number }) {
 
 export function GameScreen({ matchId, startedAt, shooterId, difficulty, currentUserId, onGameEnd, playersTotalPoints, typistTechnique }: GameScreenProps) {
     const isShooter = shooterId === currentUserId
-    const { asteroids, bullets, timer, score, starHp, aimRef, onMouseMove, dialogue, typistFireCount, contactExplosion, completeContactFail, chainHits, clearChainHits } =
+    const { asteroids, bullets, timer, score, starHp, aimRef, onMouseMove, autoAimNearest, setAutoAimNearest, dialogue, typistFireCount, contactExplosion, completeContactFail, chainHits, clearChainHits } =
         useStarShield({ matchId, startedAt, isShooter, difficulty, currentUserId, onGameEnd, playersTotalPoints, selectedTechnique: typistTechnique })
 
     return (
@@ -47,6 +47,8 @@ export function GameScreen({ matchId, startedAt, shooterId, difficulty, currentU
                     onContactExplosionComplete={completeContactFail}
                     chainHits={chainHits}
                     onChainHitsComplete={clearChainHits}
+                    autoAimNearest={autoAimNearest}
+                    onToggleAutoAim={() => setAutoAimNearest((prev) => !prev)}
                 />
             ) : (
                 <TypistView

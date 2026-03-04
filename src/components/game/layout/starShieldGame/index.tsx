@@ -367,10 +367,7 @@ export function StarShieldGame({
                     currentUserId={currentUserId}
                     onGameEnd={handleGameEnd}
                     playersTotalPoints={room.users.reduce((sum, u) => sum + (initialRankings.find((r) => r.userId === u.userId)?.points ?? 0), 0)}
-                    typistTechnique={((): TechniqueId | null => {
-                        const typist = room.users.find((u) => roleChoices[u.userId] === 'TYPIST')
-                        return typist ? (techniqueChoices[typist.userId] ?? null) : null
-                    })()}
+                    typistTechnique={techniqueChoices[room.createdBy] ?? null}
                 />
             )}
             {phase === 'RESULT' && gameResult && gameStats && (

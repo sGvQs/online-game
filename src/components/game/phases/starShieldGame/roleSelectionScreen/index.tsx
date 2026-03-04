@@ -150,31 +150,35 @@ export function RoleSelectionScreen({
                     initial={{ opacity: 0, y: 8 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: 0.18 }}
-                    className="rounded-2xl p-5 flex flex-col gap-3 bg-white/[0.03] border border-white/[0.08]"
+                    className={cn('rounded-2xl p-5 flex flex-col gap-3 bg-white/[0.03] border border-white/[0.08]', !isHost && 'opacity-70')}
                 >
-                    <p className={styles.difficultyCardTitle()}>わざ（タイピストのみ）</p>
+                    <p className={styles.difficultyCardTitle()}>わざ（ホスト・デバッグ用）</p>
                     <div className="flex flex-wrap gap-2">
                         <button
-                            onClick={() => onTechniqueChange(null)}
+                            onClick={() => isHost && onTechniqueChange(null)}
+                            disabled={!isHost}
                             className={cn(
                                 'px-3 py-2 rounded-xl text-xs transition-all border',
-                                !techniqueChoices[currentUserId]
+                                !techniqueChoices[room.createdBy]
                                     ? 'bg-brand-500/20 border-brand-500/50 text-brand-300'
-                                    : 'bg-white/[0.02] border-white/10 text-white/50 hover:border-white/20'
+                                    : 'bg-white/[0.02] border-white/10 text-white/50 hover:border-white/20',
+                                !isHost && 'cursor-default'
                             )}
                         >
                             ふつう
                         </button>
                         {TECHNIQUE_IDS.map((tid) => {
                             const tech = TECHNIQUES[tid]
-                            const isActive = techniqueChoices[currentUserId] === tid
+                            const isActive = techniqueChoices[room.createdBy] === tid
                             return (
                                 <button
                                     key={tid}
-                                    onClick={() => onTechniqueChange(tid)}
+                                    onClick={() => isHost && onTechniqueChange(tid)}
+                                    disabled={!isHost}
                                     className={cn(
                                         'px-3 py-2 rounded-xl text-xs transition-all border flex items-center gap-1.5',
-                                        isActive ? 'border-current' : 'bg-white/[0.02] border-white/10 text-white/50 hover:border-white/20'
+                                        isActive ? 'border-current' : 'bg-white/[0.02] border-white/10 text-white/50 hover:border-white/20',
+                                        !isHost && 'cursor-default'
                                     )}
                                     style={isActive ? { color: tech.color, borderColor: tech.color, backgroundColor: `${tech.color}20` } : undefined}
                                 >

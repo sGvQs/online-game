@@ -93,6 +93,8 @@ export function useStarShield({
     const fireCountRef = useRef(0)
     const starHpRef = useRef(maxStarHp)
     const aimRef = useRef({ x: 0.5, y: 0.5 }) // 正規化座標 0-1
+    const [autoAimNearest, setAutoAimNearest] = useState(false)
+    const autoAimNearestRef = useRef(false)
     const gameEndedRef = useRef(false)
     const contactPendingRef = useRef(false)
     const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null)
@@ -103,6 +105,10 @@ export function useStarShield({
     useEffect(() => {
         starHpRef.current = starHp
     }, [starHp])
+
+    useEffect(() => {
+        autoAimNearestRef.current = autoAimNearest
+    }, [autoAimNearest])
 
     /** Shooter: game_state を broadcast（スロットリング付き） */
     const sendGameState = useCallback(() => {
@@ -189,6 +195,21 @@ export function useStarShield({
                 if (!isShooter) return
 
                 const now = Date.now()
+
+                if (autoAimNearestRef.current) {
+                    const asts = asteroidsRef.current.filter((a) => !a.destroyedAt)
+                    if (asts.length > 0) {
+                        const nearest = asts.reduce(
+                            (best, a) => {
+                                const pos = getAsteroidPosition(a, now)
+                                const d = Math.hypot(pos.x - DINO_X, pos.y - DINO_Y)
+                                return d < best.dist ? { ast: a, pos, dist: d } : best
+                            },
+                            { ast: asts[0], pos: getAsteroidPosition(asts[0], now), dist: Infinity }
+                        )
+                        aimRef.current = { x: nearest.pos.x, y: nearest.pos.y }
+                    }
+                }
 
                 if (payload?.special) {
                     if (difficulty === 'HELL') {
@@ -713,6 +734,8 @@ export function useStarShield({
         starHp,
         aimRef,
         onMouseMove,
+        autoAimNearest,
+        setAutoAimNearest,
         dialogue: {
             line: currentLine ?? DIALOGUES[0],
             charIndex,

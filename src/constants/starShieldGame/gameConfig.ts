@@ -21,7 +21,7 @@ export const BULLET_SPAWN_OFFSET_Y = 0.1
 export const BULLET_ORIGIN_Y_OFFSET = -0.025
 
 export const BULLET_SPEED = 0.0008 // 正規化座標/ms（速すぎないように）
-export const BULLET_RADIUS = 0.1
+export const BULLET_RADIUS = 0.008
 export const BULLET_MAX_AGE_MS = 3000
 
 // ========== 隕石 ==========

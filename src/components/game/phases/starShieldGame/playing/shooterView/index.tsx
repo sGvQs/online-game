@@ -25,6 +25,8 @@ interface ShooterViewProps {
         color: string
     } | null
     onChainHitsComplete?: () => void
+    autoAimNearest?: boolean
+    onToggleAutoAim?: () => void
 }
 
 function AsteroidCircle({ asteroid, maxHp }: { asteroid: Asteroid; maxHp: number }) {
@@ -302,6 +304,8 @@ export function ShooterView({
     onContactExplosionComplete,
     chainHits,
     onChainHitsComplete,
+    autoAimNearest = false,
+    onToggleAutoAim,
 }: ShooterViewProps) {
     const activeAsteroids = asteroids.filter((a) => !a.destroyedAt && a.id !== contactExplosion?.asteroidId)
     const destroyedAsteroids = asteroids.filter((a) => !!a.destroyedAt)
@@ -335,6 +339,21 @@ export function ShooterView({
             <div className="absolute bottom-8 left-1/2 -translate-x-1/2 text-brand-500/50 text-xs tracking-widest">
                 SHOOTER MODE — aim with mouse, fire when typist types
             </div>
+            {onToggleAutoAim && (
+                <label
+                    htmlFor="auto-aim-debug"
+                    className="absolute bottom-8 left-6 z-20 flex items-center gap-2 pointer-events-auto cursor-pointer select-none"
+                >
+                    <input
+                        id="auto-aim-debug"
+                        type="checkbox"
+                        checked={autoAimNearest}
+                        onChange={onToggleAutoAim}
+                        className="w-3.5 h-3.5 rounded border-white/30 bg-white/5 accent-brand-500"
+                    />
+                    <span className="text-brand-500/60 text-xs">オートエイム（デバッグ）</span>
+                </label>
+            )}
         </div>
     )
 }
