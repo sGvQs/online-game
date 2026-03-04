@@ -1,4 +1,4 @@
-import { HandType } from '@/shared/types'
+import { HandType } from '@/types'
 
 // ヘルパー関数: HandTypeを絵文字付きカタカナ表記に変換
 export const getHandDisplayWithEmoji = (hand: HandType): string => {

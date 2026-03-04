@@ -3,7 +3,7 @@
 import { useNullHand } from '@/hooks/useNullHand'
 import { useGameRoom } from '@/hooks/useGameRoom'
 import { returnToRoom } from '@/server/actions/room'
-import { RoomWithUsersAndReadyStatus, HandType, HostChoice, UserRanking } from '@/shared/types'
+import { RoomWithUsersAndReadyStatus, HandType, HostChoice, UserRanking } from '@/types'
 import { useState, useEffect } from 'react'
 import { AnimatePresence } from 'framer-motion'
 import { TitleScreen } from './TitleScreen'

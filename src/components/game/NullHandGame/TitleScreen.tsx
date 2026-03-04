@@ -1,4 +1,4 @@
-import { RoomWithUsersAndReadyStatus, UserRanking, HandType, RoomUserWithReadyStatus } from '@/shared/types'
+import { RoomWithUsersAndReadyStatus, UserRanking, HandType, RoomUserWithReadyStatus } from '@/types'
 import { motion } from 'framer-motion'
 import { PlayerFaceIcon } from './common/PlayerFaceIcon'
 import { useState } from 'react'

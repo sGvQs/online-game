@@ -1,4 +1,4 @@
-import { MatchScoreWithUser, UserRanking, HandType } from '@/shared/types'
+import { MatchScoreWithUser, UserRanking, HandType } from '@/types'
 import { nullHandGame } from '../../styles'
 import { cn } from '@/lib/utils'
 import { SideHeader } from '../../common/SideHeader'

@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
-import { SESSION_KEY_HAS_LOGGED_IN } from '@/shared/constants/storage'
+import { SESSION_KEY_HAS_LOGGED_IN } from '@/constants/common/storage'
 
 /** ダッシュボード表示時にログイン済みフラグを sessionStorage に設定 */
 export function SetLoginFlag() {

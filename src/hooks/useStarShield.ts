@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, useCallback, useMemo } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import { useSE } from '@/hooks/useSE'
 import { saveStarShieldResult } from '@/server/actions/game'
-import { STAR_TARGET_X, STAR_TARGET_Y, STAR_RADIUS } from '@/components/game/StarShieldGame/phases/playing/ProtectedStar'
+import { STAR_TARGET_X, STAR_TARGET_Y, STAR_RADIUS } from '@/components/game/starShieldGame/phases/playing/ProtectedStar'
 import {
     GAME_DURATION_SECONDS,
     GAME_STATE_THROTTLE_MS,
@@ -32,10 +32,10 @@ import {
     HELL_SPECIAL_SPREAD_DEG,
     HELL_NORMAL_BULLET_COUNT,
     HELL_NORMAL_SPREAD_DEG,
-} from '@/components/game/StarShieldGame/constants/gameConfig'
-import { DIALOGUES, pickRandomDialogue } from '@/components/game/StarShieldGame/constants/dialogues'
-import type { Asteroid, Bullet, DialogueLine, Difficulty, GameResult, GameStats, GameStatePayload, GameEndPayload } from '@/components/game/StarShieldGame/types'
-import { getBulletPosition, getAsteroidPosition, getRomaji } from '@/components/game/StarShieldGame/utils/starShieldUtils'
+} from '@/constants/starShieldGame/gameConfig'
+import { DIALOGUES, pickRandomDialogue } from '@/constants/starShieldGame/dialogues'
+import type { Asteroid, Bullet, DialogueLine, Difficulty, GameResult, GameStats, GameStatePayload, GameEndPayload } from '@/types/starShieldGame'
+import { getBulletPosition, getAsteroidPosition, getRomaji } from '@/utils/starShieldGame/starShieldUtils'
 
 // ============================================
 // Hook

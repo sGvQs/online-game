@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
-import { HandType } from '@/shared/types'
+import { HandType } from '@/types'
 import { nullHandGame } from './styles'
 import { NullHandLogo } from './NullHandLogo'
 import { useSE } from '@/hooks/useSE'

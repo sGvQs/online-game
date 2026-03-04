@@ -13,10 +13,10 @@ export {
     DIALOGUE_MESSAGES_VISIT_1_PLUS,
     DIALOGUE_MESSAGES_RETURNING,
     LP_DINOSAUR_MESSAGES,
-} from './dinosaurLoginMessages'
+} from '../login/dinosaurLoginMessages'
 
 // ルーム作成時
-export { CREATE_ROOM_MESSAGES, getRandomCreateRoomMessage } from './createRoomMessages'
+export { CREATE_ROOM_MESSAGES, getRandomCreateRoomMessage } from '../room/createRoomMessages'
 
 // ルーム入室時
 export {
@@ -24,13 +24,13 @@ export {
     OTHER_JOIN_MESSAGES,
     getRandomSelfEntryMessage,
     getRandomOtherJoinMessage,
-} from './roomEntryMessages'
+} from '../room/roomEntryMessages'
 
 // ルーム削除時
 export { getComplaintMessageForRoomName } from './roomDeletedComplaints'
 
 // タイピングイベント用
-export { getRandomDinosaurRoomName } from './dinosaurTypingRoomNames'
+export { getRandomDinosaurRoomName } from '../room/dinosaurTypingRoomNames'
 
 export const TYPING_MODE_MESSAGES = [
     'もじ。',

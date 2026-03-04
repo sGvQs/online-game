@@ -1,6 +1,6 @@
 import Link from 'next/link'
 import { Trophy, ChevronRight } from 'lucide-react'
-import type { UserRanking } from '@/shared/types/game'
+import type { UserRanking } from '@/types'
 
 interface RankingCardProps {
     rankings: UserRanking[]

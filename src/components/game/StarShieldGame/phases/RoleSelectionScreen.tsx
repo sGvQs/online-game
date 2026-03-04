@@ -2,7 +2,7 @@
 
 import Image from 'next/image'
 import { motion } from 'framer-motion'
-import { RoomWithUsersAndReadyStatus, RoomUserWithReadyStatus } from '@/shared/types'
+import { RoomWithUsersAndReadyStatus, RoomUserWithReadyStatus } from '@/types'
 import { cn } from '@/lib/utils'
 import { ProtectedStar } from './playing/ProtectedStar'
 import { DinosaurWithBalls, AuroraGlow } from '../shared'

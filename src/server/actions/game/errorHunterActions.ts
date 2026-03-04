@@ -2,7 +2,7 @@
 
 import { prisma } from '@/server/lib/prisma'
 import { getAuthenticatedUser } from '../_helpers/getAuthenticatedUser'
-import { ErrorEventWithUser, ErrorEvent } from '@/shared/types'
+import { ErrorEventWithUser, ErrorEvent } from '@/types'
 
 /**
  * ゲーム開始: Match + ErrorEvent を作成し、ランダムな出現時刻を設定する

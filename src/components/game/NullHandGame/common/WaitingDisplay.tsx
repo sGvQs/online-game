@@ -1,4 +1,4 @@
-import { HandType } from '@/shared/types'
+import { HandType } from '@/types'
 import { Hand3D } from '../Hand3D'
 import { cn } from '@/lib/utils'
 import { useEffect, useState } from 'react'

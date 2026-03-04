@@ -1,5 +1,5 @@
 import Image from 'next/image'
-import { FACE_ICON_PATHS, DEFAULT_FACE_ICON, FaceIcon } from '@/shared/constants/faceIcon'
+import { FACE_ICON_PATHS, DEFAULT_FACE_ICON, FaceIcon } from '@/constants/common/faceIcon'
 
 interface PlayerFaceIconProps {
     faceIcon?: FaceIcon | null

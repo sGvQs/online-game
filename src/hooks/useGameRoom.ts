@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback, useMemo, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { createClient } from '@/utils/supabase/client'
 import { getRoomWithReadyStatus, toggleReady } from '@/server/actions/room'
-import { RoomWithUsersAndReadyStatus } from '@/shared/types'
+import { RoomWithUsersAndReadyStatus } from '@/types'
 
 interface UseGameRoomProps {
     roomId: string

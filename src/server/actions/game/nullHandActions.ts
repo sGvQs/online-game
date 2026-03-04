@@ -8,7 +8,7 @@ import {
     HandType,
     HostChoice,
     MatchScoreWithUser,
-} from '@/shared/types'
+} from '@/types'
 
 // ============================================
 // ユーティリティ

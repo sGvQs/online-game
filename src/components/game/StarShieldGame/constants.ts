@@ -2,7 +2,8 @@
  * StarShieldGame 共通定数（フォント・色・アイコン・スタイル・メタデータ）
  */
 
-export type Difficulty = 'EASY' | 'NORMAL' | 'HARD' | 'HELL'
+import type { Difficulty } from '@/types/starShieldGame'
+export type { Difficulty } from '@/types/starShieldGame'
 export type RoleChoice = 'SHOOTER' | 'TYPIST'
 
 // ========== フォント ==========

@@ -6,7 +6,7 @@ import { getNullHandRankings } from '@/server/actions/game/rankingActions'
 import { ErrorHunterGame } from '@/components/game/ErrorHunterGame'
 import { cn } from '@/lib/utils'
 import { errorHunterGame } from '@/components/game/ErrorHunterGame/styles'
-import { RoomUserWithReadyStatus } from '@/shared/types'
+import { RoomUserWithReadyStatus } from '@/types'
 
 export default async function ErrorHunterPage({ params }: { params: Promise<{ roomId: string }> }) {
     const currentUser = await getCurrentUser()

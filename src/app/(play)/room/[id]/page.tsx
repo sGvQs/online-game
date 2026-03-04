@@ -5,7 +5,7 @@ import { RoomPageClientWrapper } from '@/components/room/RoomPageClient'
 import { IconButton } from '@/components/ui/IconButton'
 import { leaveRoom } from '@/server/actions'
 import { Undo2, Gamepad2 } from 'lucide-react'
-import { RoomUserWithReadyStatus } from '@/shared/types'
+import { RoomUserWithReadyStatus } from '@/types'
 
 export default async function RoomPage({ params }: { params: Promise<{ id: string }> }) {
     const currentUser = await getCurrentUser()

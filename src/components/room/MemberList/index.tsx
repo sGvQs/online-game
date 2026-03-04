@@ -4,7 +4,7 @@ import { createClient } from '@/utils/supabase/client'
 import { useEffect, useState } from 'react'
 import { getRoomUsers } from '@/server/actions/room'
 import { Users } from 'lucide-react'
-import { RoomUserWithUser } from '@/shared/types'
+import { RoomUserWithUser } from '@/types'
 import { MemberItem } from '../MemberItem'
 import { memberListCard } from '../MemberItem/styles'
 

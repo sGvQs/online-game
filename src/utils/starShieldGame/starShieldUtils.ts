@@ -3,8 +3,8 @@
  */
 
 import { toRomaji } from 'wanakana'
-import { BULLET_SPEED } from '../constants/gameConfig'
-import type { Asteroid, Bullet } from '../types'
+import { BULLET_SPEED } from '@/constants/starShieldGame/gameConfig'
+import type { Asteroid, Bullet } from '@/types/starShieldGame'
 
 /** ひらがな・カタカナ以外を除去して toRomaji に渡す（句読点はタイピング対象外） */
 const KANA_ONLY = /[^\u3040-\u309F\u30A0-\u30FF\u31F0-\u31FF]/g

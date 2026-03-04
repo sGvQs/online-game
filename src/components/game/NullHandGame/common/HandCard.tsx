@@ -1,4 +1,4 @@
-import { HandType } from '@/shared/types'
+import { HandType } from '@/types'
 import { Hand3D } from '../Hand3D'
 import { motion } from 'framer-motion'
 import { getHandDisplayWithEmoji } from '../utils'

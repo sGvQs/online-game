@@ -1,4 +1,4 @@
-import { JankenEventWithGuests, HandType, MatchScoreWithUser } from '@/shared/types'
+import { JankenEventWithGuests, HandType, MatchScoreWithUser } from '@/types'
 import { Hand3D } from '../../Hand3D'
 import { nullHandGame } from '../../styles'
 import { getHandDisplayWithEmoji } from '../../utils'

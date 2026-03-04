@@ -12,7 +12,7 @@ import {
     getRandomCreateRoomMessage,
     getRandomDinosaurRoomName,
     getRandomTypingMessage,
-} from '@/shared/constants/dinosaurMessages'
+} from '@/constants/dashboard/dinosaurMessages'
 
 export function DashboardSidebar({ isTop5User = false }: { isTop5User?: boolean }) {
   const [roomFormOpen, setRoomFormOpen] = useState(false)

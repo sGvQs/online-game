@@ -1,8 +1,8 @@
 'use client'
 
 import { useStarShield } from '@/hooks/useStarShield'
-import type { Difficulty, GameResult, GameStats } from '@/components/game/StarShieldGame/types'
-import { ASTEROID_HP, STAR_HP } from '@/components/game/StarShieldGame/constants/gameConfig'
+import type { Difficulty, GameResult, GameStats } from '@/types/starShieldGame'
+import { ASTEROID_HP, STAR_HP } from '@/constants/starShieldGame/gameConfig'
 import { ShooterView } from './playing/ShooterView'
 import { TypistView } from './playing/TypistView'
 import { COLORS } from '../constants'

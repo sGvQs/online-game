@@ -3,7 +3,7 @@
 import { prisma } from '@/server/lib/prisma'
 import { revalidatePath } from 'next/cache'
 import { getAuthenticatedUser } from '../_helpers/getAuthenticatedUser'
-import { RoomStatus } from '@/shared/types'
+import { RoomStatus } from '@/types'
 
 /**
  * ホストがゲームを選択したときに呼び出される

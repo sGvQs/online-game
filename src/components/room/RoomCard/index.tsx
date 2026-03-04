@@ -1,4 +1,4 @@
-import type { Room, RoomUser } from '@/shared/types'
+import type { Room, RoomUser } from '@/types'
 import Image from 'next/image'
 import { Button } from '@/components/ui/Button'
 import { IconButton } from '@/components/ui/IconButton'

@@ -1,4 +1,4 @@
-import { MatchScoreWithUser } from '@/shared/types'
+import { MatchScoreWithUser } from '@/types'
 import { SideHeader } from './SideHeader'
 import { sideCard } from '../phases/phaseCard.styles'
 import { cn } from '@/lib/utils'

@@ -2,8 +2,9 @@
  * StarShieldGame 型定義
  */
 
-export type { Difficulty } from './constants'
-export type { DialogueLine } from './constants/dialogues'
+export type Difficulty = 'EASY' | 'NORMAL' | 'HARD' | 'HELL'
+
+export type { DialogueLine } from '@/constants/starShieldGame/dialogues'
 
 export type GameResult = 'CLEARED' | 'FAILED_CONTACT' | 'FAILED_TIMEOUT'
 

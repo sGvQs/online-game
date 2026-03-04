@@ -1,4 +1,4 @@
-import { JankenEventWithGuests, HostStats, HostChoice, HandType, MatchScoreWithUser } from '@/shared/types'
+import { JankenEventWithGuests, HostStats, HostChoice, HandType, MatchScoreWithUser } from '@/types'
 import { Hand3D } from '../../Hand3D'
 import { PlayerFaceIcon } from '../../common/PlayerFaceIcon'
 import { nullHandGame } from '../../styles'
@@ -18,7 +18,7 @@ interface ChoicePhaseProps {
     isProcessing: boolean
     onChoice: (choice: HostChoice) => Promise<void>
     hostName: string
-    hostFaceIcon?: import('@/shared/constants/faceIcon').FaceIcon | null
+    hostFaceIcon?: import('@/constants/common/faceIcon').FaceIcon | null
     /** カスタムホストアイコン（恐竜など）。hostFaceIcon より優先 */
     hostCustomIconSrc?: string | null
     currentScores: MatchScoreWithUser[]

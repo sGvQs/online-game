@@ -1,7 +1,7 @@
 'use client'
 
 import { Users } from 'lucide-react'
-import { RoomUserWithUser, UserRanking } from '@/shared/types'
+import { RoomUserWithUser, UserRanking } from '@/types'
 import { MemberItem } from '../MemberItem'
 import { memberListCard } from '../MemberItem/styles'
 

@@ -1,6 +1,6 @@
 import { ReactNode } from 'react'
 import { nullHandGame } from './styles'
-import { JankenPhase } from '@/shared/types'
+import { JankenPhase } from '@/types'
 import { motion } from 'framer-motion'
 
 interface GameLayoutProps {

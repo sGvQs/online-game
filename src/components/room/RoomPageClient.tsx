@@ -6,17 +6,17 @@ import { createPortal } from 'react-dom'
 import { useRouter } from 'next/navigation'
 import { getRoom, selectGame, getRoomUsers, kickUserFromRoom } from '@/server/actions/room'
 import { getNullHandRankings } from '@/server/actions/game/rankingActions'
-import { Room, RoomUserWithUser, UserRanking } from '@/shared/types'
+import { Room, RoomUserWithUser, UserRanking } from '@/types'
 import { GameSelectionCard } from './GameSelectionCard'
 import { MemberListView } from './MemberList/MemberListView'
 import { GameDescriptionModal } from './GameDescriptionModal'
 import { RoomModal } from './RoomModal'
-import { isPlayerCountValid, getPlayerRangeLabel } from '@/shared/constants/gamePlayerRequirements'
+import { isPlayerCountValid, getPlayerRangeLabel } from '@/constants/room/gamePlayerRequirements'
 import { AnnoyingDinosaurComplaint } from '@/components/dashboard/AnnoyingDinosaurComplaint'
 import {
     getRandomSelfEntryMessage,
     getRandomOtherJoinMessage,
-} from '@/shared/constants/roomEntryMessages'
+} from '@/constants/room/roomEntryMessages'
 
 interface RoomPageClientProps {
     room: Room // 初期のデータの状態

@@ -152,4 +152,3 @@ export type UserRanking = {
     points: number
     rank: number
 }
-

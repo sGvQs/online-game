@@ -5,10 +5,10 @@ import { cn } from '@/lib/utils'
 import { ChoicePhase } from '@/components/game/NullHandGame/phases/ChoicePhase'
 import { BattlePhase } from '@/components/game/NullHandGame/phases/BattlePhase'
 import { ResultPhase } from '@/components/game/NullHandGame/phases/ResultPhase'
-import { HandType } from '@/shared/types'
+import { HandType } from '@/types'
 import { nullHandGame } from '@/components/game/NullHandGame/styles'
 import { judgeHand } from '@/components/game/NullHandGame/utils'
-import type { JankenEventWithGuests, HostStats, MatchScoreWithUser, RoomUserWithUser } from '@/shared/types'
+import type { JankenEventWithGuests, HostStats, MatchScoreWithUser, RoomUserWithUser } from '@/types'
 
 // 開発者の手の組み合わせ（3種類からランダムに選ぶ）
 const HAND_PAIRS: [HandType, HandType][] = [

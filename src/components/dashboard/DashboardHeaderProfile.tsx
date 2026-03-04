@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { RoomModal } from '@/components/room/RoomModal'
 import { updateProfile } from '@/server/actions/user/updateProfile'
-import { FACE_ICON_PATHS, FACE_ICON_OPTIONS, FaceIcon } from '@/shared/constants/faceIcon'
+import { FACE_ICON_PATHS, FACE_ICON_OPTIONS, FaceIcon } from '@/constants/common/faceIcon'
 
 interface DashboardHeaderProfileProps {
     name: string

@@ -13,8 +13,8 @@ import {
     DIALOGUE_MESSAGES_RETURNING,
     LP_DINOSAUR_MESSAGES,
     SUCKED_IN_AFTERMATH_MESSAGES,
-} from '@/shared/constants/dinosaurLoginMessages'
-import { SESSION_KEY_HAS_LOGGED_IN, SESSION_KEY_LOGIN_VISIT_COUNT, LOCAL_KEY_HAS_VISITED } from '@/shared/constants/storage'
+} from '@/constants/login/dinosaurLoginMessages'
+import { SESSION_KEY_HAS_LOGGED_IN, SESSION_KEY_LOGIN_VISIT_COUNT, LOCAL_KEY_HAS_VISITED } from '@/constants/common/storage'
 import { useSE } from '@/hooks/useSE'
 
 const CHERRY_BOMB_FONT = 'var(--font-cherry-bomb-one)'

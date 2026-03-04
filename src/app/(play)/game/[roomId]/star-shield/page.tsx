@@ -2,8 +2,8 @@ import { redirect } from 'next/navigation'
 import { getCurrentUser } from '@/server/actions'
 import { getRoomWithReadyStatus } from '@/server/actions/room'
 import { getNullHandRankings } from '@/server/actions/game/rankingActions'
-import { RoomUserWithReadyStatus } from '@/shared/types'
-import { StarShieldGame } from '@/components/game/StarShieldGame'
+import { RoomUserWithReadyStatus } from '@/types'
+import { StarShieldGame } from '@/components/game/starShieldGame'
 
 export default async function StarShieldPage({ params }: { params: Promise<{ roomId: string }> }) {
     const currentUser = await getCurrentUser()

@@ -1,7 +1,7 @@
 import Image from 'next/image'
 import { Gamepad2, Users } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
-import { getPlayerRangeLabel } from '@/shared/constants/gamePlayerRequirements'
+import { getPlayerRangeLabel } from '@/constants/room/gamePlayerRequirements'
 import { gameSelection, waitingCard } from './styles'
 
 const styles = gameSelection()

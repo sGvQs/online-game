@@ -1,7 +1,7 @@
 'use server'
 
 import { prisma } from '@/server/lib/prisma'
-import { UserRanking } from '@/shared/types/game'
+import { UserRanking } from '@/types'
 
 /**
  * 指定されたユーザーIDの月間ランキング情報を取得する

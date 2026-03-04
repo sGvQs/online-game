@@ -1,4 +1,4 @@
-import { HandType, JankenEventWithGuests, HostStats, MatchScoreWithUser } from '@/shared/types'
+import { HandType, JankenEventWithGuests, HostStats, MatchScoreWithUser } from '@/types'
 import { Hand3D } from '../../Hand3D'
 import { PlayerFaceIcon } from '../../common/PlayerFaceIcon'
 import { nullHandGame } from '../../styles'
@@ -20,7 +20,7 @@ interface BattlePhaseProps {
     onSelectHand: (hand: HandType) => void
     onSubmit: () => void
     hostName: string
-    hostFaceIcon?: import('@/shared/constants/faceIcon').FaceIcon | null
+    hostFaceIcon?: import('@/constants/common/faceIcon').FaceIcon | null
     currentScores: MatchScoreWithUser[]
     currentUserId: string
     userColor?: string

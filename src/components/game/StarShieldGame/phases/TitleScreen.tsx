@@ -2,8 +2,8 @@
 
 import { motion } from 'framer-motion'
 import Image from 'next/image'
-import { RoomWithUsersAndReadyStatus, RoomUserWithReadyStatus } from '@/shared/types'
-import type { UserRanking } from '@/shared/types/game'
+import { RoomWithUsersAndReadyStatus, RoomUserWithReadyStatus } from '@/types'
+import type { UserRanking } from '@/types'
 import { cn } from '@/lib/utils'
 import { ProtectedStar } from './playing/ProtectedStar'
 import { DinosaurWithBalls, AuroraGlow } from '../shared'

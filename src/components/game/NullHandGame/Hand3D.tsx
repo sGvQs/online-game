@@ -4,7 +4,7 @@ import React, { useRef } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
 import { OrbitControls, PerspectiveCamera, RoundedBox } from '@react-three/drei'
 import * as THREE from 'three'
-import { HandType } from '@/shared/types'
+import { HandType } from '@/types'
 
 interface Hand3DProps {
     handType: HandType | null
