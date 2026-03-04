@@ -3,7 +3,8 @@
 import { useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
 import { AnimatePresence, motion } from 'framer-motion'
-import { DialogueLine, getRomaji } from '@/hooks/useStarShield'
+import type { DialogueLine } from '@/components/game/StarShieldGame/constants/dialogues'
+import { getRomaji } from '@/components/game/StarShieldGame/utils/starShieldUtils'
 import { StarVisual, AuroraGlow } from '../../shared'
 import { FONTS, COLORS, ICONS, BULLET_COLOR, AURORA_GRADIENT_TYPIST } from '../../constants'
 

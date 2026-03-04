@@ -3,15 +3,9 @@
 import { useEffect, useRef, useCallback } from 'react'
 import Image from 'next/image'
 import { motion, AnimatePresence } from 'framer-motion'
-import {
-    Asteroid,
-    Bullet,
-    getAsteroidPosition,
-    getBulletPosition,
-    BULLET_RADIUS,
-    DINO_X,
-    DINO_Y,
-} from '@/hooks/useStarShield'
+import type { Asteroid, Bullet } from '@/components/game/StarShieldGame/types'
+import { getAsteroidPosition, getBulletPosition } from '@/components/game/StarShieldGame/utils/starShieldUtils'
+import { BULLET_RADIUS, DINO_X, DINO_Y } from '@/components/game/StarShieldGame/constants/gameConfig'
 import { ProtectedStar } from './ProtectedStar'
 import { BULLET_COLOR, ICONS } from '../../constants'
 
