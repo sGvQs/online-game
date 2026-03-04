@@ -19,7 +19,7 @@ const CLEAR_POINTS: Record<Difficulty, number> = {
     HELL: 4,
 }
 
-const HELL_UNLOCK_THRESHOLD = 100
+const HELL_UNLOCK_THRESHOLD = 0
 
 const GAME_DURATION_SECONDS = 90
 
