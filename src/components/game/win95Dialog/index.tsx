@@ -4,7 +4,7 @@ import React from 'react'
 import Image from 'next/image'
 import { cn } from '@/lib/utils'
 import { win95Dialog } from './styles'
-import { Win95Button } from '../Win95Button'
+import { Win95Button } from '../win95Button'
 
 export type Win95IconType = 'error' | 'warning' | 'info' | 'question' | "lose"
 

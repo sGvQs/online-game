@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { DashboardHeaderTitle } from '@/components/dashboard/DashboardHeaderTitle'
+import { DashboardHeaderTitle } from '@/components/dashboard/dashboardHeaderTitle'
 
 interface LegalPageLayoutProps {
     title: string

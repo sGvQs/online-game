@@ -1,7 +1,7 @@
 import type { Room, RoomUser } from '@/types'
 import Image from 'next/image'
-import { Button } from '@/components/ui/Button'
-import { IconButton } from '@/components/ui/IconButton'
+import { Button } from '@/components/ui/button'
+import { IconButton } from '@/components/ui/iconButton'
 import { Trash2, Play, Users } from 'lucide-react'
 import { roomCard, emptyState } from './styles'
 

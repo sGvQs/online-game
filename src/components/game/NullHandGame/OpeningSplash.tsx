@@ -2,9 +2,9 @@ import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { HandType } from '@/types'
 import { nullHandGame } from './styles'
-import { NullHandLogo } from './NullHandLogo'
+import { NullHandLogo } from './nullHandLogo'
 import { useSE } from '@/hooks/useSE'
-import { NEON_PALETTE } from './TitleScreen'
+import { NEON_PALETTE } from './titleScreen'
 
 interface OpeningSplashProps {
     onComplete: () => void

@@ -1,4 +1,4 @@
-import { phaseHeader } from './PhaseHeader.styles'
+import { phaseHeader } from './phaseHeader.styles'
 import { cn } from '@/lib/utils'
 
 interface PhaseHeaderProps {

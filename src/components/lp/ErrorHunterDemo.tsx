@@ -2,8 +2,8 @@
 
 import { useState, useCallback, useEffect } from 'react'
 import { useSE } from '@/hooks/useSE'
-import { Win95Dialog } from '@/components/game/Win95Dialog'
-import { Win95TitleBarButton } from '@/components/game/Win95TitleBarButton'
+import { Win95Dialog } from '@/components/game/win95Dialog'
+import { Win95TitleBarButton } from '@/components/game/win95TitleBarButton'
 import { cn } from '@/lib/utils'
 
 const ERROR_MESSAGES = [

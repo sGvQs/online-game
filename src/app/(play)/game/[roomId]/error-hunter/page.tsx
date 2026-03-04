@@ -3,9 +3,9 @@ import { redirect } from 'next/navigation'
 import { getCurrentUser } from '@/server/actions'
 import { getRoomWithReadyStatus } from '@/server/actions/room'
 import { getNullHandRankings } from '@/server/actions/game/rankingActions'
-import { ErrorHunterGame } from '@/components/game/ErrorHunterGame'
+import { ErrorHunterGame } from '@/components/game/errorHunterGame'
 import { cn } from '@/lib/utils'
-import { errorHunterGame } from '@/components/game/ErrorHunterGame/styles'
+import { errorHunterGame } from '@/components/game/errorHunterGame/styles'
 import { RoomUserWithReadyStatus } from '@/types'
 
 export default async function ErrorHunterPage({ params }: { params: Promise<{ roomId: string }> }) {

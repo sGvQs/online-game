@@ -1,19 +1,19 @@
 import { HandType, JankenEventWithGuests, MatchScoreWithUser, HostStats } from '@/types'
-import { Hand3D } from '../../Hand3D'
-import { PlayerFaceIcon } from '../../common/PlayerFaceIcon'
+import { Hand3D } from '../../hand3D'
+import { PlayerFaceIcon } from '../../common/playerFaceIcon'
 import { nullHandGame } from '../../styles'
 import { cn } from '@/lib/utils'
 import { judgeHand } from '../../utils'
-import { PhaseHeader } from '../../common/PhaseHeader'
-import { RewardSystem } from '../../common/RewardSystem'
-import { GameButton } from '../../common/GameButton'
+import { PhaseHeader } from '../../common/phaseHeader'
+import { RewardSystem } from '../../common/rewardSystem'
+import { GameButton } from '../../common/gameButton'
 import { resultPhase } from './styles'
 import type { RoomUserWithUser } from '@/types'
 
 import { useState } from 'react'
 import { motion } from 'framer-motion'
-import { CurrentScores } from '../../common/CurrentScores'
-import { HandCard } from '../../common/HandCard'
+import { CurrentScores } from '../../common/currentScores'
+import { HandCard } from '../../common/handCard'
 
 type RoomUser = RoomUserWithUser
 

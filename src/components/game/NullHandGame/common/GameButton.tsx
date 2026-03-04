@@ -1,5 +1,5 @@
 'use client'
-import { gameButton } from './GameButton.styles'
+import { gameButton } from './gameButton.styles'
 import { useSE } from '@/hooks/useSE'
 
 import { motion } from 'framer-motion'

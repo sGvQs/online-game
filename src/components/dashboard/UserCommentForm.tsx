@@ -2,8 +2,8 @@
 
 import { useState, useTransition } from 'react'
 import { setUserComment } from '@/server/actions/user/setUserComment'
-import { Input } from '@/components/ui/Input'
-import { Button } from '@/components/ui/Button'
+import { Input } from '@/components/ui/input'
+import { Button } from '@/components/ui/button'
 
 interface UserCommentFormProps {
   initialComment?: string | null

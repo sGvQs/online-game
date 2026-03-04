@@ -3,7 +3,7 @@ import { UserMinus } from 'lucide-react'
 import { RoomUserWithUser, UserRanking } from '@/types'
 import { FACE_ICON_PATHS, DEFAULT_FACE_ICON } from '@/constants/common/faceIcon'
 import { memberItem } from './styles'
-import { IconButton } from '@/components/ui/IconButton'
+import { IconButton } from '@/components/ui/iconButton'
 
 const styles = memberItem()
 

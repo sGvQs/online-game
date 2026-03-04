@@ -1,15 +1,15 @@
 import { JankenEventWithGuests, HostStats, HostChoice, HandType, MatchScoreWithUser } from '@/types'
-import { Hand3D } from '../../Hand3D'
-import { PlayerFaceIcon } from '../../common/PlayerFaceIcon'
+import { Hand3D } from '../../hand3D'
+import { PlayerFaceIcon } from '../../common/playerFaceIcon'
 import { nullHandGame } from '../../styles'
-import { PhaseHeader } from '../../common/PhaseHeader'
-import { CurrentScores } from '../../common/CurrentScores'
-import { RewardSystem } from '../../common/RewardSystem'
+import { PhaseHeader } from '../../common/phaseHeader'
+import { CurrentScores } from '../../common/currentScores'
+import { RewardSystem } from '../../common/rewardSystem'
 import { motion } from 'framer-motion'
 import { useSE } from '@/hooks/useSE'
 import { useState, useEffect } from 'react'
 import { cn } from '@/lib/utils'
-import { GameButton } from '../../common/GameButton'
+import { GameButton } from '../../common/gameButton'
 
 interface ChoicePhaseProps {
     jankenEvent: JankenEventWithGuests | null

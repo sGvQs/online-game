@@ -1,7 +1,7 @@
 'use client'
 
 import { signOut } from '@/server/actions/auth'
-import { IconButton } from '@/components/ui/IconButton'
+import { IconButton } from '@/components/ui/iconButton'
 import { LogOut } from 'lucide-react'
 
 export function LogoutButton() {

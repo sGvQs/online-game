@@ -3,7 +3,7 @@
 import { ButtonHTMLAttributes, forwardRef, ReactNode } from 'react'
 import { tv, type VariantProps } from 'tailwind-variants'
 import { cn } from '@/lib/utils'
-import { Tooltip } from './Tooltip'
+import { Tooltip } from './tooltip'
 
 const iconButton = tv({
     base: [

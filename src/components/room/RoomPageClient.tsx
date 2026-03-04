@@ -7,12 +7,12 @@ import { useRouter } from 'next/navigation'
 import { getRoom, selectGame, getRoomUsers, kickUserFromRoom } from '@/server/actions/room'
 import { getNullHandRankings } from '@/server/actions/game/rankingActions'
 import { Room, RoomUserWithUser, UserRanking } from '@/types'
-import { GameSelectionCard } from './GameSelectionCard'
-import { MemberListView } from './MemberList/MemberListView'
-import { GameDescriptionModal } from './GameDescriptionModal'
-import { RoomModal } from './RoomModal'
+import { GameSelectionCard } from './gameSelectionCard'
+import { MemberListView } from './memberList/memberListView'
+import { GameDescriptionModal } from './gameDescriptionModal'
+import { RoomModal } from './roomModal'
 import { isPlayerCountValid, getPlayerRangeLabel } from '@/constants/room/gamePlayerRequirements'
-import { AnnoyingDinosaurComplaint } from '@/components/dashboard/AnnoyingDinosaurComplaint'
+import { AnnoyingDinosaurComplaint } from '@/components/dashboard/annoyingDinosaurComplaint'
 import {
     getRandomSelfEntryMessage,
     getRandomOtherJoinMessage,

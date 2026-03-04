@@ -1,8 +1,8 @@
 import { HandType } from '@/types'
-import { Hand3D } from '../Hand3D'
+import { Hand3D } from '../hand3D'
 import { motion } from 'framer-motion'
 import { getHandDisplayWithEmoji } from '../utils'
-import { handCard } from './HandCard.styles'
+import { handCard } from './handCard.styles'
 import { cn } from '@/lib/utils'
 
 interface HandCardProps {

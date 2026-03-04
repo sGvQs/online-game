@@ -2,8 +2,8 @@
 
 import { Users } from 'lucide-react'
 import { RoomUserWithUser, UserRanking } from '@/types'
-import { MemberItem } from '../MemberItem'
-import { memberListCard } from '../MemberItem/styles'
+import { MemberItem } from '../memberItem'
+import { memberListCard } from '../memberItem/styles'
 
 const styles = memberListCard()
 

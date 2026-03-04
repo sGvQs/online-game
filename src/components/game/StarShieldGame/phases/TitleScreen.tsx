@@ -5,7 +5,7 @@ import Image from 'next/image'
 import { RoomWithUsersAndReadyStatus, RoomUserWithReadyStatus } from '@/types'
 import type { UserRanking } from '@/types'
 import { cn } from '@/lib/utils'
-import { ProtectedStar } from './playing/ProtectedStar'
+import { ProtectedStar } from './playing/protectedStar'
 import { DinosaurWithBalls, AuroraGlow } from '../shared'
 import { FONTS, COLORS, ICONS } from '../constants'
 

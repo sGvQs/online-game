@@ -2,7 +2,7 @@
 
 import { ButtonHTMLAttributes, forwardRef, useState } from 'react'
 import { cn } from '@/lib/utils'
-import { win95Dialog } from '../Win95Dialog/styles'
+import { win95Dialog } from '../win95Dialog/styles'
 
 export interface Win95TitleBarButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {}
 

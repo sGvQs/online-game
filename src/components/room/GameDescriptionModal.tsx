@@ -1,13 +1,13 @@
 'use client'
 
 import Image from 'next/image'
-import { RoomModal } from './RoomModal'
-import { Win95Dialog } from '../game/Win95Dialog'
-import { Win95TitleBarButton } from '../game/Win95TitleBarButton'
-import { Hand3D } from '../game/NullHandGame/Hand3D'
+import { RoomModal } from './roomModal'
+import { Win95Dialog } from '../game/win95Dialog'
+import { Win95TitleBarButton } from '../game/win95TitleBarButton'
+import { Hand3D } from '../game/nullHandGame/hand3D'
 import { HandType } from '@/types'
-import { RewardSystem } from '../game/NullHandGame/common/RewardSystem'
-import { StarVisual } from '../game/starShieldGame/shared/StarVisual'
+import { RewardSystem } from '../game/nullHandGame/common/rewardSystem'
+import { StarVisual } from '../game/starShieldGame/shared/starVisual'
 import { ICONS, BULLET_COLOR, ROLE_META } from '../game/starShieldGame/constants'
 
 interface GameDescriptionModalProps {

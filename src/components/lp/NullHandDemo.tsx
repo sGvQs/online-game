@@ -2,12 +2,12 @@
 
 import { useState, useCallback, useEffect, useRef, useMemo } from 'react'
 import { cn } from '@/lib/utils'
-import { ChoicePhase } from '@/components/game/NullHandGame/phases/ChoicePhase'
-import { BattlePhase } from '@/components/game/NullHandGame/phases/BattlePhase'
-import { ResultPhase } from '@/components/game/NullHandGame/phases/ResultPhase'
+import { ChoicePhase } from '@/components/game/nullHandGame/phases/choicePhase'
+import { BattlePhase } from '@/components/game/nullHandGame/phases/battlePhase'
+import { ResultPhase } from '@/components/game/nullHandGame/phases/resultPhase'
 import { HandType } from '@/types'
-import { nullHandGame } from '@/components/game/NullHandGame/styles'
-import { judgeHand } from '@/components/game/NullHandGame/utils'
+import { nullHandGame } from '@/components/game/nullHandGame/styles'
+import { judgeHand } from '@/components/game/nullHandGame/utils'
 import type { JankenEventWithGuests, HostStats, MatchScoreWithUser, RoomUserWithUser } from '@/types'
 
 // 開発者の手の組み合わせ（3種類からランダムに選ぶ）

@@ -1,8 +1,8 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { DEBUG_COMPLAINT_EVENT } from './DebugComplaintKeyListener'
-import { AnnoyingDinosaurComplaint } from './AnnoyingDinosaurComplaint'
+import { DEBUG_COMPLAINT_EVENT } from './debugComplaintKeyListener'
+import { AnnoyingDinosaurComplaint } from './annoyingDinosaurComplaint'
 import { getComplaintMessageForRoomName } from '@/constants/dashboard/roomDeletedComplaints'
 import { markRoomDeletedNotificationsAsRead } from '@/server/actions'
 

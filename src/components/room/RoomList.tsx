@@ -3,7 +3,7 @@
 import { createClient } from '@/utils/supabase/client'
 import { useEffect, useState } from 'react'
 import { joinRoom, deleteRoom, getRooms } from '@/server/actions/room'
-import { RoomCard, RoomListEmptyState, type RoomWithUsers } from './RoomCard'
+import { RoomCard, RoomListEmptyState, type RoomWithUsers } from './roomCard'
 
 export function RoomList({ initialRooms, userId }: { initialRooms: RoomWithUsers[]; userId: string }) {
     const [rooms, setRooms] = useState<RoomWithUsers[]>(initialRooms)
