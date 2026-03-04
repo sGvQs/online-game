@@ -474,7 +474,7 @@ export function useStarShield({
 
             const hitBulletIds = new Set<string>()
             const hpUpdates = new Map<string, number>()
-            const slowAsteroidIds = new Set<string>()
+            const slowAsteroidData = new Map<string, { progressAtSlow: number }>()
             let destroyedCount = 0
 
             for (const bullet of bts) {
@@ -497,7 +497,10 @@ export function useStarShield({
                     hpUpdates.set(a.id, newHp)
                     if (newHp <= 0) destroyedCount++
 
-                    if (tech?.slowOnHit) slowAsteroidIds.add(a.id)
+                    if (tech?.slowOnHit && !a.slowAppliedAt) {
+                        const progressAtSlow = Math.min(1, (now - a.spawnedAt) / a.durationMs)
+                        slowAsteroidData.set(a.id, { progressAtSlow })
+                    }
 
                     if (tech?.rangeRadius && tech.rangeDamage !== undefined) {
                         for (const other of asts) {
@@ -526,7 +529,10 @@ export function useStarShield({
                         const newHp = hpUpdates.get(ast.id)
                         if (newHp === undefined) return ast
                         const base = newHp <= 0 ? { ...ast, hp: 0, destroyedAt: now } : { ...ast, hp: newHp }
-                        return slowAsteroidIds.has(ast.id) ? { ...base, speedMultiplier: 0.5 } : base
+                        const slowData = slowAsteroidData.get(ast.id)
+                        return slowData
+                            ? { ...base, speedMultiplier: 0.5, slowAppliedAt: now, progressAtSlow: slowData.progressAtSlow }
+                            : base
                     })
                     asteroidsRef.current = next
                     return next

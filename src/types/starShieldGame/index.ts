@@ -29,6 +29,10 @@ export interface Asteroid {
     hasDamagedStar?: boolean // 星にダメージを与えたか
     /** 減速効果（1=通常、0.5=半分の速さ）。青い球ヒット時に付与 */
     speedMultiplier?: number
+    /** 減速が適用された時刻（ms）。ノックバック防止用 */
+    slowAppliedAt?: number
+    /** 減速適用時点での progress（0-1）。ノックバック防止用 */
+    progressAtSlow?: number
 }
 
 export interface Bullet {
