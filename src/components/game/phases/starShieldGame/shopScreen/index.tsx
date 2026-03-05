@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ProtectedStar } from '../playing/protectedStar'
@@ -30,6 +30,8 @@ import {
 } from '@/constants/starShieldGame/shopConfig'
 import {
     LEVEL_STAR_HP,
+    LEVEL_BULLET_COUNT,
+    LEVEL_SPREAD_DEG,
     SPECIAL_ATTACK_LEVEL_PARAMS,
     type SpecialAttackLevel,
 } from '@/constants/starShieldGame/gameConfig'
@@ -220,6 +222,17 @@ export function StarShieldShop({ roomId, currentUserId }: { roomId: string; curr
                                 )
                             })}
                         </div>
+                        {/* アニメーションプレビュー */}
+                        {(() => {
+                            const selAttack = availableNormal.find((a) => a.techniqueId === selNormal)
+                            if (!selAttack) return null
+                            return (
+                                <LoadoutAnimPreview
+                                    techniqueId={selAttack.techniqueId}
+                                    level={selAttack.level}
+                                />
+                            )
+                        })()}
                     </div>
 
                     {/* 必殺技 */}
@@ -1110,6 +1123,214 @@ function StatRow({ label, value, color }: { label: string; value: string; color:
         <div className="flex items-center justify-between py-1.5 border-b border-white/[0.05] last:border-0">
             <span className="text-white/35 text-xs [font-family:var(--font-dot-gothic-16)]">{label}</span>
             <span className={cn('text-xs font-bold', color)}>{value}</span>
+        </div>
+    )
+}
+
+// ============================================================
+// LoadoutAnimPreview
+// Canvas requestAnimationFrame による恐竜射撃アニメーション
+// ============================================================
+type Bullet = {
+    x: number
+    y: number
+    vx: number
+    vy: number
+    color: string
+    alpha: number
+    radius: number
+}
+
+function LoadoutAnimPreview({ techniqueId, level }: { techniqueId: TechniqueId; level: number }) {
+    const canvasRef = useRef<HTMLCanvasElement>(null)
+    const tech = TECHNIQUES[techniqueId]
+
+    useEffect(() => {
+        const canvas = canvasRef.current
+        if (!canvas) return
+        const ctxOrNull = canvas.getContext('2d')
+        if (!ctxOrNull) return
+        const c: CanvasRenderingContext2D = ctxOrNull
+
+        const lvl = Math.max(1, Math.min(5, level)) as 1 | 2 | 3 | 4 | 5
+        const bulletCount = LEVEL_BULLET_COUNT[lvl]
+        const spreadDeg = LEVEL_SPREAD_DEG[lvl]
+
+        const DINO_X = 18
+        const H = canvas.height
+        const W = canvas.width
+        const ORIGIN_Y = H / 2 - 2
+        const FIRE_INTERVAL = 1400
+
+        const bullets: Bullet[] = []
+        let lastFire = -FIRE_INTERVAL
+        let animId: number
+
+        function fire() {
+            // yellow_beam：細かく連続発射
+            if (techniqueId === 'yellow_beam') {
+                const count = 12
+                for (let i = 0; i < count; i++) {
+                    const delay = i * 40
+                    setTimeout(() => {
+                        bullets.push({
+                            x: DINO_X + 18,
+                            y: ORIGIN_Y + (Math.random() - 0.5) * 3,
+                            vx: 4.4,
+                            vy: 0,
+                            color: tech.color,
+                            alpha: 0.9,
+                            radius: 1.8,
+                        })
+                    }, delay)
+                }
+                return
+            }
+
+            const displayCount = Math.min(bulletCount, 18)
+
+            if (displayCount === 1) {
+                bullets.push({
+                    x: DINO_X + 18,
+                    y: ORIGIN_Y,
+                    vx: 3.8,
+                    vy: 0,
+                    color: tech.color,
+                    alpha: 1,
+                    radius: techniqueId === 'purple' ? 5.5 : 3.5,
+                })
+            } else {
+                for (let i = 0; i < displayCount; i++) {
+                    const angle = ((i / (displayCount - 1)) - 0.5) * spreadDeg
+                    const rad = (angle * Math.PI) / 180
+                    const speed = 3.4
+                    bullets.push({
+                        x: DINO_X + 18,
+                        y: ORIGIN_Y,
+                        vx: Math.cos(rad) * speed,
+                        vy: Math.sin(rad) * speed,
+                        color: tech.color,
+                        alpha: 0.95,
+                        radius: 2.4,
+                    })
+                }
+            }
+        }
+
+        function draw(now: number) {
+            c.clearRect(0, 0, W, H)
+
+            if (now - lastFire >= FIRE_INTERVAL) {
+                fire()
+                lastFire = now
+            }
+
+            // orange: チェーン線
+            if (techniqueId === 'orange' && bullets.length >= 2) {
+                c.save()
+                c.strokeStyle = `${tech.color}44`
+                c.lineWidth = 0.8
+                for (let i = 0; i < Math.min(bullets.length - 1, 6); i++) {
+                    const b1 = bullets[i]
+                    const b2 = bullets[i + 1]
+                    if (Math.abs(b1.x - b2.x) < 50) {
+                        c.beginPath()
+                        c.moveTo(b1.x, b1.y)
+                        c.lineTo(b2.x, b2.y)
+                        c.stroke()
+                    }
+                }
+                c.restore()
+            }
+
+            for (let i = bullets.length - 1; i >= 0; i--) {
+                const b = bullets[i]
+                b.x += b.vx
+                b.y += b.vy
+                b.alpha -= techniqueId === 'yellow_beam' ? 0.028 : 0.015
+
+                if (b.alpha <= 0 || b.x > W + 12 || b.y < -12 || b.y > H + 12) {
+                    bullets.splice(i, 1)
+                    continue
+                }
+
+                const alphaHex = Math.round(Math.max(0, b.alpha) * 255)
+                    .toString(16)
+                    .padStart(2, '0')
+
+                c.save()
+                c.shadowBlur = techniqueId === 'purple' ? 16 : 8
+                c.shadowColor = b.color
+                c.beginPath()
+                c.arc(b.x, b.y, b.radius, 0, Math.PI * 2)
+                c.fillStyle = b.color + alphaHex
+                c.fill()
+                c.restore()
+
+                // blue：尾を引く
+                if (techniqueId === 'blue') {
+                    c.save()
+                    c.beginPath()
+                    c.arc(b.x - b.vx * 3.5, b.y, b.radius * 0.5, 0, Math.PI * 2)
+                    c.fillStyle =
+                        b.color + Math.round(b.alpha * 70).toString(16).padStart(2, '0')
+                    c.fill()
+                    c.restore()
+                }
+            }
+
+            animId = requestAnimationFrame(draw)
+        }
+
+        animId = requestAnimationFrame(draw)
+        return () => {
+            cancelAnimationFrame(animId)
+            bullets.length = 0
+        }
+    }, [techniqueId, level]) // eslint-disable-line react-hooks/exhaustive-deps
+
+    const EFFECT_LABEL: Partial<Record<TechniqueId, string>> = {
+        blue: 'スロー効果',
+        yellow_beam: 'ビーム（30連射）',
+        purple: '貫通',
+        orange: 'チェーン攻撃',
+    }
+
+    return (
+        <div
+            className="relative mt-2 rounded-xl overflow-hidden border border-white/[0.07]"
+            style={{ height: '88px', background: 'rgba(0,0,0,0.35)' }}
+        >
+            {/* 発射ライン */}
+            <div
+                className="absolute top-1/2 left-[38px] right-0 border-t border-dashed border-white/[0.05]"
+                style={{ transform: 'translateY(-1px)' }}
+            />
+
+            {/* 恐竜 */}
+            <div className="absolute left-1.5 top-1/2 -translate-y-1/2 text-[22px] select-none z-10 leading-none">
+                🦕
+            </div>
+
+            {/* Canvas */}
+            <canvas
+                ref={canvasRef}
+                width={360}
+                height={88}
+                className="absolute inset-0 w-full h-full"
+            />
+
+            {/* ラベル */}
+            <div className="absolute bottom-1.5 left-10 flex items-center gap-1.5">
+                <span
+                    className="w-1.5 h-1.5 rounded-full shrink-0"
+                    style={{ backgroundColor: tech.color }}
+                />
+                <span className="text-[9px] text-white/25 [font-family:var(--font-dot-gothic-16)]">
+                    {tech.label} lv{level}
+                    {EFFECT_LABEL[techniqueId] ? ` · ${EFFECT_LABEL[techniqueId]}` : ''}
+                </span>
+            </div>
         </div>
     )
 }
