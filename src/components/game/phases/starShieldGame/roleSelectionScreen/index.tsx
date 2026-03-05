@@ -14,7 +14,7 @@ import { getAvailableNormalAttacks } from '@/utils/starShieldGame'
 import type { OwnedSkills } from '@/utils/starShieldGame'
 import type { StarShieldProgress } from '@/server/actions/game/starShieldProgressionActions'
 import { LEVEL_STAR_HP } from '@/constants/starShieldGame/gameConfig'
-import { LEVEL_HEAL_RECOVERY } from '@/constants/starShieldGame/shopConfig'
+import { LEVEL_HEAL_RECOVERY } from '@/constants/starShieldGame/skillConfig'
 
 interface RoleSelectionScreenProps {
     room: RoomWithUsersAndReadyStatus

@@ -20,7 +20,7 @@ import {
     SPECIAL_ATTACK_LEVEL_PARAMS,
 } from '@/constants/starShieldGame/gameConfig'
 import type { SpecialAttackLevel } from '@/constants/starShieldGame/gameConfig'
-import { LEVEL_HEAL_RECOVERY } from '@/constants/starShieldGame/shopConfig'
+import { LEVEL_HEAL_RECOVERY } from '@/constants/starShieldGame/skillConfig'
 import { DIALOGUES, pickRandomDialogue } from '@/constants/starShieldGame/dialogues'
 import { TECHNIQUES, type TechniqueId } from '@/constants/starShieldGame/techniques'
 import type { SpecialAttackChoice } from '@/utils/starShieldGame'

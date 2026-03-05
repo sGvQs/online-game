@@ -2,7 +2,7 @@ import { redirect } from 'next/navigation'
 import { getCurrentUser } from '@/server/actions'
 import { getRoomWithReadyStatus } from '@/server/actions/room'
 import { RoomUserWithReadyStatus } from '@/types'
-import { StarShieldShop } from '@/components/game/phases/starShieldGame/shopScreen'
+import { StarShieldSkill } from '@/components/game/phases/starShieldGame/skillScreen'
 
 export default async function StarShieldSkillPage({ params }: { params: Promise<{ roomId: string }> }) {
     const currentUser = await getCurrentUser()
@@ -22,7 +22,7 @@ export default async function StarShieldSkillPage({ params }: { params: Promise<
 
     return (
         <div className="relative min-h-screen">
-            <StarShieldShop
+            <StarShieldSkill
                 roomId={roomId}
                 currentUserId={currentUser.user.id}
             />

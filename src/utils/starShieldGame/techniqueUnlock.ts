@@ -1,16 +1,16 @@
 /**
  * 技の所持・解放ロジック
- * 通貨ベースのショップで購入したスキルのみ使用可能
+ * 通貨ベースのスキルで購入したスキルのみ使用可能
  * PROGRESSION_DEBUG 時は全スキル解放
  */
 
 import type { TechniqueId } from '@/constants/starShieldGame/techniques'
-import { PROGRESSION_DEBUG } from '@/constants/starShieldGame/shopConfig'
+import { PROGRESSION_DEBUG } from '@/constants/starShieldGame/skillConfig'
 
-/** 全部破壊（ヒール lv max でのみ獲得。ショップにはない） */
+/** 全部破壊（ヒール lv max でのみ獲得。スキルにはない） */
 export const ALL_DESTRUCTION_ID = 'all_destruction' as const
 
-/** 必殺技の選択肢（spread: ショップで購入、all_destruction: ヒール lv max で獲得） */
+/** 必殺技の選択肢（spread: スキルで購入、all_destruction: ヒール lv max で獲得） */
 export type SpecialAttackChoice = 'spread' | 'all_destruction'
 
 /** 通常攻撃の型（red は初期所持） */

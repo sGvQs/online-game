@@ -66,7 +66,7 @@ export const STAR_HP: Record<Difficulty, number> = {
     HELL: 100,
 }
 
-/** 星HPレベル → 最大HP（ショップでレベルアップ可能。難易度には依存しない） */
+/** 星HPレベル → 最大HP（スキルでレベルアップ可能。難易度には依存しない） */
 export const LEVEL_STAR_HP: Record<1 | 2 | 3 | 4 | 5, number> = {
     1: 15,
     2: 20,

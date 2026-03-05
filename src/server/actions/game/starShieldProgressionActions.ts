@@ -10,14 +10,14 @@ import {
     HEAL_UNLOCK_COST,
     HEAL_LEVEL_UP_COSTS,
     STAR_HP_LEVEL_UP_COSTS,
-} from '@/constants/starShieldGame/shopConfig'
+} from '@/constants/starShieldGame/skillConfig'
 
 export interface StarShieldProgress {
     totalTypingCount: number
     normalAttacks: { techniqueId: string; level: number }[]
     specialAttacks: { specialAttackId: string; level: number }[]
     healLevel: number | null
-    /** 星のHPレベル (1-5)。ショップでレベルアップ可能 */
+    /** 星のHPレベル (1-5)。スキルでレベルアップ可能 */
     starHpLevel: number
     /** Shooter 時に使用する通常攻撃 */
     selectedNormalAttackId: string | null

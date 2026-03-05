@@ -31,7 +31,7 @@ import {
     LEVEL_HEAL_RECOVERY,
     SPECIAL_ATTACK_LEVEL_PARAMS,
     type SpecialAttackLevel,
-} from '@/constants/starShieldGame/shopConfig'
+} from '@/constants/starShieldGame/skillConfig'
 import {
     LEVEL_STAR_HP,
     LEVEL_BULLET_COUNT,
@@ -71,7 +71,7 @@ const SPECIAL_ATTACK_IDS = ['spread'] as const
 // ============================================================
 // Main Component
 // ============================================================
-export function StarShieldShop({ roomId, currentUserId }: { roomId: string; currentUserId: string }) {
+export function StarShieldSkill({ roomId, currentUserId }: { roomId: string; currentUserId: string }) {
     const [progress, setProgress] = useState<StarShieldProgress | null>(null)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
@@ -157,7 +157,7 @@ export function StarShieldShop({ roomId, currentUserId }: { roomId: string; curr
         setError(null)
         const result = await updateLoadout(updates)
         if (result.ok) refresh()
-        else setError(result.error ?? '設定に失敗しました')
+        else setError(result.error ?? 'スキル設定に失敗しました')
     }
 
     return (
@@ -406,7 +406,7 @@ export function StarShieldShop({ roomId, currentUserId }: { roomId: string; curr
                     </div>
                 </motion.div>
 
-                {/* ショップ：ATTACK / DEFENCE タブ */}
+                {/* スキル：ATTACK / DEFENCE タブ */}
                 <motion.div
                     initial={{ opacity: 0, y: 8 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -455,7 +455,7 @@ export function StarShieldShop({ roomId, currentUserId }: { roomId: string; curr
                                 className="flex flex-col gap-4"
                             >
                                 {/* 通常攻撃 */}
-                                <ShopCard title="通常攻撃" jurisdiction="attack">
+                                <SkillCard title="通常攻撃" jurisdiction="attack">
                                     {NORMAL_ATTACK_IDS.map((techniqueId) => {
                                         const tech = TECHNIQUES[techniqueId]
                                         const ownedAttack = normalAttacks.find((a) => a.techniqueId === techniqueId)
@@ -492,10 +492,10 @@ export function StarShieldShop({ roomId, currentUserId }: { roomId: string; curr
                                             />
                                         )
                                     })}
-                                </ShopCard>
+                                </SkillCard>
 
                                 {/* 必殺技 */}
-                                <ShopCard title="必殺技" jurisdiction="attack">
+                                <SkillCard title="必殺技" jurisdiction="attack">
                                     {SPECIAL_ATTACK_IDS.map((id) => {
                                         const ownedSA = specialAttacks.find((a) => a.specialAttackId === id)
                                         const currentLevel = ownedSA ? ownedSA.level : 0
@@ -527,7 +527,7 @@ export function StarShieldShop({ roomId, currentUserId }: { roomId: string; curr
                                             />
                                         )
                                     })}
-                                </ShopCard>
+                                </SkillCard>
                             </motion.div>
                         ) : (
                             <motion.div
@@ -539,7 +539,7 @@ export function StarShieldShop({ roomId, currentUserId }: { roomId: string; curr
                                 className="flex flex-col gap-4"
                             >
                                 {/* 星のHP */}
-                                <ShopCard title="星のHP強化" jurisdiction="defence">
+                                <SkillCard title="星のHP強化" jurisdiction="defence">
                                     {/* 現在の HP バー */}
                                     <div className="flex items-end gap-4 mb-1">
                                         <div>
@@ -590,10 +590,10 @@ export function StarShieldShop({ roomId, currentUserId }: { roomId: string; curr
                                     ) : (
                                         <MaxedMessage>星のHP MAX レベル到達 🏆</MaxedMessage>
                                     )}
-                                </ShopCard>
+                                </SkillCard>
 
                                 {/* ヒール */}
-                                <ShopCard title="ヒール" jurisdiction="defence">
+                                <SkillCard title="ヒール" jurisdiction="defence">
                                     {!healLevel ? (
                                         <>
                                             <p className="text-white/40 text-xs mb-3 [font-family:var(--font-dot-gothic-16)]">
@@ -660,7 +660,7 @@ export function StarShieldShop({ roomId, currentUserId }: { roomId: string; curr
                                             )}
                                         </>
                                     )}
-                                </ShopCard>
+                                </SkillCard>
                             </motion.div>
                         )}
                     </AnimatePresence>
@@ -684,9 +684,9 @@ export function StarShieldShop({ roomId, currentUserId }: { roomId: string; curr
 }
 
 // ============================================================
-// ShopCard
+// SkillCard
 // ============================================================
-function ShopCard({
+function SkillCard({
     title,
     jurisdiction,
     children,
