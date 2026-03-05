@@ -16,7 +16,7 @@ import {
 } from '@/constants/starShieldGame/gameConfig'
 import type { TechniqueId } from '@/constants/starShieldGame/techniques'
 
-function createBaseBullet(
+export function createBaseBullet(
     o: { dirX: number; dirY: number; startX: number; startY: number },
     tech: TechniqueConfig | null,
     now: number,

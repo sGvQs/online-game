@@ -2,8 +2,8 @@
  * 必殺技の広範囲弾生成（純粋関数）
  */
 
-import type { SpecialAttackChoice } from './techniqueUnlock'
-import type { Bullet } from '@/types/starShieldGame'
+import type { TechniqueConfig } from '@/constants/starShieldGame/techniques'
+import type { TechniqueId } from '@/constants/starShieldGame/techniques'
 import {
     DINO_X,
     DINO_Y,
@@ -11,21 +11,32 @@ import {
     BULLET_SPAWN_OFFSET_Y,
     SPECIAL_ATTACK_BULLET_COUNT,
     SPECIAL_ATTACK_SPREAD_DEG,
+    LEVEL_YELLOW_DAMAGE,
+    LEVEL_PURPLE_SPEED,
 } from '@/constants/starShieldGame/gameConfig'
+import type { Bullet, NormalAttackLevel } from '@/types/starShieldGame'
+import { createBaseBullet } from './normalAttack'
+import type { SpecialAttackChoice } from './techniqueUnlock'
 
 /**
  * 必殺技の広範囲弾を生成する（純粋関数）
+ * 散弾の数・角度は specialAttack に依存。各弾の properties は選択球（tech）に依存。
  */
 export function createSpecialAttackBullets(params: {
     specialAttack: SpecialAttackChoice
     centerAngle: number
+    tech: TechniqueConfig | null
+    level: NormalAttackLevel
     now: number
 }): Bullet[] {
-    const { specialAttack, centerAngle, now } = params
+    const { specialAttack, centerAngle, tech, level, now } = params
 
     const bulletCount = SPECIAL_ATTACK_BULLET_COUNT[specialAttack]
     const spreadDeg = SPECIAL_ATTACK_SPREAD_DEG[specialAttack]
     const spreadRad = (spreadDeg * Math.PI) / 180
+
+    const yellowDamage = tech && (tech.id as TechniqueId) === 'yellow_beam' ? LEVEL_YELLOW_DAMAGE[level] : undefined
+    const purpleSpeed = tech && (tech.id as TechniqueId) === 'purple' ? tech.speed * LEVEL_PURPLE_SPEED[level] : undefined
 
     const result: Bullet[] = []
     for (let i = 0; i < bulletCount; i++) {
@@ -35,14 +46,19 @@ export function createSpecialAttackBullets(params: {
             (bulletCount > 1 ? (spreadRad * i) / (bulletCount - 1) : 0)
         const dirX = Math.cos(angle)
         const dirY = Math.sin(angle)
-        result.push({
-            id: crypto.randomUUID(),
-            firedAt: now,
-            startX: DINO_X + dirX * BULLET_SPAWN_OFFSET_X,
-            startY: DINO_Y + dirY * BULLET_SPAWN_OFFSET_Y,
-            dirX,
-            dirY,
-        })
+        const bullet = createBaseBullet(
+            {
+                dirX,
+                dirY,
+                startX: DINO_X + dirX * BULLET_SPAWN_OFFSET_X,
+                startY: DINO_Y + dirY * BULLET_SPAWN_OFFSET_Y,
+            },
+            tech,
+            now,
+            yellowDamage,
+            purpleSpeed
+        )
+        result.push(bullet)
     }
     return result
 }

@@ -258,7 +258,15 @@ export function useStarShield({
                     const dx = aim.x - DINO_X
                     const dy = aim.y - originY
                     const centerAngle = Math.hypot(dx, dy) >= 0.001 ? Math.atan2(dy, dx) : 0
-                    const newBullets = createSpecialAttackBullets({ specialAttack, centerAngle, now })
+                    const techId = payload?.technique as TechniqueId | undefined
+                    const tech = techId && techId in TECHNIQUES ? TECHNIQUES[techId] : null
+                    const newBullets = createSpecialAttackBullets({
+                        specialAttack,
+                        centerAngle,
+                        tech,
+                        level: levelRef.current,
+                        now,
+                    })
                     setBullets((prev) => {
                         const next = [...prev, ...newBullets]
                         bulletsRef.current = next
