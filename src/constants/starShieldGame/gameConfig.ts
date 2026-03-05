@@ -94,6 +94,18 @@ export const SPREAD_DEG_EASY_NORMAL_HARD = 12
 /** HELL 必殺技の広がり角度（度） */
 export const HELL_SPECIAL_SPREAD_DEG = 150
 
+// ========== 必殺技・レベル制 ==========
+/** 必殺技のレベル別パラメータ（全球共通） */
+export type SpecialSpreadParams = { count: number; spreadDeg: number }
+
+export const LEVEL_SPECIAL: Record<NormalAttackLevel, SpecialSpreadParams> = {
+    1: { count: 5, spreadDeg: 12 },
+    2: { count: 12, spreadDeg: 20 },
+    3: { count: 20, spreadDeg: 35 },
+    4: { count: 30, spreadDeg: 55 },
+    5: { count: 45, spreadDeg: 85 },
+}
+
 // ========== 通常攻撃・レベル制 ==========
 /** レベル → 通常攻撃（tech=null）時の散弾数 */
 export const LEVEL_BULLET_COUNT: Record<NormalAttackLevel, number> = {

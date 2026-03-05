@@ -9,8 +9,7 @@ import {
     DINO_Y,
     BULLET_SPAWN_OFFSET_X,
     BULLET_SPAWN_OFFSET_Y,
-    SPECIAL_ATTACK_BULLET_COUNT,
-    SPECIAL_ATTACK_SPREAD_DEG,
+    LEVEL_SPECIAL,
     LEVEL_YELLOW_DAMAGE,
     LEVEL_PURPLE_SPEED,
 } from '@/constants/starShieldGame/gameConfig'
@@ -20,7 +19,7 @@ import type { SpecialAttackChoice } from './techniqueUnlock'
 
 /**
  * 必殺技の広範囲弾を生成する（純粋関数）
- * 散弾の数・角度は specialAttack に依存。各弾の properties は選択球（tech）に依存。
+ * 散弾の数・角度は level に依存（LEVEL_SPECIAL）。各弾の properties は選択球（tech）に依存。
  */
 export function createSpecialAttackBullets(params: {
     specialAttack: SpecialAttackChoice
@@ -29,10 +28,9 @@ export function createSpecialAttackBullets(params: {
     level: NormalAttackLevel
     now: number
 }): Bullet[] {
-    const { specialAttack, centerAngle, tech, level, now } = params
+    const { centerAngle, tech, level, now } = params
 
-    const bulletCount = SPECIAL_ATTACK_BULLET_COUNT[specialAttack]
-    const spreadDeg = SPECIAL_ATTACK_SPREAD_DEG[specialAttack]
+    const { count: bulletCount, spreadDeg } = LEVEL_SPECIAL[level]
     const spreadRad = (spreadDeg * Math.PI) / 180
 
     const yellowDamage = tech && (tech.id as TechniqueId) === 'yellow_beam' ? LEVEL_YELLOW_DAMAGE[level] : undefined
