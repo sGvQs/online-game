@@ -387,44 +387,57 @@ export function StarShieldShop({ roomId, currentUserId }: { roomId: string; curr
                                 transition={{ duration: 0.18 }}
                                 className="flex flex-col gap-4"
                             >
-                                {/* 通常攻撃解放 */}
-                                <ShopCard title="通常攻撃スキル解放" jurisdiction="attack">
+                                {/* 通常攻撃 */}
+                                <ShopCard title="通常攻撃" jurisdiction="attack">
                                     {NORMAL_ATTACK_IDS.filter((id) => id !== 'red').map((techniqueId) => {
                                         const tech = TECHNIQUES[techniqueId]
-                                        const cost = NORMAL_ATTACK_UNLOCK_COSTS[techniqueId] ?? 0
                                         const ownedAttack = normalAttacks.find((a) => a.techniqueId === techniqueId)
-                                        const isOwned = !!ownedAttack
+                                        const currentLevel = ownedAttack ? ownedAttack.level : 0
+                                        const maxLevel = 5
+                                        const isMaxed = currentLevel >= maxLevel
+                                        const nextLevel = (currentLevel + 1) as 1 | 2 | 3 | 4 | 5
+                                        const cost = currentLevel === 0
+                                            ? NORMAL_ATTACK_UNLOCK_COSTS[techniqueId] ?? 0
+                                            : NORMAL_ATTACK_LEVEL_UP_COSTS[techniqueId]?.[nextLevel as 2 | 3 | 4 | 5] ?? 0
+
                                         return (
                                             <SkillRow
                                                 key={techniqueId}
-                                                owned={isOwned}
                                                 label={
                                                     <div className="flex items-center gap-2">
                                                         <span
                                                             className="w-3 h-3 rounded-full shrink-0"
                                                             style={{ backgroundColor: tech.color }}
                                                         />
-                                                        <span>{tech.label}</span>
+                                                        <span className="[font-family:var(--font-dot-gothic-16)] font-bold">{tech.label}</span>
                                                     </div>
                                                 }
                                                 detail={getTechEffectLabel(techniqueId)}
+                                                currentLevel={currentLevel}
+                                                maxLevel={maxLevel}
                                                 cost={cost}
                                                 typingCount={typingCount}
                                                 onPurchase={
-                                                    isOwned
+                                                    isMaxed
                                                         ? undefined
                                                         : () =>
                                                             handlePurchase(
-                                                                () => purchaseNormalAttackUnlock(techniqueId),
-                                                                tech.label
+                                                                () =>
+                                                                    currentLevel === 0
+                                                                        ? purchaseNormalAttackUnlock(techniqueId)
+                                                                        : purchaseNormalAttackLevelUp(
+                                                                            techniqueId,
+                                                                            nextLevel as 2 | 3 | 4 | 5
+                                                                        ),
+                                                                currentLevel === 0 ? tech.label : '通常攻撃レベル上げ'
                                                             )
                                                 }
                                                 onPreview={() =>
                                                     setPreview({
                                                         kind: 'normalAttack',
                                                         techniqueId,
-                                                        currentLevel: ownedAttack?.level ?? 0,
-                                                        owned: isOwned,
+                                                        currentLevel,
+                                                        owned: currentLevel > 0,
                                                     })
                                                 }
                                                 color="indigo"
@@ -433,138 +446,58 @@ export function StarShieldShop({ roomId, currentUserId }: { roomId: string; curr
                                     })}
                                 </ShopCard>
 
-                                {/* 通常攻撃レベル上げ */}
-                                <ShopCard title="通常攻撃レベル上げ" jurisdiction="attack">
-                                    {normalAttacks
-                                        .filter(({ level }) => level < 5)
-                                        .map(({ techniqueId, level }) => {
-                                            const tech = TECHNIQUES[techniqueId as TechniqueId]
-                                            const costs = NORMAL_ATTACK_LEVEL_UP_COSTS[techniqueId]
-                                            const nextLevel = (level + 1) as 2 | 3 | 4 | 5
-                                            const cost = costs?.[nextLevel] ?? 0
-                                            return (
-                                                <SkillRow
-                                                    key={`${techniqueId}-lv`}
-                                                    label={
-                                                        <div className="flex items-center gap-2">
-                                                            <span
-                                                                className="w-3 h-3 rounded-full shrink-0"
-                                                                style={{ backgroundColor: tech?.color ?? '#666' }}
-                                                            />
-                                                            <span>
-                                                                {tech?.label ?? techniqueId} lv{level} → lv{nextLevel}
-                                                            </span>
-                                                        </div>
-                                                    }
-                                                    cost={cost}
-                                                    typingCount={typingCount}
-                                                    onPurchase={() =>
-                                                        handlePurchase(
-                                                            () =>
-                                                                purchaseNormalAttackLevelUp(techniqueId, nextLevel),
-                                                            'レベル上げ'
-                                                        )
-                                                    }
-                                                    onPreview={() =>
-                                                        setPreview({
-                                                            kind: 'normalAttack',
-                                                            techniqueId: techniqueId as TechniqueId,
-                                                            currentLevel: level,
-                                                            owned: true,
-                                                        })
-                                                    }
-                                                    color="indigo"
-                                                />
-                                            )
-                                        })}
-                                    {normalAttacks.length > 0 &&
-                                        normalAttacks.every(({ level }) => level >= 5) && (
-                                            <MaxedMessage>すべての通常攻撃が MAX レベルです</MaxedMessage>
-                                        )}
-                                    {normalAttacks.length === 0 && (
-                                        <p className="text-white/30 text-xs [font-family:var(--font-dot-gothic-16)]">
-                                            スキルを解放してください
-                                        </p>
-                                    )}
-                                </ShopCard>
-
                                 {/* 必殺技 */}
                                 <ShopCard title="必殺技" jurisdiction="attack">
                                     {SPECIAL_ATTACK_IDS.map((id) => {
-                                        const cost = SPECIAL_ATTACK_UNLOCK_COSTS[id]
                                         const ownedSA = specialAttacks.find((a) => a.specialAttackId === id)
-                                        const isOwned = !!ownedSA
+                                        const currentLevel = ownedSA ? ownedSA.level : 0
+                                        const maxLevel = 10
+                                        const isMaxed = currentLevel >= maxLevel
+                                        const nextLevel = (currentLevel + 1) as 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10
+                                        const cost = currentLevel === 0
+                                            ? SPECIAL_ATTACK_UNLOCK_COSTS[id] ?? 0
+                                            : SPECIAL_ATTACK_LEVEL_UP_COSTS[nextLevel as Exclude<typeof nextLevel, 1>] ?? 0
+
                                         return (
                                             <SkillRow
                                                 key={id}
-                                                owned={isOwned}
-                                                label={<span>{SPECIAL_LABELS[id] ?? id}</span>}
+                                                label={
+                                                    <span className="[font-family:var(--font-dot-gothic-16)] font-bold">
+                                                        {SPECIAL_LABELS[id] ?? id}
+                                                    </span>
+                                                }
                                                 detail="単語完了時に扇状に弾を散布"
+                                                currentLevel={currentLevel}
+                                                maxLevel={maxLevel}
                                                 cost={cost}
                                                 typingCount={typingCount}
                                                 onPurchase={
-                                                    isOwned
+                                                    isMaxed
                                                         ? undefined
                                                         : () =>
                                                             handlePurchase(
-                                                                () => purchaseSpecialAttackUnlock(id),
-                                                                SPECIAL_LABELS[id]
+                                                                () =>
+                                                                    currentLevel === 0
+                                                                        ? purchaseSpecialAttackUnlock(id)
+                                                                        : purchaseSpecialAttackLevelUp(
+                                                                            id,
+                                                                            nextLevel as Exclude<typeof nextLevel, 1>
+                                                                        ),
+                                                                currentLevel === 0 ? SPECIAL_LABELS[id] : '必殺技レベル上げ'
                                                             )
                                                 }
                                                 onPreview={() =>
                                                     setPreview({
                                                         kind: 'specialAttack',
                                                         id,
-                                                        currentLevel: ownedSA?.level ?? 0,
-                                                        owned: isOwned,
+                                                        currentLevel,
+                                                        owned: currentLevel > 0,
                                                     })
                                                 }
                                                 color="indigo"
                                             />
                                         )
                                     })}
-
-                                    {specialAttacks
-                                        .filter(({ level }) => level < 10)
-                                        .map(({ specialAttackId, level }) => {
-                                            const nextLevel = (level + 1) as 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10
-                                            const cost = SPECIAL_ATTACK_LEVEL_UP_COSTS[nextLevel] ?? 0
-                                            return (
-                                                <SkillRow
-                                                    key={`${specialAttackId}-lv`}
-                                                    label={
-                                                        <span>
-                                                            {SPECIAL_LABELS[specialAttackId] ?? specialAttackId}{' '}
-                                                            lv{level} → lv{nextLevel}
-                                                        </span>
-                                                    }
-                                                    cost={cost}
-                                                    typingCount={typingCount}
-                                                    onPurchase={() =>
-                                                        handlePurchase(
-                                                            () =>
-                                                                purchaseSpecialAttackLevelUp(
-                                                                    specialAttackId,
-                                                                    nextLevel as 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10
-                                                                ),
-                                                            '必殺技レベル上げ'
-                                                        )
-                                                    }
-                                                    onPreview={() =>
-                                                        setPreview({
-                                                            kind: 'specialAttack',
-                                                            id: specialAttackId,
-                                                            currentLevel: level,
-                                                            owned: true,
-                                                        })
-                                                    }
-                                                    color="indigo"
-                                                />
-                                            )
-                                        })}
-                                    {specialAttacks.some(({ level }) => level >= 10) && (
-                                        <MaxedMessage>必殺技が MAX レベルです</MaxedMessage>
-                                    )}
                                 </ShopCard>
                             </motion.div>
                         ) : (
@@ -760,15 +693,15 @@ function ShopCard({
             <div className="flex items-center justify-between">
                 <p
                     className={cn(
-                        'text-[11px] [font-family:var(--font-cherry-bomb-one)]',
-                        isAttack ? 'text-indigo-400/70' : 'text-emerald-400/70'
+                        'text-[13px] font-bold tracking-wider [font-family:var(--font-dot-gothic-16)]',
+                        isAttack ? 'text-indigo-400' : 'text-emerald-400'
                     )}
                 >
                     {title}
                 </p>
                 <span
                     className={cn(
-                        'text-[10px] px-2 py-0.5 rounded-full border [font-family:var(--font-cherry-bomb-one)]',
+                        'text-[10px] px-2 py-0.5 rounded-full border tracking-wide [font-family:var(--font-dot-gothic-16)]',
                         isAttack
                             ? 'bg-indigo-500/15 border-indigo-500/30 text-indigo-300'
                             : 'bg-emerald-500/15 border-emerald-500/30 text-emerald-300'
@@ -788,30 +721,32 @@ function ShopCard({
 function SkillRow({
     label,
     detail,
+    currentLevel,
+    maxLevel,
     cost,
     typingCount,
     onPurchase,
     onPreview,
-    owned,
     color,
 }: {
     label: React.ReactNode
     detail?: string
-    cost: number
-    typingCount: number
+    currentLevel?: number
+    maxLevel?: number
+    cost?: number
+    typingCount?: number
     onPurchase?: () => void
     onPreview?: () => void
-    owned?: boolean
     color: 'indigo' | 'emerald'
 }) {
-    const canAfford = typingCount >= cost
+    const canAfford = cost !== undefined && typingCount !== undefined && typingCount >= cost
     const btnCls =
         color === 'indigo'
             ? 'bg-indigo-500/25 border-indigo-500/50 text-indigo-300 hover:bg-indigo-500/35'
             : 'bg-emerald-500/25 border-emerald-500/50 text-emerald-300 hover:bg-emerald-500/35'
 
     return (
-        <div className="flex items-center justify-between gap-3 py-2.5 border-b border-white/[0.04] last:border-0">
+        <div className="flex items-center justify-between gap-3 py-2.5 border-b border-white/[0.04] last:border-0 hover:bg-white/[0.02] -mx-2 px-2 rounded-xl transition-colors">
             <div className="flex items-center gap-2 min-w-0 flex-1">
                 {onPreview && (
                     <button
@@ -822,17 +757,27 @@ function SkillRow({
                         👁️
                     </button>
                 )}
-                <div className="flex flex-col min-w-0">
+                <div className="flex flex-col min-w-0 flex-1">
                     <span className="text-white/85 text-sm">{label}</span>
                     {detail && (
                         <span className="text-white/30 text-[10px] [font-family:var(--font-dot-gothic-16)]">{detail}</span>
                     )}
+                    {currentLevel !== undefined && maxLevel !== undefined && (
+                        <div className="w-24 md:w-32 mt-1.5 relative flex items-center gap-2">
+                            <div className="flex-1 h-1.5 rounded-full bg-white/10 overflow-hidden">
+                                <div
+                                    className={cn('h-full rounded-full transition-all duration-700', color === 'indigo' ? 'bg-indigo-400' : 'bg-emerald-400')}
+                                    style={{ width: `${(currentLevel / maxLevel) * 100}%` }}
+                                />
+                            </div>
+                            <span className="text-[10px] text-white/40 [font-family:var(--font-dot-gothic-16)] shrink-0">
+                                {currentLevel}/{maxLevel}
+                            </span>
+                        </div>
+                    )}
                 </div>
-                {owned && (
-                    <span className="text-[10px] text-emerald-400 shrink-0 [font-family:var(--font-dot-gothic-16)]">所持</span>
-                )}
             </div>
-            {onPurchase && (
+            {onPurchase && cost !== undefined && (
                 <button
                     onClick={onPurchase}
                     disabled={!canAfford}
@@ -844,6 +789,9 @@ function SkillRow({
                 >
                     {cost.toLocaleString()}
                 </button>
+            )}
+            {!onPurchase && currentLevel === maxLevel && (
+                <span className="text-[10px] text-amber-300 shrink-0 [font-family:var(--font-dot-gothic-16)] border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 rounded">MAX</span>
             )}
         </div>
     )
