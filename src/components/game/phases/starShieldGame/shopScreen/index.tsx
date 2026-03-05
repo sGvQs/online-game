@@ -139,7 +139,7 @@ export function StarShieldShop({ roomId, currentUserId }: { roomId: string; curr
                     className="flex items-center justify-between"
                 >
                     <div>
-                        <h1 className="text-2xl font-black [font-family:var(--font-cherry-bomb-one)] bg-gradient-to-br from-purple-400 to-pink-400 bg-clip-text text-transparent [-webkit-background-clip:text] [-webkit-text-fill-color:transparent]">
+                        <h1 className="text-2xl font-black [font-family:var(--font-dot-gothic-16)] bg-gradient-to-br from-purple-400 to-pink-400 bg-clip-text text-transparent [-webkit-background-clip:text] [-webkit-text-fill-color:transparent]">
                             スキル設定
                         </h1>
                         <p className="text-white/35 text-xs mt-0.5 [font-family:var(--font-dot-gothic-16)]">
@@ -148,7 +148,7 @@ export function StarShieldShop({ roomId, currentUserId }: { roomId: string; curr
                     </div>
                     <Link
                         href={`/game/${roomId}/star-shield`}
-                        className="px-4 py-2 rounded-xl border border-brand-500/50 bg-brand-500/20 text-brand-300 text-sm hover:bg-brand-500/30 transition-colors [font-family:var(--font-cherry-bomb-one)]"
+                        className="px-4 py-2 rounded-xl border border-brand-500/50 bg-brand-500/20 text-brand-300 text-sm hover:bg-brand-500/30 transition-colors [font-family:var(--font-dot-gothic-16)]"
                     >
                         ← もどる
                     </Link>
@@ -185,7 +185,7 @@ export function StarShieldShop({ roomId, currentUserId }: { roomId: string; curr
                     transition={{ delay: 0.1 }}
                     className="rounded-2xl p-5 bg-white/[0.03] border border-white/[0.08] flex flex-col gap-5"
                 >
-                    <p className="text-sm [font-family:var(--font-cherry-bomb-one)] text-white/80 flex items-center gap-2">
+                    <p className="text-sm [font-family:var(--font-dot-gothic-16)] text-white/80 flex items-center gap-2">
                         🎮 ロードアウト設定
                         <span className="text-[10px] text-white/30 font-normal [font-family:var(--font-dot-gothic-16)]">
                             ゲームで使用するスキルを選択
@@ -198,7 +198,7 @@ export function StarShieldShop({ roomId, currentUserId }: { roomId: string; curr
                             <div className="absolute top-0 right-0 p-3 opacity-[0.03] pointer-events-none">
                                 <Image src={ICONS.SHOOTER} alt="" width={80} height={80} />
                             </div>
-                            <h3 className="text-indigo-400 text-xs font-bold flex items-center gap-2 [font-family:var(--font-cherry-bomb-one)] mb-1">
+                            <h3 className="text-indigo-400 text-xs font-bold flex items-center gap-2 [font-family:var(--font-dot-gothic-16)] mb-1">
                                 <Image src={ICONS.SHOOTER} alt="Shooter" width={16} height={16} className="opacity-80" />
                                 ATTACK（Shooter）
                             </h3>
@@ -286,7 +286,7 @@ export function StarShieldShop({ roomId, currentUserId }: { roomId: string; curr
                             <div className="absolute top-0 right-0 p-3 opacity-[0.03] pointer-events-none">
                                 <Image src={ICONS.TYPIST} alt="" width={80} height={80} />
                             </div>
-                            <h3 className="text-emerald-400 text-xs font-bold flex items-center gap-2 [font-family:var(--font-cherry-bomb-one)] mb-1">
+                            <h3 className="text-emerald-400 text-xs font-bold flex items-center gap-2 [font-family:var(--font-dot-gothic-16)] mb-1">
                                 <Image src={ICONS.TYPIST} alt="Typist" width={16} height={16} className="opacity-80" />
                                 DEFENCE（Typist）
                             </h3>
@@ -584,7 +584,7 @@ export function StarShieldShop({ roomId, currentUserId }: { roomId: string; curr
                                             <p className="text-[10px] text-white/30 mb-0.5 [font-family:var(--font-dot-gothic-16)]">
                                                 現在のHP上限
                                             </p>
-                                            <p className="text-3xl font-bold text-emerald-400 [font-family:var(--font-cherry-bomb-one)] leading-none">
+                                            <p className="text-3xl font-bold text-emerald-400 [font-family:var(--font-dot-gothic-16)] leading-none">
                                                 {LEVEL_STAR_HP[starHpLevel as 1 | 2 | 3 | 4 | 5]}
                                             </p>
                                         </div>
@@ -663,7 +663,7 @@ export function StarShieldShop({ roomId, currentUserId }: { roomId: string; curr
                                                     <p className="text-[10px] text-white/30 mb-0.5 [font-family:var(--font-dot-gothic-16)]">
                                                         現在の回復量
                                                     </p>
-                                                    <p className="text-xl font-bold text-emerald-400 [font-family:var(--font-cherry-bomb-one)] leading-none">
+                                                    <p className="text-xl font-bold text-emerald-400 [font-family:var(--font-dot-gothic-16)] leading-none">
                                                         {healLevel >= 5 ? '全回復' : `+${LEVEL_HEAL_RECOVERY[healLevel as 1 | 2 | 3 | 4 | 5 | 6]} HP`}
                                                     </p>
                                                 </div>
@@ -856,7 +856,7 @@ function MaxedMessage({ children }: { children: React.ReactNode }) {
     return (
         <div className="flex items-center gap-2 py-2.5">
             <span className="text-amber-400 text-base">🏆</span>
-            <span className="text-amber-400/80 text-sm [font-family:var(--font-cherry-bomb-one)]">{children}</span>
+            <span className="text-amber-400/80 text-sm [font-family:var(--font-dot-gothic-16)]">{children}</span>
         </div>
     )
 }
@@ -959,7 +959,7 @@ function PreviewContent({
                         />
                     </div>
                     <div>
-                        <p className="text-white font-bold text-base [font-family:var(--font-cherry-bomb-one)]">
+                        <p className="text-white font-bold text-base [font-family:var(--font-dot-gothic-16)]">
                             {tech.label}
                         </p>
                         <p className="text-white/40 text-xs [font-family:var(--font-dot-gothic-16)]">
@@ -972,8 +972,8 @@ function PreviewContent({
                     <StatRow label="発射タイミング" value="1文字打鍵ごと" color="text-white/55" />
                     {fx && (
                         <div className="mt-1 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 px-4 py-3">
-                            <p className="text-indigo-300 text-xs font-bold mb-1 [font-family:var(--font-cherry-bomb-one)]">
-                                ✨ 特殊効果：{fx.label}
+                            <p className="text-indigo-300 text-xs font-bold mb-1 [font-family:var(--font-dot-gothic-16)]">
+                                ⚡ 特殊効果：{fx.label}
                             </p>
                             <p className="text-white/45 text-[11px] [font-family:var(--font-dot-gothic-16)]">
                                 {fx.desc}
@@ -1015,7 +1015,7 @@ function PreviewContent({
                         })}
                     </div>
                     <div>
-                        <p className="text-white font-bold text-base [font-family:var(--font-cherry-bomb-one)]">
+                        <p className="text-white font-bold text-base [font-family:var(--font-dot-gothic-16)]">
                             {SPECIAL_LABELS[preview.id] ?? preview.id}
                         </p>
                         <p className="text-white/40 text-xs [font-family:var(--font-dot-gothic-16)]">
@@ -1051,7 +1051,7 @@ function PreviewContent({
                         💚
                     </div>
                     <div>
-                        <p className="text-white font-bold text-base [font-family:var(--font-cherry-bomb-one)]">ヒール</p>
+                        <p className="text-white font-bold text-base [font-family:var(--font-dot-gothic-16)]">ヒール</p>
                         <p className="text-white/40 text-xs [font-family:var(--font-dot-gothic-16)]">
                             {level ? `Lv ${level === 6 ? 'max' : level}` : '未所持'}
                         </p>
@@ -1061,7 +1061,7 @@ function PreviewContent({
                     <div>
                         <div className="flex items-center justify-between mb-1.5">
                             <p className="text-white/40 text-xs [font-family:var(--font-dot-gothic-16)]">回復量</p>
-                            <p className="text-emerald-400 text-sm font-bold [font-family:var(--font-cherry-bomb-one)]">
+                            <p className="text-emerald-400 text-sm font-bold [font-family:var(--font-dot-gothic-16)]">
                                 {level === null ? '---' : isFullRestore ? '全回復' : `+${healVal} HP`}
                             </p>
                         </div>
@@ -1074,7 +1074,7 @@ function PreviewContent({
                     </div>
                     {level === 6 && (
                         <div className="rounded-2xl bg-red-500/10 border border-red-500/20 px-4 py-3">
-                            <p className="text-red-300 text-xs font-bold mb-1 [font-family:var(--font-cherry-bomb-one)]">
+                            <p className="text-red-300 text-xs font-bold mb-1 [font-family:var(--font-dot-gothic-16)]">
                                 ⚡ all_destruction 付与
                             </p>
                             <p className="text-white/40 text-[11px] [font-family:var(--font-dot-gothic-16)]">
@@ -1103,7 +1103,7 @@ function PreviewContent({
                         ⭐
                     </div>
                     <div>
-                        <p className="text-white font-bold text-base [font-family:var(--font-cherry-bomb-one)]">
+                        <p className="text-white font-bold text-base [font-family:var(--font-dot-gothic-16)]">
                             星のHP
                         </p>
                         <p className="text-white/40 text-xs [font-family:var(--font-dot-gothic-16)]">Lv {level}</p>
