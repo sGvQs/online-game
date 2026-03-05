@@ -413,6 +413,8 @@ export function StarShieldShop({ roomId, currentUserId }: { roomId: string; curr
                                                     </div>
                                                 }
                                                 detail={getTechEffectLabel(techniqueId)}
+                                                currentLevel={currentLevel}
+                                                maxLevel={maxLevel}
                                                 onClick={() =>
                                                     setPreview({
                                                         kind: 'normalAttack',
@@ -446,6 +448,8 @@ export function StarShieldShop({ roomId, currentUserId }: { roomId: string; curr
                                                     </span>
                                                 }
                                                 detail="単語完了時に扇状に弾を散布"
+                                                currentLevel={currentLevel}
+                                                maxLevel={maxLevel}
                                                 onClick={() =>
                                                     setPreview({
                                                         kind: 'specialAttack',
@@ -505,6 +509,8 @@ export function StarShieldShop({ roomId, currentUserId }: { roomId: string; curr
                                                             {nextLevel}）
                                                         </span>
                                                     }
+                                                    currentLevel={starHpLevel}
+                                                    maxLevel={5}
                                                     onClick={() =>
                                                         setPreview({
                                                             kind: 'starHp',
@@ -528,6 +534,8 @@ export function StarShieldShop({ roomId, currentUserId }: { roomId: string; curr
                                             </p>
                                             <SkillRow
                                                 label={<span>ヒール解放</span>}
+                                                currentLevel={0}
+                                                maxLevel={6}
                                                 onClick={() => setPreview({ kind: 'heal' })}
                                                 color="emerald"
                                             />
@@ -569,6 +577,8 @@ export function StarShieldShop({ roomId, currentUserId }: { roomId: string; curr
                                                                     {nextLevel === 6 ? 'max' : nextLevel}
                                                                 </span>
                                                             }
+                                                            currentLevel={healLevel}
+                                                            maxLevel={6}
                                                             onClick={() =>
                                                                 setPreview({
                                                                     kind: 'heal',
