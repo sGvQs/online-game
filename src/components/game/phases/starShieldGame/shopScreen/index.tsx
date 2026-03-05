@@ -293,6 +293,7 @@ export function StarShieldShop({ roomId, currentUserId }: { roomId: string; curr
                                         <SpecialAttackLoadoutPreview
                                             specialAttackId={selSpec.specialAttackId}
                                             level={selSpec.level}
+                                            bulletColor={TECHNIQUES[selNormal as TechniqueId]?.color ?? '#ef4444'}
                                         />
                                     )
                                 })()}
@@ -1427,7 +1428,15 @@ function LoadoutAnimPreview({ techniqueId, level }: { techniqueId: TechniqueId; 
 // ============================================================
 type SpecBullet = { x: number; y: number; vx: number; vy: number; alpha: number }
 
-function SpecialAttackLoadoutPreview({ specialAttackId, level }: { specialAttackId: SpecialAttackChoice; level: number }) {
+function SpecialAttackLoadoutPreview({
+    specialAttackId,
+    level,
+    bulletColor,
+}: {
+    specialAttackId: SpecialAttackChoice
+    level: number
+    bulletColor: string
+}) {
     const canvasRef = useRef<HTMLCanvasElement>(null)
     const lvl = Math.max(1, Math.min(10, level)) as SpecialAttackLevel
     const params = SPECIAL_ATTACK_LEVEL_PARAMS[lvl]
@@ -1446,8 +1455,7 @@ function SpecialAttackLoadoutPreview({ specialAttackId, level }: { specialAttack
         const ORIGIN_Y = H / 2 - 2
         const FIRE_INTERVAL = 1800
         const SPEED = 3.4
-        // 赤球スタイル（基本）、all_destruction はオレンジ
-        const COLOR = specialAttackId === 'all_destruction' ? '#f97316' : '#ef4444'
+        const COLOR = bulletColor
 
         const bullets: SpecBullet[] = []
         let lastFire = -FIRE_INTERVAL
@@ -1517,7 +1525,7 @@ function SpecialAttackLoadoutPreview({ specialAttackId, level }: { specialAttack
             timeouts.forEach((t) => clearTimeout(t))
             bullets.length = 0
         }
-    }, [specialAttackId, level, spreadDeg, waveCount, bulletsPerWave, waveDelayMs])
+    }, [specialAttackId, level, bulletColor, spreadDeg, waveCount, bulletsPerWave, waveDelayMs])
 
     const label = specialAttackId === 'all_destruction' ? '全破壊' : '扇状散弾'
 
@@ -1532,8 +1540,8 @@ function SpecialAttackLoadoutPreview({ specialAttackId, level }: { specialAttack
                 <span
                     className="w-1.5 h-1.5 rounded-full shrink-0"
                     style={{
-                        background: specialAttackId === 'all_destruction' ? '#f97316' : '#ef4444',
-                        boxShadow: specialAttackId === 'all_destruction' ? '0 0 6px rgba(249,115,22,0.6)' : '0 0 6px rgba(239,68,68,0.6)',
+                        background: bulletColor,
+                        boxShadow: `0 0 6px ${bulletColor}99`,
                     }}
                 />
                 <span className="text-[9px] text-white/25 [font-family:var(--font-dot-gothic-16)]">{label} Lv{level}</span>
