@@ -66,7 +66,7 @@ interface UseStarShieldProps {
     selectedHealLevel?: number | null
     /** 星のHPレベル（1-5）。指定時は LEVEL_STAR_HP を使用。未指定時は難易度ベースにフォールバック */
     starHpLevel?: number
-    /** tech=null 時の散弾数レベル（1-5、5=lv.max） */
+    /** tech=null 時の散弾数レベル（1-5、5=Lv. .max） */
     level?: NormalAttackLevel
     /** デバッグ: 発射時に最も近い隕石を照準にする（準備画面で設定） */
     autoAimNearest?: boolean

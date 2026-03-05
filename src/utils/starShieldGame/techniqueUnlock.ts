@@ -7,10 +7,10 @@
 import type { TechniqueId } from '@/constants/starShieldGame/techniques'
 import { PROGRESSION_DEBUG } from '@/constants/starShieldGame/skillConfig'
 
-/** 全部破壊（ヒール lv max でのみ獲得。スキルにはない） */
+/** 全部破壊（ヒール Lv.  max でのみ獲得。スキルにはない） */
 export const ALL_DESTRUCTION_ID = 'all_destruction' as const
 
-/** 必殺技の選択肢（spread: スキルで購入、all_destruction: ヒール lv max で獲得） */
+/** 必殺技の選択肢（spread: スキルで購入、all_destruction: ヒール Lv.  max で獲得） */
 export type SpecialAttackChoice = 'spread' | 'all_destruction'
 
 /** 通常攻撃の型（red は初期所持） */

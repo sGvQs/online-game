@@ -263,7 +263,7 @@ export function StarShieldSkill({ roomId, currentUserId }: { roomId: string; cur
                                                     className="w-3 h-3 rounded-full shrink-0 ring-2 ring-white/10"
                                                     style={{ backgroundColor: tech.color }}
                                                 />
-                                                <span className="text-[10px] opacity-70">lv{level}</span>
+                                                <span className="text-[10px] opacity-70">Lv. {level}</span>
                                             </button>
                                         )
                                     })}
@@ -306,7 +306,7 @@ export function StarShieldSkill({ roomId, currentUserId }: { roomId: string; cur
                                                     className="w-3 h-3 rounded-full shrink-0 bg-[#a78bfa] ring-2 ring-white/10"
                                                     style={{ boxShadow: '0 0 6px rgba(167,139,250,0.5)' }}
                                                 />
-                                                <span className="text-[10px] opacity-70">lv{level}</span>
+                                                <span className="text-[10px] opacity-70">Lv. {level}</span>
                                             </button>
                                         )
                                     })}
@@ -379,15 +379,28 @@ export function StarShieldSkill({ roomId, currentUserId }: { roomId: string; cur
                                                 className="w-3 h-3 rounded-full shrink-0 ring-2 ring-white/10"
                                                 style={{ backgroundColor: '#10b981', boxShadow: '0 0 6px rgba(16,185,129,0.5)' }}
                                             />
-                                            <span className="text-[10px] opacity-70">lv{healLevel === 6 ? 'max' : healLevel}</span>
+                                            <span className="text-[10px] opacity-70">Lv. {healLevel === 6 ? 'max' : healLevel}</span>
                                         </div>
                                     ) : (
                                         <span className="text-white/30 text-xs [font-family:var(--font-dot-gothic-16)]">未所持</span>
                                     )}
                                 </div>
-                                {/* ヒール効果 */}
+                                {/* ヒール効果・プログレスバー */}
                                 {healLevel !== null && (
-                                    <div className="mt-2 rounded-xl px-3 py-2 bg-emerald-500/5 border border-emerald-500/20">
+                                    <div className="mt-2 space-y-2">
+                                        <div className="flex items-center gap-2">
+                                            <div className="flex-1 min-w-0 h-1.5 rounded-full bg-white/5 overflow-hidden">
+                                                <div
+                                                    className={cn(
+                                                        'h-full rounded-full transition-all duration-300',
+                                                        healLevel === 6 ? 'bg-gradient-to-r from-amber-600 to-yellow-400' : 'bg-gradient-to-r from-emerald-700 to-emerald-400'
+                                                    )}
+                                                    style={{ width: `${(healLevel / 6) * 100}%` }}
+                                                />
+                                            </div>
+                                            <span className="text-[9px] text-white/40 shrink-0">Lv{healLevel === 6 ? 'max' : healLevel}/6</span>
+                                        </div>
+                                        <div className="rounded-xl px-3 py-2 bg-emerald-500/5 border border-emerald-500/20">
                                         <p className="text-[10px] text-emerald-400/70 [font-family:var(--font-dot-gothic-16)]">
                                             {healLevel >= 5 ? (
                                                 healLevel === 6 ? (
@@ -399,6 +412,7 @@ export function StarShieldSkill({ roomId, currentUserId }: { roomId: string; cur
                                                 <>単語打ち切り時：星HP +<span className="text-emerald-300 font-bold">{LEVEL_HEAL_RECOVERY[healLevel as 1 | 2 | 3 | 4]}</span></>
                                             )}
                                         </p>
+                                        </div>
                                     </div>
                                 )}
                             </div>
@@ -572,7 +586,7 @@ export function StarShieldSkill({ roomId, currentUserId }: { roomId: string; cur
                                                     label={
                                                         <span>
                                                             HP {LEVEL_STAR_HP[starHpLevel as 1 | 2 | 3 | 4 | 5]} →{' '}
-                                                            {LEVEL_STAR_HP[nextLevel]}（lv{starHpLevel} → lv
+                                                            {LEVEL_STAR_HP[nextLevel]}（Lv. {starHpLevel} → Lv. 
                                                             {nextLevel}）
                                                         </span>
                                                     }
@@ -622,7 +636,10 @@ export function StarShieldSkill({ roomId, currentUserId }: { roomId: string; cur
                                                 <div className="flex-1 pb-1">
                                                     <div className="h-2 rounded-full bg-white/5 overflow-hidden">
                                                         <div
-                                                            className="h-full rounded-full bg-gradient-to-r from-emerald-700 to-emerald-400 transition-all duration-700"
+                                                            className={cn(
+                                                                'h-full rounded-full transition-all duration-700',
+                                                                healLevel === 6 ? 'bg-gradient-to-r from-amber-600 to-yellow-400' : 'bg-gradient-to-r from-emerald-700 to-emerald-400'
+                                                            )}
                                                             style={{ width: `${(healLevel / 6) * 100}%` }}
                                                         />
                                                     </div>
@@ -640,7 +657,7 @@ export function StarShieldSkill({ roomId, currentUserId }: { roomId: string; cur
                                                         <SkillRow
                                                             label={
                                                                 <span>
-                                                                    ヒール lv{healLevel} → lv
+                                                                    ヒール Lv. {healLevel} → Lv. 
                                                                     {nextLevel === 6 ? 'max' : nextLevel}
                                                                 </span>
                                                             }
@@ -1172,7 +1189,12 @@ function PreviewContent({
                         </div>
                         <div className="h-2.5 rounded-full bg-black/40 border border-white/[0.05] overflow-hidden">
                             <div
-                                className="h-full rounded-full bg-gradient-to-r from-emerald-600 to-emerald-400 transition-all duration-700 shadow-[0_0_10px_rgba(52,211,153,0.5)]"
+                                className={cn(
+                                    'h-full rounded-full transition-all duration-700',
+                                    currentLevel === 6
+                                        ? 'bg-gradient-to-r from-amber-600 to-yellow-400 shadow-[0_0_10px_rgba(251,191,36,0.5)]'
+                                        : 'bg-gradient-to-r from-emerald-600 to-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.5)]'
+                                )}
                                 style={{ width: `${barWidth}%` }}
                             />
                         </div>
@@ -1456,7 +1478,7 @@ function LoadoutAnimPreview({ techniqueId, level }: { techniqueId: TechniqueId; 
                     style={{ backgroundColor: tech.color }}
                 />
                 <span className="text-[9px] text-white/25 [font-family:var(--font-dot-gothic-16)]">
-                    {tech.label} lv{level}
+                    {tech.label} Lv. {level}
                     {EFFECT_LABEL[techniqueId] ? ` · ${EFFECT_LABEL[techniqueId]}` : ''}
                 </span>
             </div>

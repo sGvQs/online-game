@@ -4,7 +4,7 @@
 
 export type Difficulty = 'EASY' | 'NORMAL' | 'HARD' | 'HELL'
 
-/** 通常攻撃（tech=null）時の散弾数レベル。5 = lv.max */
+/** 通常攻撃（tech=null）時の散弾数レベル。5 = Lv. .max */
 export type NormalAttackLevel = 1 | 2 | 3 | 4 | 5
 
 export type { DialogueLine } from '@/constants/starShieldGame/dialogues'

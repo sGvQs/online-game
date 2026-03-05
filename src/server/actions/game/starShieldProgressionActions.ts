@@ -83,7 +83,7 @@ export async function updateLoadout(params: {
     if (params.selectedSpecialAttackId !== undefined) {
         if (params.selectedSpecialAttackId !== null) {
             if (params.selectedSpecialAttackId === 'all_destruction') {
-                if (maxHeal < 6) return { ok: false, error: '全部破壊はヒール lv max で獲得' }
+                if (maxHeal < 6) return { ok: false, error: '全部破壊はヒール Lv.  max で獲得' }
             } else if (!specialIds.has(params.selectedSpecialAttackId)) {
                 return { ok: false, error: '所持していない必殺技です' }
             }
@@ -216,7 +216,7 @@ export async function purchaseNormalAttackLevelUp(
 /** 必殺技を解放（spread 1種類のみ） */
 export async function purchaseSpecialAttackUnlock(specialAttackId: string): Promise<{ ok: boolean; error?: string }> {
     const user = await getAuthenticatedUser()
-    if (specialAttackId !== 'spread') return { ok: false, error: 'all_destruction はヒール lv max で獲得' }
+    if (specialAttackId !== 'spread') return { ok: false, error: 'all_destruction はヒール Lv.  max で獲得' }
     const cost = SPECIAL_ATTACK_UNLOCK_COSTS[specialAttackId]
     if (cost === undefined) return { ok: false, error: '無効なスキルID' }
 

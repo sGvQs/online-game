@@ -191,7 +191,7 @@ export function RoleSelectionScreen({
                                                             style={isActive ? { borderColor: tech.color, boxShadow: `0 0 12px ${tech.color}80` } : undefined}
                                                         >
                                                             <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: tech.color }} />
-                                                            <span>lv{level}</span>
+                                                            <span>Lv. {level}</span>
                                                         </button>
                                                     )
                                                 })}
@@ -215,16 +215,38 @@ export function RoleSelectionScreen({
                                                         Lv{(displayTypistProgress.starHpLevel ?? 1)}/5
                                                     </span>
                                                 </div>
-                                                <div className="flex flex-wrap gap-x-4 gap-y-1 text-[10px] [font-family:var(--font-dot-gothic-16)] opacity-80">
-                                                {displayTypistProgress.healLevel != null ? (
-                                                    displayTypistProgress.healLevel >= 5 ? (
-                                                        <span>回復: 全回復</span>
-                                                    ) : (
-                                                        <span>回復: +{LEVEL_HEAL_RECOVERY[displayTypistProgress.healLevel as 1 | 2 | 3 | 4]}</span>
-                                                    )
-                                                ) : (
-                                                    <span className="text-white/40">回復: 未所持</span>
-                                                )}
+                                                <div className="flex flex-col gap-1">
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="text-[10px] [font-family:var(--font-dot-gothic-16)] opacity-80 shrink-0">
+                                                            {displayTypistProgress.healLevel != null ? (
+                                                                displayTypistProgress.healLevel >= 5 ? (
+                                                                    '回復: 全回復'
+                                                                ) : (
+                                                                    `回復: +${LEVEL_HEAL_RECOVERY[displayTypistProgress.healLevel as 1 | 2 | 3 | 4]}`
+                                                                )
+                                                            ) : (
+                                                                <span className="text-white/40">回復: 未所持</span>
+                                                            )}
+                                                        </span>
+                                                        {displayTypistProgress.healLevel != null && (
+                                                            <>
+                                                                <div className="flex-1 min-w-0 h-1.5 rounded-full bg-white/5 overflow-hidden">
+                                                                    <div
+                                                                        className={cn(
+                                                                            'h-full rounded-full transition-all duration-300',
+                                                                            displayTypistProgress.healLevel === 6
+                                                                                ? 'bg-gradient-to-r from-amber-600 to-yellow-400'
+                                                                                : 'bg-gradient-to-r from-emerald-700 to-emerald-400'
+                                                                        )}
+                                                                        style={{ width: `${(displayTypistProgress.healLevel / 6) * 100}%` }}
+                                                                    />
+                                                                </div>
+                                                                <span className="text-[9px] [font-family:var(--font-dot-gothic-16)] opacity-50 shrink-0">
+                                                                    Lv{displayTypistProgress.healLevel === 6 ? 'max' : displayTypistProgress.healLevel}/6
+                                                                </span>
+                                                            </>
+                                                        )}
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
