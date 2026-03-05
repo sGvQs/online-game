@@ -900,6 +900,7 @@ function SkillPreviewModal({
 
     const isMaxed = currentLevel >= maxLevel
     const canAfford = nextCost !== null && typingCount >= nextCost
+    const isStarHp = preview.kind === 'starHp'
 
     return (
         <motion.div
@@ -915,7 +916,10 @@ function SkillPreviewModal({
                 animate={{ y: 0, scale: 1, opacity: 1 }}
                 exit={{ y: 24, scale: 0.95, opacity: 0 }}
                 transition={{ type: 'spring', damping: 26, stiffness: 280 }}
-                className="relative w-full max-w-sm rounded-[24px] bg-[#14142a] border border-white/[0.1] shadow-2xl flex flex-col overflow-hidden max-h-full"
+                className={cn(
+                    'relative w-full max-w-sm rounded-[24px] shadow-2xl flex flex-col overflow-hidden max-h-full',
+                    isStarHp ? 'bg-[#0a1a14] border border-emerald-500/20' : 'bg-[#14142a] border border-white/[0.1]'
+                )}
                 onClick={(e) => e.stopPropagation()}
             >
                 {/* Header Actions */}
@@ -934,11 +938,30 @@ function SkillPreviewModal({
                 </div>
 
                 {/* Sticky Footer for Action */}
-                <div className="p-5 bg-white/[0.02] border-t border-white/[0.05] mt-auto">
+                <div
+                    className={cn(
+                        'p-5 mt-auto',
+                        isStarHp ? 'bg-emerald-500/5 border-t border-emerald-500/20' : 'bg-white/[0.02] border-t border-white/[0.05]'
+                    )}
+                >
                     {isMaxed ? (
-                        <div className="py-3 px-4 rounded-xl border border-amber-500/20 bg-amber-500/10 text-center flex items-center justify-center gap-2">
-                            <span className="text-amber-400 text-lg">🏆</span>
-                            <span className="text-amber-300/90 text-sm font-bold [font-family:var(--font-dot-gothic-16)] tracking-wider">MAX レベル到達</span>
+                        <div
+                            className={cn(
+                                'py-3 px-4 rounded-xl text-center flex items-center justify-center gap-2',
+                                isStarHp
+                                    ? 'border border-emerald-500/30 bg-emerald-500/15'
+                                    : 'border border-amber-500/20 bg-amber-500/10'
+                            )}
+                        >
+                            <span className={isStarHp ? 'text-emerald-400 text-lg' : 'text-amber-400 text-lg'}>🏆</span>
+                            <span
+                                className={cn(
+                                    'text-sm font-bold [font-family:var(--font-dot-gothic-16)] tracking-wider',
+                                    isStarHp ? 'text-emerald-300/90' : 'text-amber-300/90'
+                                )}
+                            >
+                                MAX レベル到達
+                            </span>
                         </div>
                     ) : (
                         <button
@@ -949,7 +972,9 @@ function SkillPreviewModal({
                             className={cn(
                                 'w-full py-3.5 px-4 rounded-xl font-bold text-[15px] flex items-center justify-center gap-3 transition-all [font-family:var(--font-dot-gothic-16)]',
                                 canAfford
-                                    ? 'bg-indigo-500 hover:bg-indigo-400 text-white shadow-lg shadow-indigo-500/25 active:scale-[0.98]'
+                                    ? isStarHp
+                                        ? 'bg-emerald-500 hover:bg-emerald-400 text-white shadow-lg shadow-emerald-500/25 active:scale-[0.98]'
+                                        : 'bg-indigo-500 hover:bg-indigo-400 text-white shadow-lg shadow-indigo-500/25 active:scale-[0.98]'
                                     : 'bg-white/5 text-white/30 border border-white/10 cursor-not-allowed'
                             )}
                         >
@@ -1175,8 +1200,8 @@ function PreviewContent({
             <div>
                 <div className="flex items-center gap-4 mb-6">
                     <div
-                        className="w-16 h-16 rounded-2xl bg-yellow-500/15 border-2 border-yellow-500/40 flex items-center justify-center text-3xl shrink-0"
-                        style={{ boxShadow: '0 0 32px rgba(234,179,8,0.2)' }}
+                        className="w-16 h-16 rounded-2xl bg-emerald-500/15 border-2 border-emerald-500/40 flex items-center justify-center text-3xl shrink-0"
+                        style={{ boxShadow: '0 0 32px rgba(16,185,129,0.2)' }}
                     >
                         ⭐
                     </div>
@@ -1184,32 +1209,32 @@ function PreviewContent({
                         <p className="text-white font-bold text-xl [font-family:var(--font-dot-gothic-16)] tracking-wide mb-1">
                             星のHP
                         </p>
-                        <span className="inline-block px-2.5 py-0.5 rounded text-[11px] font-bold [font-family:var(--font-dot-gothic-16)] tracking-wider border bg-yellow-500/20 text-yellow-300 border-yellow-500/30">
+                        <span className="inline-block px-2.5 py-0.5 rounded text-[11px] font-bold [font-family:var(--font-dot-gothic-16)] tracking-wider border bg-emerald-500/20 text-emerald-300 border-emerald-500/30">
                             Lv {displayLevel}
                         </span>
                     </div>
                 </div>
                 <div className="flex flex-col gap-4">
-                    <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/[0.05]">
+                    <div className="p-4 rounded-2xl bg-emerald-500/5 border border-emerald-500/20">
                         <div className="flex items-center justify-between mb-3">
-                            <p className="text-white/50 text-[13px] [font-family:var(--font-dot-gothic-16)] font-bold">HP上限</p>
-                            <p className="text-yellow-400 text-3xl font-bold [font-family:var(--font-cherry-bomb-one)] leading-none drop-shadow-[0_0_12px_rgba(250,204,21,0.4)]">
+                            <p className="text-emerald-400/70 text-[13px] [font-family:var(--font-dot-gothic-16)] font-bold">HP上限</p>
+                            <p className="text-emerald-400 text-3xl font-bold [font-family:var(--font-cherry-bomb-one)] leading-none drop-shadow-[0_0_12px_rgba(16,185,129,0.4)]">
                                 {hp}
                             </p>
                         </div>
-                        <div className="h-2.5 rounded-full bg-black/40 border border-white/[0.05] overflow-hidden">
+                        <div className="h-2.5 rounded-full bg-black/40 border border-emerald-500/20 overflow-hidden">
                             <div
-                                className="h-full rounded-full bg-gradient-to-r from-yellow-600 to-yellow-400 transition-all duration-700 shadow-[0_0_10px_rgba(250,204,21,0.5)]"
+                                className="h-full rounded-full bg-gradient-to-r from-emerald-700 to-emerald-400 transition-all duration-700 shadow-[0_0_10px_rgba(16,185,129,0.5)]"
                                 style={{ width: `${(displayLevel / 5) * 100}%` }}
                             />
                         </div>
                         <div className="mt-2 text-right">
-                            <p className="text-yellow-500/50 text-[10px] [font-family:var(--font-dot-gothic-16)] font-bold tracking-widest">
+                            <p className="text-emerald-500/70 text-[10px] [font-family:var(--font-dot-gothic-16)] font-bold tracking-widest">
                                 Lv {displayLevel} / 5
                             </p>
                         </div>
                     </div>
-                    <StatRow label="適用ロール" value="Typist（守護担当）" color="text-white/55" />
+                    <StatRow label="適用ロール" value="Typist（守護担当）" color="text-emerald-400/80" />
                 </div>
             </div>
         )
