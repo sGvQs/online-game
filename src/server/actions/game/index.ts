@@ -40,6 +40,7 @@ export {
 export {
     getStarShieldProgress,
     getMyStarShieldProgress,
+    updateLoadout,
     purchaseNormalAttackUnlock,
     purchaseNormalAttackLevelUp,
     purchaseSpecialAttackUnlock,

@@ -10,25 +10,11 @@ import { DinosaurWithBalls } from '@/components/game/common/starShield/dinosaurW
 import { AuroraGlow } from '@/components/game/common/starShield/auroraGlow'
 import { roleSelectionScreen } from './styles'
 import { COLORS, DIFFICULTIES, DIFFICULTY_META, ROLE_META, type Difficulty, type RoleChoice } from '@/constants/starShieldGame/constants'
-import { TECHNIQUES, type TechniqueId } from '@/constants/starShieldGame/techniques'
-import {
-    getDebugNormalAttacks,
-    getAvailableNormalAttacks,
-    getAvailableSpecialAttacks,
-    getAvailableHealLevel,
-} from '@/utils/starShieldGame'
-import type { SpecialAttackChoice, OwnedSkills } from '@/utils/starShieldGame'
 
 interface RoleSelectionScreenProps {
     room: RoomWithUsersAndReadyStatus
     roleChoices: Record<string, RoleChoice>
     onRoleChange: (role: RoleChoice) => void
-    normalAttackChoices: Record<string, TechniqueId | null>
-    onNormalAttackChange: (normal: TechniqueId | null) => void
-    specialAttackChoices: Record<string, SpecialAttackChoice>
-    onSpecialAttackChange: (special: SpecialAttackChoice) => void
-    healChoices?: Record<string, number | null>
-    onHealChange?: (healLevel: number | null) => void
     roomId?: string
     roleConflict: boolean
     canProceed: boolean
@@ -41,20 +27,12 @@ interface RoleSelectionScreenProps {
     isHellUnlocked: boolean
     autoAimNearest?: boolean
     onToggleAutoAim?: () => void
-    shooterProgress?: OwnedSkills | null
-    typistProgress?: OwnedSkills | null
 }
 
 export function RoleSelectionScreen({
     room,
     roleChoices,
     onRoleChange,
-    normalAttackChoices,
-    onNormalAttackChange,
-    specialAttackChoices,
-    onSpecialAttackChange,
-    healChoices = {},
-    onHealChange,
     roomId,
     canProceed,
     onProceedToGame,
@@ -66,34 +44,10 @@ export function RoleSelectionScreen({
     isHellUnlocked,
     autoAimNearest = false,
     onToggleAutoAim,
-    shooterProgress = null,
-    typistProgress = null,
 }: RoleSelectionScreenProps) {
     const myRole = roleChoices[currentUserId]
-    const typistId = room.users.find((u) => roleChoices[u.userId] === 'TYPIST')?.userId
-    const shooterId = room.users.find((u) => roleChoices[u.userId] === 'SHOOTER')?.userId
-    const canEditTechnique = isHost
     const activeDiffMeta = DIFFICULTY_META[difficulty]
     const styles = roleSelectionScreen()
-    const shooterOwned: OwnedSkills = shooterProgress ?? {
-        normalAttacks: [{ techniqueId: 'red', level: 1 }],
-        specialAttacks: [],
-        healLevel: null,
-    }
-    const typistOwned: OwnedSkills = typistProgress ?? { normalAttacks: [], specialAttacks: [], healLevel: null }
-    const availableNormalAttacks = getAvailableNormalAttacks(shooterOwned)
-    const availableSpecialAttacks = getAvailableSpecialAttacks(shooterOwned)
-    const availableHealLevel = getAvailableHealLevel(typistOwned)
-
-    const SPECIAL_ATTACK_OPTIONS: { id: SpecialAttackChoice; label: string }[] = [
-        { id: 'spread_small', label: '小規模' },
-        { id: 'spread_medium', label: '中規模' },
-        { id: 'spread_large', label: '大規模' },
-        { id: 'all_destruction', label: '全部破壊' },
-    ].filter((opt) => availableSpecialAttacks.some((a) => a.specialAttackId === opt.id)) as {
-        id: SpecialAttackChoice
-        label: string
-    }[]
 
     return (
         <div className="relative min-h-screen overflow-hidden flex flex-col items-center justify-center">
@@ -201,126 +155,6 @@ export function RoleSelectionScreen({
                         })}
                     </motion.div>
                 </div>
-
-                <motion.div
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: 0.18 }}
-                    className={cn('rounded-2xl p-5 flex flex-col gap-3 bg-white/[0.03] border border-white/[0.08]', !canEditTechnique && 'opacity-70')}
-                >
-                    <p className={styles.difficultyCardTitle()}>[通常攻撃]（Shooter）</p>
-                    {shooterId ? (
-                        <div className="flex flex-wrap gap-2">
-                            {availableNormalAttacks.map(({ techniqueId: tid, level: lv }) => {
-                                const tech = TECHNIQUES[tid]
-                                const isActive = normalAttackChoices[shooterId] === tid
-                                return (
-                                    <button
-                                        key={tid}
-                                        onClick={() => canEditTechnique && onNormalAttackChange(tid)}
-                                        disabled={!canEditTechnique}
-                                        className={cn(
-                                            'px-3 py-2 rounded-xl text-xs transition-all border flex items-center gap-1.5',
-                                            isActive ? 'border-current' : 'bg-white/[0.02] border-white/10 text-white/50 hover:border-white/20',
-                                            !canEditTechnique && 'cursor-default'
-                                        )}
-                                        style={isActive ? { color: tech.color, borderColor: tech.color, backgroundColor: `${tech.color}20` } : undefined}
-                                    >
-                                        <span
-                                            className="w-2 h-2 rounded-full shrink-0"
-                                            style={{ backgroundColor: tech.color }}
-                                        />
-                                        {tech.label} (lv{lv})
-                                    </button>
-                                )
-                            })}
-                        </div>
-                    ) : (
-                        <p className="text-white/40 text-xs">やくわりがきまるとせんたくできます</p>
-                    )}
-                </motion.div>
-
-                <motion.div
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: 0.185 }}
-                    className={cn('rounded-2xl p-5 flex flex-col gap-3 bg-white/[0.03] border border-white/[0.08]', !canEditTechnique && 'opacity-70')}
-                >
-                    <p className={styles.difficultyCardTitle()}>[必殺技]（Shooter）</p>
-                    {shooterId ? (
-                        <div className="flex flex-wrap gap-2">
-                            {SPECIAL_ATTACK_OPTIONS.map(({ id, label }) => {
-                                const spec = availableSpecialAttacks.find((a) => a.specialAttackId === id)
-                                const lv = spec?.level ?? 1
-                                const isActive = (specialAttackChoices[shooterId] ?? 'spread_medium') === id
-                                const isAllDestruction = id === 'all_destruction'
-                                return (
-                                    <button
-                                        key={id}
-                                        onClick={() => canEditTechnique && onSpecialAttackChange(id as SpecialAttackChoice)}
-                                        disabled={!canEditTechnique}
-                                        className={cn(
-                                            'px-3 py-2 rounded-xl text-xs transition-all border flex items-center gap-1.5',
-                                            isActive
-                                                ? isAllDestruction
-                                                    ? 'border-red-500 bg-red-500/20 text-red-400'
-                                                    : 'bg-brand-500/20 border-brand-500/50 text-brand-300'
-                                                : 'bg-white/[0.02] border-white/10 text-white/50 hover:border-white/20',
-                                            !canEditTechnique && 'cursor-default'
-                                        )}
-                                    >
-                                        {isAllDestruction && <span className="w-2 h-2 rounded-full shrink-0 bg-red-500" />}
-                                        {label} (lv{lv})
-                                    </button>
-                                )
-                            })}
-                        </div>
-                    ) : (
-                        <p className="text-white/40 text-xs">やくわりがきまるとせんたくできます</p>
-                    )}
-                </motion.div>
-
-                <motion.div
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: 0.186 }}
-                    className={cn('rounded-2xl p-5 flex flex-col gap-3 bg-white/[0.03] border border-white/[0.08]', myRole !== 'TYPIST' && 'opacity-70')}
-                >
-                    <p className={styles.difficultyCardTitle()}>[ヒール]（Typist）</p>
-                    {typistId ? (
-                        availableHealLevel != null ? (
-                            <div className="flex flex-wrap gap-2">
-                                {Array.from({ length: availableHealLevel }, (_, i) => i + 1).map((lv) => {
-                                    const isActive = (healChoices[typistId] ?? 1) === lv
-                                    const isMax = lv === 6
-                                    const canEditHeal = myRole === 'TYPIST' && typistId === currentUserId
-                                    return (
-                                        <button
-                                            key={lv}
-                                            onClick={() => canEditHeal && onHealChange?.(lv)}
-                                            disabled={!canEditHeal}
-                                            className={cn(
-                                                'px-3 py-2 rounded-xl text-xs transition-all border flex items-center gap-1.5',
-                                                isActive
-                                                    ? isMax
-                                                        ? 'border-emerald-500 bg-emerald-500/20 text-emerald-400'
-                                                        : 'bg-emerald-500/20 border-emerald-500/50 text-emerald-300'
-                                                    : 'bg-white/[0.02] border-white/10 text-white/50 hover:border-white/20',
-                                                !canEditHeal && 'cursor-default'
-                                            )}
-                                        >
-                                            {lv === 6 ? 'lv.max' : `lv.${lv}`}
-                                        </button>
-                                    )
-                                })}
-                            </div>
-                        ) : (
-                            <p className="text-white/40 text-xs">ショップでヒールをかいましょう</p>
-                        )
-                    ) : (
-                        <p className="text-white/40 text-xs">やくわりがきまるとせんたくできます</p>
-                    )}
-                </motion.div>
 
                 <motion.div
                     initial={{ opacity: 0, y: 8 }}

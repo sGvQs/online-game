@@ -3,7 +3,6 @@
 import { prisma } from '@/server/lib/prisma'
 import { getAuthenticatedUser } from '../_helpers/getAuthenticatedUser'
 import {
-    PROGRESSION_DEBUG,
     NORMAL_ATTACK_UNLOCK_COSTS,
     NORMAL_ATTACK_LEVEL_UP_COSTS,
     SPECIAL_ATTACK_UNLOCK_COSTS,
@@ -17,6 +16,12 @@ export interface StarShieldProgress {
     normalAttacks: { techniqueId: string; level: number }[]
     specialAttacks: { specialAttackId: string; level: number }[]
     healLevel: number | null
+    /** Shooter 時に使用する通常攻撃 */
+    selectedNormalAttackId: string | null
+    /** Shooter 時に使用する必殺技 */
+    selectedSpecialAttackId: string | null
+    /** Typist 時に使用するヒールレベル (1-6, null=使わない) */
+    selectedHealLevel: number | null
 }
 
 /**
@@ -42,6 +47,9 @@ export async function getStarShieldProgress(userId: string): Promise<StarShieldP
         normalAttacks: normalList,
         specialAttacks: specialAttacks.map((a) => ({ specialAttackId: a.specialAttackId, level: a.level })),
         healLevel: heal?.level ?? null,
+        selectedNormalAttackId: progress?.selectedNormalAttackId ?? null,
+        selectedSpecialAttackId: progress?.selectedSpecialAttackId ?? null,
+        selectedHealLevel: progress?.selectedHealLevel ?? null,
     }
 }
 
@@ -49,6 +57,63 @@ export async function getStarShieldProgress(userId: string): Promise<StarShieldP
 export async function getMyStarShieldProgress(): Promise<StarShieldProgress> {
     const user = await getAuthenticatedUser()
     return getStarShieldProgress(user.id)
+}
+
+/** loadout を更新（認証必須）。選択は所持スキルに限定し、未所持なら更新しない */
+export async function updateLoadout(params: {
+    selectedNormalAttackId?: string | null
+    selectedSpecialAttackId?: string | null
+    selectedHealLevel?: number | null
+}): Promise<{ ok: boolean; error?: string }> {
+    const user = await getAuthenticatedUser()
+    const existing = await getStarShieldProgress(user.id)
+
+    const normalIds = new Set(existing.normalAttacks.map((a) => a.techniqueId))
+    const specialIds = new Set(existing.specialAttacks.map((a) => a.specialAttackId))
+    const maxHeal = existing.healLevel ?? 0
+
+    const data: { selectedNormalAttackId?: string | null; selectedSpecialAttackId?: string | null; selectedHealLevel?: number | null } = {}
+
+    if (params.selectedNormalAttackId !== undefined) {
+        if (params.selectedNormalAttackId !== null && !normalIds.has(params.selectedNormalAttackId)) {
+            return { ok: false, error: '所持していない通常攻撃です' }
+        }
+        data.selectedNormalAttackId = params.selectedNormalAttackId
+    }
+    if (params.selectedSpecialAttackId !== undefined) {
+        if (params.selectedSpecialAttackId !== null) {
+            if (params.selectedSpecialAttackId === 'all_destruction') {
+                if (maxHeal < 6) return { ok: false, error: '全部破壊はヒール lv max で獲得' }
+            } else if (!specialIds.has(params.selectedSpecialAttackId)) {
+                return { ok: false, error: '所持していない必殺技です' }
+            }
+        }
+        data.selectedSpecialAttackId = params.selectedSpecialAttackId
+    }
+    if (params.selectedHealLevel !== undefined) {
+        if (params.selectedHealLevel !== null) {
+            if (params.selectedHealLevel < 1 || params.selectedHealLevel > 6) {
+                return { ok: false, error: 'ヒールレベルは 1〜6 で指定してください' }
+            }
+            if (params.selectedHealLevel > maxHeal) {
+                return { ok: false, error: '所持していないヒールレベルです' }
+            }
+        }
+        data.selectedHealLevel = params.selectedHealLevel
+    }
+
+    if (Object.keys(data).length === 0) return { ok: true }
+
+    await prisma.starShieldUserProgress.upsert({
+        where: { userId: user.id },
+        update: data,
+        create: {
+            userId: user.id,
+            totalTypingCount: 0,
+            ...data,
+        },
+    })
+    return { ok: true }
 }
 
 async function ensureProgress(userId: string): Promise<{ totalTypingCount: number }> {

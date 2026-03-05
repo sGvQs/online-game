@@ -3,8 +3,7 @@
  *
  * 値の調整方法:
  * - このファイルを直接編集して値を変更する
- * - 開発時は PROGRESSION_DEBUG = true で全スキル解放
- * - 本番では PROGRESSION_DEBUG = false にすること
+ * - PROGRESSION_DEBUG: 環境変数 NEXT_PUBLIC_STAR_SHIELD_DEBUG_PROGRESSION=true でのみ全スキル解放
  */
 
 // ============================================
@@ -12,12 +11,9 @@
 // ============================================
 /**
  * true: 全スキル解放（開発用）。false: 所持スキルのみ使用可能
- * - 開発時は NODE_ENV=development で自動的に true
- * - 環境変数 NEXT_PUBLIC_STAR_SHIELD_DEBUG_PROGRESSION=true で本番でも強制的に有効化可能
+ * - 環境変数 NEXT_PUBLIC_STAR_SHIELD_DEBUG_PROGRESSION=true でのみ有効化（購入体験のため開発時も通常は false）
  */
-export const PROGRESSION_DEBUG =
-    process.env.NEXT_PUBLIC_STAR_SHIELD_DEBUG_PROGRESSION === 'true' ||
-    process.env.NODE_ENV === 'development'
+export const PROGRESSION_DEBUG = process.env.NEXT_PUBLIC_STAR_SHIELD_DEBUG_PROGRESSION === 'true'
 
 // ============================================
 // 通常攻撃スキル（技の解放）※ Shooter 用

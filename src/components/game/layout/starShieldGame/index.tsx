@@ -63,9 +63,6 @@ export function StarShieldGame({
     }, [room.users, room.createdBy])
 
     const [roleChoices, setRoleChoices] = useState<Record<string, RoleChoice>>(initialRoleChoices)
-    const [normalAttackChoices, setNormalAttackChoices] = useState<Record<string, TechniqueId | null>>({})
-    const [specialAttackChoices, setSpecialAttackChoices] = useState<Record<string, SpecialAttackChoice>>({})
-    const [healChoices, setHealChoices] = useState<Record<string, number | null>>({})
     const [autoAimNearest, setAutoAimNearest] = useState(false)
 
     // 2人揃ったときに未選択のユーザーに初期値（ホスト=Shooter、他=Typist）を補完
@@ -153,22 +150,6 @@ export function StarShieldGame({
                     setRoleChoices((prev) => ({ ...prev, [payload.userId]: payload.role }))
                 }
             })
-            .on('broadcast', { event: 'technique' }, ({ payload }: { payload: { userId: string; normal?: TechniqueId | null; special?: SpecialAttackChoice } }) => {
-                if (payload?.userId === undefined) return
-                const uid = payload.userId
-                if (payload.normal !== undefined) {
-                    const val: TechniqueId | null = payload.normal
-                    setNormalAttackChoices((prev) => ({ ...prev, [uid]: val }))
-                }
-                if (payload.special !== undefined) {
-                    const val = payload.special
-                    setSpecialAttackChoices((prev) => ({ ...prev, [uid]: val }))
-                }
-            })
-            .on('broadcast', { event: 'heal' }, ({ payload }: { payload: { userId: string; healLevel: number | null } }) => {
-                if (payload?.userId === undefined) return
-                setHealChoices((prev) => ({ ...prev, [payload.userId]: payload.healLevel }))
-            })
             .on('broadcast', { event: 'goToRoleSelect' }, () => {
                 setPhase('ROLE_SELECT')
             })
@@ -192,49 +173,6 @@ export function StarShieldGame({
             payload: { userId: currentUserId, role },
         })
     }, [currentUserId])
-
-    const typistId = room.users.find((u) => roleChoices[u.userId] === 'TYPIST')?.userId
-    const shooterIdFromRoles = room.users.find((u) => roleChoices[u.userId] === 'SHOOTER')?.userId
-
-    // 通常攻撃・必殺技は Shooter の loadout（Typist が打鍵で発動）
-    const handleNormalAttackChange = useCallback(
-        (normal: TechniqueId | null) => {
-            if (!shooterIdFromRoles) return
-            setNormalAttackChoices((prev) => ({ ...prev, [shooterIdFromRoles]: normal }))
-            lobbyChannelRef.current?.send({
-                type: 'broadcast',
-                event: 'technique',
-                payload: { userId: shooterIdFromRoles, normal, special: specialAttackChoices[shooterIdFromRoles] ?? 'spread_medium' },
-            })
-        },
-        [shooterIdFromRoles, specialAttackChoices]
-    )
-
-    const handleSpecialAttackChange = useCallback(
-        (special: SpecialAttackChoice) => {
-            if (!shooterIdFromRoles) return
-            setSpecialAttackChoices((prev) => ({ ...prev, [shooterIdFromRoles]: special }))
-            lobbyChannelRef.current?.send({
-                type: 'broadcast',
-                event: 'technique',
-                payload: { userId: shooterIdFromRoles, normal: normalAttackChoices[shooterIdFromRoles] ?? null, special },
-            })
-        },
-        [shooterIdFromRoles, normalAttackChoices]
-    )
-
-    const handleHealChange = useCallback(
-        (healLevel: number | null) => {
-            if (!typistId) return
-            setHealChoices((prev) => ({ ...prev, [typistId]: healLevel }))
-            lobbyChannelRef.current?.send({
-                type: 'broadcast',
-                event: 'heal',
-                payload: { userId: typistId, healLevel },
-            })
-        },
-        [typistId]
-    )
 
     // 役職が被っているか（2人とも同じ役職を選んだ場合）
     const roleConflict = useMemo(() => {
@@ -401,12 +339,6 @@ export function StarShieldGame({
                     room={room}
                     roleChoices={roleChoices}
                     onRoleChange={handleRoleChange}
-                    normalAttackChoices={normalAttackChoices}
-                    onNormalAttackChange={handleNormalAttackChange}
-                    specialAttackChoices={specialAttackChoices}
-                    onSpecialAttackChange={handleSpecialAttackChange}
-                    healChoices={healChoices}
-                    onHealChange={handleHealChange}
                     roomId={roomId}
                     roleConflict={roleConflict}
                     canProceed={!roleConflict}
@@ -419,8 +351,6 @@ export function StarShieldGame({
                     isHellUnlocked={hellUnlocked}
                     autoAimNearest={autoAimNearest}
                     onToggleAutoAim={() => setAutoAimNearest((prev) => !prev)}
-                    shooterProgress={shooterProgress}
-                    typistProgress={typistProgress}
                 />
             )}
             {phase === 'PLAYING' && matchId && startedAt && shooterId && (() => {
@@ -431,14 +361,19 @@ export function StarShieldGame({
                 }
                 const availableNormalAttacks = getAvailableNormalAttacks(shooterOwned)
                 const availableSpecialAttacks = getAvailableSpecialAttacks(shooterOwned)
-                const selectedNormal = normalAttackChoices[shooterId ?? ''] ?? 'red'
+                const rawNormal = shooterProgress?.selectedNormalAttackId ?? 'red'
+                const selectedNormal: TechniqueId =
+                    availableNormalAttacks.some((a) => a.techniqueId === rawNormal) ? (rawNormal as TechniqueId) : (availableNormalAttacks[0]?.techniqueId ?? 'red')
                 const derivedLevel: NormalAttackLevel =
                     (availableNormalAttacks.find((a) => a.techniqueId === selectedNormal)?.level ?? 1) as NormalAttackLevel
-                const selectedSpecialId = specialAttackChoices[shooterId ?? ''] ?? 'spread_medium'
+                const rawSpecial = shooterProgress?.selectedSpecialAttackId ?? 'spread_medium'
+                const selectedSpecialId: SpecialAttackChoice =
+                    availableSpecialAttacks.some((a) => a.specialAttackId === rawSpecial)
+                        ? (rawSpecial as SpecialAttackChoice)
+                        : (availableSpecialAttacks[0]?.specialAttackId ?? 'spread_medium')
                 const typistSpecialAttackLevel =
                     (availableSpecialAttacks.find((a) => a.specialAttackId === selectedSpecialId)?.level ?? 1) as 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10
-                const typistIdForGame = room.users.find((u) => roleChoices[u.userId] === 'TYPIST')?.userId
-                const typistHealLevel = typistIdForGame ? healChoices[typistIdForGame] ?? null : null
+                const typistHealLevel = typistProgress?.selectedHealLevel ?? null
                 return (
                     <GameScreen
                         matchId={matchId}

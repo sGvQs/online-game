@@ -302,12 +302,15 @@ model StarShieldClearRecord {
 // Star Shield プログレッション（typing 通貨・ショップ）
 // -------------------------------------------------------------------------------------------------
 
-// 総合typing数（通貨）
+// 総合typing数（通貨）+ loadout（Shooter/Typist 時に使用するスキル）
 model StarShieldUserProgress {
-  id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  userId           String   @unique @map("user_id") @db.Uuid
-  totalTypingCount Int      @default(0) @map("total_typing_count")
-  updatedAt        DateTime @updatedAt @map("updated_at")
+  id                   String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId               String   @unique @map("user_id") @db.Uuid
+  totalTypingCount     Int      @default(0) @map("total_typing_count")
+  selectedNormalAttackId   String?  @map("selected_normal_attack_id") @db.Text
+  selectedSpecialAttackId  String?  @map("selected_special_attack_id") @db.Text
+  selectedHealLevel       Int?     @map("selected_heal_level")
+  updatedAt            DateTime @updatedAt @map("updated_at")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 

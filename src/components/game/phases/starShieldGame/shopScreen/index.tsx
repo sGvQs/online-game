@@ -9,6 +9,7 @@ import { AuroraGlow } from '@/components/game/common/starShield/auroraGlow'
 import { TECHNIQUES, type TechniqueId } from '@/constants/starShieldGame/techniques'
 import {
     getMyStarShieldProgress,
+    updateLoadout,
     purchaseNormalAttackUnlock,
     purchaseNormalAttackLevelUp,
     purchaseSpecialAttackUnlock,
@@ -25,12 +26,19 @@ import {
     HEAL_UNLOCK_COST,
     HEAL_LEVEL_UP_COSTS,
 } from '@/constants/starShieldGame/shopConfig'
+import { cn } from '@/lib/utils'
 import { roleSelectionScreen } from '../roleSelectionScreen/styles'
+import {
+    getAvailableNormalAttacks,
+    getAvailableSpecialAttacks,
+} from '@/utils/starShieldGame'
+import type { OwnedSkills } from '@/utils/starShieldGame'
 
 const SPECIAL_ATTACK_LABELS: Record<string, string> = {
     spread_small: '小規模',
     spread_medium: '中規模',
     spread_large: '大規模',
+    all_destruction: '全部破壊',
 }
 
 export function StarShieldShop({ roomId, currentUserId }: { roomId: string; currentUserId: string }) {
@@ -332,6 +340,125 @@ export function StarShieldShop({ roomId, currentUserId }: { roomId: string; curr
                             <p className="text-white/50 text-sm">ヒール lv max 所持</p>
                         )}
                     </div>
+                </motion.div>
+
+                {/* スキル設定（ゲームで使用するスキルを選択） */}
+                <motion.div
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3 }}
+                    className={styles.difficultyCard()}
+                >
+                    <p className={styles.difficultyCardTitle()}>[スキル設定]</p>
+                    <p className="text-white/60 text-xs mb-4">ロール選択で使用するスキルを事前に設定します</p>
+                    {(() => {
+                        const owned: OwnedSkills = {
+                            normalAttacks: normalAttacks,
+                            specialAttacks: specialAttacks,
+                            healLevel,
+                        }
+                        const availableNormal = getAvailableNormalAttacks(owned)
+                        const availableSpecial = getAvailableSpecialAttacks(owned)
+                        const selNormal = progress?.selectedNormalAttackId ?? 'red'
+                        const selSpecial = progress?.selectedSpecialAttackId ?? null
+                        const selHeal = progress?.selectedHealLevel ?? null
+
+                        const handleLoadoutUpdate = async (updates: Parameters<typeof updateLoadout>[0]) => {
+                            setError(null)
+                            const result = await updateLoadout(updates)
+                            if (result.ok) refresh()
+                            else setError(result.error ?? '設定に失敗しました')
+                        }
+
+                        return (
+                            <div className="flex flex-col gap-4">
+                                <div>
+                                    <p className="text-white/70 text-sm mb-2">通常攻撃（Shooter）</p>
+                                    <div className="flex flex-wrap gap-2">
+                                        {availableNormal.map(({ techniqueId, level }) => {
+                                            const tech = TECHNIQUES[techniqueId]
+                                            const isActive = selNormal === techniqueId
+                                            return (
+                                                <button
+                                                    key={techniqueId}
+                                                    onClick={() => handleLoadoutUpdate({ selectedNormalAttackId: techniqueId })}
+                                                    className={cn(
+                                                        'px-3 py-1.5 rounded-lg text-xs border flex items-center gap-1.5',
+                                                        isActive
+                                                            ? 'bg-brand-500/30 border-brand-500/50 text-brand-300'
+                                                            : 'bg-white/[0.02] border-white/10 text-white/60 hover:border-white/20'
+                                                    )}
+                                                >
+                                                    <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: tech.color }} />
+                                                    {tech.label} (lv{level})
+                                                </button>
+                                            )
+                                        })}
+                                    </div>
+                                </div>
+                                <div>
+                                    <p className="text-white/70 text-sm mb-2">必殺技（Shooter）</p>
+                                    <div className="flex flex-wrap gap-2">
+                                        {availableSpecial.map(({ specialAttackId, level }) => {
+                                            const isActive = selSpecial === specialAttackId
+                                            return (
+                                                <button
+                                                    key={specialAttackId}
+                                                    onClick={() => handleLoadoutUpdate({ selectedSpecialAttackId: specialAttackId })}
+                                                    className={cn(
+                                                        'px-3 py-1.5 rounded-lg text-xs border flex items-center gap-1.5',
+                                                        isActive
+                                                            ? 'bg-brand-500/30 border-brand-500/50 text-brand-300'
+                                                            : 'bg-white/[0.02] border-white/10 text-white/60 hover:border-white/20'
+                                                    )}
+                                                >
+                                                    {specialAttackId === 'all_destruction' && <span className="w-2 h-2 rounded-full shrink-0 bg-red-500" />}
+                                                    {SPECIAL_ATTACK_LABELS[specialAttackId] ?? specialAttackId} (lv{level})
+                                                </button>
+                                            )
+                                        })}
+                                        {availableSpecial.length === 0 && <span className="text-white/40 text-xs">所持なし</span>}
+                                    </div>
+                                </div>
+                                <div>
+                                    <p className="text-white/70 text-sm mb-2">ヒール（Typist）</p>
+                                    <div className="flex flex-wrap gap-2">
+                                        <button
+                                            onClick={() => handleLoadoutUpdate({ selectedHealLevel: null })}
+                                            className={cn(
+                                                                'px-3 py-1.5 rounded-lg text-xs border',
+                                                                selHeal === null
+                                                                    ? 'bg-emerald-500/30 border-emerald-500/50 text-emerald-300'
+                                                                    : 'bg-white/[0.02] border-white/10 text-white/60 hover:border-white/20'
+                                                            )}
+                                        >
+                                            使わない
+                                        </button>
+                                        {healLevel !== null &&
+                                            [1, 2, 3, 4, 5, 6]
+                                                .filter((lv) => lv <= healLevel)
+                                                .map((lv) => {
+                                                    const isActive = selHeal === lv
+                                                    return (
+                                                        <button
+                                                            key={lv}
+                                                            onClick={() => handleLoadoutUpdate({ selectedHealLevel: lv })}
+                                                            className={cn(
+                                                                'px-3 py-1.5 rounded-lg text-xs border',
+                                                                isActive
+                                                                    ? 'bg-emerald-500/30 border-emerald-500/50 text-emerald-300'
+                                                                    : 'bg-white/[0.02] border-white/10 text-white/60 hover:border-white/20'
+                                                            )}
+                                                        >
+                                                            lv{lv === 6 ? 'max' : lv}
+                                                        </button>
+                                                    )
+                                                })}
+                                    </div>
+                                </div>
+                            </div>
+                        )
+                    })()}
                 </motion.div>
             </div>
         </div>
