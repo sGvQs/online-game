@@ -100,14 +100,11 @@ export async function updateLoadout(params: {
 
     if (Object.keys(data).length === 0) return { ok: true }
 
-    await prisma.starShieldUserProgress.upsert({
+    // レコードが無い場合は ensureProgress で先に作成（create には loadout を含めない）
+    await ensureProgress(user.id)
+    await prisma.starShieldUserProgress.update({
         where: { userId: user.id },
-        update: data,
-        create: {
-            userId: user.id,
-            totalTypingCount: 0,
-            ...data,
-        },
+        data,
     })
     return { ok: true }
 }
