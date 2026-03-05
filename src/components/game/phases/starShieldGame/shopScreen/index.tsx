@@ -29,13 +29,13 @@ import {
     HEAL_LEVEL_UP_COSTS,
     STAR_HP_LEVEL_UP_COSTS,
     LEVEL_HEAL_RECOVERY,
+    SPECIAL_ATTACK_LEVEL_PARAMS,
+    type SpecialAttackLevel,
 } from '@/constants/starShieldGame/shopConfig'
 import {
     LEVEL_STAR_HP,
     LEVEL_BULLET_COUNT,
     LEVEL_SPREAD_DEG,
-    SPECIAL_ATTACK_LEVEL_PARAMS,
-    type SpecialAttackLevel,
 } from '@/constants/starShieldGame/gameConfig'
 import { cn } from '@/lib/utils'
 import { getAvailableNormalAttacks, getAvailableSpecialAttacks } from '@/utils/starShieldGame'
@@ -695,8 +695,18 @@ function SkillRow({
                     )}
                 </div>
             </div>
-            {currentLevel === maxLevel && (
-                <span className="text-[10px] text-amber-300 shrink-0 [font-family:var(--font-dot-gothic-16)] border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 rounded">MAX</span>
+            {currentLevel === 0 ? (
+                <span className="text-[10px] text-white/40 shrink-0 [font-family:var(--font-dot-gothic-16)] border border-white/20 bg-white/5 px-2 py-0.5 rounded tracking-widest">
+                    未入手
+                </span>
+            ) : currentLevel === maxLevel ? (
+                <span className="text-[10px] text-amber-300 shrink-0 [font-family:var(--font-dot-gothic-16)] border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 rounded tracking-widest">
+                    MAX
+                </span>
+            ) : (
+                <span className="text-[10px] text-white/70 shrink-0 [font-family:var(--font-dot-gothic-16)] border border-white/10 bg-white/5 px-2 py-0.5 rounded tracking-widest">
+                    Lv {currentLevel}
+                </span>
             )}
         </button>
     )
@@ -778,7 +788,7 @@ function SkillPreviewModal({
             purchaseFn = () => purchaseSpecialAttackUnlock(preview.id as 'spread')
             purchaseLabelForFn = SPECIAL_LABELS[preview.id] ?? preview.id
         } else if (currentLevel < maxLevel) {
-            const nl = (currentLevel + 1) as Extract<SpecialAttackLevel, Exclude<SpecialAttackLevel, 1>>
+            const nl = (currentLevel + 1) as keyof typeof SPECIAL_ATTACK_LEVEL_UP_COSTS
             nextCost = SPECIAL_ATTACK_LEVEL_UP_COSTS[nl] ?? 0
             purchaseLabel = `Lv ${nl} に上げる`
             purchaseFn = () => purchaseSpecialAttackLevelUp(preview.id as 'spread', nl)

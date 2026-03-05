@@ -6,6 +6,9 @@
  * - PROGRESSION_DEBUG: 環境変数 NEXT_PUBLIC_STAR_SHIELD_DEBUG_PROGRESSION=true でのみ全スキル解放
  */
 
+export { SPECIAL_ATTACK_LEVEL_PARAMS } from './gameConfig'
+export type { SpecialAttackLevel } from './gameConfig'
+
 // ============================================
 // デバッグモード
 // ============================================
