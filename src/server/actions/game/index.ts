@@ -37,5 +37,15 @@ export {
     getStarShieldMatchStatus,
     isHellUnlocked,
 } from './starShieldActions'
+export {
+    getStarShieldProgress,
+    getMyStarShieldProgress,
+    purchaseNormalAttackUnlock,
+    purchaseNormalAttackLevelUp,
+    purchaseSpecialAttackUnlock,
+    purchaseSpecialAttackLevelUp,
+    purchaseHealUnlock,
+    purchaseHealLevelUp,
+} from './starShieldProgressionActions'
 
 

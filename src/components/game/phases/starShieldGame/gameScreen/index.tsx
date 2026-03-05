@@ -4,6 +4,7 @@ import { useStarShield } from '@/hooks/useStarShield'
 import type { Difficulty, GameResult, GameStats, NormalAttackLevel } from '@/types/starShieldGame'
 import type { TechniqueId } from '@/constants/starShieldGame/techniques'
 import type { SpecialAttackChoice } from '@/utils/starShieldGame'
+import type { SpecialAttackLevel } from '@/constants/starShieldGame/gameConfig'
 import { ASTEROID_HP, STAR_HP } from '@/constants/starShieldGame/gameConfig'
 import { ShooterView } from '../playing/shooterView'
 import { TypistView } from '../playing/typistView'
@@ -18,6 +19,8 @@ interface GameScreenProps {
     playersTotalPoints: number
     typistNormalAttack?: TechniqueId | null
     typistSpecialAttack?: SpecialAttackChoice
+    typistSpecialAttackLevel?: SpecialAttackLevel
+    typistHealLevel?: number | null
     level?: NormalAttackLevel
     autoAimNearest?: boolean
 }
@@ -33,10 +36,10 @@ function TimerDisplay({ timer }: { timer: number }) {
     )
 }
 
-export function GameScreen({ matchId, startedAt, shooterId, difficulty, currentUserId, onGameEnd, playersTotalPoints, typistNormalAttack, typistSpecialAttack = 'spread_medium', level = 1, autoAimNearest = false }: GameScreenProps) {
+export function GameScreen({ matchId, startedAt, shooterId, difficulty, currentUserId, onGameEnd, playersTotalPoints, typistNormalAttack, typistSpecialAttack = 'spread_medium', typistSpecialAttackLevel = 1, typistHealLevel = null, level = 1, autoAimNearest = false }: GameScreenProps) {
     const isShooter = shooterId === currentUserId
     const { asteroids, bullets, timer, score, starHp, aimRef, onMouseMove, dialogue, typistFireCount, contactExplosion, completeContactFail, chainHits, clearChainHits } =
-        useStarShield({ matchId, startedAt, isShooter, difficulty, currentUserId, onGameEnd, playersTotalPoints, selectedNormalAttack: typistNormalAttack, selectedSpecialAttack: typistSpecialAttack, level, autoAimNearest })
+        useStarShield({ matchId, startedAt, isShooter, difficulty, currentUserId, onGameEnd, playersTotalPoints, selectedNormalAttack: typistNormalAttack, selectedSpecialAttack: typistSpecialAttack, selectedSpecialAttackLevel: typistSpecialAttackLevel, selectedHealLevel: typistHealLevel, level, autoAimNearest })
 
     return (
         <div className="relative min-h-screen overflow-hidden">

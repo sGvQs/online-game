@@ -16,7 +16,7 @@ import {
     LEVEL_SPREAD_DEG,
     LEVEL_YELLOW_DAMAGE,
 } from '@/constants/starShieldGame/gameConfig'
-import type { TechniqueId } from '@/constants/starShieldGame/techniques'
+import { TECHNIQUES, type TechniqueId } from '@/constants/starShieldGame/techniques'
 
 export function createBaseBullet(
     o: { dirX: number; dirY: number; startX: number; startY: number },
@@ -72,7 +72,7 @@ export function createDefaultSpreadBullets(params: {
                     startX: DINO_X + dirX * BULLET_SPAWN_OFFSET_X,
                     startY: DINO_Y + dirY * BULLET_SPAWN_OFFSET_Y,
                 },
-                null,
+                TECHNIQUES.red,
                 now
             ),
         ]
@@ -93,7 +93,7 @@ export function createDefaultSpreadBullets(params: {
                     startX: DINO_X + bDirX * BULLET_SPAWN_OFFSET_X,
                     startY: DINO_Y + bDirY * BULLET_SPAWN_OFFSET_Y,
                 },
-                null,
+                TECHNIQUES.red,
                 now
             )
         )
@@ -127,7 +127,8 @@ export function createNormalAttackBullets(params: {
         return result
     }
 
-    if (!tech) {
+    // red（赤い球）または tech なし → 散弾
+    if (!tech || (tech.id as TechniqueId) === 'red') {
         const count = LEVEL_BULLET_COUNT[level]
         const spreadDeg = LEVEL_SPREAD_DEG[level]
         return createDefaultSpreadBullets({ centerAngle, count, spreadDeg, now })

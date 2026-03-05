@@ -40,6 +40,11 @@ model User {
   typingShootTypistMatches  TypingShootMatch[] @relation("TypingShootTypist")
   starShieldClearAsShooter  StarShieldClearRecord[] @relation("StarShieldClearShooter")
   starShieldClearAsTypist   StarShieldClearRecord[] @relation("StarShieldClearTypist")
+  starShieldProgress       StarShieldUserProgress?
+  starShieldNormalAttacks  StarShieldUserNormalAttack[]
+  starShieldSpecialAttacks StarShieldUserSpecialAttack[]
+  starShieldHeal           StarShieldUserHeal?
+  starShieldPurchaseHistory StarShieldPurchaseHistory[]
 
   @@map("users")
 }
@@ -291,4 +296,80 @@ model StarShieldClearRecord {
   @@index([shooterId, typistId])
   @@index([typistId, shooterId])
   @@map("star_shield_clear_records")
+}
+
+// -------------------------------------------------------------------------------------------------
+// Star Shield プログレッション（typing 通貨・ショップ）
+// -------------------------------------------------------------------------------------------------
+
+// 総合typing数（通貨）
+model StarShieldUserProgress {
+  id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId           String   @unique @map("user_id") @db.Uuid
+  totalTypingCount Int      @default(0) @map("total_typing_count")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("star_shield_user_progress")
+}
+
+// 通常攻撃スキル所持（技ごとに level 1-5）
+model StarShieldUserNormalAttack {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId       String   @map("user_id") @db.Uuid
+  techniqueId  String   @map("technique_id") // red, blue, yellow_beam, purple, orange
+  level        Int      @default(1) // 1-5
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, techniqueId])
+  @@map("star_shield_user_normal_attacks")
+}
+
+// 必殺技所持（spread_small, spread_medium, spread_large のみ。all_destruction はヒール max で獲得）
+model StarShieldUserSpecialAttack {
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId          String   @map("user_id") @db.Uuid
+  specialAttackId String   @map("special_attack_id")
+  level           Int      @default(1) // 1-10
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, specialAttackId])
+  @@map("star_shield_user_special_attacks")
+}
+
+// ヒールスキル所持（level 1-6。6=max）
+model StarShieldUserHeal {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId    String   @unique @map("user_id") @db.Uuid
+  level     Int      @default(1) // 1-6 (6 = max = 全回復+全破壊)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("star_shield_user_heal")
+}
+
+// 購入履歴
+model StarShieldPurchaseHistory {
+  id                 String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId             String   @map("user_id") @db.Uuid
+  purchaseType       String   @map("purchase_type") // SKILL_UNLOCK, LEVEL_UP
+  targetSkillId      String?  @map("target_skill_id")
+  targetLevel        Int?     @map("target_level")
+  typingCost         Int      @map("typing_cost")
+  totalTypingBefore  Int?     @map("total_typing_before")
+  createdAt          DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("star_shield_purchase_history")
 }

@@ -1,9 +1,9 @@
 /**
  * StarShieldGame 技の定義
- * 青い球、黄色いビーム、紫の球、オレンジの球 の4種類
+ * 赤い球（散弾）、青い球、黄色いビーム、紫の球、オレンジの球
  */
 
-export type TechniqueId = 'blue' | 'yellow_beam' | 'purple' | 'orange'
+export type TechniqueId = 'red' | 'blue' | 'yellow_beam' | 'purple' | 'orange'
 
 export interface TechniqueConfig {
     id: TechniqueId
@@ -32,6 +32,13 @@ export interface TechniqueConfig {
 }
 
 export const TECHNIQUES: Record<TechniqueId, TechniqueConfig> = {
+    red: {
+        id: 'red',
+        label: '赤い球',
+        damage: 1,
+        speed: 1,
+        color: '#ef4444',
+    },
     blue: {
         id: 'blue',
         label: '青い球',
@@ -71,7 +78,7 @@ export const TECHNIQUES: Record<TechniqueId, TechniqueConfig> = {
     },
 }
 
-export const TECHNIQUE_IDS: TechniqueId[] = ['blue', 'yellow_beam', 'purple', 'orange']
+export const TECHNIQUE_IDS: TechniqueId[] = ['red', 'blue', 'yellow_beam', 'purple', 'orange']
 
-/** デフォルト弾（技なし）の色 */
+/** デフォルト弾の色（red と同色） */
 export const DEFAULT_BULLET_COLOR = '#ef4444'

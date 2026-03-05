@@ -16,7 +16,10 @@ import {
     ASTEROID_RADIUS,
     STAR_HP,
     SPECIAL_ATTACK_BULLET_COUNT,
+    SPECIAL_ATTACK_LEVEL_PARAMS,
 } from '@/constants/starShieldGame/gameConfig'
+import type { SpecialAttackLevel } from '@/constants/starShieldGame/gameConfig'
+import { LEVEL_HEAL_RECOVERY } from '@/constants/starShieldGame/shopConfig'
 import { DIALOGUES, pickRandomDialogue } from '@/constants/starShieldGame/dialogues'
 import { TECHNIQUES, type TechniqueId } from '@/constants/starShieldGame/techniques'
 import type { SpecialAttackChoice } from '@/utils/starShieldGame'
@@ -56,6 +59,10 @@ interface UseStarShieldProps {
     selectedNormalAttack?: TechniqueId | null
     /** Typist が選択した必殺技（単語完了時） */
     selectedSpecialAttack?: SpecialAttackChoice
+    /** Typist が選択した必殺技レベル（1-10） */
+    selectedSpecialAttackLevel?: SpecialAttackLevel
+    /** Typist が選択したヒールレベル（単語完了時、1-6。null は未使用） */
+    selectedHealLevel?: number | null
     /** tech=null 時の散弾数レベル（1-5、5=lv.max） */
     level?: NormalAttackLevel
     /** デバッグ: 発射時に最も近い隕石を照準にする（準備画面で設定） */
@@ -71,6 +78,8 @@ export function useStarShield({
     playersTotalPoints = 0,
     selectedNormalAttack = null,
     selectedSpecialAttack = 'spread_medium',
+    selectedSpecialAttackLevel = 1,
+    selectedHealLevel = null,
     level = 1,
     autoAimNearest = false,
 }: UseStarShieldProps) {
@@ -105,9 +114,11 @@ export function useStarShield({
     const aimRef = useRef({ x: 0.5, y: 0.5 }) // 正規化座標 0-1
     const autoAimNearestRef = useRef(autoAimNearest)
     const levelRef = useRef(level)
+    const specialAttackLevelRef = useRef(selectedSpecialAttackLevel)
     const gameEndedRef = useRef(false)
     const contactPendingRef = useRef(false)
     const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null)
+    const waveTimeoutsRef = useRef<ReturnType<typeof setTimeout>[]>([])
     /** 時刻ズレ補正時のみセット。duration 計算で使用 */
     const effectiveStartedAtRef = useRef<number | null>(null)
     const lastGameStateSendRef = useRef(0)
@@ -123,6 +134,10 @@ export function useStarShield({
     useEffect(() => {
         levelRef.current = level
     }, [level])
+
+    useEffect(() => {
+        specialAttackLevelRef.current = selectedSpecialAttackLevel
+    }, [selectedSpecialAttackLevel])
 
     /** Shooter: game_state を broadcast（スロットリング付き） */
     const sendGameState = useCallback(() => {
@@ -173,6 +188,7 @@ export function useStarShield({
                 await saveStarShieldResult(matchId, {
                     spawnedCount: stats.spawnedCount,
                     destroyedCount: stats.destroyedCount,
+                    fireCount: stats.fireCount,
                     isCleared: result === 'CLEARED',
                     failureReason: result !== 'CLEARED' ? result : undefined,
                     durationSeconds: stats.durationSeconds,
@@ -201,7 +217,7 @@ export function useStarShield({
         channelRef.current = channel
 
         channel
-            .on('broadcast', { event: 'fire' }, ({ payload }: { payload?: { special?: boolean; technique?: string; specialAttack?: SpecialAttackChoice } }) => {
+            .on('broadcast', { event: 'fire' }, ({ payload }: { payload?: { special?: boolean; technique?: string; specialAttack?: SpecialAttackChoice; specialAttackLevel?: SpecialAttackLevel; healLevel?: number } }) => {
                 fireCountRef.current += 1
                 playVoiceRef.current('shooting')
                 if (isShooter) sendGameState()
@@ -213,6 +229,40 @@ export function useStarShield({
                     const nearestPos = findNearestAsteroidPosition(asteroidsRef.current, DINO_X, DINO_Y, now)
                     if (nearestPos) {
                         aimRef.current = { x: nearestPos.x, y: nearestPos.y }
+                    }
+                }
+
+                // 単語完了時: ヒール処理（必殺技より先に実行）
+                if (payload?.healLevel != null && payload.healLevel >= 1 && payload.healLevel <= 6) {
+                    const recovery = LEVEL_HEAL_RECOVERY[payload.healLevel as 1 | 2 | 3 | 4 | 5 | 6]
+                    const newHp = Math.min(maxStarHp, starHpRef.current + recovery)
+                    starHpRef.current = newHp
+                    setStarHp(newHp)
+                    lastGameStateSendRef.current = 0
+                    sendGameState()
+
+                    // ヒール lv6: 全破壊
+                    if (payload.healLevel === 6) {
+                        playVoiceRef.current('star-damage')
+                        const asts = asteroidsRef.current
+                        const toDestroy = asts.filter((a) => !a.destroyedAt)
+                        const destroyedCount = toDestroy.length
+                        if (toDestroy.length > 0) {
+                            setAsteroids((prev) => {
+                                const ids = new Set(toDestroy.map((a) => a.id))
+                                const next = prev.map((a) =>
+                                    ids.has(a.id) ? { ...a, destroyedAt: now, hp: 0 } : a
+                                )
+                                asteroidsRef.current = next
+                                return next
+                            })
+                            setScore((prev) => {
+                                const next = { ...prev, destroyed: prev.destroyed + destroyedCount }
+                                scoreRef.current = next
+                                return next
+                            })
+                            sendGameState()
+                        }
                     }
                 }
 
@@ -252,18 +302,37 @@ export function useStarShield({
                     const centerAngle = aimToCenterAngle(aim.x, aim.y, DINO_X, originY)
                     const techId = payload?.technique as TechniqueId | undefined
                     const tech = techId && techId in TECHNIQUES ? TECHNIQUES[techId] : null
-                    const newBullets = createSpecialAttackBullets({
-                        specialAttack,
-                        centerAngle,
-                        tech,
-                        level: levelRef.current,
-                        now,
-                    })
-                    setBullets((prev) => {
-                        const next = [...prev, ...newBullets]
-                        bulletsRef.current = next
-                        return next
-                    })
+                    const rawLevel = payload?.specialAttackLevel ?? specialAttackLevelRef.current
+                    const specLv = Math.max(1, Math.min(10, rawLevel)) as SpecialAttackLevel
+                    const { waveCount, waveDelayMs } = SPECIAL_ATTACK_LEVEL_PARAMS[specLv]
+                    const normalLv = levelRef.current
+
+                    const addWave = (waveNow: number) => {
+                        const newBullets = createSpecialAttackBullets({
+                            specialAttack,
+                            centerAngle,
+                            tech,
+                            specialAttackLevel: specLv,
+                            normalAttackLevel: normalLv,
+                            now: waveNow,
+                        })
+                        setBullets((prev) => {
+                            const next = [...prev, ...newBullets]
+                            bulletsRef.current = next
+                            return next
+                        })
+                    }
+
+                    if (waveCount <= 1) {
+                        addWave(now)
+                    } else {
+                        for (let w = 0; w < waveCount; w++) {
+                            const t = setTimeout(() => {
+                                addWave(Date.now())
+                            }, w * waveDelayMs)
+                            waveTimeoutsRef.current.push(t)
+                        }
+                    }
                     return
                 }
 
@@ -312,6 +381,8 @@ export function useStarShield({
         }
 
         return () => {
+            waveTimeoutsRef.current.forEach(clearTimeout)
+            waveTimeoutsRef.current = []
             supabase.removeChannel(channel)
         }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -496,9 +567,15 @@ export function useStarShield({
         const nextChar = charIndex + 1
         const isLastChar = nextChar >= romaji.length
 
-        const payload: { special: boolean; technique?: string; specialAttack?: SpecialAttackChoice } = { special: isLastChar }
+        const payload: { special: boolean; technique?: string; specialAttack?: SpecialAttackChoice; specialAttackLevel?: SpecialAttackLevel; healLevel?: number } = { special: isLastChar }
         if (selectedNormalAttack != null) payload.technique = selectedNormalAttack
-        if (isLastChar) payload.specialAttack = selectedSpecialAttack
+        if (isLastChar) {
+            payload.specialAttack = selectedSpecialAttack
+            payload.specialAttackLevel = selectedSpecialAttackLevel
+            if (selectedHealLevel != null && selectedHealLevel >= 1 && selectedHealLevel <= 6) {
+                payload.healLevel = selectedHealLevel
+            }
+        }
         channelRef.current?.send({
             type: 'broadcast',
             event: 'fire',
@@ -512,7 +589,7 @@ export function useStarShield({
         } else {
             setCharIndex(nextChar)
         }
-    }, [currentLine, charIndex, selectedNormalAttack, selectedSpecialAttack])
+    }, [currentLine, charIndex, selectedNormalAttack, selectedSpecialAttack, selectedSpecialAttackLevel, selectedHealLevel])
 
     useEffect(() => {
         if (isShooter) return

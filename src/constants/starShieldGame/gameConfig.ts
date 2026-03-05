@@ -95,7 +95,30 @@ export const SPREAD_DEG_EASY_NORMAL_HARD = 12
 export const HELL_SPECIAL_SPREAD_DEG = 150
 
 // ========== 必殺技・レベル制 ==========
-/** 必殺技のレベル別パラメータ（全球共通） */
+/** 必殺技のレベル別パラメータ（B: 時間差発射） */
+export type SpecialAttackLevelParams = {
+    waveCount: number
+    bulletsPerWave: number
+    spreadDeg: number
+    waveDelayMs: number
+}
+
+export type SpecialAttackLevel = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10
+
+export const SPECIAL_ATTACK_LEVEL_PARAMS: Record<SpecialAttackLevel, SpecialAttackLevelParams> = {
+    1: { waveCount: 1, bulletsPerWave: 5, spreadDeg: 12, waveDelayMs: 0 },
+    2: { waveCount: 1, bulletsPerWave: 12, spreadDeg: 20, waveDelayMs: 0 },
+    3: { waveCount: 1, bulletsPerWave: 20, spreadDeg: 35, waveDelayMs: 0 },
+    4: { waveCount: 1, bulletsPerWave: 28, spreadDeg: 50, waveDelayMs: 0 },
+    5: { waveCount: 1, bulletsPerWave: 35, spreadDeg: 65, waveDelayMs: 0 },
+    6: { waveCount: 1, bulletsPerWave: 42, spreadDeg: 75, waveDelayMs: 0 },
+    7: { waveCount: 1, bulletsPerWave: 50, spreadDeg: 85, waveDelayMs: 0 },
+    8: { waveCount: 2, bulletsPerWave: 18, spreadDeg: 35, waveDelayMs: 80 },
+    9: { waveCount: 3, bulletsPerWave: 18, spreadDeg: 35, waveDelayMs: 80 },
+    10: { waveCount: 5, bulletsPerWave: 20, spreadDeg: 40, waveDelayMs: 70 },
+}
+
+/** 通常攻撃レベル流用（後方互換・all_destruction 用）。新規は SPECIAL_ATTACK_LEVEL_PARAMS を使用 */
 export type SpecialSpreadParams = { count: number; spreadDeg: number }
 
 export const LEVEL_SPECIAL: Record<NormalAttackLevel, SpecialSpreadParams> = {

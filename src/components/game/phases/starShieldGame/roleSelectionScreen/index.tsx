@@ -1,6 +1,7 @@
 'use client'
 
 import Image from 'next/image'
+import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { RoomWithUsersAndReadyStatus, RoomUserWithReadyStatus } from '@/types'
 import { cn } from '@/lib/utils'
@@ -10,10 +11,13 @@ import { AuroraGlow } from '@/components/game/common/starShield/auroraGlow'
 import { roleSelectionScreen } from './styles'
 import { COLORS, DIFFICULTIES, DIFFICULTY_META, ROLE_META, type Difficulty, type RoleChoice } from '@/constants/starShieldGame/constants'
 import { TECHNIQUES, type TechniqueId } from '@/constants/starShieldGame/techniques'
-import { getDebugNormalAttacks } from '@/utils/starShieldGame'
-import type { SpecialAttackChoice } from '@/utils/starShieldGame'
-import type { NormalAttackLevel } from '@/types/starShieldGame'
-import { LEVEL_BULLET_COUNT } from '@/constants/starShieldGame/gameConfig'
+import {
+    getDebugNormalAttacks,
+    getAvailableNormalAttacks,
+    getAvailableSpecialAttacks,
+    getAvailableHealLevel,
+} from '@/utils/starShieldGame'
+import type { SpecialAttackChoice, OwnedSkills } from '@/utils/starShieldGame'
 
 interface RoleSelectionScreenProps {
     room: RoomWithUsersAndReadyStatus
@@ -23,6 +27,9 @@ interface RoleSelectionScreenProps {
     onNormalAttackChange: (normal: TechniqueId | null) => void
     specialAttackChoices: Record<string, SpecialAttackChoice>
     onSpecialAttackChange: (special: SpecialAttackChoice) => void
+    healChoices?: Record<string, number | null>
+    onHealChange?: (healLevel: number | null) => void
+    roomId?: string
     roleConflict: boolean
     canProceed: boolean
     onProceedToGame: () => void
@@ -32,10 +39,10 @@ interface RoleSelectionScreenProps {
     onDifficultyChange: (d: Difficulty) => void
     isHost: boolean
     isHellUnlocked: boolean
-    level?: NormalAttackLevel
-    onLevelChange?: (level: NormalAttackLevel) => void
     autoAimNearest?: boolean
     onToggleAutoAim?: () => void
+    shooterProgress?: OwnedSkills | null
+    typistProgress?: OwnedSkills | null
 }
 
 export function RoleSelectionScreen({
@@ -46,6 +53,9 @@ export function RoleSelectionScreen({
     onNormalAttackChange,
     specialAttackChoices,
     onSpecialAttackChange,
+    healChoices = {},
+    onHealChange,
+    roomId,
     canProceed,
     onProceedToGame,
     onBack,
@@ -54,32 +64,36 @@ export function RoleSelectionScreen({
     onDifficultyChange,
     isHost,
     isHellUnlocked,
-    level = 1,
-    onLevelChange,
     autoAimNearest = false,
     onToggleAutoAim,
+    shooterProgress = null,
+    typistProgress = null,
 }: RoleSelectionScreenProps) {
     const myRole = roleChoices[currentUserId]
     const typistId = room.users.find((u) => roleChoices[u.userId] === 'TYPIST')?.userId
+    const shooterId = room.users.find((u) => roleChoices[u.userId] === 'SHOOTER')?.userId
     const canEditTechnique = isHost
     const activeDiffMeta = DIFFICULTY_META[difficulty]
     const styles = roleSelectionScreen()
-    const debugNormalAttacks = getDebugNormalAttacks()
+    const shooterOwned: OwnedSkills = shooterProgress ?? {
+        normalAttacks: [{ techniqueId: 'red', level: 1 }],
+        specialAttacks: [],
+        healLevel: null,
+    }
+    const typistOwned: OwnedSkills = typistProgress ?? { normalAttacks: [], specialAttacks: [], healLevel: null }
+    const availableNormalAttacks = getAvailableNormalAttacks(shooterOwned)
+    const availableSpecialAttacks = getAvailableSpecialAttacks(shooterOwned)
+    const availableHealLevel = getAvailableHealLevel(typistOwned)
 
     const SPECIAL_ATTACK_OPTIONS: { id: SpecialAttackChoice; label: string }[] = [
         { id: 'spread_small', label: '小規模' },
         { id: 'spread_medium', label: '中規模' },
         { id: 'spread_large', label: '大規模' },
         { id: 'all_destruction', label: '全部破壊' },
-    ]
-
-    const LEVEL_OPTIONS: { value: NormalAttackLevel; label: string; count: number }[] = [
-        { value: 1, label: 'lv.1', count: LEVEL_BULLET_COUNT[1] },
-        { value: 2, label: 'lv.2', count: LEVEL_BULLET_COUNT[2] },
-        { value: 3, label: 'lv.3', count: LEVEL_BULLET_COUNT[3] },
-        { value: 4, label: 'lv.4', count: LEVEL_BULLET_COUNT[4] },
-        { value: 5, label: 'lv.max', count: LEVEL_BULLET_COUNT[5] },
-    ]
+    ].filter((opt) => availableSpecialAttacks.some((a) => a.specialAttackId === opt.id)) as {
+        id: SpecialAttackChoice
+        label: string
+    }[]
 
     return (
         <div className="relative min-h-screen overflow-hidden flex flex-col items-center justify-center">
@@ -88,8 +102,16 @@ export function RoleSelectionScreen({
             <AuroraGlow width={800} height={400} opacity={0.2} blur={60} />
 
             <div className="relative z-10 w-full max-w-2xl mx-auto px-6 py-10 flex flex-col gap-7">
-                <motion.div initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+                <motion.div initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="flex items-center justify-between">
                     <h2 className={styles.sectionTitle()}>[むずかしさ]と[やくわり]をきめよう。</h2>
+                    {roomId && (
+                        <Link
+                            href={`/game/${roomId}/star-shield/shop`}
+                            className="text-sm text-amber-400/80 hover:text-amber-400 border border-amber-500/40 px-3 py-1.5 rounded-xl hover:bg-amber-500/10 transition-colors"
+                        >
+                            🛒 ショップ
+                        </Link>
+                    )}
                 </motion.div>
 
                 <div className="grid grid-cols-[1fr_1fr] gap-5">
@@ -186,29 +208,12 @@ export function RoleSelectionScreen({
                     transition={{ duration: 0.5, delay: 0.18 }}
                     className={cn('rounded-2xl p-5 flex flex-col gap-3 bg-white/[0.03] border border-white/[0.08]', !canEditTechnique && 'opacity-70')}
                 >
-                    <p className={styles.difficultyCardTitle()}>[通常攻撃]</p>
-                    {typistId ? (
+                    <p className={styles.difficultyCardTitle()}>[通常攻撃]（Shooter）</p>
+                    {shooterId ? (
                         <div className="flex flex-wrap gap-2">
-                            {debugNormalAttacks.map((tid) => {
-                                if (tid === null) {
-                                    const isActive = normalAttackChoices[typistId] === null
-                                    return (
-                                        <button
-                                            key="normal"
-                                            onClick={() => canEditTechnique && onNormalAttackChange(null)}
-                                            disabled={!canEditTechnique}
-                                            className={cn(
-                                                'px-3 py-2 rounded-xl text-xs transition-all border',
-                                                isActive ? 'bg-brand-500/20 border-brand-500/50 text-brand-300' : 'bg-white/[0.02] border-white/10 text-white/50 hover:border-white/20',
-                                                !canEditTechnique && 'cursor-default'
-                                            )}
-                                        >
-                                            ふつう
-                                        </button>
-                                    )
-                                }
+                            {availableNormalAttacks.map(({ techniqueId: tid, level: lv }) => {
                                 const tech = TECHNIQUES[tid]
-                                const isActive = normalAttackChoices[typistId] === tid
+                                const isActive = normalAttackChoices[shooterId] === tid
                                 return (
                                     <button
                                         key={tid}
@@ -225,7 +230,7 @@ export function RoleSelectionScreen({
                                             className="w-2 h-2 rounded-full shrink-0"
                                             style={{ backgroundColor: tech.color }}
                                         />
-                                        {tech.label}
+                                        {tech.label} (lv{lv})
                                     </button>
                                 )
                             })}
@@ -238,49 +243,21 @@ export function RoleSelectionScreen({
                 <motion.div
                     initial={{ opacity: 0, y: 8 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: 0.182 }}
-                    className={cn('rounded-2xl p-5 flex flex-col gap-3 bg-white/[0.03] border border-white/[0.08]', !canEditTechnique && 'opacity-70')}
-                >
-                    <p className={styles.difficultyCardTitle()}>[レベル]</p>
-                    {onLevelChange ? (
-                        <div className="flex flex-wrap gap-2">
-                            {LEVEL_OPTIONS.map(({ value, label, count }) => {
-                                const isActive = level === value
-                                return (
-                                    <button
-                                        key={value}
-                                        onClick={() => canEditTechnique && onLevelChange(value)}
-                                        disabled={!canEditTechnique}
-                                        className={cn(
-                                            'px-3 py-2 rounded-xl text-xs transition-all border',
-                                            isActive ? 'bg-brand-500/20 border-brand-500/50 text-brand-300' : 'bg-white/[0.02] border-white/10 text-white/50 hover:border-white/20',
-                                            !canEditTechnique && 'cursor-default'
-                                        )}
-                                    >
-                                        {label} ({count}発)
-                                    </button>
-                                )
-                            })}
-                        </div>
-                    ) : null}
-                </motion.div>
-
-                <motion.div
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: 0.185 }}
                     className={cn('rounded-2xl p-5 flex flex-col gap-3 bg-white/[0.03] border border-white/[0.08]', !canEditTechnique && 'opacity-70')}
                 >
-                    <p className={styles.difficultyCardTitle()}>[必殺技]</p>
-                    {typistId ? (
+                    <p className={styles.difficultyCardTitle()}>[必殺技]（Shooter）</p>
+                    {shooterId ? (
                         <div className="flex flex-wrap gap-2">
                             {SPECIAL_ATTACK_OPTIONS.map(({ id, label }) => {
-                                const isActive = (specialAttackChoices[typistId] ?? 'spread_medium') === id
+                                const spec = availableSpecialAttacks.find((a) => a.specialAttackId === id)
+                                const lv = spec?.level ?? 1
+                                const isActive = (specialAttackChoices[shooterId] ?? 'spread_medium') === id
                                 const isAllDestruction = id === 'all_destruction'
                                 return (
                                     <button
                                         key={id}
-                                        onClick={() => canEditTechnique && onSpecialAttackChange(id)}
+                                        onClick={() => canEditTechnique && onSpecialAttackChange(id as SpecialAttackChoice)}
                                         disabled={!canEditTechnique}
                                         className={cn(
                                             'px-3 py-2 rounded-xl text-xs transition-all border flex items-center gap-1.5',
@@ -293,11 +270,53 @@ export function RoleSelectionScreen({
                                         )}
                                     >
                                         {isAllDestruction && <span className="w-2 h-2 rounded-full shrink-0 bg-red-500" />}
-                                        {label}
+                                        {label} (lv{lv})
                                     </button>
                                 )
                             })}
                         </div>
+                    ) : (
+                        <p className="text-white/40 text-xs">やくわりがきまるとせんたくできます</p>
+                    )}
+                </motion.div>
+
+                <motion.div
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 0.186 }}
+                    className={cn('rounded-2xl p-5 flex flex-col gap-3 bg-white/[0.03] border border-white/[0.08]', myRole !== 'TYPIST' && 'opacity-70')}
+                >
+                    <p className={styles.difficultyCardTitle()}>[ヒール]（Typist）</p>
+                    {typistId ? (
+                        availableHealLevel != null ? (
+                            <div className="flex flex-wrap gap-2">
+                                {Array.from({ length: availableHealLevel }, (_, i) => i + 1).map((lv) => {
+                                    const isActive = (healChoices[typistId] ?? 1) === lv
+                                    const isMax = lv === 6
+                                    const canEditHeal = myRole === 'TYPIST' && typistId === currentUserId
+                                    return (
+                                        <button
+                                            key={lv}
+                                            onClick={() => canEditHeal && onHealChange?.(lv)}
+                                            disabled={!canEditHeal}
+                                            className={cn(
+                                                'px-3 py-2 rounded-xl text-xs transition-all border flex items-center gap-1.5',
+                                                isActive
+                                                    ? isMax
+                                                        ? 'border-emerald-500 bg-emerald-500/20 text-emerald-400'
+                                                        : 'bg-emerald-500/20 border-emerald-500/50 text-emerald-300'
+                                                    : 'bg-white/[0.02] border-white/10 text-white/50 hover:border-white/20',
+                                                !canEditHeal && 'cursor-default'
+                                            )}
+                                        >
+                                            {lv === 6 ? 'lv.max' : `lv.${lv}`}
+                                        </button>
+                                    )
+                                })}
+                            </div>
+                        ) : (
+                            <p className="text-white/40 text-xs">ショップでヒールをかいましょう</p>
+                        )
                     ) : (
                         <p className="text-white/40 text-xs">やくわりがきまるとせんたくできます</p>
                     )}

@@ -1,64 +1,90 @@
 /**
- * 技の難易度段階解放ロジック
- * EASY→1種、NORMAL→2種、HARD→3種、HELL→4種＋全部破壊
+ * 技の所持・解放ロジック
+ * 通貨ベースのショップで購入したスキルのみ使用可能
+ * PROGRESSION_DEBUG 時は全スキル解放
  */
 
-import type { Difficulty } from '@/types/starShieldGame'
 import type { TechniqueId } from '@/constants/starShieldGame/techniques'
+import { PROGRESSION_DEBUG } from '@/constants/starShieldGame/shopConfig'
 
-/** 全部破壊（単語完了時の広範囲発射／HELL では全隕石破壊） */
+/** 全部破壊（ヒール lv max でのみ獲得。ショップにはない） */
 export const ALL_DESTRUCTION_ID = 'all_destruction' as const
 
-/** 必殺技の選択肢（単語完了時の挙動） */
+/** 必殺技の選択肢（Shooter ショップで購入可能な3種 + ヒール max の全破壊） */
 export type SpecialAttackChoice = 'spread_small' | 'spread_medium' | 'spread_large' | 'all_destruction'
 
-/** 技IDと解放難易度のマッピング */
-export const TECHNIQUE_UNLOCK_DIFFICULTY: Record<TechniqueId | typeof ALL_DESTRUCTION_ID, Difficulty> = {
-    blue: 'EASY',
-    yellow_beam: 'NORMAL',
-    purple: 'HARD',
-    orange: 'HELL',
-    all_destruction: 'HELL',
+/** 通常攻撃の型（red は初期所持） */
+export type SelectableTechnique = TechniqueId | null
+
+export interface OwnedNormalAttack {
+    techniqueId: string
+    level: number
 }
 
-/** 難易度の順序（解放判定用） */
-const DIFFICULTY_ORDER: Difficulty[] = ['EASY', 'NORMAL', 'HARD', 'HELL']
-
-function isDifficultyUnlocked(required: Difficulty, current: Difficulty): boolean {
-    return DIFFICULTY_ORDER.indexOf(current) >= DIFFICULTY_ORDER.indexOf(required)
+export interface OwnedSpecialAttack {
+    specialAttackId: string
+    level: number
 }
 
-/** 選択可能な技の型（ふつう + 4技 + 全部破壊） */
-export type SelectableTechnique = TechniqueId | typeof ALL_DESTRUCTION_ID | null
+export interface OwnedSkills {
+    normalAttacks: OwnedNormalAttack[]
+    specialAttacks: OwnedSpecialAttack[] // { specialAttackId, level }[]
+    healLevel: number | null
+}
 
-/**
- * 指定難易度で解放されている技の一覧を返す。
- * 順序: null（ふつう）, blue, yellow_beam, purple, orange, all_destruction
- */
-export function getAvailableTechniques(difficulty: Difficulty): SelectableTechnique[] {
-    const result: SelectableTechnique[] = [null] // ふつうは常に選択可能
-
-    const techniqueIds: (TechniqueId | typeof ALL_DESTRUCTION_ID)[] = [
-        'blue',
-        'yellow_beam',
-        'purple',
-        'orange',
-        ALL_DESTRUCTION_ID,
-    ]
-
-    for (const id of techniqueIds) {
-        const unlockDiff = TECHNIQUE_UNLOCK_DIFFICULTY[id]
-        if (isDifficultyUnlocked(unlockDiff, difficulty)) {
-            result.push(id)
-        }
+/** Shooter 用: 選択可能な通常攻撃一覧。PROGRESSION_DEBUG 時は全技 lv5 */
+export function getAvailableNormalAttacks(owned: OwnedSkills): { techniqueId: TechniqueId; level: number }[] {
+    if (PROGRESSION_DEBUG) {
+        return [
+            { techniqueId: 'red', level: 5 },
+            { techniqueId: 'blue', level: 5 },
+            { techniqueId: 'yellow_beam', level: 5 },
+            { techniqueId: 'purple', level: 5 },
+            { techniqueId: 'orange', level: 5 },
+        ]
     }
+    const hasRed = owned.normalAttacks.some((a) => a.techniqueId === 'red')
+    const list: { techniqueId: TechniqueId; level: number }[] = []
+    if (hasRed) {
+        const r = owned.normalAttacks.find((a) => a.techniqueId === 'red')
+        list.push({ techniqueId: 'red', level: r?.level ?? 1 })
+    }
+    for (const id of ['blue', 'yellow_beam', 'purple', 'orange'] as const) {
+        const o = owned.normalAttacks.find((a) => a.techniqueId === id)
+        if (o) list.push({ techniqueId: id, level: o.level })
+    }
+    return list
+}
 
-    return result
+/** Shooter 用: 選択可能な必殺技一覧（ID + レベル）。PROGRESSION_DEBUG 時は全種 lv10 */
+export function getAvailableSpecialAttacks(owned: OwnedSkills): { specialAttackId: SpecialAttackChoice; level: number }[] {
+    if (PROGRESSION_DEBUG) {
+        return [
+            { specialAttackId: 'spread_small', level: 10 },
+            { specialAttackId: 'spread_medium', level: 10 },
+            { specialAttackId: 'spread_large', level: 10 },
+            { specialAttackId: 'all_destruction', level: 10 },
+        ]
+    }
+    const list: { specialAttackId: SpecialAttackChoice; level: number }[] = []
+    for (const id of ['spread_small', 'spread_medium', 'spread_large'] as const) {
+        const o = owned.specialAttacks.find((a) => a.specialAttackId === id)
+        if (o) list.push({ specialAttackId: id, level: o.level })
+    }
+    if (owned.healLevel === 6) list.push({ specialAttackId: 'all_destruction', level: 10 })
+    return list
+}
+
+/** Typist 用: ヒール所持していれば選択可能。PROGRESSION_DEBUG 時は lv6 */
+export function getAvailableHealLevel(owned: OwnedSkills): number | null {
+    if (PROGRESSION_DEBUG) return 6
+    return owned.healLevel
 }
 
 /**
- * デバッグ用: 難易度制限なしで全通常攻撃（ふつう＋4技）を返す。
+ * デバッグ用: 難易度制限なしで全通常攻撃を返す。
+ * PROGRESSION_DEBUG 時に getAvailableNormalAttacks が使うのと同じ。
  */
-export function getDebugNormalAttacks(): (TechniqueId | null)[] {
-    return [null, 'blue', 'yellow_beam', 'purple', 'orange']
+export function getDebugNormalAttacks(): TechniqueId[] {
+    return ['red', 'blue', 'yellow_beam', 'purple', 'orange']
 }

@@ -169,6 +169,7 @@ export async function getStarShieldMatchStatus(matchId: string): Promise<
 interface SaveStarShieldResultData {
     spawnedCount: number
     destroyedCount: number
+    fireCount: number
     isCleared: boolean
     failureReason?: string
     durationSeconds: number
@@ -184,7 +185,7 @@ export async function saveStarShieldResult(
     data: SaveStarShieldResultData
 ): Promise<void> {
     const existing = await prisma.typingShootMatch.findUnique({ where: { matchId } })
-    const { spawnedCount, destroyedCount, isCleared, failureReason, durationSeconds, difficulty: dataDifficulty } = data
+    const { spawnedCount, destroyedCount, fireCount, isCleared, failureReason, durationSeconds, difficulty: dataDifficulty } = data
     const accuracyRate = spawnedCount > 0 ? destroyedCount / spawnedCount : 0
     const updateData = {
         spawnedCount,
@@ -283,6 +284,19 @@ export async function saveStarShieldResult(
             `
         } catch (e) {
             console.warn('[saveStarShieldResult] star_shield_clear_records への保存に失敗（マイグレーション未適用の可能性）:', e)
+        }
+    }
+
+    // Typist の typing 数を通貨として加算
+    if (fireCount > 0) {
+        try {
+            await prisma.starShieldUserProgress.upsert({
+                where: { userId: typistId },
+                update: { totalTypingCount: { increment: fireCount } },
+                create: { userId: typistId, totalTypingCount: fireCount },
+            })
+        } catch (e) {
+            console.warn('[saveStarShieldResult] star_shield_user_progress への typing 加算に失敗:', e)
         }
     }
 }
