@@ -55,7 +55,7 @@ export function RoleSelectionScreen({
 }: RoleSelectionScreenProps) {
     const myRole = roleChoices[currentUserId]
     const typistId = room.users.find((u) => roleChoices[u.userId] === 'TYPIST')?.userId
-    const canEditTechnique = myRole === 'TYPIST'
+    const canEditTechnique = isHost
     const activeDiffMeta = DIFFICULTY_META[difficulty]
     const styles = roleSelectionScreen()
     const debugNormalAttacks = getDebugNormalAttacks()

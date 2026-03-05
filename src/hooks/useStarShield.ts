@@ -28,15 +28,19 @@ import {
     ASTEROID_HP,
     STAR_HP,
     SPECIAL_ATTACK_BULLET_COUNT,
-    SPECIAL_ATTACK_SPREAD_DEG,
-    HELL_NORMAL_BULLET_COUNT,
-    HELL_NORMAL_SPREAD_DEG,
 } from '@/constants/starShieldGame/gameConfig'
 import { DIALOGUES, pickRandomDialogue } from '@/constants/starShieldGame/dialogues'
 import { TECHNIQUES, type TechniqueId } from '@/constants/starShieldGame/techniques'
 import type { SpecialAttackChoice } from '@/utils/starShieldGame'
 import type { Asteroid, Bullet, DialogueLine, Difficulty, GameResult, GameStats, GameStatePayload, GameEndPayload } from '@/types/starShieldGame'
-import { getBulletPosition, getAsteroidPosition, getRomaji, findNearestAsteroidPosition } from '@/utils/starShieldGame'
+import {
+    getBulletPosition,
+    getAsteroidPosition,
+    getRomaji,
+    findNearestAsteroidPosition,
+    createNormalAttackBullets,
+    createSpecialAttackBullets,
+} from '@/utils/starShieldGame'
 
 // ============================================
 // Hook
@@ -239,32 +243,12 @@ export function useStarShield({
                         }
                     }
 
-                    const bulletCount = SPECIAL_ATTACK_BULLET_COUNT[specialAttack]
-                    const spreadDeg = SPECIAL_ATTACK_SPREAD_DEG[specialAttack]
                     const aim = aimRef.current
                     const originY = DINO_Y + BULLET_ORIGIN_Y_OFFSET
                     const dx = aim.x - DINO_X
                     const dy = aim.y - originY
-                    const len = Math.hypot(dx, dy)
-                    const centerAngle = len >= 0.001 ? Math.atan2(dy, dx) : 0
-                    const spreadRad = (spreadDeg * Math.PI) / 180
-                    const newBullets: Bullet[] = []
-                    for (let i = 0; i < bulletCount; i++) {
-                        const angle =
-                            centerAngle -
-                            spreadRad / 2 +
-                            (bulletCount > 1 ? (spreadRad * i) / (bulletCount - 1) : 0)
-                        const dirX = Math.cos(angle)
-                        const dirY = Math.sin(angle)
-                        newBullets.push({
-                            id: crypto.randomUUID(),
-                            firedAt: now,
-                            startX: DINO_X + dirX * BULLET_SPAWN_OFFSET_X,
-                            startY: DINO_Y + dirY * BULLET_SPAWN_OFFSET_Y,
-                            dirX,
-                            dirY,
-                        })
-                    }
+                    const centerAngle = Math.hypot(dx, dy) >= 0.001 ? Math.atan2(dy, dx) : 0
+                    const newBullets = createSpecialAttackBullets({ specialAttack, centerAngle, now })
                     setBullets((prev) => {
                         const next = [...prev, ...newBullets]
                         bulletsRef.current = next
@@ -287,81 +271,19 @@ export function useStarShield({
                 const techId = payload?.technique as TechniqueId | undefined
                 const tech = techId && techId in TECHNIQUES ? TECHNIQUES[techId] : null
 
-                const createBullet = (o: { dirX: number; dirY: number; startX: number; startY: number }) => {
-                    const base: Bullet = {
-                        id: crypto.randomUUID(),
-                        firedAt: now,
-                        startX: o.startX,
-                        startY: o.startY,
-                        dirX: o.dirX,
-                        dirY: o.dirY,
-                    }
-                    if (tech) {
-                        return {
-                            ...base,
-                            damage: tech.damage,
-                            speed: tech.speed,
-                            technique: tech.id,
-                            piercing: tech.piercing,
-                        }
-                    }
-                    return base
-                }
-
-                if (tech?.count && tech.count > 1) {
-                    const verticalOffset = tech.verticalOffset ?? 0
-                    const newBullets: Bullet[] = []
-                    for (let i = 0; i < tech.count; i++) {
-                        const offsetDist = i * verticalOffset
-                        const startX = DINO_X + dirX * BULLET_SPAWN_OFFSET_X + dirX * offsetDist
-                        const startY = DINO_Y + dirY * BULLET_SPAWN_OFFSET_Y + dirY * offsetDist
-                        newBullets.push(
-                            createBullet({ dirX, dirY, startX, startY })
-                        )
-                    }
-                    setBullets((prev) => {
-                        const next = [...prev, ...newBullets]
-                        bulletsRef.current = next
-                        return next
-                    })
-                } else if (difficulty === 'HELL' && !tech) {
-                    const spreadRad = (HELL_NORMAL_SPREAD_DEG * Math.PI) / 180
-                    const count = HELL_NORMAL_BULLET_COUNT
-                    const newBullets: Bullet[] = []
-                    for (let i = 0; i < count; i++) {
-                        const angle =
-                            centerAngle -
-                            spreadRad / 2 +
-                            (count > 1 ? (spreadRad * i) / (count - 1) : 0)
-                        const bDirX = Math.cos(angle)
-                        const bDirY = Math.sin(angle)
-                        newBullets.push(
-                            createBullet({
-                                dirX: bDirX,
-                                dirY: bDirY,
-                                startX: DINO_X + bDirX * BULLET_SPAWN_OFFSET_X,
-                                startY: DINO_Y + bDirY * BULLET_SPAWN_OFFSET_Y,
-                            })
-                        )
-                    }
-                    setBullets((prev) => {
-                        const next = [...prev, ...newBullets]
-                        bulletsRef.current = next
-                        return next
-                    })
-                } else {
-                    const bullet = createBullet({
-                        dirX,
-                        dirY,
-                        startX: DINO_X + dirX * BULLET_SPAWN_OFFSET_X,
-                        startY: DINO_Y + dirY * BULLET_SPAWN_OFFSET_Y,
-                    })
-                    setBullets((prev) => {
-                        const next = [...prev, bullet]
-                        bulletsRef.current = next
-                        return next
-                    })
-                }
+                const newBullets = createNormalAttackBullets({
+                    tech,
+                    centerAngle,
+                    dirX,
+                    dirY,
+                    difficulty,
+                    now,
+                })
+                setBullets((prev) => {
+                    const next = [...prev, ...newBullets]
+                    bulletsRef.current = next
+                    return next
+                })
             })
             .on('broadcast', { event: 'game_state' }, ({ payload }: { payload?: GameStatePayload }) => {
                 if (isShooter || !payload) return

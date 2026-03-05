@@ -179,25 +179,36 @@ export function StarShieldGame({
         })
     }, [currentUserId])
 
-    // 通常攻撃変更（Typist 用、broadcast で共有）
-    const handleNormalAttackChange = useCallback((normal: TechniqueId | null) => {
-        setNormalAttackChoices((prev) => ({ ...prev, [currentUserId]: normal }))
-        lobbyChannelRef.current?.send({
-            type: 'broadcast',
-            event: 'technique',
-            payload: { userId: currentUserId, normal, special: specialAttackChoices[currentUserId] ?? 'spread_medium' },
-        })
-    }, [currentUserId, specialAttackChoices])
+    // Typist の userId（ホストが技を変更したときに typistId に保存する）
+    const typistId = room.users.find((u) => roleChoices[u.userId] === 'TYPIST')?.userId
 
-    // 必殺技変更（Typist 用、broadcast で共有）
-    const handleSpecialAttackChange = useCallback((special: SpecialAttackChoice) => {
-        setSpecialAttackChoices((prev) => ({ ...prev, [currentUserId]: special }))
-        lobbyChannelRef.current?.send({
-            type: 'broadcast',
-            event: 'technique',
-            payload: { userId: currentUserId, normal: normalAttackChoices[currentUserId] ?? null, special },
-        })
-    }, [currentUserId, normalAttackChoices])
+    // 通常攻撃変更（ホストが Typist の技を変更、broadcast で共有）
+    const handleNormalAttackChange = useCallback(
+        (normal: TechniqueId | null) => {
+            if (!typistId) return
+            setNormalAttackChoices((prev) => ({ ...prev, [typistId]: normal }))
+            lobbyChannelRef.current?.send({
+                type: 'broadcast',
+                event: 'technique',
+                payload: { userId: typistId, normal, special: specialAttackChoices[typistId] ?? 'spread_medium' },
+            })
+        },
+        [typistId, specialAttackChoices]
+    )
+
+    // 必殺技変更（ホストが Typist の技を変更、broadcast で共有）
+    const handleSpecialAttackChange = useCallback(
+        (special: SpecialAttackChoice) => {
+            if (!typistId) return
+            setSpecialAttackChoices((prev) => ({ ...prev, [typistId]: special }))
+            lobbyChannelRef.current?.send({
+                type: 'broadcast',
+                event: 'technique',
+                payload: { userId: typistId, normal: normalAttackChoices[typistId] ?? null, special },
+            })
+        },
+        [typistId, normalAttackChoices]
+    )
 
     // 役職が被っているか（2人とも同じ役職を選んだ場合）
     const roleConflict = useMemo(() => {

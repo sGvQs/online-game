@@ -3,6 +3,8 @@
  */
 
 export { findNearestAsteroidPosition } from './autoAim'
+export { createNormalAttackBullets } from './normalAttack'
+export { createSpecialAttackBullets } from './specialAttack'
 export { getAvailableTechniques, getDebugNormalAttacks, TECHNIQUE_UNLOCK_DIFFICULTY, ALL_DESTRUCTION_ID } from './techniqueUnlock'
 export type { SelectableTechnique, SpecialAttackChoice } from './techniqueUnlock'
 export { getAsteroidPosition, getBulletPosition } from './position'
