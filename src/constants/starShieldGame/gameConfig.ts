@@ -3,6 +3,7 @@
  */
 
 import type { Difficulty } from '@/types/starShieldGame'
+import type { SpecialAttackChoice } from '@/utils/starShieldGame'
 import { DINO_SPAWN } from './constants'
 
 // ========== 基本 ==========
@@ -64,12 +65,27 @@ export const STAR_HP: Record<Difficulty, number> = {
     HELL: 100,
 }
 
-/** 単語完了時の広範囲弾数（破壊なし。HELL は全破壊＋照準方向に弾で別扱い） */
+/** 単語完了時の広範囲弾数（難易度別・旧仕様。新仕様は SPECIAL_ATTACK_* を使用） */
 export const SPECIAL_SPREAD_BULLET_COUNT: Record<Difficulty, number> = {
     EASY: 12,
     NORMAL: 30,
     HARD: 60,
     HELL: 360,
+}
+
+/** 必殺技ID → 弾数（難易度非依存） */
+export const SPECIAL_ATTACK_BULLET_COUNT: Record<SpecialAttackChoice, number> = {
+    spread_small: 12,
+    spread_medium: 30,
+    spread_large: 60,
+    all_destruction: 360,
+}
+/** 必殺技ID → 広がり角度（度） */
+export const SPECIAL_ATTACK_SPREAD_DEG: Record<SpecialAttackChoice, number> = {
+    spread_small: 12,
+    spread_medium: 12,
+    spread_large: 12,
+    all_destruction: 150,
 }
 
 // ========== HELL専用・必殺技 ==========

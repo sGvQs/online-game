@@ -10,7 +10,7 @@ import type { TechniqueId } from '@/constants/starShieldGame/techniques'
 export const ALL_DESTRUCTION_ID = 'all_destruction' as const
 
 /** 必殺技の選択肢（単語完了時の挙動） */
-export type SpecialAttackChoice = 'spread' | 'all_destruction'
+export type SpecialAttackChoice = 'spread_small' | 'spread_medium' | 'spread_large' | 'all_destruction'
 
 /** 技IDと解放難易度のマッピング */
 export const TECHNIQUE_UNLOCK_DIFFICULTY: Record<TechniqueId | typeof ALL_DESTRUCTION_ID, Difficulty> = {

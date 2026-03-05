@@ -185,7 +185,7 @@ export function StarShieldGame({
         lobbyChannelRef.current?.send({
             type: 'broadcast',
             event: 'technique',
-            payload: { userId: currentUserId, normal, special: specialAttackChoices[currentUserId] ?? 'spread' },
+            payload: { userId: currentUserId, normal, special: specialAttackChoices[currentUserId] ?? 'spread_medium' },
         })
     }, [currentUserId, specialAttackChoices])
 
@@ -386,7 +386,7 @@ export function StarShieldGame({
                     onGameEnd={handleGameEnd}
                     playersTotalPoints={room.users.reduce((sum, u) => sum + (initialRankings.find((r) => r.userId === u.userId)?.points ?? 0), 0)}
                     typistNormalAttack={normalAttackChoices[room.users.find((u) => u.userId !== shooterId)?.userId ?? ''] ?? null}
-                    typistSpecialAttack={specialAttackChoices[room.users.find((u) => u.userId !== shooterId)?.userId ?? ''] ?? 'spread'}
+                    typistSpecialAttack={specialAttackChoices[room.users.find((u) => u.userId !== shooterId)?.userId ?? ''] ?? 'spread_medium'}
                     autoAimNearest={autoAimNearest}
                 />
             )}

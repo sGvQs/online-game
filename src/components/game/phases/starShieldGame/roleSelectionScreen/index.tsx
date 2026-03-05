@@ -54,9 +54,18 @@ export function RoleSelectionScreen({
     onToggleAutoAim,
 }: RoleSelectionScreenProps) {
     const myRole = roleChoices[currentUserId]
+    const typistId = room.users.find((u) => roleChoices[u.userId] === 'TYPIST')?.userId
+    const canEditTechnique = myRole === 'TYPIST'
     const activeDiffMeta = DIFFICULTY_META[difficulty]
     const styles = roleSelectionScreen()
     const debugNormalAttacks = getDebugNormalAttacks()
+
+    const SPECIAL_ATTACK_OPTIONS: { id: SpecialAttackChoice; label: string }[] = [
+        { id: 'spread_small', label: '小規模' },
+        { id: 'spread_medium', label: '中規模' },
+        { id: 'spread_large', label: '大規模' },
+        { id: 'all_destruction', label: '全部破壊' },
+    ]
 
     return (
         <div className="relative min-h-screen overflow-hidden flex flex-col items-center justify-center">
@@ -161,89 +170,93 @@ export function RoleSelectionScreen({
                     initial={{ opacity: 0, y: 8 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: 0.18 }}
-                    className={cn('rounded-2xl p-5 flex flex-col gap-3 bg-white/[0.03] border border-white/[0.08]', !isHost && 'opacity-70')}
+                    className={cn('rounded-2xl p-5 flex flex-col gap-3 bg-white/[0.03] border border-white/[0.08]', !canEditTechnique && 'opacity-70')}
                 >
                     <p className={styles.difficultyCardTitle()}>[通常攻撃]（デバッグ）</p>
-                    <div className="flex flex-wrap gap-2">
-                        {debugNormalAttacks.map((tid) => {
-                            if (tid === null) {
-                                const isActive = normalAttackChoices[room.createdBy] === null
+                    {typistId ? (
+                        <div className="flex flex-wrap gap-2">
+                            {debugNormalAttacks.map((tid) => {
+                                if (tid === null) {
+                                    const isActive = normalAttackChoices[typistId] === null
+                                    return (
+                                        <button
+                                            key="normal"
+                                            onClick={() => canEditTechnique && onNormalAttackChange(null)}
+                                            disabled={!canEditTechnique}
+                                            className={cn(
+                                                'px-3 py-2 rounded-xl text-xs transition-all border',
+                                                isActive ? 'bg-brand-500/20 border-brand-500/50 text-brand-300' : 'bg-white/[0.02] border-white/10 text-white/50 hover:border-white/20',
+                                                !canEditTechnique && 'cursor-default'
+                                            )}
+                                        >
+                                            ふつう
+                                        </button>
+                                    )
+                                }
+                                const tech = TECHNIQUES[tid]
+                                const isActive = normalAttackChoices[typistId] === tid
                                 return (
                                     <button
-                                        key="normal"
-                                        onClick={() => isHost && onNormalAttackChange(null)}
-                                        disabled={!isHost}
+                                        key={tid}
+                                        onClick={() => canEditTechnique && onNormalAttackChange(tid)}
+                                        disabled={!canEditTechnique}
                                         className={cn(
-                                            'px-3 py-2 rounded-xl text-xs transition-all border',
-                                            isActive ? 'bg-brand-500/20 border-brand-500/50 text-brand-300' : 'bg-white/[0.02] border-white/10 text-white/50 hover:border-white/20',
-                                            !isHost && 'cursor-default'
+                                            'px-3 py-2 rounded-xl text-xs transition-all border flex items-center gap-1.5',
+                                            isActive ? 'border-current' : 'bg-white/[0.02] border-white/10 text-white/50 hover:border-white/20',
+                                            !canEditTechnique && 'cursor-default'
                                         )}
+                                        style={isActive ? { color: tech.color, borderColor: tech.color, backgroundColor: `${tech.color}20` } : undefined}
                                     >
-                                        ふつう
+                                        <span
+                                            className="w-2 h-2 rounded-full shrink-0"
+                                            style={{ backgroundColor: tech.color }}
+                                        />
+                                        {tech.label}
                                     </button>
                                 )
-                            }
-                            const tech = TECHNIQUES[tid]
-                            const isActive = normalAttackChoices[room.createdBy] === tid
-                            return (
-                                <button
-                                    key={tid}
-                                    onClick={() => isHost && onNormalAttackChange(tid)}
-                                    disabled={!isHost}
-                                    className={cn(
-                                        'px-3 py-2 rounded-xl text-xs transition-all border flex items-center gap-1.5',
-                                        isActive ? 'border-current' : 'bg-white/[0.02] border-white/10 text-white/50 hover:border-white/20',
-                                        !isHost && 'cursor-default'
-                                    )}
-                                    style={isActive ? { color: tech.color, borderColor: tech.color, backgroundColor: `${tech.color}20` } : undefined}
-                                >
-                                    <span
-                                        className="w-2 h-2 rounded-full shrink-0"
-                                        style={{ backgroundColor: tech.color }}
-                                    />
-                                    {tech.label}
-                                </button>
-                            )
-                        })}
-                    </div>
+                            })}
+                        </div>
+                    ) : (
+                        <p className="text-white/40 text-xs">やくわりがきまるとせんたくできます</p>
+                    )}
                 </motion.div>
 
                 <motion.div
                     initial={{ opacity: 0, y: 8 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: 0.185 }}
-                    className={cn('rounded-2xl p-5 flex flex-col gap-3 bg-white/[0.03] border border-white/[0.08]', !isHost && 'opacity-70')}
+                    className={cn('rounded-2xl p-5 flex flex-col gap-3 bg-white/[0.03] border border-white/[0.08]', !canEditTechnique && 'opacity-70')}
                 >
                     <p className={styles.difficultyCardTitle()}>[必殺技]（デバッグ）</p>
-                    <div className="flex flex-wrap gap-2">
-                        <button
-                            onClick={() => isHost && onSpecialAttackChange('spread')}
-                            disabled={!isHost}
-                            className={cn(
-                                'px-3 py-2 rounded-xl text-xs transition-all border',
-                                specialAttackChoices[room.createdBy] === 'spread'
-                                    ? 'bg-brand-500/20 border-brand-500/50 text-brand-300'
-                                    : 'bg-white/[0.02] border-white/10 text-white/50 hover:border-white/20',
-                                !isHost && 'cursor-default'
-                            )}
-                        >
-                            ふつう（広範囲弾）
-                        </button>
-                        <button
-                            onClick={() => isHost && onSpecialAttackChange('all_destruction')}
-                            disabled={!isHost}
-                            className={cn(
-                                'px-3 py-2 rounded-xl text-xs transition-all border flex items-center gap-1.5',
-                                specialAttackChoices[room.createdBy] === 'all_destruction'
-                                    ? 'border-red-500 bg-red-500/20 text-red-400'
-                                    : 'bg-white/[0.02] border-white/10 text-white/50 hover:border-white/20',
-                                !isHost && 'cursor-default'
-                            )}
-                        >
-                            <span className="w-2 h-2 rounded-full shrink-0 bg-red-500" />
-                            全部破壊
-                        </button>
-                    </div>
+                    {typistId ? (
+                        <div className="flex flex-wrap gap-2">
+                            {SPECIAL_ATTACK_OPTIONS.map(({ id, label }) => {
+                                const isActive = (specialAttackChoices[typistId] ?? 'spread_medium') === id
+                                const isAllDestruction = id === 'all_destruction'
+                                return (
+                                    <button
+                                        key={id}
+                                        onClick={() => canEditTechnique && onSpecialAttackChange(id)}
+                                        disabled={!canEditTechnique}
+                                        className={cn(
+                                            'px-3 py-2 rounded-xl text-xs transition-all border flex items-center gap-1.5',
+                                            isActive
+                                                ? isAllDestruction
+                                                    ? 'border-red-500 bg-red-500/20 text-red-400'
+                                                    : 'bg-brand-500/20 border-brand-500/50 text-brand-300'
+                                                : 'bg-white/[0.02] border-white/10 text-white/50 hover:border-white/20',
+                                            !canEditTechnique && 'cursor-default'
+                                        )}
+                                    >
+                                        {isAllDestruction && <span className="w-2 h-2 rounded-full shrink-0 bg-red-500" />}
+                                        {label}
+                                    </button>
+                                )
+                            })}
+                        </div>
+                    ) : (
+                        <p className="text-white/40 text-xs">やくわりがきまるとせんたくできます</p>
+                    )}
                 </motion.div>
 
                 {onToggleAutoAim && (

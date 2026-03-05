@@ -27,9 +27,8 @@ import {
     SPAWN_INTERVALS_MS,
     ASTEROID_HP,
     STAR_HP,
-    SPECIAL_SPREAD_BULLET_COUNT,
-    SPREAD_DEG_EASY_NORMAL_HARD,
-    HELL_SPECIAL_SPREAD_DEG,
+    SPECIAL_ATTACK_BULLET_COUNT,
+    SPECIAL_ATTACK_SPREAD_DEG,
     HELL_NORMAL_BULLET_COUNT,
     HELL_NORMAL_SPREAD_DEG,
 } from '@/constants/starShieldGame/gameConfig'
@@ -68,7 +67,7 @@ export function useStarShield({
     onGameEnd,
     playersTotalPoints = 0,
     selectedNormalAttack = null,
-    selectedSpecialAttack = 'spread',
+    selectedSpecialAttack = 'spread_medium',
     autoAimNearest = false,
 }: UseStarShieldProps) {
     const supabase = useMemo(() => createClient(), [])
@@ -210,7 +209,12 @@ export function useStarShield({
                 }
 
                 if (payload?.special) {
-                    const useAllDestruction = payload?.specialAttack === 'all_destruction'
+                    const specialAttack: SpecialAttackChoice =
+                        payload?.specialAttack && payload.specialAttack in SPECIAL_ATTACK_BULLET_COUNT
+                            ? (payload.specialAttack as SpecialAttackChoice)
+                            : 'spread_medium'
+                    const useAllDestruction = specialAttack === 'all_destruction'
+
                     if (useAllDestruction) {
                         playVoiceRef.current('star-damage')
                         const asts = asteroidsRef.current
@@ -233,69 +237,39 @@ export function useStarShield({
                             })
                             sendGameState()
                         }
+                    }
 
-                        const hellBulletCount = SPECIAL_SPREAD_BULLET_COUNT[difficulty]
-                        const aim = aimRef.current
-                        const originY = DINO_Y + BULLET_ORIGIN_Y_OFFSET
-                        const dx = aim.x - DINO_X
-                        const dy = aim.y - originY
-                        const len = Math.hypot(dx, dy)
-                        const centerAngle = len >= 0.001 ? Math.atan2(dy, dx) : 0
-                        const hellSpreadRad = (HELL_SPECIAL_SPREAD_DEG * Math.PI) / 180
-                        const newBullets: Bullet[] = []
-                        for (let i = 0; i < hellBulletCount; i++) {
-                            const angle =
-                                centerAngle -
-                                hellSpreadRad / 2 +
-                                (hellBulletCount > 1 ? (hellSpreadRad * i) / (hellBulletCount - 1) : 0)
-                            const dirX = Math.cos(angle)
-                            const dirY = Math.sin(angle)
-                            newBullets.push({
-                                id: crypto.randomUUID(),
-                                firedAt: now,
-                                startX: DINO_X + dirX * BULLET_SPAWN_OFFSET_X,
-                                startY: DINO_Y + dirY * BULLET_SPAWN_OFFSET_Y,
-                                dirX,
-                                dirY,
-                            })
-                        }
-                        setBullets((prev) => {
-                            const next = [...prev, ...newBullets]
-                            bulletsRef.current = next
-                            return next
-                        })
-                    } else {
-                        const aim = aimRef.current
-                        const originY = DINO_Y + BULLET_ORIGIN_Y_OFFSET
-                        const dx = aim.x - DINO_X
-                        const dy = aim.y - originY
-                        const len = Math.hypot(dx, dy)
-                        const centerAngle = len >= 0.001 ? Math.atan2(dy, dx) : 0
-                        const spreadRad = (SPREAD_DEG_EASY_NORMAL_HARD * Math.PI) / 180
-                        const count = SPECIAL_SPREAD_BULLET_COUNT[difficulty]
-                        const newBullets: Bullet[] = []
-                        for (let i = 0; i < count; i++) {
-                            const angle =
-                                centerAngle -
-                                spreadRad / 2 +
-                                (count > 1 ? (spreadRad * i) / (count - 1) : 0)
-                            const dirX = Math.cos(angle)
-                            const dirY = Math.sin(angle)
-                            newBullets.push({
-                                id: crypto.randomUUID(),
-                                firedAt: now,
-                                startX: DINO_X + dirX * BULLET_SPAWN_OFFSET_X,
-                                startY: DINO_Y + dirY * BULLET_SPAWN_OFFSET_Y,
-                                dirX,
-                                dirY,
-                            })
-                        }
-                        setBullets((prev) => {
-                            const next = [...prev, ...newBullets]
-                            bulletsRef.current = next
-                            return next
+                    const bulletCount = SPECIAL_ATTACK_BULLET_COUNT[specialAttack]
+                    const spreadDeg = SPECIAL_ATTACK_SPREAD_DEG[specialAttack]
+                    const aim = aimRef.current
+                    const originY = DINO_Y + BULLET_ORIGIN_Y_OFFSET
+                    const dx = aim.x - DINO_X
+                    const dy = aim.y - originY
+                    const len = Math.hypot(dx, dy)
+                    const centerAngle = len >= 0.001 ? Math.atan2(dy, dx) : 0
+                    const spreadRad = (spreadDeg * Math.PI) / 180
+                    const newBullets: Bullet[] = []
+                    for (let i = 0; i < bulletCount; i++) {
+                        const angle =
+                            centerAngle -
+                            spreadRad / 2 +
+                            (bulletCount > 1 ? (spreadRad * i) / (bulletCount - 1) : 0)
+                        const dirX = Math.cos(angle)
+                        const dirY = Math.sin(angle)
+                        newBullets.push({
+                            id: crypto.randomUUID(),
+                            firedAt: now,
+                            startX: DINO_X + dirX * BULLET_SPAWN_OFFSET_X,
+                            startY: DINO_Y + dirY * BULLET_SPAWN_OFFSET_Y,
+                            dirX,
+                            dirY,
                         })
                     }
+                    setBullets((prev) => {
+                        const next = [...prev, ...newBullets]
+                        bulletsRef.current = next
+                        return next
+                    })
                     return
                 }
 
