@@ -323,6 +323,17 @@ export function StarShieldShop({ roomId, currentUserId }: { roomId: string; curr
                                     </span>
                                     <span className="text-[10px] text-white/30">Lv{starHpLevel}/5</span>
                                 </div>
+                                <div className="mt-1.5 flex items-center gap-2">
+                                    <div className="flex-1 h-1.5 rounded-full bg-white/5 overflow-hidden">
+                                        <div
+                                            className="h-full rounded-full bg-gradient-to-r from-emerald-700 to-emerald-400 transition-all duration-500"
+                                            style={{ width: `${(starHpLevel / 5) * 100}%` }}
+                                        />
+                                    </div>
+                                    <span className="text-[10px] text-white/40 tabular-nums w-8 text-right">
+                                        {Math.round((starHpLevel / 5) * 100)}%
+                                    </span>
+                                </div>
                             </div>
 
                             {/* ヒール */}
