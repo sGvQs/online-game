@@ -44,6 +44,8 @@ interface TypistViewProps {
     maxStarHp: number
     typistFireCount: number
     selectedNormalAttack?: TechniqueId | null
+    healLevel?: number
+    healRecoveryText?: string | null
 }
 
 function TypingDisplay({ line, charIndex }: { line: DialogueLine; charIndex: number }) {
@@ -80,7 +82,7 @@ function TypingDisplay({ line, charIndex }: { line: DialogueLine; charIndex: num
     )
 }
 
-export function TypistView({ dialogue, score, starHp, maxStarHp, typistFireCount, selectedNormalAttack }: TypistViewProps) {
+export function TypistView({ dialogue, score, starHp, maxStarHp, typistFireCount, selectedNormalAttack, healLevel, healRecoveryText }: TypistViewProps) {
     const inputRef = useRef<HTMLInputElement>(null)
     const prevStarHpRef = useRef(maxStarHp)
     const prevTypistFireCountRef = useRef(typistFireCount)
@@ -155,22 +157,32 @@ export function TypistView({ dialogue, score, starHp, maxStarHp, typistFireCount
 
             <div className="w-full shrink-0 flex flex-col items-center gap-2 py-4 z-20">
                 <span className={typistView().hpLabel()}>ほしのたいりょく</span>
-                <div className="relative w-64 md:w-80 h-3 rounded-full bg-stone-600/80 overflow-hidden">
+                <div className="flex items-center gap-2">
+                    <span className="text-[10px] text-white/50 tabular-nums [font-family:var(--font-dot-gothic-16)]">
+                        HP {starHp}
+                    </span>
                     <div
-                        className={typistView().hpBar()}
-                        style={{ ['--hp-pct' as string]: `${Math.max(0, (starHp / maxStarHp) * 100)}%` }}
-                    />
-                    {damageWidth > 0 && (
-                        <motion.div
-                            key={`dmg-${damageWidth}`}
-                            className={typistView().damageFlash()}
+                        className="relative h-3 rounded-full bg-stone-600/80 overflow-hidden shrink-0"
+                        style={{
+                            width: `${Math.max(12, Math.min(28, 12 + ((maxStarHp - 15) * 16) / 30))}rem`,
+                        }}
+                    >
+                        <div
+                            className={typistView().hpBar()}
                             style={{ ['--hp-pct' as string]: `${Math.max(0, (starHp / maxStarHp) * 100)}%` }}
-                            initial={{ width: `${damageWidth}%` }}
-                            animate={{ width: '0%' }}
-                            transition={{ duration: 0.6, ease: 'easeOut' }}
-                            onAnimationComplete={() => setDamageWidth(0)}
                         />
-                    )}
+                        {damageWidth > 0 && (
+                            <motion.div
+                                key={`dmg-${damageWidth}`}
+                                className={typistView().damageFlash()}
+                                style={{ ['--hp-pct' as string]: `${Math.max(0, (starHp / maxStarHp) * 100)}%` }}
+                                initial={{ width: `${damageWidth}%` }}
+                                animate={{ width: '0%' }}
+                                transition={{ duration: 0.6, ease: 'easeOut' }}
+                                onAnimationComplete={() => setDamageWidth(0)}
+                            />
+                        )}
+                    </div>
                 </div>
             </div>
 

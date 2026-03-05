@@ -6,6 +6,7 @@ import type { TechniqueId } from '@/constants/starShieldGame/techniques'
 import type { SpecialAttackChoice } from '@/utils/starShieldGame'
 import type { SpecialAttackLevel } from '@/constants/starShieldGame/gameConfig'
 import { ASTEROID_HP, LEVEL_STAR_HP } from '@/constants/starShieldGame/gameConfig'
+import { LEVEL_HEAL_RECOVERY } from '@/constants/starShieldGame/skillConfig'
 import { ShooterView } from '../playing/shooterView'
 import { TypistView } from '../playing/typistView'
 
@@ -46,6 +47,13 @@ export function GameScreen({ matchId, startedAt, shooterId, difficulty, currentU
         : 1
     const maxStarHp = LEVEL_STAR_HP[effectiveStarHpLevel]
 
+    const healRecoveryText =
+        typistHealLevel != null && typistHealLevel >= 1
+            ? typistHealLevel >= 5
+                ? '全回復'
+                : `+${LEVEL_HEAL_RECOVERY[typistHealLevel as 1 | 2 | 3 | 4]}`
+            : null
+
     return (
         <div className="relative min-h-screen overflow-hidden">
             {isShooter ? (
@@ -68,6 +76,8 @@ export function GameScreen({ matchId, startedAt, shooterId, difficulty, currentU
                     maxStarHp={maxStarHp}
                     typistFireCount={typistFireCount}
                     selectedNormalAttack={typistNormalAttack}
+                    healLevel={typistHealLevel ?? undefined}
+                    healRecoveryText={healRecoveryText}
                 />
             )}
 
