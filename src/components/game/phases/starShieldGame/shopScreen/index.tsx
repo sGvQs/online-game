@@ -47,10 +47,10 @@ import type { OwnedSkills } from '@/utils/starShieldGame'
 type TabType = 'attack' | 'defence'
 
 type PreviewData =
-    | { kind: 'normalAttack'; techniqueId: TechniqueId; currentLevel: number; owned: boolean }
-    | { kind: 'specialAttack'; id: string; currentLevel: number; owned: boolean }
-    | { kind: 'heal'; currentLevel: number | null }
-    | { kind: 'starHp'; currentLevel: number }
+    | { kind: 'normalAttack'; techniqueId: TechniqueId }
+    | { kind: 'specialAttack'; id: string }
+    | { kind: 'heal' }
+    | { kind: 'starHp' }
 
 // ============================================================
 // 定数
@@ -413,31 +413,10 @@ export function StarShieldShop({ roomId, currentUserId }: { roomId: string; curr
                                                     </div>
                                                 }
                                                 detail={getTechEffectLabel(techniqueId)}
-                                                currentLevel={currentLevel}
-                                                maxLevel={maxLevel}
-                                                cost={cost}
-                                                typingCount={typingCount}
-                                                onPurchase={
-                                                    isMaxed
-                                                        ? undefined
-                                                        : () =>
-                                                            handlePurchase(
-                                                                () =>
-                                                                    currentLevel === 0
-                                                                        ? purchaseNormalAttackUnlock(techniqueId)
-                                                                        : purchaseNormalAttackLevelUp(
-                                                                            techniqueId,
-                                                                            nextLevel as 2 | 3 | 4 | 5
-                                                                        ),
-                                                                currentLevel === 0 ? tech.label : '通常攻撃レベル上げ'
-                                                            )
-                                                }
-                                                onPreview={() =>
+                                                onClick={() =>
                                                     setPreview({
                                                         kind: 'normalAttack',
                                                         techniqueId,
-                                                        currentLevel,
-                                                        owned: currentLevel > 0,
                                                     })
                                                 }
                                                 color="indigo"
@@ -467,31 +446,10 @@ export function StarShieldShop({ roomId, currentUserId }: { roomId: string; curr
                                                     </span>
                                                 }
                                                 detail="単語完了時に扇状に弾を散布"
-                                                currentLevel={currentLevel}
-                                                maxLevel={maxLevel}
-                                                cost={cost}
-                                                typingCount={typingCount}
-                                                onPurchase={
-                                                    isMaxed
-                                                        ? undefined
-                                                        : () =>
-                                                            handlePurchase(
-                                                                () =>
-                                                                    currentLevel === 0
-                                                                        ? purchaseSpecialAttackUnlock(id)
-                                                                        : purchaseSpecialAttackLevelUp(
-                                                                            id,
-                                                                            nextLevel as Exclude<typeof nextLevel, 1>
-                                                                        ),
-                                                                currentLevel === 0 ? SPECIAL_LABELS[id] : '必殺技レベル上げ'
-                                                            )
-                                                }
-                                                onPreview={() =>
+                                                onClick={() =>
                                                     setPreview({
                                                         kind: 'specialAttack',
                                                         id,
-                                                        currentLevel,
-                                                        owned: currentLevel > 0,
                                                     })
                                                 }
                                                 color="indigo"
@@ -547,18 +505,9 @@ export function StarShieldShop({ roomId, currentUserId }: { roomId: string; curr
                                                             {nextLevel}）
                                                         </span>
                                                     }
-                                                    cost={cost}
-                                                    typingCount={typingCount}
-                                                    onPurchase={() =>
-                                                        handlePurchase(
-                                                            () => purchaseStarHpLevelUp(nextLevel),
-                                                            '星のHPレベル上げ'
-                                                        )
-                                                    }
-                                                    onPreview={() =>
+                                                    onClick={() =>
                                                         setPreview({
                                                             kind: 'starHp',
-                                                            currentLevel: starHpLevel,
                                                         })
                                                     }
                                                     color="emerald"
@@ -579,12 +528,7 @@ export function StarShieldShop({ roomId, currentUserId }: { roomId: string; curr
                                             </p>
                                             <SkillRow
                                                 label={<span>ヒール解放</span>}
-                                                cost={HEAL_UNLOCK_COST}
-                                                typingCount={typingCount}
-                                                onPurchase={() =>
-                                                    handlePurchase(() => purchaseHealUnlock(), 'ヒール解放')
-                                                }
-                                                onPreview={() => setPreview({ kind: 'heal', currentLevel: null })}
+                                                onClick={() => setPreview({ kind: 'heal' })}
                                                 color="emerald"
                                             />
                                         </>
@@ -625,18 +569,9 @@ export function StarShieldShop({ roomId, currentUserId }: { roomId: string; curr
                                                                     {nextLevel === 6 ? 'max' : nextLevel}
                                                                 </span>
                                                             }
-                                                            cost={cost}
-                                                            typingCount={typingCount}
-                                                            onPurchase={() =>
-                                                                handlePurchase(
-                                                                    () => purchaseHealLevelUp(nextLevel),
-                                                                    'ヒールレベル上げ'
-                                                                )
-                                                            }
-                                                            onPreview={() =>
+                                                            onClick={() =>
                                                                 setPreview({
                                                                     kind: 'heal',
-                                                                    currentLevel: healLevel,
                                                                 })
                                                             }
                                                             color="emerald"
@@ -660,8 +595,9 @@ export function StarShieldShop({ roomId, currentUserId }: { roomId: string; curr
                 {preview && (
                     <SkillPreviewModal
                         preview={preview}
-                        normalAttacks={normalAttacks}
-                        starHpLevel={starHpLevel}
+                        progress={progress}
+                        typingCount={typingCount}
+                        handlePurchase={handlePurchase}
                         onClose={() => setPreview(null)}
                     />
                 )}
@@ -723,77 +659,46 @@ function SkillRow({
     detail,
     currentLevel,
     maxLevel,
-    cost,
-    typingCount,
-    onPurchase,
-    onPreview,
+    onClick,
     color,
 }: {
     label: React.ReactNode
     detail?: string
     currentLevel?: number
     maxLevel?: number
-    cost?: number
-    typingCount?: number
-    onPurchase?: () => void
-    onPreview?: () => void
+    onClick?: () => void
     color: 'indigo' | 'emerald'
 }) {
-    const canAfford = cost !== undefined && typingCount !== undefined && typingCount >= cost
-    const btnCls =
-        color === 'indigo'
-            ? 'bg-indigo-500/25 border-indigo-500/50 text-indigo-300 hover:bg-indigo-500/35'
-            : 'bg-emerald-500/25 border-emerald-500/50 text-emerald-300 hover:bg-emerald-500/35'
-
     return (
-        <div className="flex items-center justify-between gap-3 py-2.5 border-b border-white/[0.04] last:border-0 hover:bg-white/[0.02] -mx-2 px-2 rounded-xl transition-colors">
+        <button
+            onClick={onClick}
+            className="w-full text-left flex items-center justify-between gap-3 py-2.5 border-b border-white/[0.04] last:border-0 hover:bg-white/[0.04] -mx-2 px-2 rounded-xl transition-colors cursor-pointer group"
+        >
             <div className="flex items-center gap-2 min-w-0 flex-1">
-                {onPreview && (
-                    <button
-                        onClick={onPreview}
-                        className="shrink-0 text-[11px] px-1.5 py-0.5 rounded border border-white/10 bg-white/5 text-white/40 hover:text-white/70 hover:border-white/20 transition-colors"
-                        title="プレビュー"
-                    >
-                        👁️
-                    </button>
-                )}
                 <div className="flex flex-col min-w-0 flex-1">
                     <span className="text-white/85 text-sm">{label}</span>
                     {detail && (
                         <span className="text-white/30 text-[10px] [font-family:var(--font-dot-gothic-16)]">{detail}</span>
                     )}
                     {currentLevel !== undefined && maxLevel !== undefined && (
-                        <div className="w-24 md:w-32 mt-1.5 relative flex items-center gap-2">
+                        <div className="w-full mt-1.5 relative flex items-center gap-3">
                             <div className="flex-1 h-1.5 rounded-full bg-white/10 overflow-hidden">
                                 <div
                                     className={cn('h-full rounded-full transition-all duration-700', color === 'indigo' ? 'bg-indigo-400' : 'bg-emerald-400')}
                                     style={{ width: `${(currentLevel / maxLevel) * 100}%` }}
                                 />
                             </div>
-                            <span className="text-[10px] text-white/40 [font-family:var(--font-dot-gothic-16)] shrink-0">
+                            <span className="text-[10px] tracking-wider text-white/40 [font-family:var(--font-dot-gothic-16)] shrink-0 w-8 text-right">
                                 {currentLevel}/{maxLevel}
                             </span>
                         </div>
                     )}
                 </div>
             </div>
-            {onPurchase && cost !== undefined && (
-                <button
-                    onClick={onPurchase}
-                    disabled={!canAfford}
-                    className={cn(
-                        'px-3 py-1.5 rounded-lg border text-xs shrink-0 transition-colors cursor-pointer',
-                        btnCls,
-                        !canAfford && 'opacity-30 cursor-not-allowed'
-                    )}
-                >
-                    {cost.toLocaleString()}
-                </button>
-            )}
-            {!onPurchase && currentLevel === maxLevel && (
+            {currentLevel === maxLevel && (
                 <span className="text-[10px] text-amber-300 shrink-0 [font-family:var(--font-dot-gothic-16)] border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 rounded">MAX</span>
             )}
-        </div>
+        </button>
     )
 }
 
@@ -827,39 +732,152 @@ function getTechEffectLabel(techniqueId: TechniqueId): string {
 // ============================================================
 function SkillPreviewModal({
     preview,
-    normalAttacks,
-    starHpLevel,
+    progress,
+    typingCount,
+    handlePurchase,
     onClose,
 }: {
     preview: PreviewData
-    normalAttacks: { techniqueId: string; level: number }[]
-    starHpLevel: number
+    progress: StarShieldProgress | null
+    typingCount: number
+    handlePurchase: (fn: () => Promise<{ ok: boolean; error?: string }>, label: string) => Promise<void>
     onClose: () => void
 }) {
+    // ---- 各種スキルの現在・次レベル・費用の算出 ----
+    let currentLevel = 0
+    let maxLevel = 1
+    let nextCost: number | null = null
+    let purchaseLabel = ''
+    let purchaseFn: (() => Promise<{ ok: boolean; error?: string }>) | null = null
+    let purchaseLabelForFn = ''
+
+    if (preview.kind === 'normalAttack') {
+        const ownedAttack = progress?.normalAttacks.find((a) => a.techniqueId === preview.techniqueId)
+        currentLevel = ownedAttack ? ownedAttack.level : 0
+        maxLevel = 5
+        const tech = TECHNIQUES[preview.techniqueId]
+        if (currentLevel === 0) {
+            nextCost = NORMAL_ATTACK_UNLOCK_COSTS[preview.techniqueId] ?? 0
+            purchaseLabel = '解放する'
+            purchaseFn = () => purchaseNormalAttackUnlock(preview.techniqueId)
+            purchaseLabelForFn = tech.label
+        } else if (currentLevel < maxLevel) {
+            const nl = (currentLevel + 1) as 2 | 3 | 4 | 5
+            nextCost = NORMAL_ATTACK_LEVEL_UP_COSTS[preview.techniqueId]?.[nl] ?? 0
+            purchaseLabel = `Lv ${nl} に上げる`
+            purchaseFn = () => purchaseNormalAttackLevelUp(preview.techniqueId, nl)
+            purchaseLabelForFn = '通常攻撃レベル上げ'
+        }
+    } else if (preview.kind === 'specialAttack') {
+        const ownedSA = progress?.specialAttacks.find((a) => a.specialAttackId === preview.id)
+        currentLevel = ownedSA ? ownedSA.level : 0
+        maxLevel = 10
+        if (currentLevel === 0) {
+            nextCost = SPECIAL_ATTACK_UNLOCK_COSTS[preview.id as 'spread'] ?? 0
+            purchaseLabel = '解放する'
+            purchaseFn = () => purchaseSpecialAttackUnlock(preview.id as 'spread')
+            purchaseLabelForFn = SPECIAL_LABELS[preview.id] ?? preview.id
+        } else if (currentLevel < maxLevel) {
+            const nl = (currentLevel + 1) as Extract<SpecialAttackLevel, Exclude<SpecialAttackLevel, 1>>
+            nextCost = SPECIAL_ATTACK_LEVEL_UP_COSTS[nl] ?? 0
+            purchaseLabel = `Lv ${nl} に上げる`
+            purchaseFn = () => purchaseSpecialAttackLevelUp(preview.id as 'spread', nl)
+            purchaseLabelForFn = '必殺技レベル上げ'
+        }
+    } else if (preview.kind === 'starHp') {
+        currentLevel = progress?.starHpLevel ?? 1
+        maxLevel = 5
+        if (currentLevel < maxLevel) {
+            const nl = (currentLevel + 1) as 2 | 3 | 4 | 5
+            nextCost = STAR_HP_LEVEL_UP_COSTS[nl]
+            purchaseLabel = `Lv ${nl} に上げる`
+            purchaseFn = () => purchaseStarHpLevelUp(nl)
+            purchaseLabelForFn = '星のHPレベル上げ'
+        }
+    } else if (preview.kind === 'heal') {
+        currentLevel = progress?.healLevel ?? 0
+        maxLevel = 6
+        if (currentLevel === 0) {
+            nextCost = HEAL_UNLOCK_COST
+            purchaseLabel = '解放する'
+            purchaseFn = () => purchaseHealUnlock()
+            purchaseLabelForFn = 'ヒール解放'
+        } else if (currentLevel < maxLevel) {
+            const nl = (currentLevel + 1) as 2 | 3 | 4 | 5 | 6
+            nextCost = HEAL_LEVEL_UP_COSTS[nl]
+            purchaseLabel = nl === 6 ? 'MAX に上げる' : `Lv ${nl} に上げる`
+            purchaseFn = () => purchaseHealLevelUp(nl)
+            purchaseLabelForFn = 'ヒールレベル上げ'
+        }
+    }
+
+    const isMaxed = currentLevel >= maxLevel
+    const canAfford = nextCost !== null && typingCount >= nextCost
+
     return (
         <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-end justify-center px-4 pb-8"
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6"
             onClick={onClose}
         >
             <div className="absolute inset-0 bg-black/65 backdrop-blur-sm" />
             <motion.div
-                initial={{ y: 72, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                exit={{ y: 72, opacity: 0 }}
+                initial={{ y: 24, scale: 0.95, opacity: 0 }}
+                animate={{ y: 0, scale: 1, opacity: 1 }}
+                exit={{ y: 24, scale: 0.95, opacity: 0 }}
                 transition={{ type: 'spring', damping: 26, stiffness: 280 }}
-                className="relative w-full max-w-sm rounded-3xl bg-[#14142a] border border-white/[0.1] p-6 shadow-2xl"
+                className="relative w-full max-w-sm rounded-[24px] bg-[#14142a] border border-white/[0.1] shadow-2xl flex flex-col overflow-hidden max-h-full"
                 onClick={(e) => e.stopPropagation()}
             >
-                <button
-                    onClick={onClose}
-                    className="absolute top-4 right-4 w-7 h-7 rounded-full bg-white/5 flex items-center justify-center text-white/30 hover:text-white/60 hover:bg-white/10 transition-all text-sm"
-                >
-                    ✕
-                </button>
-                <PreviewContent preview={preview} normalAttacks={normalAttacks} starHpLevel={starHpLevel} />
+                {/* Header Actions */}
+                <div className="absolute top-4 right-4 z-10">
+                    <button
+                        onClick={onClose}
+                        className="w-8 h-8 rounded-full bg-white/5 flex items-center justify-center text-white/40 hover:text-white hover:bg-white/10 transition-all text-sm backdrop-blur border border-white/5"
+                    >
+                        ✕
+                    </button>
+                </div>
+
+                {/* Scrollable Content Area */}
+                <div className="p-6 overflow-y-auto">
+                    <PreviewContent preview={preview} progress={progress} currentLevel={currentLevel} />
+                </div>
+
+                {/* Sticky Footer for Action */}
+                <div className="p-5 bg-white/[0.02] border-t border-white/[0.05] mt-auto">
+                    {isMaxed ? (
+                        <div className="py-3 px-4 rounded-xl border border-amber-500/20 bg-amber-500/10 text-center flex items-center justify-center gap-2">
+                            <span className="text-amber-400 text-lg">🏆</span>
+                            <span className="text-amber-300/90 text-sm font-bold [font-family:var(--font-dot-gothic-16)] tracking-wider">MAX レベル到達</span>
+                        </div>
+                    ) : (
+                        <button
+                            disabled={!canAfford || !purchaseFn}
+                            onClick={() => {
+                                if (purchaseFn) handlePurchase(purchaseFn, purchaseLabelForFn)
+                            }}
+                            className={cn(
+                                'w-full py-3.5 px-4 rounded-xl font-bold text-[15px] flex items-center justify-center gap-3 transition-all [font-family:var(--font-dot-gothic-16)]',
+                                canAfford
+                                    ? 'bg-indigo-500 hover:bg-indigo-400 text-white shadow-lg shadow-indigo-500/25 active:scale-[0.98]'
+                                    : 'bg-white/5 text-white/30 border border-white/10 cursor-not-allowed'
+                            )}
+                        >
+                            <span>{purchaseLabel}</span>
+                            {nextCost !== null && (
+                                <span className={cn(
+                                    "px-2.5 py-1 rounded-lg text-xs font-bold border",
+                                    canAfford ? "bg-black/20 border-black/10" : "bg-black/10 border-white/5"
+                                )}>
+                                    {nextCost.toLocaleString()}
+                                </span>
+                            )}
+                        </button>
+                    )}
+                </div>
             </motion.div>
         </motion.div>
     )
@@ -870,17 +888,17 @@ function SkillPreviewModal({
 // ============================================================
 function PreviewContent({
     preview,
-    normalAttacks,
-    starHpLevel,
+    progress,
+    currentLevel,
 }: {
     preview: PreviewData
-    normalAttacks: { techniqueId: string; level: number }[]
-    starHpLevel: number
+    progress: StarShieldProgress | null
+    currentLevel: number
 }) {
     if (preview.kind === 'normalAttack') {
         const tech = TECHNIQUES[preview.techniqueId]
-        const ownedAttack = normalAttacks.find((a) => a.techniqueId === preview.techniqueId)
-        const level = (ownedAttack?.level ?? 1) as 1 | 2 | 3 | 4 | 5
+        const owned = currentLevel > 0
+        const displayLevel = Math.max(1, currentLevel) // 未所持時はLv1相当のアニメ等を表示可能に
 
         const specialEffects: Partial<Record<TechniqueId, { label: string; desc: string }>> = {
             blue: { label: 'スロー', desc: '命中した隕石の速度を下げる' },
@@ -892,194 +910,209 @@ function PreviewContent({
 
         return (
             <div>
-                <div className="flex items-center gap-3 mb-5">
+                <div className="flex items-center gap-4 mb-6">
                     <div
-                        className="w-14 h-14 rounded-full flex items-center justify-center shrink-0"
+                        className="w-16 h-16 rounded-2xl flex items-center justify-center shrink-0"
                         style={{
-                            backgroundColor: `${tech.color}22`,
-                            border: `2px solid ${tech.color}`,
-                            boxShadow: `0 0 24px ${tech.color}55`,
+                            backgroundColor: `${tech.color}15`,
+                            border: `2px solid ${tech.color}50`,
+                            boxShadow: `0 0 32px ${tech.color}30`,
                         }}
                     >
                         <div
-                            className="w-7 h-7 rounded-full"
-                            style={{ backgroundColor: tech.color, boxShadow: `0 0 10px ${tech.color}` }}
+                            className="w-8 h-8 rounded-full"
+                            style={{ backgroundColor: tech.color, boxShadow: `0 0 12px ${tech.color}` }}
                         />
                     </div>
                     <div>
-                        <p className="text-white font-bold text-base [font-family:var(--font-dot-gothic-16)]">
+                        <p className="text-white font-bold text-xl [font-family:var(--font-dot-gothic-16)] tracking-wide mb-1">
                             {tech.label}
                         </p>
-                        <p className="text-white/40 text-xs [font-family:var(--font-dot-gothic-16)]">
-                            通常攻撃 {preview.owned ? `Lv ${level}` : '未所持'}
-                        </p>
+                        <span className={cn(
+                            "inline-block px-2.5 py-0.5 rounded text-[11px] font-bold [font-family:var(--font-dot-gothic-16)] tracking-wider border",
+                            owned ? "bg-indigo-500/20 text-indigo-300 border-indigo-500/30" : "bg-white/5 text-white/40 border-white/10"
+                        )}>
+                            通常攻撃 {owned ? `Lv ${currentLevel}` : '未所持'}
+                        </span>
                     </div>
                 </div>
-                <div className="flex flex-col gap-2">
+
+                <div className="flex flex-col gap-3">
                     <StatRow label="ダメージ / 発" value={`${tech.damage}`} color="text-orange-400" />
                     <StatRow label="発射タイミング" value="1文字打鍵ごと" color="text-white/55" />
                     {fx && (
-                        <div className="mt-1 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 px-4 py-3">
-                            <p className="text-indigo-300 text-xs font-bold mb-1 [font-family:var(--font-dot-gothic-16)]">
+                        <div className="mt-2 rounded-2xl bg-indigo-500/5 border border-indigo-500/20 p-4">
+                            <p className="text-indigo-400 text-[13px] font-bold mb-1.5 [font-family:var(--font-dot-gothic-16)] flex items-center gap-1.5">
                                 ⚡ 特殊効果：{fx.label}
                             </p>
-                            <p className="text-white/45 text-[11px] [font-family:var(--font-dot-gothic-16)]">
+                            <p className="text-white/45 text-xs [font-family:var(--font-dot-gothic-16)] leading-relaxed">
                                 {fx.desc}
                             </p>
                         </div>
                     )}
+                </div>
+
+                <div className="mt-6 pt-6 border-t border-white/[0.05]">
+                    <p className="text-white/40 text-xs mb-3 [font-family:var(--font-dot-gothic-16)] font-bold tracking-wider">アニメーション デモ (Lv {displayLevel})</p>
+                    <LoadoutAnimPreview techniqueId={preview.techniqueId} level={displayLevel} />
                 </div>
             </div>
         )
     }
 
     if (preview.kind === 'specialAttack') {
-        const level = (preview.currentLevel || 1) as SpecialAttackLevel
-        const params = SPECIAL_ATTACK_LEVEL_PARAMS[level]
+        const owned = currentLevel > 0
+        const displayLevel = Math.max(1, currentLevel) as SpecialAttackLevel
+        const params = SPECIAL_ATTACK_LEVEL_PARAMS[displayLevel]
         const totalBullets = params.waveCount * params.bulletsPerWave
 
         return (
             <div>
-                <div className="flex items-center gap-3 mb-5">
-                    {/* spread ビジュアル（扇状） */}
-                    <div className="w-14 h-14 relative flex items-center justify-center shrink-0">
+                <div className="flex items-center gap-4 mb-6">
+                    <div className="w-16 h-16 relative flex items-center justify-center shrink-0 rounded-2xl bg-purple-500/10 border-2 border-purple-500/40">
                         {Array.from({ length: 9 }).map((_, i) => {
                             const angle = (i / 8) * params.spreadDeg - params.spreadDeg / 2
                             const rad = ((angle - 90) * Math.PI) / 180
-                            const r = 22
+                            const r = 24
                             const x = Math.cos(rad) * r
                             const y = Math.sin(rad) * r
                             return (
                                 <div
                                     key={i}
-                                    className="absolute w-2 h-2 rounded-full bg-brand-400"
+                                    className="absolute w-2 h-2 rounded-full bg-[#a78bfa]"
                                     style={{
                                         transform: `translate(${x}px, ${y}px)`,
                                         opacity: 0.4 + (i / 8) * 0.6,
-                                        boxShadow: '0 0 4px rgba(129,140,248,0.6)',
+                                        boxShadow: '0 0 6px rgba(167,139,250,0.6)',
                                     }}
                                 />
                             )
                         })}
                     </div>
                     <div>
-                        <p className="text-white font-bold text-base [font-family:var(--font-dot-gothic-16)]">
+                        <p className="text-white font-bold text-xl [font-family:var(--font-dot-gothic-16)] tracking-wide mb-1">
                             {SPECIAL_LABELS[preview.id] ?? preview.id}
                         </p>
-                        <p className="text-white/40 text-xs [font-family:var(--font-dot-gothic-16)]">
-                            必殺技 {preview.owned ? `Lv ${level}` : '未所持'}
-                        </p>
+                        <span className={cn(
+                            "inline-block px-2.5 py-0.5 rounded text-[11px] font-bold [font-family:var(--font-dot-gothic-16)] tracking-wider border",
+                            owned ? "bg-purple-500/20 text-purple-300 border-purple-500/30" : "bg-white/5 text-white/40 border-white/10"
+                        )}>
+                            必殺技 {owned ? `Lv ${currentLevel}` : '未所持'}
+                        </span>
                     </div>
                 </div>
-                <div className="flex flex-col gap-2">
+                <div className="flex flex-col gap-3">
                     <StatRow label="総弾数" value={`${totalBullets} 発`} color="text-orange-400" />
                     <StatRow label="広がり角度" value={`${params.spreadDeg}°`} color="text-indigo-300" />
                     {params.waveCount > 1 && (
                         <StatRow label="ウェーブ数" value={`${params.waveCount} 波`} color="text-purple-300" />
                     )}
-                    <StatRow label="発射タイミング" value="単語を打ち切ったとき" color="text-white/55" />
+                    <StatRow label="発射タイミング" value="全文字打ち切ったとき" color="text-white/55" />
                 </div>
             </div>
         )
     }
 
     if (preview.kind === 'heal') {
-        const level = preview.currentLevel
-        const healVal = level ? LEVEL_HEAL_RECOVERY[level as 1 | 2 | 3 | 4 | 5 | 6] : 0
-        const isFullRestore = level !== null && level >= 5
-        const barWidth = isFullRestore ? 100 : level ? healVal * 100 : 0
+        const owned = currentLevel > 0
+        const healVal = owned ? LEVEL_HEAL_RECOVERY[currentLevel as 1 | 2 | 3 | 4 | 5 | 6] : 0
+        const isFullRestore = owned && currentLevel >= 5
+        const barWidth = isFullRestore ? 100 : owned ? healVal * 100 : 0
 
         return (
             <div>
-                <div className="flex items-center gap-3 mb-5">
+                <div className="flex items-center gap-4 mb-6">
                     <div
-                        className="w-14 h-14 rounded-full bg-emerald-500/20 border-2 border-emerald-500/60 flex items-center justify-center text-2xl shrink-0"
-                        style={{ boxShadow: '0 0 24px rgba(16,185,129,0.35)' }}
+                        className="w-16 h-16 rounded-2xl bg-emerald-500/15 border-2 border-emerald-500/40 flex items-center justify-center text-3xl shrink-0"
+                        style={{ boxShadow: '0 0 32px rgba(16,185,129,0.2)' }}
                     >
                         💚
                     </div>
                     <div>
-                        <p className="text-white font-bold text-base [font-family:var(--font-dot-gothic-16)]">ヒール</p>
-                        <p className="text-white/40 text-xs [font-family:var(--font-dot-gothic-16)]">
-                            {level ? `Lv ${level === 6 ? 'max' : level}` : '未所持'}
+                        <p className="text-white font-bold text-xl [font-family:var(--font-dot-gothic-16)] tracking-wide mb-1">
+                            ヒール
                         </p>
+                        <span className={cn(
+                            "inline-block px-2.5 py-0.5 rounded text-[11px] font-bold [font-family:var(--font-dot-gothic-16)] tracking-wider border",
+                            owned ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/30" : "bg-white/5 text-white/40 border-white/10"
+                        )}>
+                            {owned ? `Lv ${currentLevel === 6 ? 'max' : currentLevel}` : '未所持'}
+                        </span>
                     </div>
                 </div>
-                <div className="flex flex-col gap-3">
-                    <div>
-                        <div className="flex items-center justify-between mb-1.5">
-                            <p className="text-white/40 text-xs [font-family:var(--font-dot-gothic-16)]">回復量</p>
-                            <p className="text-emerald-400 text-sm font-bold [font-family:var(--font-dot-gothic-16)]">
-                                {level === null ? '---' : isFullRestore ? '全回復' : `+${healVal} HP`}
+                <div className="flex flex-col gap-4">
+                    <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/[0.05]">
+                        <div className="flex items-center justify-between mb-2">
+                            <p className="text-white/50 text-[13px] [font-family:var(--font-dot-gothic-16)] font-bold">回復量</p>
+                            <p className="text-emerald-400 text-[15px] font-bold [font-family:var(--font-dot-gothic-16)]">
+                                {!owned ? '---' : isFullRestore ? '全回復' : `+${healVal} HP`}
                             </p>
                         </div>
-                        <div className="h-3 rounded-full bg-white/5 overflow-hidden">
+                        <div className="h-2.5 rounded-full bg-black/40 border border-white/[0.05] overflow-hidden">
                             <div
-                                className="h-full rounded-full bg-gradient-to-r from-emerald-700 to-emerald-400 transition-all duration-700"
+                                className="h-full rounded-full bg-gradient-to-r from-emerald-600 to-emerald-400 transition-all duration-700 shadow-[0_0_10px_rgba(52,211,153,0.5)]"
                                 style={{ width: `${barWidth}%` }}
                             />
                         </div>
                     </div>
-                    {level === 6 && (
-                        <div className="rounded-2xl bg-red-500/10 border border-red-500/20 px-4 py-3">
-                            <p className="text-red-300 text-xs font-bold mb-1 [font-family:var(--font-dot-gothic-16)]">
+                    {currentLevel === 6 && (
+                        <div className="rounded-2xl bg-red-500/5 border border-red-500/20 p-4">
+                            <p className="text-red-400 text-[13px] font-bold mb-1.5 [font-family:var(--font-dot-gothic-16)] flex items-center gap-1.5">
                                 ⚡ all_destruction 付与
                             </p>
-                            <p className="text-white/40 text-[11px] [font-family:var(--font-dot-gothic-16)]">
-                                全回復＋全隕石を一撃で破壊
+                            <p className="text-white/45 text-xs [font-family:var(--font-dot-gothic-16)] leading-relaxed">
+                                全回復に加えて、フィールド上の全ての隕石を一撃で破壊する。
                             </p>
                         </div>
                     )}
-                    <StatRow label="発動タイミング" value="単語を打ち切ったとき" color="text-white/55" />
+                    <StatRow label="発動タイミング" value="全文字打ち切ったとき" color="text-white/55" />
                 </div>
             </div>
         )
     }
 
     if (preview.kind === 'starHp') {
-        const level = preview.currentLevel as 1 | 2 | 3 | 4 | 5
-        const hp = LEVEL_STAR_HP[level]
-        const nextHp = level < 5 ? LEVEL_STAR_HP[(level + 1) as 2 | 3 | 4 | 5] : null
+        const displayLevel = Math.max(1, currentLevel) as 1 | 2 | 3 | 4 | 5
+        const hp = LEVEL_STAR_HP[displayLevel]
 
         return (
             <div>
-                <div className="flex items-center gap-3 mb-5">
+                <div className="flex items-center gap-4 mb-6">
                     <div
-                        className="w-14 h-14 rounded-full bg-yellow-500/20 border-2 border-yellow-500/60 flex items-center justify-center text-2xl shrink-0"
-                        style={{ boxShadow: '0 0 24px rgba(234,179,8,0.35)' }}
+                        className="w-16 h-16 rounded-2xl bg-yellow-500/15 border-2 border-yellow-500/40 flex items-center justify-center text-3xl shrink-0"
+                        style={{ boxShadow: '0 0 32px rgba(234,179,8,0.2)' }}
                     >
                         ⭐
                     </div>
                     <div>
-                        <p className="text-white font-bold text-base [font-family:var(--font-dot-gothic-16)]">
+                        <p className="text-white font-bold text-xl [font-family:var(--font-dot-gothic-16)] tracking-wide mb-1">
                             星のHP
                         </p>
-                        <p className="text-white/40 text-xs [font-family:var(--font-dot-gothic-16)]">Lv {level}</p>
+                        <span className="inline-block px-2.5 py-0.5 rounded text-[11px] font-bold [font-family:var(--font-dot-gothic-16)] tracking-wider border bg-yellow-500/20 text-yellow-300 border-yellow-500/30">
+                            Lv {displayLevel}
+                        </span>
                     </div>
                 </div>
-                <div className="flex flex-col gap-3">
-                    <div>
-                        <div className="flex items-center justify-between mb-1.5">
-                            <p className="text-white/40 text-xs [font-family:var(--font-dot-gothic-16)]">HP上限</p>
-                            <p className="text-yellow-400 text-2xl font-bold [font-family:var(--font-cherry-bomb-one)] leading-none">
+                <div className="flex flex-col gap-4">
+                    <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/[0.05]">
+                        <div className="flex items-center justify-between mb-3">
+                            <p className="text-white/50 text-[13px] [font-family:var(--font-dot-gothic-16)] font-bold">HP上限</p>
+                            <p className="text-yellow-400 text-3xl font-bold [font-family:var(--font-cherry-bomb-one)] leading-none drop-shadow-[0_0_12px_rgba(250,204,21,0.4)]">
                                 {hp}
                             </p>
                         </div>
-                        <div className="h-3 rounded-full bg-white/5 overflow-hidden">
+                        <div className="h-2.5 rounded-full bg-black/40 border border-white/[0.05] overflow-hidden">
                             <div
-                                className="h-full rounded-full bg-gradient-to-r from-yellow-700 to-yellow-400 transition-all duration-700"
-                                style={{ width: `${(level / 5) * 100}%` }}
+                                className="h-full rounded-full bg-gradient-to-r from-yellow-600 to-yellow-400 transition-all duration-700 shadow-[0_0_10px_rgba(250,204,21,0.5)]"
+                                style={{ width: `${(displayLevel / 5) * 100}%` }}
                             />
                         </div>
-                        <p className="text-white/25 text-[10px] mt-1 [font-family:var(--font-dot-gothic-16)]">
-                            Lv {level} / 5
-                        </p>
+                        <div className="mt-2 text-right">
+                            <p className="text-yellow-500/50 text-[10px] [font-family:var(--font-dot-gothic-16)] font-bold tracking-widest">
+                                Lv {displayLevel} / 5
+                            </p>
+                        </div>
                     </div>
-                    {nextHp && (
-                        <p className="text-white/40 text-xs [font-family:var(--font-dot-gothic-16)]">
-                            次のレベルで HP {nextHp} に強化
-                        </p>
-                    )}
                     <StatRow label="適用ロール" value="Typist（守護担当）" color="text-white/55" />
                 </div>
             </div>
