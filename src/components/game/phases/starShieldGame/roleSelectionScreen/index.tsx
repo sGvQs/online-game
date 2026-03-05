@@ -1,7 +1,6 @@
 'use client'
 
 import Image from 'next/image'
-import Link from 'next/link'
 import { motion } from 'framer-motion'
 import { RoomWithUsersAndReadyStatus, RoomUserWithReadyStatus } from '@/types'
 import { cn } from '@/lib/utils'
@@ -56,16 +55,8 @@ export function RoleSelectionScreen({
             <AuroraGlow width={800} height={400} opacity={0.2} blur={60} />
 
             <div className="relative z-10 w-full max-w-2xl mx-auto px-6 py-10 flex flex-col gap-7">
-                <motion.div initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }} className="flex items-center justify-between">
+                <motion.div initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
                     <h2 className={styles.sectionTitle()}>[むずかしさ]と[やくわり]をきめよう。</h2>
-                    {roomId && (
-                        <Link
-                            href={`/game/${roomId}/star-shield/shop`}
-                            className="text-sm text-amber-400/80 hover:text-amber-400 border border-amber-500/40 px-3 py-1.5 rounded-xl hover:bg-amber-500/10 transition-colors"
-                        >
-                            🛒 ショップ
-                        </Link>
-                    )}
                 </motion.div>
 
                 <div className="grid grid-cols-[1fr_1fr] gap-5">

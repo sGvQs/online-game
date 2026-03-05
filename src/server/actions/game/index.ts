@@ -47,6 +47,7 @@ export {
     purchaseSpecialAttackLevelUp,
     purchaseHealUnlock,
     purchaseHealLevelUp,
+    purchaseStarHpLevelUp,
 } from './starShieldProgressionActions'
 
 

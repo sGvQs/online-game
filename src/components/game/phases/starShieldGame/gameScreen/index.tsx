@@ -5,7 +5,7 @@ import type { Difficulty, GameResult, GameStats, NormalAttackLevel } from '@/typ
 import type { TechniqueId } from '@/constants/starShieldGame/techniques'
 import type { SpecialAttackChoice } from '@/utils/starShieldGame'
 import type { SpecialAttackLevel } from '@/constants/starShieldGame/gameConfig'
-import { ASTEROID_HP, STAR_HP } from '@/constants/starShieldGame/gameConfig'
+import { ASTEROID_HP, LEVEL_STAR_HP, STAR_HP } from '@/constants/starShieldGame/gameConfig'
 import { ShooterView } from '../playing/shooterView'
 import { TypistView } from '../playing/typistView'
 
@@ -21,6 +21,7 @@ interface GameScreenProps {
     typistSpecialAttack?: SpecialAttackChoice
     typistSpecialAttackLevel?: SpecialAttackLevel
     typistHealLevel?: number | null
+    starHpLevel?: number
     level?: NormalAttackLevel
     autoAimNearest?: boolean
 }
@@ -36,10 +37,14 @@ function TimerDisplay({ timer }: { timer: number }) {
     )
 }
 
-export function GameScreen({ matchId, startedAt, shooterId, difficulty, currentUserId, onGameEnd, playersTotalPoints, typistNormalAttack, typistSpecialAttack = 'spread', typistSpecialAttackLevel = 1, typistHealLevel = null, level = 1, autoAimNearest = false }: GameScreenProps) {
+export function GameScreen({ matchId, startedAt, shooterId, difficulty, currentUserId, onGameEnd, playersTotalPoints, typistNormalAttack, typistSpecialAttack = 'spread', typistSpecialAttackLevel = 1, typistHealLevel = null, starHpLevel, level = 1, autoAimNearest = false }: GameScreenProps) {
     const isShooter = shooterId === currentUserId
     const { asteroids, bullets, timer, score, starHp, aimRef, onMouseMove, dialogue, typistFireCount, contactExplosion, completeContactFail, chainHits, clearChainHits } =
-        useStarShield({ matchId, startedAt, isShooter, difficulty, currentUserId, onGameEnd, playersTotalPoints, selectedNormalAttack: typistNormalAttack, selectedSpecialAttack: typistSpecialAttack, selectedSpecialAttackLevel: typistSpecialAttackLevel, selectedHealLevel: typistHealLevel, level, autoAimNearest })
+        useStarShield({ matchId, startedAt, isShooter, difficulty, currentUserId, onGameEnd, playersTotalPoints, selectedNormalAttack: typistNormalAttack, selectedSpecialAttack: typistSpecialAttack, selectedSpecialAttackLevel: typistSpecialAttackLevel, selectedHealLevel: typistHealLevel, starHpLevel, level, autoAimNearest })
+    const maxStarHp =
+        starHpLevel != null && starHpLevel >= 1 && starHpLevel <= 5
+            ? LEVEL_STAR_HP[starHpLevel as 1 | 2 | 3 | 4 | 5]
+            : STAR_HP[difficulty]
 
     return (
         <div className="relative min-h-screen overflow-hidden">
@@ -60,7 +65,7 @@ export function GameScreen({ matchId, startedAt, shooterId, difficulty, currentU
                     dialogue={dialogue}
                     score={score}
                     starHp={starHp}
-                    maxStarHp={STAR_HP[difficulty]}
+                    maxStarHp={maxStarHp}
                     typistFireCount={typistFireCount}
                     selectedNormalAttack={typistNormalAttack}
                 />

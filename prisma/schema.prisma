@@ -310,6 +310,7 @@ model StarShieldUserProgress {
   selectedNormalAttackId   String?  @map("selected_normal_attack_id") @db.Text
   selectedSpecialAttackId  String?  @map("selected_special_attack_id") @db.Text
   selectedHealLevel       Int?     @map("selected_heal_level")
+  starHpLevel            Int      @default(1) @map("star_hp_level") // 1-5
   updatedAt            DateTime @updatedAt @map("updated_at")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)

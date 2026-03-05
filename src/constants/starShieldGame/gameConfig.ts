@@ -58,11 +58,21 @@ export const ASTEROID_HP: Record<Difficulty, number> = {
     HELL: 6,
 }
 
+/** 難易度別の星HP（後方互換用。starHpLevel が無い場合のフォールバック） */
 export const STAR_HP: Record<Difficulty, number> = {
     EASY: 20,
     NORMAL: 18,
     HARD: 15,
     HELL: 100,
+}
+
+/** 星HPレベル → 最大HP（ショップでレベルアップ可能。難易度には依存しない） */
+export const LEVEL_STAR_HP: Record<1 | 2 | 3 | 4 | 5, number> = {
+    1: 15,
+    2: 20,
+    3: 26,
+    4: 34,
+    5: 45,
 }
 
 /** 単語完了時の広範囲弾数（難易度別・旧仕様。新仕様は SPECIAL_ATTACK_* を使用） */

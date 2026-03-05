@@ -44,7 +44,7 @@
 
 ### ショップUI
 - **Star Shield ゲーム内**に配置
-- **別ページ**として分離（例: `/game/[roomId]/star-shield/shop` または タイトル/役割選択からの導線）
+- **別ページ**として分離（例: `/game/[roomId]/star-shield/settings` または タイトルからの導線）
 
 ### A. 通常攻撃スキル（技の解放）※ Shooter 用
 

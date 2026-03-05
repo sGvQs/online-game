@@ -15,6 +15,7 @@ import {
     SPAWN_INTERVALS_MS,
     ASTEROID_RADIUS,
     STAR_HP,
+    LEVEL_STAR_HP,
     SPECIAL_ATTACK_BULLET_COUNT,
     SPECIAL_ATTACK_LEVEL_PARAMS,
 } from '@/constants/starShieldGame/gameConfig'
@@ -63,6 +64,8 @@ interface UseStarShieldProps {
     selectedSpecialAttackLevel?: SpecialAttackLevel
     /** Typist が選択したヒールレベル（単語完了時、1-6。null は未使用） */
     selectedHealLevel?: number | null
+    /** 星のHPレベル（1-5）。指定時は LEVEL_STAR_HP を使用。未指定時は難易度ベースにフォールバック */
+    starHpLevel?: number
     /** tech=null 時の散弾数レベル（1-5、5=lv.max） */
     level?: NormalAttackLevel
     /** デバッグ: 発射時に最も近い隕石を照準にする（準備画面で設定） */
@@ -80,6 +83,7 @@ export function useStarShield({
     selectedSpecialAttack = 'spread',
     selectedSpecialAttackLevel = 1,
     selectedHealLevel = null,
+    starHpLevel,
     level = 1,
     autoAimNearest = false,
 }: UseStarShieldProps) {
@@ -94,7 +98,10 @@ export function useStarShield({
     const [bullets, setBullets] = useState<Bullet[]>([])
     const [timer, setTimer] = useState(GAME_DURATION_SECONDS)
     const [score, setScore] = useState({ spawned: 0, destroyed: 0 })
-    const maxStarHp = STAR_HP[difficulty]
+    const maxStarHp =
+        starHpLevel != null && starHpLevel >= 1 && starHpLevel <= 5
+            ? LEVEL_STAR_HP[starHpLevel as 1 | 2 | 3 | 4 | 5]
+            : STAR_HP[difficulty]
     const [starHp, setStarHp] = useState(maxStarHp)
 
     // タイピング状態（Typist のみ）：配列からランダムに選択

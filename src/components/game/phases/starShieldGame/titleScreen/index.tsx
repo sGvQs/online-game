@@ -93,14 +93,14 @@ export function TitleScreen({
                                 {isReady ? '✓ READY' : '▶ READY'}
                             </MenuButton>
                             <Link
-                                href={`/game/${roomId}/star-shield/shop`}
+                                href={`/game/${roomId}/star-shield/settings`}
                                 className={cn(
                                     'flex items-center justify-center py-3 px-6 rounded-2xl font-bold transition-all [font-family:var(--font-cherry-bomb-one)]',
                                     'bg-amber-600/30 border-2 border-amber-500/50 text-amber-200',
                                     'hover:bg-amber-500/40 hover:scale-[1.02] active:scale-[0.98] cursor-pointer',
                                 )}
                             >
-                                🛒 ショップ
+                                ⚙️ スキル設定
                             </Link>
                             {isHost && (
                                 <MenuButton

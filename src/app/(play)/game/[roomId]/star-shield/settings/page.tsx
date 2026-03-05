@@ -4,7 +4,7 @@ import { getRoomWithReadyStatus } from '@/server/actions/room'
 import { RoomUserWithReadyStatus } from '@/types'
 import { StarShieldShop } from '@/components/game/phases/starShieldGame/shopScreen'
 
-export default async function StarShieldShopPage({ params }: { params: Promise<{ roomId: string }> }) {
+export default async function StarShieldSettingsPage({ params }: { params: Promise<{ roomId: string }> }) {
     const currentUser = await getCurrentUser()
     if (!currentUser) redirect('/')
 

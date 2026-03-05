@@ -374,6 +374,7 @@ export function StarShieldGame({
                 const typistSpecialAttackLevel =
                     (availableSpecialAttacks.find((a) => a.specialAttackId === selectedSpecialId)?.level ?? 1) as 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10
                 const typistHealLevel = typistProgress?.selectedHealLevel ?? null
+                const starHpLevel = typistProgress?.starHpLevel ?? 1
                 return (
                     <GameScreen
                         matchId={matchId}
@@ -387,6 +388,7 @@ export function StarShieldGame({
                         typistSpecialAttack={selectedSpecialId}
                         typistSpecialAttackLevel={typistSpecialAttackLevel}
                         typistHealLevel={typistHealLevel}
+                        starHpLevel={starHpLevel}
                         level={derivedLevel}
                         autoAimNearest={autoAimNearest}
                     />

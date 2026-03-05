@@ -16,6 +16,7 @@ import {
     purchaseSpecialAttackLevelUp,
     purchaseHealUnlock,
     purchaseHealLevelUp,
+    purchaseStarHpLevelUp,
 } from '@/server/actions/game'
 import type { StarShieldProgress } from '@/server/actions/game/starShieldProgressionActions'
 import {
@@ -25,7 +26,9 @@ import {
     SPECIAL_ATTACK_LEVEL_UP_COSTS,
     HEAL_UNLOCK_COST,
     HEAL_LEVEL_UP_COSTS,
+    STAR_HP_LEVEL_UP_COSTS,
 } from '@/constants/starShieldGame/shopConfig'
+import { LEVEL_STAR_HP } from '@/constants/starShieldGame/gameConfig'
 import { cn } from '@/lib/utils'
 import { roleSelectionScreen } from '../roleSelectionScreen/styles'
 import {
@@ -86,6 +89,7 @@ export function StarShieldShop({ roomId, currentUserId }: { roomId: string; curr
     const normalAttacks = progress?.normalAttacks ?? []
     const specialAttacks = progress?.specialAttacks ?? []
     const healLevel = progress?.healLevel ?? null
+    const starHpLevel = progress?.starHpLevel ?? 1
 
     const normalAttackIds: TechniqueId[] = ['red', 'blue', 'yellow_beam', 'purple', 'orange']
     const specialAttackIds = ['spread'] as const
@@ -102,7 +106,7 @@ export function StarShieldShop({ roomId, currentUserId }: { roomId: string; curr
                     animate={{ opacity: 1, y: 0 }}
                     className="flex items-center justify-between"
                 >
-                    <h1 className={styles.sectionTitle()}>ショップ</h1>
+                    <h1 className={styles.sectionTitle()}>スキル設定</h1>
                     <Link
                         href={`/game/${roomId}/star-shield`}
                         className="px-4 py-2 rounded-xl border border-brand-500/50 bg-brand-500/20 text-brand-300 text-sm hover:bg-brand-500/30 transition-colors"
@@ -127,174 +131,57 @@ export function StarShieldShop({ roomId, currentUserId }: { roomId: string; curr
                     </div>
                 )}
 
-                {/* Shooter: 通常攻撃 */}
+                {/* [Typing] 星のHP */}
                 <motion.div
                     initial={{ opacity: 0, y: 8 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.15 }}
                     className={styles.difficultyCard()}
                 >
-                    <p className={styles.difficultyCardTitle()}>[通常攻撃]（Shooter）</p>
+                    <p className={styles.difficultyCardTitle()}>[Typing] 星のHP</p>
                     <div className="flex flex-col gap-2">
-                        {normalAttackIds
-                            .filter((id) => id !== 'red')
-                            .map((techniqueId) => {
-                                const tech = TECHNIQUES[techniqueId]
-                                const cost = NORMAL_ATTACK_UNLOCK_COSTS[techniqueId] ?? 0
-                                const owned = normalAttacks.some((a) => a.techniqueId === techniqueId)
+                        {starHpLevel < 5 ? (
+                            (() => {
+                                const nextLevel = (starHpLevel + 1) as 2 | 3 | 4 | 5
+                                const cost = STAR_HP_LEVEL_UP_COSTS[nextLevel]
                                 return (
                                     <div
-                                        key={techniqueId}
+                                        key={nextLevel}
                                         className="flex items-center justify-between gap-4 py-2 border-b border-white/5 last:border-0"
                                     >
-                                        <div className="flex items-center gap-2">
-                                            <span
-                                                className="w-3 h-3 rounded-full shrink-0"
-                                                style={{ backgroundColor: tech.color }}
-                                            />
-                                            <span className="text-white/90">{tech.label}</span>
-                                            {owned && <span className="text-xs text-emerald-400">所持</span>}
-                                        </div>
-                                        {!owned && (
-                                            <button
-                                                onClick={() =>
-                                                    handlePurchase(
-                                                        () => purchaseNormalAttackUnlock(techniqueId),
-                                                        tech.label
-                                                    )
-                                                }
-                                                disabled={typingCount < cost}
-                                                className="px-3 py-1.5 rounded-lg bg-brand-500/30 border border-brand-500/50 text-brand-300 text-sm disabled:opacity-40 disabled:cursor-not-allowed hover:bg-brand-500/40"
-                                            >
-                                                {cost.toLocaleString()} で購入
-                                            </button>
-                                        )}
-                                    </div>
-                                )
-                            })}
-                    </div>
-
-                    {/* レベル上げ */}
-                    <p className={styles.difficultyCardTitle() + ' mt-4'}>通常攻撃 レベル上げ</p>
-                    <div className="flex flex-col gap-2">
-                        {normalAttacks.map(({ techniqueId, level }) => {
-                            if (level >= 5) return null
-                            const tech = TECHNIQUES[techniqueId as TechniqueId]
-                            const costs = NORMAL_ATTACK_LEVEL_UP_COSTS[techniqueId]
-                            const nextLevel = (level + 1) as 2 | 3 | 4 | 5
-                            const cost = costs?.[nextLevel] ?? 0
-                            return (
-                                <div
-                                    key={`${techniqueId}-${level}`}
-                                    className="flex items-center justify-between gap-4 py-2 border-b border-white/5 last:border-0"
-                                >
-                                    <div className="flex items-center gap-2">
-                                        <span
-                                            className="w-3 h-3 rounded-full shrink-0"
-                                            style={{ backgroundColor: tech?.color ?? '#666' }}
-                                        />
                                         <span className="text-white/90">
-                                            {tech?.label ?? techniqueId} lv{level} → lv{nextLevel}
+                                            星のHP lv{starHpLevel} → lv{nextLevel}（HP {LEVEL_STAR_HP[starHpLevel as 1 | 2 | 3 | 4 | 5]} →{' '}
+                                            {LEVEL_STAR_HP[nextLevel]}）
                                         </span>
-                                    </div>
-                                    <button
-                                        onClick={() =>
-                                            handlePurchase(
-                                                () => purchaseNormalAttackLevelUp(techniqueId, nextLevel),
-                                                'レベル上げ'
-                                            )
-                                        }
-                                        disabled={typingCount < cost}
-                                        className="px-3 py-1.5 rounded-lg bg-brand-500/30 border border-brand-500/50 text-brand-300 text-sm disabled:opacity-40 disabled:cursor-not-allowed hover:bg-brand-500/40"
-                                    >
-                                        {cost.toLocaleString()} で購入
-                                    </button>
-                                </div>
-                            )
-                        })}
-                    </div>
-                </motion.div>
-
-                {/* Shooter: 必殺技 */}
-                <motion.div
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.2 }}
-                    className={styles.difficultyCard()}
-                >
-                    <p className={styles.difficultyCardTitle()}>[必殺技]（Shooter）</p>
-                    <div className="flex flex-col gap-2">
-                        {specialAttackIds.map((id) => {
-                            const cost = SPECIAL_ATTACK_UNLOCK_COSTS[id]
-                            const owned = specialAttacks.some((a) => a.specialAttackId === id)
-                            return (
-                                <div
-                                    key={id}
-                                    className="flex items-center justify-between gap-4 py-2 border-b border-white/5 last:border-0"
-                                >
-                                    <span className="text-white/90">{SPECIAL_ATTACK_LABELS[id] ?? id}</span>
-                                    {owned && <span className="text-xs text-emerald-400">所持</span>}
-                                    {!owned && (
                                         <button
                                             onClick={() =>
                                                 handlePurchase(
-                                                    () => purchaseSpecialAttackUnlock(id),
-                                                    SPECIAL_ATTACK_LABELS[id]
+                                                    () => purchaseStarHpLevelUp(nextLevel),
+                                                    '星のHPレベル上げ'
                                                 )
                                             }
                                             disabled={typingCount < cost}
-                                            className="px-3 py-1.5 rounded-lg bg-brand-500/30 border border-brand-500/50 text-brand-300 text-sm disabled:opacity-40 disabled:cursor-not-allowed hover:bg-brand-500/40"
+                                            className="px-3 py-1.5 rounded-lg bg-amber-500/30 border border-amber-500/50 text-amber-300 text-sm disabled:opacity-40 disabled:cursor-not-allowed hover:bg-amber-500/40"
                                         >
                                             {cost.toLocaleString()} で購入
                                         </button>
-                                    )}
-                                </div>
-                            )
-                        })}
-                    </div>
-
-                    {/* 必殺技 レベル上げ */}
-                    <p className={styles.difficultyCardTitle() + ' mt-4'}>必殺技 レベル上げ</p>
-                    <div className="flex flex-col gap-2">
-                        {specialAttacks.map(({ specialAttackId, level }) => {
-                            if (level >= 10) return null
-                            const nextLevel = (level + 1) as 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10
-                            const cost = SPECIAL_ATTACK_LEVEL_UP_COSTS[nextLevel] ?? 0
-                            const label = SPECIAL_ATTACK_LABELS[specialAttackId] ?? specialAttackId
-                            return (
-                                <div
-                                    key={`${specialAttackId}-${level}`}
-                                    className="flex items-center justify-between gap-4 py-2 border-b border-white/5 last:border-0"
-                                >
-                                    <span className="text-white/90">
-                                        {label} lv{level} → lv{nextLevel}
-                                    </span>
-                                    <button
-                                        onClick={() =>
-                                            handlePurchase(
-                                                () => purchaseSpecialAttackLevelUp(specialAttackId, nextLevel),
-                                                '必殺技レベル上げ'
-                                            )
-                                        }
-                                        disabled={typingCount < cost}
-                                        className="px-3 py-1.5 rounded-lg bg-brand-500/30 border border-brand-500/50 text-brand-300 text-sm disabled:opacity-40 disabled:cursor-not-allowed hover:bg-brand-500/40"
-                                    >
-                                        {cost.toLocaleString()} で購入
-                                    </button>
-                                </div>
-                            )
-                        })}
+                                    </div>
+                                )
+                            })()
+                        ) : (
+                            <p className="text-white/50 text-sm">星のHP lv max 所持（HP {LEVEL_STAR_HP[5]}）</p>
+                        )}
                     </div>
                 </motion.div>
 
-                {/* Typist: ヒール */}
+                {/* [Typing] ヒール */}
                 <motion.div
                     initial={{ opacity: 0, y: 8 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.25 }}
+                    transition={{ delay: 0.18 }}
                     className={styles.difficultyCard()}
                 >
-                    <p className={styles.difficultyCardTitle()}>[ヒール]（Typist）</p>
+                    <p className={styles.difficultyCardTitle()}>[Typing] ヒール</p>
                     <div className="flex flex-col gap-2">
                         {!healLevel ? (
                             <div className="flex items-center justify-between gap-4 py-2">
@@ -337,6 +224,166 @@ export function StarShieldShop({ roomId, currentUserId }: { roomId: string; curr
                         ) : (
                             <p className="text-white/50 text-sm">ヒール lv max 所持</p>
                         )}
+                    </div>
+                </motion.div>
+
+                {/* [Shooting] 通常攻撃 */}
+                <motion.div
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.2 }}
+                    className={styles.difficultyCard()}
+                >
+                    <p className={styles.difficultyCardTitle()}>[Shooting] 通常攻撃</p>
+                    <div className="flex flex-col gap-2">
+                        {normalAttackIds
+                            .filter((id) => id !== 'red')
+                            .map((techniqueId) => {
+                                const tech = TECHNIQUES[techniqueId]
+                                const cost = NORMAL_ATTACK_UNLOCK_COSTS[techniqueId] ?? 0
+                                const owned = normalAttacks.some((a) => a.techniqueId === techniqueId)
+                                return (
+                                    <div
+                                        key={techniqueId}
+                                        className="flex items-center justify-between gap-4 py-2 border-b border-white/5 last:border-0"
+                                    >
+                                        <div className="flex items-center gap-2">
+                                            <span
+                                                className="w-3 h-3 rounded-full shrink-0"
+                                                style={{ backgroundColor: tech.color }}
+                                            />
+                                            <span className="text-white/90">{tech.label}</span>
+                                            {owned && <span className="text-xs text-emerald-400">所持</span>}
+                                        </div>
+                                        {!owned && (
+                                            <button
+                                                onClick={() =>
+                                                    handlePurchase(
+                                                        () => purchaseNormalAttackUnlock(techniqueId),
+                                                        tech.label
+                                                    )
+                                                }
+                                                disabled={typingCount < cost}
+                                                className="px-3 py-1.5 rounded-lg bg-brand-500/30 border border-brand-500/50 text-brand-300 text-sm disabled:opacity-40 disabled:cursor-not-allowed hover:bg-brand-500/40"
+                                            >
+                                                {cost.toLocaleString()} で購入
+                                            </button>
+                                        )}
+                                    </div>
+                                )
+                            })}
+                    </div>
+
+                    {/* レベル上げ */}
+                    <p className={styles.difficultyCardTitle() + ' mt-4'}>レベル上げ</p>
+                    <div className="flex flex-col gap-2">
+                        {normalAttacks.map(({ techniqueId, level }) => {
+                            if (level >= 5) return null
+                            const tech = TECHNIQUES[techniqueId as TechniqueId]
+                            const costs = NORMAL_ATTACK_LEVEL_UP_COSTS[techniqueId]
+                            const nextLevel = (level + 1) as 2 | 3 | 4 | 5
+                            const cost = costs?.[nextLevel] ?? 0
+                            return (
+                                <div
+                                    key={`${techniqueId}-${level}`}
+                                    className="flex items-center justify-between gap-4 py-2 border-b border-white/5 last:border-0"
+                                >
+                                    <div className="flex items-center gap-2">
+                                        <span
+                                            className="w-3 h-3 rounded-full shrink-0"
+                                            style={{ backgroundColor: tech?.color ?? '#666' }}
+                                        />
+                                        <span className="text-white/90">
+                                            {tech?.label ?? techniqueId} lv{level} → lv{nextLevel}
+                                        </span>
+                                    </div>
+                                    <button
+                                        onClick={() =>
+                                            handlePurchase(
+                                                () => purchaseNormalAttackLevelUp(techniqueId, nextLevel),
+                                                'レベル上げ'
+                                            )
+                                        }
+                                        disabled={typingCount < cost}
+                                        className="px-3 py-1.5 rounded-lg bg-brand-500/30 border border-brand-500/50 text-brand-300 text-sm disabled:opacity-40 disabled:cursor-not-allowed hover:bg-brand-500/40"
+                                    >
+                                        {cost.toLocaleString()} で購入
+                                    </button>
+                                </div>
+                            )
+                        })}
+                    </div>
+                </motion.div>
+
+                {/* [Shooting] 必殺技 */}
+                <motion.div
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.23 }}
+                    className={styles.difficultyCard()}
+                >
+                    <p className={styles.difficultyCardTitle()}>[Shooting] 必殺技</p>
+                    <div className="flex flex-col gap-2">
+                        {specialAttackIds.map((id) => {
+                            const cost = SPECIAL_ATTACK_UNLOCK_COSTS[id]
+                            const owned = specialAttacks.some((a) => a.specialAttackId === id)
+                            return (
+                                <div
+                                    key={id}
+                                    className="flex items-center justify-between gap-4 py-2 border-b border-white/5 last:border-0"
+                                >
+                                    <span className="text-white/90">{SPECIAL_ATTACK_LABELS[id] ?? id}</span>
+                                    {owned && <span className="text-xs text-emerald-400">所持</span>}
+                                    {!owned && (
+                                        <button
+                                            onClick={() =>
+                                                handlePurchase(
+                                                    () => purchaseSpecialAttackUnlock(id),
+                                                    SPECIAL_ATTACK_LABELS[id]
+                                                )
+                                            }
+                                            disabled={typingCount < cost}
+                                            className="px-3 py-1.5 rounded-lg bg-brand-500/30 border border-brand-500/50 text-brand-300 text-sm disabled:opacity-40 disabled:cursor-not-allowed hover:bg-brand-500/40"
+                                        >
+                                            {cost.toLocaleString()} で購入
+                                        </button>
+                                    )}
+                                </div>
+                            )
+                        })}
+                    </div>
+
+                    {/* 必殺技 レベル上げ */}
+                    <p className={styles.difficultyCardTitle() + ' mt-4'}>レベル上げ</p>
+                    <div className="flex flex-col gap-2">
+                        {specialAttacks.map(({ specialAttackId, level }) => {
+                            if (level >= 10) return null
+                            const nextLevel = (level + 1) as 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10
+                            const cost = SPECIAL_ATTACK_LEVEL_UP_COSTS[nextLevel] ?? 0
+                            const label = SPECIAL_ATTACK_LABELS[specialAttackId] ?? specialAttackId
+                            return (
+                                <div
+                                    key={`${specialAttackId}-${level}`}
+                                    className="flex items-center justify-between gap-4 py-2 border-b border-white/5 last:border-0"
+                                >
+                                    <span className="text-white/90">
+                                        {label} lv{level} → lv{nextLevel}
+                                    </span>
+                                    <button
+                                        onClick={() =>
+                                            handlePurchase(
+                                                () => purchaseSpecialAttackLevelUp(specialAttackId, nextLevel),
+                                                '必殺技レベル上げ'
+                                            )
+                                        }
+                                        disabled={typingCount < cost}
+                                        className="px-3 py-1.5 rounded-lg bg-brand-500/30 border border-brand-500/50 text-brand-300 text-sm disabled:opacity-40 disabled:cursor-not-allowed hover:bg-brand-500/40"
+                                    >
+                                        {cost.toLocaleString()} で購入
+                                    </button>
+                                </div>
+                            )
+                        })}
                     </div>
                 </motion.div>
 

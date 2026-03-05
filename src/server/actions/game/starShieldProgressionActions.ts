@@ -9,6 +9,7 @@ import {
     SPECIAL_ATTACK_LEVEL_UP_COSTS,
     HEAL_UNLOCK_COST,
     HEAL_LEVEL_UP_COSTS,
+    STAR_HP_LEVEL_UP_COSTS,
 } from '@/constants/starShieldGame/shopConfig'
 
 export interface StarShieldProgress {
@@ -16,6 +17,8 @@ export interface StarShieldProgress {
     normalAttacks: { techniqueId: string; level: number }[]
     specialAttacks: { specialAttackId: string; level: number }[]
     healLevel: number | null
+    /** 星のHPレベル (1-5)。ショップでレベルアップ可能 */
+    starHpLevel: number
     /** Shooter 時に使用する通常攻撃 */
     selectedNormalAttackId: string | null
     /** Shooter 時に使用する必殺技 */
@@ -43,6 +46,7 @@ export async function getStarShieldProgress(userId: string): Promise<StarShieldP
         normalAttacks: normalList,
         specialAttacks: specialAttacks.map((a) => ({ specialAttackId: a.specialAttackId, level: a.level })),
         healLevel: heal?.level ?? null,
+        starHpLevel: progress?.starHpLevel ?? 1,
         selectedNormalAttackId: progress?.selectedNormalAttackId ?? null,
         selectedSpecialAttackId: progress?.selectedSpecialAttackId ?? null,
         selectedHealLevel: progress?.selectedHealLevel ?? null,
@@ -116,6 +120,17 @@ async function ensureProgress(userId: string): Promise<{ totalTypingCount: numbe
         create: { userId, totalTypingCount: 0 },
     })
     return { totalTypingCount: p.totalTypingCount }
+}
+
+async function ensureProgressWithStarHp(
+    userId: string
+): Promise<{ totalTypingCount: number; starHpLevel: number }> {
+    const p = await prisma.starShieldUserProgress.upsert({
+        where: { userId },
+        update: {},
+        create: { userId, totalTypingCount: 0 },
+    })
+    return { totalTypingCount: p.totalTypingCount, starHpLevel: p.starHpLevel }
 }
 
 /** 通常攻撃スキルを解放 */
@@ -268,6 +283,39 @@ export async function purchaseSpecialAttackLevelUp(
                 userId: user.id,
                 purchaseType: 'LEVEL_UP',
                 targetSkillId: specialAttackId,
+                targetLevel,
+                typingCost: cost,
+                totalTypingBefore: totalTypingCount,
+            },
+        }),
+    ])
+    return { ok: true }
+}
+
+/** 星のHPのレベル上げ (1→2, 2→3, 3→4, 4→5) */
+export async function purchaseStarHpLevelUp(targetLevel: 2 | 3 | 4 | 5): Promise<{ ok: boolean; error?: string }> {
+    const user = await getAuthenticatedUser()
+    const cost = STAR_HP_LEVEL_UP_COSTS[targetLevel]
+    if (cost === undefined) return { ok: false, error: '無効なレベル' }
+
+    const { totalTypingCount, starHpLevel } = await ensureProgressWithStarHp(user.id)
+    if (starHpLevel >= targetLevel) return { ok: false, error: '既にそのレベル以上です' }
+    if (starHpLevel !== targetLevel - 1) return { ok: false, error: '前のレベルを先に購入してください' }
+    if (totalTypingCount < cost) return { ok: false, error: 'typing 数が不足しています' }
+
+    await prisma.$transaction([
+        prisma.starShieldUserProgress.update({
+            where: { userId: user.id },
+            data: {
+                totalTypingCount: { decrement: cost },
+                starHpLevel: targetLevel,
+            },
+        }),
+        prisma.starShieldPurchaseHistory.create({
+            data: {
+                userId: user.id,
+                purchaseType: 'LEVEL_UP',
+                targetSkillId: 'star_hp',
                 targetLevel,
                 typingCost: cost,
                 totalTypingBefore: totalTypingCount,
