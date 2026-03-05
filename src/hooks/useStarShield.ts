@@ -77,7 +77,7 @@ export function useStarShield({
     onGameEnd,
     playersTotalPoints = 0,
     selectedNormalAttack = null,
-    selectedSpecialAttack = 'spread_medium',
+    selectedSpecialAttack = 'spread',
     selectedSpecialAttackLevel = 1,
     selectedHealLevel = null,
     level = 1,
@@ -270,7 +270,7 @@ export function useStarShield({
                     const specialAttack: SpecialAttackChoice =
                         payload?.specialAttack && payload.specialAttack in SPECIAL_ATTACK_BULLET_COUNT
                             ? (payload.specialAttack as SpecialAttackChoice)
-                            : 'spread_medium'
+                            : 'spread'
                     const useAllDestruction = specialAttack === 'all_destruction'
 
                     if (useAllDestruction) {

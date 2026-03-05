@@ -10,8 +10,8 @@ import { PROGRESSION_DEBUG } from '@/constants/starShieldGame/shopConfig'
 /** 全部破壊（ヒール lv max でのみ獲得。ショップにはない） */
 export const ALL_DESTRUCTION_ID = 'all_destruction' as const
 
-/** 必殺技の選択肢（Shooter ショップで購入可能な3種 + ヒール max の全破壊） */
-export type SpecialAttackChoice = 'spread_small' | 'spread_medium' | 'spread_large' | 'all_destruction'
+/** 必殺技の選択肢（spread: ショップで購入、all_destruction: ヒール lv max で獲得） */
+export type SpecialAttackChoice = 'spread' | 'all_destruction'
 
 /** 通常攻撃の型（red は初期所持） */
 export type SelectableTechnique = TechniqueId | null
@@ -60,17 +60,13 @@ export function getAvailableNormalAttacks(owned: OwnedSkills): { techniqueId: Te
 export function getAvailableSpecialAttacks(owned: OwnedSkills): { specialAttackId: SpecialAttackChoice; level: number }[] {
     if (PROGRESSION_DEBUG) {
         return [
-            { specialAttackId: 'spread_small', level: 10 },
-            { specialAttackId: 'spread_medium', level: 10 },
-            { specialAttackId: 'spread_large', level: 10 },
+            { specialAttackId: 'spread', level: 10 },
             { specialAttackId: 'all_destruction', level: 10 },
         ]
     }
     const list: { specialAttackId: SpecialAttackChoice; level: number }[] = []
-    for (const id of ['spread_small', 'spread_medium', 'spread_large'] as const) {
-        const o = owned.specialAttacks.find((a) => a.specialAttackId === id)
-        if (o) list.push({ specialAttackId: id, level: o.level })
-    }
+    const spread = owned.specialAttacks.find((a) => a.specialAttackId === 'spread')
+    if (spread) list.push({ specialAttackId: 'spread', level: spread.level })
     if (owned.healLevel === 6) list.push({ specialAttackId: 'all_destruction', level: 10 })
     return list
 }

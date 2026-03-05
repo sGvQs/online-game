@@ -36,7 +36,7 @@ function TimerDisplay({ timer }: { timer: number }) {
     )
 }
 
-export function GameScreen({ matchId, startedAt, shooterId, difficulty, currentUserId, onGameEnd, playersTotalPoints, typistNormalAttack, typistSpecialAttack = 'spread_medium', typistSpecialAttackLevel = 1, typistHealLevel = null, level = 1, autoAimNearest = false }: GameScreenProps) {
+export function GameScreen({ matchId, startedAt, shooterId, difficulty, currentUserId, onGameEnd, playersTotalPoints, typistNormalAttack, typistSpecialAttack = 'spread', typistSpecialAttackLevel = 1, typistHealLevel = null, level = 1, autoAimNearest = false }: GameScreenProps) {
     const isShooter = shooterId === currentUserId
     const { asteroids, bullets, timer, score, starHp, aimRef, onMouseMove, dialogue, typistFireCount, contactExplosion, completeContactFail, chainHits, clearChainHits } =
         useStarShield({ matchId, startedAt, isShooter, difficulty, currentUserId, onGameEnd, playersTotalPoints, selectedNormalAttack: typistNormalAttack, selectedSpecialAttack: typistSpecialAttack, selectedSpecialAttackLevel: typistSpecialAttackLevel, selectedHealLevel: typistHealLevel, level, autoAimNearest })

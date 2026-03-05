@@ -43,6 +43,13 @@ export async function syncUser({ supabaseUid, email, name }: SyncUserParams) {
                     }
                 })
                 userId = newUser.id
+                // Star Shield 初期データ（syncUser で登録と同時に初期化）
+                await tx.starShieldUserProgress.create({
+                    data: { userId: newUser.id, totalTypingCount: 0 },
+                })
+                await tx.starShieldUserNormalAttack.create({
+                    data: { userId: newUser.id, techniqueId: 'red', level: 1 },
+                })
             }
 
             const idp = await tx.userIDP.create({

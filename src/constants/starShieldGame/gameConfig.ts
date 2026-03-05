@@ -73,18 +73,14 @@ export const SPECIAL_SPREAD_BULLET_COUNT: Record<Difficulty, number> = {
     HELL: 360,
 }
 
-/** 必殺技ID → 弾数（難易度非依存） */
+/** 必殺技ID → 弾数（難易度非依存）。spread は SPECIAL_ATTACK_LEVEL_PARAMS で制御 */
 export const SPECIAL_ATTACK_BULLET_COUNT: Record<SpecialAttackChoice, number> = {
-    spread_small: 12,
-    spread_medium: 30,
-    spread_large: 60,
+    spread: 30,
     all_destruction: 360,
 }
-/** 必殺技ID → 広がり角度（度） */
+/** 必殺技ID → 広がり角度（度）。spread は SPECIAL_ATTACK_LEVEL_PARAMS で制御 */
 export const SPECIAL_ATTACK_SPREAD_DEG: Record<SpecialAttackChoice, number> = {
-    spread_small: 12,
-    spread_medium: 12,
-    spread_large: 12,
+    spread: 12,
     all_destruction: 150,
 }
 

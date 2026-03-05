@@ -35,9 +35,7 @@ import {
 import type { OwnedSkills } from '@/utils/starShieldGame'
 
 const SPECIAL_ATTACK_LABELS: Record<string, string> = {
-    spread_small: '小規模',
-    spread_medium: '中規模',
-    spread_large: '大規模',
+    spread: '必殺技',
     all_destruction: '全部破壊',
 }
 
@@ -90,7 +88,7 @@ export function StarShieldShop({ roomId, currentUserId }: { roomId: string; curr
     const healLevel = progress?.healLevel ?? null
 
     const normalAttackIds: TechniqueId[] = ['red', 'blue', 'yellow_beam', 'purple', 'orange']
-    const specialAttackIds = ['spread_small', 'spread_medium', 'spread_large'] as const
+    const specialAttackIds = ['spread'] as const
 
     return (
         <div className="relative min-h-screen overflow-hidden flex flex-col items-center justify-center">

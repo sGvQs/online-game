@@ -48,15 +48,13 @@ export const NORMAL_ATTACK_LEVEL_UP_COSTS: Record<string, LevelUpCosts> = {
 }
 
 // ============================================
-// 必殺技 ※ Shooter 用
+// 必殺技 ※ Shooter 用（1種類、lv1〜10で規模を制御）
 // ============================================
 export const SPECIAL_ATTACK_MAX_LEVEL = 10
-export const SPECIAL_ATTACK_IDS = ['spread_small', 'spread_medium', 'spread_large'] as const
+export const SPECIAL_ATTACK_IDS = ['spread'] as const
 
 export const SPECIAL_ATTACK_UNLOCK_COSTS: Record<string, number> = {
-    spread_small: 20,
-    spread_medium: 50,
-    spread_large: 100,
+    spread: 20,
 }
 
 /** 必殺技レベルアップコスト（2〜10） */

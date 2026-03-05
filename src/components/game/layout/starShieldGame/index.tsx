@@ -366,11 +366,11 @@ export function StarShieldGame({
                     availableNormalAttacks.some((a) => a.techniqueId === rawNormal) ? (rawNormal as TechniqueId) : (availableNormalAttacks[0]?.techniqueId ?? 'red')
                 const derivedLevel: NormalAttackLevel =
                     (availableNormalAttacks.find((a) => a.techniqueId === selectedNormal)?.level ?? 1) as NormalAttackLevel
-                const rawSpecial = shooterProgress?.selectedSpecialAttackId ?? 'spread_medium'
+                const rawSpecial = shooterProgress?.selectedSpecialAttackId ?? 'spread'
                 const selectedSpecialId: SpecialAttackChoice =
                     availableSpecialAttacks.some((a) => a.specialAttackId === rawSpecial)
                         ? (rawSpecial as SpecialAttackChoice)
-                        : (availableSpecialAttacks[0]?.specialAttackId ?? 'spread_medium')
+                        : (availableSpecialAttacks[0]?.specialAttackId ?? 'spread')
                 const typistSpecialAttackLevel =
                     (availableSpecialAttacks.find((a) => a.specialAttackId === selectedSpecialId)?.level ?? 1) as 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10
                 const typistHealLevel = typistProgress?.selectedHealLevel ?? null

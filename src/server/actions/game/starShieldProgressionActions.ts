@@ -25,7 +25,7 @@ export interface StarShieldProgress {
 }
 
 /**
- * ユーザーのプログレッション状態を取得。未登録時は red lv1 のみ所持として返す。
+ * ユーザーのプログレッション状態を取得。
  * ルームメンバー同士でスキル確認するために、他ユーザーの progress も取得可能。
  */
 export async function getStarShieldProgress(userId: string): Promise<StarShieldProgress> {
@@ -37,10 +37,6 @@ export async function getStarShieldProgress(userId: string): Promise<StarShieldP
     ])
 
     const normalList = normalAttacks.map((a) => ({ techniqueId: a.techniqueId, level: a.level }))
-    const hasRed = normalList.some((a) => a.techniqueId === 'red')
-    if (!hasRed) {
-        normalList.unshift({ techniqueId: 'red', level: 1 })
-    }
 
     return {
         totalTypingCount: progress?.totalTypingCount ?? 0,
@@ -205,12 +201,12 @@ export async function purchaseNormalAttackLevelUp(
     return { ok: true }
 }
 
-/** 必殺技を解放 */
+/** 必殺技を解放（spread 1種類のみ） */
 export async function purchaseSpecialAttackUnlock(specialAttackId: string): Promise<{ ok: boolean; error?: string }> {
     const user = await getAuthenticatedUser()
+    if (specialAttackId !== 'spread') return { ok: false, error: 'all_destruction はヒール lv max で獲得' }
     const cost = SPECIAL_ATTACK_UNLOCK_COSTS[specialAttackId]
     if (cost === undefined) return { ok: false, error: '無効なスキルID' }
-    if (specialAttackId === 'all_destruction') return { ok: false, error: '全破壊はヒール lv max で獲得' }
 
     const { totalTypingCount } = await ensureProgress(user.id)
     if (totalTypingCount < cost) return { ok: false, error: 'typing 数が不足しています' }
@@ -241,12 +237,13 @@ export async function purchaseSpecialAttackUnlock(specialAttackId: string): Prom
     return { ok: true }
 }
 
-/** 必殺技のレベル上げ */
+/** 必殺技のレベル上げ（spread のみ） */
 export async function purchaseSpecialAttackLevelUp(
     specialAttackId: string,
     targetLevel: 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10
 ): Promise<{ ok: boolean; error?: string }> {
     const user = await getAuthenticatedUser()
+    if (specialAttackId !== 'spread') return { ok: false, error: 'all_destruction はレベルアップ対象外' }
     const cost = SPECIAL_ATTACK_LEVEL_UP_COSTS[targetLevel]
     if (cost === undefined) return { ok: false, error: '無効なレベル' }
 
