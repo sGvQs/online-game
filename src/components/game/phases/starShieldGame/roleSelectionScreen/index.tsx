@@ -183,11 +183,12 @@ export function RoleSelectionScreen({
                                                             onClick={() => canChange && onShooterLoadoutUpdate({ selectedNormalAttackId: techniqueId })}
                                                             disabled={!canChange}
                                                             className={cn(
-                                                                'flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] border transition-all',
+                                                                'flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] border-2 transition-all',
                                                                 canChange && 'cursor-pointer hover:brightness-110',
                                                                 !canChange && 'cursor-default opacity-70',
-                                                                isActive ? 'border-white/30 bg-white/10' : 'border-white/10 bg-white/[0.03]'
+                                                                isActive ? 'bg-white/15 shadow-[0_0_10px_rgba(255,255,255,0.2)]' : 'border-white/15 bg-white/[0.03]'
                                                             )}
+                                                            style={isActive ? { borderColor: tech.color, boxShadow: `0 0 12px ${tech.color}80` } : undefined}
                                                         >
                                                             <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: tech.color }} />
                                                             <span>lv{level}</span>
