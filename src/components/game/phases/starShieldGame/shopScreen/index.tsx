@@ -389,7 +389,7 @@ export function StarShieldShop({ roomId, currentUserId }: { roomId: string; curr
                             >
                                 {/* 通常攻撃 */}
                                 <ShopCard title="通常攻撃" jurisdiction="attack">
-                                    {NORMAL_ATTACK_IDS.filter((id) => id !== 'red').map((techniqueId) => {
+                                    {NORMAL_ATTACK_IDS.map((techniqueId) => {
                                         const tech = TECHNIQUES[techniqueId]
                                         const ownedAttack = normalAttacks.find((a) => a.techniqueId === techniqueId)
                                         const currentLevel = ownedAttack ? ownedAttack.level : 0
