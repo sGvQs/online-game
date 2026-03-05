@@ -44,6 +44,7 @@ import {
 import { cn } from '@/lib/utils'
 import { getAvailableNormalAttacks, getAvailableSpecialAttacks } from '@/utils/starShieldGame'
 import type { OwnedSkills } from '@/utils/starShieldGame'
+import type { SpecialAttackChoice } from '@/utils/starShieldGame'
 
 // ============================================================
 // 型定義
@@ -284,6 +285,17 @@ export function StarShieldShop({ roomId, currentUserId }: { roomId: string; curr
                                         <span className="text-white/30 text-xs [font-family:var(--font-dot-gothic-16)]">未所持</span>
                                     )}
                                 </div>
+                                {/* 必殺技プレビュー */}
+                                {(() => {
+                                    const selSpec = availableSpecial.find((a) => a.specialAttackId === selSpecial)
+                                    if (!selSpec) return null
+                                    return (
+                                        <SpecialAttackLoadoutPreview
+                                            specialAttackId={selSpec.specialAttackId}
+                                            level={selSpec.level}
+                                        />
+                                    )
+                                })()}
                             </div>
                         </div>
 
@@ -355,6 +367,22 @@ export function StarShieldShop({ roomId, currentUserId }: { roomId: string; curr
                                         <span className="text-white/30 text-xs [font-family:var(--font-dot-gothic-16)]">未所持</span>
                                     )}
                                 </div>
+                                {/* ヒール効果 */}
+                                {selHeal !== null && (
+                                    <div className="mt-2 rounded-xl px-3 py-2 bg-emerald-500/5 border border-emerald-500/20">
+                                        <p className="text-[10px] text-emerald-400/70 [font-family:var(--font-dot-gothic-16)]">
+                                            {selHeal >= 5 ? (
+                                                selHeal === 6 ? (
+                                                    <>単語打ち切り時：<span className="text-emerald-300 font-bold">全回復</span> ＋ 全隕石破壊</>
+                                                ) : (
+                                                    <>単語打ち切り時：<span className="text-emerald-300 font-bold">全回復</span></>
+                                                )
+                                            ) : (
+                                                <>単語打ち切り時：星HP +<span className="text-emerald-300 font-bold">{LEVEL_HEAL_RECOVERY[selHeal as 1 | 2 | 3 | 4]}</span></>
+                                            )}
+                                        </p>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>
@@ -1388,6 +1416,127 @@ function LoadoutAnimPreview({ techniqueId, level }: { techniqueId: TechniqueId; 
                     {tech.label} lv{level}
                     {EFFECT_LABEL[techniqueId] ? ` · ${EFFECT_LABEL[techniqueId]}` : ''}
                 </span>
+            </div>
+        </div>
+    )
+}
+
+// ============================================================
+// SpecialAttackLoadoutPreview
+// 必殺技（スプレッド）の扇状発射プレビュー。赤球ベース、前方発射、レベルで波紋・ウェーブ表現
+// ============================================================
+type SpecBullet = { x: number; y: number; vx: number; vy: number; alpha: number }
+
+function SpecialAttackLoadoutPreview({ specialAttackId, level }: { specialAttackId: SpecialAttackChoice; level: number }) {
+    const canvasRef = useRef<HTMLCanvasElement>(null)
+    const lvl = Math.max(1, Math.min(10, level)) as SpecialAttackLevel
+    const params = SPECIAL_ATTACK_LEVEL_PARAMS[lvl]
+    const { spreadDeg, waveCount, bulletsPerWave, waveDelayMs } = params
+
+    useEffect(() => {
+        const canvas = canvasRef.current
+        if (!canvas) return
+        const ctx = canvas.getContext('2d')
+        if (!ctx) return
+        const c = ctx
+
+        const W = canvas.width
+        const H = canvas.height
+        const DINO_X = 18
+        const ORIGIN_Y = H / 2 - 2
+        const FIRE_INTERVAL = 1800
+        const SPEED = 3.4
+        // 赤球スタイル（基本）、all_destruction はオレンジ
+        const COLOR = specialAttackId === 'all_destruction' ? '#f97316' : '#ef4444'
+
+        const bullets: SpecBullet[] = []
+        let lastFire = -FIRE_INTERVAL
+        let animId: number
+
+        function spawnWave(waveIndex: number) {
+            const displayCount = Math.min(bulletsPerWave, 24)
+            if (displayCount <= 1) {
+                bullets.push({ x: DINO_X + 18, y: ORIGIN_Y, vx: SPEED, vy: 0, alpha: 0.95 })
+                return
+            }
+            for (let i = 0; i < displayCount; i++) {
+                const angle = ((i / (displayCount - 1)) - 0.5) * spreadDeg
+                const rad = (angle * Math.PI) / 180
+                bullets.push({
+                    x: DINO_X + 18,
+                    y: ORIGIN_Y,
+                    vx: Math.cos(rad) * SPEED,
+                    vy: Math.sin(rad) * SPEED,
+                    alpha: 0.95,
+                })
+            }
+        }
+
+        const timeouts: ReturnType<typeof setTimeout>[] = []
+
+        function fire() {
+            if (waveCount <= 1) {
+                spawnWave(0)
+                return
+            }
+            for (let w = 0; w < waveCount; w++) {
+                timeouts.push(setTimeout(() => spawnWave(w), w * waveDelayMs))
+            }
+        }
+
+        function draw(now: number) {
+            c.clearRect(0, 0, W, H)
+            if (now - lastFire >= FIRE_INTERVAL) {
+                fire()
+                lastFire = now
+            }
+            for (let i = bullets.length - 1; i >= 0; i--) {
+                const b = bullets[i]
+                b.x += b.vx
+                b.y += b.vy
+                b.alpha -= 0.012
+                if (b.alpha <= 0 || b.x > W + 12 || b.y < -12 || b.y > H + 12) {
+                    bullets.splice(i, 1)
+                    continue
+                }
+                const alphaHex = Math.round(Math.max(0, b.alpha) * 255).toString(16).padStart(2, '0')
+                c.save()
+                c.shadowBlur = 8
+                c.shadowColor = COLOR
+                c.beginPath()
+                c.arc(b.x, b.y, 2.4, 0, Math.PI * 2)
+                c.fillStyle = COLOR + alphaHex
+                c.fill()
+                c.restore()
+            }
+            animId = requestAnimationFrame(draw)
+        }
+        animId = requestAnimationFrame(draw)
+        return () => {
+            cancelAnimationFrame(animId)
+            timeouts.forEach((t) => clearTimeout(t))
+            bullets.length = 0
+        }
+    }, [specialAttackId, level, spreadDeg, waveCount, bulletsPerWave, waveDelayMs])
+
+    const label = specialAttackId === 'all_destruction' ? '全破壊' : '扇状散弾'
+
+    return (
+        <div className="relative mt-2 rounded-xl overflow-hidden border border-white/[0.07]" style={{ height: '88px', background: 'rgba(0,0,0,0.35)' }}>
+            <div className="absolute top-1/2 left-[38px] right-0 border-t border-dashed border-white/[0.05]" style={{ transform: 'translateY(-1px)' }} />
+            <div className="absolute left-1.5 top-1/2 -translate-y-1/2 z-10 opacity-90 ptr-events-none">
+                <Image src={ICONS.DINO} alt="Dino" width={24} height={24} />
+            </div>
+            <canvas ref={canvasRef} width={360} height={88} className="absolute inset-0 w-full h-full" />
+            <div className="absolute bottom-1.5 left-10 flex items-center gap-1.5">
+                <span
+                    className="w-1.5 h-1.5 rounded-full shrink-0"
+                    style={{
+                        background: specialAttackId === 'all_destruction' ? '#f97316' : '#ef4444',
+                        boxShadow: specialAttackId === 'all_destruction' ? '0 0 6px rgba(249,115,22,0.6)' : '0 0 6px rgba(239,68,68,0.6)',
+                    }}
+                />
+                <span className="text-[9px] text-white/25 [font-family:var(--font-dot-gothic-16)]">{label} Lv{level}</span>
             </div>
         </div>
     )
