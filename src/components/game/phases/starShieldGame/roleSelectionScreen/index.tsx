@@ -86,7 +86,7 @@ export function RoleSelectionScreen({
                     <h2 className={styles.sectionTitle()}>[むずかしさ]と[やくわり]をきめよう。</h2>
                 </motion.div>
 
-                <div className="grid grid-cols-[1fr_1fr] gap-5">
+                <div className="grid grid-cols-[1fr_1fr] gap-5 items-stretch">
                     <motion.div
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
@@ -140,7 +140,7 @@ export function RoleSelectionScreen({
                         initial={{ opacity: 0, y: 10 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.5, delay: 0.15 }}
-                        className="flex flex-col gap-2"
+                        className="flex flex-col gap-2 min-h-0"
                     >
                         {(['SHOOTER', 'TYPIST'] as const).map((r) => {
                             const meta = ROLE_META[r]
@@ -169,7 +169,7 @@ export function RoleSelectionScreen({
                                     <p className={styles.roleDescription()}>{meta.description}</p>
                                     <p className={styles.roleDetail()}>{meta.detail}</p>
                                     {isSelected && r === 'SHOOTER' && displayShooterProgress && (
-                                        <div className="mt-3 pt-3 border-t border-white/[0.06]" onClick={(e) => e.stopPropagation()}>
+                                        <div className="mt-3 pt-3 border-t border-white/[0.06] min-h-[5.5rem]" onClick={(e) => e.stopPropagation()}>
                                             <p className="text-[10px] mb-1.5 [font-family:var(--font-dot-gothic-16)] opacity-70">選択している色</p>
                                             <div className="flex flex-wrap gap-1.5">
                                                 {availableNormal.map(({ techniqueId, level }) => {
@@ -198,9 +198,23 @@ export function RoleSelectionScreen({
                                         </div>
                                     )}
                                     {isSelected && r === 'TYPIST' && displayTypistProgress && (
-                                        <div className="mt-3 pt-3 border-t border-white/[0.06]">
-                                            <div className="flex flex-wrap gap-x-4 gap-y-1 text-[10px] [font-family:var(--font-dot-gothic-16)] opacity-80">
-                                                <span>HP {LEVEL_STAR_HP[(displayTypistProgress.starHpLevel ?? 1) as 1 | 2 | 3 | 4 | 5]}</span>
+                                        <div className="mt-3 pt-3 border-t border-white/[0.06] min-h-[5.5rem]">
+                                            <div className="flex flex-col gap-1.5">
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-[10px] [font-family:var(--font-dot-gothic-16)] opacity-80">
+                                                        HP {LEVEL_STAR_HP[(displayTypistProgress.starHpLevel ?? 1) as 1 | 2 | 3 | 4 | 5]}
+                                                    </span>
+                                                    <div className="flex-1 min-w-0 h-1.5 rounded-full bg-white/5 overflow-hidden">
+                                                        <div
+                                                            className="h-full rounded-full bg-gradient-to-r from-emerald-700 to-emerald-400 transition-all duration-300"
+                                                            style={{ width: `${((displayTypistProgress.starHpLevel ?? 1) / 5) * 100}%` }}
+                                                        />
+                                                    </div>
+                                                    <span className="text-[9px] [font-family:var(--font-dot-gothic-16)] opacity-50 shrink-0">
+                                                        Lv{(displayTypistProgress.starHpLevel ?? 1)}/5
+                                                    </span>
+                                                </div>
+                                                <div className="flex flex-wrap gap-x-4 gap-y-1 text-[10px] [font-family:var(--font-dot-gothic-16)] opacity-80">
                                                 {displayTypistProgress.healLevel != null ? (
                                                     displayTypistProgress.healLevel >= 5 ? (
                                                         <span>回復: 全回復</span>
@@ -210,6 +224,7 @@ export function RoleSelectionScreen({
                                                 ) : (
                                                     <span className="text-white/40">回復: 未所持</span>
                                                 )}
+                                                </div>
                                             </div>
                                         </div>
                                     )}
