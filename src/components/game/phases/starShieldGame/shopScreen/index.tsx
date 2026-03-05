@@ -222,7 +222,7 @@ export function StarShieldShop({ roomId, currentUserId }: { roomId: string; curr
                                                 key={techniqueId}
                                                 onClick={() => handleLoadoutUpdate({ selectedNormalAttackId: techniqueId })}
                                                 className={cn(
-                                                    'px-3 py-1.5 rounded-xl text-xs border flex items-center gap-1.5 transition-all',
+                                                    'px-3 py-1.5 rounded-xl text-xs border flex items-center gap-2 transition-all',
                                                     isActive
                                                         ? 'border-indigo-500/60 bg-indigo-500/20 text-indigo-200 shadow-[0_0_10px_rgba(99,102,241,0.25)]'
                                                         : 'bg-white/[0.02] border-white/10 text-white/50 hover:border-white/25 hover:text-white/70'
@@ -230,11 +230,10 @@ export function StarShieldShop({ roomId, currentUserId }: { roomId: string; curr
                                             >
                                                 {isActive && <span className="text-indigo-400 font-bold">✓</span>}
                                                 <span
-                                                    className="w-2 h-2 rounded-full shrink-0"
+                                                    className="w-3 h-3 rounded-full shrink-0 ring-2 ring-white/10"
                                                     style={{ backgroundColor: tech.color }}
                                                 />
-                                                {tech.label}
-                                                <span className="text-[10px] opacity-50">lv{level}</span>
+                                                <span className="text-[10px] opacity-70">lv{level}</span>
                                             </button>
                                         )
                                     })}
@@ -266,15 +265,18 @@ export function StarShieldShop({ roomId, currentUserId }: { roomId: string; curr
                                                 key={specialAttackId}
                                                 onClick={() => handleLoadoutUpdate({ selectedSpecialAttackId: specialAttackId })}
                                                 className={cn(
-                                                    'px-3 py-1.5 rounded-xl text-xs border flex items-center gap-1.5 transition-all',
+                                                    'px-3 py-1.5 rounded-xl text-xs border flex items-center gap-2 transition-all',
                                                     isActive
                                                         ? 'border-indigo-500/60 bg-indigo-500/20 text-indigo-200 shadow-[0_0_10px_rgba(99,102,241,0.25)]'
                                                         : 'bg-white/[0.02] border-white/10 text-white/50 hover:border-white/25 hover:text-white/70'
                                                 )}
                                             >
                                                 {isActive && <span className="text-indigo-400 font-bold">✓</span>}
-                                                {SPECIAL_LABELS[specialAttackId] ?? specialAttackId}
-                                                <span className="text-[10px] opacity-50">lv{level}</span>
+                                                <span
+                                                    className="w-3 h-3 rounded-full shrink-0 bg-[#a78bfa] ring-2 ring-white/10"
+                                                    style={{ boxShadow: '0 0 6px rgba(167,139,250,0.5)' }}
+                                                />
+                                                <span className="text-[10px] opacity-70">lv{level}</span>
                                             </button>
                                         )
                                     })}
@@ -294,6 +296,21 @@ export function StarShieldShop({ roomId, currentUserId }: { roomId: string; curr
                                 <Image src={ICONS.TYPIST} alt="Typist" width={16} height={16} className="opacity-80" />
                                 DEFENCE（Typist）
                             </h3>
+
+                            {/* 星のHP */}
+                            <div>
+                                <p className="text-[10px] text-emerald-400/50 [font-family:var(--font-dot-gothic-16)] mb-1.5 flex items-center gap-1.5">
+                                    <span className="w-1 h-1 rounded-full bg-emerald-400 shrink-0 opacity-50" />
+                                    星のHP
+                                </p>
+                                <div className="flex items-center gap-2">
+                                    <span className="text-white/50 text-xs [font-family:var(--font-dot-gothic-16)]">HP</span>
+                                    <span className="text-xl font-bold text-emerald-400 [font-family:var(--font-dot-gothic-16)] tabular-nums">
+                                        {LEVEL_STAR_HP[starHpLevel as 1 | 2 | 3 | 4 | 5]}
+                                    </span>
+                                    <span className="text-[10px] text-white/30">Lv{starHpLevel}/5</span>
+                                </div>
+                            </div>
 
                             {/* ヒール */}
                             <div>
