@@ -10,39 +10,33 @@ import {
     GAME_STATE_THROTTLE_MS,
     DINO_X,
     DINO_Y,
-    BULLET_SPAWN_OFFSET_X,
-    BULLET_SPAWN_OFFSET_Y,
     BULLET_ORIGIN_Y_OFFSET,
-    SPAWN_X_MIN,
-    SPAWN_X_MAX,
-    SPAWN_Y_MIN,
-    SPAWN_Y_MAX,
-    ASTEROID_DURATION_MS,
-    HELL_ASTEROID_DURATION_BASE,
-    HELL_ASTEROID_DURATION_MIN,
-    BULLET_RADIUS,
-    ASTEROID_RADIUS,
     BULLET_MAX_AGE_MS,
-    STAR_TARGET_OFFSET,
     SPAWN_INTERVALS_MS,
-    ASTEROID_HP,
+    ASTEROID_RADIUS,
     STAR_HP,
     SPECIAL_ATTACK_BULLET_COUNT,
-    LEVEL_BLUE_SLOW_MULTIPLIER,
-    LEVEL_ORANGE_DAMAGE,
-    ORANGE_CHAIN_RADIUS,
 } from '@/constants/starShieldGame/gameConfig'
 import { DIALOGUES, pickRandomDialogue } from '@/constants/starShieldGame/dialogues'
 import { TECHNIQUES, type TechniqueId } from '@/constants/starShieldGame/techniques'
 import type { SpecialAttackChoice } from '@/utils/starShieldGame'
 import type { Asteroid, Bullet, DialogueLine, Difficulty, GameResult, GameStats, GameStatePayload, GameEndPayload, NormalAttackLevel } from '@/types/starShieldGame'
 import {
-    getBulletPosition,
     getAsteroidPosition,
     getRomaji,
     findNearestAsteroidPosition,
     createNormalAttackBullets,
     createSpecialAttackBullets,
+    createAsteroid,
+    computeCollisionResult,
+    applyHpUpdates,
+    getContactAsteroids,
+    getExpiredBulletIds,
+    calcRemainingSeconds,
+    resolveStartTime,
+    createGameStats,
+    aimToCenterAngle,
+    aimToDirection,
 } from '@/utils/starShieldGame'
 
 // ============================================
@@ -166,13 +160,12 @@ export function useStarShield({
         gameEndedRef.current = true
 
         const baseStartedAt = effectiveStartedAtRef.current ?? startedAt
-        const durationSeconds = Math.round((Date.now() - baseStartedAt) / 1000)
-        const stats: GameStats = {
+        const stats = createGameStats({
+            baseStartedAt,
             spawnedCount: scoreRef.current.spawned,
             destroyedCount: scoreRef.current.destroyed,
-            durationSeconds,
             fireCount: fireCountRef.current,
-        }
+        })
 
         // Shooter: DB 保存を先に完了してから結果画面へ（returnToRoom による Match 削除との競合を防ぐ）
         if (isShooter) {
@@ -256,9 +249,7 @@ export function useStarShield({
 
                     const aim = aimRef.current
                     const originY = DINO_Y + BULLET_ORIGIN_Y_OFFSET
-                    const dx = aim.x - DINO_X
-                    const dy = aim.y - originY
-                    const centerAngle = Math.hypot(dx, dy) >= 0.001 ? Math.atan2(dy, dx) : 0
+                    const centerAngle = aimToCenterAngle(aim.x, aim.y, DINO_X, originY)
                     const techId = payload?.technique as TechniqueId | undefined
                     const tech = techId && techId in TECHNIQUES ? TECHNIQUES[techId] : null
                     const newBullets = createSpecialAttackBullets({
@@ -278,23 +269,18 @@ export function useStarShield({
 
                 const aim = aimRef.current
                 const originY = DINO_Y + BULLET_ORIGIN_Y_OFFSET
-                const dx = aim.x - DINO_X
-                const dy = aim.y - originY
-                const len = Math.hypot(dx, dy)
-                if (len < 0.001) return
+                const dir = aimToDirection(aim.x, aim.y, DINO_X, originY)
+                if (!dir) return
 
-                const centerAngle = Math.atan2(dy, dx)
-                const dirX = dx / len
-                const dirY = dy / len
-
+                const centerAngle = aimToCenterAngle(aim.x, aim.y, DINO_X, originY)
                 const techId = payload?.technique as TechniqueId | undefined
                 const tech = techId && techId in TECHNIQUES ? TECHNIQUES[techId] : null
 
                 const newBullets = createNormalAttackBullets({
                     tech,
                     centerAngle,
-                    dirX,
-                    dirY,
+                    dirX: dir.dirX,
+                    dirY: dir.dirY,
                     level,
                     now,
                 })
@@ -338,20 +324,13 @@ export function useStarShield({
     useEffect(() => {
         effectiveStartedAtRef.current = null
 
-        const getBase = () => effectiveStartedAtRef.current ?? startedAt
-        const calcRemaining = () =>
-            Math.max(0, GAME_DURATION_SECONDS - Math.floor((Date.now() - getBase()) / 1000))
-
-        let initialRemaining = calcRemaining()
-        if (initialRemaining <= 0) {
-            effectiveStartedAtRef.current = Date.now()
-            initialRemaining = GAME_DURATION_SECONDS
-        }
-
+        const { effectiveStartedAt, initialRemaining } = resolveStartTime(startedAt, GAME_DURATION_SECONDS)
+        effectiveStartedAtRef.current = effectiveStartedAt
         setTimer(initialRemaining)
 
         const interval = setInterval(() => {
-            const remaining = calcRemaining()
+            const base = effectiveStartedAtRef.current ?? startedAt
+            const remaining = calcRemainingSeconds(base, GAME_DURATION_SECONDS)
             setTimer(remaining)
 
             if (remaining <= 0) {
@@ -378,22 +357,12 @@ export function useStarShield({
 
         spawnTimer = setInterval(() => {
             if (gameEndedRef.current || contactPendingRef.current) return
-            const targetX = STAR_TARGET_X + (Math.random() * 2 - 1) * STAR_TARGET_OFFSET
-            const targetY = STAR_TARGET_Y + (Math.random() * 2 - 1) * STAR_TARGET_OFFSET
-            const durationMs =
-                difficulty === 'HELL'
-                    ? Math.max(HELL_ASTEROID_DURATION_MIN, HELL_ASTEROID_DURATION_BASE - playersTotalPoints)
-                    : ASTEROID_DURATION_MS[difficulty]
-            const asteroid: Asteroid = {
-                id: crypto.randomUUID(),
-                spawnedAt: Date.now(),
-                spawnX: SPAWN_X_MIN + Math.random() * (SPAWN_X_MAX - SPAWN_X_MIN),
-                spawnY: SPAWN_Y_MIN + Math.random() * (SPAWN_Y_MAX - SPAWN_Y_MIN),
-                targetX,
-                targetY,
-                durationMs,
-                hp: ASTEROID_HP[difficulty],
-            }
+            const asteroid = createAsteroid({
+                difficulty,
+                playersTotalPoints,
+                starTargetX: STAR_TARGET_X,
+                starTargetY: STAR_TARGET_Y,
+            })
             setAsteroids((prev) => {
                 const next = [...prev, asteroid]
                 asteroidsRef.current = next
@@ -413,112 +382,28 @@ export function useStarShield({
             const asts = asteroidsRef.current
             const bts = bulletsRef.current
 
-            const hitBulletIds = new Set<string>()
-            const hpUpdates = new Map<string, number>()
-            const slowAsteroidData = new Map<string, { progressAtSlow: number }>()
-            let destroyedCount = 0
+            const result = computeCollisionResult({
+                asteroids: asts,
+                bullets: bts,
+                now,
+                level: levelRef.current,
+            })
 
-            for (const bullet of bts) {
-                if (hitBulletIds.has(bullet.id)) continue
-                const bp = getBulletPosition(bullet, now)
-                const damage = bullet.damage ?? 1
-                const tech = bullet.technique && bullet.technique in TECHNIQUES ? TECHNIQUES[bullet.technique as TechniqueId] : null
-
-                for (const a of asts) {
-                    if (a.destroyedAt || (hpUpdates.has(a.id) && (hpUpdates.get(a.id) ?? 0) <= 0)) continue
-                    const ap = getAsteroidPosition(a, now)
-                    const dist = Math.hypot(bp.x - ap.x, bp.y - ap.y)
-                    const bulletRadius = bullet.radius ?? BULLET_RADIUS
-                    if (dist >= ASTEROID_RADIUS + bulletRadius) continue
-
-                    const currentHp = hpUpdates.get(a.id) ?? a.hp
-                    const newHp = Math.max(0, currentHp - damage)
-
-                    if (damage <= 0) continue
-
-                    hpUpdates.set(a.id, newHp)
-                    if (newHp <= 0) destroyedCount++
-
-                    if (tech?.slowOnHit && !a.slowAppliedAt) {
-                        const progressAtSlow = Math.min(1, (now - a.spawnedAt) / a.durationMs)
-                        slowAsteroidData.set(a.id, { progressAtSlow })
-                    }
-
-                    if (tech?.chainLevel1Count !== undefined && tech.chainRadius !== undefined) {
-                        const chainRadius = ORANGE_CHAIN_RADIUS
-                        const chainHitIds = new Set<string>([a.id])
-                        const applyChainDamage = (astId: string, dmg: number) => {
-                            const cur = hpUpdates.get(astId) ?? asts.find((x) => x.id === astId)?.hp ?? 0
-                            const next = Math.max(0, cur - dmg)
-                            hpUpdates.set(astId, next)
-                            if (next <= 0) destroyedCount++
-                            chainHitIds.add(astId)
-                        }
-                        const findNearest = (centerPos: { x: number; y: number }, limit: number, radius: number) => {
-                            const withDist = asts
-                                .filter((o) => !o.destroyedAt && !chainHitIds.has(o.id))
-                                .map((o) => ({ ast: o, pos: getAsteroidPosition(o, now) }))
-                                .map(({ ast, pos }) => ({ ast, dist: Math.hypot(centerPos.x - pos.x, centerPos.y - pos.y) }))
-                                .filter(({ dist }) => dist <= radius)
-                                .sort((x, y) => x.dist - y.dist)
-                            return withDist.slice(0, limit).map(({ ast }) => ast)
-                        }
-                        const l1 = findNearest(ap, tech.chainLevel1Count, chainRadius)
-                        if (process.env.NODE_ENV === 'development') {
-                            console.log('[orange chain] L1 targets:', l1.length)
-                        }
-                        const chainTargets: { pos: { x: number; y: number }; asteroidId: string }[] = []
-                        for (const t1 of l1) {
-                            const t1Pos = getAsteroidPosition(t1, now)
-                            chainTargets.push({ pos: t1Pos, asteroidId: t1.id })
-                            const l1Dmg = (tech.chainLevel1Damage ?? 0) * LEVEL_ORANGE_DAMAGE[levelRef.current]
-                            applyChainDamage(t1.id, l1Dmg)
-                            const l2 = findNearest(t1Pos, tech.chainLevel2Count ?? 0, chainRadius)
-                            const l2Dmg = (tech.chainLevel2Damage ?? 0) * LEVEL_ORANGE_DAMAGE[levelRef.current]
-                            for (const t2 of l2) {
-                                chainTargets.push({ pos: getAsteroidPosition(t2, now), asteroidId: t2.id })
-                                applyChainDamage(t2.id, l2Dmg)
-                            }
-                        }
-                        if (chainTargets.length > 0) {
-                            setChainHits({
-                                primaryPos: ap,
-                                targets: chainTargets,
-                                color: tech.color ?? '#f97316',
-                            })
-                        }
-                    }
-
-                    if (!bullet.piercing) {
-                        hitBulletIds.add(bullet.id)
-                        break
-                    }
-                }
-            }
-
-            if (hpUpdates.size > 0) {
+            if (result.hpUpdates.size > 0) {
                 setAsteroids((prev) => {
-                    const next = prev.map((ast) => {
-                        const newHp = hpUpdates.get(ast.id)
-                        if (newHp === undefined) return ast
-                        const base = newHp <= 0 ? { ...ast, hp: 0, destroyedAt: now } : { ...ast, hp: newHp }
-                        const slowData = slowAsteroidData.get(ast.id)
-                        const slowMult = LEVEL_BLUE_SLOW_MULTIPLIER[levelRef.current]
-                        return slowData
-                            ? { ...base, speedMultiplier: slowMult, slowAppliedAt: now, progressAtSlow: slowData.progressAtSlow }
-                            : base
-                    })
+                    const next = applyHpUpdates(prev, result, now, levelRef.current)
                     asteroidsRef.current = next
                     return next
                 })
                 setBullets((prev) => {
-                    const next = prev.filter((b) => !hitBulletIds.has(b.id))
+                    const next = prev.filter((b) => !result.hitBulletIds.has(b.id))
                     bulletsRef.current = next
                     return next
                 })
-                if (destroyedCount > 0) {
+                if (result.chainHits) setChainHits(result.chainHits)
+                if (result.destroyedCount > 0) {
                     setScore((prev) => {
-                        const next = { ...prev, destroyed: prev.destroyed + destroyedCount }
+                        const next = { ...prev, destroyed: prev.destroyed + result.destroyedCount }
                         scoreRef.current = next
                         return next
                     })
@@ -526,28 +411,26 @@ export function useStarShield({
                 }
             }
 
-            const toRemove = bts.filter((b) => now - b.firedAt > BULLET_MAX_AGE_MS)
-            if (toRemove.length > 0) {
-                const ids = new Set(toRemove.map((b) => b.id))
+            const expiredIds = getExpiredBulletIds(bts, now)
+            if (expiredIds.size > 0) {
                 setBullets((prev) => {
-                    const next = prev.filter((b) => !ids.has(b.id))
+                    const next = prev.filter((b) => !expiredIds.has(b.id))
                     bulletsRef.current = next
                     return next
                 })
             }
 
             const destroyedThisFrame = new Set(
-                [...hpUpdates.entries()]
-                    .filter(([, newHp]) => newHp <= 0)
-                    .map(([id]) => id)
+                [...result.hpUpdates.entries()].filter(([, newHp]) => newHp <= 0).map(([id]) => id)
             )
-            const contacts = asts.filter((a) => {
-                if (a.destroyedAt || destroyedThisFrame.has(a.id) || a.hasDamagedStar) return false
-                const ap = getAsteroidPosition(a, now)
-                const progress = (now - a.spawnedAt) / a.durationMs
-                if (progress >= 1) return true
-                const dist = Math.hypot(ap.x - STAR_TARGET_X, ap.y - STAR_TARGET_Y)
-                return dist < STAR_RADIUS + ASTEROID_RADIUS
+            const contacts = getContactAsteroids({
+                asteroids: asts,
+                now,
+                destroyedAsteroidIds: destroyedThisFrame,
+                starTargetX: STAR_TARGET_X,
+                starTargetY: STAR_TARGET_Y,
+                starRadius: STAR_RADIUS,
+                asteroidRadius: ASTEROID_RADIUS,
             })
             if (contacts.length > 0 && !contactPendingRef.current) {
                 playVoiceRef.current('star-damage')

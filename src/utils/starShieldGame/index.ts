@@ -3,6 +3,18 @@
  */
 
 export { findNearestAsteroidPosition } from './autoAim'
+export { createAsteroid } from './asteroid'
+export type { CreateAsteroidParams } from './asteroid'
+export {
+    computeCollisionResult,
+    applyHpUpdates,
+    getContactAsteroids,
+    getExpiredBulletIds,
+} from './collision'
+export type { CollisionResult, ChainHitTarget } from './collision'
+export { calcRemainingSeconds, resolveStartTime } from './timer'
+export { createGameStats } from './gameEnd'
+export { aimToCenterAngle, aimToDirection } from './aim'
 export { createNormalAttackBullets } from './normalAttack'
 export { createSpecialAttackBullets } from './specialAttack'
 export { getAvailableTechniques, getDebugNormalAttacks, TECHNIQUE_UNLOCK_DIFFICULTY, ALL_DESTRUCTION_ID } from './techniqueUnlock'
