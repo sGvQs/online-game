@@ -91,6 +91,36 @@ export function StarShieldShop({ roomId, currentUserId }: { roomId: string; curr
             .catch(() => { })
     }, [])
 
+    // ヒール・必殺技：最大値のものを自動でセット
+    useEffect(() => {
+        if (!progress || loading) return
+        const updates: Parameters<typeof updateLoadout>[0] = {}
+
+        // ヒール：所持している最大レベルをセット
+        const healLv = progress.healLevel ?? 0
+        const selHeal = progress.selectedHealLevel ?? null
+        if (healLv > 0 && (selHeal === null || selHeal < healLv)) {
+            updates.selectedHealLevel = healLv
+        }
+
+        // 必殺技：利用可能な最強のものをセット（all_destruction > spread）
+        const ownedSkills: OwnedSkills = {
+            normalAttacks: progress.normalAttacks ?? [],
+            specialAttacks: progress.specialAttacks ?? [],
+            healLevel: progress.healLevel ?? null,
+        }
+        const availSpecial = getAvailableSpecialAttacks(ownedSkills)
+        const selSpecial = progress.selectedSpecialAttackId ?? null
+        const bestSpecial = availSpecial.length > 0 ? availSpecial[availSpecial.length - 1]!.specialAttackId : null
+        if (bestSpecial && selSpecial !== bestSpecial) {
+            updates.selectedSpecialAttackId = bestSpecial
+        }
+
+        if (Object.keys(updates).length > 0) {
+            updateLoadout(updates).then((r) => r.ok && refresh())
+        }
+    }, [progress, loading, refresh])
+
     const handlePurchase = useCallback(
         async (fn: () => Promise<{ ok: boolean; error?: string }>, label: string) => {
             setError(null)
@@ -122,7 +152,6 @@ export function StarShieldShop({ roomId, currentUserId }: { roomId: string; curr
     const availableSpecial = getAvailableSpecialAttacks(ownedSkills)
     const selNormal = progress?.selectedNormalAttackId ?? 'red'
     const selSpecial = progress?.selectedSpecialAttackId ?? null
-    const selHeal = progress?.selectedHealLevel ?? null
 
     const handleLoadoutUpdate = async (updates: Parameters<typeof updateLoadout>[0]) => {
         setError(null)
@@ -343,54 +372,31 @@ export function StarShieldShop({ roomId, currentUserId }: { roomId: string; curr
                                     ヒール
                                 </p>
                                 <div className="flex flex-wrap gap-2">
-                                    <button
-                                        onClick={() => handleLoadoutUpdate({ selectedHealLevel: null })}
-                                        className={cn(
-                                            'px-3 py-1.5 rounded-xl text-xs border transition-all',
-                                            selHeal === null
-                                                ? 'border-white/30 bg-white/10 text-white/70'
-                                                : 'bg-white/[0.02] border-white/10 text-white/30 hover:border-white/20 hover:text-white/50'
-                                        )}
-                                    >
-                                        ✕ 使わない
-                                    </button>
-                                    {healLevel !== null &&
-                                        [1, 2, 3, 4, 5, 6]
-                                            .filter((lv) => lv <= healLevel)
-                                            .map((lv) => {
-                                                const isActive = selHeal === lv
-                                                return (
-                                                    <button
-                                                        key={lv}
-                                                        onClick={() => handleLoadoutUpdate({ selectedHealLevel: lv })}
-                                                        className={cn(
-                                                            'px-3 py-1.5 rounded-xl text-xs border transition-all',
-                                                            isActive
-                                                                ? 'border-emerald-500/60 bg-emerald-500/20 text-emerald-200 shadow-[0_0_10px_rgba(16,185,129,0.25)]'
-                                                                : 'bg-white/[0.02] border-white/10 text-white/50 hover:border-white/25 hover:text-white/70'
-                                                        )}
-                                                    >
-                                                        {isActive && <span className="text-emerald-400 font-bold mr-1">✓</span>}
-                                                        lv{lv === 6 ? 'max' : lv}
-                                                    </button>
-                                                )
-                                            })}
-                                    {healLevel === null && (
+                                    {healLevel !== null ? (
+                                        <div className="px-3 py-1.5 rounded-xl text-xs border border-emerald-500/60 bg-emerald-500/20 text-emerald-200 shadow-[0_0_10px_rgba(16,185,129,0.25)] flex items-center gap-2">
+                                            <span className="text-emerald-400 font-bold">✓</span>
+                                            <span
+                                                className="w-3 h-3 rounded-full shrink-0 ring-2 ring-white/10"
+                                                style={{ backgroundColor: '#10b981', boxShadow: '0 0 6px rgba(16,185,129,0.5)' }}
+                                            />
+                                            <span className="text-[10px] opacity-70">lv{healLevel === 6 ? 'max' : healLevel}</span>
+                                        </div>
+                                    ) : (
                                         <span className="text-white/30 text-xs [font-family:var(--font-dot-gothic-16)]">未所持</span>
                                     )}
                                 </div>
                                 {/* ヒール効果 */}
-                                {selHeal !== null && (
+                                {healLevel !== null && (
                                     <div className="mt-2 rounded-xl px-3 py-2 bg-emerald-500/5 border border-emerald-500/20">
                                         <p className="text-[10px] text-emerald-400/70 [font-family:var(--font-dot-gothic-16)]">
-                                            {selHeal >= 5 ? (
-                                                selHeal === 6 ? (
+                                            {healLevel >= 5 ? (
+                                                healLevel === 6 ? (
                                                     <>単語打ち切り時：<span className="text-emerald-300 font-bold">全回復</span> ＋ 全隕石破壊</>
                                                 ) : (
                                                     <>単語打ち切り時：<span className="text-emerald-300 font-bold">全回復</span></>
                                                 )
                                             ) : (
-                                                <>単語打ち切り時：星HP +<span className="text-emerald-300 font-bold">{LEVEL_HEAL_RECOVERY[selHeal as 1 | 2 | 3 | 4]}</span></>
+                                                <>単語打ち切り時：星HP +<span className="text-emerald-300 font-bold">{LEVEL_HEAL_RECOVERY[healLevel as 1 | 2 | 3 | 4]}</span></>
                                             )}
                                         </p>
                                     </div>
