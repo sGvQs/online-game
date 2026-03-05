@@ -28,6 +28,8 @@ import {
     ASTEROID_HP,
     STAR_HP,
     SPECIAL_ATTACK_BULLET_COUNT,
+    LEVEL_BLUE_SLOW_MULTIPLIER,
+    LEVEL_ORANGE_CHAIN_RADIUS,
 } from '@/constants/starShieldGame/gameConfig'
 import { DIALOGUES, pickRandomDialogue } from '@/constants/starShieldGame/dialogues'
 import { TECHNIQUES, type TechniqueId } from '@/constants/starShieldGame/techniques'
@@ -107,6 +109,7 @@ export function useStarShield({
     const starHpRef = useRef(maxStarHp)
     const aimRef = useRef({ x: 0.5, y: 0.5 }) // 正規化座標 0-1
     const autoAimNearestRef = useRef(autoAimNearest)
+    const levelRef = useRef(level)
     const gameEndedRef = useRef(false)
     const contactPendingRef = useRef(false)
     const channelRef = useRef<ReturnType<typeof supabase.channel> | null>(null)
@@ -121,6 +124,10 @@ export function useStarShield({
     useEffect(() => {
         autoAimNearestRef.current = autoAimNearest
     }, [autoAimNearest])
+
+    useEffect(() => {
+        levelRef.current = level
+    }, [level])
 
     /** Shooter: game_state を broadcast（スロットリング付き） */
     const sendGameState = useCallback(() => {
@@ -428,6 +435,7 @@ export function useStarShield({
                     }
 
                     if (tech?.chainLevel1Count !== undefined && tech.chainRadius !== undefined) {
+                        const chainRadius = LEVEL_ORANGE_CHAIN_RADIUS[levelRef.current]
                         const chainHitIds = new Set<string>([a.id])
                         const applyChainDamage = (astId: string, dmg: number) => {
                             const cur = hpUpdates.get(astId) ?? asts.find((x) => x.id === astId)?.hp ?? 0
@@ -445,7 +453,7 @@ export function useStarShield({
                                 .sort((x, y) => x.dist - y.dist)
                             return withDist.slice(0, limit).map(({ ast }) => ast)
                         }
-                        const l1 = findNearest(ap, tech.chainLevel1Count, tech.chainRadius)
+                        const l1 = findNearest(ap, tech.chainLevel1Count, chainRadius)
                         if (process.env.NODE_ENV === 'development') {
                             console.log('[orange chain] L1 targets:', l1.length)
                         }
@@ -454,7 +462,7 @@ export function useStarShield({
                             const t1Pos = getAsteroidPosition(t1, now)
                             chainTargets.push({ pos: t1Pos, asteroidId: t1.id })
                             applyChainDamage(t1.id, tech.chainLevel1Damage ?? 0)
-                            const l2 = findNearest(t1Pos, tech.chainLevel2Count ?? 0, tech.chainRadius)
+                            const l2 = findNearest(t1Pos, tech.chainLevel2Count ?? 0, chainRadius)
                             for (const t2 of l2) {
                                 chainTargets.push({ pos: getAsteroidPosition(t2, now), asteroidId: t2.id })
                                 applyChainDamage(t2.id, tech.chainLevel2Damage ?? 0)
@@ -483,8 +491,9 @@ export function useStarShield({
                         if (newHp === undefined) return ast
                         const base = newHp <= 0 ? { ...ast, hp: 0, destroyedAt: now } : { ...ast, hp: newHp }
                         const slowData = slowAsteroidData.get(ast.id)
+                        const slowMult = LEVEL_BLUE_SLOW_MULTIPLIER[levelRef.current]
                         return slowData
-                            ? { ...base, speedMultiplier: 0.5, slowAppliedAt: now, progressAtSlow: slowData.progressAtSlow }
+                            ? { ...base, speedMultiplier: slowMult, slowAppliedAt: now, progressAtSlow: slowData.progressAtSlow }
                             : base
                     })
                     asteroidsRef.current = next

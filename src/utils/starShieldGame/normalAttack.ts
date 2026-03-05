@@ -11,12 +11,17 @@ import {
     BULLET_SPAWN_OFFSET_Y,
     LEVEL_BULLET_COUNT,
     LEVEL_SPREAD_DEG,
+    LEVEL_YELLOW_DAMAGE,
+    LEVEL_PURPLE_SPEED,
 } from '@/constants/starShieldGame/gameConfig'
+import type { TechniqueId } from '@/constants/starShieldGame/techniques'
 
 function createBaseBullet(
     o: { dirX: number; dirY: number; startX: number; startY: number },
     tech: TechniqueConfig | null,
-    now: number
+    now: number,
+    overrideDamage?: number,
+    overrideSpeed?: number
 ): Bullet {
     const base: Bullet = {
         id: crypto.randomUUID(),
@@ -27,10 +32,12 @@ function createBaseBullet(
         dirY: o.dirY,
     }
     if (tech) {
+        const damage = overrideDamage ?? tech.damage
+        const speed = overrideSpeed ?? tech.speed
         return {
             ...base,
-            damage: tech.damage,
-            speed: tech.speed,
+            damage,
+            speed,
             technique: tech.id,
             piercing: tech.piercing,
         }
@@ -105,12 +112,13 @@ export function createNormalAttackBullets(params: {
 
     if (tech?.count && tech.count > 1) {
         const verticalOffset = tech.verticalOffset ?? 0
+        const yellowDamage = (tech.id as TechniqueId) === 'yellow_beam' ? LEVEL_YELLOW_DAMAGE[level] : undefined
         const result: Bullet[] = []
         for (let i = 0; i < tech.count; i++) {
             const offsetDist = i * verticalOffset
             const startX = DINO_X + dirX * BULLET_SPAWN_OFFSET_X + dirX * offsetDist
             const startY = DINO_Y + dirY * BULLET_SPAWN_OFFSET_Y + dirY * offsetDist
-            result.push(createBaseBullet({ dirX, dirY, startX, startY }, tech, now))
+            result.push(createBaseBullet({ dirX, dirY, startX, startY }, tech, now, yellowDamage))
         }
         return result
     }
@@ -121,6 +129,9 @@ export function createNormalAttackBullets(params: {
         return createDefaultSpreadBullets({ centerAngle, count, spreadDeg, now })
     }
 
+    const yellowDamage = (tech.id as TechniqueId) === 'yellow_beam' ? LEVEL_YELLOW_DAMAGE[level] : undefined
+    const purpleSpeed = (tech.id as TechniqueId) === 'purple' ? (tech.speed * LEVEL_PURPLE_SPEED[level]) : undefined
+
     return [
         createBaseBullet(
             {
@@ -130,7 +141,9 @@ export function createNormalAttackBullets(params: {
                 startY: DINO_Y + dirY * BULLET_SPAWN_OFFSET_Y,
             },
             tech,
-            now
+            now,
+            yellowDamage,
+            purpleSpeed
         ),
     ]
 }

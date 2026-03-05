@@ -112,6 +112,40 @@ export const LEVEL_SPREAD_DEG: Record<NormalAttackLevel, number> = {
     5: 15,
 }
 
+// ========== 技別・レベルスケール ==========
+/** 黄: レベル別ダメージ（1発あたり。30本ビームの各々に適用） */
+export const LEVEL_YELLOW_DAMAGE: Record<NormalAttackLevel, number> = {
+    1: 0.1,
+    2: 0.15,
+    3: 0.2,
+    4: 0.28,
+    5: 0.4,
+}
+/** 青: レベル別減速倍率（隕石に付与。値が小さいほど遅くなる。0.5=半分） */
+export const LEVEL_BLUE_SLOW_MULTIPLIER: Record<NormalAttackLevel, number> = {
+    1: 0.8,
+    2: 0.7,
+    3: 0.5,
+    4: 0.4,
+    5: 0.3,
+}
+/** 紫: レベル別弾速倍率（bullet.speed に乗算） */
+export const LEVEL_PURPLE_SPEED: Record<NormalAttackLevel, number> = {
+    1: 1,
+    2: 1.2,
+    3: 1.4,
+    4: 1.6,
+    5: 2,
+}
+/** オレンジ: レベル別反響半径（正規化座標） */
+export const LEVEL_ORANGE_CHAIN_RADIUS: Record<NormalAttackLevel, number> = {
+    1: 0.08,
+    2: 0.1,
+    3: 0.12,
+    4: 0.15,
+    5: 0.18,
+}
+
 // ========== 星 ==========
 /** 隕石の目標点のランダムオフセット（±） */
 export const STAR_TARGET_OFFSET = 0.04
