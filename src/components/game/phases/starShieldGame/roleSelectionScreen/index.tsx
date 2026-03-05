@@ -151,7 +151,7 @@ export function RoleSelectionScreen({
                     initial={{ opacity: 0, y: 8 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: 0.19 }}
-                    className={cn('rounded-2xl p-5 flex flex-col gap-3 bg-white/[0.03] border border-white/[0.08]', !isHost && 'opacity-70')}
+                    className="rounded-2xl p-5 flex flex-col gap-3 bg-white/[0.03] border border-white/[0.08]"
                 >
                     <p className={styles.difficultyCardTitle()}>[デバッグチェック]</p>
                     {onToggleAutoAim && (
@@ -164,8 +164,7 @@ export function RoleSelectionScreen({
                                 type="checkbox"
                                 checked={autoAimNearest}
                                 onChange={onToggleAutoAim}
-                                disabled={!isHost}
-                                className="w-3.5 h-3.5 rounded border-white/30 bg-white/5 accent-brand-500 disabled:cursor-default"
+                                className="w-3.5 h-3.5 rounded border-white/30 bg-white/5 accent-brand-500"
                             />
                             <span className="text-brand-500/60 text-xs">オートエイム</span>
                         </label>
