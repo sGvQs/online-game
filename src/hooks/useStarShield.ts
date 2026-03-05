@@ -14,7 +14,6 @@ import {
     BULLET_MAX_AGE_MS,
     SPAWN_INTERVALS_MS,
     ASTEROID_RADIUS,
-    STAR_HP,
     LEVEL_STAR_HP,
     SPECIAL_ATTACK_BULLET_COUNT,
     SPECIAL_ATTACK_LEVEL_PARAMS,
@@ -64,7 +63,7 @@ interface UseStarShieldProps {
     selectedSpecialAttackLevel?: SpecialAttackLevel
     /** Typist が選択したヒールレベル（単語完了時、1-6。null は未使用） */
     selectedHealLevel?: number | null
-    /** 星のHPレベル（1-5）。指定時は LEVEL_STAR_HP を使用。未指定時は難易度ベースにフォールバック */
+    /** 星のHPレベル（1-5）。未指定・不正値時は Lv1 として LEVEL_STAR_HP を使用 */
     starHpLevel?: number
     /** tech=null 時の散弾数レベル（1-5、5=Lv. .max） */
     level?: NormalAttackLevel
@@ -98,10 +97,10 @@ export function useStarShield({
     const [bullets, setBullets] = useState<Bullet[]>([])
     const [timer, setTimer] = useState(GAME_DURATION_SECONDS)
     const [score, setScore] = useState({ spawned: 0, destroyed: 0 })
-    const maxStarHp =
-        starHpLevel != null && starHpLevel >= 1 && starHpLevel <= 5
-            ? LEVEL_STAR_HP[starHpLevel as 1 | 2 | 3 | 4 | 5]
-            : STAR_HP[difficulty]
+    const effectiveStarHpLevel = (starHpLevel != null && starHpLevel >= 1 && starHpLevel <= 5)
+        ? (starHpLevel as 1 | 2 | 3 | 4 | 5)
+        : 1
+    const maxStarHp = LEVEL_STAR_HP[effectiveStarHpLevel]
     const [starHp, setStarHp] = useState(maxStarHp)
 
     // タイピング状態（Typist のみ）：配列からランダムに選択

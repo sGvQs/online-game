@@ -146,9 +146,12 @@ export function RoleSelectionScreen({
                             const meta = ROLE_META[r]
                             const isSelected = myRole === r
                             return (
-                                <button
+                                <div
                                     key={r}
+                                    role="button"
+                                    tabIndex={0}
                                     onClick={() => onRoleChange(r)}
+                                    onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), onRoleChange(r))}
                                     className={styles.roleButton()}
                                     style={{
                                         ['--role-bg' as string]: isSelected ? meta.bg : 'rgba(255,255,255,0.02)',
@@ -251,7 +254,7 @@ export function RoleSelectionScreen({
                                             </div>
                                         </div>
                                     )}
-                                </button>
+                                </div>
                             )
                         })}
                     </motion.div>

@@ -5,7 +5,7 @@ import type { Difficulty, GameResult, GameStats, NormalAttackLevel } from '@/typ
 import type { TechniqueId } from '@/constants/starShieldGame/techniques'
 import type { SpecialAttackChoice } from '@/utils/starShieldGame'
 import type { SpecialAttackLevel } from '@/constants/starShieldGame/gameConfig'
-import { ASTEROID_HP, LEVEL_STAR_HP, STAR_HP } from '@/constants/starShieldGame/gameConfig'
+import { ASTEROID_HP, LEVEL_STAR_HP } from '@/constants/starShieldGame/gameConfig'
 import { ShooterView } from '../playing/shooterView'
 import { TypistView } from '../playing/typistView'
 
@@ -41,10 +41,10 @@ export function GameScreen({ matchId, startedAt, shooterId, difficulty, currentU
     const isShooter = shooterId === currentUserId
     const { asteroids, bullets, timer, score, starHp, aimRef, onMouseMove, dialogue, typistFireCount, contactExplosion, completeContactFail, chainHits, clearChainHits } =
         useStarShield({ matchId, startedAt, isShooter, difficulty, currentUserId, onGameEnd, playersTotalPoints, selectedNormalAttack: typistNormalAttack, selectedSpecialAttack: typistSpecialAttack, selectedSpecialAttackLevel: typistSpecialAttackLevel, selectedHealLevel: typistHealLevel, starHpLevel, level, autoAimNearest })
-    const maxStarHp =
-        starHpLevel != null && starHpLevel >= 1 && starHpLevel <= 5
-            ? LEVEL_STAR_HP[starHpLevel as 1 | 2 | 3 | 4 | 5]
-            : STAR_HP[difficulty]
+    const effectiveStarHpLevel = (starHpLevel != null && starHpLevel >= 1 && starHpLevel <= 5)
+        ? (starHpLevel as 1 | 2 | 3 | 4 | 5)
+        : 1
+    const maxStarHp = LEVEL_STAR_HP[effectiveStarHpLevel]
 
     return (
         <div className="relative min-h-screen overflow-hidden">

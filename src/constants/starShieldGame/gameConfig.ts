@@ -55,14 +55,6 @@ export const ASTEROID_HP: Record<Difficulty, number> = {
     EASY: 3,
     NORMAL: 4,
     HARD: 5,
-    HELL: 6,
-}
-
-/** 難易度別の星HP（後方互換用。starHpLevel が無い場合のフォールバック） */
-export const STAR_HP: Record<Difficulty, number> = {
-    EASY: 20,
-    NORMAL: 18,
-    HARD: 15,
     HELL: 100,
 }
 
@@ -115,13 +107,13 @@ export const SPECIAL_ATTACK_LEVEL_PARAMS: Record<SpecialAttackLevel, SpecialAtta
     1: { waveCount: 1, bulletsPerWave: 5, spreadDeg: 12, waveDelayMs: 0 },
     2: { waveCount: 1, bulletsPerWave: 12, spreadDeg: 20, waveDelayMs: 0 },
     3: { waveCount: 1, bulletsPerWave: 20, spreadDeg: 35, waveDelayMs: 0 },
-    4: { waveCount: 1, bulletsPerWave: 28, spreadDeg: 50, waveDelayMs: 0 },
-    5: { waveCount: 1, bulletsPerWave: 35, spreadDeg: 65, waveDelayMs: 0 },
-    6: { waveCount: 1, bulletsPerWave: 42, spreadDeg: 75, waveDelayMs: 0 },
-    7: { waveCount: 1, bulletsPerWave: 50, spreadDeg: 85, waveDelayMs: 0 },
-    8: { waveCount: 2, bulletsPerWave: 18, spreadDeg: 35, waveDelayMs: 80 },
-    9: { waveCount: 3, bulletsPerWave: 18, spreadDeg: 35, waveDelayMs: 80 },
-    10: { waveCount: 5, bulletsPerWave: 20, spreadDeg: 40, waveDelayMs: 70 },
+    4: { waveCount: 1, bulletsPerWave: 40, spreadDeg: 50, waveDelayMs: 0 },
+    5: { waveCount: 1, bulletsPerWave: 60, spreadDeg: 85, waveDelayMs: 0 },
+    6: { waveCount: 1, bulletsPerWave: 80, spreadDeg: 135, waveDelayMs: 0 },
+    7: { waveCount: 1, bulletsPerWave: 100, spreadDeg: 150, waveDelayMs: 0 },
+    8: { waveCount: 2, bulletsPerWave: 100, spreadDeg: 150, waveDelayMs: 80 },
+    9: { waveCount: 3, bulletsPerWave: 100, spreadDeg: 150, waveDelayMs: 80 },
+    10: { waveCount: 5, bulletsPerWave: 100, spreadDeg: 150, waveDelayMs: 70 },
 }
 
 /** 通常攻撃レベル流用（後方互換・all_destruction 用）。新規は SPECIAL_ATTACK_LEVEL_PARAMS を使用 */
@@ -165,18 +157,18 @@ export const LEVEL_YELLOW_DAMAGE: Record<NormalAttackLevel, number> = {
 /** 青: レベル別減速倍率（隕石に付与。値が小さいほど遅くなる。0.5=半分） */
 export const LEVEL_BLUE_SLOW_MULTIPLIER: Record<NormalAttackLevel, number> = {
     1: 0.8,
-    2: 0.7,
-    3: 0.5,
-    4: 0.4,
-    5: 0.3,
+    2: 0.5,
+    3: 0.2,
+    4: 0.1,
+    5: 0.05,
 }
 /** 紫: レベル別球サイズ倍率（BULLET_RADIUS に乗算） */
 export const LEVEL_PURPLE_SIZE: Record<NormalAttackLevel, number> = {
     1: 1,
-    2: 1.2,
-    3: 1.4,
-    4: 1.6,
-    5: 2,
+    2: 2,
+    3: 4,
+    4: 8,
+    5: 16,
 }
 /** オレンジ: 連鎖範囲（正規化座標。固定） */
 export const ORANGE_CHAIN_RADIUS = 0.25
