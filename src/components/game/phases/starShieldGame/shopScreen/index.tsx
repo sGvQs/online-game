@@ -1,11 +1,13 @@
 'use client'
 
 import { useState, useEffect, useCallback, useRef } from 'react'
+import Image from 'next/image'
 import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ProtectedStar } from '../playing/protectedStar'
 import { AuroraGlow } from '@/components/game/common/starShield/auroraGlow'
 import { TECHNIQUES, type TechniqueId } from '@/constants/starShieldGame/techniques'
+import { ICONS } from '@/constants/starShieldGame/constants'
 import {
     getMyStarShieldProgress,
     updateLoadout,
@@ -167,7 +169,7 @@ export function StarShieldShop({ roomId, currentUserId }: { roomId: string; curr
                             {typingCount.toLocaleString()}
                         </p>
                     </div>
-                    <span className="text-4xl opacity-30 select-none">⌨️</span>
+                    <Image src={ICONS.TYPIST} alt="Typing" width={36} height={36} className="opacity-40 select-none" />
                 </motion.div>
 
                 {error && (
@@ -190,125 +192,149 @@ export function StarShieldShop({ roomId, currentUserId }: { roomId: string; curr
                         </span>
                     </p>
 
-                    {/* 通常攻撃 */}
-                    <div>
-                        <p className="text-[11px] text-indigo-400/70 [font-family:var(--font-cherry-bomb-one)] mb-2 flex items-center gap-1.5">
-                            <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 shrink-0" />
-                            通常攻撃（Shooter）
-                        </p>
-                        <div className="flex flex-wrap gap-2">
-                            {availableNormal.map(({ techniqueId, level }) => {
-                                const tech = TECHNIQUES[techniqueId]
-                                const isActive = selNormal === techniqueId
-                                return (
-                                    <button
-                                        key={techniqueId}
-                                        onClick={() => handleLoadoutUpdate({ selectedNormalAttackId: techniqueId })}
-                                        className={cn(
-                                            'px-3 py-1.5 rounded-xl text-xs border flex items-center gap-1.5 transition-all',
-                                            isActive
-                                                ? 'border-indigo-500/60 bg-indigo-500/20 text-indigo-200 shadow-[0_0_10px_rgba(99,102,241,0.25)]'
-                                                : 'bg-white/[0.02] border-white/10 text-white/50 hover:border-white/25 hover:text-white/70'
-                                        )}
-                                    >
-                                        {isActive && <span className="text-indigo-400 font-bold">✓</span>}
-                                        <span
-                                            className="w-2 h-2 rounded-full shrink-0"
-                                            style={{ backgroundColor: tech.color }}
-                                        />
-                                        {tech.label}
-                                        <span className="text-[10px] opacity-50">lv{level}</span>
-                                    </button>
-                                )
-                            })}
-                        </div>
-                        {/* アニメーションプレビュー */}
-                        {(() => {
-                            const selAttack = availableNormal.find((a) => a.techniqueId === selNormal)
-                            if (!selAttack) return null
-                            return (
-                                <LoadoutAnimPreview
-                                    techniqueId={selAttack.techniqueId}
-                                    level={selAttack.level}
-                                />
-                            )
-                        })()}
-                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {/* ===================== ATTACK COLUMN ===================== */}
+                        <div className="flex flex-col gap-4 p-4 rounded-xl bg-indigo-500/5 border border-indigo-500/10 relative overflow-hidden">
+                            <div className="absolute top-0 right-0 p-3 opacity-[0.03] pointer-events-none">
+                                <Image src={ICONS.SHOOTER} alt="" width={80} height={80} />
+                            </div>
+                            <h3 className="text-indigo-400 text-xs font-bold flex items-center gap-2 [font-family:var(--font-cherry-bomb-one)] mb-1">
+                                <Image src={ICONS.SHOOTER} alt="Shooter" width={16} height={16} className="opacity-80" />
+                                ATTACK（Shooter）
+                            </h3>
 
-                    {/* 必殺技 */}
-                    <div>
-                        <p className="text-[11px] text-indigo-400/70 [font-family:var(--font-cherry-bomb-one)] mb-2 flex items-center gap-1.5">
-                            <span className="w-1.5 h-1.5 rounded-full bg-indigo-400 shrink-0" />
-                            必殺技（Shooter）
-                        </p>
-                        <div className="flex flex-wrap gap-2">
-                            {availableSpecial.map(({ specialAttackId, level }) => {
-                                const isActive = selSpecial === specialAttackId
-                                return (
-                                    <button
-                                        key={specialAttackId}
-                                        onClick={() => handleLoadoutUpdate({ selectedSpecialAttackId: specialAttackId })}
-                                        className={cn(
-                                            'px-3 py-1.5 rounded-xl text-xs border flex items-center gap-1.5 transition-all',
-                                            isActive
-                                                ? 'border-indigo-500/60 bg-indigo-500/20 text-indigo-200 shadow-[0_0_10px_rgba(99,102,241,0.25)]'
-                                                : 'bg-white/[0.02] border-white/10 text-white/50 hover:border-white/25 hover:text-white/70'
-                                        )}
-                                    >
-                                        {isActive && <span className="text-indigo-400 font-bold">✓</span>}
-                                        {SPECIAL_LABELS[specialAttackId] ?? specialAttackId}
-                                        <span className="text-[10px] opacity-50">lv{level}</span>
-                                    </button>
-                                )
-                            })}
-                            {availableSpecial.length === 0 && (
-                                <span className="text-white/30 text-xs [font-family:var(--font-dot-gothic-16)]">未所持</span>
-                            )}
-                        </div>
-                    </div>
-
-                    {/* ヒール */}
-                    <div>
-                        <p className="text-[11px] text-emerald-400/70 [font-family:var(--font-cherry-bomb-one)] mb-2 flex items-center gap-1.5">
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 shrink-0" />
-                            ヒール（Typist）
-                        </p>
-                        <div className="flex flex-wrap gap-2">
-                            <button
-                                onClick={() => handleLoadoutUpdate({ selectedHealLevel: null })}
-                                className={cn(
-                                    'px-3 py-1.5 rounded-xl text-xs border transition-all',
-                                    selHeal === null
-                                        ? 'border-white/30 bg-white/10 text-white/70'
-                                        : 'bg-white/[0.02] border-white/10 text-white/30 hover:border-white/20 hover:text-white/50'
-                                )}
-                            >
-                                ✕ 使わない
-                            </button>
-                            {healLevel !== null &&
-                                [1, 2, 3, 4, 5, 6]
-                                    .filter((lv) => lv <= healLevel)
-                                    .map((lv) => {
-                                        const isActive = selHeal === lv
+                            {/* 通常攻撃 */}
+                            <div>
+                                <p className="text-[10px] text-indigo-400/50 [font-family:var(--font-dot-gothic-16)] mb-1.5 flex items-center gap-1.5">
+                                    <span className="w-1 h-1 rounded-full bg-indigo-400 shrink-0 opacity-50" />
+                                    通常攻撃
+                                </p>
+                                <div className="flex flex-wrap gap-2">
+                                    {availableNormal.map(({ techniqueId, level }) => {
+                                        const tech = TECHNIQUES[techniqueId]
+                                        const isActive = selNormal === techniqueId
                                         return (
                                             <button
-                                                key={lv}
-                                                onClick={() => handleLoadoutUpdate({ selectedHealLevel: lv })}
+                                                key={techniqueId}
+                                                onClick={() => handleLoadoutUpdate({ selectedNormalAttackId: techniqueId })}
                                                 className={cn(
-                                                    'px-3 py-1.5 rounded-xl text-xs border transition-all',
+                                                    'px-3 py-1.5 rounded-xl text-xs border flex items-center gap-1.5 transition-all',
                                                     isActive
-                                                        ? 'border-emerald-500/60 bg-emerald-500/20 text-emerald-200 shadow-[0_0_10px_rgba(16,185,129,0.25)]'
+                                                        ? 'border-indigo-500/60 bg-indigo-500/20 text-indigo-200 shadow-[0_0_10px_rgba(99,102,241,0.25)]'
                                                         : 'bg-white/[0.02] border-white/10 text-white/50 hover:border-white/25 hover:text-white/70'
                                                 )}
                                             >
-                                                {isActive && <span className="text-emerald-400 font-bold mr-1">✓</span>}
-                                                lv{lv === 6 ? 'max' : lv}
+                                                {isActive && <span className="text-indigo-400 font-bold">✓</span>}
+                                                <span
+                                                    className="w-2 h-2 rounded-full shrink-0"
+                                                    style={{ backgroundColor: tech.color }}
+                                                />
+                                                {tech.label}
+                                                <span className="text-[10px] opacity-50">lv{level}</span>
                                             </button>
                                         )
                                     })}
-                            {healLevel === null && (
-                                <span className="text-white/30 text-xs [font-family:var(--font-dot-gothic-16)]">未所持</span>
-                            )}
+                                </div>
+                                {/* アニメーションプレビュー */}
+                                {(() => {
+                                    const selAttack = availableNormal.find((a) => a.techniqueId === selNormal)
+                                    if (!selAttack) return null
+                                    return (
+                                        <LoadoutAnimPreview
+                                            techniqueId={selAttack.techniqueId}
+                                            level={selAttack.level}
+                                        />
+                                    )
+                                })()}
+                            </div>
+
+                            {/* 必殺技 */}
+                            <div>
+                                <p className="text-[10px] text-indigo-400/50 [font-family:var(--font-dot-gothic-16)] mb-1.5 flex items-center gap-1.5">
+                                    <span className="w-1 h-1 rounded-full bg-indigo-400 shrink-0 opacity-50" />
+                                    必殺技
+                                </p>
+                                <div className="flex flex-wrap gap-2">
+                                    {availableSpecial.map(({ specialAttackId, level }) => {
+                                        const isActive = selSpecial === specialAttackId
+                                        return (
+                                            <button
+                                                key={specialAttackId}
+                                                onClick={() => handleLoadoutUpdate({ selectedSpecialAttackId: specialAttackId })}
+                                                className={cn(
+                                                    'px-3 py-1.5 rounded-xl text-xs border flex items-center gap-1.5 transition-all',
+                                                    isActive
+                                                        ? 'border-indigo-500/60 bg-indigo-500/20 text-indigo-200 shadow-[0_0_10px_rgba(99,102,241,0.25)]'
+                                                        : 'bg-white/[0.02] border-white/10 text-white/50 hover:border-white/25 hover:text-white/70'
+                                                )}
+                                            >
+                                                {isActive && <span className="text-indigo-400 font-bold">✓</span>}
+                                                {SPECIAL_LABELS[specialAttackId] ?? specialAttackId}
+                                                <span className="text-[10px] opacity-50">lv{level}</span>
+                                            </button>
+                                        )
+                                    })}
+                                    {availableSpecial.length === 0 && (
+                                        <span className="text-white/30 text-xs [font-family:var(--font-dot-gothic-16)]">未所持</span>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* ===================== DEFENCE COLUMN ===================== */}
+                        <div className="flex flex-col gap-4 p-4 rounded-xl bg-emerald-500/5 border border-emerald-500/10 relative overflow-hidden">
+                            <div className="absolute top-0 right-0 p-3 opacity-[0.03] pointer-events-none">
+                                <Image src={ICONS.TYPIST} alt="" width={80} height={80} />
+                            </div>
+                            <h3 className="text-emerald-400 text-xs font-bold flex items-center gap-2 [font-family:var(--font-cherry-bomb-one)] mb-1">
+                                <Image src={ICONS.TYPIST} alt="Typist" width={16} height={16} className="opacity-80" />
+                                DEFENCE（Typist）
+                            </h3>
+
+                            {/* ヒール */}
+                            <div>
+                                <p className="text-[10px] text-emerald-400/50 [font-family:var(--font-dot-gothic-16)] mb-1.5 flex items-center gap-1.5">
+                                    <span className="w-1 h-1 rounded-full bg-emerald-400 shrink-0 opacity-50" />
+                                    ヒール
+                                </p>
+                                <div className="flex flex-wrap gap-2">
+                                    <button
+                                        onClick={() => handleLoadoutUpdate({ selectedHealLevel: null })}
+                                        className={cn(
+                                            'px-3 py-1.5 rounded-xl text-xs border transition-all',
+                                            selHeal === null
+                                                ? 'border-white/30 bg-white/10 text-white/70'
+                                                : 'bg-white/[0.02] border-white/10 text-white/30 hover:border-white/20 hover:text-white/50'
+                                        )}
+                                    >
+                                        ✕ 使わない
+                                    </button>
+                                    {healLevel !== null &&
+                                        [1, 2, 3, 4, 5, 6]
+                                            .filter((lv) => lv <= healLevel)
+                                            .map((lv) => {
+                                                const isActive = selHeal === lv
+                                                return (
+                                                    <button
+                                                        key={lv}
+                                                        onClick={() => handleLoadoutUpdate({ selectedHealLevel: lv })}
+                                                        className={cn(
+                                                            'px-3 py-1.5 rounded-xl text-xs border transition-all',
+                                                            isActive
+                                                                ? 'border-emerald-500/60 bg-emerald-500/20 text-emerald-200 shadow-[0_0_10px_rgba(16,185,129,0.25)]'
+                                                                : 'bg-white/[0.02] border-white/10 text-white/50 hover:border-white/25 hover:text-white/70'
+                                                        )}
+                                                    >
+                                                        {isActive && <span className="text-emerald-400 font-bold mr-1">✓</span>}
+                                                        lv{lv === 6 ? 'max' : lv}
+                                                    </button>
+                                                )
+                                            })}
+                                    {healLevel === null && (
+                                        <span className="text-white/30 text-xs [font-family:var(--font-dot-gothic-16)]">未所持</span>
+                                    )}
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </motion.div>
@@ -1308,8 +1334,8 @@ function LoadoutAnimPreview({ techniqueId, level }: { techniqueId: TechniqueId; 
             />
 
             {/* 恐竜 */}
-            <div className="absolute left-1.5 top-1/2 -translate-y-1/2 text-[22px] select-none z-10 leading-none">
-                🦕
+            <div className="absolute left-1.5 top-1/2 -translate-y-1/2 z-10 opacity-90 ptr-events-none">
+                <Image src={ICONS.DINO} alt="Dino" width={24} height={24} />
             </div>
 
             {/* Canvas */}
