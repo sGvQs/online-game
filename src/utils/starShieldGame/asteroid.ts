@@ -39,6 +39,8 @@ export function createAsteroid(params: CreateAsteroidParams): Asteroid {
 
     const targetX = starTargetX + (Math.random() * 2 - 1) * STAR_TARGET_OFFSET
     const targetY = starTargetY + (Math.random() * 2 - 1) * STAR_TARGET_OFFSET
+
+    // HELLの場合は（プレイヤーのポイント分だけ隕石が速くなる仕様）
     const durationMs =
         difficulty === 'HELL'
             ? Math.max(HELL_ASTEROID_DURATION_MIN, HELL_ASTEROID_DURATION_BASE - playersTotalPoints)
