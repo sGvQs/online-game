@@ -174,7 +174,7 @@ export function StarShieldShop({ roomId, currentUserId }: { roomId: string; curr
                 >
                     <div>
                         <h1 className="text-2xl font-black [font-family:var(--font-dot-gothic-16)] bg-gradient-to-br from-purple-400 to-pink-400 bg-clip-text text-transparent [-webkit-background-clip:text] [-webkit-text-fill-color:transparent]">
-                            スキル設定
+                            SKILL
                         </h1>
                         <p className="text-white/35 text-xs mt-0.5 [font-family:var(--font-dot-gothic-16)]">
                             スキルを購入してロードアウトを整えよう

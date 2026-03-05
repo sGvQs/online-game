@@ -115,7 +115,7 @@
 
 ---
 
-## 6. スキル設定（loadout）
+## 6. SKILL（loadout）
 
 ゲームで使用するスキルを事前に選択。所持スキルのみ選択可能。
 
@@ -129,6 +129,6 @@
 
 ## 7. 画面・導線
 
-- **スキル設定画面**: タイトル画面（READY/START がある画面）から「⚙️ スキル設定」リンクで遷移
-- **役割選択画面**: スキル設定への導線なし
-- **URL**: `/game/[roomId]/star-shield/settings`
+- **SKILL画面**: タイトル画面（READY/START がある画面）から「SKILL」リンクで遷移
+- **役割選択画面**: SKILLへの導線なし
+- **URL**: `/game/[roomId]/star-shield/skill`
