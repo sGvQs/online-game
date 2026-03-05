@@ -53,8 +53,8 @@ export const SPAWN_INTERVALS_MS: Record<Difficulty, number> = {
 // ========== 難易度別 ==========
 export const ASTEROID_HP: Record<Difficulty, number> = {
     EASY: 3,
-    NORMAL: 4,
-    HARD: 5,
+    NORMAL: 10,
+    HARD: 20,
     HELL: 100,
 }
 
@@ -128,13 +128,13 @@ export const LEVEL_SPECIAL: Record<NormalAttackLevel, SpecialSpreadParams> = {
 }
 
 // ========== 通常攻撃・レベル制 ==========
-/** レベル → 通常攻撃（tech=null）時の散弾数 */
+/** レベル → 通常攻撃（tech=null）時の散弾数（基本ダメージは変えず、弾数のみ緩やかに増加） */
 export const LEVEL_BULLET_COUNT: Record<NormalAttackLevel, number> = {
     1: 1,
     2: 3,
-    3: 9,
-    4: 15,
-    5: 25,
+    3: 6,
+    4: 12,
+    5: 15,
 }
 /** レベル別の散弾広がり角度（度） */
 export const LEVEL_SPREAD_DEG: Record<NormalAttackLevel, number> = {
@@ -146,7 +146,7 @@ export const LEVEL_SPREAD_DEG: Record<NormalAttackLevel, number> = {
 }
 
 // ========== 技別・レベルスケール ==========
-/** 黄: レベル別ダメージ（1発あたり。30本ビームの各々に適用） */
+/** 黄: 1発あたりのダメージ（30本ビームの各々に適用）。基本ダメージはレベルで変わらない */
 export const LEVEL_YELLOW_DAMAGE: Record<NormalAttackLevel, number> = {
     1: 0.1,
     2: 0.15,
@@ -160,9 +160,9 @@ export const LEVEL_BLUE_SLOW_MULTIPLIER: Record<NormalAttackLevel, number> = {
     2: 0.5,
     3: 0.2,
     4: 0.1,
-    5: 0.05,
+    5: 0.01,
 }
-/** 紫: レベル別球サイズ倍率（BULLET_RADIUS に乗算） */
+/** 紫: 球サイズ倍率（BULLET_RADIUS に乗算）。基本ダメージはレベルで変わらない */
 export const LEVEL_PURPLE_SIZE: Record<NormalAttackLevel, number> = {
     1: 1,
     2: 2,
@@ -172,7 +172,7 @@ export const LEVEL_PURPLE_SIZE: Record<NormalAttackLevel, number> = {
 }
 /** オレンジ: 連鎖範囲（正規化座標。固定） */
 export const ORANGE_CHAIN_RADIUS = 0.25
-/** オレンジ: レベル別ダメージ倍率（直撃・連鎖の両方に適用） */
+/** オレンジ: ダメージ倍率（直撃・連鎖の両方に適用）。基本ダメージはレベルで変わらない */
 export const LEVEL_ORANGE_DAMAGE: Record<NormalAttackLevel, number> = {
     1: 1,
     2: 1.2,

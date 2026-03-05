@@ -25,7 +25,7 @@ export const NORMAL_ATTACK_UNLOCK_COSTS: Record<string, number> = {
     red: 0, // 初期所持
     blue: 1000,
     yellow_beam: 3000,
-    purple: 500,
+    purple: 4000,
     orange: 5000,
 }
 
@@ -43,11 +43,11 @@ const createLevelUpCosts = (base: number): LevelUpCosts => ({
 })
 
 export const NORMAL_ATTACK_LEVEL_UP_COSTS: Record<string, LevelUpCosts> = {
-    red: createLevelUpCosts(30),
-    blue: createLevelUpCosts(50),
-    yellow_beam: createLevelUpCosts(80),
-    purple: createLevelUpCosts(80),
-    orange: createLevelUpCosts(240),
+    red: createLevelUpCosts(300),
+    blue: createLevelUpCosts(1000),
+    yellow_beam: createLevelUpCosts(3000),
+    purple: createLevelUpCosts(4000),
+    orange: createLevelUpCosts(5000),
 }
 
 // ============================================
@@ -57,20 +57,20 @@ export const SPECIAL_ATTACK_MAX_LEVEL = 10
 export const SPECIAL_ATTACK_IDS = ['spread'] as const
 
 export const SPECIAL_ATTACK_UNLOCK_COSTS: Record<string, number> = {
-    spread: 20,
+    spread: 100,
 }
 
 /** 必殺技レベルアップコスト（2〜10） */
 export const SPECIAL_ATTACK_LEVEL_UP_COSTS: Record<2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10, number> = {
-    2: 30,
-    3: 60,
-    4: 120,
-    5: 240,
-    6: 400,
-    7: 600,
-    8: 900,
-    9: 1300,
-    10: 2000,
+    2: 300,
+    3: 600,
+    4: 1200,
+    5: 2400,
+    6: 4000,
+    7: 6000,
+    8: 9000,
+    9: 13000,
+    10: 20000,
 }
 
 // ============================================
@@ -103,6 +103,6 @@ export const LEVEL_HEAL_RECOVERY: Record<1 | 2 | 3 | 4 | 5 | 6, number> = {
     2: 0.2,
     3: 0.4,
     4: 1.6,
-    5: 1.0,
-    6: 1.0, // max: 全回復 + 全破壊
+    5: 100,
+    6: 100, // max: 全回復 + 全破壊
 }

@@ -200,13 +200,17 @@ export function StarShieldGame({
         getStarShieldProgress(typistIdForUnlock).then(setTypistProgress)
     }, [phase, shooterIdForUnlock, typistIdForUnlock, roleConflict])
 
-    const refreshProgress = useCallback(() => {
+    const refreshProgress = useCallback(async () => {
         if (phase !== 'ROLE_SELECT') return
-        getMyStarShieldProgress().then(setCurrentUserProgress)
-        if (shooterIdForUnlock && typistIdForUnlock && !roleConflict) {
-            getStarShieldProgress(shooterIdForUnlock).then(setShooterProgress)
-            getStarShieldProgress(typistIdForUnlock).then(setTypistProgress)
-        }
+        const p1 = getMyStarShieldProgress().then(setCurrentUserProgress)
+        const p2 =
+            shooterIdForUnlock && typistIdForUnlock && !roleConflict
+                ? Promise.all([
+                      getStarShieldProgress(shooterIdForUnlock).then(setShooterProgress),
+                      getStarShieldProgress(typistIdForUnlock).then(setTypistProgress),
+                  ])
+                : Promise.resolve()
+        await Promise.all([p1, p2])
     }, [phase, shooterIdForUnlock, typistIdForUnlock, roleConflict])
 
     // 役割選択画面表示時に自分の progress を取得（1人でも表示できるよう常に取得）
@@ -218,7 +222,7 @@ export function StarShieldGame({
     const handleShooterLoadoutUpdate = useCallback(
         async (updates: Parameters<typeof updateLoadout>[0]) => {
             const result = await updateLoadout(updates)
-            if (result.ok) refreshProgress()
+            if (result.ok) await refreshProgress()
         },
         [refreshProgress]
     )
@@ -291,6 +295,13 @@ export function StarShieldGame({
         const typistIdFromRoles = room.users.find((u) => roleChoices[u.userId] === 'TYPIST')?.userId
         if (!shooterIdFromRoles || !typistIdFromRoles) return
         try {
+            // ゲーム開始前に最新の loadout を取得（シューターが色を変えてもホストは broadcast を受けてないため）
+            const [freshShooter, freshTypist] = await Promise.all([
+                getStarShieldProgress(shooterIdFromRoles),
+                getStarShieldProgress(typistIdFromRoles),
+            ])
+            setShooterProgress(freshShooter)
+            setTypistProgress(freshTypist)
             const { matchId: newMatchId, startedAt: ts, shooterId: sid } = await startStarShieldMatch(roomId, difficulty, {
                 shooterId: shooterIdFromRoles,
                 typistId: typistIdFromRoles,

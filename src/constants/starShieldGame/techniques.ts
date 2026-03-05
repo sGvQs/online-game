@@ -42,7 +42,7 @@ export const TECHNIQUES: Record<TechniqueId, TechniqueConfig> = {
     blue: {
         id: 'blue',
         label: '青い球',
-        damage: 2,
+        damage: 1,
         speed: 1,
         color: '#3b82f6',
         slowOnHit: true,
