@@ -2,7 +2,7 @@
  * StarShieldGame ゲームロジック定数
  */
 
-import type { Difficulty } from '@/types/starShieldGame'
+import type { Difficulty, NormalAttackLevel } from '@/types/starShieldGame'
 import type { SpecialAttackChoice } from '@/utils/starShieldGame'
 import { DINO_SPAWN } from './constants'
 
@@ -93,10 +93,24 @@ export const SPECIAL_ATTACK_SPREAD_DEG: Record<SpecialAttackChoice, number> = {
 export const SPREAD_DEG_EASY_NORMAL_HARD = 12
 /** HELL 必殺技の広がり角度（度） */
 export const HELL_SPECIAL_SPREAD_DEG = 150
-/** HELL 通常攻撃の弾数 */
-export const HELL_NORMAL_BULLET_COUNT = 3
-/** HELL 通常攻撃の広がり角度（度） */
-export const HELL_NORMAL_SPREAD_DEG = 3
+
+// ========== 通常攻撃・レベル制 ==========
+/** レベル → 通常攻撃（tech=null）時の散弾数 */
+export const LEVEL_BULLET_COUNT: Record<NormalAttackLevel, number> = {
+    1: 1,
+    2: 3,
+    3: 9,
+    4: 15,
+    5: 25,
+}
+/** レベル別の散弾広がり角度（度） */
+export const LEVEL_SPREAD_DEG: Record<NormalAttackLevel, number> = {
+    1: 0,
+    2: 3,
+    3: 8,
+    4: 12,
+    5: 15,
+}
 
 // ========== 星 ==========
 /** 隕石の目標点のランダムオフセット（±） */

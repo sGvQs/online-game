@@ -1,7 +1,7 @@
 'use client'
 
 import { useStarShield } from '@/hooks/useStarShield'
-import type { Difficulty, GameResult, GameStats } from '@/types/starShieldGame'
+import type { Difficulty, GameResult, GameStats, NormalAttackLevel } from '@/types/starShieldGame'
 import type { TechniqueId } from '@/constants/starShieldGame/techniques'
 import type { SpecialAttackChoice } from '@/utils/starShieldGame'
 import { ASTEROID_HP, STAR_HP } from '@/constants/starShieldGame/gameConfig'
@@ -18,6 +18,7 @@ interface GameScreenProps {
     playersTotalPoints: number
     typistNormalAttack?: TechniqueId | null
     typistSpecialAttack?: SpecialAttackChoice
+    level?: NormalAttackLevel
     autoAimNearest?: boolean
 }
 
@@ -32,10 +33,10 @@ function TimerDisplay({ timer }: { timer: number }) {
     )
 }
 
-export function GameScreen({ matchId, startedAt, shooterId, difficulty, currentUserId, onGameEnd, playersTotalPoints, typistNormalAttack, typistSpecialAttack = 'spread_medium', autoAimNearest = false }: GameScreenProps) {
+export function GameScreen({ matchId, startedAt, shooterId, difficulty, currentUserId, onGameEnd, playersTotalPoints, typistNormalAttack, typistSpecialAttack = 'spread_medium', level = 1, autoAimNearest = false }: GameScreenProps) {
     const isShooter = shooterId === currentUserId
     const { asteroids, bullets, timer, score, starHp, aimRef, onMouseMove, dialogue, typistFireCount, contactExplosion, completeContactFail, chainHits, clearChainHits } =
-        useStarShield({ matchId, startedAt, isShooter, difficulty, currentUserId, onGameEnd, playersTotalPoints, selectedNormalAttack: typistNormalAttack, selectedSpecialAttack: typistSpecialAttack, autoAimNearest })
+        useStarShield({ matchId, startedAt, isShooter, difficulty, currentUserId, onGameEnd, playersTotalPoints, selectedNormalAttack: typistNormalAttack, selectedSpecialAttack: typistSpecialAttack, level, autoAimNearest })
 
     return (
         <div className="relative min-h-screen overflow-hidden">

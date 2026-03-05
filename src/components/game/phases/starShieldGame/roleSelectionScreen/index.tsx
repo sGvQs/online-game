@@ -12,6 +12,8 @@ import { COLORS, DIFFICULTIES, DIFFICULTY_META, ROLE_META, type Difficulty, type
 import { TECHNIQUES, type TechniqueId } from '@/constants/starShieldGame/techniques'
 import { getDebugNormalAttacks } from '@/utils/starShieldGame'
 import type { SpecialAttackChoice } from '@/utils/starShieldGame'
+import type { NormalAttackLevel } from '@/types/starShieldGame'
+import { LEVEL_BULLET_COUNT } from '@/constants/starShieldGame/gameConfig'
 
 interface RoleSelectionScreenProps {
     room: RoomWithUsersAndReadyStatus
@@ -30,6 +32,8 @@ interface RoleSelectionScreenProps {
     onDifficultyChange: (d: Difficulty) => void
     isHost: boolean
     isHellUnlocked: boolean
+    level?: NormalAttackLevel
+    onLevelChange?: (level: NormalAttackLevel) => void
     autoAimNearest?: boolean
     onToggleAutoAim?: () => void
 }
@@ -50,6 +54,8 @@ export function RoleSelectionScreen({
     onDifficultyChange,
     isHost,
     isHellUnlocked,
+    level = 1,
+    onLevelChange,
     autoAimNearest = false,
     onToggleAutoAim,
 }: RoleSelectionScreenProps) {
@@ -65,6 +71,14 @@ export function RoleSelectionScreen({
         { id: 'spread_medium', label: '中規模' },
         { id: 'spread_large', label: '大規模' },
         { id: 'all_destruction', label: '全部破壊' },
+    ]
+
+    const LEVEL_OPTIONS: { value: NormalAttackLevel; label: string; count: number }[] = [
+        { value: 1, label: 'lv.1', count: LEVEL_BULLET_COUNT[1] },
+        { value: 2, label: 'lv.2', count: LEVEL_BULLET_COUNT[2] },
+        { value: 3, label: 'lv.3', count: LEVEL_BULLET_COUNT[3] },
+        { value: 4, label: 'lv.4', count: LEVEL_BULLET_COUNT[4] },
+        { value: 5, label: 'lv.max', count: LEVEL_BULLET_COUNT[5] },
     ]
 
     return (
@@ -172,7 +186,7 @@ export function RoleSelectionScreen({
                     transition={{ duration: 0.5, delay: 0.18 }}
                     className={cn('rounded-2xl p-5 flex flex-col gap-3 bg-white/[0.03] border border-white/[0.08]', !canEditTechnique && 'opacity-70')}
                 >
-                    <p className={styles.difficultyCardTitle()}>[通常攻撃]（デバッグ）</p>
+                    <p className={styles.difficultyCardTitle()}>[通常攻撃]</p>
                     {typistId ? (
                         <div className="flex flex-wrap gap-2">
                             {debugNormalAttacks.map((tid) => {
@@ -224,10 +238,40 @@ export function RoleSelectionScreen({
                 <motion.div
                     initial={{ opacity: 0, y: 8 }}
                     animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 0.182 }}
+                    className={cn('rounded-2xl p-5 flex flex-col gap-3 bg-white/[0.03] border border-white/[0.08]', !canEditTechnique && 'opacity-70')}
+                >
+                    <p className={styles.difficultyCardTitle()}>[レベル]</p>
+                    {onLevelChange ? (
+                        <div className="flex flex-wrap gap-2">
+                            {LEVEL_OPTIONS.map(({ value, label, count }) => {
+                                const isActive = level === value
+                                return (
+                                    <button
+                                        key={value}
+                                        onClick={() => canEditTechnique && onLevelChange(value)}
+                                        disabled={!canEditTechnique}
+                                        className={cn(
+                                            'px-3 py-2 rounded-xl text-xs transition-all border',
+                                            isActive ? 'bg-brand-500/20 border-brand-500/50 text-brand-300' : 'bg-white/[0.02] border-white/10 text-white/50 hover:border-white/20',
+                                            !canEditTechnique && 'cursor-default'
+                                        )}
+                                    >
+                                        {label} ({count}発)
+                                    </button>
+                                )
+                            })}
+                        </div>
+                    ) : null}
+                </motion.div>
+
+                <motion.div
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: 0.185 }}
                     className={cn('rounded-2xl p-5 flex flex-col gap-3 bg-white/[0.03] border border-white/[0.08]', !canEditTechnique && 'opacity-70')}
                 >
-                    <p className={styles.difficultyCardTitle()}>[必殺技]（デバッグ）</p>
+                    <p className={styles.difficultyCardTitle()}>[必殺技]</p>
                     {typistId ? (
                         <div className="flex flex-wrap gap-2">
                             {SPECIAL_ATTACK_OPTIONS.map(({ id, label }) => {
@@ -259,13 +303,14 @@ export function RoleSelectionScreen({
                     )}
                 </motion.div>
 
-                {onToggleAutoAim && (
-                    <motion.div
-                        initial={{ opacity: 0, y: 8 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.5, delay: 0.19 }}
-                        className={cn('rounded-2xl p-4 flex items-center gap-3 bg-white/[0.03] border border-white/[0.08]', !isHost && 'opacity-70')}
-                    >
+                <motion.div
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.5, delay: 0.19 }}
+                    className={cn('rounded-2xl p-5 flex flex-col gap-3 bg-white/[0.03] border border-white/[0.08]', !isHost && 'opacity-70')}
+                >
+                    <p className={styles.difficultyCardTitle()}>[デバッグチェック]</p>
+                    {onToggleAutoAim && (
                         <label
                             htmlFor="auto-aim-debug"
                             className="flex items-center gap-2 cursor-pointer select-none"
@@ -278,10 +323,10 @@ export function RoleSelectionScreen({
                                 disabled={!isHost}
                                 className="w-3.5 h-3.5 rounded border-white/30 bg-white/5 accent-brand-500 disabled:cursor-default"
                             />
-                            <span className="text-brand-500/60 text-xs">オートエイム（デバッグ）</span>
+                            <span className="text-brand-500/60 text-xs">オートエイム</span>
                         </label>
-                    </motion.div>
-                )}
+                    )}
+                </motion.div>
 
                 <motion.div
                     initial={{ opacity: 0, y: 8 }}

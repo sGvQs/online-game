@@ -3,14 +3,14 @@
  */
 
 import type { TechniqueConfig } from '@/constants/starShieldGame/techniques'
-import type { Bullet, Difficulty } from '@/types/starShieldGame'
+import type { Bullet, NormalAttackLevel } from '@/types/starShieldGame'
 import {
     DINO_X,
     DINO_Y,
     BULLET_SPAWN_OFFSET_X,
     BULLET_SPAWN_OFFSET_Y,
-    HELL_NORMAL_BULLET_COUNT,
-    HELL_NORMAL_SPREAD_DEG,
+    LEVEL_BULLET_COUNT,
+    LEVEL_SPREAD_DEG,
 } from '@/constants/starShieldGame/gameConfig'
 
 function createBaseBullet(
@@ -39,6 +39,58 @@ function createBaseBullet(
 }
 
 /**
+ * tech=null 時の散弾を生成する純粋関数。
+ * HELL専用3発も、レベル制の N 発もこの関数で共通化。
+ */
+export function createDefaultSpreadBullets(params: {
+    centerAngle: number
+    count: number
+    spreadDeg: number
+    now: number
+}): Bullet[] {
+    const { centerAngle, count, spreadDeg, now } = params
+
+    if (count <= 1) {
+        const dirX = Math.cos(centerAngle)
+        const dirY = Math.sin(centerAngle)
+        return [
+            createBaseBullet(
+                {
+                    dirX,
+                    dirY,
+                    startX: DINO_X + dirX * BULLET_SPAWN_OFFSET_X,
+                    startY: DINO_Y + dirY * BULLET_SPAWN_OFFSET_Y,
+                },
+                null,
+                now
+            ),
+        ]
+    }
+
+    const spreadRad = (spreadDeg * Math.PI) / 180
+    const result: Bullet[] = []
+    for (let i = 0; i < count; i++) {
+        const angle =
+            centerAngle - spreadRad / 2 + (spreadRad * i) / (count - 1)
+        const bDirX = Math.cos(angle)
+        const bDirY = Math.sin(angle)
+        result.push(
+            createBaseBullet(
+                {
+                    dirX: bDirX,
+                    dirY: bDirY,
+                    startX: DINO_X + bDirX * BULLET_SPAWN_OFFSET_X,
+                    startY: DINO_Y + bDirY * BULLET_SPAWN_OFFSET_Y,
+                },
+                null,
+                now
+            )
+        )
+    }
+    return result
+}
+
+/**
  * 通常攻撃の弾を生成する（純粋関数）
  */
 export function createNormalAttackBullets(params: {
@@ -46,10 +98,10 @@ export function createNormalAttackBullets(params: {
     centerAngle: number
     dirX: number
     dirY: number
-    difficulty: Difficulty
+    level: NormalAttackLevel
     now: number
 }): Bullet[] {
-    const { tech, centerAngle, dirX, dirY, difficulty, now } = params
+    const { tech, centerAngle, dirX, dirY, level, now } = params
 
     if (tech?.count && tech.count > 1) {
         const verticalOffset = tech.verticalOffset ?? 0
@@ -63,31 +115,10 @@ export function createNormalAttackBullets(params: {
         return result
     }
 
-    if (difficulty === 'HELL' && !tech) {
-        const spreadRad = (HELL_NORMAL_SPREAD_DEG * Math.PI) / 180
-        const count = HELL_NORMAL_BULLET_COUNT
-        const result: Bullet[] = []
-        for (let i = 0; i < count; i++) {
-            const angle =
-                centerAngle -
-                spreadRad / 2 +
-                (count > 1 ? (spreadRad * i) / (count - 1) : 0)
-            const bDirX = Math.cos(angle)
-            const bDirY = Math.sin(angle)
-            result.push(
-                createBaseBullet(
-                    {
-                        dirX: bDirX,
-                        dirY: bDirY,
-                        startX: DINO_X + bDirX * BULLET_SPAWN_OFFSET_X,
-                        startY: DINO_Y + bDirY * BULLET_SPAWN_OFFSET_Y,
-                    },
-                    null,
-                    now
-                )
-            )
-        }
-        return result
+    if (!tech) {
+        const count = LEVEL_BULLET_COUNT[level]
+        const spreadDeg = LEVEL_SPREAD_DEG[level]
+        return createDefaultSpreadBullets({ centerAngle, count, spreadDeg, now })
     }
 
     return [

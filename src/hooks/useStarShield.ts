@@ -32,7 +32,7 @@ import {
 import { DIALOGUES, pickRandomDialogue } from '@/constants/starShieldGame/dialogues'
 import { TECHNIQUES, type TechniqueId } from '@/constants/starShieldGame/techniques'
 import type { SpecialAttackChoice } from '@/utils/starShieldGame'
-import type { Asteroid, Bullet, DialogueLine, Difficulty, GameResult, GameStats, GameStatePayload, GameEndPayload } from '@/types/starShieldGame'
+import type { Asteroid, Bullet, DialogueLine, Difficulty, GameResult, GameStats, GameStatePayload, GameEndPayload, NormalAttackLevel } from '@/types/starShieldGame'
 import {
     getBulletPosition,
     getAsteroidPosition,
@@ -59,6 +59,8 @@ interface UseStarShieldProps {
     selectedNormalAttack?: TechniqueId | null
     /** Typist が選択した必殺技（単語完了時） */
     selectedSpecialAttack?: SpecialAttackChoice
+    /** tech=null 時の散弾数レベル（1-5、5=lv.max） */
+    level?: NormalAttackLevel
     /** デバッグ: 発射時に最も近い隕石を照準にする（準備画面で設定） */
     autoAimNearest?: boolean
 }
@@ -72,6 +74,7 @@ export function useStarShield({
     playersTotalPoints = 0,
     selectedNormalAttack = null,
     selectedSpecialAttack = 'spread_medium',
+    level = 1,
     autoAimNearest = false,
 }: UseStarShieldProps) {
     const supabase = useMemo(() => createClient(), [])
@@ -276,7 +279,7 @@ export function useStarShield({
                     centerAngle,
                     dirX,
                     dirY,
-                    difficulty,
+                    level,
                     now,
                 })
                 setBullets((prev) => {

@@ -7,7 +7,7 @@ import { returnToRoom, resetAllReady } from '@/server/actions/room'
 import { startStarShieldMatch, getStarShieldMatchStatus, isHellUnlocked } from '@/server/actions/game'
 import { RoomWithUsersAndReadyStatus } from '@/types'
 import type { UserRanking } from '@/types'
-import type { Difficulty, GameResult, GameStats } from '@/types/starShieldGame'
+import type { Difficulty, GameResult, GameStats, NormalAttackLevel } from '@/types/starShieldGame'
 import type { TechniqueId } from '@/constants/starShieldGame/techniques'
 import type { SpecialAttackChoice } from '@/utils/starShieldGame'
 import { TitleScreen } from '@/components/game/phases/starShieldGame/titleScreen'
@@ -62,6 +62,7 @@ export function StarShieldGame({
     const [roleChoices, setRoleChoices] = useState<Record<string, RoleChoice>>(initialRoleChoices)
     const [normalAttackChoices, setNormalAttackChoices] = useState<Record<string, TechniqueId | null>>({})
     const [specialAttackChoices, setSpecialAttackChoices] = useState<Record<string, SpecialAttackChoice>>({})
+    const [level, setLevel] = useState<NormalAttackLevel>(1)
     const [autoAimNearest, setAutoAimNearest] = useState(false)
 
     // 2人揃ったときに未選択のユーザーに初期値（ホスト=Shooter、他=Typist）を補完
@@ -142,6 +143,11 @@ export function StarShieldGame({
             .on('broadcast', { event: 'difficulty' }, ({ payload }: { payload: { difficulty: Difficulty } }) => {
                 if (payload?.difficulty && ['EASY', 'NORMAL', 'HARD', 'HELL'].includes(payload.difficulty)) {
                     setDifficulty(payload.difficulty)
+                }
+            })
+            .on('broadcast', { event: 'level' }, ({ payload }: { payload: { level: NormalAttackLevel } }) => {
+                if (payload?.level !== undefined && payload.level >= 1 && payload.level <= 5) {
+                    setLevel(payload.level as NormalAttackLevel)
                 }
             })
             .on('broadcast', { event: 'role' }, ({ payload }: { payload: { userId: string; role: RoleChoice } }) => {
@@ -256,6 +262,21 @@ export function StarShieldGame({
                     type: 'broadcast',
                     event: 'difficulty',
                     payload: { difficulty: d },
+                })
+            }
+        },
+        [isHost]
+    )
+
+    // ホストがレベルを変更したときに state 更新 + broadcast
+    const handleLevelChange = useCallback(
+        (l: NormalAttackLevel) => {
+            setLevel(l)
+            if (isHost) {
+                lobbyChannelRef.current?.send({
+                    type: 'broadcast',
+                    event: 'level',
+                    payload: { level: l },
                 })
             }
         },
@@ -383,6 +404,8 @@ export function StarShieldGame({
                     onDifficultyChange={handleDifficultyChange}
                     isHost={isHost}
                     isHellUnlocked={hellUnlocked}
+                    level={level}
+                    onLevelChange={handleLevelChange}
                     autoAimNearest={autoAimNearest}
                     onToggleAutoAim={() => setAutoAimNearest((prev) => !prev)}
                 />
@@ -398,6 +421,7 @@ export function StarShieldGame({
                     playersTotalPoints={room.users.reduce((sum, u) => sum + (initialRankings.find((r) => r.userId === u.userId)?.points ?? 0), 0)}
                     typistNormalAttack={normalAttackChoices[room.users.find((u) => u.userId !== shooterId)?.userId ?? ''] ?? null}
                     typistSpecialAttack={specialAttackChoices[room.users.find((u) => u.userId !== shooterId)?.userId ?? ''] ?? 'spread_medium'}
+                    level={level}
                     autoAimNearest={autoAimNearest}
                 />
             )}
