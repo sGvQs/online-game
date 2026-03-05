@@ -36,6 +36,10 @@ import {
     LEVEL_STAR_HP,
     LEVEL_BULLET_COUNT,
     LEVEL_SPREAD_DEG,
+    LEVEL_BLUE_SLOW_MULTIPLIER,
+    LEVEL_YELLOW_DAMAGE,
+    LEVEL_PURPLE_SIZE,
+    LEVEL_ORANGE_DAMAGE,
 } from '@/constants/starShieldGame/gameConfig'
 import { cn } from '@/lib/utils'
 import { getAvailableNormalAttacks, getAvailableSpecialAttacks } from '@/utils/starShieldGame'
@@ -918,7 +922,18 @@ function PreviewContent({
     if (preview.kind === 'normalAttack') {
         const tech = TECHNIQUES[preview.techniqueId]
         const owned = currentLevel > 0
-        const displayLevel = Math.max(1, currentLevel) // 未所持時はLv1相当のアニメ等を表示可能に
+        const displayLevel = Math.max(1, currentLevel) as 1 | 2 | 3 | 4 | 5
+
+        const damageStars = '⭐️'.repeat(Math.max(1, Math.min(5, Math.round(tech.damage))))
+
+        const traitByTech: Record<TechniqueId, { label: string; value: string }> = {
+            red: { label: '散弾数', value: `${LEVEL_BULLET_COUNT[displayLevel]} 発` },
+            blue: { label: '減速割合', value: `${Math.round((1 - LEVEL_BLUE_SLOW_MULTIPLIER[displayLevel]) * 100)}%` },
+            yellow_beam: { label: '火力', value: `${LEVEL_YELLOW_DAMAGE[displayLevel]} × 30発` },
+            purple: { label: '球サイズ', value: `${LEVEL_PURPLE_SIZE[displayLevel]}x` },
+            orange: { label: 'ダメージ倍率', value: `${LEVEL_ORANGE_DAMAGE[displayLevel]}x` },
+        }
+        const trait = traitByTech[preview.techniqueId]
 
         const specialEffects: Partial<Record<TechniqueId, { label: string; desc: string }>> = {
             blue: { label: 'スロー', desc: '命中した隕石の速度を下げる' },
@@ -958,8 +973,8 @@ function PreviewContent({
                 </div>
 
                 <div className="flex flex-col gap-3">
-                    <StatRow label="ダメージ / 発" value={`${tech.damage}`} color="text-orange-400" />
-                    <StatRow label="発射タイミング" value="1文字打鍵ごと" color="text-white/55" />
+                    <StatRow label="ダメージ / 発" value={damageStars} color="text-orange-400" />
+                    <StatRow label="特性" value={`${trait.label}：${trait.value}`} color="text-indigo-300" />
                     {fx && (
                         <div className="mt-2 rounded-2xl bg-indigo-500/5 border border-indigo-500/20 p-4">
                             <p className="text-indigo-400 text-[13px] font-bold mb-1.5 [font-family:var(--font-dot-gothic-16)] flex items-center gap-1.5">
@@ -1027,7 +1042,6 @@ function PreviewContent({
                     {params.waveCount > 1 && (
                         <StatRow label="ウェーブ数" value={`${params.waveCount} 波`} color="text-purple-300" />
                     )}
-                    <StatRow label="発射タイミング" value="全文字打ち切ったとき" color="text-white/55" />
                 </div>
             </div>
         )
@@ -1085,7 +1099,6 @@ function PreviewContent({
                             </p>
                         </div>
                     )}
-                    <StatRow label="発動タイミング" value="全文字打ち切ったとき" color="text-white/55" />
                 </div>
             </div>
         )
@@ -1180,8 +1193,9 @@ function LoadoutAnimPreview({ techniqueId, level }: { techniqueId: TechniqueId; 
         const c: CanvasRenderingContext2D = ctxOrNull
 
         const lvl = Math.max(1, Math.min(5, level)) as 1 | 2 | 3 | 4 | 5
-        const bulletCount = LEVEL_BULLET_COUNT[lvl]
-        const spreadDeg = LEVEL_SPREAD_DEG[lvl]
+        const bulletCount = techniqueId === 'red' ? LEVEL_BULLET_COUNT[lvl] : 1
+        const spreadDeg = techniqueId === 'red' ? LEVEL_SPREAD_DEG[lvl] : 0
+        const purpleRadius = techniqueId === 'purple' ? 3.5 * LEVEL_PURPLE_SIZE[lvl] : 3.5
 
         const DINO_X = 18
         const H = canvas.height
@@ -1224,7 +1238,7 @@ function LoadoutAnimPreview({ techniqueId, level }: { techniqueId: TechniqueId; 
                     vy: 0,
                     color: tech.color,
                     alpha: 1,
-                    radius: techniqueId === 'purple' ? 5.5 : 3.5,
+                    radius: purpleRadius,
                 })
             } else {
                 for (let i = 0; i < displayCount; i++) {
