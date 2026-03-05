@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import { useGameRoom } from '@/hooks/useGameRoom'
 import { returnToRoom, resetAllReady } from '@/server/actions/room'
-import { startStarShieldMatch, getStarShieldMatchStatus, isHellUnlocked, getStarShieldProgress } from '@/server/actions/game'
+import { startStarShieldMatch, getStarShieldMatchStatus, isHellUnlocked, getStarShieldProgress, getMyStarShieldProgress, updateLoadout } from '@/server/actions/game'
 import { RoomWithUsersAndReadyStatus } from '@/types'
 import type { UserRanking } from '@/types'
 import type { Difficulty, GameResult, GameStats, NormalAttackLevel } from '@/types/starShieldGame'
@@ -52,6 +52,7 @@ export function StarShieldGame({
     const [hellUnlocked, setHellUnlocked] = useState(false)
     const [shooterProgress, setShooterProgress] = useState<Awaited<ReturnType<typeof getStarShieldProgress>> | null>(null)
     const [typistProgress, setTypistProgress] = useState<Awaited<ReturnType<typeof getStarShieldProgress>> | null>(null)
+    const [currentUserProgress, setCurrentUserProgress] = useState<Awaited<ReturnType<typeof getStarShieldProgress>> | null>(null)
 
     const initialRoleChoices = useMemo(() => {
         const users = room.users
@@ -198,6 +199,29 @@ export function StarShieldGame({
         getStarShieldProgress(shooterIdForUnlock).then(setShooterProgress)
         getStarShieldProgress(typistIdForUnlock).then(setTypistProgress)
     }, [phase, shooterIdForUnlock, typistIdForUnlock, roleConflict])
+
+    const refreshProgress = useCallback(() => {
+        if (phase !== 'ROLE_SELECT') return
+        getMyStarShieldProgress().then(setCurrentUserProgress)
+        if (shooterIdForUnlock && typistIdForUnlock && !roleConflict) {
+            getStarShieldProgress(shooterIdForUnlock).then(setShooterProgress)
+            getStarShieldProgress(typistIdForUnlock).then(setTypistProgress)
+        }
+    }, [phase, shooterIdForUnlock, typistIdForUnlock, roleConflict])
+
+    // 役割選択画面表示時に自分の progress を取得（1人でも表示できるよう常に取得）
+    useEffect(() => {
+        if (phase !== 'ROLE_SELECT') return
+        getMyStarShieldProgress().then(setCurrentUserProgress)
+    }, [phase])
+
+    const handleShooterLoadoutUpdate = useCallback(
+        async (updates: Parameters<typeof updateLoadout>[0]) => {
+            const result = await updateLoadout(updates)
+            if (result.ok) refreshProgress()
+        },
+        [refreshProgress]
+    )
 
     // HELL が未解放のときに HELL が選択されていたら NORMAL にリセット
     useEffect(() => {
@@ -351,6 +375,11 @@ export function StarShieldGame({
                     isHellUnlocked={hellUnlocked}
                     autoAimNearest={autoAimNearest}
                     onToggleAutoAim={() => setAutoAimNearest((prev) => !prev)}
+                    shooterProgress={shooterProgress}
+                    typistProgress={typistProgress}
+                    currentUserProgress={currentUserProgress}
+                    shooterId={shooterIdForUnlock ?? null}
+                    onShooterLoadoutUpdate={handleShooterLoadoutUpdate}
                 />
             )}
             {phase === 'PLAYING' && matchId && startedAt && shooterId && (() => {

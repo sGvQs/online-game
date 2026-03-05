@@ -9,6 +9,12 @@ import { DinosaurWithBalls } from '@/components/game/common/starShield/dinosaurW
 import { AuroraGlow } from '@/components/game/common/starShield/auroraGlow'
 import { roleSelectionScreen } from './styles'
 import { COLORS, DIFFICULTIES, DIFFICULTY_META, ROLE_META, type Difficulty, type RoleChoice } from '@/constants/starShieldGame/constants'
+import { TECHNIQUES, type TechniqueId } from '@/constants/starShieldGame/techniques'
+import { getAvailableNormalAttacks } from '@/utils/starShieldGame'
+import type { OwnedSkills } from '@/utils/starShieldGame'
+import type { StarShieldProgress } from '@/server/actions/game/starShieldProgressionActions'
+import { LEVEL_STAR_HP } from '@/constants/starShieldGame/gameConfig'
+import { LEVEL_HEAL_RECOVERY } from '@/constants/starShieldGame/shopConfig'
 
 interface RoleSelectionScreenProps {
     room: RoomWithUsersAndReadyStatus
@@ -26,6 +32,11 @@ interface RoleSelectionScreenProps {
     isHellUnlocked: boolean
     autoAimNearest?: boolean
     onToggleAutoAim?: () => void
+    shooterProgress?: StarShieldProgress | null
+    typistProgress?: StarShieldProgress | null
+    currentUserProgress?: StarShieldProgress | null
+    shooterId?: string | null
+    onShooterLoadoutUpdate?: (updates: { selectedNormalAttackId: TechniqueId }) => void
 }
 
 export function RoleSelectionScreen({
@@ -43,8 +54,24 @@ export function RoleSelectionScreen({
     isHellUnlocked,
     autoAimNearest = false,
     onToggleAutoAim,
+    shooterProgress,
+    typistProgress,
+    currentUserProgress,
+    shooterId,
+    onShooterLoadoutUpdate,
 }: RoleSelectionScreenProps) {
     const myRole = roleChoices[currentUserId]
+    const isShooter = currentUserId === shooterId
+    // 役割衝突時・1人プレイ時は shooterProgress/typistProgress が null なので、自分の progress をフォールバック
+    const displayShooterProgress = shooterProgress ?? (myRole === 'SHOOTER' ? currentUserProgress : null)
+    const displayTypistProgress = typistProgress ?? (myRole === 'TYPIST' ? currentUserProgress : null)
+    const ownedSkills: OwnedSkills = {
+        normalAttacks: displayShooterProgress?.normalAttacks ?? [],
+        specialAttacks: displayShooterProgress?.specialAttacks ?? [],
+        healLevel: displayShooterProgress?.healLevel ?? null,
+    }
+    const availableNormal = getAvailableNormalAttacks(ownedSkills)
+    const selNormal = displayShooterProgress?.selectedNormalAttackId ?? 'red'
     const activeDiffMeta = DIFFICULTY_META[difficulty]
     const styles = roleSelectionScreen()
 
@@ -141,6 +168,51 @@ export function RoleSelectionScreen({
                                     </div>
                                     <p className={styles.roleDescription()}>{meta.description}</p>
                                     <p className={styles.roleDetail()}>{meta.detail}</p>
+                                    {isSelected && r === 'SHOOTER' && displayShooterProgress && (
+                                        <div className="mt-3 pt-3 border-t border-white/[0.06]" onClick={(e) => e.stopPropagation()}>
+                                            <p className="text-[10px] mb-1.5 [font-family:var(--font-dot-gothic-16)] opacity-70">選択している色</p>
+                                            <div className="flex flex-wrap gap-1.5">
+                                                {availableNormal.map(({ techniqueId, level }) => {
+                                                    const tech = TECHNIQUES[techniqueId]
+                                                    const isActive = selNormal === techniqueId
+                                                    const canChange = isShooter && onShooterLoadoutUpdate
+                                                    return (
+                                                        <button
+                                                            key={techniqueId}
+                                                            type="button"
+                                                            onClick={() => canChange && onShooterLoadoutUpdate({ selectedNormalAttackId: techniqueId })}
+                                                            disabled={!canChange}
+                                                            className={cn(
+                                                                'flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] border transition-all',
+                                                                canChange && 'cursor-pointer hover:brightness-110',
+                                                                !canChange && 'cursor-default opacity-70',
+                                                                isActive ? 'border-white/30 bg-white/10' : 'border-white/10 bg-white/[0.03]'
+                                                            )}
+                                                        >
+                                                            <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: tech.color }} />
+                                                            <span>lv{level}</span>
+                                                        </button>
+                                                    )
+                                                })}
+                                            </div>
+                                        </div>
+                                    )}
+                                    {isSelected && r === 'TYPIST' && displayTypistProgress && (
+                                        <div className="mt-3 pt-3 border-t border-white/[0.06]">
+                                            <div className="flex flex-wrap gap-x-4 gap-y-1 text-[10px] [font-family:var(--font-dot-gothic-16)] opacity-80">
+                                                <span>HP {LEVEL_STAR_HP[(displayTypistProgress.starHpLevel ?? 1) as 1 | 2 | 3 | 4 | 5]}</span>
+                                                {displayTypistProgress.healLevel != null ? (
+                                                    displayTypistProgress.healLevel >= 5 ? (
+                                                        <span>回復: 全回復</span>
+                                                    ) : (
+                                                        <span>回復: +{LEVEL_HEAL_RECOVERY[displayTypistProgress.healLevel as 1 | 2 | 3 | 4]}</span>
+                                                    )
+                                                ) : (
+                                                    <span className="text-white/40">回復: 未所持</span>
+                                                )}
+                                            </div>
+                                        </div>
+                                    )}
                                 </button>
                             )
                         })}
