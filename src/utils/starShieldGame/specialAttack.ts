@@ -7,11 +7,13 @@ import type { TechniqueId } from '@/constants/starShieldGame/techniques'
 import {
     DINO_X,
     DINO_Y,
+    BULLET_RADIUS,
     BULLET_SPAWN_OFFSET_X,
     BULLET_SPAWN_OFFSET_Y,
+    LEVEL_ORANGE_DAMAGE,
+    LEVEL_PURPLE_SIZE,
     LEVEL_SPECIAL,
     LEVEL_YELLOW_DAMAGE,
-    LEVEL_PURPLE_SPEED,
 } from '@/constants/starShieldGame/gameConfig'
 import type { Bullet, NormalAttackLevel } from '@/types/starShieldGame'
 import { createBaseBullet } from './normalAttack'
@@ -34,7 +36,8 @@ export function createSpecialAttackBullets(params: {
     const spreadRad = (spreadDeg * Math.PI) / 180
 
     const yellowDamage = tech && (tech.id as TechniqueId) === 'yellow_beam' ? LEVEL_YELLOW_DAMAGE[level] : undefined
-    const purpleSpeed = tech && (tech.id as TechniqueId) === 'purple' ? tech.speed * LEVEL_PURPLE_SPEED[level] : undefined
+    const orangeDamage = tech && (tech.id as TechniqueId) === 'orange' ? tech.damage * LEVEL_ORANGE_DAMAGE[level] : undefined
+    const purpleRadius = tech && (tech.id as TechniqueId) === 'purple' ? BULLET_RADIUS * LEVEL_PURPLE_SIZE[level] : undefined
 
     const result: Bullet[] = []
     for (let i = 0; i < bulletCount; i++) {
@@ -53,8 +56,9 @@ export function createSpecialAttackBullets(params: {
             },
             tech,
             now,
-            yellowDamage,
-            purpleSpeed
+            yellowDamage ?? orangeDamage,
+            undefined,
+            purpleRadius
         )
         result.push(bullet)
     }

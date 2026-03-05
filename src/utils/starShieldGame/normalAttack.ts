@@ -7,12 +7,14 @@ import type { Bullet, NormalAttackLevel } from '@/types/starShieldGame'
 import {
     DINO_X,
     DINO_Y,
+    BULLET_RADIUS,
     BULLET_SPAWN_OFFSET_X,
     BULLET_SPAWN_OFFSET_Y,
     LEVEL_BULLET_COUNT,
+    LEVEL_ORANGE_DAMAGE,
+    LEVEL_PURPLE_SIZE,
     LEVEL_SPREAD_DEG,
     LEVEL_YELLOW_DAMAGE,
-    LEVEL_PURPLE_SPEED,
 } from '@/constants/starShieldGame/gameConfig'
 import type { TechniqueId } from '@/constants/starShieldGame/techniques'
 
@@ -21,7 +23,8 @@ export function createBaseBullet(
     tech: TechniqueConfig | null,
     now: number,
     overrideDamage?: number,
-    overrideSpeed?: number
+    overrideSpeed?: number,
+    overrideRadius?: number
 ): Bullet {
     const base: Bullet = {
         id: crypto.randomUUID(),
@@ -40,6 +43,7 @@ export function createBaseBullet(
             speed,
             technique: tech.id,
             piercing: tech.piercing,
+            ...(overrideRadius !== undefined && { radius: overrideRadius }),
         }
     }
     return base
@@ -130,7 +134,8 @@ export function createNormalAttackBullets(params: {
     }
 
     const yellowDamage = (tech.id as TechniqueId) === 'yellow_beam' ? LEVEL_YELLOW_DAMAGE[level] : undefined
-    const purpleSpeed = (tech.id as TechniqueId) === 'purple' ? (tech.speed * LEVEL_PURPLE_SPEED[level]) : undefined
+    const orangeDamage = (tech.id as TechniqueId) === 'orange' ? tech.damage * LEVEL_ORANGE_DAMAGE[level] : undefined
+    const purpleRadius = (tech.id as TechniqueId) === 'purple' ? BULLET_RADIUS * LEVEL_PURPLE_SIZE[level] : undefined
 
     return [
         createBaseBullet(
@@ -142,8 +147,9 @@ export function createNormalAttackBullets(params: {
             },
             tech,
             now,
-            yellowDamage,
-            purpleSpeed
+            yellowDamage ?? orangeDamage,
+            undefined,
+            purpleRadius
         ),
     ]
 }

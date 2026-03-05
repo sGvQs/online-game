@@ -53,6 +53,8 @@ export interface Bullet {
     technique?: string
     /** 貫通弾（当たっても消えない） */
     piercing?: boolean
+    /** 弾の半径（正規化座標）。未指定時は BULLET_RADIUS を使用 */
+    radius?: number
 }
 
 /** fire broadcast のペイロード（Typist が送信） */

@@ -84,7 +84,8 @@ function BulletCircle({ bullet }: { bullet: Bullet }) {
         rafId = requestAnimationFrame(loop)
         return () => cancelAnimationFrame(rafId)
     }, [update])
-    const sizePx = Math.max(8, BULLET_RADIUS * 400)
+    const bulletRadius = bullet.radius ?? BULLET_RADIUS
+    const sizePx = Math.max(8, bulletRadius * 400)
     const bulletColor = bullet.technique && bullet.technique in TECHNIQUES ? TECHNIQUES[bullet.technique as keyof typeof TECHNIQUES].color : DEFAULT_BULLET_COLOR
     const styles = shooterView()
     return (

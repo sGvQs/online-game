@@ -141,23 +141,24 @@ export const LEVEL_BLUE_SLOW_MULTIPLIER: Record<NormalAttackLevel, number> = {
     4: 0.4,
     5: 0.3,
 }
-/** 紫: レベル別弾速倍率（bullet.speed に乗算） */
-export const LEVEL_PURPLE_SPEED: Record<NormalAttackLevel, number> = {
+/** 紫: レベル別球サイズ倍率（BULLET_RADIUS に乗算） */
+export const LEVEL_PURPLE_SIZE: Record<NormalAttackLevel, number> = {
     1: 1,
     2: 1.2,
     3: 1.4,
     4: 1.6,
     5: 2,
 }
-/** オレンジ: レベル別反響半径（正規化座標） */
-export const LEVEL_ORANGE_CHAIN_RADIUS: Record<NormalAttackLevel, number> = {
-    1: 0.08,
-    2: 0.1,
-    3: 0.12,
-    4: 0.15,
-    5: 0.18,
+/** オレンジ: 連鎖範囲（正規化座標。固定） */
+export const ORANGE_CHAIN_RADIUS = 0.25
+/** オレンジ: レベル別ダメージ倍率（直撃・連鎖の両方に適用） */
+export const LEVEL_ORANGE_DAMAGE: Record<NormalAttackLevel, number> = {
+    1: 1,
+    2: 1.2,
+    3: 1.5,
+    4: 2,
+    5: 2.5,
 }
-
 // ========== 星 ==========
 /** 隕石の目標点のランダムオフセット（±） */
 export const STAR_TARGET_OFFSET = 0.04

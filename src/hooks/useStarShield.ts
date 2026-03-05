@@ -29,7 +29,8 @@ import {
     STAR_HP,
     SPECIAL_ATTACK_BULLET_COUNT,
     LEVEL_BLUE_SLOW_MULTIPLIER,
-    LEVEL_ORANGE_CHAIN_RADIUS,
+    LEVEL_ORANGE_DAMAGE,
+    ORANGE_CHAIN_RADIUS,
 } from '@/constants/starShieldGame/gameConfig'
 import { DIALOGUES, pickRandomDialogue } from '@/constants/starShieldGame/dialogues'
 import { TECHNIQUES, type TechniqueId } from '@/constants/starShieldGame/techniques'
@@ -427,7 +428,8 @@ export function useStarShield({
                     if (a.destroyedAt || (hpUpdates.has(a.id) && (hpUpdates.get(a.id) ?? 0) <= 0)) continue
                     const ap = getAsteroidPosition(a, now)
                     const dist = Math.hypot(bp.x - ap.x, bp.y - ap.y)
-                    if (dist >= ASTEROID_RADIUS + BULLET_RADIUS) continue
+                    const bulletRadius = bullet.radius ?? BULLET_RADIUS
+                    if (dist >= ASTEROID_RADIUS + bulletRadius) continue
 
                     const currentHp = hpUpdates.get(a.id) ?? a.hp
                     const newHp = Math.max(0, currentHp - damage)
@@ -443,7 +445,7 @@ export function useStarShield({
                     }
 
                     if (tech?.chainLevel1Count !== undefined && tech.chainRadius !== undefined) {
-                        const chainRadius = LEVEL_ORANGE_CHAIN_RADIUS[levelRef.current]
+                        const chainRadius = ORANGE_CHAIN_RADIUS
                         const chainHitIds = new Set<string>([a.id])
                         const applyChainDamage = (astId: string, dmg: number) => {
                             const cur = hpUpdates.get(astId) ?? asts.find((x) => x.id === astId)?.hp ?? 0
@@ -469,11 +471,13 @@ export function useStarShield({
                         for (const t1 of l1) {
                             const t1Pos = getAsteroidPosition(t1, now)
                             chainTargets.push({ pos: t1Pos, asteroidId: t1.id })
-                            applyChainDamage(t1.id, tech.chainLevel1Damage ?? 0)
+                            const l1Dmg = (tech.chainLevel1Damage ?? 0) * LEVEL_ORANGE_DAMAGE[levelRef.current]
+                            applyChainDamage(t1.id, l1Dmg)
                             const l2 = findNearest(t1Pos, tech.chainLevel2Count ?? 0, chainRadius)
+                            const l2Dmg = (tech.chainLevel2Damage ?? 0) * LEVEL_ORANGE_DAMAGE[levelRef.current]
                             for (const t2 of l2) {
                                 chainTargets.push({ pos: getAsteroidPosition(t2, now), asteroidId: t2.id })
-                                applyChainDamage(t2.id, tech.chainLevel2Damage ?? 0)
+                                applyChainDamage(t2.id, l2Dmg)
                             }
                         }
                         if (chainTargets.length > 0) {
