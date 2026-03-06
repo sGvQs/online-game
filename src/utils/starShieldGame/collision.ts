@@ -7,6 +7,7 @@ import {
     ASTEROID_RADIUS,
     BULLET_MAX_AGE_MS,
     LEVEL_BLUE_SLOW_MULTIPLIER,
+    LEVEL_ORANGE_CHAIN_COUNT,
     LEVEL_ORANGE_DAMAGE,
     ORANGE_CHAIN_RADIUS,
 } from '@/constants/starShieldGame/gameConfig'
@@ -104,21 +105,15 @@ export function computeCollisionResult(params: {
                 slowAsteroidData.set(a.id, { progressAtSlow })
             }
 
-            if (tech?.chainLevel1Count !== undefined && tech.chainRadius !== undefined) {
+            if (tech?.chainRadius !== undefined && (bullet.technique as TechniqueId) === 'orange') {
                 const chainHitIds = new Set<string>([a.id])
-                const l1 = findNearestInRadius(ap, tech.chainLevel1Count, chainRadius, chainHitIds)
+                const chainCount = LEVEL_ORANGE_CHAIN_COUNT[level]
+                const chainAsteroids = findNearestInRadius(ap, chainCount, chainRadius, chainHitIds)
                 const chainTargets: ChainHitTarget[] = []
-                for (const t1 of l1) {
-                    const t1Pos = getAsteroidPosition(t1, now)
-                    chainTargets.push({ pos: t1Pos, asteroidId: t1.id })
-                    const l1Dmg = (tech.chainLevel1Damage ?? 0) * LEVEL_ORANGE_DAMAGE[level]
-                    applyChainDamage(t1.id, l1Dmg, chainHitIds)
-                    const l2 = findNearestInRadius(t1Pos, tech.chainLevel2Count ?? 0, chainRadius, chainHitIds)
-                    const l2Dmg = (tech.chainLevel2Damage ?? 0) * LEVEL_ORANGE_DAMAGE[level]
-                    for (const t2 of l2) {
-                        chainTargets.push({ pos: getAsteroidPosition(t2, now), asteroidId: t2.id })
-                        applyChainDamage(t2.id, l2Dmg, chainHitIds)
-                    }
+                const chainDmg = (tech.damage ?? 1) * LEVEL_ORANGE_DAMAGE[level]
+                for (const ast of chainAsteroids) {
+                    chainTargets.push({ pos: getAsteroidPosition(ast, now), asteroidId: ast.id })
+                    applyChainDamage(ast.id, chainDmg, chainHitIds)
                 }
                 if (chainTargets.length > 0) {
                     chainHits = {

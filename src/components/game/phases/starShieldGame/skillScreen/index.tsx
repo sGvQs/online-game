@@ -40,6 +40,7 @@ import {
     LEVEL_BLUE_SLOW_MULTIPLIER,
     LEVEL_YELLOW_DAMAGE,
     LEVEL_PURPLE_SIZE,
+    LEVEL_ORANGE_CHAIN_COUNT,
     LEVEL_ORANGE_DAMAGE,
 } from '@/constants/starShieldGame/gameConfig'
 import { cn } from '@/lib/utils'
@@ -827,7 +828,7 @@ function getTechEffectLabel(techniqueId: TechniqueId): string {
         blue: 'スロー効果',
         yellow_beam: 'ビーム状（30連射）',
         purple: '貫通効果',
-        orange: 'チェーン攻撃',
+        orange: '直撃＋一段連鎖',
         pink: '円弧軌道（5発・レベルで増加）',
     }
     return effects[techniqueId] ?? ''
@@ -1038,7 +1039,7 @@ function PreviewContent({
             blue: { label: '減速割合', value: `${Math.round((1 - LEVEL_BLUE_SLOW_MULTIPLIER[displayLevel]) * 100)}%` },
             yellow_beam: { label: '火力', value: `${LEVEL_YELLOW_DAMAGE[displayLevel]} × 30発` },
             purple: { label: '球サイズ', value: `${LEVEL_PURPLE_SIZE[displayLevel]}x` },
-            orange: { label: 'ダメージ倍率', value: `${LEVEL_ORANGE_DAMAGE[displayLevel]}x` },
+            orange: { label: '連鎖数 / ダメージ', value: `${LEVEL_ORANGE_CHAIN_COUNT[displayLevel]}体 / ${LEVEL_ORANGE_DAMAGE[displayLevel]}x` },
             pink: { label: '弾数', value: `${LEVEL_PINK_COUNT[displayLevel]} 発` },
         }
         const trait = traitByTech[preview.techniqueId]
@@ -1047,7 +1048,7 @@ function PreviewContent({
             blue: { label: 'スロー', desc: '命中した隕石の速度を下げる' },
             yellow_beam: { label: 'ビーム', desc: '30発が前方に連続して飛ぶ' },
             purple: { label: '貫通', desc: '隕石を貫通し複数を同時に攻撃' },
-            orange: { label: 'チェーン', desc: '周囲の隕石に連鎖してダメージ' },
+            orange: { label: '一段連鎖', desc: '直撃から近隣に一段連鎖' },
             pink: { label: '円弧軌道', desc: 'ターゲットの上下から弧を描いて着弾する' },
         }
         const fx = specialEffects[preview.techniqueId]
@@ -1475,7 +1476,7 @@ function LoadoutAnimPreview({ techniqueId, level }: { techniqueId: TechniqueId; 
         blue: 'スロー効果',
         yellow_beam: 'ビーム（30連射）',
         purple: '貫通',
-        orange: 'チェーン攻撃',
+        orange: '一段連鎖',
         pink: '円弧軌道',
     }
 

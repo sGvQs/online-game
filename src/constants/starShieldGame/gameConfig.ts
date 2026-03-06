@@ -181,6 +181,14 @@ export const LEVEL_PINK_COUNT: Record<NormalAttackLevel, number> = {
 
 /** オレンジ: 連鎖範囲（正規化座標。固定） */
 export const ORANGE_CHAIN_RADIUS = 0.25
+/** オレンジ: 直撃から波及する隕石数（レベルで増加） */
+export const LEVEL_ORANGE_CHAIN_COUNT: Record<NormalAttackLevel, number> = {
+    1: 2,
+    2: 3,
+    3: 4,
+    4: 5,
+    5: 6,
+}
 /** オレンジ: ダメージ倍率（直撃・連鎖の両方に適用）。基本ダメージはレベルで変わらない */
 export const LEVEL_ORANGE_DAMAGE: Record<NormalAttackLevel, number> = {
     1: 1,
