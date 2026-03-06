@@ -1314,7 +1314,7 @@ function LoadoutAnimPreview({ techniqueId, level }: { techniqueId: TechniqueId; 
                   ? LEVEL_PINK_COUNT[lvl]
                   : 1
         const spreadDeg = techniqueId === 'red' ? LEVEL_SPREAD_DEG[lvl] : 0
-        const purpleRadius = techniqueId === 'purple' ? 3.5 * LEVEL_PURPLE_SIZE[lvl] : 3.5
+        const purpleRadius = techniqueId === 'purple' ? Math.min(3.5 * LEVEL_PURPLE_SIZE[lvl], 8) : 3.5
 
         const DINO_X = 18
         const H = canvas.height
@@ -1327,19 +1327,17 @@ function LoadoutAnimPreview({ techniqueId, level }: { techniqueId: TechniqueId; 
         let animId: number
 
         function fire() {
-            // pink：円弧軌道（簡易版: 上下オフセットから収束）
+            // pink：円弧軌道（恐竜の口から発射、弧を描いて右へ）
             if (techniqueId === 'pink') {
                 const displayCount = Math.min(bulletCount, 8)
-                const targetX = W - 40
-                const targetY = ORIGIN_Y
+                const startX = DINO_X + 18
                 for (let i = 0; i < displayCount; i++) {
                     const sign = i % 2 === 0 ? 1 : -1
-                    const offsetY = 12 + Math.random() * 8
                     bullets.push({
-                        x: targetX - 60,
-                        y: targetY + sign * offsetY,
-                        vx: 2.2,
-                        vy: -sign * 0.5,
+                        x: startX,
+                        y: ORIGIN_Y,
+                        vx: 2.8,
+                        vy: -sign * 0.4,
                         color: tech.color,
                         alpha: 0.9,
                         radius: 2.2,
@@ -1426,6 +1424,9 @@ function LoadoutAnimPreview({ techniqueId, level }: { techniqueId: TechniqueId; 
 
             for (let i = bullets.length - 1; i >= 0; i--) {
                 const b = bullets[i]
+                if (techniqueId === 'pink') {
+                    b.vy += 0.012 * (ORIGIN_Y - b.y)
+                }
                 b.x += b.vx
                 b.y += b.vy
                 b.alpha -= techniqueId === 'yellow_beam' ? 0.028 : 0.015
