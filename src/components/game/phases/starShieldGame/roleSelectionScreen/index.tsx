@@ -61,7 +61,6 @@ export function RoleSelectionScreen({
     onShooterLoadoutUpdate,
 }: RoleSelectionScreenProps) {
     const myRole = roleChoices[currentUserId]
-    const isShooter = currentUserId === shooterId
     // 役割衝突時・1人プレイ時は shooterProgress/typistProgress が null なので、自分の progress をフォールバック
     const displayShooterProgress = shooterProgress ?? (myRole === 'SHOOTER' ? currentUserProgress : null)
     const displayTypistProgress = typistProgress ?? (myRole === 'TYPIST' ? currentUserProgress : null)
@@ -178,7 +177,7 @@ export function RoleSelectionScreen({
                                                 {availableNormal.map(({ techniqueId, level }) => {
                                                     const tech = TECHNIQUES[techniqueId]
                                                     const isActive = selNormal === techniqueId
-                                                    const canChange = isShooter && onShooterLoadoutUpdate
+                                                    const canChange = isSelected && r === 'SHOOTER' && onShooterLoadoutUpdate
                                                     return (
                                                         <button
                                                             key={techniqueId}
