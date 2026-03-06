@@ -53,7 +53,12 @@ function AsteroidCircle({ asteroid, maxHp }: { asteroid: Asteroid; maxHp: number
             initial={{ scale: 0.5, opacity: 0 }}
             transition={destroyed ? { duration: 0.25, ease: 'easeOut' } : { duration: 0.3, ease: 'easeOut' }}
         >
-            <div className="absolute -top-4 left-1/2 -translate-x-1/2 w-8 h-1.5 rounded-full bg-stone-600/80 overflow-hidden">
+            <div
+                className="absolute -top-4 left-1/2 -translate-x-1/2 h-1.5 rounded-full bg-stone-600/80 overflow-hidden shrink-0"
+                style={{
+                    width: `${Math.max(1.5, Math.min(10, 1.5 + ((maxHp - 3) * 4) / 97))}rem`,
+                }}
+            >
                 <div
                     className={shooterView().asteroidHpBar()}
                     style={{ ['--asteroid-hp-pct' as string]: `${Math.max(0, (asteroid.hp / maxHp) * 100)}%` }}
