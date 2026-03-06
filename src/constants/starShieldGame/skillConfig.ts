@@ -24,10 +24,10 @@ export const PROGRESSION_DEBUG = process.env.NEXT_PUBLIC_STAR_SHIELD_DEBUG_PROGR
 export const NORMAL_ATTACK_UNLOCK_COSTS: Record<string, number> = {
     red: 0, // 初期所持
     blue: 1000,
+    pink: 2000,
     yellow_beam: 3000,
     purple: 4000,
     orange: 5000,
-    pink: 5500,
 }
 
 // ============================================
@@ -46,10 +46,10 @@ const createLevelUpCosts = (base: number): LevelUpCosts => ({
 export const NORMAL_ATTACK_LEVEL_UP_COSTS: Record<string, LevelUpCosts> = {
     red: createLevelUpCosts(300),
     blue: createLevelUpCosts(1000),
+    pink: createLevelUpCosts(2000),
     yellow_beam: createLevelUpCosts(3000),
     purple: createLevelUpCosts(4000),
     orange: createLevelUpCosts(5000),
-    pink: createLevelUpCosts(5500),
 }
 
 // ============================================
@@ -59,15 +59,15 @@ export const SPECIAL_ATTACK_MAX_LEVEL = 10
 export const SPECIAL_ATTACK_IDS = ['spread'] as const
 
 export const SPECIAL_ATTACK_UNLOCK_COSTS: Record<string, number> = {
-    spread: 100,
+    spread: 500,
 }
 
 /** 必殺技レベルアップコスト（2〜10） */
 export const SPECIAL_ATTACK_LEVEL_UP_COSTS: Record<2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10, number> = {
-    2: 300,
-    3: 600,
-    4: 1200,
-    5: 2400,
+    2: 1000,
+    3: 1500,
+    4: 3000,
+    5: 3500,
     6: 4000,
     7: 6000,
     8: 9000,

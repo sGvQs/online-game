@@ -24,13 +24,15 @@ export interface TechniqueConfig {
 }
 
 export const TECHNIQUES: Record<TechniqueId, TechniqueConfig> = {
+    // 赤：　ダメージ ⭐️⭐️, 当てやすさ ⭐️⭐️⭐️⭐️, サポート ⭐️, 必殺技との相性　⭐️, かっこよさ ⭐️⭐️⭐️,
     red: {
         id: 'red',
         label: '赤い球',
         damage: 1,
         speed: 1,
         color: '#ef4444',
-    },
+    }, 
+    // 青：　ダメージ ⭐️, 当てやすさ ⭐️, サポート ⭐️⭐️⭐️⭐️⭐️, 必殺技との相性　⭐️⭐️⭐️, かっこよさ ⭐️,
     blue: {
         id: 'blue',
         label: '青い球',
@@ -39,6 +41,16 @@ export const TECHNIQUES: Record<TechniqueId, TechniqueConfig> = {
         color: '#3b82f6',
         slowOnHit: true,
     },
+    // ピンク：　ダメージ ⭐️⭐️⭐️⭐️⭐️, 当てやすさ ⭐️, サポート ⭐️, 必殺技との相性　⭐️, かっこよさ ⭐️⭐️⭐️⭐️⭐️,
+    pink: {
+        id: 'pink',
+        label: 'ピンクの球',
+        damage: 0.5,
+        speed: 1,
+        color: '#ec4899',
+        count: 5,
+    },
+    // 黄色：　ダメージ ⭐️⭐️⭐️⭐️⭐️, 当てやすさ ⭐️⭐️, サポート ⭐️, 必殺技との相性　⭐️, かっこよさ ⭐️⭐️⭐️,
     yellow_beam: {
         id: 'yellow_beam',
         label: '黄色いビーム',
@@ -48,6 +60,7 @@ export const TECHNIQUES: Record<TechniqueId, TechniqueConfig> = {
         count: 30,
         verticalOffset: 0.01, // 進行方向に沿って3発オフセット（ビーム状）
     },
+    // 紫：　ダメージ ⭐️⭐️, 当てやすさ ⭐️⭐️, サポート ⭐️, 必殺技との相性　⭐️⭐️⭐️⭐️⭐️, かっこよさ ⭐️,
     purple: {
         id: 'purple',
         label: '紫の球',
@@ -56,6 +69,7 @@ export const TECHNIQUES: Record<TechniqueId, TechniqueConfig> = {
         color: '#a855f7',
         piercing: true,
     },
+    // オレンジ：　ダメージ ⭐️⭐️⭐️⭐️, 当てやすさ ⭐️, サポート ⭐️, 必殺技との相性　⭐️⭐️⭐️⭐️⭐️, かっこよさ ⭐️⭐️,
     orange: {
         id: 'orange',
         label: 'オレンジの球',
@@ -63,14 +77,6 @@ export const TECHNIQUES: Record<TechniqueId, TechniqueConfig> = {
         speed: 1,
         color: '#f97316',
         chainRadius: 0.10,
-    },
-    pink: {
-        id: 'pink',
-        label: 'ピンクの球',
-        damage: 0.5,
-        speed: 1,
-        color: '#ec4899',
-        count: 5,
     },
 }
 
