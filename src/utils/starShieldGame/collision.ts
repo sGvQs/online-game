@@ -184,8 +184,6 @@ export function getContactAsteroids(params: {
     return asteroids.filter((a) => {
         if (a.destroyedAt || destroyedAsteroidIds.has(a.id) || a.hasDamagedStar) return false
         const ap = getAsteroidPosition(a, now)
-        const progress = (now - a.spawnedAt) / a.durationMs
-        if (progress >= 1) return true
         const dist = Math.hypot(ap.x - starTargetX, ap.y - starTargetY)
         return dist < starRadius + asteroidRadius
     })
