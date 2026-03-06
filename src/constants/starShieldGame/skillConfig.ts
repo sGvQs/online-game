@@ -27,6 +27,7 @@ export const NORMAL_ATTACK_UNLOCK_COSTS: Record<string, number> = {
     yellow_beam: 3000,
     purple: 4000,
     orange: 5000,
+    pink: 5500,
 }
 
 // ============================================
@@ -48,6 +49,7 @@ export const NORMAL_ATTACK_LEVEL_UP_COSTS: Record<string, LevelUpCosts> = {
     yellow_beam: createLevelUpCosts(3000),
     purple: createLevelUpCosts(4000),
     orange: createLevelUpCosts(5000),
+    pink: createLevelUpCosts(5500),
 }
 
 // ============================================

@@ -35,6 +35,7 @@ import {
 import {
     LEVEL_STAR_HP,
     LEVEL_BULLET_COUNT,
+    LEVEL_PINK_COUNT,
     LEVEL_SPREAD_DEG,
     LEVEL_BLUE_SLOW_MULTIPLIER,
     LEVEL_YELLOW_DAMAGE,
@@ -65,7 +66,7 @@ const SPECIAL_LABELS: Record<string, string> = {
     all_destruction: '全破壊',
 }
 
-const NORMAL_ATTACK_IDS: TechniqueId[] = ['red', 'blue', 'yellow_beam', 'purple', 'orange']
+const NORMAL_ATTACK_IDS: TechniqueId[] = ['red', 'blue', 'yellow_beam', 'purple', 'orange', 'pink']
 const SPECIAL_ATTACK_IDS = ['spread'] as const
 
 // ============================================================
@@ -827,6 +828,7 @@ function getTechEffectLabel(techniqueId: TechniqueId): string {
         yellow_beam: 'ビーム状（30連射）',
         purple: '貫通効果',
         orange: 'チェーン攻撃',
+        pink: '円弧軌道（5発・レベルで増加）',
     }
     return effects[techniqueId] ?? ''
 }
@@ -1037,6 +1039,7 @@ function PreviewContent({
             yellow_beam: { label: '火力', value: `${LEVEL_YELLOW_DAMAGE[displayLevel]} × 30発` },
             purple: { label: '球サイズ', value: `${LEVEL_PURPLE_SIZE[displayLevel]}x` },
             orange: { label: 'ダメージ倍率', value: `${LEVEL_ORANGE_DAMAGE[displayLevel]}x` },
+            pink: { label: '弾数', value: `${LEVEL_PINK_COUNT[displayLevel]} 発` },
         }
         const trait = traitByTech[preview.techniqueId]
 
@@ -1045,6 +1048,7 @@ function PreviewContent({
             yellow_beam: { label: 'ビーム', desc: '30発が前方に連続して飛ぶ' },
             purple: { label: '貫通', desc: '隕石を貫通し複数を同時に攻撃' },
             orange: { label: 'チェーン', desc: '周囲の隕石に連鎖してダメージ' },
+            pink: { label: '円弧軌道', desc: 'ターゲットの上下から弧を描いて着弾する' },
         }
         const fx = specialEffects[preview.techniqueId]
 
@@ -1303,7 +1307,12 @@ function LoadoutAnimPreview({ techniqueId, level }: { techniqueId: TechniqueId; 
         const c: CanvasRenderingContext2D = ctxOrNull
 
         const lvl = Math.max(1, Math.min(5, level)) as 1 | 2 | 3 | 4 | 5
-        const bulletCount = techniqueId === 'red' ? LEVEL_BULLET_COUNT[lvl] : 1
+        const bulletCount =
+            techniqueId === 'red'
+                ? LEVEL_BULLET_COUNT[lvl]
+                : techniqueId === 'pink'
+                  ? LEVEL_PINK_COUNT[lvl]
+                  : 1
         const spreadDeg = techniqueId === 'red' ? LEVEL_SPREAD_DEG[lvl] : 0
         const purpleRadius = techniqueId === 'purple' ? 3.5 * LEVEL_PURPLE_SIZE[lvl] : 3.5
 
@@ -1318,6 +1327,27 @@ function LoadoutAnimPreview({ techniqueId, level }: { techniqueId: TechniqueId; 
         let animId: number
 
         function fire() {
+            // pink：円弧軌道（簡易版: 上下オフセットから収束）
+            if (techniqueId === 'pink') {
+                const displayCount = Math.min(bulletCount, 8)
+                const targetX = W - 40
+                const targetY = ORIGIN_Y
+                for (let i = 0; i < displayCount; i++) {
+                    const sign = i % 2 === 0 ? 1 : -1
+                    const offsetY = 12 + Math.random() * 8
+                    bullets.push({
+                        x: targetX - 60,
+                        y: targetY + sign * offsetY,
+                        vx: 2.2,
+                        vy: -sign * 0.5,
+                        color: tech.color,
+                        alpha: 0.9,
+                        radius: 2.2,
+                    })
+                }
+                return
+            }
+
             // yellow_beam：細かく連続発射
             if (techniqueId === 'yellow_beam') {
                 const count = 12
@@ -1445,6 +1475,7 @@ function LoadoutAnimPreview({ techniqueId, level }: { techniqueId: TechniqueId; 
         yellow_beam: 'ビーム（30連射）',
         purple: '貫通',
         orange: 'チェーン攻撃',
+        pink: '円弧軌道',
     }
 
     return (

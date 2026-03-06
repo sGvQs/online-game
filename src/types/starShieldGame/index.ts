@@ -55,6 +55,12 @@ export interface Bullet {
     piercing?: boolean
     /** 弾の半径（正規化座標）。未指定時は BULLET_RADIUS を使用 */
     radius?: number
+    /** 円弧軌道（ベジェ曲線）用。指定時は直線ではなく曲線で補間 */
+    curveType?: 'bezier'
+    curveP0?: { x: number; y: number }
+    curveP1?: { x: number; y: number }
+    curveP2?: { x: number; y: number }
+    curveDurationMs?: number
 }
 
 /** fire broadcast のペイロード（Typist が送信） */

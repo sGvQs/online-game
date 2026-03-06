@@ -3,7 +3,7 @@
  * 赤い球（散弾）、青い球、黄色いビーム、紫の球、オレンジの球
  */
 
-export type TechniqueId = 'red' | 'blue' | 'yellow_beam' | 'purple' | 'orange'
+export type TechniqueId = 'red' | 'blue' | 'yellow_beam' | 'purple' | 'orange' | 'pink'
 
 export interface TechniqueConfig {
     id: TechniqueId
@@ -76,9 +76,17 @@ export const TECHNIQUES: Record<TechniqueId, TechniqueConfig> = {
         chainLevel2Count: 4,
         chainLevel2Damage: 0.5,
     },
+    pink: {
+        id: 'pink',
+        label: 'ピンクの球',
+        damage: 0.5,
+        speed: 1,
+        color: '#ec4899',
+        count: 5,
+    },
 }
 
-export const TECHNIQUE_IDS: TechniqueId[] = ['red', 'blue', 'yellow_beam', 'purple', 'orange']
+export const TECHNIQUE_IDS: TechniqueId[] = ['red', 'blue', 'yellow_beam', 'purple', 'orange', 'pink']
 
 /** デフォルト弾の色（red と同色） */
 export const DEFAULT_BULLET_COLOR = '#ef4444'

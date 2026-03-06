@@ -41,6 +41,7 @@ export function getAvailableNormalAttacks(owned: OwnedSkills): { techniqueId: Te
             { techniqueId: 'yellow_beam', level: 5 },
             { techniqueId: 'purple', level: 5 },
             { techniqueId: 'orange', level: 5 },
+            { techniqueId: 'pink', level: 5 },
         ]
     }
     const hasRed = owned.normalAttacks.some((a) => a.techniqueId === 'red')
@@ -49,7 +50,7 @@ export function getAvailableNormalAttacks(owned: OwnedSkills): { techniqueId: Te
         const r = owned.normalAttacks.find((a) => a.techniqueId === 'red')
         list.push({ techniqueId: 'red', level: r?.level ?? 1 })
     }
-    for (const id of ['blue', 'yellow_beam', 'purple', 'orange'] as const) {
+    for (const id of ['blue', 'yellow_beam', 'purple', 'orange', 'pink'] as const) {
         const o = owned.normalAttacks.find((a) => a.techniqueId === id)
         if (o) list.push({ techniqueId: id, level: o.level })
     }
@@ -82,5 +83,5 @@ export function getAvailableHealLevel(owned: OwnedSkills): number | null {
  * PROGRESSION_DEBUG 時に getAvailableNormalAttacks が使うのと同じ。
  */
 export function getDebugNormalAttacks(): TechniqueId[] {
-    return ['red', 'blue', 'yellow_beam', 'purple', 'orange']
+    return ['red', 'blue', 'yellow_beam', 'purple', 'orange', 'pink']
 }

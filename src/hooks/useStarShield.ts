@@ -358,6 +358,8 @@ export function useStarShield({
                     dirY: dir.dirY,
                     level,
                     now,
+                    targetX: aim.x,
+                    targetY: aim.y,
                 })
                 setBullets((prev) => {
                     const next = [...prev, ...newBullets]

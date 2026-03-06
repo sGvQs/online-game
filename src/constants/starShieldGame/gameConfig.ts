@@ -170,6 +170,15 @@ export const LEVEL_PURPLE_SIZE: Record<NormalAttackLevel, number> = {
     4: 8,
     5: 16,
 }
+/** ピンク: 1発撃ちあたりの弾数（円弧軌道。レベルで増加） */
+export const LEVEL_PINK_COUNT: Record<NormalAttackLevel, number> = {
+    1: 5,
+    2: 6,
+    3: 7,
+    4: 8,
+    5: 9,
+}
+
 /** オレンジ: 連鎖範囲（正規化座標。固定） */
 export const ORANGE_CHAIN_RADIUS = 0.25
 /** オレンジ: ダメージ倍率（直撃・連鎖の両方に適用）。基本ダメージはレベルで変わらない */

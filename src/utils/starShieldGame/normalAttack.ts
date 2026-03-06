@@ -5,13 +5,15 @@
 import type { TechniqueConfig } from '@/constants/starShieldGame/techniques'
 import type { Bullet, NormalAttackLevel } from '@/types/starShieldGame'
 import {
+    BULLET_RADIUS,
+    BULLET_SPEED,
     DINO_X,
     DINO_Y,
-    BULLET_RADIUS,
     BULLET_SPAWN_OFFSET_X,
     BULLET_SPAWN_OFFSET_Y,
     LEVEL_BULLET_COUNT,
     LEVEL_ORANGE_DAMAGE,
+    LEVEL_PINK_COUNT,
     LEVEL_PURPLE_SIZE,
     LEVEL_SPREAD_DEG,
     LEVEL_YELLOW_DAMAGE,
@@ -103,6 +105,7 @@ export function createDefaultSpreadBullets(params: {
 
 /**
  * 通常攻撃の弾を生成する（純粋関数）
+ * pink の円弧軌道用に targetX, targetY（照準座標）を渡すこと
  */
 export function createNormalAttackBullets(params: {
     tech: TechniqueConfig | null
@@ -111,8 +114,52 @@ export function createNormalAttackBullets(params: {
     dirY: number
     level: NormalAttackLevel
     now: number
+    /** 照準座標（pink の円弧終点用） */
+    targetX?: number
+    targetY?: number
 }): Bullet[] {
-    const { tech, centerAngle, dirX, dirY, level, now } = params
+    const { tech, centerAngle, dirX, dirY, level, now, targetX, targetY } = params
+
+    // ピンク: 円弧軌道。恐竜の口から発射 → 弧を描いてターゲットへ
+    if (tech && (tech.id as TechniqueId) === 'pink' && targetX != null && targetY != null) {
+        const count = LEVEL_PINK_COUNT[level]
+        const perpX = -dirY
+        const perpY = dirX
+        const result: Bullet[] = []
+        const p0 = {
+            x: DINO_X + dirX * BULLET_SPAWN_OFFSET_X,
+            y: DINO_Y + dirY * BULLET_SPAWN_OFFSET_Y,
+        }
+        const p2 = { x: targetX, y: targetY }
+        for (let i = 0; i < count; i++) {
+            const sign = Math.random() > 0.5 ? 1 : -1
+            const arcStrength = 0.15 + Math.random() * 0.3
+            const midX = (p0.x + p2.x) / 2
+            const midY = (p0.y + p2.y) / 2
+            const p1 = {
+                x: midX + sign * arcStrength * perpX,
+                y: midY + sign * arcStrength * perpY,
+            }
+            const chordLen = Math.hypot(p2.x - p0.x, p2.y - p0.y)
+            const curveDurationMs = (chordLen * 1.3) / BULLET_SPEED
+
+            const bullet = createBaseBullet(
+                { dirX: 1, dirY: 0, startX: p0.x, startY: p0.y },
+                tech,
+                now,
+                tech.damage
+            )
+            result.push({
+                ...bullet,
+                curveType: 'bezier' as const,
+                curveP0: p0,
+                curveP1: p1,
+                curveP2: p2,
+                curveDurationMs,
+            })
+        }
+        return result
+    }
 
     if (tech?.count && tech.count > 1) {
         const verticalOffset = tech.verticalOffset ?? 0

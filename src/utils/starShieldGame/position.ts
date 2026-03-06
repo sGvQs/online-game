@@ -31,8 +31,33 @@ export function getAsteroidPosition(asteroid: Asteroid, now: number): { x: numbe
     }
 }
 
+function bezierQuadratic(
+    t: number,
+    p0: { x: number; y: number },
+    p1: { x: number; y: number },
+    p2: { x: number; y: number }
+): { x: number; y: number } {
+    const u = 1 - t
+    return {
+        x: u * u * p0.x + 2 * u * t * p1.x + t * t * p2.x,
+        y: u * u * p0.y + 2 * u * t * p1.y + t * t * p2.y,
+    }
+}
+
 export function getBulletPosition(bullet: Bullet, now: number): { x: number; y: number } {
     const elapsed = now - bullet.firedAt
+
+    if (
+        bullet.curveType === 'bezier' &&
+        bullet.curveP0 &&
+        bullet.curveP1 &&
+        bullet.curveP2 &&
+        bullet.curveDurationMs != null
+    ) {
+        const t = Math.min(1, elapsed / bullet.curveDurationMs)
+        return bezierQuadratic(t, bullet.curveP0, bullet.curveP1, bullet.curveP2)
+    }
+
     const speedMult = bullet.speed ?? 1
     const dist = BULLET_SPEED * speedMult * elapsed
     return {

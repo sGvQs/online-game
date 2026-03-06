@@ -191,11 +191,19 @@ export function getContactAsteroids(params: {
     })
 }
 
-/** 寿命切れの弾 ID 一覧 */
+/** 寿命切れの弾 ID 一覧。ベジェ弾は軌道終点到達時に即削除 */
 export function getExpiredBulletIds(
     bullets: Bullet[],
     now: number,
     maxAgeMs: number = BULLET_MAX_AGE_MS
 ): Set<string> {
-    return new Set(bullets.filter((b) => now - b.firedAt > maxAgeMs).map((b) => b.id))
+    return new Set(
+        bullets
+            .filter((b) => {
+                const elapsed = now - b.firedAt
+                if (b.curveDurationMs != null) return elapsed >= b.curveDurationMs
+                return elapsed > maxAgeMs
+            })
+            .map((b) => b.id)
+    )
 }
