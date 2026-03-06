@@ -6,7 +6,7 @@ import Link from 'next/link'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ProtectedStar } from '../playing/protectedStar'
 import { AuroraGlow } from '@/components/game/common/starShield/auroraGlow'
-import { TECHNIQUES, type TechniqueId } from '@/constants/starShieldGame/techniques'
+import { TECHNIQUES, TECHNIQUE_STATS, type TechniqueId } from '@/constants/starShieldGame/techniques'
 import { ICONS } from '@/constants/starShieldGame/constants'
 import {
     getMyStarShieldProgress,
@@ -835,6 +835,89 @@ function getTechEffectLabel(techniqueId: TechniqueId): string {
 }
 
 // ============================================================
+// TechniquePentagonChart
+// 五角形レーダーチャート（ダメージ・当てやすさ・サポート・必殺技相性・かっこよさ）
+// ============================================================
+const PENTAGON_LABELS = ['ダメージ', '当てやすさ', 'サポート', '必殺技相性', 'かっこよさ'] as const
+
+function TechniquePentagonChart({
+    stats,
+    color,
+}: {
+    stats: { damage: number; hitEase: number; support: number; specialCombo: number; coolness: number }
+    color: string
+}) {
+    const size = 200
+    const cx = size / 2
+    const cy = size / 2
+    const maxR = 44
+    const values = [stats.damage, stats.hitEase, stats.support, stats.specialCombo, stats.coolness]
+
+    // 頂点座標（上から時計回り、角度は垂直上向き基準）
+    const getPoint = (angleDeg: number, r: number) => {
+        const rad = ((angleDeg - 90) * Math.PI) / 180
+        return { x: cx + Math.cos(rad) * r, y: cy + Math.sin(rad) * r }
+    }
+
+    // データポリゴンの頂点（1-5 を 8〜maxR に正規化）
+    const dataPoints = values.map((v, i) => {
+        const r = 8 + ((Math.max(1, Math.min(5, v)) - 1) / 4) * (maxR - 8)
+        return getPoint(i * 72, r)
+    })
+    const dataPath = dataPoints.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ') + ' Z'
+
+    // グリッド（正五角形、1-5の各段階）
+    const gridPaths = [1, 2, 3, 4, 5].map((level) => {
+        const r = 8 + ((level - 1) / 4) * (maxR - 8)
+        const pts = [0, 1, 2, 3, 4].map((i) => getPoint(i * 72, r))
+        return pts.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ') + ' Z'
+    })
+
+    return (
+        <div className="flex flex-col items-center gap-3">
+            <p className="text-indigo-400 text-[12px] font-bold [font-family:var(--font-dot-gothic-16)] tracking-wider">
+                特性評価
+            </p>
+            <svg width={size} height={size} className="shrink-0">
+                {/* グリッド線 */}
+                <g fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="0.5">
+                    {gridPaths.map((d, i) => (
+                        <path key={i} d={d} />
+                    ))}
+                </g>
+                {/* 軸線（中心→各頂点） */}
+                <g stroke="rgba(255,255,255,0.12)" strokeWidth="0.5">
+                    {[0, 1, 2, 3, 4].map((i) => {
+                        const p = getPoint(i * 72, maxR)
+                        return <line key={i} x1={cx} y1={cy} x2={p.x} y2={p.y} />
+                    })}
+                </g>
+                {/* データポリゴン */}
+                <path
+                    d={dataPath}
+                    fill={`${color}40`}
+                    stroke={color}
+                    strokeWidth="1.5"
+                    strokeLinejoin="round"
+                />
+                {/* ラベル */}
+                <g fill="rgba(255,255,255,0.7)" fontSize="9" fontFamily="var(--font-dot-gothic-16)">
+                    {PENTAGON_LABELS.map((label, i) => {
+                        const p = getPoint(i * 72, maxR + 14)
+                        const anchor = i === 0 ? 'middle' : i < 3 ? 'start' : i === 3 ? 'middle' : 'end'
+                        return (
+                            <text key={i} x={p.x} y={p.y} textAnchor={anchor} dominantBaseline="middle">
+                                {label}
+                            </text>
+                        )
+                    })}
+                </g>
+            </svg>
+        </div>
+    )
+}
+
+// ============================================================
 // SkillPreviewModal
 // ============================================================
 function SkillPreviewModal({
@@ -1083,7 +1166,6 @@ function PreviewContent({
                 </div>
 
                 <div className="flex flex-col gap-3">
-                    <StatRow label="ダメージ / 発" value={damageStars} color="text-orange-400" />
                     <StatRow label="特性" value={`${trait.label}：${trait.value}`} color="text-indigo-300" />
                     {fx && (
                         <div className="mt-2 rounded-2xl bg-indigo-500/5 border border-indigo-500/20 p-4">
@@ -1095,6 +1177,10 @@ function PreviewContent({
                             </p>
                         </div>
                     )}
+                </div>
+
+                <div className="mt-4 rounded-2xl bg-indigo-500/5 border border-indigo-500/20 p-4 flex justify-center">
+                    <TechniquePentagonChart stats={TECHNIQUE_STATS[preview.techniqueId]} color={tech.color} />
                 </div>
 
                 <div className="mt-6 pt-6 border-t border-white/[0.05]">

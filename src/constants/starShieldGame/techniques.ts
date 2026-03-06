@@ -82,5 +82,23 @@ export const TECHNIQUES: Record<TechniqueId, TechniqueConfig> = {
 
 export const TECHNIQUE_IDS: TechniqueId[] = ['red', 'blue', 'yellow_beam', 'purple', 'orange', 'pink']
 
+/** 技の特性評価（五角形チャート用。各 1〜5） */
+export type TechniqueStats = {
+    damage: number
+    hitEase: number
+    support: number
+    specialCombo: number
+    coolness: number
+}
+
+export const TECHNIQUE_STATS: Record<TechniqueId, TechniqueStats> = {
+    red: { damage: 2, hitEase: 4, support: 1, specialCombo: 1, coolness: 3 },
+    blue: { damage: 1, hitEase: 1, support: 5, specialCombo: 3, coolness: 1 },
+    pink: { damage: 5, hitEase: 1, support: 1, specialCombo: 1, coolness: 5 },
+    yellow_beam: { damage: 5, hitEase: 2, support: 1, specialCombo: 1, coolness: 3 },
+    purple: { damage: 2, hitEase: 2, support: 1, specialCombo: 5, coolness: 1 },
+    orange: { damage: 4, hitEase: 1, support: 1, specialCombo: 5, coolness: 2 },
+}
+
 /** デフォルト弾の色（red と同色） */
 export const DEFAULT_BULLET_COLOR = '#ef4444'
