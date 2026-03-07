@@ -918,6 +918,85 @@ function TechniquePentagonChart({
 }
 
 // ============================================================
+// LevelProgressionBarChart
+// レベルごとの値を縦棒グラフで表示。現在レベルをアクセント色で強調
+// ============================================================
+function LevelProgressionBarChart({
+    values,
+    currentLevel,
+    maxLevel,
+    color,
+    formatValue,
+    title = 'レベル推移',
+}: {
+    values: number[]
+    currentLevel: number
+    maxLevel: number
+    color: string
+    formatValue: (v: number, level: number) => string
+    title?: string
+}) {
+    const barCount = Math.min(values.length, maxLevel)
+    const maxVal = Math.max(...values, 1)
+    const w = barCount <= 5 ? 220 : Math.min(320, 40 + barCount * 26)
+    const h = 100
+    const padding = { left: 28, right: 8, top: 4, bottom: 22 }
+    const chartW = w - padding.left - padding.right
+    const chartH = h - padding.top - padding.bottom
+    const barGap = 4
+    const barTotalW = barCount > 0 ? (chartW - barGap * (barCount - 1)) / barCount : 0
+
+    return (
+        <div className="flex flex-col items-center gap-2">
+            <p className="text-indigo-400 text-[12px] font-bold [font-family:var(--font-dot-gothic-16)] tracking-wider">
+                {title}
+            </p>
+            <svg width={w} height={h} className="shrink-0">
+                {Array.from({ length: barCount }).map((_, i) => {
+                    const level = i + 1
+                    const val = values[i] ?? 0
+                    const ratio = maxVal > 0 ? val / maxVal : 0
+                    const barH = Math.max(2, ratio * chartH)
+                    const x = padding.left + i * (barTotalW + barGap)
+                    const y = padding.top + chartH - barH
+                    const isCurrent = level === currentLevel
+                    return (
+                        <g key={level}>
+                            <rect
+                                x={x}
+                                y={y}
+                                width={barTotalW}
+                                height={barH}
+                                rx={3}
+                                ry={3}
+                                fill={isCurrent ? color : 'rgba(255,255,255,0.18)'}
+                                stroke={isCurrent ? color : 'transparent'}
+                                strokeWidth={1.5}
+                            />
+                            <text
+                                x={x + barTotalW / 2}
+                                y={h - 6}
+                                textAnchor="middle"
+                                fontSize="9"
+                                fill="rgba(255,255,255,0.6)"
+                                fontFamily="var(--font-dot-gothic-16)"
+                            >
+                                Lv{level}
+                            </text>
+                        </g>
+                    )
+                })}
+            </svg>
+            {currentLevel > 0 && currentLevel <= barCount && (
+                <p className="text-white/50 text-[10px] [font-family:var(--font-dot-gothic-16)]">
+                    現在 Lv{currentLevel}: {formatValue(values[currentLevel - 1] ?? 0, currentLevel)}
+                </p>
+            )}
+        </div>
+    )
+}
+
+// ============================================================
 // SkillPreviewModal
 // ============================================================
 function SkillPreviewModal({
@@ -1183,6 +1262,37 @@ function PreviewContent({
                     <TechniquePentagonChart stats={TECHNIQUE_STATS[preview.techniqueId]} color={tech.color} />
                 </div>
 
+                {(() => {
+                    const normLevels = [1, 2, 3, 4, 5] as const
+                    const levelValues: Record<TechniqueId, number[]> = {
+                        red: normLevels.map((l) => LEVEL_BULLET_COUNT[l]),
+                        blue: normLevels.map((l) => Math.round((1 - LEVEL_BLUE_SLOW_MULTIPLIER[l]) * 100)),
+                        yellow_beam: normLevels.map((l) => LEVEL_YELLOW_DAMAGE[l] * 30),
+                        purple: normLevels.map((l) => LEVEL_PURPLE_SIZE[l]),
+                        orange: normLevels.map((l) => LEVEL_ORANGE_CHAIN_COUNT[l]),
+                        pink: normLevels.map((l) => LEVEL_PINK_COUNT[l]),
+                    }
+                    const formatByTech: Record<TechniqueId, (v: number) => string> = {
+                        red: (v) => `${v} 発`,
+                        blue: (v) => `${v}%`,
+                        yellow_beam: (v) => `${v}`,
+                        purple: (v) => `${v}x`,
+                        orange: (v) => `${v} 体`,
+                        pink: (v) => `${v} 発`,
+                    }
+                    return (
+                        <div className="mt-4 rounded-2xl bg-indigo-500/5 border border-indigo-500/20 p-4 flex justify-center">
+                            <LevelProgressionBarChart
+                                values={levelValues[preview.techniqueId]}
+                                currentLevel={displayLevel}
+                                maxLevel={5}
+                                color={tech.color}
+                                formatValue={(v, _l) => formatByTech[preview.techniqueId](v)}
+                            />
+                        </div>
+                    )
+                })()}
+
                 <div className="mt-6 pt-6 border-t border-white/[0.05]">
                     <p className="text-white/40 text-xs mb-3 [font-family:var(--font-dot-gothic-16)] font-bold tracking-wider">アニメーション デモ (Lv {displayLevel})</p>
                     <LoadoutAnimPreview techniqueId={preview.techniqueId} level={displayLevel} />
@@ -1238,6 +1348,17 @@ function PreviewContent({
                     {params.waveCount > 1 && (
                         <StatRow label="ウェーブ数" value={`${params.waveCount} 波`} color="text-purple-300" />
                     )}
+                </div>
+                <div className="mt-4 rounded-2xl bg-indigo-500/5 border border-indigo-500/20 p-4 flex justify-center">
+                    <LevelProgressionBarChart
+                        values={[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(
+                            (l) => SPECIAL_ATTACK_LEVEL_PARAMS[l as SpecialAttackLevel].waveCount * SPECIAL_ATTACK_LEVEL_PARAMS[l as SpecialAttackLevel].bulletsPerWave
+                        )}
+                        currentLevel={displayLevel}
+                        maxLevel={10}
+                        color="#a78bfa"
+                        formatValue={(v) => `${v} 発`}
+                    />
                 </div>
             </div>
         )
@@ -1301,6 +1422,20 @@ function PreviewContent({
                         </div>
                     )}
                 </div>
+                <div className="mt-4 rounded-2xl bg-emerald-500/5 border border-emerald-500/20 p-4 flex justify-center">
+                    <LevelProgressionBarChart
+                        values={[1, 2, 3, 4, 5, 6].map((l) => {
+                            const v = LEVEL_HEAL_RECOVERY[l as 1 | 2 | 3 | 4 | 5 | 6]
+                            return v >= 100 ? 99 : v * 10
+                        })}
+                        currentLevel={currentLevel > 0 ? (currentLevel === 6 ? 6 : currentLevel) : 0}
+                        maxLevel={6}
+                        color="#10b981"
+                        formatValue={(v, level) =>
+                            level >= 5 ? '全回復' : `+${LEVEL_HEAL_RECOVERY[level as 1 | 2 | 3 | 4]} HP`
+                        }
+                    />
+                </div>
             </div>
         )
     }
@@ -1348,6 +1483,15 @@ function PreviewContent({
                         </div>
                     </div>
                     <StatRow label="適用ロール" value="Typist（守護担当）" color="text-emerald-400/80" />
+                </div>
+                <div className="mt-4 rounded-2xl bg-emerald-500/5 border border-emerald-500/20 p-4 flex justify-center">
+                    <LevelProgressionBarChart
+                        values={[1, 2, 3, 4, 5].map((l) => LEVEL_STAR_HP[l as 1 | 2 | 3 | 4 | 5])}
+                        currentLevel={displayLevel}
+                        maxLevel={5}
+                        color="#10b981"
+                        formatValue={(v) => `${v} HP`}
+                    />
                 </div>
             </div>
         )
