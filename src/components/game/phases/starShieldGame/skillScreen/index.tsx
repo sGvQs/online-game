@@ -919,7 +919,7 @@ function TechniquePentagonChart({
 
 // ============================================================
 // LevelProgressionBarChart
-// レベルごとの値を縦棒グラフで表示。現在レベルをアクセント色で強調
+// レベルごとの値を縦棒グラフで表示。現在レベルをアクセント色で強調。ホバーで他レベルの値を表示
 // ============================================================
 function LevelProgressionBarChart({
     values,
@@ -936,6 +936,7 @@ function LevelProgressionBarChart({
     formatValue: (v: number, level: number) => string
     title?: string
 }) {
+    const [hoveredLevel, setHoveredLevel] = useState<number | null>(null)
     const barCount = Math.min(values.length, maxLevel)
     const maxVal = Math.max(...values, 1)
     const w = barCount <= 5 ? 220 : Math.min(320, 40 + barCount * 26)
@@ -947,11 +948,11 @@ function LevelProgressionBarChart({
     const barTotalW = barCount > 0 ? (chartW - barGap * (barCount - 1)) / barCount : 0
 
     return (
-        <div className="flex flex-col items-center gap-2">
+        <div className="flex flex-col items-center gap-2 relative">
             <p className="text-indigo-400 text-[12px] font-bold [font-family:var(--font-dot-gothic-16)] tracking-wider">
                 {title}
             </p>
-            <svg width={w} height={h} className="shrink-0">
+            <svg width={w} height={h} className="shrink-0" style={{ overflow: 'visible' }}>
                 {Array.from({ length: barCount }).map((_, i) => {
                     const level = i + 1
                     const val = values[i] ?? 0
@@ -960,6 +961,10 @@ function LevelProgressionBarChart({
                     const x = padding.left + i * (barTotalW + barGap)
                     const y = padding.top + chartH - barH
                     const isCurrent = level === currentLevel
+                    const isHovered = level === hoveredLevel
+                    const barFill =
+                        isHovered ? (isCurrent ? color : `${color}99`) : isCurrent ? color : 'rgba(255,255,255,0.18)'
+                    const barStroke = isCurrent || isHovered ? color : 'transparent'
                     return (
                         <g key={level}>
                             <rect
@@ -969,9 +974,12 @@ function LevelProgressionBarChart({
                                 height={barH}
                                 rx={3}
                                 ry={3}
-                                fill={isCurrent ? color : 'rgba(255,255,255,0.18)'}
-                                stroke={isCurrent ? color : 'transparent'}
+                                fill={barFill}
+                                stroke={barStroke}
                                 strokeWidth={1.5}
+                                onMouseEnter={() => setHoveredLevel(level)}
+                                onMouseLeave={() => setHoveredLevel(null)}
+                                className="cursor-pointer"
                             />
                             <text
                                 x={x + barTotalW / 2}
@@ -986,6 +994,31 @@ function LevelProgressionBarChart({
                         </g>
                     )
                 })}
+                {hoveredLevel !== null && hoveredLevel <= barCount && (
+                    <g>
+                        <rect
+                            x={padding.left + (hoveredLevel - 1) * (barTotalW + barGap) + barTotalW / 2 - 36}
+                            y={padding.top - 20}
+                            width={72}
+                            height={16}
+                            rx={4}
+                            ry={4}
+                            fill="rgba(0,0,0,0.75)"
+                            stroke="rgba(255,255,255,0.2)"
+                            strokeWidth={1}
+                        />
+                        <text
+                            x={padding.left + (hoveredLevel - 1) * (barTotalW + barGap) + barTotalW / 2}
+                            y={padding.top - 10}
+                            textAnchor="middle"
+                            fontSize="10"
+                            fill="white"
+                            fontFamily="var(--font-dot-gothic-16)"
+                        >
+                            Lv{hoveredLevel}: {formatValue(values[hoveredLevel - 1] ?? 0, hoveredLevel)}
+                        </text>
+                    </g>
+                )}
             </svg>
             {currentLevel > 0 && currentLevel <= barCount && (
                 <p className="text-white/50 text-[10px] [font-family:var(--font-dot-gothic-16)]">
