@@ -73,7 +73,7 @@ const SPECIAL_ATTACK_IDS = ['spread'] as const
 // ============================================================
 // Main Component
 // ============================================================
-export function StarShieldSkill({ roomId, currentUserId }: { roomId: string; currentUserId: string }) {
+export function StarShieldSkill({ roomId, currentUserId: _currentUserId }: { roomId: string; currentUserId: string }) {
     const [progress, setProgress] = useState<StarShieldProgress | null>(null)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
@@ -138,7 +138,7 @@ export function StarShieldSkill({ roomId, currentUserId }: { roomId: string; cur
             <div className="relative min-h-screen overflow-hidden flex flex-col items-center justify-center">
                 <ProtectedStar />
                 <AuroraGlow width={800} height={400} opacity={0.2} blur={60} />
-                <p className="relative z-10 text-white/60 [font-family:var(--font-dot-gothic-16)]">読み込み中…</p>
+                <p className="relative z-10 text-white/60 font-dot-gothic-16">読み込み中…</p>
             </div>
         )
     }
@@ -175,16 +175,16 @@ export function StarShieldSkill({ roomId, currentUserId }: { roomId: string; cur
                     className="flex items-center justify-between"
                 >
                     <div>
-                        <h1 className="text-2xl font-black [font-family:var(--font-dot-gothic-16)] bg-gradient-to-br from-purple-400 to-pink-400 bg-clip-text text-transparent [-webkit-background-clip:text] [-webkit-text-fill-color:transparent]">
+                        <h1 className="text-2xl font-black font-dot-gothic-16 bg-linear-to-br from-purple-400 to-pink-400 bg-clip-text text-transparent [-webkit-background-clip:text] [-webkit-text-fill-color:transparent]">
                             SKILL
                         </h1>
-                        <p className="text-white/35 text-xs mt-0.5 [font-family:var(--font-dot-gothic-16)]">
+                        <p className="text-white/35 text-xs mt-0.5 font-dot-gothic-16">
                             スキルを購入してロードアウトを整えよう
                         </p>
                     </div>
                     <Link
                         href={`/game/${roomId}/star-shield`}
-                        className="px-4 py-2 rounded-xl border border-brand-500/50 bg-brand-500/20 text-brand-300 text-sm hover:bg-brand-500/30 transition-colors [font-family:var(--font-dot-gothic-16)]"
+                        className="px-4 py-2 rounded-xl border border-brand-500/50 bg-brand-500/20 text-brand-300 text-sm hover:bg-brand-500/30 transition-colors font-dot-gothic-16"
                     >
                         ← もどる
                     </Link>
@@ -195,13 +195,13 @@ export function StarShieldSkill({ roomId, currentUserId }: { roomId: string; cur
                     initial={{ opacity: 0, y: 8 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.05 }}
-                    className="rounded-2xl px-5 py-4 bg-white/[0.03] border border-white/[0.08] flex items-center justify-between"
+                    className="rounded-2xl px-5 py-4 bg-white/3 border border-white/8 flex items-center justify-between"
                 >
                     <div>
-                        <p className="text-[11px] [font-family:var(--font-cherry-bomb-one)] text-[rgba(129,140,248,0.6)] mb-1">
+                        <p className="text-[11px] font-cherry-bomb-one text-[rgba(129,140,248,0.6)] mb-1">
                             所持 typing 数
                         </p>
-                        <p className="text-3xl font-bold text-brand-400 [font-family:var(--font-cherry-bomb-one)] tabular-nums">
+                        <p className="text-3xl font-bold text-brand-400 font-cherry-bomb-one tabular-nums">
                             {typingCount.toLocaleString()}
                         </p>
                     </div>
@@ -219,11 +219,11 @@ export function StarShieldSkill({ roomId, currentUserId }: { roomId: string; cur
                     initial={{ opacity: 0, y: 8 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.1 }}
-                    className="rounded-2xl p-5 bg-white/[0.03] border border-white/[0.08] flex flex-col gap-5"
+                    className="rounded-2xl p-5 bg-white/3 border border-white/8 flex flex-col gap-5"
                 >
-                    <p className="text-sm [font-family:var(--font-dot-gothic-16)] text-white/80 flex items-center gap-2">
+                    <p className="text-sm font-dot-gothic-16 text-white/80 flex items-center gap-2">
                         🎮 ロードアウト設定
-                        <span className="text-[10px] text-white/30 font-normal [font-family:var(--font-dot-gothic-16)]">
+                        <span className="text-[10px] text-white/30 font-normal font-dot-gothic-16">
                             ゲームで使用するスキルを選択
                         </span>
                     </p>
@@ -234,14 +234,14 @@ export function StarShieldSkill({ roomId, currentUserId }: { roomId: string; cur
                             <div className="absolute top-0 right-0 p-3 opacity-[0.03] pointer-events-none">
                                 <Image src={ICONS.SHOOTER} alt="" width={80} height={80} />
                             </div>
-                            <h3 className="text-indigo-400 text-xs font-bold flex items-center gap-2 [font-family:var(--font-dot-gothic-16)] mb-1">
+                            <h3 className="text-indigo-400 text-xs font-bold flex items-center gap-2 font-dot-gothic-16 mb-1">
                                 <Image src={ICONS.SHOOTER} alt="Shooter" width={16} height={16} className="opacity-80" />
                                 ATTACK（Shooter）
                             </h3>
 
                             {/* 通常攻撃 */}
                             <div>
-                                <p className="text-[10px] text-indigo-400/50 [font-family:var(--font-dot-gothic-16)] mb-1.5 flex items-center gap-1.5">
+                                <p className="text-[10px] text-indigo-400/50 font-dot-gothic-16 mb-1.5 flex items-center gap-1.5">
                                     <span className="w-1 h-1 rounded-full bg-indigo-400 shrink-0 opacity-50" />
                                     通常攻撃
                                 </p>
@@ -257,7 +257,7 @@ export function StarShieldSkill({ roomId, currentUserId }: { roomId: string; cur
                                                     'px-3 py-1.5 rounded-xl text-xs border flex items-center gap-2 transition-all',
                                                     isActive
                                                         ? 'border-indigo-500/60 bg-indigo-500/20 text-indigo-200 shadow-[0_0_10px_rgba(99,102,241,0.25)]'
-                                                        : 'bg-white/[0.02] border-white/10 text-white/50 hover:border-white/25 hover:text-white/70'
+                                                        : 'bg-white/2 border-white/10 text-white/50 hover:border-white/25 hover:text-white/70'
                                                 )}
                                             >
                                                 {isActive && <span className="text-indigo-400 font-bold">✓</span>}
@@ -285,7 +285,7 @@ export function StarShieldSkill({ roomId, currentUserId }: { roomId: string; cur
 
                             {/* 必殺技 */}
                             <div>
-                                <p className="text-[10px] text-indigo-400/50 [font-family:var(--font-dot-gothic-16)] mb-1.5 flex items-center gap-1.5">
+                                <p className="text-[10px] text-indigo-400/50 font-dot-gothic-16 mb-1.5 flex items-center gap-1.5">
                                     <span className="w-1 h-1 rounded-full bg-indigo-400 shrink-0 opacity-50" />
                                     必殺技
                                 </p>
@@ -300,7 +300,7 @@ export function StarShieldSkill({ roomId, currentUserId }: { roomId: string; cur
                                                     'px-3 py-1.5 rounded-xl text-xs border flex items-center gap-2 transition-all',
                                                     isActive
                                                         ? 'border-indigo-500/60 bg-indigo-500/20 text-indigo-200 shadow-[0_0_10px_rgba(99,102,241,0.25)]'
-                                                        : 'bg-white/[0.02] border-white/10 text-white/50 hover:border-white/25 hover:text-white/70'
+                                                        : 'bg-white/2 border-white/10 text-white/50 hover:border-white/25 hover:text-white/70'
                                                 )}
                                             >
                                                 {isActive && <span className="text-indigo-400 font-bold">✓</span>}
@@ -313,7 +313,7 @@ export function StarShieldSkill({ roomId, currentUserId }: { roomId: string; cur
                                         )
                                     })}
                                     {availableSpecial.length === 0 && (
-                                        <span className="text-white/30 text-xs [font-family:var(--font-dot-gothic-16)]">未所持</span>
+                                        <span className="text-white/30 text-xs font-dot-gothic-16">未所持</span>
                                     )}
                                 </div>
                                 {/* 必殺技プレビュー */}
@@ -336,20 +336,20 @@ export function StarShieldSkill({ roomId, currentUserId }: { roomId: string; cur
                             <div className="absolute top-0 right-0 p-3 opacity-[0.03] pointer-events-none">
                                 <Image src={ICONS.TYPIST} alt="" width={80} height={80} />
                             </div>
-                            <h3 className="text-emerald-400 text-xs font-bold flex items-center gap-2 [font-family:var(--font-dot-gothic-16)] mb-1">
+                            <h3 className="text-emerald-400 text-xs font-bold flex items-center gap-2 font-dot-gothic-16 mb-1">
                                 <Image src={ICONS.TYPIST} alt="Typist" width={16} height={16} className="opacity-80" />
                                 DEFENCE（Typist）
                             </h3>
 
                             {/* 星のHP */}
                             <div>
-                                <p className="text-[10px] text-emerald-400/50 [font-family:var(--font-dot-gothic-16)] mb-1.5 flex items-center gap-1.5">
+                                <p className="text-[10px] text-emerald-400/50 font-dot-gothic-16 mb-1.5 flex items-center gap-1.5">
                                     <span className="w-1 h-1 rounded-full bg-emerald-400 shrink-0 opacity-50" />
                                     星のHP
                                 </p>
                                 <div className="flex items-center gap-2">
-                                    <span className="text-white/50 text-xs [font-family:var(--font-dot-gothic-16)]">HP</span>
-                                    <span className="text-xl font-bold text-emerald-400 [font-family:var(--font-dot-gothic-16)] tabular-nums">
+                                    <span className="text-white/50 text-xs font-dot-gothic-16">HP</span>
+                                    <span className="text-xl font-bold text-emerald-400 font-dot-gothic-16 tabular-nums">
                                         {LEVEL_STAR_HP[starHpLevel as 1 | 2 | 3 | 4 | 5]}
                                     </span>
                                     <span className="text-[10px] text-white/30">Lv{starHpLevel}/5</span>
@@ -357,7 +357,7 @@ export function StarShieldSkill({ roomId, currentUserId }: { roomId: string; cur
                                 <div className="mt-1.5 flex items-center gap-2">
                                     <div className="flex-1 h-1.5 rounded-full bg-white/5 overflow-hidden">
                                         <div
-                                            className="h-full rounded-full bg-gradient-to-r from-emerald-700 to-emerald-400 transition-all duration-500"
+                                            className="h-full rounded-full bg-linear-to-r from-emerald-700 to-emerald-400 transition-all duration-500"
                                             style={{ width: `${(starHpLevel / 5) * 100}%` }}
                                         />
                                     </div>
@@ -369,7 +369,7 @@ export function StarShieldSkill({ roomId, currentUserId }: { roomId: string; cur
 
                             {/* ヒール */}
                             <div>
-                                <p className="text-[10px] text-emerald-400/50 [font-family:var(--font-dot-gothic-16)] mb-1.5 flex items-center gap-1.5">
+                                <p className="text-[10px] text-emerald-400/50 font-dot-gothic-16 mb-1.5 flex items-center gap-1.5">
                                     <span className="w-1 h-1 rounded-full bg-emerald-400 shrink-0 opacity-50" />
                                     ヒール
                                 </p>
@@ -384,7 +384,7 @@ export function StarShieldSkill({ roomId, currentUserId }: { roomId: string; cur
                                             <span className="text-[10px] opacity-70">Lv. {healLevel === 6 ? 'max' : healLevel}</span>
                                         </div>
                                     ) : (
-                                        <span className="text-white/30 text-xs [font-family:var(--font-dot-gothic-16)]">未所持</span>
+                                        <span className="text-white/30 text-xs font-dot-gothic-16">未所持</span>
                                     )}
                                 </div>
                                 {/* ヒール効果・プログレスバー */}
@@ -395,7 +395,7 @@ export function StarShieldSkill({ roomId, currentUserId }: { roomId: string; cur
                                                 <div
                                                     className={cn(
                                                         'h-full rounded-full transition-all duration-300',
-                                                        healLevel === 6 ? 'bg-gradient-to-r from-amber-600 to-yellow-400' : 'bg-gradient-to-r from-emerald-700 to-emerald-400'
+                                                        healLevel === 6 ? 'bg-linear-to-r from-amber-600 to-yellow-400' : 'bg-linear-to-r from-emerald-700 to-emerald-400'
                                                     )}
                                                     style={{ width: `${(healLevel / 6) * 100}%` }}
                                                 />
@@ -403,7 +403,7 @@ export function StarShieldSkill({ roomId, currentUserId }: { roomId: string; cur
                                             <span className="text-[9px] text-white/40 shrink-0">Lv{healLevel === 6 ? 'max' : healLevel}/6</span>
                                         </div>
                                         <div className="rounded-xl px-3 py-2 bg-emerald-500/5 border border-emerald-500/20">
-                                        <p className="text-[10px] text-emerald-400/70 [font-family:var(--font-dot-gothic-16)]">
+                                        <p className="text-[10px] text-emerald-400/70 font-dot-gothic-16">
                                             {healLevel >= 5 ? (
                                                 healLevel === 6 ? (
                                                     <>単語打ち切り時：<span className="text-emerald-300 font-bold">全回復</span> ＋ 全隕石破壊</>
@@ -429,33 +429,33 @@ export function StarShieldSkill({ roomId, currentUserId }: { roomId: string; cur
                     transition={{ delay: 0.15 }}
                 >
                     {/* タブスイッチャー */}
-                    <div className="flex rounded-2xl overflow-hidden border border-white/[0.08] mb-4">
+                    <div className="flex rounded-2xl overflow-hidden border border-white/8 mb-4">
                         <button
                             onClick={() => setActiveTab('attack')}
                             className={cn(
                                 'flex-1 py-4 flex flex-col items-center justify-center gap-1 transition-all duration-300',
                                 activeTab === 'attack'
                                     ? 'bg-indigo-700/70 text-indigo-100 shadow-[inset_0_0_30px_rgba(99,102,241,0.2)]'
-                                    : 'bg-white/[0.02] text-white/35 hover:text-white/55 hover:bg-white/[0.04]'
+                                    : 'bg-white/2 text-white/35 hover:text-white/55 hover:bg-white/4'
                             )}
                         >
                             <span className="text-2xl">⚔️</span>
-                            <span className="text-sm font-bold [font-family:var(--font-cherry-bomb-one)]">ATTACK</span>
-                            <span className="text-[10px] opacity-60 [font-family:var(--font-dot-gothic-16)]">Shooter・攻撃担当</span>
+                            <span className="text-sm font-bold font-cherry-bomb-one">ATTACK</span>
+                            <span className="text-[10px] opacity-60 font-dot-gothic-16">Shooter・攻撃担当</span>
                         </button>
-                        <div className="w-px bg-white/[0.08]" />
+                        <div className="w-px bg-white/8" />
                         <button
                             onClick={() => setActiveTab('defence')}
                             className={cn(
                                 'flex-1 py-4 flex flex-col items-center justify-center gap-1 transition-all duration-300',
                                 activeTab === 'defence'
                                     ? 'bg-emerald-800/70 text-emerald-100 shadow-[inset_0_0_30px_rgba(16,185,129,0.2)]'
-                                    : 'bg-white/[0.02] text-white/35 hover:text-white/55 hover:bg-white/[0.04]'
+                                    : 'bg-white/2 text-white/35 hover:text-white/55 hover:bg-white/4'
                             )}
                         >
                             <span className="text-2xl">🛡️</span>
-                            <span className="text-sm font-bold [font-family:var(--font-cherry-bomb-one)]">DEFENCE</span>
-                            <span className="text-[10px] opacity-60 [font-family:var(--font-dot-gothic-16)]">Typist・守護担当</span>
+                            <span className="text-sm font-bold font-cherry-bomb-one">DEFENCE</span>
+                            <span className="text-[10px] opacity-60 font-dot-gothic-16">Typist・守護担当</span>
                         </button>
                     </div>
 
@@ -477,11 +477,6 @@ export function StarShieldSkill({ roomId, currentUserId }: { roomId: string; cur
                                         const ownedAttack = normalAttacks.find((a) => a.techniqueId === techniqueId)
                                         const currentLevel = ownedAttack ? ownedAttack.level : 0
                                         const maxLevel = 5
-                                        const isMaxed = currentLevel >= maxLevel
-                                        const nextLevel = (currentLevel + 1) as 1 | 2 | 3 | 4 | 5
-                                        const cost = currentLevel === 0
-                                            ? NORMAL_ATTACK_UNLOCK_COSTS[techniqueId] ?? 0
-                                            : NORMAL_ATTACK_LEVEL_UP_COSTS[techniqueId]?.[nextLevel as 2 | 3 | 4 | 5] ?? 0
 
                                         return (
                                             <SkillRow
@@ -492,7 +487,7 @@ export function StarShieldSkill({ roomId, currentUserId }: { roomId: string; cur
                                                             className="w-3 h-3 rounded-full shrink-0"
                                                             style={{ backgroundColor: tech.color }}
                                                         />
-                                                        <span className="[font-family:var(--font-dot-gothic-16)] font-bold">{tech.label}</span>
+                                                        <span className="font-dot-gothic-16 font-bold">{tech.label}</span>
                                                     </div>
                                                 }
                                                 detail={getTechEffectLabel(techniqueId)}
@@ -516,17 +511,12 @@ export function StarShieldSkill({ roomId, currentUserId }: { roomId: string; cur
                                         const ownedSA = specialAttacks.find((a) => a.specialAttackId === id)
                                         const currentLevel = ownedSA ? ownedSA.level : 0
                                         const maxLevel = 10
-                                        const isMaxed = currentLevel >= maxLevel
-                                        const nextLevel = (currentLevel + 1) as 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10
-                                        const cost = currentLevel === 0
-                                            ? SPECIAL_ATTACK_UNLOCK_COSTS[id] ?? 0
-                                            : SPECIAL_ATTACK_LEVEL_UP_COSTS[nextLevel as Exclude<typeof nextLevel, 1>] ?? 0
 
                                         return (
                                             <SkillRow
                                                 key={id}
                                                 label={
-                                                    <span className="[font-family:var(--font-dot-gothic-16)] font-bold">
+                                                    <span className="font-dot-gothic-16 font-bold">
                                                         {SPECIAL_LABELS[id] ?? id}
                                                     </span>
                                                 }
@@ -559,21 +549,21 @@ export function StarShieldSkill({ roomId, currentUserId }: { roomId: string; cur
                                     {/* 現在の HP バー */}
                                     <div className="flex items-end gap-4 mb-1">
                                         <div>
-                                            <p className="text-[10px] text-white/30 mb-0.5 [font-family:var(--font-dot-gothic-16)]">
+                                            <p className="text-[10px] text-white/30 mb-0.5 font-dot-gothic-16">
                                                 現在のHP上限
                                             </p>
-                                            <p className="text-3xl font-bold text-emerald-400 [font-family:var(--font-dot-gothic-16)] leading-none">
+                                            <p className="text-3xl font-bold text-emerald-400 font-dot-gothic-16 leading-none">
                                                 {LEVEL_STAR_HP[starHpLevel as 1 | 2 | 3 | 4 | 5]}
                                             </p>
                                         </div>
                                         <div className="flex-1 pb-1">
                                             <div className="h-2 rounded-full bg-white/5 overflow-hidden">
                                                 <div
-                                                    className="h-full rounded-full bg-gradient-to-r from-emerald-700 to-emerald-400 transition-all duration-700"
+                                                    className="h-full rounded-full bg-linear-to-r from-emerald-700 to-emerald-400 transition-all duration-700"
                                                     style={{ width: `${(starHpLevel / 5) * 100}%` }}
                                                 />
                                             </div>
-                                            <p className="text-[10px] text-white/25 mt-0.5 [font-family:var(--font-dot-gothic-16)]">
+                                            <p className="text-[10px] text-white/25 mt-0.5 font-dot-gothic-16">
                                                 Lv {starHpLevel} / 5
                                             </p>
                                         </div>
@@ -582,7 +572,6 @@ export function StarShieldSkill({ roomId, currentUserId }: { roomId: string; cur
                                     {starHpLevel < 5 ? (
                                         (() => {
                                             const nextLevel = (starHpLevel + 1) as 2 | 3 | 4 | 5
-                                            const cost = STAR_HP_LEVEL_UP_COSTS[nextLevel]
                                             return (
                                                 <SkillRow
                                                     label={
@@ -612,7 +601,7 @@ export function StarShieldSkill({ roomId, currentUserId }: { roomId: string; cur
                                 <SkillCard title="ヒール" jurisdiction="defence">
                                     {!healLevel ? (
                                         <>
-                                            <p className="text-white/40 text-xs mb-3 [font-family:var(--font-dot-gothic-16)]">
+                                            <p className="text-white/40 text-xs mb-3 font-dot-gothic-16">
                                                 単語を打ち切ったとき、星のHPを回復します
                                             </p>
                                             <SkillRow
@@ -628,10 +617,10 @@ export function StarShieldSkill({ roomId, currentUserId }: { roomId: string; cur
                                             {/* 現在の回復量バー */}
                                             <div className="flex items-end gap-4 mb-1">
                                                 <div>
-                                                    <p className="text-[10px] text-white/30 mb-0.5 [font-family:var(--font-dot-gothic-16)]">
+                                                    <p className="text-[10px] text-white/30 mb-0.5 font-dot-gothic-16">
                                                         現在の回復量
                                                     </p>
-                                                    <p className="text-xl font-bold text-emerald-400 [font-family:var(--font-dot-gothic-16)] leading-none">
+                                                    <p className="text-xl font-bold text-emerald-400 font-dot-gothic-16 leading-none">
                                                         {healLevel >= 5 ? '全回復' : `+${LEVEL_HEAL_RECOVERY[healLevel as 1 | 2 | 3 | 4 | 5 | 6]} HP`}
                                                     </p>
                                                 </div>
@@ -640,12 +629,12 @@ export function StarShieldSkill({ roomId, currentUserId }: { roomId: string; cur
                                                         <div
                                                             className={cn(
                                                                 'h-full rounded-full transition-all duration-700',
-                                                                healLevel === 6 ? 'bg-gradient-to-r from-amber-600 to-yellow-400' : 'bg-gradient-to-r from-emerald-700 to-emerald-400'
+                                                                healLevel === 6 ? 'bg-linear-to-r from-amber-600 to-yellow-400' : 'bg-linear-to-r from-emerald-700 to-emerald-400'
                                                             )}
                                                             style={{ width: `${(healLevel / 6) * 100}%` }}
                                                         />
                                                     </div>
-                                                    <p className="text-[10px] text-white/25 mt-0.5 [font-family:var(--font-dot-gothic-16)]">
+                                                    <p className="text-[10px] text-white/25 mt-0.5 font-dot-gothic-16">
                                                         Lv {healLevel === 6 ? 'max' : healLevel} / max
                                                     </p>
                                                 </div>
@@ -654,7 +643,6 @@ export function StarShieldSkill({ roomId, currentUserId }: { roomId: string; cur
                                             {healLevel < 6 ? (
                                                 (() => {
                                                     const nextLevel = (healLevel + 1) as 2 | 3 | 4 | 5 | 6
-                                                    const cost = HEAL_LEVEL_UP_COSTS[nextLevel]
                                                     return (
                                                         <SkillRow
                                                             label={
@@ -718,14 +706,14 @@ function SkillCard({
     return (
         <div
             className={cn(
-                'rounded-2xl p-5 bg-white/[0.02] border flex flex-col gap-3',
+                'rounded-2xl p-5 bg-white/2 border flex flex-col gap-3',
                 isAttack ? 'border-indigo-500/20' : 'border-emerald-500/20'
             )}
         >
             <div className="flex items-center justify-between">
                 <p
                     className={cn(
-                        'text-[13px] font-bold tracking-wider [font-family:var(--font-dot-gothic-16)]',
+                        'text-[13px] font-bold tracking-wider font-dot-gothic-16',
                         isAttack ? 'text-indigo-400' : 'text-emerald-400'
                     )}
                 >
@@ -733,7 +721,7 @@ function SkillCard({
                 </p>
                 <span
                     className={cn(
-                        'text-[10px] px-2 py-0.5 rounded-full border tracking-wide [font-family:var(--font-dot-gothic-16)]',
+                        'text-[10px] px-2 py-0.5 rounded-full border tracking-wide font-dot-gothic-16',
                         isAttack
                             ? 'bg-indigo-500/15 border-indigo-500/30 text-indigo-300'
                             : 'bg-emerald-500/15 border-emerald-500/30 text-emerald-300'
@@ -768,13 +756,13 @@ function SkillRow({
     return (
         <button
             onClick={onClick}
-            className="w-full text-left flex items-center justify-between gap-3 py-2.5 border-b border-white/[0.04] last:border-0 hover:bg-white/[0.04] -mx-2 px-2 rounded-xl transition-colors cursor-pointer group"
+            className="w-full text-left flex items-center justify-between gap-3 py-2.5 border-b border-white/4 last:border-0 hover:bg-white/4 -mx-2 px-2 rounded-xl transition-colors cursor-pointer group"
         >
             <div className="flex items-center gap-2 min-w-0 flex-1">
                 <div className="flex flex-col min-w-0 flex-1">
                     <span className="text-white/85 text-sm">{label}</span>
                     {detail && (
-                        <span className="text-white/30 text-[10px] [font-family:var(--font-dot-gothic-16)]">{detail}</span>
+                        <span className="text-white/30 text-[10px] font-dot-gothic-16">{detail}</span>
                     )}
                     {currentLevel !== undefined && maxLevel !== undefined && (
                         <div className="w-full mt-1.5 relative flex items-center gap-3">
@@ -784,7 +772,7 @@ function SkillRow({
                                     style={{ width: `${(currentLevel / maxLevel) * 100}%` }}
                                 />
                             </div>
-                            <span className="text-[10px] tracking-wider text-white/40 [font-family:var(--font-dot-gothic-16)] shrink-0 w-8 text-right">
+                            <span className="text-[10px] tracking-wider text-white/40 font-dot-gothic-16 shrink-0 w-8 text-right">
                                 {currentLevel}/{maxLevel}
                             </span>
                         </div>
@@ -792,15 +780,15 @@ function SkillRow({
                 </div>
             </div>
             {currentLevel === 0 ? (
-                <span className="text-[10px] text-white/40 shrink-0 [font-family:var(--font-dot-gothic-16)] border border-white/20 bg-white/5 px-2 py-0.5 rounded tracking-widest">
+                <span className="text-[10px] text-white/40 shrink-0 font-dot-gothic-16 border border-white/20 bg-white/5 px-2 py-0.5 rounded tracking-widest">
                     未入手
                 </span>
             ) : currentLevel === maxLevel ? (
-                <span className="text-[10px] text-amber-300 shrink-0 [font-family:var(--font-dot-gothic-16)] border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 rounded tracking-widest">
+                <span className="text-[10px] text-amber-300 shrink-0 font-dot-gothic-16 border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 rounded tracking-widest">
                     MAX
                 </span>
             ) : (
-                <span className="text-[10px] text-white/70 shrink-0 [font-family:var(--font-dot-gothic-16)] border border-white/10 bg-white/5 px-2 py-0.5 rounded tracking-widest">
+                <span className="text-[10px] text-white/70 shrink-0 font-dot-gothic-16 border border-white/10 bg-white/5 px-2 py-0.5 rounded tracking-widest">
                     Lv {currentLevel}
                 </span>
             )}
@@ -815,7 +803,7 @@ function MaxedMessage({ children }: { children: React.ReactNode }) {
     return (
         <div className="flex items-center gap-2 py-2.5">
             <span className="text-amber-400 text-base">🏆</span>
-            <span className="text-amber-400/80 text-sm [font-family:var(--font-dot-gothic-16)]">{children}</span>
+            <span className="text-amber-400/80 text-sm font-dot-gothic-16">{children}</span>
         </div>
     )
 }
@@ -875,7 +863,7 @@ function TechniquePentagonChart({
 
     return (
         <div className="flex flex-col items-center gap-3">
-            <p className="text-indigo-400 text-[12px] font-bold [font-family:var(--font-dot-gothic-16)] tracking-wider">
+            <p className="text-indigo-400 text-[12px] font-bold font-dot-gothic-16 tracking-wider">
                 特性評価
             </p>
             <svg width={size} height={size} className="shrink-0">
@@ -949,7 +937,7 @@ function LevelProgressionBarChart({
 
     return (
         <div className="flex flex-col items-center gap-2 relative">
-            <p className="text-indigo-400 text-[12px] font-bold [font-family:var(--font-dot-gothic-16)] tracking-wider">
+            <p className="text-indigo-400 text-[12px] font-bold font-dot-gothic-16 tracking-wider">
                 {title}
             </p>
             <svg width={w} height={h} className="shrink-0" style={{ overflow: 'visible' }}>
@@ -1021,7 +1009,7 @@ function LevelProgressionBarChart({
                 )}
             </svg>
             {currentLevel > 0 && currentLevel <= barCount && (
-                <p className="text-white/50 text-[10px] [font-family:var(--font-dot-gothic-16)]">
+                <p className="text-white/50 text-[10px] font-dot-gothic-16">
                     現在 Lv{currentLevel}: {formatValue(values[currentLevel - 1] ?? 0, currentLevel)}
                 </p>
             )}
@@ -1133,7 +1121,7 @@ function SkillPreviewModal({
                 transition={{ type: 'spring', damping: 26, stiffness: 280 }}
                 className={cn(
                     'relative w-full max-w-sm rounded-[24px] shadow-2xl flex flex-col overflow-hidden max-h-full',
-                    isStarHp ? 'bg-[#0a1a14] border border-emerald-500/20' : 'bg-[#14142a] border border-white/[0.1]'
+                    isStarHp ? 'bg-[#0a1a14] border border-emerald-500/20' : 'bg-[#14142a] border border-white/10'
                 )}
                 onClick={(e) => e.stopPropagation()}
             >
@@ -1156,7 +1144,7 @@ function SkillPreviewModal({
                 <div
                     className={cn(
                         'p-5 mt-auto',
-                        isStarHp ? 'bg-emerald-500/5 border-t border-emerald-500/20' : 'bg-white/[0.02] border-t border-white/[0.05]'
+                        isStarHp ? 'bg-emerald-500/5 border-t border-emerald-500/20' : 'bg-white/2 border-t border-white/5'
                     )}
                 >
                     {isMaxed ? (
@@ -1171,7 +1159,7 @@ function SkillPreviewModal({
                             <span className={isStarHp ? 'text-emerald-400 text-lg' : 'text-amber-400 text-lg'}>🏆</span>
                             <span
                                 className={cn(
-                                    'text-sm font-bold [font-family:var(--font-dot-gothic-16)] tracking-wider',
+                                    'text-sm font-bold font-dot-gothic-16 tracking-wider',
                                     isStarHp ? 'text-emerald-300/90' : 'text-amber-300/90'
                                 )}
                             >
@@ -1185,7 +1173,7 @@ function SkillPreviewModal({
                                 if (purchaseFn) handlePurchase(purchaseFn, purchaseLabelForFn)
                             }}
                             className={cn(
-                                'w-full py-3.5 px-4 rounded-xl font-bold text-[15px] flex items-center justify-center gap-3 transition-all [font-family:var(--font-dot-gothic-16)]',
+                                'w-full py-3.5 px-4 rounded-xl font-bold text-[15px] flex items-center justify-center gap-3 transition-all font-dot-gothic-16',
                                 canAfford
                                     ? isStarHp
                                         ? 'bg-emerald-500 hover:bg-emerald-400 text-white shadow-lg shadow-emerald-500/25 active:scale-[0.98]'
@@ -1215,7 +1203,7 @@ function SkillPreviewModal({
 // ============================================================
 function PreviewContent({
     preview,
-    progress,
+    progress: _progress,
     currentLevel,
 }: {
     preview: PreviewData
@@ -1226,8 +1214,6 @@ function PreviewContent({
         const tech = TECHNIQUES[preview.techniqueId]
         const owned = currentLevel > 0
         const displayLevel = Math.max(1, currentLevel) as 1 | 2 | 3 | 4 | 5
-
-        const damageStars = '⭐️'.repeat(Math.max(1, Math.min(5, Math.round(tech.damage))))
 
         const traitByTech: Record<TechniqueId, { label: string; value: string }> = {
             red: { label: '散弾数', value: `${LEVEL_BULLET_COUNT[displayLevel]} 発` },
@@ -1265,11 +1251,11 @@ function PreviewContent({
                         />
                     </div>
                     <div>
-                        <p className="text-white font-bold text-xl [font-family:var(--font-dot-gothic-16)] tracking-wide mb-1">
+                        <p className="text-white font-bold text-xl font-dot-gothic-16 tracking-wide mb-1">
                             {tech.label}
                         </p>
                         <span className={cn(
-                            "inline-block px-2.5 py-0.5 rounded text-[11px] font-bold [font-family:var(--font-dot-gothic-16)] tracking-wider border",
+                            "inline-block px-2.5 py-0.5 rounded text-[11px] font-bold font-dot-gothic-16 tracking-wider border",
                             owned ? "bg-indigo-500/20 text-indigo-300 border-indigo-500/30" : "bg-white/5 text-white/40 border-white/10"
                         )}>
                             通常攻撃 {owned ? `Lv ${currentLevel}` : '未所持'}
@@ -1281,10 +1267,10 @@ function PreviewContent({
                     <StatRow label="特性" value={`${trait.label}：${trait.value}`} color="text-indigo-300" />
                     {fx && (
                         <div className="mt-2 rounded-2xl bg-indigo-500/5 border border-indigo-500/20 p-4">
-                            <p className="text-indigo-400 text-[13px] font-bold mb-1.5 [font-family:var(--font-dot-gothic-16)] flex items-center gap-1.5">
+                            <p className="text-indigo-400 text-[13px] font-bold mb-1.5 font-dot-gothic-16 flex items-center gap-1.5">
                                 ⚡ 特殊効果：{fx.label}
                             </p>
-                            <p className="text-white/45 text-xs [font-family:var(--font-dot-gothic-16)] leading-relaxed">
+                            <p className="text-white/45 text-xs font-dot-gothic-16 leading-relaxed">
                                 {fx.desc}
                             </p>
                         </div>
@@ -1326,8 +1312,8 @@ function PreviewContent({
                     )
                 })()}
 
-                <div className="mt-6 pt-6 border-t border-white/[0.05]">
-                    <p className="text-white/40 text-xs mb-3 [font-family:var(--font-dot-gothic-16)] font-bold tracking-wider">アニメーション デモ (Lv {displayLevel})</p>
+                <div className="mt-6 pt-6 border-t border-white/5">
+                    <p className="text-white/40 text-xs mb-3 font-dot-gothic-16 font-bold tracking-wider">アニメーション デモ (Lv {displayLevel})</p>
                     <LoadoutAnimPreview techniqueId={preview.techniqueId} level={displayLevel} />
                 </div>
             </div>
@@ -1364,11 +1350,11 @@ function PreviewContent({
                         })}
                     </div>
                     <div>
-                        <p className="text-white font-bold text-xl [font-family:var(--font-dot-gothic-16)] tracking-wide mb-1">
+                        <p className="text-white font-bold text-xl font-dot-gothic-16 tracking-wide mb-1">
                             {SPECIAL_LABELS[preview.id] ?? preview.id}
                         </p>
                         <span className={cn(
-                            "inline-block px-2.5 py-0.5 rounded text-[11px] font-bold [font-family:var(--font-dot-gothic-16)] tracking-wider border",
+                            "inline-block px-2.5 py-0.5 rounded text-[11px] font-bold font-dot-gothic-16 tracking-wider border",
                             owned ? "bg-purple-500/20 text-purple-300 border-purple-500/30" : "bg-white/5 text-white/40 border-white/10"
                         )}>
                             必殺技 {owned ? `Lv ${currentLevel}` : '未所持'}
@@ -1413,11 +1399,11 @@ function PreviewContent({
                         💚
                     </div>
                     <div>
-                        <p className="text-white font-bold text-xl [font-family:var(--font-dot-gothic-16)] tracking-wide mb-1">
+                        <p className="text-white font-bold text-xl font-dot-gothic-16 tracking-wide mb-1">
                             ヒール
                         </p>
                         <span className={cn(
-                            "inline-block px-2.5 py-0.5 rounded text-[11px] font-bold [font-family:var(--font-dot-gothic-16)] tracking-wider border",
+                            "inline-block px-2.5 py-0.5 rounded text-[11px] font-bold font-dot-gothic-16 tracking-wider border",
                             owned ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/30" : "bg-white/5 text-white/40 border-white/10"
                         )}>
                             {owned ? `Lv ${currentLevel === 6 ? 'max' : currentLevel}` : '未所持'}
@@ -1425,20 +1411,20 @@ function PreviewContent({
                     </div>
                 </div>
                 <div className="flex flex-col gap-4">
-                    <div className="p-4 rounded-2xl bg-white/[0.02] border border-white/[0.05]">
+                    <div className="p-4 rounded-2xl bg-white/2 border border-white/5">
                         <div className="flex items-center justify-between mb-2">
-                            <p className="text-white/50 text-[13px] [font-family:var(--font-dot-gothic-16)] font-bold">回復量</p>
-                            <p className="text-emerald-400 text-[15px] font-bold [font-family:var(--font-dot-gothic-16)]">
+                            <p className="text-white/50 text-[13px] font-dot-gothic-16 font-bold">回復量</p>
+                            <p className="text-emerald-400 text-[15px] font-bold font-dot-gothic-16">
                                 {!owned ? '---' : isFullRestore ? '全回復' : `+${healVal} HP`}
                             </p>
                         </div>
-                        <div className="h-2.5 rounded-full bg-black/40 border border-white/[0.05] overflow-hidden">
+                        <div className="h-2.5 rounded-full bg-black/40 border border-white/5 overflow-hidden">
                             <div
                                 className={cn(
                                     'h-full rounded-full transition-all duration-700',
                                     currentLevel === 6
-                                        ? 'bg-gradient-to-r from-amber-600 to-yellow-400 shadow-[0_0_10px_rgba(251,191,36,0.5)]'
-                                        : 'bg-gradient-to-r from-emerald-600 to-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.5)]'
+                                        ? 'bg-linear-to-r from-amber-600 to-yellow-400 shadow-[0_0_10px_rgba(251,191,36,0.5)]'
+                                        : 'bg-linear-to-r from-emerald-600 to-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.5)]'
                                 )}
                                 style={{ width: `${barWidth}%` }}
                             />
@@ -1446,10 +1432,10 @@ function PreviewContent({
                     </div>
                     {currentLevel === 6 && (
                         <div className="rounded-2xl bg-red-500/5 border border-red-500/20 p-4">
-                            <p className="text-red-400 text-[13px] font-bold mb-1.5 [font-family:var(--font-dot-gothic-16)] flex items-center gap-1.5">
+                            <p className="text-red-400 text-[13px] font-bold mb-1.5 font-dot-gothic-16 flex items-center gap-1.5">
                                 ⚡ all_destruction 付与
                             </p>
-                            <p className="text-white/45 text-xs [font-family:var(--font-dot-gothic-16)] leading-relaxed">
+                            <p className="text-white/45 text-xs font-dot-gothic-16 leading-relaxed">
                                 全回復に加えて、フィールド上の全ての隕石を一撃で破壊する。
                             </p>
                         </div>
@@ -1464,7 +1450,7 @@ function PreviewContent({
                         currentLevel={currentLevel > 0 ? (currentLevel === 6 ? 6 : currentLevel) : 0}
                         maxLevel={6}
                         color="#10b981"
-                        formatValue={(v, level) =>
+                        formatValue={(_v, level) =>
                             level >= 5 ? '全回復' : `+${LEVEL_HEAL_RECOVERY[level as 1 | 2 | 3 | 4]} HP`
                         }
                     />
@@ -1487,10 +1473,10 @@ function PreviewContent({
                         ⭐
                     </div>
                     <div>
-                        <p className="text-white font-bold text-xl [font-family:var(--font-dot-gothic-16)] tracking-wide mb-1">
+                        <p className="text-white font-bold text-xl font-dot-gothic-16 tracking-wide mb-1">
                             星のHP
                         </p>
-                        <span className="inline-block px-2.5 py-0.5 rounded text-[11px] font-bold [font-family:var(--font-dot-gothic-16)] tracking-wider border bg-emerald-500/20 text-emerald-300 border-emerald-500/30">
+                        <span className="inline-block px-2.5 py-0.5 rounded text-[11px] font-bold font-dot-gothic-16 tracking-wider border bg-emerald-500/20 text-emerald-300 border-emerald-500/30">
                             Lv {displayLevel}
                         </span>
                     </div>
@@ -1498,19 +1484,19 @@ function PreviewContent({
                 <div className="flex flex-col gap-4">
                     <div className="p-4 rounded-2xl bg-emerald-500/5 border border-emerald-500/20">
                         <div className="flex items-center justify-between mb-3">
-                            <p className="text-emerald-400/70 text-[13px] [font-family:var(--font-dot-gothic-16)] font-bold">HP上限</p>
-                            <p className="text-emerald-400 text-3xl font-bold [font-family:var(--font-cherry-bomb-one)] leading-none drop-shadow-[0_0_12px_rgba(16,185,129,0.4)]">
+                            <p className="text-emerald-400/70 text-[13px] font-dot-gothic-16 font-bold">HP上限</p>
+                            <p className="text-emerald-400 text-3xl font-bold font-cherry-bomb-one leading-none drop-shadow-[0_0_12px_rgba(16,185,129,0.4)]">
                                 {hp}
                             </p>
                         </div>
                         <div className="h-2.5 rounded-full bg-black/40 border border-emerald-500/20 overflow-hidden">
                             <div
-                                className="h-full rounded-full bg-gradient-to-r from-emerald-700 to-emerald-400 transition-all duration-700 shadow-[0_0_10px_rgba(16,185,129,0.5)]"
+                                className="h-full rounded-full bg-linear-to-r from-emerald-700 to-emerald-400 transition-all duration-700 shadow-[0_0_10px_rgba(16,185,129,0.5)]"
                                 style={{ width: `${(displayLevel / 5) * 100}%` }}
                             />
                         </div>
                         <div className="mt-2 text-right">
-                            <p className="text-emerald-500/70 text-[10px] [font-family:var(--font-dot-gothic-16)] font-bold tracking-widest">
+                            <p className="text-emerald-500/70 text-[10px] font-dot-gothic-16 font-bold tracking-widest">
                                 Lv {displayLevel} / 5
                             </p>
                         </div>
@@ -1538,8 +1524,8 @@ function PreviewContent({
 // ============================================================
 function StatRow({ label, value, color }: { label: string; value: string; color: string }) {
     return (
-        <div className="flex items-center justify-between py-1.5 border-b border-white/[0.05] last:border-0">
-            <span className="text-white/35 text-xs [font-family:var(--font-dot-gothic-16)]">{label}</span>
+        <div className="flex items-center justify-between py-1.5 border-b border-white/5 last:border-0">
+            <span className="text-white/35 text-xs font-dot-gothic-16">{label}</span>
             <span className={cn('text-xs font-bold', color)}>{value}</span>
         </div>
     )
@@ -1750,7 +1736,7 @@ function LoadoutAnimPreview({ techniqueId, level }: { techniqueId: TechniqueId; 
         >
             {/* 発射ライン */}
             <div
-                className="absolute top-1/2 left-[38px] right-0 border-t border-dashed border-white/[0.05]"
+                className="absolute top-1/2 left-[38px] right-0 border-t border-dashed border-white/5"
                 style={{ transform: 'translateY(-1px)' }}
             />
 
@@ -1773,7 +1759,7 @@ function LoadoutAnimPreview({ techniqueId, level }: { techniqueId: TechniqueId; 
                     className="w-1.5 h-1.5 rounded-full shrink-0"
                     style={{ backgroundColor: tech.color }}
                 />
-                <span className="text-[9px] text-white/25 [font-family:var(--font-dot-gothic-16)]">
+                <span className="text-[9px] text-white/25 font-dot-gothic-16">
                     {tech.label} Lv. {level}
                     {EFFECT_LABEL[techniqueId] ? ` · ${EFFECT_LABEL[techniqueId]}` : ''}
                 </span>
@@ -1821,7 +1807,7 @@ function SpecialAttackLoadoutPreview({
         let lastFire = -FIRE_INTERVAL
         let animId: number
 
-        function spawnWave(waveIndex: number) {
+        function spawnWave(_waveIndex: number) {
             const displayCount = Math.min(bulletsPerWave, 24)
             if (displayCount <= 1) {
                 bullets.push({ x: DINO_X + 18, y: ORIGIN_Y, vx: SPEED, vy: 0, alpha: 0.95 })
@@ -1891,7 +1877,7 @@ function SpecialAttackLoadoutPreview({
 
     return (
         <div className="relative mt-2 rounded-xl overflow-hidden border border-white/[0.07]" style={{ height: '88px', background: 'rgba(0,0,0,0.35)' }}>
-            <div className="absolute top-1/2 left-[38px] right-0 border-t border-dashed border-white/[0.05]" style={{ transform: 'translateY(-1px)' }} />
+            <div className="absolute top-1/2 left-[38px] right-0 border-t border-dashed border-white/5" style={{ transform: 'translateY(-1px)' }} />
             <div className="absolute left-1.5 top-1/2 -translate-y-1/2 z-10 opacity-90 ptr-events-none">
                 <Image src={ICONS.DINO} alt="Dino" width={24} height={24} />
             </div>
@@ -1904,7 +1890,7 @@ function SpecialAttackLoadoutPreview({
                         boxShadow: `0 0 6px ${bulletColor}99`,
                     }}
                 />
-                <span className="text-[9px] text-white/25 [font-family:var(--font-dot-gothic-16)]">{label} Lv{level}</span>
+                <span className="text-[9px] text-white/25 font-dot-gothic-16">{label} Lv{level}</span>
             </div>
         </div>
     )
