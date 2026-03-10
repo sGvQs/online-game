@@ -4,8 +4,9 @@ import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import Image from 'next/image'
 import { useSE } from '@/hooks/useSE'
+import { annoyingDinosaurComplaint } from './annoyingDinosaurComplaint.styles'
 
-const CHERRY_BOMB_FONT = 'var(--font-cherry-bomb-one)'
+const styles = annoyingDinosaurComplaint()
 const ENTER_DURATION = 3
 const IDLE_DURATION = 8
 const EXIT_DURATION = 3
@@ -113,8 +114,8 @@ export function AnnoyingDinosaurComplaint({
                 ease: phase === 'exiting' ? 'easeIn' : 'easeOut',
             }}
         >
-            <div className="flex items-start gap-2 w-full">
-                <div className="relative w-14 h-14 sm:w-16 sm:h-16 shrink-0">
+            <div className={styles.inner()}>
+                <div className={styles.imageWrapper()}>
                     <Image
                         src="/svg/charactor/annoying-dinosaur.svg"
                         alt="Annoying Dinosaur"
@@ -125,17 +126,14 @@ export function AnnoyingDinosaurComplaint({
                 </div>
                 {phase !== 'entering' && (
                     <motion.div
-                        className="shrink-0 mt-2 w-[200px]"
+                        className={styles.bubbleWrapper()}
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ duration: 0.4, delay: 0.2 }}
                     >
-                        <div className="relative px-2.5 py-1.5 rounded-xl border border-white bg-white text-black text-[10px] font-medium shadow-sm">
-                            <span className="tracking-wide" style={{ fontFamily: CHERRY_BOMB_FONT }}>{displayedText}</span>
-                            <div
-                                className="absolute -left-1.5 top-1/2 -translate-y-1/2 w-0 h-0 border-t-4 border-t-transparent border-b-4 border-b-transparent border-r-[6px] border-r-white"
-                                aria-hidden
-                            />
+                        <div className={styles.bubble()}>
+                            <span className={styles.bubbleText()}>{displayedText}</span>
+                            <div className={styles.bubbleTail()} aria-hidden />
                         </div>
                     </motion.div>
                 )}

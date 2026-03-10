@@ -1,6 +1,9 @@
 import Link from 'next/link'
 import { Trophy, ChevronRight } from 'lucide-react'
 import type { UserRanking } from '@/types'
+import { rankingCard } from './rankingCard.styles'
+
+const styles = rankingCard()
 
 interface RankingCardProps {
     rankings: UserRanking[]
@@ -9,31 +12,24 @@ interface RankingCardProps {
 
 export function RankingCard({ rankings, currentUserId }: RankingCardProps) {
     return (
-        <div className="glass-card p-5 rounded-2xl shrink-0 w-full self-start">
-            <h2 className="text-lg font-bold mb-4 text-brand-900 flex items-center gap-2">
+        <div className={styles.wrapper()}>
+            <h2 className={styles.heading()}>
                 <Trophy className="w-5 h-5" />
                 ランキング
             </h2>
-            <ul className="space-y-1.5 mb-4 max-h-[280px] overflow-y-auto">
+            <ul className={styles.list()}>
                 {rankings.map((r) => (
                     <li
                         key={r.userId}
-                        className={`flex items-center gap-2 py-2 px-3 rounded-lg text-sm ${
-                            currentUserId === r.userId ? 'bg-brand-300/30' : ''
-                        }`}
+                        className={`${styles.listItem()} ${currentUserId === r.userId ? styles.listItemActive() : ''}`}
                     >
-                        <span className="font-bold text-brand-700 w-7 shrink-0 text-sm">
-                            {r.rank}位
-                        </span>
-                        <span className="truncate flex-1 min-w-0 font-medium">{r.name}</span>
-                        <span className="text-brand-600 shrink-0 text-sm font-semibold">{r.points}pt</span>
+                        <span className={styles.rank()}>{r.rank}位</span>
+                        <span className={styles.name()}>{r.name}</span>
+                        <span className={styles.points()}>{r.points}pt</span>
                     </li>
                 ))}
             </ul>
-            <Link
-                href="/dashboard/ranking"
-                className="flex items-center justify-center gap-1 text-sm font-medium text-brand-600 hover:text-brand-500 py-2"
-            >
+            <Link href="/dashboard/ranking" className={styles.moreLink()}>
                 もっと見る
                 <ChevronRight className="w-4 h-4" />
             </Link>

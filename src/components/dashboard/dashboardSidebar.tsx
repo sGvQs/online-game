@@ -13,6 +13,9 @@ import {
     getRandomDinosaurRoomName,
     getRandomTypingMessage,
 } from '@/constants/dashboard/dinosaurMessages'
+import { dashboardSidebar } from './dashboardSidebar.styles'
+
+const sidebarStyles = dashboardSidebar()
 
 export function DashboardSidebar({ isTop5User = false }: { isTop5User?: boolean }) {
   const [roomFormOpen, setRoomFormOpen] = useState(false)
@@ -57,8 +60,8 @@ export function DashboardSidebar({ isTop5User = false }: { isTop5User?: boolean 
   const showDinosaur = roomFormOpen || dinosaurExiting
 
   return (
-    <div className="glass-card p-6 rounded-2xl">
-      <h2 className="text-xl font-bold mb-4 text-brand-900 flex items-center gap-2">
+    <div className={sidebarStyles.wrapper()}>
+      <h2 className={sidebarStyles.heading()}>
         <PackagePlus className="w-4 h-4" />
         ルームを作成
       </h2>
@@ -107,15 +110,11 @@ function CreateRoomFormContent({
   const isControlled = roomName !== undefined && onRoomNameChange !== undefined
 
   return (
-    <div className="animate-in fade-in slide-in-from-top-2 duration-300">
-      {/* <h3 className="font-bold mb-3 text-sm text-brand-800 dark:text-brand-300 uppercase tracking-wider flex items-center gap-2">
-        <span className="w-2 h-2 rounded-full bg-brand-500 animate-pulse"></span>
-        新しいルームの詳細
-      </h3> */}
+    <div className={sidebarStyles.formWrapper()}>
       <form action={async (formData) => {
         await createRoom(formData)
         onClose()
-      }} className="flex flex-col gap-3">
+      }} className={sidebarStyles.formInner()}>
         <Input
           name="name"
           placeholder="ルーム名を入力...（15文字以内）"
@@ -126,7 +125,7 @@ function CreateRoomFormContent({
           className="input-room-name w-full border-brand-200 focus:border-brand-500 focus:ring-brand-500/20 focus:ring-2"
           autoFocus
         />
-        <div className="flex gap-2 mt-1">
+        <div className={sidebarStyles.formActions()}>
           <Button type="submit" className="flex-1 bg-brand-300 hover:bg-brand-500 text-white shadow-[0_0_15px_rgba(99,102,241,0.5)] hover:shadow-[0_0_25px_rgba(99,102,241,0.6)] transition-all duration-300 gap-2">
             <Check className="w-4 h-4" />
             作成

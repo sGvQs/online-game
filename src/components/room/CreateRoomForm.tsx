@@ -6,6 +6,9 @@ import { IconButton } from '@/components/ui/iconButton'
 import { Input } from '@/components/ui/input'
 import { useState } from 'react'
 import { Plus, X, Check } from 'lucide-react'
+import { createRoomForm } from './CreateRoomForm.styles'
+
+const styles = createRoomForm()
 
 export function CreateRoomForm() {
     const [open, setOpen] = useState(false)
@@ -23,15 +26,11 @@ export function CreateRoomForm() {
     }
 
     return (
-        <div className="animate-in fade-in slide-in-from-top-2 duration-300">
-            {/* <h3 className="font-bold mb-3 text-sm text-brand-800 dark:text-brand-300 uppercase tracking-wider flex items-center gap-2">
-                <span className="w-2 h-2 rounded-full bg-brand-500 animate-pulse"></span>
-                新しいルームの詳細
-            </h3> */}
+        <div className={styles.formWrapper()}>
             <form action={async (formData) => {
                 await createRoom(formData)
                 setOpen(false)
-            }} className="flex flex-col gap-3">
+            }} className={styles.form()}>
                 <Input
                     name="name"
                     placeholder="ルーム名を入力...（15文字以内）"
@@ -40,7 +39,7 @@ export function CreateRoomForm() {
                     className="input-room-name w-full border-brand-200 focus:border-brand-500 focus:ring-brand-500/20 focus:ring-2"
                     autoFocus
                 />
-                <div className="flex gap-2 mt-1">
+                <div className={styles.actions()}>
                     <Button type="submit" className="flex-1 bg-brand-300 hover:bg-brand-500 text-white shadow-[0_0_15px_rgba(99,102,241,0.5)] hover:shadow-[0_0_25px_rgba(99,102,241,0.6)] transition-all duration-300 gap-2">
                         <Check className="w-4 h-4" />
                         作成

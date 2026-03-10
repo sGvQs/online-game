@@ -27,16 +27,16 @@ export async function cleanupAbandonedRooms() {
         include: { creator: true },
     })
 
-    for (const room of abandonedRooms) {
-        await prisma.roomDeletedNotification.create({
-            data: {
+    if (abandonedRooms.length > 0) {
+        await prisma.roomDeletedNotification.createMany({
+            data: abandonedRooms.map((room) => ({
                 userId: room.createdBy,
                 roomName: room.name,
-            },
+            })),
         })
 
-        await prisma.room.delete({
-            where: { id: room.id },
+        await prisma.room.deleteMany({
+            where: { id: { in: abandonedRooms.map((r) => r.id) } },
         })
     }
 }

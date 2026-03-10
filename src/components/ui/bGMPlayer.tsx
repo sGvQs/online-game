@@ -3,8 +3,10 @@
 import { useEffect, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { useSound } from '@/lib/sound-context';
-import { CircleDivide, Volume2, VolumeOff } from 'lucide-react'
+import { Volume2, VolumeOff } from 'lucide-react'
+import { bgmPlayer } from './bGMPlayer.styles'
 
+const styles = bgmPlayer()
 
 const BGM_CONFIG = {
     ERROR_HUNTER: {
@@ -82,7 +84,7 @@ export default function BGMPlayer() {
     const isSingleTrack = activeConfig.srcs.length === 1;
 
     return (
-        <div className="fixed bottom-6 right-6 z-50">
+        <div className={styles.wrapper()}>
             <audio
                 ref={audioRef}
                 loop={isSingleTrack}
@@ -97,7 +99,7 @@ export default function BGMPlayer() {
                     }
                     setIsPlaying(!isPlaying);
                 }}
-                className="w-12 h-12 rounded-full shadow-lg text-white flex items-center justify-center"
+                className={styles.button()}
             >
                 {!isPlaying ? <VolumeOff/>: <Volume2/>}
             </button>

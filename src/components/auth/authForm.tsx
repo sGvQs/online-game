@@ -3,9 +3,9 @@
 import Link from 'next/link'
 import { createClient } from '@/utils/supabase/client'
 import { useState } from 'react'
+import { authForm } from './authForm.styles'
 
-const DOT_GOTHIC_FONT = 'var(--font-dot-gothic-16)'
-const CHERRY_BOMB_FONT = 'var(--font-cherry-bomb-one)'
+const styles = authForm()
 
 export default function AuthForm() {
     const [loading, setLoading] = useState(false)
@@ -30,37 +30,23 @@ export default function AuthForm() {
     }
 
     return (
-        <div
-            className="w-full rounded-2xl px-8 py-8 flex flex-col items-center gap-6"
-            style={{
-                background: 'rgba(129,140,248,0.05)',
-                border: '1px solid rgba(129,140,248,0.18)',
-                boxShadow: '0 8px 32px rgba(0,0,0,0.14)',
-                backdropFilter: 'blur(12px)',
-            }}
-        >
+        <div className={styles.wrapper()}>
             {/* ヘッダー */}
-            <div className="text-center">
-                <h3
-                    className="text-xl text-white"
-                    style={{ fontFamily: CHERRY_BOMB_FONT }}
-                >
+            <div className={styles.header()}>
+                <h3 className={styles.headerTitle()}>
                     ログインはここからよろしく。
                 </h3>
-                <p className="mt-1.5 text-[10px] text-brand-700" style={{ fontFamily: DOT_GOTHIC_FONT }}>
+                <p className={styles.headerSub()}>
                     Google アカウントで一発ログイン
                 </p>
             </div>
 
             {/* セパレーター */}
-            <div className="w-full h-px bg-brand-500/10" />
+            <div className={styles.separator()} />
 
             {/* エラー */}
             {error && (
-                <div
-                    className="w-full p-3 bg-red-900/40 text-red-300 border border-red-700/50 rounded-xl text-[11px]"
-                    style={{ fontFamily: DOT_GOTHIC_FONT }}
-                >
+                <div className={styles.errorBox()}>
                     {error}
                 </div>
             )}
@@ -69,19 +55,7 @@ export default function AuthForm() {
             <button
                 onClick={handleGoogleLogin}
                 disabled={loading}
-                className="w-full flex items-center justify-center gap-3 py-3 px-6 rounded-full text-sm font-semibold tracking-wide text-white transition-all duration-300 hover:scale-105 disabled:opacity-50 disabled:pointer-events-none"
-                style={{
-                    fontFamily: DOT_GOTHIC_FONT,
-                    background: 'linear-gradient(135deg, rgba(99,102,241,0.15), rgba(168,85,247,0.15))',
-                    border: '1px solid rgba(129,140,248,0.4)',
-                    boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.08)',
-                }}
-                onMouseEnter={e => {
-                    (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 0 20px rgba(129,140,248,0.25), inset 0 1px 0 rgba(255,255,255,0.08)'
-                }}
-                onMouseLeave={e => {
-                    (e.currentTarget as HTMLButtonElement).style.boxShadow = 'inset 0 1px 0 rgba(255,255,255,0.08)'
-                }}
+                className={styles.googleButton()}
             >
                 {loading ? (
                     <span className="text-brand-400">Connecting...</span>
@@ -99,15 +73,12 @@ export default function AuthForm() {
             </button>
 
             {/* 利用規約 */}
-            <p
-                className="text-[10px] text-center text-brand-700/60 leading-relaxed"
-                style={{ fontFamily: DOT_GOTHIC_FONT }}
-            >
-                <Link href="/terms" className="hover:text-brand-500 transition-colors underline underline-offset-2">
+            <p className={styles.legalText()}>
+                <Link href="/terms" className={styles.legalLink()}>
                     利用規約
                 </Link>
                 {' '}と{' '}
-                <Link href="/privacy" className="hover:text-brand-500 transition-colors underline underline-offset-2">
+                <Link href="/privacy" className={styles.legalLink()}>
                     プライバシーポリシー
                 </Link>
                 {'\n'}に同意の上、ご利用ください。

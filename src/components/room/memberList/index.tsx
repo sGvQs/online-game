@@ -1,7 +1,7 @@
 'use client'
 
 import { createClient } from '@/utils/supabase/client'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback, useRef } from 'react'
 import { getRoomUsers } from '@/server/actions/room'
 import { Users } from 'lucide-react'
 import { RoomUserWithUser } from '@/types'
@@ -12,18 +12,19 @@ const styles = memberListCard()
 
 export function MemberList({ roomId, initialMembers }: { roomId: string, initialMembers: RoomUserWithUser[] }) {
     const [members, setMembers] = useState<RoomUserWithUser[]>(initialMembers)
-    const supabase = createClient()
+    const supabaseRef = useRef(createClient())
 
-    const handlePayload = async () => {
+    const handlePayload = useCallback(async () => {
         try {
-            const roomUsers = await getRoomUsers(roomId);
-            setMembers(roomUsers);
+            const roomUsers = await getRoomUsers(roomId)
+            setMembers(roomUsers)
         } catch (error) {
-            console.error("更新に失敗:", error);
+            console.error("更新に失敗:", error)
         }
-    };
+    }, [roomId])
 
     useEffect(() => {
+        const supabase = supabaseRef.current
         const channel = supabase
             .channel(`room_${roomId}`)
             .on('postgres_changes', {
@@ -32,15 +33,14 @@ export function MemberList({ roomId, initialMembers }: { roomId: string, initial
                 table: 'room_users',
                 filter: `room_id=eq.${roomId}`,
             }, () => {
-                handlePayload();
+                handlePayload()
             })
-            .subscribe();
+            .subscribe()
 
         return () => {
             supabase.removeChannel(channel)
         }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [roomId])
+    }, [roomId, handlePayload])
 
     return (
         <div className={styles.wrapper()}>

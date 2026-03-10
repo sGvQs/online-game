@@ -4,6 +4,9 @@ import { useState, useTransition } from 'react'
 import { setUserComment } from '@/server/actions/user/setUserComment'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
+import { userCommentForm } from './UserCommentForm.styles'
+
+const styles = userCommentForm()
 
 interface UserCommentFormProps {
   initialComment?: string | null
@@ -30,9 +33,9 @@ export function UserCommentForm({ initialComment }: UserCommentFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className={styles.form()}>
       <div>
-        <label htmlFor="comment" className="block text-sm font-medium text-brand-900 mb-2">
+        <label htmlFor="comment" className={styles.label()}>
           煽りコメント
         </label>
         <Input
@@ -45,7 +48,7 @@ export function UserCommentForm({ initialComment }: UserCommentFormProps) {
           disabled={isPending}
           className="w-full"
         />
-        <p className="mt-1 text-xs text-brand-900 opacity-70">
+        <p className={styles.charCount()}>
           {comment.length} / 20文字
         </p>
       </div>
@@ -59,7 +62,7 @@ export function UserCommentForm({ initialComment }: UserCommentFormProps) {
       </Button>
 
       {success && (
-        <p className="text-sm text-green-600 text-center">
+        <p className={styles.successMessage()}>
           コメントが保存されました
         </p>
       )}

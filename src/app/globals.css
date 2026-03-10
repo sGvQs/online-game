@@ -74,6 +74,7 @@ html {
   --font-dot-gothic-16: var(--font-dot-gothic-16), "DotGothic16", sans-serif;
   --font-yusei-magic: var(--font-yusei-magic), "Yusei Magic", sans-serif;
   --font-cherry-bomb-one: var(--font-cherry-bomb-one), "Cherry Bomb One", sans-serif;
+  --font-rubik-puddles: var(--font-rubik-puddles), "Rubik Puddles", sans-serif;
 
   /* Map brand colors */
   --color-brand-50: var(--brand-50);

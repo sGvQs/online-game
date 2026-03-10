@@ -407,18 +407,15 @@ async function judgeRound(eventId: string) {
     })
 
     // ゲストのJankenLogを記録
-    for (const guestHand of event.guestHands) {
-        const isGuestWin = guestWinners.includes(guestHand.userId)
-        await prisma.jankenLog.create({
-            data: {
-                userId: guestHand.userId,
-                isHost: false,
-                matchId: event.matchId,
-                jankenEventId: event.id,
-                isWinning: isGuestWin,
-            }
-        })
-    }
+    await prisma.jankenLog.createMany({
+        data: event.guestHands.map((guestHand) => ({
+            userId: guestHand.userId,
+            isHost: false,
+            matchId: event.matchId,
+            jankenEventId: event.id,
+            isWinning: guestWinners.includes(guestHand.userId),
+        })),
+    })
 
     // RESULTフェーズへ遷移
     await prisma.jankenEvent.update({
@@ -659,39 +656,36 @@ export async function finishJanken(matchId: string, roomId: string) {
         })
 
         // 2. 月間ランキングとポイント履歴の更新
-        for (const score of match.matchScores) {
-            if (score.points > 0) {
-                // 月間ランキングを加算（または新規作成）
-                await tx.monthlyRanking.upsert({
-                    where: {
-                        userId_year_month: {
+        await Promise.all(
+            match.matchScores
+                .filter((score) => score.points > 0)
+                .flatMap((score) => [
+                    tx.monthlyRanking.upsert({
+                        where: {
+                            userId_year_month: {
+                                userId: score.userId,
+                                year,
+                                month,
+                            },
+                        },
+                        update: { totalPoints: { increment: score.points } },
+                        create: {
                             userId: score.userId,
                             year,
-                            month
-                        }
-                    },
-                    update: {
-                        totalPoints: { increment: score.points }
-                    },
-                    create: {
-                        userId: score.userId,
-                        year,
-                        month,
-                        totalPoints: score.points
-                    }
-                })
-
-                // 獲得履歴を記録
-                await tx.pointLog.create({
-                    data: {
-                        userId: score.userId,
-                        amount: score.points,
-                        gameType: 'NULL_HAND',
-                        reason: `MATCH_REWARD_${matchId}`
-                    }
-                })
-            }
-        }
+                            month,
+                            totalPoints: score.points,
+                        },
+                    }),
+                    tx.pointLog.create({
+                        data: {
+                            userId: score.userId,
+                            amount: score.points,
+                            gameType: 'NULL_HAND',
+                            reason: `MATCH_REWARD_${matchId}`,
+                        },
+                    }),
+                ])
+        )
     })
 }
 

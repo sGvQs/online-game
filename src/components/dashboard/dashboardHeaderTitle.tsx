@@ -1,15 +1,13 @@
 'use client'
 
 import Image from 'next/image'
+import { dashboardHeaderTitle } from './dashboardHeaderTitle.styles'
 
-const RUBIK_PUDDLES_FONT = 'var(--font-rubik-puddles)'
+const styles = dashboardHeaderTitle()
 
 export function DashboardHeaderTitle() {
   return (
-    <h1
-      className="font-black tracking-tight text-brand-900 flex items-center gap-4 text-2xl"
-      style={{ fontFamily: RUBIK_PUDDLES_FONT }}
-    >
+    <h1 className={styles.heading()}>
       <Image
         src="/icon.svg"
         alt=""

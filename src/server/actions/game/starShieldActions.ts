@@ -249,32 +249,34 @@ export async function saveStarShieldResult(
         const year = now.getFullYear()
         const month = now.getMonth() + 1
 
-        for (const userId of [shooterId, typistId]) {
-            await prisma.monthlyRanking.upsert({
-                where: {
-                    userId_year_month: {
+        await Promise.all(
+            [shooterId, typistId].flatMap((userId) => [
+                prisma.monthlyRanking.upsert({
+                    where: {
+                        userId_year_month: {
+                            userId,
+                            year,
+                            month,
+                        },
+                    },
+                    update: { totalPoints: { increment: points } },
+                    create: {
                         userId,
                         year,
                         month,
+                        totalPoints: points,
                     },
-                },
-                update: { totalPoints: { increment: points } },
-                create: {
-                    userId,
-                    year,
-                    month,
-                    totalPoints: points,
-                },
-            })
-            await prisma.pointLog.create({
-                data: {
-                    userId,
-                    amount: points,
-                    gameType: 'STAR_SHIELD',
-                    reason: 'CLEARED',
-                },
-            })
-        }
+                }),
+                prisma.pointLog.create({
+                    data: {
+                        userId,
+                        amount: points,
+                        gameType: 'STAR_SHIELD',
+                        reason: 'CLEARED',
+                    },
+                }),
+            ])
+        )
 
         // クリア記録（HELL解放判定用）。テーブル未作成時はエラーを握りつぶす
         try {

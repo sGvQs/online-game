@@ -18,6 +18,9 @@ import {
     getRandomOtherJoinMessage,
 } from '@/constants/room/roomEntryMessages'
 import { PresenceDuplicateWarning } from '@/components/common/PresenceDuplicateWarning'
+import { roomPageClient } from './roomPageClient.styles'
+
+const styles = roomPageClient()
 
 interface RoomPageClientProps {
     room: Room // 初期のデータの状態
@@ -193,9 +196,9 @@ export function RoomPageClientWrapper({
                     />,
                     document.body
                 )}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className={styles.layout()}>
                 {/* Game Board Area */}
-                <div className="lg:col-span-2 space-y-4">
+                <div className={styles.mainArea()}>
                     {children}
 
                     {/* Game Selection for Host */}
@@ -207,7 +210,7 @@ export function RoomPageClientWrapper({
                 </div>
 
                 {/* Sidebar / Members */}
-                <div className="lg:col-span-1">
+                <div className={styles.sidebar()}>
                     <MemberListView
                         members={members}
                         rankingsMap={rankingsMap}
@@ -232,19 +235,19 @@ export function RoomPageClientWrapper({
                 title="ゲームを開始できません"
                 showCloseButton
             >
-                <div className="p-6 space-y-4">
-                    <p className="text-brand-800">
+                <div className={styles.errorModalContent()}>
+                    <p className={styles.errorModalText()}>
                         現在の参加者数（{members.length}人）では、このゲームをプレイできません。
                     </p>
-                    <p className="text-sm text-brand-600">
+                    <p className={styles.errorModalSub()}>
                         {gameStartErrorType === 'error-hunter' && `ERROR HUNTER は ${getPlayerRangeLabel('error-hunter')}でプレイできます。`}
                         {gameStartErrorType === 'null-hand' && `NULL HAND は ${getPlayerRangeLabel('null-hand')}でプレイできます。`}
                         {gameStartErrorType === 'star-shield' && 'STAR SHIELD は 2人のみでプレイできます。'}
                     </p>
-                    <div className="flex justify-center pt-4">
+                    <div className={styles.errorModalActions()}>
                         <button
                             onClick={() => setShowGameStartError(false)}
-                            className="px-8 py-3 rounded-lg font-bold text-sm transition-all border bg-brand-500 text-white border-brand-600 hover:bg-brand-600"
+                            className={styles.errorModalButton()}
                         >
                             OK
                         </button>

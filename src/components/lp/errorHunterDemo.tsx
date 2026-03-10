@@ -4,7 +4,9 @@ import { useState, useCallback, useEffect } from 'react'
 import { useSE } from '@/hooks/useSE'
 import { Win95Dialog } from '@/components/game/common/errorHunter/win95Dialog'
 import { Win95TitleBarButton } from '@/components/game/common/errorHunter/win95TitleBarButton'
-import { cn } from '@/lib/utils'
+import { errorHunterDemo as errorHunterDemoStyles } from './errorHunterDemo.styles'
+
+const styles = errorHunterDemoStyles()
 
 const ERROR_MESSAGES = [
     'Windows Protection Error.\nYou need to restart your computer.',
@@ -81,13 +83,7 @@ export function ErrorHunterDemo() {
     }, [play])
 
     return (
-        <div
-            className={cn(
-                'relative rounded-xl overflow-hidden border-2 border-brand-500/50',
-                'bg-[#008080] min-h-[400px]',
-                "font-['MS_Sans_Serif','Segoe_UI',Tahoma,sans-serif] text-xs"
-            )}
-        >
+        <div className={styles.wrapper()}>
             {/* Win95 デスクトップ上にエラーダイアログを配置 */}
             {phase === 'playing' &&
                 errors
@@ -95,10 +91,7 @@ export function ErrorHunterDemo() {
                     .map((e) => (
                         <div
                             key={e.id}
-                            className={cn(
-                                'absolute translate-x-[-50%] translate-y-[-50%] z-10',
-                                'animate-[win95-appear_0.15s_ease-out]'
-                            )}
+                            className={styles.errorCard()}
                             style={{
                                 left: `${e.positionX}%`,
                                 top: `${e.positionY}%`,
@@ -127,10 +120,7 @@ export function ErrorHunterDemo() {
 
             {/* リザルトモーダル */}
             {phase === 'result' && (
-                <div
-                    className="absolute inset-0 flex items-center justify-center z-20"
-                    style={{ backgroundColor: 'rgba(0, 0, 0, 0.3)' }}
-                >
+                <div className={styles.overlay()}>
                     <Win95Dialog
                         title="Result"
                         customIconSrc={DINOSAUR_ICON}

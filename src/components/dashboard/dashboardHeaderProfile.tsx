@@ -9,6 +9,9 @@ import { Input } from '@/components/ui/input'
 import { RoomModal } from '@/components/room/roomModal'
 import { updateProfile } from '@/server/actions/user/updateProfile'
 import { FACE_ICON_PATHS, FACE_ICON_OPTIONS, FaceIcon } from '@/constants/common/faceIcon'
+import { dashboardHeaderProfile } from './dashboardHeaderProfile.styles'
+
+const styles = dashboardHeaderProfile()
 
 interface DashboardHeaderProfileProps {
     name: string
@@ -37,29 +40,21 @@ export function DashboardHeaderProfile({
 
     return (
         <>
-            <div className="flex items-center gap-2">
+            <div className={styles.wrapper()}>
                 {/* 吹き出し（外側に配置） */}
-                <div className="relative px-2.5 py-1 rounded-lg border border-brand-200/20 bg-brand-300 text-white text-[10px] font-medium shadow-sm max-w-[180px] shrink-0">
-                    <span className="font-(--font-dot-gothic-16) tracking-wide line-clamp-2 text-left block">
+                <div className={styles.bubble()}>
+                    <span className={styles.bubbleText()}>
                         {comment || '煽りコメントを設定'}
                     </span>
-                    <div
-                        className="absolute -right-1.5 top-1/2 -translate-y-1/2 w-0 h-0 border-t-[5px] border-t-transparent border-b-[5px] border-b-transparent border-l-[6px] border-l-brand-300"
-                        aria-hidden
-                    />
+                    <div className={styles.bubbleTail()} aria-hidden />
                 </div>
                 {/* アイコン・名前・順位・ポイント（クリック可能、ホバー派手） */}
                 <button
                     type="button"
                     onClick={() => setModalOpen(true)}
-                    className="flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium text-white shrink-0
-                        bg-white/10 border border-brand-200/30
-                        hover:bg-brand-400/30 hover:border-brand-400/60
-                        hover:shadow-[0_0_20px_rgba(99,102,241,0.4)]
-                        active:scale-[0.98]
-                        transition-all duration-300 cursor-pointer"
+                    className={styles.profileButton()}
                 >
-                    <div className="relative w-8 h-8 rounded-full overflow-hidden">
+                    <div className={styles.avatarWrapper()}>
                         <Image
                             src={FACE_ICON_PATHS[faceIcon]}
                             alt=""
