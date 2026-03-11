@@ -8,6 +8,7 @@ import { ErrorHunterDemo } from '@/components/lp/errorHunterDemo'
 import { NullHandDemo } from '@/components/lp/nullHandDemo'
 import { AnnoyingDinosaur } from '@/components/login/annoyingDinosaur'
 import { lpPage } from './page.styles'
+import { Typography } from '@/components/ui/typography'
 
 const styles = lpPage()
 
@@ -50,12 +51,12 @@ export default function Home() {
                 <div className={styles.sectionDivider()}>
                     <div className={styles.dividerRow()}>
                         <div className={styles.dividerLine()} />
-                        <span className={styles.dividerLabel()}>GAMES</span>
+                        <Typography variant="label" as="span" className={styles.dividerLabel()}>GAMES</Typography>
                         <div className={styles.dividerLine()} />
                     </div>
-                    <p className={styles.dividerSub()}>
+                    <Typography variant="small" as="p" className={styles.dividerSub()}>
                         各ゲームにはランキングがある。上を目指すもよし、友達と遊ぶもよし。
-                    </p>
+                    </Typography>
                 </div>
 
                 {/* ゲーム紹介 */}
@@ -68,9 +69,9 @@ export default function Home() {
                         >
                             {/* ゲーム番号バナー */}
                             <div className={styles.gameBanner()}>
-                                <span className={styles.gameNumber()} style={{ color: game.tagColor }}>
+                                <Typography variant="caption" as="span" font="rubik-puddles" className={styles.gameNumber()} style={{ color: game.tagColor }}>
                                     {game.number}
-                                </span>
+                                </Typography>
                                 <div>
                                     <div className={styles.gameTags()}>
                                         {game.tags.map((tag) => (
@@ -87,12 +88,14 @@ export default function Home() {
                                             </span>
                                         ))}
                                     </div>
-                                    <h2
+                                    <Typography
+                                        variant="h2"
+                                        font="rubik-puddles"
                                         className={styles.gameTitle()}
                                         style={{ color: game.tagColor, textShadow: `0 0 30px ${game.tagColor}60` }}
                                     >
                                         {game.title}
-                                    </h2>
+                                    </Typography>
                                 </div>
                             </div>
 
@@ -108,9 +111,9 @@ export default function Home() {
                             >
                                 {/* カードヘッダー：説明 + 恐竜 */}
                                 <div className={styles.gameCardHeader()}>
-                                    <p className={styles.gameDescription()}>
+                                    <Typography variant="body" className={styles.gameDescription()}>
                                         {game.description}
-                                    </p>
+                                    </Typography>
                                     <div
                                         className={styles.gameDeveloper()}
                                         style={{
@@ -126,7 +129,7 @@ export default function Home() {
                                                 className="object-contain"
                                             />
                                         </div>
-                                        <p className={styles.devComment()}>{game.comment}</p>
+                                        <Typography variant="body" font="cherry-bomb-one" className={styles.devComment()}>{game.comment}</Typography>
                                     </div>
                                 </div>
 
@@ -162,15 +165,15 @@ export default function Home() {
                         <div className="absolute top-6 right-12 w-1.5 h-1.5 rounded-full bg-purple-400/50 animate-pulse" style={{ animationDelay: '0.7s' }} />
                         <div className="absolute bottom-12 left-16 w-1 h-1 rounded-full bg-pink-400/50 animate-pulse" style={{ animationDelay: '1.3s' }} />
 
-                        <p className={styles.ctaReadyLabel()}>
+                        <Typography variant="label" as="p" className={styles.ctaReadyLabel()}>
                             ✦ ready to play ✦
-                        </p>
+                        </Typography>
 
-                        <h2 className={styles.ctaHeading()}>
+                        <Typography variant="h2" className={styles.ctaHeading()}>
                             <span className={styles.ctaHeadingSpan()}>
                                 ゲームでまってるぞ。
                             </span>
-                        </h2>
+                        </Typography>
 
                         <Link href="/login" className={styles.ctaButton()}>
                             <span className={styles.ctaPulse()} />
@@ -180,22 +183,22 @@ export default function Home() {
                             </svg>
                         </Link>
 
-                        <p className={styles.ctaFreeLabel()}>
+                        <Typography variant="small" as="p" className={styles.ctaFreeLabel()}>
                             ✦ アカウント登録 無料 ✦
-                        </p>
+                        </Typography>
 
-                        <p className={styles.ctaLegal()}>
+                        <Typography variant="caption" as="p" className={styles.ctaLegal()}>
                             <Link href="/terms" className={styles.ctaLegalLink()}>利用規約</Link>
                             {' '}·{' '}
                             <Link href="/privacy" className={styles.ctaLegalLink()}>プライバシーポリシー</Link>
-                        </p>
+                        </Typography>
                     </div>
                 </section>
 
                 {/* Footer */}
                 <footer className={styles.footer()}>
-                    <p className={styles.footerTitle()}>Pukapuka Space</p>
-                    <p className={styles.footerSub()}>Music by Dream or real?</p>
+                    <Typography variant="body" font="rubik-puddles" className={styles.footerTitle()}>Pukapuka Space</Typography>
+                    <Typography variant="small" className={styles.footerSub()}>Music by Dream or real?</Typography>
                 </footer>
             </div>
         </main>

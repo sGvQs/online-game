@@ -1,5 +1,6 @@
 import { MatchScoreWithUser, UserRanking, HandType } from '@/types'
 import { gameOverPhase } from './styles'
+import { Typography } from '@/components/ui/typography'
 import { cn } from '@/lib/utils'
 import { SideHeader } from '@/components/game/common/nullHand/sideHeader'
 import { GameButton } from '@/components/game/common/nullHand/gameButton'
@@ -80,7 +81,7 @@ export function GameOverPhase({
                                     <div className="flex items-center gap-4">
                                         <span className="text-gray-500">{Math.floor(oldPoints)}pt</span>
                                         <span className="text-white">→</span>
-                                        <span className="text-[#44FFFF] font-bold text-2xl">{Math.floor(newPoints)}pt</span>
+                                        <Typography variant="h3" as="span" className="text-[#44FFFF]">{Math.floor(newPoints)}pt</Typography>
                                     </div>
                                 </div>
                             )}

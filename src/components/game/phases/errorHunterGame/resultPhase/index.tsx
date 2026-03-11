@@ -2,6 +2,7 @@
 
 import { Win95Dialog } from '@/components/game/common/errorHunter/win95Dialog'
 import { resultPhase } from './styles'
+import { Typography } from '@/components/ui/typography'
 import type { MatchWithErrorEventsAndUsers } from '@/types'
 
 export interface ResultPhaseProps {
@@ -36,21 +37,21 @@ export function ResultPhase({
             >
                 <div className={styles.inner()}>
                     <div className={styles.headerSection()}>
-                        <p className={styles.commentLabel()}>
+                        <Typography variant="small" className={styles.commentLabel()}>
                             {match?.winnerId === currentUserId ? `${winnerName}さんから皆さんへのコメント` : `${winnerName}さんからのコメント`}
-                        </p>
-                        <p className={styles.commentText()}>
+                        </Typography>
+                        <Typography variant="body" className={styles.commentText()}>
                             {winnerComment || '私の勝ちです'}
-                        </p>
+                        </Typography>
                     </div>
                     {match?.winnerId === currentUserId ? (
-                        <p className={styles.resultText()}>
+                        <Typography variant="body" className={styles.resultText()}>
                             あなたの勝ちです
-                        </p>
+                        </Typography>
                     ) : (
-                        <p className={styles.resultText()}>
+                        <Typography variant="body" className={styles.resultText()}>
                             あなたの負けです
-                        </p>
+                        </Typography>
                     )}
                 </div>
             </Win95Dialog>

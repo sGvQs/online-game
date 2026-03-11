@@ -8,6 +8,7 @@ import { getRomaji } from '@/utils/starShieldGame'
 import { StarVisual } from '@/components/game/common/starShield/starVisual'
 import { AuroraGlow } from '@/components/game/common/starShield/auroraGlow'
 import { typistView } from './styles'
+import { Typography } from '@/components/ui/typography'
 import { ICONS, AURORA_GRADIENT_TYPIST } from '@/constants/starShieldGame/constants'
 import { DEFAULT_BULLET_COLOR, TECHNIQUES } from '@/constants/starShieldGame/techniques'
 import type { TechniqueId } from '@/constants/starShieldGame/techniques'
@@ -125,13 +126,13 @@ export function TypistView({ dialogue, score, starHp, maxStarHp, typistFireCount
             <StarVisual position={TYPIST_STAR_POSITION} />
 
             <div className="w-full shrink-0 flex flex-col items-center gap-2 py-4 z-20 mt-10">
-                <span className={typistView().scoreLabel()}>いんせきをかはいしたかず</span>
+                <Typography variant="label" as="span" className={typistView().scoreLabel()}>いんせきをかはいしたかず</Typography>
                 <div className="flex items-center gap-3">
                     <div className="relative w-10 h-10">
                         <Image src={ICONS.METOR} alt="" fill className="object-contain" />
                     </div>
                     <span className="text-white/60 text-2xl">×</span>
-                    <span className={typistView().scoreValue()}>{score.destroyed}</span>
+                    <Typography variant="h3" as="span" className={typistView().scoreValue()}>{score.destroyed}</Typography>
                 </div>
             </div>
 
@@ -156,11 +157,11 @@ export function TypistView({ dialogue, score, starHp, maxStarHp, typistFireCount
             </div>
 
             <div className="w-full shrink-0 flex flex-col items-center gap-2 py-4 z-20">
-                <span className={typistView().hpLabel()}>ほしのたいりょく</span>
+                <Typography variant="label" as="span" className={typistView().hpLabel()}>ほしのたいりょく</Typography>
                 <div className="flex items-center gap-2">
-                    <span className="text-[10px] text-white/50 tabular-nums [font-family:var(--font-dot-gothic-16)]">
+                    <Typography variant="caption" as="span" font="dot-gothic-16" className="text-white/50 tabular-nums">
                         HP {starHp}
-                    </span>
+                    </Typography>
                     <div
                         className="relative h-3 rounded-full bg-stone-600/80 overflow-hidden shrink-0"
                         style={{

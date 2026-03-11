@@ -2,6 +2,7 @@ import { HandType, JankenEventWithGuests, HostStats, MatchScoreWithUser } from '
 import { Hand3D } from '@/components/game/common/nullHand/hand3D'
 import { PlayerFaceIcon } from '@/components/game/common/nullHand/playerFaceIcon'
 import { battlePhase } from './styles'
+import { Typography } from '@/components/ui/typography'
 import { getHandDisplayWithEmoji } from '@/utils/nullHandGame'
 import { HandSelectionGrid } from '@/components/game/common/nullHand/handSelectionGrid'
 import { PhaseHeader } from '@/components/game/common/nullHand/phaseHeader'
@@ -110,7 +111,7 @@ export function BattlePhase({
                                 <div className="w-32 h-32 flex items-center justify-center">
                                     {realHand && <Hand3D handType={realHand} revealed={true} size="small" />}
                                 </div>
-                                <p className="text-[10px] text-[#44FFFF] font-bold text-center -translate-y-8">SYSTEM SELECTION</p>
+                                <Typography variant="caption" as="p" className="text-[#44FFFF] font-bold text-center -translate-y-8">SYSTEM SELECTION</Typography>
                             </div>
                             <div className="flex flex-col items-center gap-1">
                                 <div className="w-32 h-32 flex items-center justify-center">

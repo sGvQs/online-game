@@ -7,6 +7,7 @@ import { PhaseHeader } from '@/components/game/common/nullHand/phaseHeader'
 import { RewardSystem } from '@/components/game/common/nullHand/rewardSystem'
 import { GameButton } from '@/components/game/common/nullHand/gameButton'
 import { resultPhase } from './styles'
+import { Typography } from '@/components/ui/typography'
 import type { RoomUserWithUser } from '@/types'
 
 import { useState } from 'react'
@@ -236,9 +237,9 @@ export function ResultPhase({
                                             )}
                                         </div>
                                         <div className="h-6">
-                                            <p className="text-xs text-[#44FFFF] font-black tracking-widest text-center translate-y-2 px-3 py-2">
+                                            <Typography variant="caption" as="p" className="text-[#44FFFF] font-black tracking-widest text-center translate-y-2 px-3 py-2">
                                                 SYSTEM SELECTION
-                                            </p>
+                                            </Typography>
                                         </div>
                                     </div>
 

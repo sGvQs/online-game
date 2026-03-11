@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { IconButton } from '@/components/ui/iconButton'
 import { Trash2, Play, Users } from 'lucide-react'
 import { roomCard, emptyState } from './styles'
+import { Typography } from '@/components/ui/typography'
 
 export type RoomWithUsers = Room & { users: RoomUser[] }
 
@@ -30,7 +31,7 @@ export function RoomCard({ room, isOwner, onJoin, onDelete }: RoomCardProps) {
             <div className={styles.glowOverlay()} />
 
             <div className={styles.main()}>
-                <h3 className={styles.title()}>{room.name}</h3>
+                <Typography variant="h3" className={styles.title()}>{room.name}</Typography>
                 <div className={styles.meta()}>
                     <span
                         className={`${styles.statusBadge()} ${
@@ -92,18 +93,12 @@ export function RoomListEmptyState() {
                     className="mx-auto"
                 />
             </div>
-            <h3
-                className={emptyStyles.title()}
-                style={{ color: '#ffffff', fontFamily: 'var(--font-cherry-bomb-one)' }}
-            >
+            <Typography variant="h3" font="cherry-bomb-one" className={emptyStyles.title()} style={{ color: '#ffffff' }}>
                 いまはだれもあそんでないな。
-            </h3>
-            <p
-                className={emptyStyles.description()}
-                style={{ color: '#ffffff', fontFamily: 'var(--font-cherry-bomb-one)' }}
-            >
+            </Typography>
+            <Typography variant="body" font="cherry-bomb-one" className={emptyStyles.description()} style={{ color: '#ffffff' }}>
                でもいいんだよ。きみがるーむつくると、きっとみんなあつまってくるからさ。
-            </p>
+            </Typography>
         </div>
     )
 }

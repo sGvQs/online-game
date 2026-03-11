@@ -8,6 +8,7 @@ import type { SpecialAttackLevel } from '@/constants/starShieldGame/gameConfig'
 import { ASTEROID_HP, LEVEL_STAR_HP } from '@/constants/starShieldGame/gameConfig'
 import { LEVEL_HEAL_RECOVERY } from '@/constants/starShieldGame/skillConfig'
 import { ShooterView } from '../playing/shooterView'
+import { Typography } from '@/components/ui/typography'
 import { TypistView } from '../playing/typistView'
 
 interface GameScreenProps {
@@ -84,15 +85,15 @@ export function GameScreen({ matchId, startedAt, shooterId, difficulty, currentU
             <div className="absolute top-0 left-0 right-0 z-30 pointer-events-none">
                 <div className="flex items-center justify-between px-6 py-3 backdrop-blur-sm border-b bg-[rgba(30,41,59,0.4)] border-[rgba(129,140,248,0.2)]">
                     <div className="flex items-center gap-2">
-                        <span className="text-brand-500/60 text-xs tracking-widest">TIME</span>
-                        <span className="text-xl font-bold text-white">
+                        <Typography variant="caption" as="span" className="text-brand-500/60 tracking-widest">TIME</Typography>
+                        <Typography variant="h3" as="span" className="text-white">
                             <TimerDisplay timer={timer} />
-                        </span>
+                        </Typography>
                     </div>
                     <div className="flex items-center gap-2">
                         {isShooter && (
                             <>
-                                <span className="text-brand-500 font-bold text-xl">{score.destroyed}</span>
+                                <Typography variant="h3" as="span" className="text-brand-500">{score.destroyed}</Typography>
                                 <span className="text-white/30 text-sm">/</span>
                                 <span className="text-white/50 text-sm">{score.spawned}</span>
                                 <span className="text-white/30 text-xs ml-1 tracking-widest">DESTROYED</span>

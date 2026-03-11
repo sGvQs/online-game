@@ -3,6 +3,7 @@
 import Image from 'next/image'
 import { cn } from '@/lib/utils'
 import { titlePhase } from './styles'
+import { Typography } from '@/components/ui/typography'
 import { Win95Button } from '@/components/game/common/errorHunter/win95Button'
 import { Win95TitleBarButton } from '@/components/game/common/errorHunter/win95TitleBarButton'
 import { RoomUserWithReadyStatus, UserRanking } from '@/types'
@@ -64,7 +65,7 @@ export function TitlePhase({
             <div className={styles.modal()}>
                 <div className={styles.modalInner()}>
                     <div className={styles.titlebar()}>
-                        <span className={styles.titlebarText()}>ERROR HUNTER</span>
+                        <Typography variant="label" as="span" className={styles.titlebarText()}>ERROR HUNTER</Typography>
                         {isHost && (
                             <div className={styles.titlebarButtons()}>
                                 <Win95TitleBarButton onClick={onClose}>
@@ -81,9 +82,9 @@ export function TitlePhase({
                                     <>
                                         <pre className={styles.asciiArt()}>{ASCII_ART}</pre>
                                         <div className={styles.playerStatusSection()}>
-                                            <p className={styles.statusTitle()}>
+                                            <Typography variant="body" className={styles.statusTitle()}>
                                                 プレイヤー準備状況: {readyCount} / {totalUsers}
-                                            </p>
+                                            </Typography>
                                             <div className={styles.playerListbox()}>
                                                 {[...room.users]
                                                     .sort((a, b) => {
@@ -113,9 +114,9 @@ export function TitlePhase({
                                                                     {roomUser.userId === currentUserId && ' (あなた)'}
                                                                 </span>
                                                                 {ranking && (
-                                                                    <span className="text-[10px] text-gray-500 ml-auto">
+                                                                    <Typography variant="caption" as="span" className="text-gray-500 ml-auto">
                                                                         {ranking.rank}位 {ranking.points}pt
-                                                                    </span>
+                                                                    </Typography>
                                                                 )}
                                                             </div>
                                                         )

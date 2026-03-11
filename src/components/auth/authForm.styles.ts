@@ -9,10 +9,10 @@ export const authForm = tv({
         ],
         header: 'text-center',
         headerTitle: 'text-xl text-white font-cherry-bomb-one',
-        headerSub: 'mt-1.5 text-[10px] text-brand-700 font-dot-gothic-16',
+        headerSub: 'mt-1.5 text-[10px] text-brand-700',
         separator: 'w-full h-px bg-brand-500/10',
         errorBox: 'w-full p-3 bg-red-900/40 text-red-300 border border-red-700/50 rounded-xl text-[11px] font-dot-gothic-16',
-        legalText: 'text-[10px] text-center text-brand-700/60 leading-relaxed font-dot-gothic-16',
+        legalText: 'text-[10px] text-center text-brand-700/60 leading-relaxed',
         legalLink: 'hover:text-brand-500 transition-colors underline underline-offset-2',
     },
 })

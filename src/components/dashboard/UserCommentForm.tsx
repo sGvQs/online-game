@@ -5,6 +5,7 @@ import { setUserComment } from '@/server/actions/user/setUserComment'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { userCommentForm } from './UserCommentForm.styles'
+import { Typography } from '@/components/ui/typography'
 
 const styles = userCommentForm()
 
@@ -48,9 +49,9 @@ export function UserCommentForm({ initialComment }: UserCommentFormProps) {
           disabled={isPending}
           className="w-full"
         />
-        <p className={styles.charCount()}>
+        <Typography variant="caption" as="p" className={styles.charCount()}>
           {comment.length} / 20文字
-        </p>
+        </Typography>
       </div>
 
       <Button

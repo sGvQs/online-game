@@ -3,6 +3,7 @@ import { Hand3D } from '@/components/game/common/nullHand/hand3D'
 import { cn } from '@/lib/utils'
 import { useEffect, useState } from 'react'
 import { waitingDisplay } from './styles'
+import { Typography } from '@/components/ui/typography'
 
 interface WaitingDisplayProps {
     engLabel?: string
@@ -47,10 +48,10 @@ export const WaitingDisplay = ({
 
             <div className={styles.content()}>
                 <div className={styles.pulse()}>
-                    <h2 className={styles.engLabel()}>{engLabel}</h2>
-                    <h3 className={styles.title()}>{text}</h3>
+                    <Typography variant="h4" as="h2" className={styles.engLabel()}>{engLabel}</Typography>
+                    <Typography variant="h3" className={styles.title()}>{text}</Typography>
                     {subText && (
-                        <p className={styles.subText()}>{subText}</p>
+                        <Typography variant="small" className={styles.subText()}>{subText}</Typography>
                     )}
                 </div>
             </div>

@@ -18,6 +18,7 @@ import { DashboardHeaderTitle } from '@/components/dashboard/dashboardHeaderTitl
 import { DashboardHeaderProfile } from '@/components/dashboard/dashboardHeaderProfile'
 import { DashboardComplaintWrapper } from '@/components/dashboard/dashboardComplaintWrapper'
 import { RankingCard } from '@/components/dashboard/rankingCard'
+import { Typography } from '@/components/ui/typography'
 
 export default async function DashboardPage({
     searchParams,
@@ -65,9 +66,9 @@ export default async function DashboardPage({
                 <header className="glass-card flex justify-between items-center p-6 rounded-2xl shadow-sm">
                     <div>
                         <DashboardHeaderTitle />
-                        <p className="text-brand-900 font-medium mt-1 opacity-80">
+                        <Typography variant="body" className="text-brand-900 font-medium mt-1 opacity-80">
                             Music By Dream or Real?
-                        </p>
+                        </Typography>
                     </div>
                     <div className="flex gap-4 items-center">
                         <DashboardHeaderProfile

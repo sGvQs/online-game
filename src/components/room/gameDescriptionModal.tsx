@@ -11,6 +11,7 @@ import { StarVisual } from '../game/common/starShield/starVisual'
 import { ICONS, BULLET_COLOR, ROLE_META } from '@/constants/starShieldGame/constants'
 import { ehModal, nhModal, ssModal } from './gameDescriptionModal.styles'
 import { Button } from '@/components/ui/button'
+import { Typography } from '@/components/ui/typography'
 
 interface GameDescriptionModalProps {
     isOpen: boolean
@@ -53,19 +54,19 @@ export function GameDescriptionModal({ isOpen, onClose, gameType }: GameDescript
 
                     {/* キャッチコピー */}
                     <div className="text-center space-y-2">
-                        <h2 className={eh.catchTitle()}>
+                        <Typography variant="h2" className={eh.catchTitle()}>
                             🎯 エラーを狩れ。最速を競え。
-                        </h2>
-                        <p className={eh.catchSub()}>
+                        </Typography>
+                        <Typography variant="body" className={eh.catchSub()}>
                             あなたの反射神経が試される、スリル満点のクリックバトル！
-                        </p>
+                        </Typography>
                     </div>
 
                     {/* ゲームの流れ */}
                     <div className="space-y-3">
-                        <h3 className={eh.sectionTitle()}>
+                        <Typography variant="h3" className={eh.sectionTitle()}>
                             📋 ゲームの流れ
-                        </h3>
+                        </Typography>
                         <ol className={eh.list()}>
                             <li className={eh.listItem()}>
                                 <span className={eh.bullet()}>1.</span>
@@ -98,9 +99,9 @@ export function GameDescriptionModal({ isOpen, onClose, gameType }: GameDescript
 
                     {/* 勝利条件 */}
                     <div className="space-y-2">
-                        <h3 className={eh.sectionTitle()}>
+                        <Typography variant="h3" className={eh.sectionTitle()}>
                             🏆 勝利条件
-                        </h3>
+                        </Typography>
                         <div className={eh.victoryBox()}>
                             <p className={eh.victoryText()}>
                                 エラーダイアログの「×」ボタンを<span className="text-base text-red-400">最初にクリック</span>した人が勝利！
@@ -114,9 +115,9 @@ export function GameDescriptionModal({ isOpen, onClose, gameType }: GameDescript
 
                     {/* プレイのコツ */}
                     <div className="space-y-2">
-                        <h3 className={eh.sectionTitle()}>
+                        <Typography variant="h3" className={eh.sectionTitle()}>
                             💡 プレイのコツ
-                        </h3>
+                        </Typography>
                         <ul className={eh.tipsList()}>
                             <li className={eh.listItem()}>
                                 <span className="mr-2">•</span>
@@ -172,20 +173,20 @@ export function GameDescriptionModal({ isOpen, onClose, gameType }: GameDescript
 
                         {/* キャッチコピー */}
                         <div className="text-center space-y-2">
-                            <h2 className={nh.catchTitle()}>
+                            <Typography variant="h2" className={nh.catchTitle()}>
                                 👁️ 嘘を見抜け。心理を読め。
-                            </h2>
-                            <p className={nh.catchSub()}>
+                            </Typography>
+                            <Typography variant="body" className={nh.catchSub()}>
                                 ホストの企みを見抜き、じゃんけんで完全勝利せよ！
-                            </p>
+                            </Typography>
                         </div>
 
                         {/* ゲームの流れ */}
                         <div className="space-y-3">
-                            <h3 className={nh.sectionTitle()}>
+                            <Typography variant="h3" className={nh.sectionTitle()}>
                                 <div className={nh.sectionDot()} />
                                 📋 ゲームの流れ
-                            </h3>
+                            </Typography>
                             <ol className={nh.flowList()}>
                                 <li className={nh.listItem()}>
                                     <span className={nh.bullet()}>1.</span>
@@ -213,10 +214,10 @@ export function GameDescriptionModal({ isOpen, onClose, gameType }: GameDescript
 
                         {/* ポイント配当 (REWARD SYSTEM) */}
                         <div className="space-y-3">
-                            <h3 className={nh.sectionTitle()}>
+                            <Typography variant="h3" className={nh.sectionTitle()}>
                                 <div className={nh.sectionDot()} />
                                 ■ REWARD SYSTEM / ポイント配当
-                            </h3>
+                            </Typography>
                             <RewardSystem
                                 isHost={false}
                                 userColor="#44FFFF"
@@ -227,10 +228,10 @@ export function GameDescriptionModal({ isOpen, onClose, gameType }: GameDescript
 
                         {/* プレイのコツ */}
                         <div className="space-y-2">
-                            <h3 className={nh.sectionTitle()}>
+                            <Typography variant="h3" className={nh.sectionTitle()}>
                                 <div className={nh.sectionDot()} />
                                 💡 プレイのコツ
-                            </h3>
+                            </Typography>
                             <ul className={nh.tipsList()}>
                                 <li className={nh.listItem()}>
                                     <span className={nh.tipsBullet()}>•</span>
@@ -336,20 +337,20 @@ export function GameDescriptionModal({ isOpen, onClose, gameType }: GameDescript
 
                         {/* キャッチコピー */}
                         <div className="text-center space-y-2">
-                            <h2 className={ss.catchTitle()}>
+                            <Typography variant="h2" className={ss.catchTitle()}>
                                 90秒隕石から星を守れ
-                            </h2>
-                            <p className={ss.catchSub()}>
+                            </Typography>
+                            <Typography variant="body" className={ss.catchSub()}>
                                 2人協力！タイピング × シューティングで星を守り抜け
-                            </p>
+                            </Typography>
                         </div>
 
                         {/* ゲームの流れ */}
                         <div className="space-y-3">
-                            <h3 className={ss.flowHeader()}>
+                            <Typography variant="h3" className={ss.flowHeader()}>
                                 <div className={ss.flowDot()} />
                                 ゲームの流れ
-                            </h3>
+                            </Typography>
                             <ol className={ss.flowList()}>
                                 <li className={ss.listItem()}>
                                     <span className={ss.bullet()}>1.</span>
@@ -380,9 +381,9 @@ export function GameDescriptionModal({ isOpen, onClose, gameType }: GameDescript
 
                         {/* 勝利・敗北条件 */}
                         <div className="space-y-2">
-                            <h3 className={ss.sectionTitle()}>
+                            <Typography variant="h3" className={ss.sectionTitle()}>
                                 勝利・敗北条件
-                            </h3>
+                            </Typography>
                             <div className={ss.victoryBox()}>
                                 <p><strong className="text-green-400">クリア</strong> - 90秒間、星のHPを保ちながら隕石を破壊し続ける</p>
                                 <p><strong className="text-red-400">ゲームオーバー</strong> - 隕石が星に直撃して星のHPが0になる</p>
@@ -391,9 +392,9 @@ export function GameDescriptionModal({ isOpen, onClose, gameType }: GameDescript
 
                         {/* 必殺技 */}
                         <div className="space-y-2">
-                            <h3 className={ss.sectionTitle()}>
+                            <Typography variant="h3" className={ss.sectionTitle()}>
                                 必殺技
-                            </h3>
+                            </Typography>
                             <p className="text-xs text-brand-600 pl-2">
                                 1単語（1行）を打ち終えた最後の文字で、広範囲に複数発の弾が飛ぶ。難易度HELLでは全隕石を一斉破壊する必殺技が発動！
                             </p>
@@ -401,9 +402,9 @@ export function GameDescriptionModal({ isOpen, onClose, gameType }: GameDescript
 
                         {/* プレイのコツ */}
                         <div className="space-y-2">
-                            <h3 className={ss.sectionTitle()}>
+                            <Typography variant="h3" className={ss.sectionTitle()}>
                                 プレイのコツ
-                            </h3>
+                            </Typography>
                             <ul className={ss.tipsList()}>
                                 <li className={ss.listItem()}>
                                     <span className={ss.tipsBullet()}>•</span>

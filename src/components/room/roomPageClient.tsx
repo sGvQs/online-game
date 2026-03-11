@@ -20,6 +20,7 @@ import {
 import { PresenceDuplicateWarning } from '@/components/common/PresenceDuplicateWarning'
 import { roomPageClient } from './roomPageClient.styles'
 import { Button } from '@/components/ui/button'
+import { Typography } from '@/components/ui/typography'
 
 const styles = roomPageClient()
 
@@ -237,14 +238,14 @@ export function RoomPageClientWrapper({
                 showCloseButton
             >
                 <div className={styles.errorModalContent()}>
-                    <p className={styles.errorModalText()}>
+                    <Typography variant="body" className={styles.errorModalText()}>
                         現在の参加者数（{members.length}人）では、このゲームをプレイできません。
-                    </p>
-                    <p className={styles.errorModalSub()}>
+                    </Typography>
+                    <Typography variant="small" className={styles.errorModalSub()}>
                         {gameStartErrorType === 'error-hunter' && `ERROR HUNTER は ${getPlayerRangeLabel('error-hunter')}でプレイできます。`}
                         {gameStartErrorType === 'null-hand' && `NULL HAND は ${getPlayerRangeLabel('null-hand')}でプレイできます。`}
                         {gameStartErrorType === 'star-shield' && 'STAR SHIELD は 2人のみでプレイできます。'}
-                    </p>
+                    </Typography>
                     <div className={styles.errorModalActions()}>
                         <Button
                             variant="danger"

@@ -7,6 +7,7 @@ import { BattlePhase } from '@/components/game/phases/nullHandGame/battlePhase'
 import { ResultPhase } from '@/components/game/phases/nullHandGame/resultPhase'
 import { HandType } from '@/types'
 import { nullHandDemo } from './styles'
+import { Typography } from '@/components/ui/typography'
 import { judgeHand } from '@/utils/nullHandGame'
 import type { JankenEventWithGuests, HostStats, MatchScoreWithUser, RoomUserWithUser } from '@/types'
 
@@ -287,9 +288,9 @@ export function NullHandDemo() {
         >
             <div className={cn(styles.gameGrid(), 'scale-[0.85] origin-center md:scale-90 lg:scale-95')}>
                 <div className={styles.phaseBox()}>
-                    <h2 className="text-2xl font-black text-[#FF4444] tracking-[0.2em] uppercase">
+                    <Typography variant="h2" className="font-black text-[#FF4444] tracking-[0.2em] uppercase">
                         {phaseLabel}
-                    </h2>
+                    </Typography>
                 </div>
 
                 {demoPhase === 'choice' && (

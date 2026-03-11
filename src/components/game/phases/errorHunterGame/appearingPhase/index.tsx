@@ -3,6 +3,7 @@
 import { Win95Dialog } from '@/components/game/common/errorHunter/win95Dialog'
 import { Win95TitleBarButton } from '@/components/game/common/errorHunter/win95TitleBarButton'
 import { appearingPhase } from './styles'
+import { Typography } from '@/components/ui/typography'
 import type { ErrorEventWithUser } from '@/types'
 
 const ERROR_MESSAGES = ['Windows Protection Error.\nYou need to restart your computer.']
@@ -48,9 +49,9 @@ export function AppearingPhase({ errorEvents, onCloseError, isProcessing }: Appe
                                 </Win95TitleBarButton>
                             }
                         >
-                            <p className={styles.errorMessage()}>
+                            <Typography variant="body" className={styles.errorMessage()}>
                                 {getRandomErrorMessage()}
-                            </p>
+                            </Typography>
                         </Win95Dialog>
                     </div>
                 )

@@ -2,12 +2,13 @@
 
 import Image from 'next/image'
 import { dashboardHeaderTitle } from './dashboardHeaderTitle.styles'
+import { Typography } from '@/components/ui/typography'
 
 const styles = dashboardHeaderTitle()
 
 export function DashboardHeaderTitle() {
   return (
-    <h1 className={styles.heading()}>
+    <Typography variant="h1" font="rubik-puddles" className={styles.heading()}>
       <Image
         src="/icon.svg"
         alt=""
@@ -17,6 +18,6 @@ export function DashboardHeaderTitle() {
       />
       <span>Pukapuka</span>
       <span>Space</span>
-    </h1>
+    </Typography>
   )
 }

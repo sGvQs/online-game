@@ -16,8 +16,7 @@ import {
 } from '@/constants/login/dinosaurLoginMessages'
 import { SESSION_KEY_HAS_LOGGED_IN, SESSION_KEY_LOGIN_VISIT_COUNT, LOCAL_KEY_HAS_VISITED } from '@/constants/common/storage'
 import { useSE } from '@/hooks/useSE'
-
-const CHERRY_BOMB_FONT = 'var(--font-cherry-bomb-one)'
+import { Typography } from '@/components/ui/typography'
 const ENTER_DURATION = 3
 const IDLE_DURATION = 10
 /** なんちゃってパターン時の待機時間（秒） */
@@ -126,7 +125,7 @@ function RotateWhileTalkingAnimation({
                     />
                 </div>
                 <div className="shrink-0 mb-2 px-2.5 py-1.5 rounded-xl border border-white bg-white text-black text-[10px] font-medium shadow-sm max-w-[400px]">
-                    <span style={{ fontFamily: CHERRY_BOMB_FONT }}>{displayedText}</span>
+                    <Typography variant="body" as="span" font="cherry-bomb-one">{displayedText}</Typography>
                 </div>
             </motion.div>
         </motion.div>
@@ -173,7 +172,7 @@ function SuckedInAnimation({ onComplete }: { onComplete: () => void }) {
                     />
                 </div>
                 <div className="shrink-0 mb-1 px-2.5 py-1.5 rounded-xl border border-white bg-white text-black text-[10px] font-medium shadow-sm">
-                    <span style={{ fontFamily: CHERRY_BOMB_FONT }}>{SUCKED_IN_MESSAGE}</span>
+                    <Typography variant="body" as="span" font="cherry-bomb-one">{SUCKED_IN_MESSAGE}</Typography>
                 </div>
             </motion.div>
         </motion.div>
@@ -447,12 +446,12 @@ export function AnnoyingDinosaur() {
                         transition={{ duration: 0.4, delay: 0.2 }}
                     >
                         <div className="relative px-2.5 py-1.5 rounded-xl border border-white bg-white text-black text-[10px] font-medium shadow-sm">
-                            <span className="tracking-wide" style={{ fontFamily: CHERRY_BOMB_FONT }}>
+                            <Typography variant="body" as="span" font="cherry-bomb-one" className="tracking-wide">
                                 {displayedText}
                                 {displayedText.length < (dialogueMessages[Math.min(dialogueIndex, dialogueMessages.length - 1)] ?? '').length && (
                                     <span className="inline-block w-0.5 h-3 ml-0.5 bg-current animate-pulse" aria-hidden />
                                 )}
-                            </span>
+                            </Typography>
                             {/* 口方向へのしっぽ（吹き出しの左からキャラへ向かう） */}
                             <div
                                 className="absolute -left-1.5 top-1/2 -translate-y-1/2 w-0 h-0 border-t-4 border-t-transparent border-b-4 border-b-transparent border-r-[6px] border-r-white"

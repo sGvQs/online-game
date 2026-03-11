@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { Trophy, ChevronRight } from 'lucide-react'
 import type { UserRanking } from '@/types'
 import { rankingCard } from './rankingCard.styles'
+import { Typography } from '@/components/ui/typography'
 
 const styles = rankingCard()
 
@@ -13,10 +14,10 @@ interface RankingCardProps {
 export function RankingCard({ rankings, currentUserId }: RankingCardProps) {
     return (
         <div className={styles.wrapper()}>
-            <h2 className={styles.heading()}>
+            <Typography variant="h3" as="h2" className={styles.heading()}>
                 <Trophy className="w-5 h-5" />
                 ランキング
-            </h2>
+            </Typography>
             <ul className={styles.list()}>
                 {rankings.map((r) => (
                     <li

@@ -38,9 +38,9 @@ export default function AuthForm() {
                 <Typography variant="h3" className={styles.headerTitle()}>
                     ログインはここからよろしく。
                 </Typography>
-                <p className={styles.headerSub()}>
+                <Typography variant="small" className={styles.headerSub()}>
                     Google アカウントで一発ログイン
-                </p>
+                </Typography>
             </div>
 
             {/* セパレーター */}
@@ -77,7 +77,7 @@ export default function AuthForm() {
             </Button>
 
             {/* 利用規約 */}
-            <p className={styles.legalText()}>
+            <Typography variant="caption" as="p" className={styles.legalText()}>
                 <Link href="/terms" className={styles.legalLink()}>
                     利用規約
                 </Link>
@@ -86,7 +86,7 @@ export default function AuthForm() {
                     プライバシーポリシー
                 </Link>
                 {'\n'}に同意の上、ご利用ください。
-            </p>
+            </Typography>
         </div>
     )
 }

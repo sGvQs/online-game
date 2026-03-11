@@ -10,6 +10,7 @@ import { ProtectedStar } from '../playing/protectedStar'
 import { DinosaurWithBalls } from '@/components/game/common/starShield/dinosaurWithBalls'
 import { AuroraGlow } from '@/components/game/common/starShield/auroraGlow'
 import { titleScreen } from './styles'
+import { Typography } from '@/components/ui/typography'
 import { ICONS } from '@/constants/starShieldGame/constants'
 
 interface TitleScreenProps {
@@ -63,16 +64,16 @@ export function TitleScreen({
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.8, ease: 'easeOut' }}
                         >
-                            <h1 className="leading-none select-none">
+                            <Typography variant="display" className="leading-none select-none">
                                 <span className={styles.titleStar()}>STAR</span>
                                 <span className={styles.titleShield()}>SHIELD</span>
-                            </h1>
-                            <p className={styles.subtitle()}>
+                            </Typography>
+                            <Typography variant="small" className={styles.subtitle()}>
                                 <Image src={ICONS.TARGET_CIRCLE} alt="" width={18} height={18} className="shrink-0 opacity-80" />
                                 と
                                 <Image src={ICONS.TYPIST} alt="" width={18} height={18} className="shrink-0 opacity-80" />
                                 で役割分担して隕石から星を守りぬけ
-                            </p>
+                            </Typography>
                         </motion.div>
 
                         <motion.div
@@ -142,7 +143,7 @@ export function TitleScreen({
                         transition={{ duration: 0.8, delay: 0.6 }}
                     >
                         <div className={styles.playerCard()}>
-                            <p className={styles.playerCardTitle()}>Players {readyCount}/{totalUsers}</p>
+                            <Typography variant="h4" className={styles.playerCardTitle()}>Players {readyCount}/{totalUsers}</Typography>
                             <div className="flex flex-col gap-3">
                                 {room.users.map((u: RoomUserWithReadyStatus) => {
                                     const isMe = u.userId === currentUserId
@@ -158,15 +159,15 @@ export function TitleScreen({
                                             }}
                                         >
                                             <div className={styles.statusDot()} />
-                                            <span className={styles.playerName()}>
+                                            <Typography variant="small" as="span" className={styles.playerName()}>
                                                 {u.user?.name ?? '...'}
-                                                {isMe && <span className={styles.playerNameSuffix()}>(あなた)</span>}
-                                            </span>
-                                            <span className={styles.playerRank()}>{rankDisplay}</span>
+                                                {isMe && <Typography variant="caption" as="span" className={styles.playerNameSuffix()}>(あなた)</Typography>}
+                                            </Typography>
+                                            <Typography variant="label" as="span" className={styles.playerRank()}>{rankDisplay}</Typography>
                                             {u.isReady ? (
-                                                <span className={styles.readyBadge()}>READY</span>
+                                                <Typography variant="label" as="span" className={styles.readyBadge()}>READY</Typography>
                                             ) : (
-                                                <span className={styles.waitingBadge()}>---</span>
+                                                <Typography variant="label" as="span" className={styles.waitingBadge()}>---</Typography>
                                             )}
                                         </div>
                                     )
@@ -181,12 +182,12 @@ export function TitleScreen({
                         </div>
 
                         <div className={styles.howToCard()}>
-                            <p className={styles.howToTitle()}>How to Play</p>
+                            <Typography variant="h4" className={styles.howToTitle()}>How to Play</Typography>
                             <div className="flex flex-col gap-2.5">
                                 {HOW_TO_PLAY.map(({ iconSrc, text }) => (
                                     <div key={text} className="flex items-start gap-2.5">
                                         <Image src={iconSrc} alt="" width={20} height={20} className="mt-0.5 shrink-0 opacity-90" />
-                                        <span className={styles.howToText()}>{text}</span>
+                                        <Typography variant="body" as="span" className={styles.howToText()}>{text}</Typography>
                                     </div>
                                 ))}
                             </div>

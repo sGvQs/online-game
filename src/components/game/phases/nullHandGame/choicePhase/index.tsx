@@ -2,6 +2,7 @@ import { JankenEventWithGuests, HostStats, HostChoice, HandType, MatchScoreWithU
 import { Hand3D } from '@/components/game/common/nullHand/hand3D'
 import { PlayerFaceIcon } from '@/components/game/common/nullHand/playerFaceIcon'
 import { choicePhase } from './styles'
+import { Typography } from '@/components/ui/typography'
 import { PhaseHeader } from '@/components/game/common/nullHand/phaseHeader'
 import { CurrentScores } from '@/components/game/common/nullHand/currentScores'
 import { RewardSystem } from '@/components/game/common/nullHand/rewardSystem'
@@ -130,13 +131,13 @@ export function ChoicePhase({
                                 }%</span> の確率で <span className="text-[#44FFFF] text-sm font-bold"> SYSTEM SELECTION </span> を選んでいます
                             </div>
                             {isCurrentHost ? (
-                                <p className="flex justify-center items-center gap-2 text-gray-400 animate-pulse text-xs">
+                                <Typography variant="caption" as="p" className="flex justify-center items-center gap-2 text-gray-400 animate-pulse">
                                     上記のデータはゲストに公開されています...
-                                </p>
+                                </Typography>
                             ) : (
-                                <p className="flex justify-center items-center gap-2 text-gray-400 animate-pulse text-xs">
+                                <Typography variant="caption" as="p" className="flex justify-center items-center gap-2 text-gray-400 animate-pulse">
                                     {hostName}は現在選択中です...
-                                </p>
+                                </Typography>
 
                             )}
                         </motion.div>
@@ -161,14 +162,15 @@ export function ChoicePhase({
                             </div>
                             <div className="h-6">
                                 {selectionStep >= 3 && (
-                                    <motion.p
+                                    <motion.div
                                         initial={{ opacity: 0, y: 10 }}
                                         animate={{ opacity: 1, y: 0 }}
                                         exit={{ opacity: 0 }}
-                                        className="text-xs text-[#44FFFF] font-black tracking-widest text-center translate-y-2 px-3 py-2"
                                     >
-                                        SYSTEM SELECTION
-                                    </motion.p>
+                                        <Typography variant="caption" as="p" className="text-[#44FFFF] font-black tracking-widest text-center translate-y-2 px-3 py-2">
+                                            SYSTEM SELECTION
+                                        </Typography>
+                                    </motion.div>
                                 )}
                             </div>
                         </motion.div>

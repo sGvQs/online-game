@@ -1,5 +1,6 @@
 import { phaseHeader } from './styles'
 import { cn } from '@/lib/utils'
+import { Typography } from '@/components/ui/typography'
 
 interface PhaseHeaderProps {
     engLabel: string
@@ -20,9 +21,9 @@ export const PhaseHeader = ({ engLabel, title, subLabel, className, currentTurn,
                     ROUND <span className="text-[#44FFFF]">{String(currentTurn).padStart(2, '0')}</span> / {String(totalTurns).padStart(2, '0')}
                 </div>
             )}
-            <h2 className={styles.engLabel()}>{engLabel}</h2>
-            <h3 className={cn(styles.title(), titleVariant === 'red' && "text-[#FF4444]")}>{title}</h3>
-            <p className={cn(styles.subLabel(), titleVariant === 'red' && "text-[#FF4444]")}>{subLabel}</p>
+            <Typography variant="h4" as="h2" className={styles.engLabel()}>{engLabel}</Typography>
+            <Typography variant="h3" className={cn(styles.title(), titleVariant === 'red' && "text-[#FF4444]")}>{title}</Typography>
+            <Typography variant="small" className={cn(styles.subLabel(), titleVariant === 'red' && "text-[#FF4444]")}>{subLabel}</Typography>
         </div>
     )
 }

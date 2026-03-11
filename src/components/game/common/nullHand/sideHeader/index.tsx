@@ -1,5 +1,6 @@
 import { sideHeader } from './styles'
 import { cn } from '@/lib/utils'
+import { Typography } from '@/components/ui/typography'
 
 interface SideHeaderProps {
     engLabel: string
@@ -15,11 +16,11 @@ export const SideHeader = ({ engLabel, label, className, badge, variant = 'cyan'
     return (
         <div className={cn(styles.root(), className)}>
             <div>
-                <h2 className={styles.engLabel()}>{engLabel}</h2>
-                <h3 className={styles.label()}>{label}</h3>
+                <Typography variant="h4" as="h2" className={styles.engLabel()}>{engLabel}</Typography>
+                <Typography variant="h3" className={styles.label()}>{label}</Typography>
             </div>
             {badge && (
-                <span className={styles.badge()}>{badge}</span>
+                <Typography variant="label" as="span" className={styles.badge()}>{badge}</Typography>
             )}
         </div>
     )

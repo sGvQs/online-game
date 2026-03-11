@@ -44,9 +44,9 @@ export function DashboardHeaderProfile({
             <div className={styles.wrapper()}>
                 {/* 吹き出し（外側に配置） */}
                 <div className={styles.bubble()}>
-                    <span className={styles.bubbleText()}>
+                    <Typography variant="small" as="span" className={styles.bubbleText()}>
                         {comment || '煽りコメントを設定'}
-                    </span>
+                    </Typography>
                     <div className={styles.bubbleTail()} aria-hidden />
                 </div>
                 {/* アイコン・名前・順位・ポイント（クリック可能、ホバー派手） */}
@@ -154,9 +154,9 @@ function ProfileEditForm({
                     disabled={isPending}
                     className="input-dark w-full border-brand-200 focus:border-brand-500 focus:ring-brand-500/20 focus:ring-2"
                 />
-                <p className="text-xs text-brand-500 opacity-90 mt-1">
+                <Typography variant="caption" as="p" className="text-brand-500 opacity-90 mt-1">
                     {name.length} / {NAME_MAX_LENGTH}文字
-                </p>
+                </Typography>
             </div>
 
             {/* 顔アイコン */}
@@ -204,9 +204,9 @@ function ProfileEditForm({
                     disabled={isPending}
                     className="input-dark w-full border-brand-200 focus:border-brand-500 focus:ring-brand-500/20 focus:ring-2"
                 />
-                <p className="text-xs text-brand-500 opacity-90 mt-1">
+                <Typography variant="caption" as="p" className="text-brand-500 opacity-90 mt-1">
                     {comment.length} / {COMMENT_MAX_LENGTH}文字
-                </p>
+                </Typography>
             </div>
 
             <Button

@@ -4,6 +4,7 @@ import { Users } from 'lucide-react'
 import { RoomUserWithUser, UserRanking } from '@/types'
 import { MemberItem } from '../memberItem'
 import { memberListCard } from '../memberItem/styles'
+import { Typography } from '@/components/ui/typography'
 
 const styles = memberListCard()
 
@@ -34,10 +35,10 @@ export function MemberListView({
     return (
         <div className={styles.wrapper()}>
             <div className={styles.header()}>
-                <h3 className={styles.title()}>
+                <Typography variant="h3" className={styles.title()}>
                     <Users className="w-4 h-4" />
                     メンバー
-                </h3>
+                </Typography>
                 <span className={styles.count()}>
                     {members.length}
                 </span>

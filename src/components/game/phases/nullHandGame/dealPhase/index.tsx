@@ -1,6 +1,7 @@
 import { JankenEventWithGuests, HandType, MatchScoreWithUser } from '@/types'
 import { Hand3D } from '@/components/game/common/nullHand/hand3D'
 import { dealPhase } from './styles'
+import { Typography } from '@/components/ui/typography'
 import { getHandDisplayWithEmoji } from '@/utils/nullHandGame'
 import { PhaseHeader } from '@/components/game/common/nullHand/phaseHeader'
 import { CurrentScores } from '@/components/game/common/nullHand/currentScores'
@@ -96,16 +97,16 @@ export function DealPhase({
                 {/* ルール説明 */}
                 <div className="max-w-sm text-center space-y-2 text-xs text-gray-500 leading-relaxed border border-gray-800 p-4 bg-black/20">
                     <div className="text-[#44FFFF] font-bold text-xs mb-2">RULE</div>
-                    <p>
+                    <Typography variant="body">
                         <span className="text-[#44FFFF]">REAL</span> は <span className="text-[#FF4444]">BLUFF</span> に必ず勝ちます。
-                    </p>
-                    <p>
+                    </Typography>
+                    <Typography variant="body">
                         ホストは <span className="text-white font-bold">STAY</span>（REALを出す）か
                         <span className="text-white font-bold"> REVERSE</span>（BLUFFを出す）かを選択します。
-                    </p>
-                    <p>
+                    </Typography>
+                    <Typography variant="body">
                         過去のホストの <span className="text-white font-bold">REVERSE RATE</span> を参考に手を選んでください。
-                    </p>
+                    </Typography>
                 </div>
             </div>
 

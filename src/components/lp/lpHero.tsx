@@ -20,8 +20,8 @@ export function LPHero() {
                     <div key={title} className={styles.specBadge()}>
                         <span className="text-base leading-none">{icon}</span>
                         <div className="text-left">
-                            <p className={styles.specBadgeTitle()}>{title}</p>
-                            <p className={styles.specBadgeSub()}>{sub}</p>
+                            <Typography variant="label" as="p" className={styles.specBadgeTitle()}>{title}</Typography>
+                            <Typography variant="caption" as="p" className={styles.specBadgeSub()}>{sub}</Typography>
                         </div>
                     </div>
                 ))}
@@ -34,13 +34,13 @@ export function LPHero() {
             </Typography>
 
             {/* キャッチコピー */}
-            <p className={styles.catchCopy()}>
+            <Typography variant="body" className={styles.catchCopy()}>
                 さあ、宇宙の果てで
                 <span className="text-brand-400 font-bold">誰かと</span>
                 人生の大事な時間を
                 <br />
                 <span className="text-brand-500 font-bold">無駄にする</span>準備はできた？
-            </p>
+            </Typography>
 
             {/* CTAボタン */}
             <Link href="/login" className={button({ variant: 'primary', size: 'xl', className: 'mt-10 gap-2.5 font-dot-gothic-16 tracking-wider' })}>

@@ -2,6 +2,7 @@ import { MatchScoreWithUser } from '@/types'
 import { SideHeader } from '@/components/game/common/nullHand/sideHeader'
 import { currentScores as currentScoresStyles } from './styles'
 import { cn } from '@/lib/utils'
+import { Typography } from '@/components/ui/typography'
 import { PlayerFaceIcon } from '@/components/game/common/nullHand/playerFaceIcon'
 
 interface CurrentScoresProps {
@@ -72,7 +73,7 @@ export function CurrentScores({
                             </div>
                             <div className={cn(currentScoresStyles().points(), 'text-[color:var(--row-color)]')}>
                                 <span>{score.points}</span>
-                                <span className="text-xs ml-1">pt</span>
+                                <Typography variant="caption" as="span" className="ml-1">pt</Typography>
                             </div>
                         </div>
                     ))

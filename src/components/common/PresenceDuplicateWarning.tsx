@@ -4,6 +4,7 @@ import { useState, ReactNode } from 'react'
 import { usePresenceDuplicateWarning } from '@/hooks/usePresenceDuplicateWarning'
 import { AlertTriangle, X } from 'lucide-react'
 import { presenceDuplicateWarning } from './PresenceDuplicateWarning.styles'
+import { Typography } from '@/components/ui/typography'
 
 const styles = presenceDuplicateWarning()
 
@@ -29,9 +30,9 @@ export function PresenceDuplicateWarning({
             {showWarning && (
                 <div className={styles.banner()}>
                     <AlertTriangle className="w-5 h-5 shrink-0" />
-                    <p className={styles.message()}>
+                    <Typography variant="small" className={styles.message()}>
                         同じルームが別のタブで開かれています。ゲームの動作が不安定になる可能性があります。
-                    </p>
+                    </Typography>
                     <button
                         type="button"
                         onClick={() => setDismissed(true)}
