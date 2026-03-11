@@ -1,5 +1,6 @@
 import { prisma } from '@/server/lib/prisma'
 import { createClient } from '@/server/lib/supabase/server'
+import { redirect } from 'next/navigation'
 import { User } from '@/types'
 
 /**
@@ -23,7 +24,10 @@ export async function getAuthenticatedUser(): Promise<User> {
     })
 
     if (!dbUser) {
-        throw new Error('ユーザーがデータベースに見つかりません')
+        // DBリセット等でSupabaseセッションのみ残存する場合のリカバリー
+        // scope: 'local' はネットワーク呼び出しなしでCookieのみクリア
+        await supabase.auth.signOut({ scope: 'local' })
+        redirect('/login')
     }
 
     return dbUser.user
