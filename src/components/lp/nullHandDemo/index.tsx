@@ -288,7 +288,7 @@ export function NullHandDemo() {
         >
             <div className={cn(styles.gameGrid(), 'scale-[0.85] origin-center md:scale-90 lg:scale-95')}>
                 <div className={styles.phaseBox()}>
-                    <Typography variant="h2" className="font-black text-[#FF4444] tracking-[0.2em] uppercase">
+                    <Typography variant="h2" font="sans" className="font-black text-[#FF4444] tracking-[0.2em] uppercase">
                         {phaseLabel}
                     </Typography>
                 </div>

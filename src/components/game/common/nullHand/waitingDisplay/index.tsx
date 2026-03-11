@@ -48,10 +48,10 @@ export const WaitingDisplay = ({
 
             <div className={styles.content()}>
                 <div className={styles.pulse()}>
-                    <Typography variant="h4" as="h2" className={styles.engLabel()}>{engLabel}</Typography>
-                    <Typography variant="h3" className={styles.title()}>{text}</Typography>
+                    <Typography variant="h4" as="h2" font="sans" className={styles.engLabel()}>{engLabel}</Typography>
+                    <Typography variant="h3" font="sans" className={styles.title()}>{text}</Typography>
                     {subText && (
-                        <Typography variant="small" className={styles.subText()}>{subText}</Typography>
+                        <Typography variant="small" font="sans" className={styles.subText()}>{subText}</Typography>
                     )}
                 </div>
             </div>

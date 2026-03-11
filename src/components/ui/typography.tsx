@@ -3,7 +3,7 @@ import { type ElementType, type HTMLAttributes, type ReactNode } from 'react'
 import { cn } from '@/lib/utils'
 
 type TypographyVariant = 'display' | 'h1' | 'h2' | 'h3' | 'h4' | 'body' | 'small' | 'label' | 'caption'
-type TypographyFont = 'cherry-bomb-one' | 'dot-gothic-16' | 'rubik-puddles'
+type TypographyFont = 'cherry-bomb-one' | 'dot-gothic-16' | 'rubik-puddles' | 'sans'
 
 interface TypographyProps extends HTMLAttributes<HTMLElement> {
     variant: TypographyVariant
@@ -30,6 +30,7 @@ const typography = tv({
             'cherry-bomb-one': 'font-cherry-bomb-one',
             'dot-gothic-16': 'font-dot-gothic-16',
             'rubik-puddles': 'font-rubik-puddles',
+            'sans': 'font-sans',
         },
     },
 })
@@ -38,6 +39,7 @@ const FONT_VARIANTS = {
     'rubik-puddles':   ['display'],
     'cherry-bomb-one': ['h1', 'h2', 'h3'],
     'dot-gothic-16':   ['h4', 'body', 'small', 'label', 'caption'],
+    'sans':            [],
 } as const satisfies Record<TypographyFont, readonly TypographyVariant[]>
 
 function getDefaultFont(variant: TypographyVariant): TypographyFont {

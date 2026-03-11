@@ -72,7 +72,7 @@ export function RewardSystem({
                                         )}
                                     </div>
                                     <span className={cn(
-                                        "text-[10px] font-black tracking-widest font-mono transition-colors",
+                                        "text-[10px] font-black tracking-widest font-sans transition-colors",
                                         isMyTarget ? "text-white" : "text-white/70"
                                     )}>
                                         {item.title}

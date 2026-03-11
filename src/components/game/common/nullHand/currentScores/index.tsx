@@ -73,7 +73,7 @@ export function CurrentScores({
                             </div>
                             <div className={cn(currentScoresStyles().points(), 'text-[color:var(--row-color)]')}>
                                 <span>{score.points}</span>
-                                <Typography variant="caption" as="span" className="ml-1">pt</Typography>
+                                <Typography variant="caption" as="span" font="sans" className="ml-1">pt</Typography>
                             </div>
                         </div>
                     ))

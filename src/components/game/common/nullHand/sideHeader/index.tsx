@@ -16,11 +16,11 @@ export const SideHeader = ({ engLabel, label, className, badge, variant = 'cyan'
     return (
         <div className={cn(styles.root(), className)}>
             <div>
-                <Typography variant="h4" as="h2" className={styles.engLabel()}>{engLabel}</Typography>
-                <Typography variant="h3" className={styles.label()}>{label}</Typography>
+                <Typography variant="h4" as="h2" font="sans" className={styles.engLabel()}>{engLabel}</Typography>
+                <Typography variant="h3" font="sans" className={styles.label()}>{label}</Typography>
             </div>
             {badge && (
-                <Typography variant="label" as="span" className={styles.badge()}>{badge}</Typography>
+                <Typography variant="label" as="span" font="sans" className={styles.badge()}>{badge}</Typography>
             )}
         </div>
     )

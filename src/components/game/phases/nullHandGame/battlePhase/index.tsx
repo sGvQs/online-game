@@ -111,7 +111,7 @@ export function BattlePhase({
                                 <div className="w-32 h-32 flex items-center justify-center">
                                     {realHand && <Hand3D handType={realHand} revealed={true} size="small" />}
                                 </div>
-                                <Typography variant="caption" as="p" className="text-[#44FFFF] font-bold text-center -translate-y-8">SYSTEM SELECTION</Typography>
+                                <Typography variant="caption" as="p" font="sans" className="text-[#44FFFF] font-bold text-center -translate-y-8">SYSTEM SELECTION</Typography>
                             </div>
                             <div className="flex flex-col items-center gap-1">
                                 <div className="w-32 h-32 flex items-center justify-center">

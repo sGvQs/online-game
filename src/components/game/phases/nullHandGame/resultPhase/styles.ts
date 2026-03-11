@@ -32,7 +32,7 @@ export const resultPhase = tv({
     revealSubtitle: 'text-gray-500 text-sm mt-2',
     sideFooter: 'mt-auto pt-4 border-t border-[#44FFFF]/10',
     sideFooterContent: 'flex justify-between text-[10px] text-gray-500 uppercase tracking-widest font-bold',
-    youBadge: 'text-[10px] bg-[#44FFFF]/10 text-[#44FFFF] border border-[#44FFFF]/20 px-1.5 py-0.5 rounded font-mono',
+    youBadge: 'text-[10px] bg-[#44FFFF]/10 text-[#44FFFF] border border-[#44FFFF]/20 px-1.5 py-0.5 rounded font-sans',
   },
   variants: {
     winner: {

@@ -206,7 +206,7 @@ export function TitleScreen({
                         delay: 1
                     }}
                     className="col-span-1 md:col-span-2 bg-black flex items-center justify-center text-center w-full pointer-events-none opacity-100">
-                    <p className="text-[12px] text-white font-mono tracking-[0.2em] leading-relaxed uppercase drop-shadow-md">
+                    <p className="text-[12px] text-white font-sans tracking-[0.2em] leading-relaxed uppercase drop-shadow-md">
                         Music by <span className="text-[#FF4444] font-bold">Dream or real?</span>
                     </p>
                 </motion.div>
@@ -238,7 +238,7 @@ export function TitleScreen({
                                             <Hand3D handType={HandType.ROCK} revealed={true} size={"small"} />
                                         </div>
                                     </div>
-                                    <p className="text-[#FF4444]/80 text-[10px] font-mono tracking-wider relative z-10">
+                                    <p className="text-[#FF4444]/80 text-[10px] font-sans tracking-wider relative z-10">
                                         PSYCHOLOGICAL ROCK-PAPER-SCISSORS
                                     </p>
                                 </div>

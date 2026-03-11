@@ -28,7 +28,7 @@ export function NullHandLogo({ titleHand, userColor, onClick, showChangeButton =
                 />
             </div>
             {showChangeButton &&
-                <p className="text-[10px] text-gray-500 font-mono mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                <p className="text-[10px] text-gray-500 font-sans mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
                     CLICK TO CHANGE YOUR COLOR
                 </p>
             }

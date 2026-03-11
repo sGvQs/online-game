@@ -88,7 +88,7 @@ export function ResultPhase({
 
         return (
             <div className="flex flex-col items-center mb-4 w-full h-8 justify-center mt-8">
-                <div className="flex justify-center items-center gap-2 text-gray-400 text-xs font-mono tracking-widest">
+                <div className="flex justify-center items-center gap-2 text-gray-400 text-xs font-sans tracking-widest">
                     <div className={cn("w-1.5 h-1.5 rounded-full animate-pulse mr-1", earnedPoints > 0 ? "bg-[#44FFFF]" : "bg-gray-600")} />
 
                     {earnedPoints === 0 ? (
@@ -237,7 +237,7 @@ export function ResultPhase({
                                             )}
                                         </div>
                                         <div className="h-6">
-                                            <Typography variant="caption" as="p" className="text-[#44FFFF] font-black tracking-widest text-center translate-y-2 px-3 py-2">
+                                            <Typography variant="caption" as="p" font="sans" className="text-[#44FFFF] font-black tracking-widest text-center translate-y-2 px-3 py-2">
                                                 SYSTEM SELECTION
                                             </Typography>
                                         </div>

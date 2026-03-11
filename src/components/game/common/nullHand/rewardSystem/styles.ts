@@ -5,7 +5,7 @@ export const rewardSystem = tv({
     card: 'rounded-xl border flex flex-col',
     ruleDot: 'absolute inset-0 rounded-full shadow-[0_0_8px_rgba(0,0,0,0.5)] [background-color:var(--rule-color)]',
     ruleArrow: 'absolute top-1/2 -translate-y-1/2 text-[10px] font-bold -translate-x-1/2 [color:var(--rule-color)]',
-    rulePts: 'text-xs font-black font-mono tabular-nums [color:var(--rule-color)]',
+    rulePts: 'text-xs font-black font-sans tabular-nums [color:var(--rule-color)]',
   },
   variants: {
     variant: {

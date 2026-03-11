@@ -110,7 +110,7 @@ export function ChoicePhase({
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="flex justify-center items-center gap-2 text-gray-500 text-xs font-mono tracking-widest animate-pulse"
+                        className="flex justify-center items-center gap-2 text-gray-500 text-xs font-sans tracking-widest animate-pulse"
                     >
                         <span className="w-2 h-2 bg-[#FF4444] rounded-full" />
                         SYSTEM: GENERATING HANDS...
@@ -131,11 +131,11 @@ export function ChoicePhase({
                                 }%</span> の確率で <span className="text-[#44FFFF] text-sm font-bold"> SYSTEM SELECTION </span> を選んでいます
                             </div>
                             {isCurrentHost ? (
-                                <Typography variant="caption" as="p" className="flex justify-center items-center gap-2 text-gray-400 animate-pulse">
+                                <Typography variant="caption" as="p" font="sans" className="flex justify-center items-center gap-2 text-gray-400 animate-pulse">
                                     上記のデータはゲストに公開されています...
                                 </Typography>
                             ) : (
-                                <Typography variant="caption" as="p" className="flex justify-center items-center gap-2 text-gray-400 animate-pulse">
+                                <Typography variant="caption" as="p" font="sans" className="flex justify-center items-center gap-2 text-gray-400 animate-pulse">
                                     {hostName}は現在選択中です...
                                 </Typography>
 
@@ -167,7 +167,7 @@ export function ChoicePhase({
                                         animate={{ opacity: 1, y: 0 }}
                                         exit={{ opacity: 0 }}
                                     >
-                                        <Typography variant="caption" as="p" className="text-[#44FFFF] font-black tracking-widest text-center translate-y-2 px-3 py-2">
+                                        <Typography variant="caption" as="p" font="sans" className="text-[#44FFFF] font-black tracking-widest text-center translate-y-2 px-3 py-2">
                                             SYSTEM SELECTION
                                         </Typography>
                                     </motion.div>

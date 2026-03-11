@@ -70,18 +70,18 @@ export function GameOverPhase({
                                 />
                                 <div className="text-[#44FFFF] text-xl font-bold tracking-widest">のランキング</div>
                             </div>
-                            <div className="flex items-center justify-center gap-8 text-4xl font-mono font-bold">
+                            <div className="flex items-center justify-center gap-8 text-4xl font-sans font-bold">
                                 <span className="text-gray-500">{oldRank}位</span>
                                 <span className="text-white">→</span>
                                 <span className="text-[#FF4444] text-5xl">{newRank}位</span>
                             </div>
                             {oldPoints !== undefined && newPoints !== undefined && (
-                                <div className="mt-4 flex items-center justify-center gap-4 text-xl font-mono pb-2">
+                                <div className="mt-4 flex items-center justify-center gap-4 text-xl font-sans pb-2">
                                     <div className="text-gray-400">合計ポイント:</div>
                                     <div className="flex items-center gap-4">
                                         <span className="text-gray-500">{Math.floor(oldPoints)}pt</span>
                                         <span className="text-white">→</span>
-                                        <Typography variant="h3" as="span" className="text-[#44FFFF]">{Math.floor(newPoints)}pt</Typography>
+                                        <Typography variant="h3" as="span" font="sans" className="text-[#44FFFF]">{Math.floor(newPoints)}pt</Typography>
                                     </div>
                                 </div>
                             )}

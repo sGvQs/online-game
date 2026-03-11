@@ -97,14 +97,14 @@ export function DealPhase({
                 {/* ルール説明 */}
                 <div className="max-w-sm text-center space-y-2 text-xs text-gray-500 leading-relaxed border border-gray-800 p-4 bg-black/20">
                     <div className="text-[#44FFFF] font-bold text-xs mb-2">RULE</div>
-                    <Typography variant="body">
+                    <Typography variant="body" font="sans">
                         <span className="text-[#44FFFF]">REAL</span> は <span className="text-[#FF4444]">BLUFF</span> に必ず勝ちます。
                     </Typography>
-                    <Typography variant="body">
+                    <Typography variant="body" font="sans">
                         ホストは <span className="text-white font-bold">STAY</span>（REALを出す）か
                         <span className="text-white font-bold"> REVERSE</span>（BLUFFを出す）かを選択します。
                     </Typography>
-                    <Typography variant="body">
+                    <Typography variant="body" font="sans">
                         過去のホストの <span className="text-white font-bold">REVERSE RATE</span> を参考に手を選んでください。
                     </Typography>
                 </div>

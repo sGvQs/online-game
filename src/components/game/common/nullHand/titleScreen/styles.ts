@@ -37,7 +37,7 @@ export const titleScreen = tv({
     playerItem: [
       'flex', 'justify-between', 'text-lg', 'mb-1', 'font-bold', 'tracking-wider',
     ],
-    rankingText: ['mr-6', 'text-[#44FFFF]', 'font-mono', 'text-base'],
+    rankingText: ['mr-6', 'text-[#44FFFF]', 'font-sans', 'text-base'],
     playerName: '[color:var(--player-name-color)]',
     playerStatus: 'font-black text-sm [color:var(--player-status-color)]',
     aboutScrollArea: 'overflow-y-auto p-6 custom-scrollbar flex-1 [scrollbar-width:thin] [scrollbar-color:#FF4444_#000]',
