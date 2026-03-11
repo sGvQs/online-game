@@ -34,16 +34,17 @@ const typography = tv({
     },
 })
 
-const DEFAULT_FONTS: Record<TypographyVariant, TypographyFont> = {
-    display: 'rubik-puddles',
-    h1: 'cherry-bomb-one',
-    h2: 'cherry-bomb-one',
-    h3: 'cherry-bomb-one',
-    h4: 'dot-gothic-16',
-    body: 'dot-gothic-16',
-    small: 'dot-gothic-16',
-    label: 'dot-gothic-16',
-    caption: 'dot-gothic-16',
+const FONT_VARIANTS = {
+    'rubik-puddles':   ['display'],
+    'cherry-bomb-one': ['h1', 'h2', 'h3'],
+    'dot-gothic-16':   ['h4', 'body', 'small', 'label', 'caption'],
+} as const satisfies Record<TypographyFont, readonly TypographyVariant[]>
+
+function getDefaultFont(variant: TypographyVariant): TypographyFont {
+    for (const [font, variants] of Object.entries(FONT_VARIANTS) as [TypographyFont, readonly TypographyVariant[]][]) {
+        if ((variants as readonly string[]).includes(variant)) return font
+    }
+    return 'dot-gothic-16'
 }
 
 const DEFAULT_ELEMENTS: Record<TypographyVariant, ElementType> = {
@@ -68,7 +69,7 @@ export function Typography({
 }: TypographyProps) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const Tag = (as ?? DEFAULT_ELEMENTS[variant]) as any
-    const appliedFont = font ?? DEFAULT_FONTS[variant]
+    const appliedFont = font ?? getDefaultFont(variant)
 
     return (
         <Tag

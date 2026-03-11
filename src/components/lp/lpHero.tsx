@@ -42,15 +42,6 @@ export function LPHero() {
                 <span className="text-brand-500 font-bold">無駄にする</span>準備はできた？
             </Typography>
 
-            {/* CTAボタン */}
-            <Link href="/login" className={button({ variant: 'primary', size: 'xl', className: 'mt-10 gap-2.5 font-dot-gothic-16 tracking-wider' })}>
-                <span className={styles.ctaPulse()} />
-                ログインして始める
-                <svg className={styles.ctaArrow()} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                </svg>
-            </Link>
-
             {/* スクロールインジケーター */}
             <div className={styles.scrollIndicator()}>
                 <span className={styles.scrollLabel()}>SCROLL</span>

@@ -14,7 +14,7 @@ interface RankingCardProps {
 export function RankingCard({ rankings, currentUserId }: RankingCardProps) {
     return (
         <div className={styles.wrapper()}>
-            <Typography variant="h3" as="h2" className={styles.heading()}>
+            <Typography variant="h3" as="h2" font='dot-gothic-16' className={styles.heading()}>
                 <Trophy className="w-5 h-5" />
                 ランキング
             </Typography>

@@ -31,7 +31,7 @@ export function RoomCard({ room, isOwner, onJoin, onDelete }: RoomCardProps) {
             <div className={styles.glowOverlay()} />
 
             <div className={styles.main()}>
-                <Typography variant="h3" className={styles.title()}>{room.name}</Typography>
+                <Typography variant="h3" font='dot-gothic-16' className={styles.title()}>{room.name}</Typography>
                 <div className={styles.meta()}>
                     <span
                         className={`${styles.statusBadge()} ${

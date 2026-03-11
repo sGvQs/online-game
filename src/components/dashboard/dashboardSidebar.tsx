@@ -62,7 +62,7 @@ export function DashboardSidebar({ isTop5User = false }: { isTop5User?: boolean 
 
   return (
     <div className={sidebarStyles.wrapper()}>
-      <Typography variant="h3" as="h2" className={sidebarStyles.heading()}>
+      <Typography variant="h3" as="h2" font='dot-gothic-16' className={sidebarStyles.heading()}>
         <PackagePlus className="w-4 h-4" />
         ルームを作成
       </Typography>
