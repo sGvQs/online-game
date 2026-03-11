@@ -8,6 +8,7 @@ import { ProtectedStar } from '../playing/protectedStar'
 import { DinosaurWithBalls } from '@/components/game/common/starShield/dinosaurWithBalls'
 import { AuroraGlow } from '@/components/game/common/starShield/auroraGlow'
 import { roleSelectionScreen } from './styles'
+import { Button } from '@/components/ui/button'
 import { COLORS, DIFFICULTIES, DIFFICULTY_META, ROLE_META, type Difficulty, type RoleChoice } from '@/constants/starShieldGame/constants'
 import { TECHNIQUES, type TechniqueId } from '@/constants/starShieldGame/techniques'
 import { getAvailableNormalAttacks } from '@/utils/starShieldGame'
@@ -341,21 +342,20 @@ export function RoleSelectionScreen({
 
                 <motion.div className="flex gap-3" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5, delay: 0.25 }}>
                     {isHost && (
-                        <button onClick={onBack} className={styles.exitButton()}>
+                        <Button variant="ghost" size="lg" onClick={onBack} className="shrink-0 font-cherry-bomb-one">
                             ← EXIT
-                        </button>
+                        </Button>
                     )}
                     {isHost && (
-                        <button
-                            onClick={() => canProceed && onProceedToGame()}
+                        <Button
+                            variant="solid"
+                            size="lg"
                             disabled={!canProceed}
-                            className={cn(
-                                styles.startButton(),
-                                canProceed ? styles.startButtonEnabled() : styles.startButtonDisabled(),
-                            )}
+                            onClick={() => canProceed && onProceedToGame()}
+                            className="flex-1 font-cherry-bomb-one"
                         >
                             {canProceed ? '🚀 START GAME' : '🔒 START GAME'}
-                        </button>
+                        </Button>
                     )}
                 </motion.div>
             </div>

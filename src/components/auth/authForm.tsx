@@ -4,6 +4,8 @@ import Link from 'next/link'
 import { createClient } from '@/utils/supabase/client'
 import { useState } from 'react'
 import { authForm } from './authForm.styles'
+import { Button } from '@/components/ui/button'
+import { Typography } from '@/components/ui/typography'
 
 const styles = authForm()
 
@@ -33,9 +35,9 @@ export default function AuthForm() {
         <div className={styles.wrapper()}>
             {/* ヘッダー */}
             <div className={styles.header()}>
-                <h3 className={styles.headerTitle()}>
+                <Typography variant="h3" className={styles.headerTitle()}>
                     ログインはここからよろしく。
-                </h3>
+                </Typography>
                 <p className={styles.headerSub()}>
                     Google アカウントで一発ログイン
                 </p>
@@ -47,18 +49,20 @@ export default function AuthForm() {
             {/* エラー */}
             {error && (
                 <div className={styles.errorBox()}>
-                    {error}
+                    <Typography variant="small">{error}</Typography>
                 </div>
             )}
 
             {/* Googleボタン */}
-            <button
+            <Button
+                variant="primary"
+                size="lg"
+                fullWidth
                 onClick={handleGoogleLogin}
                 disabled={loading}
-                className={styles.googleButton()}
             >
                 {loading ? (
-                    <span className="text-brand-400">Connecting...</span>
+                    <span>Connecting...</span>
                 ) : (
                     <>
                         <svg className="w-4 h-4 shrink-0" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 18 18">
@@ -70,7 +74,7 @@ export default function AuthForm() {
                         <span>Google でサインイン</span>
                     </>
                 )}
-            </button>
+            </Button>
 
             {/* 利用規約 */}
             <p className={styles.legalText()}>

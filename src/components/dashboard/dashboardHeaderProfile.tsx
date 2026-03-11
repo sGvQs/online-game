@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 import { ScanFace, MessageSquare, User } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import { Typography } from '@/components/ui/typography'
 import { Input } from '@/components/ui/input'
 import { RoomModal } from '@/components/room/roomModal'
 import { updateProfile } from '@/server/actions/user/updateProfile'
@@ -49,10 +50,11 @@ export function DashboardHeaderProfile({
                     <div className={styles.bubbleTail()} aria-hidden />
                 </div>
                 {/* アイコン・名前・順位・ポイント（クリック可能、ホバー派手） */}
-                <button
+                <Button
                     type="button"
+                    variant="outline"
                     onClick={() => setModalOpen(true)}
-                    className={styles.profileButton()}
+                    className="flex items-center gap-2 rounded-full text-white shrink-0 bg-white/10 border-brand-200/30 hover:bg-brand-400/30 hover:border-brand-400/60 hover:shadow-[0_0_20px_rgba(99,102,241,0.4)] active:scale-[0.98] duration-300"
                 >
                     <div className={styles.avatarWrapper()}>
                         <Image
@@ -68,7 +70,7 @@ export function DashboardHeaderProfile({
                         {rank ? `${rank}位` : '圏外'}
                     </span>
                     <span className="opacity-95">{totalPoints}pt</span>
-                </button>
+                </Button>
             </div>
 
             <RoomModal
@@ -139,10 +141,10 @@ function ProfileEditForm({
         <form onSubmit={handleSubmit} className="space-y-6">
             {/* 名前 */}
             <div>
-                <h3 className="font-bold mb-2 text-sm text-brand-500 uppercase tracking-wider flex items-center gap-2">
+                <Typography variant="h4" className="mb-2 text-brand-500 flex items-center gap-2">
                     <User className="w-4 h-4" />
                     名前
-                </h3>
+                </Typography>
                 <Input
                     type="text"
                     value={name}
@@ -159,10 +161,10 @@ function ProfileEditForm({
 
             {/* 顔アイコン */}
             <div>
-                <h3 className="font-bold mb-2 text-sm text-brand-500 uppercase tracking-wider flex items-center gap-2">
+                <Typography variant="h4" className="mb-2 text-brand-500 flex items-center gap-2">
                     <ScanFace className="w-4 h-4" />
                     顔アイコン
-                </h3>
+                </Typography>
                 <div className="grid grid-cols-4 gap-2">
                     {FACE_ICON_OPTIONS.map((option) => (
                         <button
@@ -189,10 +191,10 @@ function ProfileEditForm({
 
             {/* 煽りコメント */}
             <div>
-                <h3 className="font-bold mb-2 text-sm text-brand-500 uppercase tracking-wider flex items-center gap-2">
+                <Typography variant="h4" className="mb-2 text-brand-500 flex items-center gap-2">
                     <MessageSquare className="w-4 h-4" />
                     煽りコメント
-                </h3>
+                </Typography>
                 <Input
                     type="text"
                     value={comment}

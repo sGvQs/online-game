@@ -25,6 +25,5 @@ export const resultScreen = tv({
         ],
         statValue: 'text-2xl font-black tabular-nums leading-none [font-family:var(--font-cherry-bomb-one)] [color:var(--stat-color)] [text-shadow:0_0_12px_var(--stat-glow)]',
         statLabel: 'text-[9px] tracking-[0.35em] uppercase text-white/25',
-        backButton: 'py-3 px-8 rounded-2xl border-2 border-green-500 bg-green-600/90 text-green-50 hover:bg-green-500 hover:border-green-400 hover:scale-105 active:scale-95 transition-all shadow-[0_0_20px_rgba(34,197,94,0.45)] cursor-pointer [font-family:var(--font-cherry-bomb-one)] text-base',
     },
 })

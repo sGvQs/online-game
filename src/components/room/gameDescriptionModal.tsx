@@ -10,6 +10,7 @@ import { RewardSystem } from '../game/common/nullHand/rewardSystem'
 import { StarVisual } from '../game/common/starShield/starVisual'
 import { ICONS, BULLET_COLOR, ROLE_META } from '@/constants/starShieldGame/constants'
 import { ehModal, nhModal, ssModal } from './gameDescriptionModal.styles'
+import { Button } from '@/components/ui/button'
 
 interface GameDescriptionModalProps {
     isOpen: boolean
@@ -134,9 +135,7 @@ export function GameDescriptionModal({ isOpen, onClose, gameType }: GameDescript
 
                     {/* 閉じるボタン */}
                     <div className={eh.closeRow()}>
-                        <button onClick={onClose} className={eh.closeButton()}>
-                            OK
-                        </button>
+                        <Button variant="solid" onClick={onClose}>OK</Button>
                     </div>
                 </div>
             </RoomModal>
@@ -252,9 +251,7 @@ export function GameDescriptionModal({ isOpen, onClose, gameType }: GameDescript
 
                 {/* 閉じるボタン */}
                 <div className={nh.closeRow()}>
-                    <button onClick={onClose} className={nh.closeButton()}>
-                        OK
-                    </button>
+                    <Button variant="solid" onClick={onClose}>OK</Button>
                 </div>
             </RoomModal>
         )
@@ -427,9 +424,7 @@ export function GameDescriptionModal({ isOpen, onClose, gameType }: GameDescript
 
                 {/* 閉じるボタン */}
                 <div className={ss.closeRow()}>
-                    <button onClick={onClose} className={ss.closeButton()}>
-                        OK
-                    </button>
+                    <Button variant="solid" onClick={onClose}>OK</Button>
                 </div>
             </RoomModal>
         )

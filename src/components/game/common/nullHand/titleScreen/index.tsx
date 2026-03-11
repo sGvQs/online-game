@@ -3,6 +3,7 @@ import { motion } from 'framer-motion'
 import { PlayerFaceIcon } from '@/components/game/common/nullHand/playerFaceIcon'
 import { useState } from 'react'
 import { titleScreen } from './styles'
+import { Button } from '@/components/ui/button'
 import { Hand3D } from '@/components/game/common/nullHand/hand3D'
 import { cn } from '@/lib/utils'
 import { NullHandLogo } from '@/components/game/common/nullHand/nullHandLogo'
@@ -322,15 +323,18 @@ export function TitleScreen({
 
                         {/* フッター（閉じるボタン） */}
                         <div className="p-4 border-t border-[#FF4444] bg-black flex justify-center">
-                            <button
+                            <Button
+                                variant="danger"
+                                size="lg"
+                                fullWidth
+                                className="max-w-xs"
                                 onClick={() => {
                                     play("submit")
                                     setShowAbout(false)
                                 }}
-                                className="w-full max-w-xs py-3 rounded font-bold text-sm transition-all duration-200 bg-[#FF4444] text-black hover:bg-[#FF8888] shadow-[0_0_15px_rgba(255,68,68,0.5)]"
                             >
                                 OK
-                            </button>
+                            </Button>
                         </div>
                     </motion.div>
                 </motion.div>

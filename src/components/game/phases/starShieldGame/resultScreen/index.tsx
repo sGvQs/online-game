@@ -6,6 +6,7 @@ import type { GameResult, GameStats } from '@/types/starShieldGame'
 import { ProtectedStar } from '../playing/protectedStar'
 import { AuroraGlow } from '@/components/game/common/starShield/auroraGlow'
 import { resultScreen } from './styles'
+import { Button } from '@/components/ui/button'
 import { ICONS, DIFFICULTY_META, type Difficulty } from '@/constants/starShieldGame/constants'
 
 interface ResultScreenProps {
@@ -242,9 +243,9 @@ export function ResultScreen({ result, stats, difficulty, onBackToTitle }: Resul
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.85, duration: 0.5 }}
                 >
-                    <button onClick={onBackToTitle} className={styles.backButton()}>
+                    <Button variant="success" onClick={onBackToTitle} className="font-cherry-bomb-one text-base">
                         ▶ BACK TO TITLE
-                    </button>
+                    </Button>
                 </motion.div>
             </motion.div>
         </div>

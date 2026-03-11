@@ -2,6 +2,8 @@
 
 import Link from 'next/link'
 import { lpHero } from './lpHero.styles'
+import { button } from '@/components/ui/button'
+import { Typography } from '@/components/ui/typography'
 
 const styles = lpHero()
 
@@ -26,10 +28,10 @@ export function LPHero() {
             </div>
 
             {/* メインタイトル */}
-            <h1 className={styles.titleBlock()}>
+            <Typography variant="display" className={styles.titleBlock()}>
                 <span className={styles.titleSpanWhite()}>Pukapuka</span>
                 <span className={styles.titleSpanPurple()}>Space</span>
-            </h1>
+            </Typography>
 
             {/* キャッチコピー */}
             <p className={styles.catchCopy()}>
@@ -41,7 +43,7 @@ export function LPHero() {
             </p>
 
             {/* CTAボタン */}
-            <Link href="/login" className={styles.ctaButton()}>
+            <Link href="/login" className={button({ variant: 'primary', size: 'xl', className: 'mt-10 gap-2.5 font-dot-gothic-16 tracking-wider' })}>
                 <span className={styles.ctaPulse()} />
                 ログインして始める
                 <svg className={styles.ctaArrow()} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

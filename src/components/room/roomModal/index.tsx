@@ -3,6 +3,8 @@
 import React, { useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { roomModal } from './styles'
+import { Button } from '@/components/ui/button'
+import { Typography } from '@/components/ui/typography'
 
 interface RoomModalProps {
     isOpen: boolean
@@ -64,15 +66,17 @@ export function RoomModal({
             >
                 {/* ヘッダー */}
                 <div className={styles.header()}>
-                    <h2 className={styles.title()}>{title}</h2>
+                    <Typography variant="h2" className={styles.title()}>{title}</Typography>
                     {showCloseButton && (
-                        <button
-                            className={styles.closeButton()}
+                        <Button
+                            variant="ghost"
+                            size="sm"
                             onClick={onClose}
                             aria-label="閉じる"
+                            className="text-white text-2xl w-8 h-8 hover:bg-white/20 active:bg-white/30"
                         >
                             ×
-                        </button>
+                        </Button>
                     )}
                 </div>
 

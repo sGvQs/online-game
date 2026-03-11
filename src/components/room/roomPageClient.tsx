@@ -19,6 +19,7 @@ import {
 } from '@/constants/room/roomEntryMessages'
 import { PresenceDuplicateWarning } from '@/components/common/PresenceDuplicateWarning'
 import { roomPageClient } from './roomPageClient.styles'
+import { Button } from '@/components/ui/button'
 
 const styles = roomPageClient()
 
@@ -245,12 +246,12 @@ export function RoomPageClientWrapper({
                         {gameStartErrorType === 'star-shield' && 'STAR SHIELD は 2人のみでプレイできます。'}
                     </p>
                     <div className={styles.errorModalActions()}>
-                        <button
+                        <Button
+                            variant="danger"
                             onClick={() => setShowGameStartError(false)}
-                            className={styles.errorModalButton()}
                         >
                             OK
-                        </button>
+                        </Button>
                     </div>
                 </div>
             </RoomModal>

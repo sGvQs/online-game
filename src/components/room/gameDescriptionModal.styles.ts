@@ -17,7 +17,6 @@ export const ehModal = tv({
         victoryBox: 'border-2 p-3 rounded bg-brand-500/10 border-brand-400',
         victoryText: 'text-sm font-bold text-brand-900',
         closeRow: 'flex justify-center pt-4',
-        closeButton: 'px-8 py-3 rounded-lg font-bold text-sm transition-all duration-200 border bg-brand-400 text-white border-brand-500 hover:bg-brand-300 hover:shadow-[0_0_20px_rgba(99,102,241,0.5)]',
     },
 })
 
@@ -40,7 +39,6 @@ export const nhModal = tv({
         tipsList: 'space-y-2 text-xs pl-2 text-gray-300',
         tipsBullet: 'mr-2 text-[#FF4444]',
         closeRow: 'p-4 border-t border-[#FF4444]/30 flex justify-center',
-        closeButton: 'px-8 py-3 rounded font-bold text-sm transition-all duration-200 bg-[#FF4444] text-black hover:bg-[#FF8888] shadow-[0_0_15px_rgba(255,68,68,0.5)]',
     },
 })
 
@@ -65,6 +63,5 @@ export const ssModal = tv({
         tipsList: 'space-y-2 text-xs pl-2 text-brand-600',
         tipsBullet: 'mr-2 text-brand-500',
         closeRow: 'p-4 border-t border-brand-500/30 flex justify-center',
-        closeButton: 'px-8 py-3 rounded font-bold text-sm transition-all duration-200 bg-brand-500 text-white hover:bg-brand-400 border border-brand-400 shadow-[0_0_15px_rgba(129,140,248,0.4)]',
     },
 })

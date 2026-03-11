@@ -9,6 +9,5 @@ export const roomPageClient = tv({
         errorModalText: 'text-brand-800',
         errorModalSub: 'text-sm text-brand-600',
         errorModalActions: 'flex justify-center pt-4',
-        errorModalButton: 'px-8 py-3 rounded-lg font-bold text-sm transition-all border bg-brand-500 text-white border-brand-600 hover:bg-brand-600',
     },
 })
