@@ -80,7 +80,7 @@ model Room {
   matches Match[]
   users   RoomUser[]
 
-  creator User @relation("CreatedRooms", fields: [createdBy], references: [id])
+  creator User @relation("CreatedRooms", fields: [createdBy], references: [id], onDelete: Restrict)
 
   @@map("rooms")
 }
@@ -125,6 +125,7 @@ model ErrorEvent {
 
   @@index([matchId])
   @@index([matchId, closedAt])
+  @@index([roomId])
   @@map("error_events")
 }
 
@@ -144,8 +145,9 @@ model Match {
   matchScores      MatchScore[]
   typingShootMatch TypingShootMatch?
   room             Room              @relation(fields: [roomId], references: [id], onDelete: Cascade)
-  winner           User?             @relation(fields: [winnerId], references: [id])
+  winner           User?             @relation(fields: [winnerId], references: [id], onDelete: SetNull)
 
+  @@index([roomId])
   @@map("matches")
 }
 
@@ -179,7 +181,7 @@ model GuestHand {
   isConfirmed   Boolean @default(false) @map("is_confirmed")
 
   jankenEvent JankenEvent @relation(fields: [jankenEventId], references: [id], onDelete: Cascade)
-  user        User        @relation(fields: [userId], references: [id])
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([jankenEventId, userId])
   @@map("guest_hands")
@@ -198,7 +200,7 @@ model JankenLog {
 
   match       Match?       @relation(fields: [matchId], references: [id], onDelete: SetNull)
   jankenEvent JankenEvent? @relation(fields: [jankenEventId], references: [id], onDelete: SetNull)
-  user        User         @relation(fields: [userId], references: [id])
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, isHost])
   @@map("janken_logs")
@@ -214,7 +216,7 @@ model MatchScore {
   createdAt DateTime @default(now()) @map("created_at")
 
   match Match @relation(fields: [matchId], references: [id], onDelete: Cascade)
-  user  User  @relation(fields: [userId], references: [id])
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([matchId, userId])
   @@map("match_scores")

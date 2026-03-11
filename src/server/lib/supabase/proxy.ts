@@ -50,10 +50,19 @@ export async function updateSession(request: NextRequest) {
         !request.nextUrl.pathname.startsWith('/privacy') &&
         !request.nextUrl.pathname.startsWith('/terms')
     ) {
-        // no user, potentially respond by redirecting the user to the login page
+        // 無効なセッション Cookie をローカルでクリア（API呼び出しなし）
+        await supabase.auth.signOut({ scope: 'local' })
+
         const url = request.nextUrl.clone()
         url.pathname = '/login'
-        return NextResponse.redirect(url)
+        const redirectResponse = NextResponse.redirect(url)
+
+        // クリア済み Cookie をリダイレクトレスポンスにコピー
+        supabaseResponse.cookies.getAll().forEach((cookie) => {
+            redirectResponse.cookies.set(cookie.name, cookie.value, cookie)
+        })
+
+        return redirectResponse
     }
 
     if (user) {
