@@ -342,13 +342,13 @@ export function RoleSelectionScreen({
 
                 <motion.div className="flex gap-3" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.5, delay: 0.25 }}>
                     {isHost && (
-                        <Button variant="ghost" size="lg" onClick={onBack} className="shrink-0 font-cherry-bomb-one">
+                        <Button variant="success" size="lg" onClick={onBack} className="shrink-0 font-cherry-bomb-one">
                             ← EXIT
                         </Button>
                     )}
                     {isHost && (
                         <Button
-                            variant="solid"
+                            variant="primary"
                             size="lg"
                             disabled={!canProceed}
                             onClick={() => canProceed && onProceedToGame()}

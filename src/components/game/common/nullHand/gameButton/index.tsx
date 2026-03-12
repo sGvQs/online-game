@@ -1,42 +1,43 @@
 'use client'
-import { gameButton } from './styles'
+import { type ButtonHTMLAttributes } from 'react'
+import { Button } from '@/components/ui/button'
 import { useSE } from '@/hooks/useSE'
 
-import { motion } from 'framer-motion'
+type NullHandVariant = 'primary' | 'secondary' | 'danger' | 'cyan'
 
-interface GameButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-    variant?: 'primary' | 'secondary' | 'danger' | 'cyan'
+const VARIANT_MAP = {
+    primary: 'primary',
+    secondary: 'solid',
+    danger: 'danger',
+    cyan: 'success',
+} as const
+
+interface GameButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+    variant?: NullHandVariant
     fullWidth?: boolean
     size?: 'sm' | 'md' | 'lg'
 }
 
 export const GameButton = ({
-    className,
     variant = 'primary',
-    fullWidth = false,
+    fullWidth,
     size = 'md',
-    children,
     onClick,
     ...props
 }: GameButtonProps) => {
     const { play } = useSE()
 
     return (
-        <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className={gameButton({ variant, size, fullWidth, className })}
+        <Button
+            screen="null-hand"
+            variant={VARIANT_MAP[variant]}
+            size={size}
+            fullWidth={fullWidth}
             onClick={(e) => {
-                if (variant === 'danger' || variant === 'primary') {
-                    play('submit')
-                } else {
-                    play('select')
-                }
-                if (onClick) onClick(e as any)
+                play(variant === 'primary' || variant === 'danger' ? 'submit' : 'select')
+                onClick?.(e)
             }}
-            {...props as any}
-        >
-            {children}
-        </motion.button>
+            {...props}
+        />
     )
 }

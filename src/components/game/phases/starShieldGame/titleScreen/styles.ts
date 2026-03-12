@@ -26,15 +26,5 @@ export const titleScreen = tv({
     howToCard: 'rounded-2xl p-5 bg-[rgba(192,132,252,0.05)] border border-[rgba(192,132,252,0.18)]',
     howToTitle: 'text-[10px] tracking-[0.4em] uppercase mb-4 text-[rgba(192,132,252,0.6)]',
     howToText: 'text-xs leading-5 text-[rgba(203,213,225,0.7)]',
-    menuButton: [
-      'py-3 px-6 rounded-2xl font-bold text-left transition-all duration-200 select-none',
-      'font-cherry-bomb-one text-base',
-      '[background:var(--btn-bg)] [border:var(--btn-border)] [color:var(--btn-color)] [box-shadow:var(--btn-glow)]',
-    ],
-    menuButtonDisabled: [
-      'py-3 px-6 rounded-2xl font-bold text-left transition-all duration-200 select-none',
-      'font-cherry-bomb-one text-base',
-      'bg-gray-800/60 text-gray-500 border-2 border-gray-700/50',
-    ],
   },
 })

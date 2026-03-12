@@ -5,7 +5,7 @@ import { motion } from 'framer-motion'
 import Image from 'next/image'
 import { RoomWithUsersAndReadyStatus, RoomUserWithReadyStatus } from '@/types'
 import type { UserRanking } from '@/types'
-import { cn } from '@/lib/utils'
+import { Button } from '@/components/ui/button'
 import { ProtectedStar } from '../playing/protectedStar'
 import { DinosaurWithBalls } from '@/components/game/common/starShield/dinosaurWithBalls'
 import { AuroraGlow } from '@/components/game/common/starShield/auroraGlow'
@@ -82,54 +82,45 @@ export function TitleScreen({
                             animate={{ opacity: 1 }}
                             transition={{ duration: 0.8, delay: 0.4 }}
                         >
-                            <MenuButton
+                            <Button
+                                screen="star-shield"
+                                variant={isReady ? 'primary' : 'solid'}
+                                size="lg"
                                 onClick={() => !isReady && onToggleReady()}
-                                active={isReady}
                                 disabled={isReady}
-                                activeBg="rgba(79,70,229,0.92)"
-                                activeBorder="#6366f1"
-                                activeText="#e0e7ff"
-                                activeGlow="0 0 20px rgba(99,102,241,0.5)"
+                                className="w-full"
                             >
                                 {isReady ? '✓ READY' : '▶ READY'}
-                            </MenuButton>
+                            </Button>
                             <Link
                                 href={`/game/${roomId}/star-shield/skill`}
-                                className={cn(
-                                    'flex items-center justify-start gap-2 py-3 px-6 rounded-2xl font-bold transition-all [font-family:var(--font-cherry-bomb-one)] text-left',
-                                    'bg-amber-600/30 border-2 border-amber-500/50 text-amber-200',
-                                    'hover:bg-amber-500/40 hover:scale-[1.02] active:scale-[0.98] cursor-pointer',
-                                )}
+                                className="flex items-center justify-start gap-2 py-3 px-6 rounded-2xl font-bold transition-all font-cherry-bomb-one text-left bg-amber-600/30 border-2 border-amber-500/50 text-amber-200 hover:bg-amber-500/40 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
                             >
                                 <span>⚙️</span>
                                 <span>SKILL</span>
                             </Link>
                             {isHost && (
-                                <MenuButton
+                                <Button
+                                    screen="star-shield"
+                                    variant={canStart ? 'primary' : 'solid'}
+                                    size="lg"
                                     onClick={() => canStart && onStartGame()}
-                                    active={canStart}
                                     disabled={!canStart}
-                                    activeBg="rgba(79,70,229,0.9)"
-                                    activeBorder="#6366f1"
-                                    activeText="#e0e7ff"
-                                    activeGlow="0 0 20px rgba(99,102,241,0.5)"
+                                    className="w-full"
                                 >
                                     {canStart ? '🚀 START' : '🔒 START'}
-                                </MenuButton>
+                                </Button>
                             )}
                             {isHost && (
-                                <MenuButton
+                                <Button
+                                    screen="star-shield"
+                                    variant="success"
+                                    size="lg"
                                     onClick={onExit}
-                                    active={false}
-                                    disabled={false}
-                                    activeBg="rgba(34,197,94,0.92)"
-                                    activeBorder="#22c55e"
-                                    activeText="#dcfce7"
-                                    activeGlow="0 0 16px rgba(34,197,94,0.4)"
-                                    isExit
+                                    className="w-full"
                                 >
                                     ← EXIT
-                                </MenuButton>
+                                </Button>
                             )}
                         </motion.div>
                     </div>
@@ -199,39 +190,3 @@ export function TitleScreen({
     )
 }
 
-interface MenuButtonProps {
-    children: React.ReactNode
-    onClick: () => void
-    active: boolean
-    disabled: boolean
-    activeBg: string
-    activeBorder: string
-    activeText: string
-    activeGlow: string
-    isExit?: boolean
-}
-
-function MenuButton({ children, onClick, active, disabled, activeBg, activeBorder, activeText, activeGlow, isExit }: MenuButtonProps) {
-    const isDisabled = disabled && !isExit
-    const styles = titleScreen()
-    const btnVars = active
-        ? { ['--btn-bg' as string]: activeBg, ['--btn-border' as string]: `2px solid ${activeBorder}`, ['--btn-color' as string]: activeText, ['--btn-glow' as string]: activeGlow }
-        : isExit
-          ? { ['--btn-bg' as string]: 'rgba(34,197,94,0.9)', ['--btn-border' as string]: '2px solid #22c55e', ['--btn-color' as string]: '#dcfce7', ['--btn-glow' as string]: '0 0 20px rgba(34,197,94,0.5)' }
-          : { ['--btn-bg' as string]: 'rgba(45,42,66,0.92)', ['--btn-border' as string]: '2px solid #4a4a6a', ['--btn-color' as string]: '#9ca3af', ['--btn-glow' as string]: 'none' }
-    return (
-        <button
-            onClick={onClick}
-            disabled={isDisabled}
-            className={cn(
-                isDisabled ? styles.menuButtonDisabled() : styles.menuButton(),
-                isDisabled ? 'opacity-30 cursor-not-allowed' : 'cursor-pointer',
-                !isDisabled && !isExit && 'hover:scale-[1.02] hover:brightness-110 active:scale-[0.98]',
-                !isDisabled && isExit && 'hover:scale-105 hover:bg-green-500 hover:border-green-400 active:scale-95',
-            )}
-            style={!isDisabled ? btnVars : undefined}
-        >
-            {children}
-        </button>
-    )
-}
