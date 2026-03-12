@@ -51,8 +51,6 @@ import type { SpecialAttackChoice } from '@/utils/starShieldGame'
 // ============================================================
 // 型定義
 // ============================================================
-type TabType = 'attack' | 'defence'
-
 type PreviewData =
     | { kind: 'normalAttack'; techniqueId: TechniqueId }
     | { kind: 'specialAttack'; id: string }
@@ -77,7 +75,6 @@ export function StarShieldSkill({ roomId, currentUserId: _currentUserId }: { roo
     const [progress, setProgress] = useState<StarShieldProgress | null>(null)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
-    const [activeTab, setActiveTab] = useState<TabType>('attack')
     const [preview, setPreview] = useState<PreviewData | null>(null)
 
     useEffect(() => {
@@ -179,12 +176,12 @@ export function StarShieldSkill({ roomId, currentUserId: _currentUserId }: { roo
                             SKILL
                         </h1>
                         <p className="text-white/35 text-xs mt-0.5 font-dot-gothic-16">
-                            スキルを購入してロードアウトを整えよう
+                            スキルを強化して星を守る力を高めよう
                         </p>
                     </div>
                     <Link
                         href={`/game/${roomId}/star-shield`}
-                        className="px-4 py-2 rounded-xl border border-brand-500/50 bg-brand-500/20 text-brand-300 text-sm hover:bg-brand-500/30 transition-colors font-dot-gothic-16"
+                        className="px-4 py-2 rounded-xl bg-white/10 border border-white/20 text-white/80 text-sm hover:bg-white/15 transition-colors font-dot-gothic-16"
                     >
                         ← もどる
                     </Link>
@@ -222,9 +219,9 @@ export function StarShieldSkill({ roomId, currentUserId: _currentUserId }: { roo
                     className="rounded-2xl p-5 bg-white/3 border border-white/8 flex flex-col gap-5"
                 >
                     <p className="text-sm font-dot-gothic-16 text-white/80 flex items-center gap-2">
-                        🎮 ロードアウト設定
+                        ⚙️ 現在の装備
                         <span className="text-[10px] text-white/30 font-normal font-dot-gothic-16">
-                            ゲームで使用するスキルを選択
+                            ゲームで使用するスキルの状態
                         </span>
                     </p>
 
@@ -402,19 +399,11 @@ export function StarShieldSkill({ roomId, currentUserId: _currentUserId }: { roo
                                             </div>
                                             <span className="text-[9px] text-white/40 shrink-0">Lv{healLevel === 6 ? 'max' : healLevel}/6</span>
                                         </div>
-                                        <div className="rounded-xl px-3 py-2 bg-emerald-500/5 border border-emerald-500/20">
-                                        <p className="text-[10px] text-emerald-400/70 font-dot-gothic-16">
-                                            {healLevel >= 5 ? (
-                                                healLevel === 6 ? (
-                                                    <>単語打ち切り時：<span className="text-emerald-300 font-bold">全回復</span> ＋ 全隕石破壊</>
-                                                ) : (
-                                                    <>単語打ち切り時：<span className="text-emerald-300 font-bold">全回復</span></>
-                                                )
-                                            ) : (
-                                                <>単語打ち切り時：星HP +<span className="text-emerald-300 font-bold">{LEVEL_HEAL_RECOVERY[healLevel as 1 | 2 | 3 | 4]}</span></>
-                                            )}
-                                        </p>
-                                        </div>
+                                        <HealLoadoutPreview
+                                            healValue={LEVEL_HEAL_RECOVERY[healLevel as 1 | 2 | 3 | 4 | 5 | 6] as number}
+                                            isFullRestore={healLevel >= 5}
+                                            starHpMax={LEVEL_STAR_HP[starHpLevel as 1 | 2 | 3 | 4 | 5]}
+                                        />
                                     </div>
                                 )}
                             </div>
@@ -422,255 +411,188 @@ export function StarShieldSkill({ roomId, currentUserId: _currentUserId }: { roo
                     </div>
                 </motion.div>
 
-                {/* スキル：ATTACK / DEFENCE タブ */}
+                {/* スキル一覧：ATTACK / DEFENCE */}
                 <motion.div
                     initial={{ opacity: 0, y: 8 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.15 }}
+                    className="flex flex-col gap-4"
                 >
-                    {/* タブスイッチャー */}
-                    <div className="flex rounded-2xl overflow-hidden border border-white/8 mb-4">
-                        <button
-                            onClick={() => setActiveTab('attack')}
-                            className={cn(
-                                'flex-1 py-4 flex flex-col items-center justify-center gap-1 transition-all duration-300',
-                                activeTab === 'attack'
-                                    ? 'bg-indigo-700/70 text-indigo-100 shadow-[inset_0_0_30px_rgba(99,102,241,0.2)]'
-                                    : 'bg-white/2 text-white/35 hover:text-white/55 hover:bg-white/4'
-                            )}
-                        >
-                            <span className="text-2xl">⚔️</span>
-                            <span className="text-sm font-bold font-cherry-bomb-one">ATTACK</span>
-                            <span className="text-[10px] opacity-60 font-dot-gothic-16">Shooter・攻撃担当</span>
-                        </button>
-                        <div className="w-px bg-white/8" />
-                        <button
-                            onClick={() => setActiveTab('defence')}
-                            className={cn(
-                                'flex-1 py-4 flex flex-col items-center justify-center gap-1 transition-all duration-300',
-                                activeTab === 'defence'
-                                    ? 'bg-emerald-800/70 text-emerald-100 shadow-[inset_0_0_30px_rgba(16,185,129,0.2)]'
-                                    : 'bg-white/2 text-white/35 hover:text-white/55 hover:bg-white/4'
-                            )}
-                        >
-                            <span className="text-2xl">🛡️</span>
-                            <span className="text-sm font-bold font-cherry-bomb-one">DEFENCE</span>
-                            <span className="text-[10px] opacity-60 font-dot-gothic-16">Typist・守護担当</span>
-                        </button>
-                    </div>
+                    {/* ATTACK セクション */}
+                    <SectionDivider icon={ICONS.SHOOTER} label="ATTACK" color="indigo" desc="Shooter・攻撃担当" />
 
-                    {/* タブコンテンツ */}
-                    <AnimatePresence mode="wait">
-                        {activeTab === 'attack' ? (
-                            <motion.div
-                                key="attack"
-                                initial={{ opacity: 0, x: -12 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                exit={{ opacity: 0, x: 12 }}
-                                transition={{ duration: 0.18 }}
-                                className="flex flex-col gap-4"
-                            >
-                                {/* 通常攻撃 */}
-                                <SkillCard title="通常攻撃" jurisdiction="attack">
-                                    {NORMAL_ATTACK_IDS.map((techniqueId) => {
-                                        const tech = TECHNIQUES[techniqueId]
-                                        const ownedAttack = normalAttacks.find((a) => a.techniqueId === techniqueId)
-                                        const currentLevel = ownedAttack ? ownedAttack.level : 0
-                                        const maxLevel = 5
+                    {/* 通常攻撃 */}
+                    <SkillCard title="通常攻撃" jurisdiction="attack">
+                        {NORMAL_ATTACK_IDS.map((techniqueId) => {
+                            const tech = TECHNIQUES[techniqueId]
+                            const ownedAttack = normalAttacks.find((a) => a.techniqueId === techniqueId)
+                            const currentLevel = ownedAttack ? ownedAttack.level : 0
+                            const maxLevel = 5
 
-                                        return (
-                                            <SkillRow
-                                                key={techniqueId}
-                                                label={
-                                                    <div className="flex items-center gap-2">
-                                                        <span
-                                                            className="w-3 h-3 rounded-full shrink-0"
-                                                            style={{ backgroundColor: tech.color }}
-                                                        />
-                                                        <span className="font-dot-gothic-16 font-bold">{tech.label}</span>
-                                                    </div>
-                                                }
-                                                detail={getTechEffectLabel(techniqueId)}
-                                                currentLevel={currentLevel}
-                                                maxLevel={maxLevel}
-                                                onClick={() =>
-                                                    setPreview({
-                                                        kind: 'normalAttack',
-                                                        techniqueId,
-                                                    })
-                                                }
-                                                color="indigo"
+                            return (
+                                <SkillRow
+                                    key={techniqueId}
+                                    label={
+                                        <div className="flex items-center gap-2">
+                                            <span
+                                                className="w-3 h-3 rounded-full shrink-0"
+                                                style={{ backgroundColor: tech.color }}
                                             />
-                                        )
-                                    })}
-                                </SkillCard>
+                                            <span className="font-dot-gothic-16 font-bold">{tech.label}</span>
+                                        </div>
+                                    }
+                                    detail={getTechEffectLabel(techniqueId)}
+                                    currentLevel={currentLevel}
+                                    maxLevel={maxLevel}
+                                    onClick={() => setPreview({ kind: 'normalAttack', techniqueId })}
+                                    color="indigo"
+                                />
+                            )
+                        })}
+                    </SkillCard>
 
-                                {/* 必殺技 */}
-                                <SkillCard title="必殺技" jurisdiction="attack">
-                                    {SPECIAL_ATTACK_IDS.map((id) => {
-                                        const ownedSA = specialAttacks.find((a) => a.specialAttackId === id)
-                                        const currentLevel = ownedSA ? ownedSA.level : 0
-                                        const maxLevel = 10
+                    {/* 必殺技 */}
+                    <SkillCard title="必殺技" jurisdiction="attack">
+                        {SPECIAL_ATTACK_IDS.map((id) => {
+                            const ownedSA = specialAttacks.find((a) => a.specialAttackId === id)
+                            const currentLevel = ownedSA ? ownedSA.level : 0
+                            const maxLevel = 10
 
+                            return (
+                                <SkillRow
+                                    key={id}
+                                    label={
+                                        <span className="font-dot-gothic-16 font-bold">
+                                            {SPECIAL_LABELS[id] ?? id}
+                                        </span>
+                                    }
+                                    detail="単語完了時に扇状に弾を散布"
+                                    currentLevel={currentLevel}
+                                    maxLevel={maxLevel}
+                                    onClick={() => setPreview({ kind: 'specialAttack', id })}
+                                    color="indigo"
+                                />
+                            )
+                        })}
+                    </SkillCard>
+
+                    {/* DEFENCE セクション */}
+                    <SectionDivider icon={ICONS.TYPIST} label="DEFENCE" color="emerald" desc="Typist・守護担当" />
+
+                    {/* 星のHP */}
+                    <SkillCard title="星のHP強化" jurisdiction="defence">
+                        {/* 現在の HP バー */}
+                        <div className="flex items-end gap-4 mb-1">
+                            <div>
+                                <p className="text-[10px] text-white/30 mb-0.5 font-dot-gothic-16">
+                                    現在のHP上限
+                                </p>
+                                <p className="text-3xl font-bold text-emerald-400 font-dot-gothic-16 leading-none">
+                                    {LEVEL_STAR_HP[starHpLevel as 1 | 2 | 3 | 4 | 5]}
+                                </p>
+                            </div>
+                            <div className="flex-1 pb-1">
+                                <div className="h-2 rounded-full bg-white/5 overflow-hidden">
+                                    <div
+                                        className="h-full rounded-full bg-linear-to-r from-emerald-700 to-emerald-400 transition-all duration-700"
+                                        style={{ width: `${(starHpLevel / 5) * 100}%` }}
+                                    />
+                                </div>
+                                <p className="text-[10px] text-white/25 mt-0.5 font-dot-gothic-16">
+                                    Lv {starHpLevel} / 5
+                                </p>
+                            </div>
+                        </div>
+
+                        {starHpLevel < 5 ? (
+                            (() => {
+                                const nextLevel = (starHpLevel + 1) as 2 | 3 | 4 | 5
+                                return (
+                                    <SkillRow
+                                        label={
+                                            <span>
+                                                HP {LEVEL_STAR_HP[starHpLevel as 1 | 2 | 3 | 4 | 5]} →{' '}
+                                                {LEVEL_STAR_HP[nextLevel]}（Lv. {starHpLevel} → Lv. {nextLevel}）
+                                            </span>
+                                        }
+                                        currentLevel={starHpLevel}
+                                        maxLevel={5}
+                                        onClick={() => setPreview({ kind: 'starHp' })}
+                                        color="emerald"
+                                    />
+                                )
+                            })()
+                        ) : (
+                            <MaxedMessage>星のHP MAX レベル到達 🏆</MaxedMessage>
+                        )}
+                    </SkillCard>
+
+                    {/* ヒール */}
+                    <SkillCard title="ヒール" jurisdiction="defence">
+                        {!healLevel ? (
+                            <>
+                                <p className="text-white/40 text-xs mb-3 font-dot-gothic-16">
+                                    単語を打ち切ったとき、星のHPを回復します
+                                </p>
+                                <SkillRow
+                                    label={<span>ヒール解放</span>}
+                                    currentLevel={0}
+                                    maxLevel={6}
+                                    onClick={() => setPreview({ kind: 'heal' })}
+                                    color="emerald"
+                                />
+                            </>
+                        ) : (
+                            <>
+                                {/* 現在の回復量バー */}
+                                <div className="flex items-end gap-4 mb-1">
+                                    <div>
+                                        <p className="text-[10px] text-white/30 mb-0.5 font-dot-gothic-16">
+                                            現在の回復量
+                                        </p>
+                                        <p className="text-xl font-bold text-emerald-400 font-dot-gothic-16 leading-none">
+                                            {healLevel >= 5 ? '全回復' : `+${LEVEL_HEAL_RECOVERY[healLevel as 1 | 2 | 3 | 4 | 5 | 6]} HP`}
+                                        </p>
+                                    </div>
+                                    <div className="flex-1 pb-1">
+                                        <div className="h-2 rounded-full bg-white/5 overflow-hidden">
+                                            <div
+                                                className={cn(
+                                                    'h-full rounded-full transition-all duration-700',
+                                                    healLevel === 6 ? 'bg-linear-to-r from-amber-600 to-yellow-400' : 'bg-linear-to-r from-emerald-700 to-emerald-400'
+                                                )}
+                                                style={{ width: `${(healLevel / 6) * 100}%` }}
+                                            />
+                                        </div>
+                                        <p className="text-[10px] text-white/25 mt-0.5 font-dot-gothic-16">
+                                            Lv {healLevel === 6 ? 'max' : healLevel} / max
+                                        </p>
+                                    </div>
+                                </div>
+
+                                {healLevel < 6 ? (
+                                    (() => {
+                                        const nextLevel = (healLevel + 1) as 2 | 3 | 4 | 5 | 6
                                         return (
                                             <SkillRow
-                                                key={id}
                                                 label={
-                                                    <span className="font-dot-gothic-16 font-bold">
-                                                        {SPECIAL_LABELS[id] ?? id}
+                                                    <span>
+                                                        ヒール Lv. {healLevel} → Lv. {nextLevel === 6 ? 'max' : nextLevel}
                                                     </span>
                                                 }
-                                                detail="単語完了時に扇状に弾を散布"
-                                                currentLevel={currentLevel}
-                                                maxLevel={maxLevel}
-                                                onClick={() =>
-                                                    setPreview({
-                                                        kind: 'specialAttack',
-                                                        id,
-                                                    })
-                                                }
-                                                color="indigo"
-                                            />
-                                        )
-                                    })}
-                                </SkillCard>
-                            </motion.div>
-                        ) : (
-                            <motion.div
-                                key="defence"
-                                initial={{ opacity: 0, x: 12 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                exit={{ opacity: 0, x: -12 }}
-                                transition={{ duration: 0.18 }}
-                                className="flex flex-col gap-4"
-                            >
-                                {/* 星のHP */}
-                                <SkillCard title="星のHP強化" jurisdiction="defence">
-                                    {/* 現在の HP バー */}
-                                    <div className="flex items-end gap-4 mb-1">
-                                        <div>
-                                            <p className="text-[10px] text-white/30 mb-0.5 font-dot-gothic-16">
-                                                現在のHP上限
-                                            </p>
-                                            <p className="text-3xl font-bold text-emerald-400 font-dot-gothic-16 leading-none">
-                                                {LEVEL_STAR_HP[starHpLevel as 1 | 2 | 3 | 4 | 5]}
-                                            </p>
-                                        </div>
-                                        <div className="flex-1 pb-1">
-                                            <div className="h-2 rounded-full bg-white/5 overflow-hidden">
-                                                <div
-                                                    className="h-full rounded-full bg-linear-to-r from-emerald-700 to-emerald-400 transition-all duration-700"
-                                                    style={{ width: `${(starHpLevel / 5) * 100}%` }}
-                                                />
-                                            </div>
-                                            <p className="text-[10px] text-white/25 mt-0.5 font-dot-gothic-16">
-                                                Lv {starHpLevel} / 5
-                                            </p>
-                                        </div>
-                                    </div>
-
-                                    {starHpLevel < 5 ? (
-                                        (() => {
-                                            const nextLevel = (starHpLevel + 1) as 2 | 3 | 4 | 5
-                                            return (
-                                                <SkillRow
-                                                    label={
-                                                        <span>
-                                                            HP {LEVEL_STAR_HP[starHpLevel as 1 | 2 | 3 | 4 | 5]} →{' '}
-                                                            {LEVEL_STAR_HP[nextLevel]}（Lv. {starHpLevel} → Lv. 
-                                                            {nextLevel}）
-                                                        </span>
-                                                    }
-                                                    currentLevel={starHpLevel}
-                                                    maxLevel={5}
-                                                    onClick={() =>
-                                                        setPreview({
-                                                            kind: 'starHp',
-                                                        })
-                                                    }
-                                                    color="emerald"
-                                                />
-                                            )
-                                        })()
-                                    ) : (
-                                        <MaxedMessage>星のHP MAX レベル到達 🏆</MaxedMessage>
-                                    )}
-                                </SkillCard>
-
-                                {/* ヒール */}
-                                <SkillCard title="ヒール" jurisdiction="defence">
-                                    {!healLevel ? (
-                                        <>
-                                            <p className="text-white/40 text-xs mb-3 font-dot-gothic-16">
-                                                単語を打ち切ったとき、星のHPを回復します
-                                            </p>
-                                            <SkillRow
-                                                label={<span>ヒール解放</span>}
-                                                currentLevel={0}
+                                                currentLevel={healLevel}
                                                 maxLevel={6}
                                                 onClick={() => setPreview({ kind: 'heal' })}
                                                 color="emerald"
                                             />
-                                        </>
-                                    ) : (
-                                        <>
-                                            {/* 現在の回復量バー */}
-                                            <div className="flex items-end gap-4 mb-1">
-                                                <div>
-                                                    <p className="text-[10px] text-white/30 mb-0.5 font-dot-gothic-16">
-                                                        現在の回復量
-                                                    </p>
-                                                    <p className="text-xl font-bold text-emerald-400 font-dot-gothic-16 leading-none">
-                                                        {healLevel >= 5 ? '全回復' : `+${LEVEL_HEAL_RECOVERY[healLevel as 1 | 2 | 3 | 4 | 5 | 6]} HP`}
-                                                    </p>
-                                                </div>
-                                                <div className="flex-1 pb-1">
-                                                    <div className="h-2 rounded-full bg-white/5 overflow-hidden">
-                                                        <div
-                                                            className={cn(
-                                                                'h-full rounded-full transition-all duration-700',
-                                                                healLevel === 6 ? 'bg-linear-to-r from-amber-600 to-yellow-400' : 'bg-linear-to-r from-emerald-700 to-emerald-400'
-                                                            )}
-                                                            style={{ width: `${(healLevel / 6) * 100}%` }}
-                                                        />
-                                                    </div>
-                                                    <p className="text-[10px] text-white/25 mt-0.5 font-dot-gothic-16">
-                                                        Lv {healLevel === 6 ? 'max' : healLevel} / max
-                                                    </p>
-                                                </div>
-                                            </div>
-
-                                            {healLevel < 6 ? (
-                                                (() => {
-                                                    const nextLevel = (healLevel + 1) as 2 | 3 | 4 | 5 | 6
-                                                    return (
-                                                        <SkillRow
-                                                            label={
-                                                                <span>
-                                                                    ヒール Lv. {healLevel} → Lv. 
-                                                                    {nextLevel === 6 ? 'max' : nextLevel}
-                                                                </span>
-                                                            }
-                                                            currentLevel={healLevel}
-                                                            maxLevel={6}
-                                                            onClick={() =>
-                                                                setPreview({
-                                                                    kind: 'heal',
-                                                                })
-                                                            }
-                                                            color="emerald"
-                                                        />
-                                                    )
-                                                })()
-                                            ) : (
-                                                <MaxedMessage>ヒール MAX レベル到達 🏆</MaxedMessage>
-                                            )}
-                                        </>
-                                    )}
-                                </SkillCard>
-                            </motion.div>
+                                        )
+                                    })()
+                                ) : (
+                                    <MaxedMessage>ヒール MAX レベル到達 🏆</MaxedMessage>
+                                )}
+                            </>
                         )}
-                    </AnimatePresence>
+                    </SkillCard>
                 </motion.div>
             </div>
 
@@ -727,7 +649,16 @@ function SkillCard({
                             : 'bg-emerald-500/15 border-emerald-500/30 text-emerald-300'
                     )}
                 >
-                    {isAttack ? '⚔️ Shooter' : '🛡️ Typist'}
+                    <span className="flex items-center gap-1">
+                        <Image
+                            src={isAttack ? ICONS.SHOOTER : ICONS.TYPIST}
+                            alt=""
+                            width={11}
+                            height={11}
+                            className="opacity-70"
+                        />
+                        {isAttack ? 'Shooter' : 'Typist'}
+                    </span>
                 </span>
             </div>
             {children}
@@ -820,6 +751,71 @@ function getTechEffectLabel(techniqueId: TechniqueId): string {
         pink: '円弧軌道（5発・レベルで増加）',
     }
     return effects[techniqueId] ?? ''
+}
+
+// ============================================================
+// SectionDivider
+// ============================================================
+function SectionDivider({
+    icon,
+    label,
+    color,
+    desc,
+}: {
+    icon: string
+    label: string
+    color: 'indigo' | 'emerald'
+    desc: string
+}) {
+    return (
+        <div className="flex items-center gap-2 mt-2">
+            <Image src={icon} alt={label} width={18} height={18} className="opacity-80 shrink-0" />
+            <span
+                className={cn(
+                    'font-bold font-cherry-bomb-one text-sm shrink-0',
+                    color === 'indigo' ? 'text-indigo-400' : 'text-emerald-400'
+                )}
+            >
+                {label}
+            </span>
+            <span className="text-white/30 text-xs font-dot-gothic-16 shrink-0">{desc}</span>
+            <div className="flex-1 h-px bg-white/8 ml-1" />
+        </div>
+    )
+}
+
+// ============================================================
+// HealLoadoutPreview
+// ============================================================
+function HealLoadoutPreview({ healValue, isFullRestore, starHpMax }: { healValue: number; isFullRestore: boolean; starHpMax: number }) {
+    const BASE_PCT = 28
+    const HEAL_PCT = isFullRestore ? 100 - BASE_PCT : Math.min(100 - BASE_PCT, (healValue / starHpMax) * 100)
+
+    return (
+        <div className="rounded-xl bg-black/30 border border-white/5 p-2.5 flex flex-col gap-1.5">
+            <p className="text-[9px] text-white/25 font-dot-gothic-16">ヒール効果イメージ</p>
+            <div className="relative h-3 rounded-full bg-white/5 overflow-hidden">
+                <div
+                    className="absolute inset-y-0 left-0 bg-emerald-900/60"
+                    style={{ width: `${BASE_PCT}%` }}
+                />
+                <motion.div
+                    className={cn(
+                        'absolute inset-y-0',
+                        isFullRestore
+                            ? 'bg-linear-to-r from-amber-500 to-yellow-400'
+                            : 'bg-linear-to-r from-emerald-500 to-emerald-300'
+                    )}
+                    style={{ left: `${BASE_PCT}%` }}
+                    animate={{ width: ['0%', `${HEAL_PCT}%`, `${HEAL_PCT}%`, '0%'] }}
+                    transition={{ duration: 1.8, times: [0, 0.4, 0.7, 1], repeat: Infinity, repeatDelay: 0.6 }}
+                />
+            </div>
+            <p className="text-[9px] text-emerald-400/60 font-dot-gothic-16 text-right">
+                {isFullRestore ? '全回復' : `+${healValue} HP`}
+            </p>
+        </div>
+    )
 }
 
 // ============================================================
@@ -1203,7 +1199,7 @@ function SkillPreviewModal({
 // ============================================================
 function PreviewContent({
     preview,
-    progress: _progress,
+    progress,
     currentLevel,
 }: {
     preview: PreviewData
@@ -1379,6 +1375,16 @@ function PreviewContent({
                         formatValue={(v) => `${v} 発`}
                     />
                 </div>
+                <div className="mt-6 pt-6 border-t border-white/5">
+                    <p className="text-white/40 text-xs mb-3 font-dot-gothic-16 font-bold tracking-wider">
+                        アニメーション デモ (Lv {displayLevel})
+                    </p>
+                    <SpecialAttackLoadoutPreview
+                        specialAttackId={preview.id as SpecialAttackChoice}
+                        level={displayLevel}
+                        bulletColor={TECHNIQUES[progress?.selectedNormalAttackId as TechniqueId ?? 'red']?.color ?? '#ef4444'}
+                    />
+                </div>
             </div>
         )
     }
@@ -1455,6 +1461,18 @@ function PreviewContent({
                         }
                     />
                 </div>
+                {owned && (
+                    <div className="mt-6 pt-6 border-t border-white/5">
+                        <p className="text-white/40 text-xs mb-3 font-dot-gothic-16 font-bold tracking-wider">
+                            ヒール効果イメージ
+                        </p>
+                        <HealLoadoutPreview
+                            healValue={healVal as number}
+                            isFullRestore={isFullRestore}
+                            starHpMax={LEVEL_STAR_HP[(progress?.starHpLevel ?? 1) as 1 | 2 | 3 | 4 | 5]}
+                        />
+                    </div>
+                )}
             </div>
         )
     }
