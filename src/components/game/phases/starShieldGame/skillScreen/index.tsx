@@ -68,6 +68,11 @@ const SPECIAL_LABELS: Record<string, string> = {
 const NORMAL_ATTACK_IDS: TechniqueId[] = ['red', 'blue', 'yellow_beam', 'purple', 'orange', 'pink']
 const SPECIAL_ATTACK_IDS = ['spread'] as const
 
+const PROGRESS_BAR_COLORS = {
+    indigo: '#818cf8',
+    emerald: '#34d399',
+} as const
+
 // ============================================================
 // Main Component
 // ============================================================
@@ -206,7 +211,7 @@ export function StarShieldSkill({ roomId, currentUserId: _currentUserId }: { roo
                 </motion.div>
 
                 {error && (
-                    <div className="rounded-xl bg-red-500/20 border border-red-500/50 text-red-400 px-4 py-2 text-sm">
+                    <div className="rounded-xl bg-red-500/20 border border-red-500 text-red-400 px-4 py-2 text-sm">
                         {error}
                     </div>
                 )}
@@ -235,7 +240,7 @@ export function StarShieldSkill({ roomId, currentUserId: _currentUserId }: { roo
 
                             {/* 通常攻撃 */}
                             <div>
-                                <p className="text-[10px] text-indigo-400/50 font-dot-gothic-16 mb-1.5 flex items-center gap-1.5">
+                                <p className="text-[10px] text-indigo-400 font-dot-gothic-16 mb-1.5 flex items-center gap-1.5">
                                     <span className="w-1 h-1 rounded-full bg-indigo-400 shrink-0 opacity-50" />
                                     通常攻撃
                                 </p>
@@ -255,7 +260,7 @@ export function StarShieldSkill({ roomId, currentUserId: _currentUserId }: { roo
                             {/* 必殺技 */}
                             {availableSpecial.length > 0 && (
                             <div>
-                                <p className="text-[10px] text-indigo-400/50 font-dot-gothic-16 mb-1.5 flex items-center gap-1.5">
+                                <p className="text-[10px] text-indigo-400 font-dot-gothic-16 mb-1.5 flex items-center gap-1.5">
                                     <span className="w-1 h-1 rounded-full bg-indigo-400 shrink-0 opacity-50" />
                                     必殺技
                                 </p>
@@ -289,7 +294,7 @@ export function StarShieldSkill({ roomId, currentUserId: _currentUserId }: { roo
                                     星のHP
                                 </p>
                                 <div className="flex items-center gap-2">
-                                    <span className="text-white/50 text-lg font-dot-gothic-16">HP</span>
+                                    <span className="text-white text-lg font-dot-gothic-16">HP</span>
                                     <span className="text-xl font-bold text-emerald-400 font-dot-gothic-16 tabular-nums">
                                         {LEVEL_STAR_HP[starHpLevel as 1 | 2 | 3 | 4 | 5]}
                                     </span>
@@ -334,6 +339,46 @@ export function StarShieldSkill({ roomId, currentUserId: _currentUserId }: { roo
                             )}
                         </div>
                     </div>
+
+                    {/* 通常攻撃選択 */}
+                    {availableNormal.length > 0 && (
+                        <div className="pt-2 border-t border-white/8">
+                            <p className="text-[10px] text-indigo-400 font-dot-gothic-16 mb-2 flex items-center gap-1.5">
+                                <span className="w-1 h-1 rounded-full bg-indigo-400 shrink-0 opacity-50" />
+                                通常攻撃を選択
+                            </p>
+                            <div className="flex flex-wrap justify-between">
+                                {availableNormal.map(({ techniqueId, level }) => {
+                                    const tech = TECHNIQUES[techniqueId]
+                                    const isActive = selNormal === techniqueId
+                                    return (
+                                        <button
+                                            key={techniqueId}
+                                            type="button"
+                                            onClick={() => handleLoadoutUpdate({ selectedNormalAttackId: techniqueId })}
+                                            className={cn(
+                                                'flex items-center gap-2 px-5 py-3 rounded-xl border-2 transition-all font-dot-gothic-16 text-sm',
+                                                isActive
+                                                    ? 'shadow-[0_0_12px_rgba(255,255,255,0.2)]'
+                                                    : 'border-white/15 bg-white/3 hover:bg-white/6'
+                                            )}
+                                            style={
+                                                isActive
+                                                    ? { borderColor: tech.color, boxShadow: `0 0 12px ${tech.color}80` }
+                                                    : undefined
+                                            }
+                                        >
+                                            <span
+                                                className="w-3 h-3 rounded-full shrink-0"
+                                                style={{ backgroundColor: tech.color }}
+                                            />
+                                            <span className="text-white text-xs">Lv.{level}</span>
+                                        </button>
+                                    )
+                                })}
+                            </div>
+                        </div>
+                    )}
                 </motion.div>
 
                 {/* スキル一覧：ATTACK / DEFENCE */}
@@ -370,7 +415,7 @@ export function StarShieldSkill({ roomId, currentUserId: _currentUserId }: { roo
                                     currentLevel={currentLevel}
                                     maxLevel={maxLevel}
                                     onClick={() => setPreview({ kind: 'normalAttack', techniqueId })}
-                                    color="indigo"
+                                    progressBarColor={tech.color}
                                 />
                             )
                         })}
@@ -391,11 +436,11 @@ export function StarShieldSkill({ roomId, currentUserId: _currentUserId }: { roo
                                             {SPECIAL_LABELS[id] ?? id}
                                         </span>
                                     }
-                                    detail="単語完了時に扇状に弾を散布"
+                                    detail="単語を打ち切ったとき、強攻撃を発生させる"
                                     currentLevel={currentLevel}
                                     maxLevel={maxLevel}
                                     onClick={() => setPreview({ kind: 'specialAttack', id })}
-                                    color="indigo"
+                                    progressBarColor="#818cf8"
                                 />
                             )
                         })}
@@ -406,29 +451,6 @@ export function StarShieldSkill({ roomId, currentUserId: _currentUserId }: { roo
 
                     {/* 星のHP */}
                     <SkillCard title="星のHP強化" jurisdiction="defence">
-                        {/* 現在の HP バー */}
-                        <div className="flex items-end gap-4 mb-1">
-                            <div>
-                                <p className="text-[10px] text-white/30 mb-0.5 font-dot-gothic-16">
-                                    現在のHP上限
-                                </p>
-                                <p className="text-3xl font-bold text-emerald-400 font-dot-gothic-16 leading-none">
-                                    {LEVEL_STAR_HP[starHpLevel as 1 | 2 | 3 | 4 | 5]}
-                                </p>
-                            </div>
-                            <div className="flex-1 pb-1">
-                                <div className="h-2 rounded-full bg-white/5 overflow-hidden">
-                                    <div
-                                        className="h-full rounded-full bg-linear-to-r from-emerald-700 to-emerald-400 transition-all duration-700"
-                                        style={{ width: `${(starHpLevel / 5) * 100}%` }}
-                                    />
-                                </div>
-                                <p className="text-[10px] text-white/25 mt-0.5 font-dot-gothic-16">
-                                    Lv {starHpLevel} / 5
-                                </p>
-                            </div>
-                        </div>
-
                         {starHpLevel < 5 ? (
                             (() => {
                                 const nextLevel = (starHpLevel + 1) as 2 | 3 | 4 | 5
@@ -436,14 +458,14 @@ export function StarShieldSkill({ roomId, currentUserId: _currentUserId }: { roo
                                     <SkillRow
                                         label={
                                             <span>
-                                                HP {LEVEL_STAR_HP[starHpLevel as 1 | 2 | 3 | 4 | 5]} →{' '}
-                                                {LEVEL_STAR_HP[nextLevel]}（Lv. {starHpLevel} → Lv. {nextLevel}）
+                                                HP上限 <span className="text-emerald-400 font-bold">{LEVEL_STAR_HP[starHpLevel as 1 | 2 | 3 | 4 | 5]}</span>
+                                                {' '}→ {LEVEL_STAR_HP[nextLevel]}（Lv. {starHpLevel} → Lv. {nextLevel}）
                                             </span>
                                         }
                                         currentLevel={starHpLevel}
                                         maxLevel={5}
                                         onClick={() => setPreview({ kind: 'starHp' })}
-                                        color="emerald"
+                                        progressBarColor="#34d399"
                                     />
                                 )
                             })()
@@ -464,58 +486,33 @@ export function StarShieldSkill({ roomId, currentUserId: _currentUserId }: { roo
                                     currentLevel={0}
                                     maxLevel={6}
                                     onClick={() => setPreview({ kind: 'heal' })}
-                                    color="emerald"
+                                    progressBarColor="#34d399"
                                 />
                             </>
                         ) : (
-                            <>
-                                {/* 現在の回復量バー */}
-                                <div className="flex items-end gap-4 mb-1">
-                                    <div>
-                                        <p className="text-[10px] text-white/30 mb-0.5 font-dot-gothic-16">
-                                            現在の回復量
-                                        </p>
-                                        <p className="text-xl font-bold text-emerald-400 font-dot-gothic-16 leading-none">
-                                            {healLevel >= 5 ? '全回復' : `+${LEVEL_HEAL_RECOVERY[healLevel as 1 | 2 | 3 | 4 | 5 | 6]} HP`}
-                                        </p>
-                                    </div>
-                                    <div className="flex-1 pb-1">
-                                        <div className="h-2 rounded-full bg-white/5 overflow-hidden">
-                                            <div
-                                                className={cn(
-                                                    'h-full rounded-full transition-all duration-700',
-                                                    healLevel === 6 ? 'bg-linear-to-r from-amber-600 to-yellow-400' : 'bg-linear-to-r from-emerald-700 to-emerald-400'
-                                                )}
-                                                style={{ width: `${(healLevel / 6) * 100}%` }}
-                                            />
-                                        </div>
-                                        <p className="text-[10px] text-white/25 mt-0.5 font-dot-gothic-16">
-                                            Lv {healLevel === 6 ? 'max' : healLevel} / max
-                                        </p>
-                                    </div>
-                                </div>
-
-                                {healLevel < 6 ? (
-                                    (() => {
-                                        const nextLevel = (healLevel + 1) as 2 | 3 | 4 | 5 | 6
-                                        return (
-                                            <SkillRow
-                                                label={
-                                                    <span>
-                                                        ヒール Lv. {healLevel} → Lv. {nextLevel === 6 ? 'max' : nextLevel}
+                            healLevel < 6 ? (
+                                (() => {
+                                    const nextLevel = (healLevel + 1) as 2 | 3 | 4 | 5 | 6
+                                    return (
+                                        <SkillRow
+                                            label={
+                                                <span>
+                                                    回復量 <span className="text-emerald-400 font-bold">
+                                                        {healLevel >= 5 ? '全回復' : `+${LEVEL_HEAL_RECOVERY[healLevel as 1 | 2 | 3 | 4 | 5 | 6]} HP`}
                                                     </span>
-                                                }
-                                                currentLevel={healLevel}
-                                                maxLevel={6}
-                                                onClick={() => setPreview({ kind: 'heal' })}
-                                                color="emerald"
-                                            />
-                                        )
-                                    })()
-                                ) : (
-                                    <MaxedMessage>ヒール MAX レベル到達 🏆</MaxedMessage>
-                                )}
-                            </>
+                                                    {' '}→ Lv. {nextLevel === 6 ? 'max' : nextLevel}
+                                                </span>
+                                            }
+                                            currentLevel={healLevel}
+                                            maxLevel={6}
+                                            onClick={() => setPreview({ kind: 'heal' })}
+                                            progressBarColor="#34d399"
+                                        />
+                                    )
+                                })()
+                            ) : (
+                                <MaxedMessage>ヒール MAX レベル到達 🏆</MaxedMessage>
+                            )
                         )}
                     </SkillCard>
                 </motion.div>
@@ -600,14 +597,14 @@ function SkillRow({
     currentLevel,
     maxLevel,
     onClick,
-    color,
+    progressBarColor,
 }: {
     label: React.ReactNode
     detail?: string
     currentLevel?: number
     maxLevel?: number
     onClick?: () => void
-    color: 'indigo' | 'emerald'
+    progressBarColor: string
 }) {
     return (
         <button
@@ -624,8 +621,11 @@ function SkillRow({
                         <div className="w-full mt-1.5 relative flex items-center gap-3">
                             <div className="flex-1 h-1.5 rounded-full bg-white/10 overflow-hidden">
                                 <div
-                                    className={cn('h-full rounded-full transition-all duration-700', color === 'indigo' ? 'bg-indigo-400' : 'bg-emerald-400')}
-                                    style={{ width: `${(currentLevel / maxLevel) * 100}%` }}
+                                    className="h-full rounded-full transition-all duration-700"
+                                    style={{
+                                        width: `${(currentLevel / maxLevel) * 100}%`,
+                                        backgroundColor: progressBarColor,
+                                    }}
                                 />
                             </div>
                             <span className="text-[10px] tracking-wider text-white/40 font-dot-gothic-16 shrink-0 w-8 text-right">
@@ -931,7 +931,7 @@ function LevelProgressionBarChart({
                 )}
             </svg>
             {currentLevel > 0 && currentLevel <= barCount && (
-                <p className="text-white/50 text-[10px] font-dot-gothic-16">
+                <p className="text-white text-[10px] font-dot-gothic-16">
                     現在 Lv{currentLevel}: {formatValue(values[currentLevel - 1] ?? 0, currentLevel)}
                 </p>
             )}
@@ -1345,7 +1345,7 @@ function PreviewContent({
                 <div className="flex flex-col gap-4">
                     <div className="p-4 rounded-2xl bg-white/2 border border-white/5">
                         <div className="flex items-center justify-between mb-2">
-                            <p className="text-white/50 text-[13px] font-dot-gothic-16 font-bold">回復量</p>
+                            <p className="text-white text-[13px] font-dot-gothic-16 font-bold">回復量</p>
                             <p className="text-emerald-400 text-[15px] font-bold font-dot-gothic-16">
                                 {!owned ? '---' : isFullRestore ? '全回復' : `+${healVal} HP`}
                             </p>
@@ -1835,7 +1835,7 @@ function SpecialAttackLoadoutPreview({
                         boxShadow: `0 0 6px ${bulletColor}99`,
                     }}
                 />
-                <span className="text-[9px] text-white/25 font-dot-gothic-16">{label} Lv{level}</span>
+                <span className="text-[9px] text-white font-dot-gothic-16">{label} Lv{level}</span>
             </div>
         </div>
     )
