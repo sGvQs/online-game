@@ -1,63 +1,76 @@
 'use client'
 
-import { createClient } from '@/utils/supabase/client'
-import { useEffect, useState, useCallback, useRef } from 'react'
-import { getRoomUsers } from '@/server/actions/room'
 import { Users } from 'lucide-react'
-import { RoomUserWithUser } from '@/types'
+import { RoomUserWithUser, UserRanking } from '@/types'
 import { MemberItem } from '../memberItem'
 import { memberListCard } from '../memberItem/styles'
+import { Typography } from '@/components/ui/typography'
 
 const styles = memberListCard()
 
-export function MemberList({ roomId, initialMembers }: { roomId: string, initialMembers: RoomUserWithUser[] }) {
-    const [members, setMembers] = useState<RoomUserWithUser[]>(initialMembers)
-    const supabaseRef = useRef(createClient())
+interface MemberListViewProps {
+    members: RoomUserWithUser[]
+    rankingsMap?: Map<string, UserRanking>
+    isHost?: boolean
+    currentUserId?: string
+    roomCreatorId?: string
+    onKick?: (userId: string) => void
+    kickingUserId?: string | null
+}
 
-    const handlePayload = useCallback(async () => {
-        try {
-            const roomUsers = await getRoomUsers(roomId)
-            setMembers(roomUsers)
-        } catch (error) {
-            console.error("更新に失敗:", error)
-        }
-    }, [roomId])
-
-    useEffect(() => {
-        const supabase = supabaseRef.current
-        const channel = supabase
-            .channel(`room_${roomId}`)
-            .on('postgres_changes', {
-                event: '*',
-                schema: 'public',
-                table: 'room_users',
-                filter: `room_id=eq.${roomId}`,
-            }, () => {
-                handlePayload()
-            })
-            .subscribe()
-
-        return () => {
-            supabase.removeChannel(channel)
-        }
-    }, [roomId, handlePayload])
-
+/**
+ * メンバーリスト表示コンポーネント
+ *
+ * ホストの場合はゲストに追放ボタンを表示
+ */
+export function MemberList({
+    members,
+    rankingsMap,
+    isHost,
+    currentUserId,
+    roomCreatorId,
+    onKick,
+    kickingUserId,
+}: MemberListViewProps) {
     return (
         <div className={styles.wrapper()}>
             <div className={styles.header()}>
-                <h3 className={styles.title()}>
+                <Typography variant="h3" font='dot-gothic-16' className={styles.title()}>
                     <Users className="w-4 h-4" />
                     メンバー
-                </h3>
+                </Typography>
                 <span className={styles.count()}>
                     {members.length}
                 </span>
             </div>
 
             <ul className={styles.list()}>
-                {members.map((member: RoomUserWithUser) => (
-                    <MemberItem key={member.id} member={member} />
-                ))}
+                {[...members]
+                    .sort((a, b) => {
+                        if (!rankingsMap) return 0
+                        const rankA = rankingsMap.get(a.userId)?.rank ?? Infinity
+                        const rankB = rankingsMap.get(b.userId)?.rank ?? Infinity
+                        return rankA - rankB
+                    })
+                    .map((member: RoomUserWithUser) => {
+                        const showKickButton = Boolean(
+                            isHost &&
+                            roomCreatorId &&
+                            currentUserId &&
+                            member.userId !== roomCreatorId &&
+                            member.userId !== currentUserId
+                        )
+                        return (
+                            <MemberItem
+                                key={member.id}
+                                member={member}
+                                ranking={rankingsMap?.get(member.userId)}
+                                showKickButton={showKickButton}
+                                onKick={showKickButton && onKick ? () => onKick(member.userId) : undefined}
+                                isKicking={kickingUserId === member.userId}
+                            />
+                        )
+                    })}
             </ul>
         </div>
     )

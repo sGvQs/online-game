@@ -8,7 +8,7 @@ import { getRoom, selectGame, getRoomUsers, kickUserFromRoom } from '@/server/ac
 import { getNullHandRankings } from '@/server/actions/game/rankingActions'
 import { Room, RoomUserWithUser, UserRanking } from '@/types'
 import { GameSelectionCard } from './gameSelectionCard'
-import { MemberListView } from './memberList/memberListView'
+import { MemberList } from './memberList'
 import { GameDescriptionModal } from './gameDescriptionModal'
 import { RoomModal } from './roomModal'
 import { isPlayerCountValid, getPlayerRangeLabel } from '@/constants/room/gamePlayerRequirements'
@@ -213,7 +213,7 @@ export function RoomPageClientWrapper({
 
                 {/* Sidebar / Members */}
                 <div className={styles.sidebar()}>
-                    <MemberListView
+                    <MemberList
                         members={members}
                         rankingsMap={rankingsMap}
                         isHost={isHost}

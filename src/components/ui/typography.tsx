@@ -69,7 +69,6 @@ export function Typography({
     children,
     ...props
 }: TypographyProps) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const Tag = (as ?? DEFAULT_ELEMENTS[variant]) as any
     const appliedFont = font ?? getDefaultFont(variant)
 
