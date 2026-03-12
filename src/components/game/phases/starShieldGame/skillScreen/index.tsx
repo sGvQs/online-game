@@ -227,10 +227,7 @@ export function StarShieldSkill({ roomId, currentUserId: _currentUserId }: { roo
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {/* ===================== ATTACK COLUMN ===================== */}
-                        <div className="flex flex-col gap-4 p-4 rounded-xl bg-indigo-500/5 border border-indigo-500/10 relative overflow-hidden">
-                            <div className="absolute top-0 right-0 p-3 opacity-[0.03] pointer-events-none">
-                                <Image src={ICONS.SHOOTER} alt="" width={80} height={80} />
-                            </div>
+                        <div className="flex flex-col gap-4 p-4 rounded-xl bg-indigo-500/5 border border-indigo-500/10 overflow-hidden h-full">
                             <h3 className="text-indigo-400 text-xs font-bold flex items-center gap-2 font-dot-gothic-16 mb-1">
                                 <Image src={ICONS.SHOOTER} alt="Shooter" width={16} height={16} className="opacity-80" />
                                 ATTACK（Shooter）
@@ -242,31 +239,6 @@ export function StarShieldSkill({ roomId, currentUserId: _currentUserId }: { roo
                                     <span className="w-1 h-1 rounded-full bg-indigo-400 shrink-0 opacity-50" />
                                     通常攻撃
                                 </p>
-                                <div className="flex flex-wrap gap-2">
-                                    {availableNormal.map(({ techniqueId, level }) => {
-                                        const tech = TECHNIQUES[techniqueId]
-                                        const isActive = selNormal === techniqueId
-                                        return (
-                                            <button
-                                                key={techniqueId}
-                                                onClick={() => handleLoadoutUpdate({ selectedNormalAttackId: techniqueId })}
-                                                className={cn(
-                                                    'px-3 py-1.5 rounded-xl text-xs border flex items-center gap-2 transition-all',
-                                                    isActive
-                                                        ? 'border-indigo-500/60 bg-indigo-500/20 text-indigo-200 shadow-[0_0_10px_rgba(99,102,241,0.25)]'
-                                                        : 'bg-white/2 border-white/10 text-white/50 hover:border-white/25 hover:text-white/70'
-                                                )}
-                                            >
-                                                {isActive && <span className="text-indigo-400 font-bold">✓</span>}
-                                                <span
-                                                    className="w-3 h-3 rounded-full shrink-0 ring-2 ring-white/10"
-                                                    style={{ backgroundColor: tech.color }}
-                                                />
-                                                <span className="text-[10px] opacity-70">Lv. {level}</span>
-                                            </button>
-                                        )
-                                    })}
-                                </div>
                                 {/* アニメーションプレビュー */}
                                 {(() => {
                                     const selAttack = availableNormal.find((a) => a.techniqueId === selNormal)
@@ -281,38 +253,12 @@ export function StarShieldSkill({ roomId, currentUserId: _currentUserId }: { roo
                             </div>
 
                             {/* 必殺技 */}
+                            {availableSpecial.length > 0 && (
                             <div>
                                 <p className="text-[10px] text-indigo-400/50 font-dot-gothic-16 mb-1.5 flex items-center gap-1.5">
                                     <span className="w-1 h-1 rounded-full bg-indigo-400 shrink-0 opacity-50" />
                                     必殺技
                                 </p>
-                                <div className="flex flex-wrap gap-2">
-                                    {availableSpecial.map(({ specialAttackId, level }) => {
-                                        const isActive = selSpecial === specialAttackId
-                                        return (
-                                            <button
-                                                key={specialAttackId}
-                                                onClick={() => handleLoadoutUpdate({ selectedSpecialAttackId: specialAttackId })}
-                                                className={cn(
-                                                    'px-3 py-1.5 rounded-xl text-xs border flex items-center gap-2 transition-all',
-                                                    isActive
-                                                        ? 'border-indigo-500/60 bg-indigo-500/20 text-indigo-200 shadow-[0_0_10px_rgba(99,102,241,0.25)]'
-                                                        : 'bg-white/2 border-white/10 text-white/50 hover:border-white/25 hover:text-white/70'
-                                                )}
-                                            >
-                                                {isActive && <span className="text-indigo-400 font-bold">✓</span>}
-                                                <span
-                                                    className="w-3 h-3 rounded-full shrink-0 bg-[#a78bfa] ring-2 ring-white/10"
-                                                    style={{ boxShadow: '0 0 6px rgba(167,139,250,0.5)' }}
-                                                />
-                                                <span className="text-[10px] opacity-70">Lv. {level}</span>
-                                            </button>
-                                        )
-                                    })}
-                                    {availableSpecial.length === 0 && (
-                                        <span className="text-white/30 text-xs font-dot-gothic-16">未所持</span>
-                                    )}
-                                </div>
                                 {/* 必殺技プレビュー */}
                                 {(() => {
                                     const selSpec = availableSpecial.find((a) => a.specialAttackId === selSpecial)
@@ -326,13 +272,11 @@ export function StarShieldSkill({ roomId, currentUserId: _currentUserId }: { roo
                                     )
                                 })()}
                             </div>
+                            )}
                         </div>
 
                         {/* ===================== DEFENCE COLUMN ===================== */}
-                        <div className="flex flex-col gap-4 p-4 rounded-xl bg-emerald-500/5 border border-emerald-500/10 relative overflow-hidden">
-                            <div className="absolute top-0 right-0 p-3 opacity-[0.03] pointer-events-none">
-                                <Image src={ICONS.TYPIST} alt="" width={80} height={80} />
-                            </div>
+                        <div className="flex flex-col gap-4 p-4 rounded-xl bg-emerald-500/5 border border-emerald-500/10 overflow-hidden h-full">
                             <h3 className="text-emerald-400 text-xs font-bold flex items-center gap-2 font-dot-gothic-16 mb-1">
                                 <Image src={ICONS.TYPIST} alt="Typist" width={16} height={16} className="opacity-80" />
                                 DEFENCE（Typist）
@@ -340,73 +284,54 @@ export function StarShieldSkill({ roomId, currentUserId: _currentUserId }: { roo
 
                             {/* 星のHP */}
                             <div>
-                                <p className="text-[10px] text-emerald-400/50 font-dot-gothic-16 mb-1.5 flex items-center gap-1.5">
+                                <p className="text-[10px] text-emerald-400 font-dot-gothic-16 mb-1.5 flex items-center gap-1.5">
                                     <span className="w-1 h-1 rounded-full bg-emerald-400 shrink-0 opacity-50" />
                                     星のHP
                                 </p>
                                 <div className="flex items-center gap-2">
-                                    <span className="text-white/50 text-xs font-dot-gothic-16">HP</span>
+                                    <span className="text-white/50 text-lg font-dot-gothic-16">HP</span>
                                     <span className="text-xl font-bold text-emerald-400 font-dot-gothic-16 tabular-nums">
                                         {LEVEL_STAR_HP[starHpLevel as 1 | 2 | 3 | 4 | 5]}
                                     </span>
-                                    <span className="text-[10px] text-white/30">Lv{starHpLevel}/5</span>
                                 </div>
                                 <div className="mt-1.5 flex items-center gap-2">
-                                    <div className="flex-1 h-1.5 rounded-full bg-white/5 overflow-hidden">
+                                    <div className="flex-1 h-3 rounded-full bg-white/5 overflow-hidden">
                                         <div
-                                            className="h-full rounded-full bg-linear-to-r from-emerald-700 to-emerald-400 transition-all duration-500"
+                                            className="h-full bg-linear-to-r from-emerald-700 to-emerald-400 transition-all duration-500"
                                             style={{ width: `${(starHpLevel / 5) * 100}%` }}
                                         />
                                     </div>
                                     <span className="text-[10px] text-white/40 tabular-nums w-8 text-right">
-                                        {Math.round((starHpLevel / 5) * 100)}%
+                                        Lv. {starHpLevel}
                                     </span>
                                 </div>
                             </div>
 
                             {/* ヒール */}
-                            <div>
-                                <p className="text-[10px] text-emerald-400/50 font-dot-gothic-16 mb-1.5 flex items-center gap-1.5">
+                            {healLevel !== null && (
+                            <div className="h-full flex flex-col justify-end">
+                                <p className="text-[10px] text-emerald-400 font-dot-gothic-16 mb-1.5 flex items-center gap-1.5">
                                     <span className="w-1 h-1 rounded-full bg-emerald-400 shrink-0 opacity-50" />
                                     ヒール
                                 </p>
-                                <div className="flex flex-wrap gap-2">
-                                    {healLevel !== null ? (
-                                        <div className="px-3 py-1.5 rounded-xl text-xs border border-emerald-500/60 bg-emerald-500/20 text-emerald-200 shadow-[0_0_10px_rgba(16,185,129,0.25)] flex items-center gap-2">
-                                            <span className="text-emerald-400 font-bold">✓</span>
-                                            <span
-                                                className="w-3 h-3 rounded-full shrink-0 ring-2 ring-white/10"
-                                                style={{ backgroundColor: '#10b981', boxShadow: '0 0 6px rgba(16,185,129,0.5)' }}
-                                            />
-                                            <span className="text-[10px] opacity-70">Lv. {healLevel === 6 ? 'max' : healLevel}</span>
-                                        </div>
-                                    ) : (
-                                        <span className="text-white/30 text-xs font-dot-gothic-16">未所持</span>
-                                    )}
-                                </div>
-                                {/* ヒール効果・プログレスバー */}
                                 {healLevel !== null && (
-                                    <div className="mt-2 space-y-2">
-                                        <div className="flex items-center gap-2">
-                                            <div className="flex-1 min-w-0 h-1.5 rounded-full bg-white/5 overflow-hidden">
-                                                <div
-                                                    className={cn(
-                                                        'h-full rounded-full transition-all duration-300',
-                                                        healLevel === 6 ? 'bg-linear-to-r from-amber-600 to-yellow-400' : 'bg-linear-to-r from-emerald-700 to-emerald-400'
-                                                    )}
-                                                    style={{ width: `${(healLevel / 6) * 100}%` }}
-                                                />
-                                            </div>
-                                            <span className="text-[9px] text-white/40 shrink-0">Lv{healLevel === 6 ? 'max' : healLevel}/6</span>
-                                        </div>
+                                <div className="flex items-center gap-2 flex-row">
+                                    <span className="text-lg font-bold text-emerald-400 font-dot-gothic-16 tabular-nums">
+                                        +{LEVEL_HEAL_RECOVERY[healLevel as 1 | 2 | 3 | 4 | 5 | 6] as number}HP
+                                    </span>
+                                </div>
+                                )}
+                                {/* ヒールプレビュー */}
+                                    <div className="mt-2">
                                         <HealLoadoutPreview
                                             healValue={LEVEL_HEAL_RECOVERY[healLevel as 1 | 2 | 3 | 4 | 5 | 6] as number}
                                             isFullRestore={healLevel >= 5}
                                             starHpMax={LEVEL_STAR_HP[starHpLevel as 1 | 2 | 3 | 4 | 5]}
+                                            healLevel={healLevel}
                                         />
                                     </div>
-                                )}
-                            </div>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </motion.div>
@@ -787,7 +712,7 @@ function SectionDivider({
 // ============================================================
 // HealLoadoutPreview
 // ============================================================
-function HealLoadoutPreview({ healValue, isFullRestore, starHpMax }: { healValue: number; isFullRestore: boolean; starHpMax: number }) {
+function HealLoadoutPreview({ healValue, isFullRestore, starHpMax, healLevel }: { healValue: number; isFullRestore: boolean; starHpMax: number; healLevel: number }) {
     const BASE_PCT = 28
     const HEAL_PCT = isFullRestore ? 100 - BASE_PCT : Math.min(100 - BASE_PCT, (healValue / starHpMax) * 100)
 
@@ -796,23 +721,24 @@ function HealLoadoutPreview({ healValue, isFullRestore, starHpMax }: { healValue
             <p className="text-[9px] text-white/25 font-dot-gothic-16">ヒール効果イメージ</p>
             <div className="relative h-3 rounded-full bg-white/5 overflow-hidden">
                 <div
-                    className="absolute inset-y-0 left-0 bg-emerald-900/60"
+                    className="absolute inset-y-0 left-0 bg-emerald-600"
                     style={{ width: `${BASE_PCT}%` }}
                 />
                 <motion.div
                     className={cn(
                         'absolute inset-y-0',
                         isFullRestore
-                            ? 'bg-linear-to-r from-amber-500 to-yellow-400'
-                            : 'bg-linear-to-r from-emerald-500 to-emerald-300'
+                            ? 'bg-linear-to-r from-amber-600 to-yellow-400'
+                            : 'bg-linear-to-r from-emerald-600 to-emerald-400'
                     )}
                     style={{ left: `${BASE_PCT}%` }}
                     animate={{ width: ['0%', `${HEAL_PCT}%`, `${HEAL_PCT}%`, '0%'] }}
                     transition={{ duration: 1.8, times: [0, 0.4, 0.7, 1], repeat: Infinity, repeatDelay: 0.6 }}
                 />
             </div>
-            <p className="text-[9px] text-emerald-400/60 font-dot-gothic-16 text-right">
-                {isFullRestore ? '全回復' : `+${healValue} HP`}
+            <p className="text-[9px] font-dot-gothic-16 flex justify-between items-center">
+                <span className="text-emerald-400/60">{isFullRestore ? '全回復' : `+${healValue} HP`}</span>
+                <span className="text-white/25">{healLevel === 6 ? 'Lv. max' : `Lv. ${healLevel}`}</span>
             </p>
         </div>
     )
@@ -1470,6 +1396,7 @@ function PreviewContent({
                             healValue={healVal as number}
                             isFullRestore={isFullRestore}
                             starHpMax={LEVEL_STAR_HP[(progress?.starHpLevel ?? 1) as 1 | 2 | 3 | 4 | 5]}
+                            healLevel={progress?.healLevel ?? 1}
                         />
                     </div>
                 )}
