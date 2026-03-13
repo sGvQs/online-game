@@ -38,6 +38,8 @@ export {
     getStarShieldMatchInfo,
     getStarShieldMatchStatus,
     isHellUnlocked,
+    isAbyssUnlocked,
+    awardAbyssWavePoints,
 } from './starShieldActions'
 export {
     getStarShieldProgress,

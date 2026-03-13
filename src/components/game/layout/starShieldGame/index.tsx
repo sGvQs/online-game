@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import { useGameRoom } from '@/hooks/useGameRoom'
 import { returnToRoom, resetAllReady } from '@/server/actions/room'
-import { startStarShieldMatch, getStarShieldMatchStatus, isHellUnlocked, getStarShieldProgress, getMyStarShieldProgress, updateLoadout } from '@/server/actions/game'
+import { startStarShieldMatch, getStarShieldMatchStatus, isHellUnlocked, isAbyssUnlocked, getStarShieldProgress, getMyStarShieldProgress, updateLoadout } from '@/server/actions/game'
 import { RoomWithUsersAndReadyStatus } from '@/types'
 import type { UserRanking } from '@/types'
 import type { PairRanking } from '@/server/actions/game/starShieldRankingActions'
@@ -54,6 +54,7 @@ export function StarShieldGame({
     const [gameStats, setGameStats] = useState<GameStats | null>(null)
     const [gameResultDifficulty, setGameResultDifficulty] = useState<Difficulty | null>(null)
     const [hellUnlocked, setHellUnlocked] = useState(false)
+    const [abyssUnlocked, setAbyssUnlocked] = useState(false)
     const [shooterProgress, setShooterProgress] = useState<Awaited<ReturnType<typeof getStarShieldProgress>> | null>(null)
     const [typistProgress, setTypistProgress] = useState<Awaited<ReturnType<typeof getStarShieldProgress>> | null>(null)
     const [currentUserProgress, setCurrentUserProgress] = useState<Awaited<ReturnType<typeof getStarShieldProgress>> | null>(null)
@@ -146,7 +147,7 @@ export function StarShieldGame({
 
         channel
             .on('broadcast', { event: 'difficulty' }, ({ payload }: { payload: { difficulty: Difficulty } }) => {
-                if (payload?.difficulty && ['EASY', 'NORMAL', 'HARD', 'HELL'].includes(payload.difficulty)) {
+                if (payload?.difficulty && ['EASY', 'NORMAL', 'HARD', 'HELL', 'ABYSS'].includes(payload.difficulty)) {
                     setDifficulty(payload.difficulty)
                 }
             })
@@ -195,6 +196,7 @@ export function StarShieldGame({
         if (phase !== 'ROLE_SELECT') return
         if (shooterIdForUnlock && typistIdForUnlock && !roleConflict) {
             isHellUnlocked(shooterIdForUnlock, typistIdForUnlock).then(setHellUnlocked)
+            isAbyssUnlocked(shooterIdForUnlock, typistIdForUnlock).then(setAbyssUnlocked)
             getStarShieldProgress(shooterIdForUnlock).then(setShooterProgress)
             getStarShieldProgress(typistIdForUnlock).then(setTypistProgress)
             return
@@ -202,8 +204,10 @@ export function StarShieldGame({
         if (roleConflict && room.users.length >= 2) {
             const [u0, u1] = room.users
             isHellUnlocked(u0.userId, u1.userId).then(setHellUnlocked)
+            isAbyssUnlocked(u0.userId, u1.userId).then(setAbyssUnlocked)
         } else {
             setHellUnlocked(false)
+            setAbyssUnlocked(false)
         }
         setShooterProgress(null)
         setTypistProgress(null)
@@ -236,9 +240,10 @@ export function StarShieldGame({
         [refreshProgress]
     )
 
-    // HELL が未解放のときに HELL が選択されていたら EASY にリセット
+    // HELL/ABYSS が未解放のときに選択されていたら EASY にリセット
     useEffect(() => {
-        if (!hellUnlocked && difficulty === 'HELL') {
+        const needsReset = (!hellUnlocked && difficulty === 'HELL') || (!abyssUnlocked && difficulty === 'ABYSS')
+        if (needsReset) {
             setDifficulty('EASY')
             if (isHost) {
                 lobbyChannelRef.current?.send({
@@ -248,7 +253,7 @@ export function StarShieldGame({
                 })
             }
         }
-    }, [hellUnlocked, difficulty, isHost])
+    }, [hellUnlocked, abyssUnlocked, difficulty, isHost])
 
     const canStartLobby = allUsersReady
 
@@ -397,6 +402,7 @@ export function StarShieldGame({
                     onDifficultyChange={handleDifficultyChange}
                     isHost={isHost}
                     isHellUnlocked={hellUnlocked}
+                    isAbyssUnlocked={abyssUnlocked}
                     autoAimNearest={autoAimNearest}
                     onToggleAutoAim={() => setAutoAimNearest((prev) => !prev)}
                     shooterProgress={shooterProgress}

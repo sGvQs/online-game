@@ -2,7 +2,7 @@
  * StarShieldGame 型定義
  */
 
-export type Difficulty = 'EASY' | 'NORMAL' | 'HARD' | 'HELL'
+export type Difficulty = 'EASY' | 'NORMAL' | 'HARD' | 'HELL' | 'ABYSS'
 
 /** 通常攻撃（tech=null）時の散弾数レベル。5 = Lv. .max */
 export type NormalAttackLevel = 1 | 2 | 3 | 4 | 5
@@ -28,6 +28,8 @@ export interface Asteroid {
     targetY: number // 0-1（飛翔先 Y、星中心+ランダム）
     durationMs: number // スポーン→目標までの時間（ms）
     hp: number // 現在HP（0で破壊）
+    /** ABYSS ボス隕石フラグ */
+    isBoss?: boolean
     destroyedAt?: number
     hasDamagedStar?: boolean // 星にダメージを与えたか
     /** 減速効果（1=通常、0.5=半分の速さ）。青い球ヒット時に付与 */

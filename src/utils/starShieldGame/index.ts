@@ -3,8 +3,8 @@
  */
 
 export { findNearestAsteroidPosition } from './autoAim'
-export { createAsteroid } from './asteroid'
-export type { CreateAsteroidParams } from './asteroid'
+export { createAsteroid, createBossAsteroid } from './asteroid'
+export type { CreateAsteroidParams, CreateBossAsteroidParams } from './asteroid'
 export {
     computeCollisionResult,
     applyHpUpdates,

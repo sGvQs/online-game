@@ -5,7 +5,7 @@ import type { Difficulty, GameResult, GameStats, NormalAttackLevel } from '@/typ
 import type { TechniqueId } from '@/constants/starShieldGame/techniques'
 import type { SpecialAttackChoice } from '@/utils/starShieldGame'
 import type { SpecialAttackLevel } from '@/constants/starShieldGame/gameConfig'
-import { ASTEROID_HP, LEVEL_STAR_HP } from '@/constants/starShieldGame/gameConfig'
+import { ASTEROID_HP, LEVEL_STAR_HP, getAbyssBossHp } from '@/constants/starShieldGame/gameConfig'
 import { LEVEL_HEAL_RECOVERY } from '@/constants/starShieldGame/skillConfig'
 import { ShooterView } from '../playing/shooterView'
 import { Typography } from '@/components/ui/typography'
@@ -40,7 +40,7 @@ function TimerDisplay({ timer }: { timer: number }) {
 
 export function GameScreen({ matchId, startedAt, shooterId, difficulty, currentUserId, onGameEnd, typistNormalAttack, typistSpecialAttack = 'spread', typistSpecialAttackLevel = 1, typistHealLevel = null, starHpLevel, level = 1, autoAimNearest = false }: GameScreenProps) {
     const isShooter = shooterId === currentUserId
-    const { asteroids, bullets, timer, score, starHp, aimRef, onMouseMove, dialogue, typistFireCount, contactExplosion, completeContactFail, chainHits, clearChainHits } =
+    const { asteroids, bullets, timer, score, starHp, aimRef, onMouseMove, dialogue, typistFireCount, contactExplosion, completeContactFail, chainHits, clearChainHits, waveNumber } =
         useStarShield({ matchId, startedAt, isShooter, difficulty, currentUserId, onGameEnd, selectedNormalAttack: typistNormalAttack, selectedSpecialAttack: typistSpecialAttack, selectedSpecialAttackLevel: typistSpecialAttackLevel, selectedHealLevel: typistHealLevel, starHpLevel, level, autoAimNearest })
     const effectiveStarHpLevel = (starHpLevel != null && starHpLevel >= 1 && starHpLevel <= 5)
         ? (starHpLevel as 1 | 2 | 3 | 4 | 5)
@@ -84,10 +84,19 @@ export function GameScreen({ matchId, startedAt, shooterId, difficulty, currentU
             <div className="absolute top-0 left-0 right-0 z-30 pointer-events-none">
                 <div className="flex items-center justify-between px-6 py-3 backdrop-blur-sm border-b bg-[rgba(30,41,59,0.4)] border-[rgba(129,140,248,0.2)]">
                     <div className="flex items-center gap-2">
-                        <Typography variant="caption" as="span" className="text-brand-500/60 tracking-widest">TIME</Typography>
-                        <Typography variant="h3" as="span" className="text-white">
-                            <TimerDisplay timer={timer} />
-                        </Typography>
+                        {difficulty === 'ABYSS' ? (
+                            <>
+                                <Typography variant="caption" as="span" className="text-purple-400/60 tracking-widest">WAVE</Typography>
+                                <Typography variant="h3" as="span" className="text-purple-300">{waveNumber}</Typography>
+                            </>
+                        ) : (
+                            <>
+                                <Typography variant="caption" as="span" className="text-brand-500/60 tracking-widest">TIME</Typography>
+                                <Typography variant="h3" as="span" className="text-white">
+                                    <TimerDisplay timer={timer} />
+                                </Typography>
+                            </>
+                        )}
                     </div>
                     <div className="flex items-center gap-2">
                         {isShooter && (
@@ -101,6 +110,26 @@ export function GameScreen({ matchId, startedAt, shooterId, difficulty, currentU
                     </div>
                     <div className="text-xs tracking-widest text-brand-500/50">{difficulty}</div>
                 </div>
+                {difficulty === 'ABYSS' && (() => {
+                    const boss = asteroids.find((a) => a.isBoss && !a.destroyedAt)
+                    if (!boss) return null
+                    const bossMaxHp = getAbyssBossHp(waveNumber)
+                    const pct = Math.max(0, (boss.hp / bossMaxHp) * 100)
+                    return (
+                        <div className="px-6 py-2 bg-black/40 border-b border-purple-500/30 flex flex-col gap-1">
+                            <div className="flex items-center justify-between text-xs">
+                                <span className="text-purple-300 font-bold tracking-widest animate-pulse">⚠ 巨大隕石接近</span>
+                                <span className="text-purple-200/70 tabular-nums">{boss.hp} / {bossMaxHp}</span>
+                            </div>
+                            <div className="h-2 rounded-full bg-white/10 overflow-hidden">
+                                <div
+                                    className="h-full rounded-full bg-linear-to-r from-purple-800 to-purple-400 transition-all duration-300"
+                                    style={{ width: `${pct}%` }}
+                                />
+                            </div>
+                        </div>
+                    )
+                })()}
             </div>
         </div>
     )

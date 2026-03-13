@@ -3,17 +3,18 @@
 import { useEffect } from 'react'
 import type { Dispatch, MutableRefObject, SetStateAction } from 'react'
 import { STAR_TARGET_X, STAR_TARGET_Y, STAR_RADIUS } from '@/components/game/phases/starShieldGame/playing/protectedStar'
-import { SPAWN_INTERVALS_MS, ASTEROID_RADIUS } from '@/constants/starShieldGame/gameConfig'
+import { SPAWN_INTERVALS_MS, ASTEROID_RADIUS, ABYSS_WAVE_DURATION_SECONDS } from '@/constants/starShieldGame/gameConfig'
 import {
     createAsteroid,
+    createBossAsteroid,
     computeCollisionResult,
     applyHpUpdates,
     getContactAsteroids,
     getExpiredBulletIds,
     getAsteroidPosition,
 } from '@/utils/starShieldGame'
-import type { Asteroid, Bullet, Difficulty, GameResult } from '@/types/starShieldGame'
-import type { NormalAttackLevel } from '@/types/starShieldGame'
+import { awardAbyssWavePoints } from '@/server/actions/game/starShieldActions'
+import type { Asteroid, Bullet, GameResult, NormalAttackLevel } from '@/types/starShieldGame'
 
 type Score = { spawned: number; destroyed: number }
 type ChainHits = {
@@ -22,10 +23,9 @@ type ChainHits = {
     color: string
 } | null
 
-interface UseAsteroidPhysicsParams {
+interface UseAbyssPhysicsParams {
     matchId: string
     isShooter: boolean
-    difficulty: Difficulty
     // Shared refs
     asteroidsRef: MutableRefObject<Asteroid[]>
     bulletsRef: MutableRefObject<Bullet[]>
@@ -45,12 +45,14 @@ interface UseAsteroidPhysicsParams {
     playVoice: (key: string) => void
     sendGameState: (immediate?: boolean) => void
     endGame: (result: GameResult) => Promise<void>
+    // ABYSS ウェーブ管理
+    waveNumber: number
+    setWaveNumber: Dispatch<SetStateAction<number>>
 }
 
-export function useAsteroidPhysics({
+export function useAbyssPhysics({
     matchId,
     isShooter,
-    difficulty,
     asteroidsRef,
     bulletsRef,
     scoreRef,
@@ -67,18 +69,33 @@ export function useAsteroidPhysics({
     playVoice,
     sendGameState,
     endGame,
-}: UseAsteroidPhysicsParams): void {
+    waveNumber,
+    setWaveNumber,
+}: UseAbyssPhysicsParams): void {
     useEffect(() => {
-        if (!isShooter || difficulty === 'ABYSS') return
+        if (!isShooter) return
 
-        const spawnInterval = SPAWN_INTERVALS_MS[difficulty]
+        // 新ウェーブ開始時: 前ウェーブの残骸をクリア
+        contactPendingRef.current = false
+        setAsteroids(() => {
+            asteroidsRef.current = []
+            return []
+        })
+
+        const spawnInterval = SPAWN_INTERVALS_MS['ABYSS']
+        const waveStartTime = Date.now()
+        let phase: 'normal' | 'boss' | 'boss_cleared' = 'normal'
         let spawnTimer: ReturnType<typeof setInterval> | null = null
+        let waveTimer: ReturnType<typeof setTimeout> | null = null
         let rafId: number | null = null
 
+        // --- 通常フェーズ: 隕石スポーン ---
         spawnTimer = setInterval(() => {
-            if (gameEndedRef.current || contactPendingRef.current) return
+            if (gameEndedRef.current || phase !== 'normal') return
+            const waveElapsedMs = Date.now() - waveStartTime
             const asteroid = createAsteroid({
-                difficulty,
+                difficulty: 'ABYSS',
+                waveElapsedMs,
                 starTargetX: STAR_TARGET_X,
                 starTargetY: STAR_TARGET_Y,
             })
@@ -95,6 +112,35 @@ export function useAsteroidPhysics({
             sendGameState()
         }, spawnInterval)
 
+        // --- 90秒後: ボスフェーズへ移行 ---
+        waveTimer = setTimeout(() => {
+            if (gameEndedRef.current) return
+            phase = 'boss'
+            if (spawnTimer) {
+                clearInterval(spawnTimer)
+                spawnTimer = null
+            }
+
+            // 通常隕石を一掃してボスをスポーン
+            const boss = createBossAsteroid({
+                waveNumber,
+                starTargetX: STAR_TARGET_X,
+                starTargetY: STAR_TARGET_Y,
+            })
+            setAsteroids(() => {
+                const next = [boss]
+                asteroidsRef.current = next
+                return next
+            })
+            setScore((prev) => {
+                const next = { ...prev, spawned: prev.spawned + 1 }
+                scoreRef.current = next
+                return next
+            })
+            sendGameState()
+        }, ABYSS_WAVE_DURATION_SECONDS * 1000)
+
+        // --- ゲームループ ---
         const gameLoop = () => {
             if (gameEndedRef.current || contactPendingRef.current) return
             const now = Date.now()
@@ -110,6 +156,11 @@ export function useAsteroidPhysics({
             })
 
             if (result.hpUpdates.size > 0) {
+                // ボス撃破判定（state 更新前に実施）
+                const boss = asts.find((a) => a.isBoss && !a.destroyedAt)
+                const bossNewHp = boss ? (result.hpUpdates.get(boss.id) ?? boss.hp) : undefined
+                const bossJustDefeated = bossNewHp !== undefined && bossNewHp <= 0 && phase === 'boss'
+
                 setAsteroids((prev) => {
                     const next = applyHpUpdates(prev, result, now, levelRef.current)
                     asteroidsRef.current = next
@@ -128,6 +179,14 @@ export function useAsteroidPhysics({
                         return next
                     })
                     sendGameState()
+                }
+
+                if (bossJustDefeated) {
+                    phase = 'boss_cleared'
+                    void awardAbyssWavePoints(matchId).catch((e) => console.error('[ABYSS] ポイント付与失敗:', e))
+                    setWaveNumber((n) => n + 1)
+                    rafId = null
+                    return
                 }
             }
 
@@ -154,7 +213,19 @@ export function useAsteroidPhysics({
                 starRadius: STAR_RADIUS,
                 asteroidRadius: ASTEROID_RADIUS,
             })
+
             if (contacts.length > 0 && !contactPendingRef.current) {
+                const bossContact = contacts.find((a) => a.isBoss)
+
+                if (bossContact) {
+                    // ボス接触 = 星HP に関わらず即ゲームオーバー
+                    contactPendingRef.current = true
+                    const ap = getAsteroidPosition(bossContact, now)
+                    setContactExplosion({ x: ap.x, y: ap.y, asteroidId: bossContact.id })
+                    return
+                }
+
+                // 通常隕石接触（通常フェーズのみ発生）
                 playVoice('star-damage')
                 const damage = contacts.length
                 const newStarHp = Math.max(0, starHpRef.current - damage)
@@ -183,7 +254,8 @@ export function useAsteroidPhysics({
 
         return () => {
             if (spawnTimer) clearInterval(spawnTimer)
+            if (waveTimer) clearTimeout(waveTimer)
             if (rafId) cancelAnimationFrame(rafId)
         }
-    }, [matchId, isShooter, difficulty, sendGameState, endGame])
+    }, [matchId, isShooter, waveNumber, sendGameState, endGame])
 }

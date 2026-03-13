@@ -34,6 +34,7 @@ export const ASTEROID_DURATION_MS: Record<Difficulty, number> = {
     NORMAL: 7000,
     HARD: 6000,
     HELL: 6000,
+    ABYSS: 6000, // 波の経過時間で動的に減少する初期値
 }
 
 // ========== スポーン ==========
@@ -47,6 +48,7 @@ export const SPAWN_INTERVALS_MS: Record<Difficulty, number> = {
     NORMAL: 1500,
     HARD: 800,
     HELL: 200,
+    ABYSS: 200,
 }
 
 // ========== 難易度別 ==========
@@ -55,6 +57,31 @@ export const ASTEROID_HP: Record<Difficulty, number> = {
     NORMAL: 10,
     HARD: 20,
     HELL: 100,
+    ABYSS: 100,
+}
+
+// ========== ABYSS 専用 ==========
+/** 1ウェーブの通常フェーズ時間（秒） */
+export const ABYSS_WAVE_DURATION_SECONDS = 90
+/** 1秒あたりの隕石到達時間減少量（ms）。80秒後: 6000-80*50=2000ms */
+export const ABYSS_SPEED_DECREASE_PER_SECOND = 50
+/** 隕石到達時間の下限（ms） */
+export const ABYSS_MIN_DURATION_MS = 2000
+/** ボス隕石の到達時間（ms）。ゆっくり落下 */
+export const ABYSS_BOSS_DURATION_MS = 60000
+/** ウェーブごとのボスHP数列 */
+export const ABYSS_BOSS_HP_SEQUENCE = [1000, 2000, 3000, 50000, 10000] as const
+/** ABYSS 解放に必要な隕石破壊数 */
+export const ABYSS_UNLOCK_THRESHOLD = 500
+/** ボス撃破ごとに付与するポイント */
+export const ABYSS_POINTS_PER_WAVE = 5
+
+/** ウェーブ番号（1始まり）からボスHPを計算 */
+export function getAbyssBossHp(waveNumber: number): number {
+    if (waveNumber <= ABYSS_BOSS_HP_SEQUENCE.length) {
+        return ABYSS_BOSS_HP_SEQUENCE[waveNumber - 1]!
+    }
+    return 3000 + (waveNumber - ABYSS_BOSS_HP_SEQUENCE.length) * 1000
 }
 
 /** 星HPレベル → 最大HP（スキルでレベルアップ可能。難易度には依存しない） */

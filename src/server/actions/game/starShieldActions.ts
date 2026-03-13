@@ -3,13 +3,14 @@
 import { prisma } from '@/server/lib/prisma'
 import { getAuthenticatedUser } from '../_helpers/getAuthenticatedUser'
 
-type Difficulty = 'EASY' | 'NORMAL' | 'HARD' | 'HELL'
+type Difficulty = 'EASY' | 'NORMAL' | 'HARD' | 'HELL' | 'ABYSS'
 
 const SPAWN_RATES: Record<Difficulty, number> = {
     EASY: 0.5,
     NORMAL: 1,
     HARD: 1.5,
     HELL: 2,
+    ABYSS: 2,
 }
 
 const CLEAR_POINTS: Record<Difficulty, number> = {
@@ -17,10 +18,15 @@ const CLEAR_POINTS: Record<Difficulty, number> = {
     NORMAL: 2,
     HARD: 3,
     HELL: 4,
+    ABYSS: 0, // ABYSS はウェーブ報酬で付与するためクリア時は 0
 }
 
 /** HELL 解放に必要な隕石破壊数 */
 const HELL_UNLOCK_THRESHOLD = 200
+/** ABYSS 解放に必要な隕石破壊数 */
+const ABYSS_UNLOCK_THRESHOLD = 500
+/** ABYSS ボス撃破ごとに付与するポイント */
+const ABYSS_POINTS_PER_WAVE = 5
 
 const GAME_DURATION_SECONDS = 90
 
@@ -60,6 +66,13 @@ export async function startStarShieldMatch(
         const unlocked = await isHellUnlocked(shooterId, typistId)
         if (!unlocked) {
             throw new Error('HELL難易度は解放されていません（隕石破壊数200以上のクリアで解放）')
+        }
+    }
+
+    if (difficulty === 'ABYSS') {
+        const unlocked = await isAbyssUnlocked(shooterId, typistId)
+        if (!unlocked) {
+            throw new Error('ABYSS難易度は解放されていません（隕石破壊数500以上のクリアで解放）')
         }
     }
 
@@ -244,7 +257,19 @@ export async function saveStarShieldResult(
         data: { status: 'FINISHED' },
     })
 
-    // 成功時: 両プレイヤーに難易度に応じた pt を加算し、クリア記録を保存
+    // ABYSS: クリア概念なし。ゲームオーバー時にランキング用記録を保存
+    if (diff === 'ABYSS' && !isCleared) {
+        try {
+            await prisma.$executeRaw`
+                INSERT INTO star_shield_clear_records (shooter_id, typist_id, destroyed_count, difficulty)
+                VALUES (${shooterId}, ${typistId}, ${destroyedCount}, ${diff})
+            `
+        } catch (e) {
+            console.warn('[saveStarShieldResult] ABYSS star_shield_clear_records への保存に失敗:', e)
+        }
+    }
+
+    // EASY/NORMAL/HARD/HELL 成功時: 両プレイヤーに難易度に応じた pt を加算し、クリア記録を保存
     // ※ポイント付与を先に行う（star_shield_clear_records が未作成の環境でもポイントは付与される）
     if (isCleared) {
         const points = CLEAR_POINTS[diff]
@@ -323,4 +348,51 @@ export async function isHellUnlocked(shooterId: string, typistId: string): Promi
         LIMIT 1
     `
     return rows.length > 0
+}
+
+/**
+ * ABYSS 難易度が解放されているか（ペアで隕石破壊数500以上の記録があるか）
+ */
+export async function isAbyssUnlocked(shooterId: string, typistId: string): Promise<boolean> {
+    const rows = await prisma.$queryRaw<unknown[]>`
+        SELECT 1 FROM star_shield_clear_records
+        WHERE destroyed_count >= ${ABYSS_UNLOCK_THRESHOLD}
+        AND (
+            (shooter_id = ${shooterId} AND typist_id = ${typistId})
+            OR (shooter_id = ${typistId} AND typist_id = ${shooterId})
+        )
+        LIMIT 1
+    `
+    return rows.length > 0
+}
+
+/**
+ * ABYSS ボス撃破時にポイントを付与する（シューター側がウェーブ完了時に呼ぶ）
+ */
+export async function awardAbyssWavePoints(matchId: string): Promise<void> {
+    const tsm = await prisma.typingShootMatch.findUnique({ where: { matchId } })
+    if (!tsm) return
+
+    const { shooterId, typistId } = tsm
+    const now = new Date()
+    const year = now.getFullYear()
+    const month = now.getMonth() + 1
+
+    await Promise.all(
+        [shooterId, typistId].flatMap((userId) => [
+            prisma.monthlyRanking.upsert({
+                where: { userId_year_month: { userId, year, month } },
+                update: { totalPoints: { increment: ABYSS_POINTS_PER_WAVE } },
+                create: { userId, year, month, totalPoints: ABYSS_POINTS_PER_WAVE },
+            }),
+            prisma.pointLog.create({
+                data: {
+                    userId,
+                    amount: ABYSS_POINTS_PER_WAVE,
+                    gameType: 'STAR_SHIELD',
+                    reason: 'ABYSS_WAVE_CLEAR',
+                },
+            }),
+        ])
+    )
 }

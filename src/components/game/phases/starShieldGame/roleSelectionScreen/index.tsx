@@ -31,6 +31,7 @@ interface RoleSelectionScreenProps {
     onDifficultyChange: (d: Difficulty) => void
     isHost: boolean
     isHellUnlocked: boolean
+    isAbyssUnlocked: boolean
     autoAimNearest?: boolean
     onToggleAutoAim?: () => void
     shooterProgress?: StarShieldProgress | null
@@ -53,6 +54,7 @@ export function RoleSelectionScreen({
     onDifficultyChange,
     isHost,
     isHellUnlocked,
+    isAbyssUnlocked,
     autoAimNearest = false,
     onToggleAutoAim,
     shooterProgress,
@@ -99,19 +101,26 @@ export function RoleSelectionScreen({
                                 const meta = DIFFICULTY_META[d]
                                 const isActive = difficulty === d
                                 const isHellLocked = d === 'HELL' && !isHellUnlocked
-                                const canSelect = isHost && (!isHellLocked || d !== 'HELL')
+                                const isAbyssLocked = d === 'ABYSS' && !isAbyssUnlocked
+                                const isLocked = isHellLocked || isAbyssLocked
+                                const canSelect = isHost && !isLocked
                                 const isSelectableInactive = canSelect && !isActive
+                                const lockTitle = isHellLocked
+                                    ? '隕石破壊数200以上のクリアで解放'
+                                    : isAbyssLocked
+                                      ? '隕石破壊数500以上のクリアで解放'
+                                      : undefined
                                 return (
                                     <button
                                         key={d}
                                         onClick={() => canSelect && onDifficultyChange(d)}
                                         disabled={!canSelect}
-                                        title={isHellLocked ? '隕石破壊数100以上のクリアで解放' : undefined}
+                                        title={lockTitle}
                                         className={cn(
                                             styles.difficultyButton(),
                                             canSelect ? 'cursor-pointer hover:scale-[1.02] hover:brightness-110' : 'cursor-default',
                                             isSelectableInactive && 'hover:bg-white/[0.05] hover:border-white/25',
-                                            isHellLocked && 'opacity-50',
+                                            isLocked && 'opacity-50',
                                         )}
                                         style={{
                                             ['--diff-bg' as string]: isActive ? meta.bg : 'transparent',
@@ -121,14 +130,14 @@ export function RoleSelectionScreen({
                                                   ? '1.5px solid rgba(255,255,255,0.12)'
                                                   : '1.5px solid rgba(255,255,255,0.07)',
                                             ['--diff-glow' as string]: isActive ? meta.glow : 'none',
-                                            ['--diff-color' as string]: isActive ? meta.text : isHellLocked ? COLORS.WHITE_15 : COLORS.WHITE_2,
+                                            ['--diff-color' as string]: isActive ? meta.text : isLocked ? COLORS.WHITE_15 : COLORS.WHITE_2,
                                             ['--diff-rate-color' as string]: isActive ? meta.text : COLORS.WHITE_15,
                                         }}
                                     >
                                         <span className="text-lg leading-none w-5 text-center shrink-0">{meta.emoji}</span>
                                         <span className="text-sm font-bold flex-1 text-left">{meta.label}</span>
-                                        {isHellLocked && <span className={styles.hellLockLabel()}>解放条件</span>}
-                                        {!isHellLocked && <span className={styles.rateLabel()}>{meta.rate}</span>}
+                                        {isLocked && <span className={styles.hellLockLabel()}>解放条件</span>}
+                                        {!isLocked && <span className={styles.rateLabel()}>{meta.rate}</span>}
                                     </button>
                                 )
                             })}

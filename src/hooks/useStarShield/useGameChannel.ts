@@ -163,10 +163,10 @@ export function useGameChannel({
                     setStarHp(newHp)
                     sendGameState(true)
 
-                    // ヒール lv6: 全破壊
+                    // ヒール lv6: 全破壊（ボスは対象外）
                     if (payload.healLevel === 6) {
                         playVoice('star-damage')
-                        const toDestroy = asteroidsRef.current.filter((a) => !a.destroyedAt)
+                        const toDestroy = asteroidsRef.current.filter((a) => !a.destroyedAt && !a.isBoss)
                         if (toDestroy.length > 0) {
                             const count = toDestroy.length
                             setAsteroids((prev) => {
@@ -193,7 +193,7 @@ export function useGameChannel({
 
                     if (specialAttack === 'all_destruction') {
                         playVoice('star-damage')
-                        const toDestroy = asteroidsRef.current.filter((a) => !a.destroyedAt)
+                        const toDestroy = asteroidsRef.current.filter((a) => !a.destroyedAt && !a.isBoss)
                         if (toDestroy.length > 0) {
                             const count = toDestroy.length
                             setAsteroids((prev) => {

@@ -45,6 +45,31 @@ function AsteroidCircle({ asteroid, maxHp }: { asteroid: Asteroid; maxHp: number
         return () => cancelAnimationFrame(rafId)
     }, [update])
     const destroyed = !!asteroid.destroyedAt
+    const isBoss = !!asteroid.isBoss
+
+    if (isBoss) {
+        return (
+            <motion.div
+                ref={divRef}
+                className="absolute -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+                animate={destroyed ? { scale: 0, opacity: 0 } : { scale: 1, opacity: 1 }}
+                initial={{ scale: 0.3, opacity: 0 }}
+                transition={destroyed ? { duration: 0.5, ease: 'easeOut' } : { duration: 0.8, ease: 'easeOut' }}
+            >
+                <div className="absolute inset-0 rounded-full bg-purple-600/40 blur-xl scale-150 animate-pulse" />
+                <div className="relative w-36 h-36">
+                    <Image
+                        src={ICONS.METOR}
+                        alt="巨大隕石"
+                        fill
+                        className="object-contain drop-shadow-[0_0_24px_rgba(192,132,252,0.8)]"
+                        style={{ filter: 'hue-rotate(260deg) saturate(2) brightness(0.7)' }}
+                    />
+                </div>
+            </motion.div>
+        )
+    }
+
     return (
         <motion.div
             ref={divRef}

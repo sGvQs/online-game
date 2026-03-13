@@ -24,6 +24,7 @@ import type {
 import { TECHNIQUES, type TechniqueId } from '@/constants/starShieldGame/techniques'
 import { useGameChannel } from './useGameChannel'
 import { useAsteroidPhysics } from './useAsteroidPhysics'
+import { useAbyssPhysics } from './useAbyssPhysics'
 
 // ============================================
 // Hook
@@ -69,6 +70,7 @@ export function useStarShield({
     const [bullets, setBullets] = useState<Bullet[]>([])
     const [timer, setTimer] = useState(GAME_DURATION_SECONDS)
     const [score, setScore] = useState({ spawned: 0, destroyed: 0 })
+    const [waveNumber, setWaveNumber] = useState(1)
 
     const effectiveStarHpLevel = useMemo(
         () => (starHpLevel != null && starHpLevel >= 1 && starHpLevel <= 5 ? (starHpLevel as 1 | 2 | 3 | 4 | 5) : 1),
@@ -205,6 +207,29 @@ export function useStarShield({
         endGame,
     })
 
+    useAbyssPhysics({
+        matchId,
+        isShooter: isShooter && difficulty === 'ABYSS',
+        asteroidsRef,
+        bulletsRef,
+        scoreRef,
+        starHpRef,
+        levelRef,
+        gameEndedRef,
+        contactPendingRef,
+        setAsteroids,
+        setBullets,
+        setScore,
+        setStarHp,
+        setContactExplosion,
+        setChainHits,
+        playVoice,
+        sendGameState,
+        endGame,
+        waveNumber,
+        setWaveNumber,
+    })
+
     // ============================================
     // タイマー
     // ============================================
@@ -221,7 +246,7 @@ export function useStarShield({
             setTimer(remaining)
             if (remaining <= 0) {
                 clearInterval(interval)
-                if (!isShooter || gameEndedRef.current) return
+                if (!isShooter || gameEndedRef.current || difficulty === 'ABYSS') return
                 endGame('CLEARED')
             }
         }, 1000)
@@ -323,5 +348,6 @@ export function useStarShield({
         completeContactFail,
         chainHits,
         clearChainHits,
+        waveNumber,
     }
 }
