@@ -57,18 +57,15 @@ export function getAvailableNormalAttacks(owned: OwnedSkills): { techniqueId: Te
     return list
 }
 
-/** Shooter 用: 選択可能な必殺技一覧（ID + レベル）。PROGRESSION_DEBUG 時は全種 lv10 */
+/** Shooter 用: 選択可能な必殺技一覧（ID + レベル）。PROGRESSION_DEBUG 時は lv10 */
 export function getAvailableSpecialAttacks(owned: OwnedSkills): { specialAttackId: SpecialAttackChoice; level: number }[] {
     if (PROGRESSION_DEBUG) {
-        return [
-            { specialAttackId: 'spread', level: 10 },
-            { specialAttackId: 'all_destruction', level: 0 },
-        ]
+        return [{ specialAttackId: 'spread', level: 10 }]
     }
     const list: { specialAttackId: SpecialAttackChoice; level: number }[] = []
     const spread = owned.specialAttacks.find((a) => a.specialAttackId === 'spread')
     if (spread) list.push({ specialAttackId: 'spread', level: spread.level })
-    if (owned.healLevel === 6) list.push({ specialAttackId: 'all_destruction', level: 0 })
+    // all_destruction は Typist の healLevel === 6 で自動発動（Shooter の選択肢には含めない）
     return list
 }
 

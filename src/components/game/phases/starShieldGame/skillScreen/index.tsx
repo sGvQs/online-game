@@ -327,6 +327,13 @@ export function StarShieldSkill({ roomId, currentUserId: _currentUserId }: { roo
                                             healLevel={healLevel}
                                         />
                                     </div>
+                                    {/* all_destruction ボーナス（heal Lv.max 限定） */}
+                                    {healLevel === 6 && (
+                                        <div className="mt-2 rounded-xl bg-amber-500/10 border border-amber-500/20 px-3 py-2 flex items-center gap-2">
+                                            <span className="text-amber-400 text-xs">⚡</span>
+                                            <span className="text-amber-300/80 text-[10px] font-dot-gothic-16">全破壊（heal Lv. max ボーナス）</span>
+                                        </div>
+                                    )}
                                 </div>
                             )}
                         </div>
