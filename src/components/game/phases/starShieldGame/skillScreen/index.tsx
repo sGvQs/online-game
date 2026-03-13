@@ -199,15 +199,12 @@ export function StarShieldSkill({ roomId, currentUserId: _currentUserId }: { roo
                     transition={{ delay: 0.05 }}
                     className="rounded-2xl px-5 py-4 bg-white/3 border border-white/8 flex items-center justify-between"
                 >
-                    <div>
-                        <p className="text-[11px] font-cherry-bomb-one text-[rgba(129,140,248,0.6)] mb-1">
-                            所持 typing 数
-                        </p>
-                        <p className="text-3xl font-bold text-brand-400 font-cherry-bomb-one tabular-nums">
+                    <div className="flex items-center gap-4">
+                        <Image src={ICONS.TYPIST} alt="Typing" width={36} height={36} className="select-none" />
+                        <p className="text-3xl font-bold text-white tabular-nums">
                             {typingCount.toLocaleString()}
                         </p>
                     </div>
-                    <Image src={ICONS.TYPIST} alt="Typing" width={36} height={36} className="opacity-40 select-none" />
                 </motion.div>
 
                 {error && (
@@ -229,7 +226,6 @@ export function StarShieldSkill({ roomId, currentUserId: _currentUserId }: { roo
                             ゲームで使用するスキルの状態
                         </span>
                     </p>
-
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {/* ===================== ATTACK COLUMN ===================== */}
                         <div className="flex flex-col gap-4 p-4 rounded-xl bg-indigo-500/5 border border-indigo-500/10 overflow-hidden h-full">
