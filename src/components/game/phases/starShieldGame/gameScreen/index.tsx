@@ -18,7 +18,6 @@ interface GameScreenProps {
     difficulty: Difficulty
     currentUserId: string
     onGameEnd: (result: GameResult, stats: GameStats) => void
-    playersTotalPoints: number
     typistNormalAttack?: TechniqueId | null
     typistSpecialAttack?: SpecialAttackChoice
     typistSpecialAttackLevel?: SpecialAttackLevel
@@ -39,10 +38,10 @@ function TimerDisplay({ timer }: { timer: number }) {
     )
 }
 
-export function GameScreen({ matchId, startedAt, shooterId, difficulty, currentUserId, onGameEnd, playersTotalPoints, typistNormalAttack, typistSpecialAttack = 'spread', typistSpecialAttackLevel = 1, typistHealLevel = null, starHpLevel, level = 1, autoAimNearest = false }: GameScreenProps) {
+export function GameScreen({ matchId, startedAt, shooterId, difficulty, currentUserId, onGameEnd, typistNormalAttack, typistSpecialAttack = 'spread', typistSpecialAttackLevel = 1, typistHealLevel = null, starHpLevel, level = 1, autoAimNearest = false }: GameScreenProps) {
     const isShooter = shooterId === currentUserId
     const { asteroids, bullets, timer, score, starHp, aimRef, onMouseMove, dialogue, typistFireCount, contactExplosion, completeContactFail, chainHits, clearChainHits } =
-        useStarShield({ matchId, startedAt, isShooter, difficulty, currentUserId, onGameEnd, playersTotalPoints, selectedNormalAttack: typistNormalAttack, selectedSpecialAttack: typistSpecialAttack, selectedSpecialAttackLevel: typistSpecialAttackLevel, selectedHealLevel: typistHealLevel, starHpLevel, level, autoAimNearest })
+        useStarShield({ matchId, startedAt, isShooter, difficulty, currentUserId, onGameEnd, selectedNormalAttack: typistNormalAttack, selectedSpecialAttack: typistSpecialAttack, selectedSpecialAttackLevel: typistSpecialAttackLevel, selectedHealLevel: typistHealLevel, starHpLevel, level, autoAimNearest })
     const effectiveStarHpLevel = (starHpLevel != null && starHpLevel >= 1 && starHpLevel <= 5)
         ? (starHpLevel as 1 | 2 | 3 | 4 | 5)
         : 1

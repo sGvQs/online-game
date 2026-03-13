@@ -26,7 +26,6 @@ interface UseAsteroidPhysicsParams {
     matchId: string
     isShooter: boolean
     difficulty: Difficulty
-    playersTotalPoints: number
     // Shared refs
     asteroidsRef: MutableRefObject<Asteroid[]>
     bulletsRef: MutableRefObject<Bullet[]>
@@ -52,7 +51,6 @@ export function useAsteroidPhysics({
     matchId,
     isShooter,
     difficulty,
-    playersTotalPoints,
     asteroidsRef,
     bulletsRef,
     scoreRef,
@@ -81,7 +79,6 @@ export function useAsteroidPhysics({
             if (gameEndedRef.current || contactPendingRef.current) return
             const asteroid = createAsteroid({
                 difficulty,
-                playersTotalPoints,
                 starTargetX: STAR_TARGET_X,
                 starTargetY: STAR_TARGET_Y,
             })
@@ -188,5 +185,5 @@ export function useAsteroidPhysics({
             if (spawnTimer) clearInterval(spawnTimer)
             if (rafId) cancelAnimationFrame(rafId)
         }
-    }, [matchId, isShooter, difficulty, playersTotalPoints, sendGameState, endGame])
+    }, [matchId, isShooter, difficulty, sendGameState, endGame])
 }

@@ -8,8 +8,6 @@ import {
     SPAWN_Y_MIN,
     SPAWN_Y_MAX,
     ASTEROID_DURATION_MS,
-    HELL_ASTEROID_DURATION_BASE,
-    HELL_ASTEROID_DURATION_MIN,
     ASTEROID_HP,
     STAR_TARGET_OFFSET,
 } from '@/constants/starShieldGame/gameConfig'
@@ -17,7 +15,6 @@ import type { Asteroid, Difficulty } from '@/types/starShieldGame'
 
 export interface CreateAsteroidParams {
     difficulty: Difficulty
-    playersTotalPoints: number
     starTargetX: number
     starTargetY: number
     /** テスト用。未指定時は Date.now() */
@@ -30,7 +27,6 @@ export interface CreateAsteroidParams {
 export function createAsteroid(params: CreateAsteroidParams): Asteroid {
     const {
         difficulty,
-        playersTotalPoints,
         starTargetX,
         starTargetY,
         now = Date.now(),
@@ -40,12 +36,6 @@ export function createAsteroid(params: CreateAsteroidParams): Asteroid {
     const targetX = starTargetX + (Math.random() * 2 - 1) * STAR_TARGET_OFFSET
     const targetY = starTargetY + (Math.random() * 2 - 1) * STAR_TARGET_OFFSET
 
-    // HELLの場合は（プレイヤーのポイント分だけ隕石が速くなる仕様）
-    const durationMs =
-        difficulty === 'HELL'
-            ? Math.max(HELL_ASTEROID_DURATION_MIN, HELL_ASTEROID_DURATION_BASE - playersTotalPoints)
-            : ASTEROID_DURATION_MS[difficulty]
-
     return {
         id: randomId(),
         spawnedAt: now,
@@ -53,7 +43,7 @@ export function createAsteroid(params: CreateAsteroidParams): Asteroid {
         spawnY: SPAWN_Y_MIN + Math.random() * (SPAWN_Y_MAX - SPAWN_Y_MIN),
         targetX,
         targetY,
-        durationMs,
+        durationMs: ASTEROID_DURATION_MS[difficulty],
         hp: ASTEROID_HP[difficulty],
     }
 }

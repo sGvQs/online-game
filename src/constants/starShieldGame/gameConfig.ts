@@ -28,14 +28,13 @@ export const BULLET_MAX_AGE_MS = 3000
 // ========== 隕石 ==========
 export const ASTEROID_RADIUS = 0.02
 
-/** 隕石がスポーンから目標まで到達する時間（ms）。短いほど速い。HELL は playersTotalPoints で動的調整 */
-export const ASTEROID_DURATION_MS: Record<Exclude<Difficulty, 'HELL'>, number> = {
+/** 隕石がスポーンから目標まで到達する時間（ms）。短いほど速い */
+export const ASTEROID_DURATION_MS: Record<Difficulty, number> = {
     EASY: 8000,
     NORMAL: 7000,
     HARD: 6000,
+    HELL: 6000,
 }
-export const HELL_ASTEROID_DURATION_BASE = 6000
-export const HELL_ASTEROID_DURATION_MIN = 2000
 
 // ========== スポーン ==========
 export const SPAWN_X_MIN = 0.0 // 左

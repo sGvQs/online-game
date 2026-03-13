@@ -36,7 +36,6 @@ interface UseStarShieldProps {
     difficulty: Difficulty
     currentUserId: string
     onGameEnd: (result: GameResult, stats: GameStats, difficulty?: Difficulty) => void
-    playersTotalPoints?: number
     selectedNormalAttack?: TechniqueId | null
     selectedSpecialAttack?: SpecialAttackChoice
     selectedSpecialAttackLevel?: SpecialAttackLevel
@@ -52,7 +51,6 @@ export function useStarShield({
     isShooter,
     difficulty,
     onGameEnd,
-    playersTotalPoints = 0,
     selectedNormalAttack = null,
     selectedSpecialAttack = 'spread',
     selectedSpecialAttackLevel = 1,
@@ -189,7 +187,6 @@ export function useStarShield({
         matchId,
         isShooter,
         difficulty,
-        playersTotalPoints,
         asteroidsRef,
         bulletsRef,
         scoreRef,
