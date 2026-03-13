@@ -11,21 +11,7 @@ import {
     HEAL_LEVEL_UP_COSTS,
     STAR_HP_LEVEL_UP_COSTS,
 } from '@/constants/starShieldGame/skillConfig'
-
-export interface StarShieldProgress {
-    totalTypingCount: number
-    normalAttacks: { techniqueId: string; level: number }[]
-    specialAttacks: { specialAttackId: string; level: number }[]
-    healLevel: number | null
-    /** 星のHPレベル (1-5)。スキルでレベルアップ可能 */
-    starHpLevel: number
-    /** Shooter 時に使用する通常攻撃 */
-    selectedNormalAttackId: string | null
-    /** Shooter 時に使用する必殺技 */
-    selectedSpecialAttackId: string | null
-    /** Typist 時に使用するヒールレベル (1-6, null=使わない) */
-    selectedHealLevel: number | null
-}
+import type { StarShieldProgress } from '@/types/starShieldGame'
 
 /**
  * ユーザーのプログレッション状態を取得。

@@ -19,9 +19,8 @@ const CLEAR_POINTS: Record<Difficulty, number> = {
     HELL: 4,
 }
 
-const HELL_UNLOCK_THRESHOLD = 0
-/** 検証用: true にすると HELL 制限を常に解除。本番では false に戻すこと */
-const HELL_UNLOCK_FOR_VERIFICATION = true
+/** HELL 解放に必要な隕石破壊数 */
+const HELL_UNLOCK_THRESHOLD = 200
 
 const GAME_DURATION_SECONDS = 90
 
@@ -307,7 +306,6 @@ export async function saveStarShieldResult(
  * HELL 難易度が解放されているか（シューター＋タイピストのペアで隕石破壊数200以上の記録があるか）
  */
 export async function isHellUnlocked(shooterId: string, typistId: string): Promise<boolean> {
-    if (HELL_UNLOCK_FOR_VERIFICATION) return true
     // $queryRaw を使用（Prisma 7 + adapter 環境で starShieldClearRecord が undefined になる問題を回避）
     const rows = await prisma.$queryRaw<unknown[]>`
         SELECT 1 FROM star_shield_clear_records

@@ -13,7 +13,7 @@ import { COLORS, DIFFICULTIES, DIFFICULTY_META, ROLE_META, type Difficulty, type
 import { TECHNIQUES, type TechniqueId } from '@/constants/starShieldGame/techniques'
 import { getAvailableNormalAttacks } from '@/utils/starShieldGame'
 import type { OwnedSkills } from '@/utils/starShieldGame'
-import type { StarShieldProgress } from '@/server/actions/game/starShieldProgressionActions'
+import type { StarShieldProgress } from '@/types/starShieldGame'
 import { LEVEL_STAR_HP } from '@/constants/starShieldGame/gameConfig'
 import { LEVEL_HEAL_RECOVERY } from '@/constants/starShieldGame/skillConfig'
 
