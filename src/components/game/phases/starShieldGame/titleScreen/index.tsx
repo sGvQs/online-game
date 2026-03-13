@@ -1,5 +1,6 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 import Image from 'next/image'
@@ -12,6 +13,7 @@ import { AuroraGlow } from '@/components/game/common/starShield/auroraGlow'
 import { titleScreen } from './styles'
 import { Typography } from '@/components/ui/typography'
 import { ICONS } from '@/constants/starShieldGame/constants'
+import { getMyStarShieldProgress } from '@/server/actions/game'
 
 interface TitleScreenProps {
     room: RoomWithUsersAndReadyStatus
@@ -49,6 +51,13 @@ export function TitleScreen({
     const readyCount = room.users.filter((u: RoomUserWithReadyStatus) => u.isReady).length
     const totalUsers = room.users.length
     const styles = titleScreen()
+    const [typingCount, setTypingCount] = useState<number>(0)
+
+    useEffect(() => {
+        getMyStarShieldProgress()
+            .then((p) => setTypingCount(p.totalTypingCount ?? 0))
+            .catch(() => {})
+    }, [])
 
     return (
         <div className="relative min-h-screen overflow-hidden flex flex-col items-center justify-center">
@@ -88,13 +97,13 @@ export function TitleScreen({
                                 size="lg"
                                 onClick={() => !isReady && onToggleReady()}
                                 disabled={isReady}
-                                className="w-full"
+                                className="w-full justify-start"
                             >
                                 {isReady ? '✓ READY' : '▶ READY'}
                             </Button>
                             <Link
                                 href={`/game/${roomId}/star-shield/skill`}
-                                className="flex items-center justify-start gap-2 py-3 px-6 rounded-2xl font-bold transition-all font-cherry-bomb-one text-left bg-amber-600/30 border-2 border-amber-500/50 text-amber-200 hover:bg-amber-500/40 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+                                className="flex w-full items-center justify-start gap-2 py-3 px-6 rounded-2xl font-bold transition-all font-cherry-bomb-one text-left bg-amber-600/30 border-2 border-amber-500/50 text-amber-200 hover:bg-amber-500/40 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
                             >
                                 <span>⚙️</span>
                                 <span>SKILL</span>
@@ -106,7 +115,7 @@ export function TitleScreen({
                                     size="lg"
                                     onClick={() => canStart && onStartGame()}
                                     disabled={!canStart}
-                                    className="w-full"
+                                    className="w-full justify-start"
                                 >
                                     {canStart ? '🚀 START' : '🔒 START'}
                                 </Button>
@@ -117,7 +126,7 @@ export function TitleScreen({
                                     variant="success"
                                     size="lg"
                                     onClick={onExit}
-                                    className="w-full"
+                                    className="w-full justify-start"
                                 >
                                     ← EXIT
                                 </Button>
@@ -133,6 +142,10 @@ export function TitleScreen({
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ duration: 0.8, delay: 0.6 }}
                     >
+                        <div className="rounded-2xl p-4 bg-[rgba(129,140,248,0.05)] border border-[rgba(129,140,248,0.18)] flex items-center gap-3">
+                            <Image src={ICONS.TYPIST} alt="Typing" width={28} height={28} className="shrink-0 opacity-90" />
+                            <span className="text-xl font-bold tabular-nums text-white/90">{typingCount.toLocaleString()}</span>
+                        </div>
                         <div className={styles.playerCard()}>
                             <Typography variant="h4" className={styles.playerCardTitle()}>Players {readyCount}/{totalUsers}</Typography>
                             <div className="flex flex-col gap-3">
