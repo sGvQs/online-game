@@ -190,16 +190,21 @@ export function StarShieldGame({
     const typistIdForUnlock = room.users.find((u) => roleChoices[u.userId] === 'TYPIST')?.userId
     useEffect(() => {
         if (phase !== 'ROLE_SELECT') return
-        if (!shooterIdForUnlock || !typistIdForUnlock || roleConflict) {
-            setHellUnlocked(false)
-            setShooterProgress(null)
-            setTypistProgress(null)
+        if (shooterIdForUnlock && typistIdForUnlock && !roleConflict) {
+            isHellUnlocked(shooterIdForUnlock, typistIdForUnlock).then(setHellUnlocked)
+            getStarShieldProgress(shooterIdForUnlock).then(setShooterProgress)
+            getStarShieldProgress(typistIdForUnlock).then(setTypistProgress)
             return
         }
-        isHellUnlocked(shooterIdForUnlock, typistIdForUnlock).then(setHellUnlocked)
-        getStarShieldProgress(shooterIdForUnlock).then(setShooterProgress)
-        getStarShieldProgress(typistIdForUnlock).then(setTypistProgress)
-    }, [phase, shooterIdForUnlock, typistIdForUnlock, roleConflict])
+        if (roleConflict && room.users.length >= 2) {
+            const [u0, u1] = room.users
+            isHellUnlocked(u0.userId, u1.userId).then(setHellUnlocked)
+        } else {
+            setHellUnlocked(false)
+        }
+        setShooterProgress(null)
+        setTypistProgress(null)
+    }, [phase, shooterIdForUnlock, typistIdForUnlock, roleConflict, room.users])
 
     const refreshProgress = useCallback(async () => {
         if (phase !== 'ROLE_SELECT') return

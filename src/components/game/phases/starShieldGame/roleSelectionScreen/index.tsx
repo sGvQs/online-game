@@ -100,6 +100,7 @@ export function RoleSelectionScreen({
                                 const isActive = difficulty === d
                                 const isHellLocked = d === 'HELL' && !isHellUnlocked
                                 const canSelect = isHost && (!isHellLocked || d !== 'HELL')
+                                const isSelectableInactive = canSelect && !isActive
                                 return (
                                     <button
                                         key={d}
@@ -109,11 +110,16 @@ export function RoleSelectionScreen({
                                         className={cn(
                                             styles.difficultyButton(),
                                             canSelect ? 'cursor-pointer hover:scale-[1.02] hover:brightness-110' : 'cursor-default',
+                                            isSelectableInactive && 'hover:bg-white/[0.05] hover:border-white/25',
                                             isHellLocked && 'opacity-50',
                                         )}
                                         style={{
                                             ['--diff-bg' as string]: isActive ? meta.bg : 'transparent',
-                                            ['--diff-border' as string]: isActive ? `1.5px solid ${meta.border}` : '1.5px solid rgba(255,255,255,0.07)',
+                                            ['--diff-border' as string]: isActive
+                                                ? `1.5px solid ${meta.border}`
+                                                : isSelectableInactive
+                                                  ? '1.5px solid rgba(255,255,255,0.12)'
+                                                  : '1.5px solid rgba(255,255,255,0.07)',
                                             ['--diff-glow' as string]: isActive ? meta.glow : 'none',
                                             ['--diff-color' as string]: isActive ? meta.text : isHellLocked ? COLORS.WHITE_15 : COLORS.WHITE_2,
                                             ['--diff-rate-color' as string]: isActive ? meta.text : COLORS.WHITE_15,
