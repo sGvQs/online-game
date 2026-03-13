@@ -1,27 +1,38 @@
 'use server'
 
+import { Prisma } from '@prisma/client'
 import { prisma } from '@/server/lib/prisma'
 
 export type PairRanking = {
     rank: number
-    shooterId: string
-    shooterName: string
-    typistId: string
-    typistName: string
+    user1Id: string
+    user1Name: string
+    user2Id: string
+    user2Name: string
     bestDestroyedCount: number
 }
 
+type PairRow = {
+    user1_id: string
+    user2_id: string
+    best_destroyed_count: bigint
+}
+
 export async function getStarShieldPairRankings(limit = 50): Promise<PairRanking[]> {
-    const groups = await prisma.typingShootMatch.groupBy({
-        by: ['shooterId', 'typistId'],
-        _max: { destroyedCount: true },
-        orderBy: { _max: { destroyedCount: 'desc' } },
-        take: limit,
-    })
+    const rows = await prisma.$queryRaw<PairRow[]>(Prisma.sql`
+        SELECT
+            LEAST(shooter_id, typist_id)::text  AS user1_id,
+            GREATEST(shooter_id, typist_id)::text AS user2_id,
+            MAX(destroyed_count) AS best_destroyed_count
+        FROM star_shield_clear_records
+        GROUP BY LEAST(shooter_id, typist_id), GREATEST(shooter_id, typist_id)
+        ORDER BY best_destroyed_count DESC
+        LIMIT ${limit}
+    `)
 
-    if (groups.length === 0) return []
+    if (rows.length === 0) return []
 
-    const userIds = [...new Set(groups.flatMap((g) => [g.shooterId, g.typistId]))]
+    const userIds = [...new Set(rows.flatMap((r) => [r.user1_id, r.user2_id]))]
     const users = await prisma.user.findMany({
         where: { id: { in: userIds } },
         select: { id: true, name: true },
@@ -30,18 +41,18 @@ export async function getStarShieldPairRankings(limit = 50): Promise<PairRanking
 
     const ranked: PairRanking[] = []
     let rank = 1
-    for (let i = 0; i < groups.length; i++) {
-        const g = groups[i]!
-        const bestDestroyedCount = g._max.destroyedCount ?? 0
-        if (i > 0 && bestDestroyedCount < (groups[i - 1]!._max.destroyedCount ?? 0)) {
+    for (let i = 0; i < rows.length; i++) {
+        const row = rows[i]!
+        const bestDestroyedCount = Number(row.best_destroyed_count)
+        if (i > 0 && bestDestroyedCount < Number(rows[i - 1]!.best_destroyed_count)) {
             rank = i + 1
         }
         ranked.push({
             rank,
-            shooterId: g.shooterId,
-            shooterName: nameMap.get(g.shooterId) ?? '???',
-            typistId: g.typistId,
-            typistName: nameMap.get(g.typistId) ?? '???',
+            user1Id: row.user1_id,
+            user1Name: nameMap.get(row.user1_id) ?? '???',
+            user2Id: row.user2_id,
+            user2Name: nameMap.get(row.user2_id) ?? '???',
             bestDestroyedCount,
         })
     }

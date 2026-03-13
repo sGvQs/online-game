@@ -101,7 +101,7 @@ export const DIFFICULTY_META: Record<
     EASY: { label: 'かんたん', rate: '+1pt', emoji: '🌿', bg: 'rgba(134,239,172,0.12)', border: 'rgba(134,239,172,0.5)', text: '#86efac', glow: '0 0 12px rgba(134,239,172,0.4)' },
     NORMAL: { label: 'ふつう', rate: '+2pt', emoji: '🌟', bg: 'rgba(253,224,71,0.12)', border: 'rgba(253,224,71,0.5)', text: '#fde047', glow: '0 0 12px rgba(253,224,71,0.4)' },
     HARD: { label: 'むずかしい', rate: '+3pt', emoji: '🔥', bg: 'rgba(248,113,113,0.12)', border: 'rgba(248,113,113,0.5)', text: '#f87171', glow: '0 0 12px rgba(248,113,113,0.4)' },
-    HELL: { label: 'hell', rate: '+4pt', emoji: '💀', bg: 'rgba(139,92,246,0.12)', border: 'rgba(139,92,246,0.6)', text: '#8b5cf6', glow: '0 0 12px rgba(139,92,246,0.4)' },
+    HELL: { label: 'じこく', rate: '+4pt', emoji: '💀', bg: 'rgba(139,92,246,0.12)', border: 'rgba(139,92,246,0.6)', text: '#8b5cf6', glow: '0 0 12px rgba(139,92,246,0.4)' },
 }
 
 export const ROLE_META: Record<

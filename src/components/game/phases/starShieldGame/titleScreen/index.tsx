@@ -91,7 +91,7 @@ export function TitleScreen({
                         </motion.div>
 
                         <motion.div
-                            className="flex flex-col gap-3"
+                            className="flex flex-col gap-2"
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             transition={{ duration: 0.8, delay: 0.4 }}
@@ -149,29 +149,31 @@ export function TitleScreen({
                     <div className="w-px self-stretch bg-linear-to-b from-transparent via-brand-500/30 to-transparent" />
 
                     <motion.div
-                        className="flex flex-col gap-2"
+                        className="flex flex-col gap-4"
                         initial={{ opacity: 0, x: 20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ duration: 0.8, delay: 0.6 }}
                     >
-                        <div className="rounded-2xl p-4 bg-[rgba(129,140,248,0.05)] border border-[rgba(129,140,248,0.18)] flex items-center gap-3">
-                            <Image src={ICONS.TYPIST} alt="Typing" width={28} height={28} className="shrink-0 opacity-90" />
-                            <span className="text-xl font-bold tabular-nums text-white/90">{typingCount.toLocaleString()}</span>
-                        </div>
+                        <div className='flex justify-between gap-2'>
                         <Link href={`/game/${roomId}/star-shield/ranking`} className={styles.pairRankBadge()}>
-                            <span className="text-base shrink-0">🏆</span>
                             {memberPairRank ? (
                                 <>
-                                    <span className="text-xs font-bold tabular-nums text-purple-300 shrink-0">#{memberPairRank.rank}位</span>
+                                    <span className="text-xs font-bold tabular-nums text-purple-300 shrink-0">{memberPairRank.rank}位</span>
                                     <span className="text-xs text-white/70 truncate">
-                                        {memberPairRank.shooterName} &amp; {memberPairRank.typistName}
+                                        {memberPairRank.user1Name} &amp; {memberPairRank.user2Name}
                                     </span>
-                                    <span className="text-xs font-bold tabular-nums text-white/90 shrink-0 ml-auto">{memberPairRank.bestDestroyedCount}個</span>
+                                    <span className="text-xs font-bold tabular-nums text-white/90 shrink-0 ml-auto">{memberPairRank.bestDestroyedCount}</span>
+                                    <Image src={ICONS.METOR} alt="Typing" width={20} height={20} className="shrink-0 opacity-90" />
                                 </>
                             ) : (
                                 <span className="text-xs text-white/60 group-hover:text-white/80 transition-colors">ランキングを見る →</span>
                             )}
                         </Link>
+                        <div className="rounded-2xl p-4 bg-[rgba(129,140,248,0.05)] border border-[rgba(129,140,248,0.18)] flex items-center gap-3">
+                            <Image src={ICONS.TYPIST} alt="Typing" width={28} height={28} className="shrink-0 opacity-90" />
+                            <span className="text-xl font-bold tabular-nums text-white/90">{typingCount.toLocaleString()}</span>
+                        </div>
+                        </div>
                         <div className={styles.playerCard()}>
                             <Typography variant="h4" className={styles.playerCardTitle()}>Players {readyCount}/{totalUsers}</Typography>
                             <div className="flex flex-col gap-3">

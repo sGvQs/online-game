@@ -7,15 +7,12 @@ import type { PairRanking } from '@/server/actions/game/starShieldRankingActions
 import { RoomUserWithReadyStatus } from '@/types'
 import { StarShieldGame } from '@/components/game/layout/starShieldGame'
 
-function findBestMemberPairRank(rankings: PairRanking[], userIds: string[]): PairRanking | null {
+function findMemberPairRank(rankings: PairRanking[], userIds: string[]): PairRanking | null {
     if (userIds.length !== 2) return null
     const [u1, u2] = userIds as [string, string]
-    const a = rankings.find((r) => r.shooterId === u1 && r.typistId === u2) ?? null
-    const b = rankings.find((r) => r.shooterId === u2 && r.typistId === u1) ?? null
-    if (!a && !b) return null
-    if (!a) return b
-    if (!b) return a
-    return a.rank <= b.rank ? a : b
+    const norm1 = u1 < u2 ? u1 : u2
+    const norm2 = u1 < u2 ? u2 : u1
+    return rankings.find((r) => r.user1Id === norm1 && r.user2Id === norm2) ?? null
 }
 
 export default async function StarShieldPage({ params }: { params: Promise<{ roomId: string }> }) {
@@ -44,7 +41,7 @@ export default async function StarShieldPage({ params }: { params: Promise<{ roo
         getNullHandRankings(userIds),
         getStarShieldPairRankings(),
     ])
-    const memberPairRank = findBestMemberPairRank(allPairRankings, userIds)
+    const memberPairRank = findMemberPairRank(allPairRankings, userIds)
 
     return (
         <div className="relative min-h-screen">

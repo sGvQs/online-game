@@ -17,7 +17,7 @@ export function StarShieldRankingScreen({ roomId, rankings, memberUserIds }: Sta
     const styles = rankingScreen()
 
     const isMemberPair = (r: PairRanking) =>
-        (memberUserIds.includes(r.shooterId) && memberUserIds.includes(r.typistId))
+        memberUserIds.includes(r.user1Id) && memberUserIds.includes(r.user2Id)
 
     return (
         <div className={styles.container()}>
@@ -42,14 +42,14 @@ export function StarShieldRankingScreen({ roomId, rankings, memberUserIds }: Sta
                         {rankings.map((r) => {
                             const isMe = isMemberPair(r)
                             return (
-                                <li key={`${r.shooterId}-${r.typistId}`} className={isMe ? styles.myRankRow() : styles.rankRow()}>
+                                <li key={`${r.user1Id}-${r.user2Id}`} className={isMe ? styles.myRankRow() : styles.rankRow()}>
                                     {r.rank <= 3 ? (
                                         <span className={styles.medalBadge()}>{MEDALS[r.rank - 1]}</span>
                                     ) : (
                                         <span className={styles.rankNum()}>{r.rank}</span>
                                     )}
                                     <span className={isMe ? styles.myPairName() : styles.pairName()}>
-                                        {r.shooterName} &amp; {r.typistName}
+                                        {r.user1Name} &amp; {r.user2Name}
                                     </span>
                                     {isMe && <span className={styles.myBadge()}>あなたたち</span>}
                                     <span className={styles.destroyedCount()}>{r.bestDestroyedCount}個</span>
