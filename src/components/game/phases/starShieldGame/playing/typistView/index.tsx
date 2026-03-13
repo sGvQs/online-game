@@ -157,7 +157,7 @@ export function TypistView({ dialogue, score, starHp, maxStarHp, typistFireCount
             </div>
 
             <div className="w-full shrink-0 flex flex-col items-center gap-2 py-4 z-20">
-                <Typography variant="label" as="span" className={typistView().hpLabel()}>ほしのたいりょく</Typography>
+                <Typography variant="label" font="cherry-bomb-one" as="span" className={typistView().hpLabel()}>ほしのたいりょく</Typography>
                 <div className="flex items-center gap-2">
                     <Typography variant="caption" as="span" font="dot-gothic-16" className="text-white/50 tabular-nums">
                         HP {starHp}

@@ -35,7 +35,7 @@ interface UseStarShieldProps {
     isShooter: boolean
     difficulty: Difficulty
     currentUserId: string
-    onGameEnd: (result: GameResult, stats: GameStats) => void
+    onGameEnd: (result: GameResult, stats: GameStats, difficulty?: Difficulty) => void
     playersTotalPoints?: number
     selectedNormalAttack?: TechniqueId | null
     selectedSpecialAttack?: SpecialAttackChoice
@@ -159,9 +159,10 @@ export function useStarShield({
             fireCount: fireCountRef.current,
         })
 
+        let actualDifficulty: Difficulty | undefined
         if (isShooter) {
             try {
-                await saveStarShieldResult(matchId, {
+                const saved = await saveStarShieldResult(matchId, {
                     spawnedCount: stats.spawnedCount,
                     destroyedCount: stats.destroyedCount,
                     fireCount: stats.fireCount,
@@ -170,13 +171,14 @@ export function useStarShield({
                     durationSeconds: stats.durationSeconds,
                     difficulty,
                 })
+                actualDifficulty = saved.difficulty
             } catch (e) {
                 console.error('結果保存失敗:', e)
             }
-            sendGameEnd(result, stats)
+            sendGameEnd(result, stats, actualDifficulty)
         }
 
-        onGameEnd(result, stats)
+        onGameEnd(result, stats, actualDifficulty)
     }, [isShooter, matchId, startedAt, onGameEnd, difficulty, sendGameEnd])
 
     // ============================================

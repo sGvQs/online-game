@@ -120,6 +120,7 @@ export async function getStarShieldMatchStatus(matchId: string): Promise<
           shooterId: string
           result: 'CLEARED' | 'FAILED_CONTACT' | 'FAILED_TIMEOUT'
           stats: { spawnedCount: number; destroyedCount: number; durationSeconds: number }
+          difficulty: Difficulty
       }
     | { status: 'not_found' }
 > {
@@ -162,6 +163,7 @@ export async function getStarShieldMatchStatus(matchId: string): Promise<
             destroyedCount: tsm.destroyedCount,
             durationSeconds: tsm.durationSeconds ?? 0,
         },
+        difficulty: tsm.difficulty as Difficulty,
     }
 }
 
@@ -182,7 +184,7 @@ interface SaveStarShieldResultData {
 export async function saveStarShieldResult(
     matchId: string,
     data: SaveStarShieldResultData
-): Promise<void> {
+): Promise<{ difficulty: Difficulty }> {
     const existing = await prisma.typingShootMatch.findUnique({ where: { matchId } })
     const { spawnedCount, destroyedCount, fireCount, isCleared, failureReason, durationSeconds, difficulty: dataDifficulty } = data
     const accuracyRate = spawnedCount > 0 ? destroyedCount / spawnedCount : 0
@@ -198,7 +200,9 @@ export async function saveStarShieldResult(
 
     let shooterId: string
     let typistId: string
-    const diff: Difficulty = (dataDifficulty ?? (existing?.difficulty as Difficulty) ?? 'NORMAL')
+    const diff: Difficulty = existing
+        ? (existing.difficulty as Difficulty)
+        : (dataDifficulty ?? 'NORMAL')
 
     if (existing) {
         shooterId = existing.shooterId
@@ -214,7 +218,7 @@ export async function saveStarShieldResult(
         })
         if (!match) {
             console.warn('[saveStarShieldResult] Match not found (may have been deleted):', matchId)
-            return
+            return { difficulty: diff }
         }
 
         shooterId = match.room.createdBy
@@ -300,6 +304,8 @@ export async function saveStarShieldResult(
             console.warn('[saveStarShieldResult] star_shield_user_progress への typing 加算に失敗:', e)
         }
     }
+
+    return { difficulty: diff }
 }
 
 /**

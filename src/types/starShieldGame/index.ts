@@ -81,6 +81,7 @@ export interface GameStatePayload {
 export interface GameEndPayload {
     result: GameResult
     stats: GameStats
+    difficulty?: Difficulty
 }
 
 /** ユーザーごとの Star Shield プログレッション状態 */

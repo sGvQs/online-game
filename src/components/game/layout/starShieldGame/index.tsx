@@ -49,6 +49,7 @@ export function StarShieldGame({
     const [shooterId, setShooterId] = useState<string | null>(null)
     const [gameResult, setGameResult] = useState<GameResult | null>(null)
     const [gameStats, setGameStats] = useState<GameStats | null>(null)
+    const [gameResultDifficulty, setGameResultDifficulty] = useState<Difficulty | null>(null)
     const [hellUnlocked, setHellUnlocked] = useState(false)
     const [shooterProgress, setShooterProgress] = useState<Awaited<ReturnType<typeof getStarShieldProgress>> | null>(null)
     const [typistProgress, setTypistProgress] = useState<Awaited<ReturnType<typeof getStarShieldProgress>> | null>(null)
@@ -227,15 +228,15 @@ export function StarShieldGame({
         [refreshProgress]
     )
 
-    // HELL が未解放のときに HELL が選択されていたら NORMAL にリセット
+    // HELL が未解放のときに HELL が選択されていたら EASY にリセット
     useEffect(() => {
         if (!hellUnlocked && difficulty === 'HELL') {
-            setDifficulty('NORMAL')
+            setDifficulty('EASY')
             if (isHost) {
                 lobbyChannelRef.current?.send({
                     type: 'broadcast',
                     event: 'difficulty',
-                    payload: { difficulty: 'NORMAL' as const },
+                    payload: { difficulty: 'EASY' as const },
                 })
             }
         }
@@ -270,6 +271,7 @@ export function StarShieldGame({
                 addPlayedMatchId(newMatchId)
                 setGameResult(status.result)
                 setGameStats({ ...status.stats, fireCount: 0 }) // サーバーに保存しないので再入時は0
+                setGameResultDifficulty(status.difficulty)
                 setPhase('RESULT')
             } else if (status.status === 'playing') {
                 setMatchId(newMatchId)
@@ -322,9 +324,10 @@ export function StarShieldGame({
     }, [])
 
     // ゲーム終了時
-    const handleGameEnd = useCallback((result: GameResult, stats: GameStats) => {
+    const handleGameEnd = useCallback((result: GameResult, stats: GameStats, actualDifficulty?: Difficulty) => {
         setGameResult(result)
         setGameStats(stats)
+        if (actualDifficulty != null) setGameResultDifficulty(actualDifficulty)
         setPhase('RESULT')
     }, [])
 
@@ -337,6 +340,7 @@ export function StarShieldGame({
         setShooterId(null)
         setGameResult(null)
         setGameStats(null)
+        setGameResultDifficulty(null)
         setPhase('TITLE')
         try {
             await resetAllReady(roomId)
@@ -442,7 +446,7 @@ export function StarShieldGame({
                 <ResultScreen
                     result={gameResult}
                     stats={gameStats}
-                    difficulty={difficulty}
+                    difficulty={gameResultDifficulty ?? difficulty}
                     onBackToTitle={handleBackToTitle}
                 />
             )}

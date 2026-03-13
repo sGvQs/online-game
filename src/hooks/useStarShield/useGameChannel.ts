@@ -25,6 +25,7 @@ import {
 import type {
     Asteroid,
     Bullet,
+    Difficulty,
     FirePayload,
     GameResult,
     GameStats,
@@ -59,7 +60,7 @@ interface UseGameChannelParams {
     setTypistFireCount: Dispatch<SetStateAction<number>>
     // Callbacks
     playVoice: (key: string) => void
-    onGameEnd: (result: GameResult, stats: GameStats) => void
+    onGameEnd: (result: GameResult, stats: GameStats, difficulty?: Difficulty) => void
 }
 
 export function useGameChannel({
@@ -86,7 +87,7 @@ export function useGameChannel({
     onGameEnd,
 }: UseGameChannelParams): {
     sendGameState: (immediate?: boolean) => void
-    sendGameEnd: (result: GameResult, stats: GameStats) => void
+    sendGameEnd: (result: GameResult, stats: GameStats, difficulty?: Difficulty) => void
     sendFire: (payload: FirePayload) => void
 } {
     const supabase = useMemo(() => createClient(), [])
@@ -112,11 +113,11 @@ export function useGameChannel({
         })
     }, [isShooter, scoreRef, fireCountRef, starHpRef])
 
-    const sendGameEnd = useCallback((result: GameResult, stats: GameStats) => {
+    const sendGameEnd = useCallback((result: GameResult, stats: GameStats, difficulty?: Difficulty) => {
         channelRef.current?.send({
             type: 'broadcast',
             event: 'game_end',
-            payload: { result, stats } satisfies GameEndPayload,
+            payload: { result, stats, ...(difficulty != null && { difficulty }) } satisfies GameEndPayload,
         })
     }, [])
 
@@ -283,7 +284,7 @@ export function useGameChannel({
                 if (isShooter || !payload) return
                 if (gameEndedRef.current) return
                 gameEndedRef.current = true
-                onGameEnd(payload.result, payload.stats)
+                onGameEnd(payload.result, payload.stats, payload.difficulty)
             })
             .subscribe()
 
