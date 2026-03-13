@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import Image from 'next/image'
 import { RoomWithUsersAndReadyStatus, RoomUserWithReadyStatus } from '@/types'
@@ -22,7 +23,7 @@ interface TitleScreenProps {
     isReady: boolean
     allUsersReady: boolean
     canStart: boolean
-    onToggleReady: () => void
+    onToggleReady: () => void | Promise<void>
     onStartGame: () => void
     onExit: () => void
     currentUserId: string
@@ -48,6 +49,7 @@ export function TitleScreen({
     currentUserId,
     initialRankings,
 }: TitleScreenProps) {
+    const router = useRouter()
     const readyCount = room.users.filter((u: RoomUserWithReadyStatus) => u.isReady).length
     const totalUsers = room.users.length
     const styles = titleScreen()
@@ -103,6 +105,13 @@ export function TitleScreen({
                             </Button>
                             <Link
                                 href={`/game/${roomId}/star-shield/skill`}
+                                onClick={async (e) => {
+                                    if (isReady) {
+                                        e.preventDefault()
+                                        await onToggleReady()
+                                        router.push(`/game/${roomId}/star-shield/skill`)
+                                    }
+                                }}
                                 className="flex w-full items-center justify-start gap-2 py-3 px-6 rounded-2xl font-bold transition-all font-cherry-bomb-one text-left bg-amber-600/30 border-2 border-amber-500/50 text-amber-200 hover:bg-amber-500/40 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
                             >
                                 <span>⚙️</span>
