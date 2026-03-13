@@ -26,5 +26,11 @@ export const titleScreen = tv({
     howToCard: 'rounded-2xl p-5 bg-[rgba(192,132,252,0.05)] border border-[rgba(192,132,252,0.18)]',
     howToTitle: 'text-[10px] tracking-[0.4em] uppercase mb-4 text-[rgba(192,132,252,0.6)]',
     howToText: 'text-xs leading-5 text-[rgba(203,213,225,0.7)]',
+    pairRankBadge: [
+      'flex items-center gap-2 rounded-2xl px-4 py-3',
+      'bg-[rgba(129,140,248,0.05)] border border-[rgba(129,140,248,0.18)]',
+      'hover:bg-[rgba(129,140,248,0.1)] hover:border-[rgba(129,140,248,0.35)]',
+      'transition-all duration-200 cursor-pointer group',
+    ],
   },
 })

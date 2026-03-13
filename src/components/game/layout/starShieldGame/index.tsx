@@ -7,6 +7,7 @@ import { returnToRoom, resetAllReady } from '@/server/actions/room'
 import { startStarShieldMatch, getStarShieldMatchStatus, isHellUnlocked, getStarShieldProgress, getMyStarShieldProgress, updateLoadout } from '@/server/actions/game'
 import { RoomWithUsersAndReadyStatus } from '@/types'
 import type { UserRanking } from '@/types'
+import type { PairRanking } from '@/server/actions/game/starShieldRankingActions'
 import type { Difficulty, GameResult, GameStats, NormalAttackLevel } from '@/types/starShieldGame'
 import { getAvailableNormalAttacks, getAvailableSpecialAttacks } from '@/utils/starShieldGame'
 import type { TechniqueId } from '@/constants/starShieldGame/techniques'
@@ -26,6 +27,7 @@ interface StarShieldGameProps {
     roomId: string
     currentUserId: string
     initialRankings: UserRanking[]
+    memberPairRank?: PairRanking | null
 }
 
 export function StarShieldGame({
@@ -34,6 +36,7 @@ export function StarShieldGame({
     roomId,
     currentUserId,
     initialRankings,
+    memberPairRank,
 }: StarShieldGameProps) {
     const { room, isReady, toggleReady } = useGameRoom({
         roomId,
@@ -376,6 +379,7 @@ export function StarShieldGame({
                     onExit={handleExit}
                     currentUserId={currentUserId}
                     initialRankings={initialRankings}
+                    memberPairRank={memberPairRank}
                 />
             )}
             {phase === 'ROLE_SELECT' && (

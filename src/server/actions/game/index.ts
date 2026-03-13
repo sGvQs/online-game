@@ -30,6 +30,8 @@ export {
 export { getTopRankings } from './rankingActions'
 
 // STAR SHIELD
+export { getStarShieldPairRankings } from './starShieldRankingActions'
+export type { PairRanking } from './starShieldRankingActions'
 export {
     startStarShieldMatch,
     saveStarShieldResult,

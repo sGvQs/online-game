@@ -7,6 +7,7 @@ import { motion } from 'framer-motion'
 import Image from 'next/image'
 import { RoomWithUsersAndReadyStatus, RoomUserWithReadyStatus } from '@/types'
 import type { UserRanking } from '@/types'
+import type { PairRanking } from '@/server/actions/game/starShieldRankingActions'
 import { Button } from '@/components/ui/button'
 import { ProtectedStar } from '../playing/protectedStar'
 import { DinosaurWithBalls } from '@/components/game/common/starShield/dinosaurWithBalls'
@@ -28,6 +29,7 @@ interface TitleScreenProps {
     onExit: () => void
     currentUserId: string
     initialRankings: UserRanking[]
+    memberPairRank?: PairRanking | null
 }
 
 const HOW_TO_PLAY = [
@@ -48,6 +50,7 @@ export function TitleScreen({
     onExit,
     currentUserId,
     initialRankings,
+    memberPairRank,
 }: TitleScreenProps) {
     const router = useRouter()
     const readyCount = room.users.filter((u: RoomUserWithReadyStatus) => u.isReady).length
@@ -146,7 +149,7 @@ export function TitleScreen({
                     <div className="w-px self-stretch bg-linear-to-b from-transparent via-brand-500/30 to-transparent" />
 
                     <motion.div
-                        className="flex flex-col gap-6"
+                        className="flex flex-col gap-2"
                         initial={{ opacity: 0, x: 20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ duration: 0.8, delay: 0.6 }}
@@ -155,6 +158,20 @@ export function TitleScreen({
                             <Image src={ICONS.TYPIST} alt="Typing" width={28} height={28} className="shrink-0 opacity-90" />
                             <span className="text-xl font-bold tabular-nums text-white/90">{typingCount.toLocaleString()}</span>
                         </div>
+                        <Link href={`/game/${roomId}/star-shield/ranking`} className={styles.pairRankBadge()}>
+                            <span className="text-base shrink-0">🏆</span>
+                            {memberPairRank ? (
+                                <>
+                                    <span className="text-xs font-bold tabular-nums text-purple-300 shrink-0">#{memberPairRank.rank}位</span>
+                                    <span className="text-xs text-white/70 truncate">
+                                        {memberPairRank.shooterName} &amp; {memberPairRank.typistName}
+                                    </span>
+                                    <span className="text-xs font-bold tabular-nums text-white/90 shrink-0 ml-auto">{memberPairRank.bestDestroyedCount}個</span>
+                                </>
+                            ) : (
+                                <span className="text-xs text-white/60 group-hover:text-white/80 transition-colors">ランキングを見る →</span>
+                            )}
+                        </Link>
                         <div className={styles.playerCard()}>
                             <Typography variant="h4" className={styles.playerCardTitle()}>Players {readyCount}/{totalUsers}</Typography>
                             <div className="flex flex-col gap-3">
