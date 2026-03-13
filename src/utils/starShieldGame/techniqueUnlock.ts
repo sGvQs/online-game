@@ -62,13 +62,13 @@ export function getAvailableSpecialAttacks(owned: OwnedSkills): { specialAttackI
     if (PROGRESSION_DEBUG) {
         return [
             { specialAttackId: 'spread', level: 10 },
-            { specialAttackId: 'all_destruction', level: 10 },
+            { specialAttackId: 'all_destruction', level: 0 },
         ]
     }
     const list: { specialAttackId: SpecialAttackChoice; level: number }[] = []
     const spread = owned.specialAttacks.find((a) => a.specialAttackId === 'spread')
     if (spread) list.push({ specialAttackId: 'spread', level: spread.level })
-    if (owned.healLevel === 6) list.push({ specialAttackId: 'all_destruction', level: 10 })
+    if (owned.healLevel === 6) list.push({ specialAttackId: 'all_destruction', level: 0 })
     return list
 }
 

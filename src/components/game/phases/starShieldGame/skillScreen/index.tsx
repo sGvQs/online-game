@@ -68,10 +68,6 @@ const SPECIAL_LABELS: Record<string, string> = {
 const NORMAL_ATTACK_IDS: TechniqueId[] = ['red', 'blue', 'yellow_beam', 'purple', 'orange', 'pink']
 const SPECIAL_ATTACK_IDS = ['spread'] as const
 
-const PROGRESS_BAR_COLORS = {
-    indigo: '#818cf8',
-    emerald: '#34d399',
-} as const
 
 // ============================================================
 // Main Component
@@ -389,6 +385,7 @@ export function StarShieldSkill({ roomId, currentUserId: _currentUserId }: { roo
 
                     {/* 通常攻撃 */}
                     <SkillCard title="通常攻撃" jurisdiction="attack">
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                         {NORMAL_ATTACK_IDS.map((techniqueId) => {
                             const tech = TECHNIQUES[techniqueId]
                             const ownedAttack = normalAttacks.find((a) => a.techniqueId === techniqueId)
@@ -415,6 +412,7 @@ export function StarShieldSkill({ roomId, currentUserId: _currentUserId }: { roo
                                 />
                             )
                         })}
+                        </div>
                     </SkillCard>
 
                     {/* 必殺技 */}
@@ -665,11 +663,12 @@ function MaxedMessage({ children }: { children: React.ReactNode }) {
 // ============================================================
 function getTechEffectLabel(techniqueId: TechniqueId): string {
     const effects: Partial<Record<TechniqueId, string>> = {
+        red: 'スタンダード',
         blue: 'スロー効果',
-        yellow_beam: 'ビーム状（30連射）',
+        yellow_beam: 'ビーム状',
         purple: '貫通効果',
-        orange: '直撃＋一段連鎖',
-        pink: '円弧軌道（5発・レベルで増加）',
+        orange: '連鎖',
+        pink: '円弧軌道',
     }
     return effects[techniqueId] ?? ''
 }
@@ -722,10 +721,8 @@ function HealLoadoutPreview({ healValue, isFullRestore, starHpMax, healLevel }: 
                 />
                 <motion.div
                     className={cn(
-                        'absolute inset-y-0',
-                        isFullRestore
-                            ? 'bg-linear-to-r from-amber-600 to-yellow-400'
-                            : 'bg-linear-to-r from-emerald-600 to-emerald-400'
+                        'absolute inset-y-0 bg-linear-to-r from-emerald-600 to-emerald-400',
+                        
                     )}
                     style={{ left: `${BASE_PCT}%` }}
                     animate={{ width: ['0%', `${HEAL_PCT}%`, `${HEAL_PCT}%`, '0%'] }}
