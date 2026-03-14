@@ -69,6 +69,12 @@ export interface Bullet {
 export interface FirePayload {
     special?: boolean
     technique?: string
+    /** 単語完了時のみ */
+    specialAttack?: 'spread' | 'all_destruction'
+    /** 必殺技レベル（1-10）。単語完了時のみ */
+    specialAttackLevel?: number
+    /** ヒールレベル（1-6）。単語完了時のみ */
+    healLevel?: number
 }
 
 /** game_state broadcast のペイロード（ホストが一元管理し Typist に通知） */

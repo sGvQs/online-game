@@ -70,7 +70,7 @@ export const ABYSS_MIN_DURATION_MS = 2000
 /** ボス隕石の到達時間（ms）。ゆっくり落下 */
 export const ABYSS_BOSS_DURATION_MS = 60000
 /** ウェーブごとのボスHP数列 */
-export const ABYSS_BOSS_HP_SEQUENCE = [1000, 2000, 3000, 50000, 10000] as const
+export const ABYSS_BOSS_HP_SEQUENCE = [1000, 2000, 3000, 5000, 10000] as const
 /** ABYSS 解放に必要な隕石破壊数 */
 export const ABYSS_UNLOCK_THRESHOLD = 500
 /** ボス撃破ごとに付与するポイント */
