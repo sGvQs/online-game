@@ -31,22 +31,18 @@ const ABYSS_POINTS_PER_WAVE = 5
 const GAME_DURATION_SECONDS = 90
 
 /**
- * STAR SHIELD ゲーム開始
- * Match + TypingShootMatch を作成し Room.currentMatchId を更新する
- * ホストのみ実行可能
+ * STAR SHIELD セットアップ画面用マッチ作成
+ * ロビーから「START」を押したときに呼ばれる
  */
-export async function startStarShieldMatch(
+export async function createStarShieldSetupMatch(
     roomId: string,
-    difficulty: Difficulty,
     roles: { shooterId: string; typistId: string }
-): Promise<{ matchId: string; startedAt: number; shooterId: string; typistId: string }> {
+): Promise<{ matchId: string }> {
     const user = await getAuthenticatedUser()
 
     const room = await prisma.room.findUnique({
         where: { id: roomId },
-        include: {
-            users: true,
-        },
+        include: { users: true },
     })
 
     if (!room) throw new Error('ルームが見つかりません')
@@ -62,28 +58,11 @@ export async function startStarShieldMatch(
         throw new Error('Shooter と Typist は別のプレイヤーである必要があります')
     }
 
-    if (difficulty === 'HELL') {
-        const unlocked = await isHellUnlocked(shooterId, typistId)
-        if (!unlocked) {
-            throw new Error('HELL難易度は解放されていません（隕石破壊数200以上のクリアで解放）')
-        }
-    }
-
-    if (difficulty === 'ABYSS') {
-        const unlocked = await isAbyssUnlocked(shooterId, typistId)
-        if (!unlocked) {
-            throw new Error('ABYSS難易度は解放されていません（隕石破壊数500以上のクリアで解放）')
-        }
-    }
-
-    const spawnRate = SPAWN_RATES[difficulty]
-    const targetAsteroidCount = Math.floor(GAME_DURATION_SECONDS * spawnRate)
-
     const match = await prisma.match.create({
         data: {
             roomId,
             gameType: 'star-shield',
-            status: 'PLAYING',
+            status: 'SETUP',
         },
     })
 
@@ -93,8 +72,8 @@ export async function startStarShieldMatch(
             shooterId,
             typistId,
             characterName: 'dinosaur',
-            difficulty,
-            targetAsteroidCount,
+            difficulty: 'NORMAL',
+            targetAsteroidCount: 0,
         },
     })
 
@@ -103,9 +82,87 @@ export async function startStarShieldMatch(
         data: { currentMatchId: match.id },
     })
 
+    return { matchId: match.id }
+}
+
+/**
+ * STAR SHIELD セットアップ中の役職・難易度更新
+ */
+export async function updateStarShieldSetupMatch(
+    matchId: string,
+    updates: { shooterId?: string; typistId?: string; difficulty?: Difficulty }
+): Promise<void> {
+    await getAuthenticatedUser()
+    const match = await prisma.match.findUnique({ where: { id: matchId } })
+    if (!match || match.status !== 'SETUP') return // 無視
+
+    await prisma.typingShootMatch.update({
+        where: { matchId },
+        data: {
+            shooterId: updates.shooterId,
+            typistId: updates.typistId,
+            difficulty: updates.difficulty,
+        },
+    })
+}
+
+/**
+ * STAR SHIELD ゲーム開始（セットアップ完了）
+ * ホストのみ実行可能
+ */
+export async function startStarShieldMatch(
+    matchId: string
+): Promise<{ startedAt: number; shooterId: string; typistId: string }> {
+    const user = await getAuthenticatedUser()
+
+    const match = await prisma.match.findUnique({
+        where: { id: matchId },
+        include: { room: true },
+    })
+
+    if (!match) throw new Error('マッチが見つかりません')
+    if (match.room.createdBy !== user.id) throw new Error('ゲームを開始する権限がありません（ホストのみ）')
+    if (match.status !== 'SETUP') throw new Error('既に開始されています')
+
+    const tsm = await prisma.typingShootMatch.findUnique({ where: { matchId } })
+    if (!tsm) throw new Error('TypingShootMatchが見つかりません')
+
+    const shooterId = tsm.shooterId
+    const typistId = tsm.typistId
+
+    if (tsm.difficulty === 'HELL') {
+        const unlocked = await isHellUnlocked(shooterId, typistId)
+        if (!unlocked) {
+            throw new Error('HELL難易度は解放されていません（隕石破壊数200以上のクリアで解放）')
+        }
+    }
+
+    if (tsm.difficulty === 'ABYSS') {
+        const unlocked = await isAbyssUnlocked(shooterId, typistId)
+        if (!unlocked) {
+            throw new Error('ABYSS難易度は解放されていません（隕石破壊数500以上のクリアで解放）')
+        }
+    }
+
+    const spawnRate = SPAWN_RATES[tsm.difficulty as Difficulty]
+    const targetAsteroidCount = Math.floor(GAME_DURATION_SECONDS * spawnRate)
+    const startedAt = new Date()
+
+    await prisma.match.update({
+        where: { id: matchId },
+        data: { status: 'PLAYING' },
+    })
+
+    await prisma.typingShootMatch.update({
+        where: { matchId },
+        data: {
+            targetAsteroidCount,
+            startedAt,
+        },
+    })
+
     return {
-        matchId: match.id,
-        startedAt: match.createdAt.getTime(),
+        startedAt: startedAt.getTime(),
         shooterId,
         typistId,
     }
@@ -126,45 +183,57 @@ export async function getStarShieldMatchInfo(
 
 /** リロード時に match ステータスを確認し、終了済みなら結果を返す */
 export async function getStarShieldMatchStatus(matchId: string): Promise<
-    | { status: 'playing'; startedAt: number; shooterId: string }
+    | { status: 'setup'; shooterId: string; typistId: string; difficulty: Difficulty }
+    | { status: 'playing'; startedAt: number; shooterId: string; typistId: string }
     | {
-          status: 'finished'
-          startedAt: number
-          shooterId: string
-          result: 'CLEARED' | 'FAILED_CONTACT' | 'FAILED_TIMEOUT'
-          stats: { spawnedCount: number; destroyedCount: number; durationSeconds: number }
-          difficulty: Difficulty
-      }
+        status: 'finished'
+        startedAt: number
+        shooterId: string
+        result: 'CLEARED' | 'FAILED_CONTACT' | 'FAILED_TIMEOUT'
+        stats: { spawnedCount: number; destroyedCount: number; durationSeconds: number }
+        difficulty: Difficulty
+    }
     | { status: 'not_found' }
 > {
-    const tsm = await prisma.typingShootMatch.findUnique({
-        where: { matchId },
+    const match = await prisma.match.findUnique({
+        where: { id: matchId },
+        include: { typingShootMatch: true, room: { include: { users: true } } },
     })
 
+    if (!match) return { status: 'not_found' }
+
+    const tsm = match.typingShootMatch
     if (!tsm) {
-        const match = await prisma.match.findUnique({
-            where: { id: matchId },
-            include: { room: true },
-        })
-        if (!match) return { status: 'not_found' }
+        // Fallback for some reason
+        const typistId = match.room.users.find((u) => u.userId !== match.room.createdBy)?.userId || match.room.createdBy
         return {
             status: 'playing',
             startedAt: match.createdAt.getTime(),
             shooterId: match.room.createdBy,
+            typistId,
+        }
+    }
+
+    if (match.status === 'SETUP') {
+        return {
+            status: 'setup',
+            shooterId: tsm.shooterId,
+            typistId: tsm.typistId,
+            difficulty: tsm.difficulty as Difficulty,
         }
     }
 
     const startedAt = tsm.startedAt.getTime()
 
     if (!tsm.endedAt) {
-        return { status: 'playing', startedAt, shooterId: tsm.shooterId }
+        return { status: 'playing', startedAt, shooterId: tsm.shooterId, typistId: tsm.typistId }
     }
 
     const result: 'CLEARED' | 'FAILED_CONTACT' | 'FAILED_TIMEOUT' = tsm.isCleared
         ? 'CLEARED'
         : tsm.failureReason === 'FAILED_CONTACT'
-          ? 'FAILED_CONTACT'
-          : 'FAILED_TIMEOUT'
+            ? 'FAILED_CONTACT'
+            : 'FAILED_TIMEOUT'
 
     return {
         status: 'finished',

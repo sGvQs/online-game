@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useRef, useMemo } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import { useGameRoom } from '@/hooks/useGameRoom'
 import { returnToRoom, resetAllReady } from '@/server/actions/room'
-import { startStarShieldMatch, getStarShieldMatchStatus, isHellUnlocked, isAbyssUnlocked, getStarShieldProgress, getMyStarShieldProgress, updateLoadout } from '@/server/actions/game'
+import { createStarShieldSetupMatch, updateStarShieldSetupMatch, startStarShieldMatch, getStarShieldMatchStatus, isHellUnlocked, isAbyssUnlocked, getStarShieldProgress, getMyStarShieldProgress, updateLoadout } from '@/server/actions/game'
 import { RoomWithUsersAndReadyStatus } from '@/types'
 import type { UserRanking } from '@/types'
 import type { PairRanking } from '@/server/actions/game/starShieldRankingActions'
@@ -44,7 +44,6 @@ export function StarShieldGame({
         currentUserId,
     })
 
-    const PHASE_STORAGE_KEY = `star-shield-phase-${roomId}`
     const [phase, setPhase] = useState<GamePhase>('TITLE')
     const [difficulty, setDifficulty] = useState<Difficulty>('NORMAL')
     const [matchId, setMatchId] = useState<string | null>(null)
@@ -59,16 +58,7 @@ export function StarShieldGame({
     const [typistProgress, setTypistProgress] = useState<Awaited<ReturnType<typeof getStarShieldProgress>> | null>(null)
     const [currentUserProgress, setCurrentUserProgress] = useState<Awaited<ReturnType<typeof getStarShieldProgress>> | null>(null)
 
-    const initialRoleChoices = useMemo(() => {
-        const users = room.users
-        if (users.length < 2) return {} as Record<string, RoleChoice>
-        const hostId = room.createdBy
-        const other = users.find((u) => u.userId !== hostId)
-        if (!other) return {} as Record<string, RoleChoice>
-        return { [hostId]: 'SHOOTER' as RoleChoice, [other.userId]: 'TYPIST' as RoleChoice }
-    }, [room.users, room.createdBy])
-
-    const [roleChoices, setRoleChoices] = useState<Record<string, RoleChoice>>(initialRoleChoices)
+    const [roleChoices, setRoleChoices] = useState<Record<string, RoleChoice>>({})
     const [autoAimNearest, setAutoAimNearest] = useState(false)
 
     // 2人揃ったときに未選択のユーザーに初期値（ホスト=Shooter、他=Typist）を補完
@@ -77,6 +67,7 @@ export function StarShieldGame({
         const hostId = room.createdBy
         const other = room.users.find((u) => u.userId !== hostId)
         if (!other) return
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         setRoleChoices((prev) => {
             const missing = room.users.filter((u) => !(u.userId in prev))
             if (missing.length === 0) return prev
@@ -90,7 +81,6 @@ export function StarShieldGame({
 
     // 既にプレイ済みの matchId を記録。タイトルに戻ったとき room.currentMatchId が
     // まだ DB に残っていても再度 PLAYING に遷移しないようにするため。
-    // リロード時も保持するため sessionStorage に永続化（ROLE_SELECT リロードで RESULT に飛ぶのを防ぐ）
     const STORAGE_KEY = `star-shield-played-${roomId}`
     const initialPlayedMatchIds = useMemo(() => {
         if (typeof window === 'undefined') return new Set<string>()
@@ -109,36 +99,13 @@ export function StarShieldGame({
         } catch {
             /* ignore */
         }
-    }, [roomId])
+    }, [STORAGE_KEY])
     const lobbyChannelRef = useRef<ReturnType<ReturnType<typeof createClient>['channel']> | null>(null)
 
     const supabase = useMemo(() => createClient(), [])
     const allUsersReady = room.users.length > 0 && room.users.every((u) => u.isReady)
 
-    // マウント後に sessionStorage から ROLE_SELECT を復元（SSR との hydration ミスマッチを防ぐためクライアント only）
-    useEffect(() => {
-        try {
-            const stored = sessionStorage.getItem(PHASE_STORAGE_KEY)
-            if (stored === 'ROLE_SELECT') setPhase('ROLE_SELECT')
-        } catch {
-            /* ignore */
-        }
-    }, []) // eslint-disable-line react-hooks/exhaustive-deps -- PHASE_STORAGE_KEY は roomId 依存でマウント時は不変
-
-    // phase を sessionStorage に永続化（ROLE_SELECT でリロードしても復元）
-    useEffect(() => {
-        try {
-            if (phase === 'TITLE' || phase === 'ROLE_SELECT') {
-                sessionStorage.setItem(PHASE_STORAGE_KEY, phase)
-            } else {
-                sessionStorage.removeItem(PHASE_STORAGE_KEY)
-            }
-        } catch {
-            /* ignore */
-        }
-    }, [phase, roomId])
-
-    // ロビー用 broadcast: TITLE と ROLE_SELECT で channel を有効化
+    // ロビー用 broadcast: 難易度・役職変更の即時反映と全体進行
     useEffect(() => {
         if (phase !== 'TITLE' && phase !== 'ROLE_SELECT') return
 
@@ -156,11 +123,17 @@ export function StarShieldGame({
                     setRoleChoices((prev) => ({ ...prev, [payload.userId]: payload.role }))
                 }
             })
-            .on('broadcast', { event: 'goToRoleSelect' }, () => {
-                setPhase('ROLE_SELECT')
-            })
-            .on('broadcast', { event: 'goToLobby' }, () => {
-                setPhase('TITLE')
+            .on('broadcast', { event: 'startGame' }, () => {
+                if (matchId) {
+                    // Refetch status to proceed to playing
+                    getStarShieldMatchStatus(matchId).then((status) => {
+                        if (status.status === 'playing') {
+                            setStartedAt(status.startedAt)
+                            setShooterId(status.shooterId)
+                            setPhase('PLAYING')
+                        }
+                    })
+                }
             })
             .subscribe()
 
@@ -168,17 +141,26 @@ export function StarShieldGame({
             supabase.removeChannel(channel)
             lobbyChannelRef.current = null
         }
-    }, [phase, roomId, supabase])
+    }, [phase, roomId, supabase, matchId])
 
-    // 役職変更（各自が選択、broadcast で共有）
-    const handleRoleChange = useCallback((role: RoleChoice) => {
-        setRoleChoices((prev) => ({ ...prev, [currentUserId]: role }))
+    // 役職変更（各自が選択、broadcast で共有＆DB保存）
+    const handleRoleChange = useCallback(async (role: RoleChoice) => {
+        const nextChoices = { ...roleChoices, [currentUserId]: role }
+        setRoleChoices(nextChoices)
         lobbyChannelRef.current?.send({
             type: 'broadcast',
             event: 'role',
             payload: { userId: currentUserId, role },
         })
-    }, [currentUserId])
+
+        if (matchId && phase === 'ROLE_SELECT') {
+            const sId = room.users.find((u) => nextChoices[u.userId] === 'SHOOTER')?.userId
+            const tId = room.users.find((u) => nextChoices[u.userId] === 'TYPIST')?.userId
+            if (sId && tId) {
+                await updateStarShieldSetupMatch(matchId, { shooterId: sId, typistId: tId })
+            }
+        }
+    }, [currentUserId, roleChoices, matchId, room.users, phase])
 
     // 役職が被っているか（2人とも同じ役職を選んだ場合）
     const roleConflict = useMemo(() => {
@@ -206,6 +188,7 @@ export function StarShieldGame({
             isHellUnlocked(u0.userId, u1.userId).then(setHellUnlocked)
             isAbyssUnlocked(u0.userId, u1.userId).then(setAbyssUnlocked)
         } else {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setHellUnlocked(false)
             setAbyssUnlocked(false)
         }
@@ -244,6 +227,7 @@ export function StarShieldGame({
     useEffect(() => {
         const needsReset = (!hellUnlocked && difficulty === 'HELL') || (!abyssUnlocked && difficulty === 'ABYSS')
         if (needsReset) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
             setDifficulty('EASY')
             if (isHost) {
                 lobbyChannelRef.current?.send({
@@ -257,9 +241,9 @@ export function StarShieldGame({
 
     const canStartLobby = allUsersReady
 
-    // ホストが難易度を変更したときに state 更新 + broadcast
+    // ホストが難易度を変更したときに state 更新 + broadcast + DB保存
     const handleDifficultyChange = useCallback(
-        (d: Difficulty) => {
+        async (d: Difficulty) => {
             setDifficulty(d)
             if (isHost) {
                 lobbyChannelRef.current?.send({
@@ -267,30 +251,51 @@ export function StarShieldGame({
                     event: 'difficulty',
                     payload: { difficulty: d },
                 })
+                if (matchId && phase === 'ROLE_SELECT') {
+                    await updateStarShieldSetupMatch(matchId, { difficulty: d })
+                }
             }
         },
-        [isHost]
+        [isHost, matchId, phase]
     )
 
-    // 非ホスト: Room.currentMatchId の変化を検知。match ステータスを確認し、終了済みなら RESULT、プレイ中なら PLAYING へ
+    // DB-Driven: Room.currentMatchId の変化を検知して Phase 等をステートに反映
     useEffect(() => {
-        if (phase !== 'TITLE' && phase !== 'ROLE_SELECT') return
-        if (!room.currentMatchId) return
-        if (playedMatchIdsRef.current.has(room.currentMatchId)) return
+        if (!room.currentMatchId || playedMatchIdsRef.current.has(room.currentMatchId)) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect
+            if (phase !== 'TITLE') setPhase('TITLE')
+            return
+        }
 
         const newMatchId = room.currentMatchId
         getStarShieldMatchStatus(newMatchId).then(async (status) => {
-            if (status.status === 'finished') {
-                addPlayedMatchId(newMatchId)
-                setGameResult(status.result)
-                setGameStats({ ...status.stats, fireCount: 0 }) // サーバーに保存しないので再入時は0
-                setGameResultDifficulty(status.difficulty)
-                setPhase('RESULT')
+            if (status.status === 'not_found') {
+                if (phase !== 'TITLE') setPhase('TITLE')
+            } else if (status.status === 'setup') {
+                setDifficulty(status.difficulty)
+                setRoleChoices((prev) => {
+                    const next = { ...prev }
+                    if (status.shooterId) next[status.shooterId] = 'SHOOTER'
+                    if (status.typistId) next[status.typistId] = 'TYPIST'
+                    return next
+                })
+                setMatchId(newMatchId)
+
+                // SSR後等でプログレスがなければ取得
+                if (!shooterProgress || !typistProgress) {
+                    const [freshShooter, freshTypist] = await Promise.all([
+                        getStarShieldProgress(status.shooterId),
+                        getStarShieldProgress(status.typistId)
+                    ])
+                    setShooterProgress(freshShooter)
+                    setTypistProgress(freshTypist)
+                }
+
+                if (phase !== 'ROLE_SELECT') setPhase('ROLE_SELECT')
             } else if (status.status === 'playing') {
-                // ゲーム進行に必要な progress を取得してから画面遷移（ここで取らないと古いロードアウトになる）
                 const sId = status.shooterId
-                const tId = room.users.find(u => u.userId !== sId)?.userId
-                if (sId && tId) {
+                const tId = status.typistId
+                if (sId && tId && (!shooterProgress || !typistProgress)) {
                     const [freshShooter, freshTypist] = await Promise.all([
                         getStarShieldProgress(sId),
                         getStarShieldProgress(tId)
@@ -302,51 +307,61 @@ export function StarShieldGame({
                 setMatchId(newMatchId)
                 setStartedAt(status.startedAt)
                 setShooterId(status.shooterId)
-                setPhase('PLAYING')
+                if (phase !== 'PLAYING') setPhase('PLAYING')
+            } else if (status.status === 'finished') {
+                addPlayedMatchId(newMatchId)
+                setGameResult(status.result)
+                setGameStats({ ...status.stats, fireCount: 0 }) // サーバーに保存しないので再入時は0
+                setGameResultDifficulty(status.difficulty)
+                if (phase !== 'RESULT') setPhase('RESULT')
             }
-            // not_found の場合は何もしない（削除済みなど）
         })
-    }, [room.currentMatchId, phase, addPlayedMatchId])
+    }, [room.currentMatchId, addPlayedMatchId, phase, shooterProgress, typistProgress])
 
     // ロビーから役職決定画面へ（ホストが START 押下時）
-    const handleStartGame = useCallback(() => {
-        if (!canStartLobby) return
-        lobbyChannelRef.current?.send({ type: 'broadcast', event: 'goToRoleSelect', payload: {} })
-        setPhase('ROLE_SELECT')
-    }, [canStartLobby])
+    const handleStartGame = useCallback(async () => {
+        if (!canStartLobby || !isHost) return
+        try {
+            const hostId = room.createdBy
+            const other = room.users.find((u) => u.userId !== hostId)
+            const typistId = other?.userId ?? hostId
+            await createStarShieldSetupMatch(roomId, {
+                shooterId: hostId,
+                typistId: typistId,
+            })
+            // DB-driven なので、このアクションで room.currentMatchId が更新され、useEffect で画面が自動的に切り替わる
+        } catch (e) {
+            console.error('セットアップ開始失敗:', e)
+        }
+    }, [canStartLobby, isHost, room.createdBy, room.users, roomId])
 
     // 役職決定後にゲーム開始（ホストのみ）
     const handleProceedToGame = useCallback(async () => {
-        if (roleConflict) return
+        if (roleConflict || !matchId || !isHost) return
         const shooterIdFromRoles = room.users.find((u) => roleChoices[u.userId] === 'SHOOTER')?.userId
         const typistIdFromRoles = room.users.find((u) => roleChoices[u.userId] === 'TYPIST')?.userId
         if (!shooterIdFromRoles || !typistIdFromRoles) return
         try {
-            // ゲーム開始前に最新の loadout を取得（シューターが色を変えてもホストは broadcast を受けてないため）
-            const [freshShooter, freshTypist] = await Promise.all([
-                getStarShieldProgress(shooterIdFromRoles),
-                getStarShieldProgress(typistIdFromRoles),
-            ])
-            setShooterProgress(freshShooter)
-            setTypistProgress(freshTypist)
-            const { matchId: newMatchId, startedAt: ts, shooterId: sid } = await startStarShieldMatch(roomId, difficulty, {
-                shooterId: shooterIdFromRoles,
-                typistId: typistIdFromRoles,
-            })
-            setMatchId(newMatchId)
+            // DB のステータスを PLAYING に変更
+            const { startedAt: ts, shooterId: sid } = await startStarShieldMatch(matchId)
             setStartedAt(ts)
             setShooterId(sid)
+            // ゲスト達の画面切り替えのために Broadcast
+            lobbyChannelRef.current?.send({ type: 'broadcast', event: 'startGame', payload: {} })
             setPhase('PLAYING')
         } catch (e) {
             console.error('ゲーム開始失敗:', e)
         }
-    }, [roleConflict, room.users, roleChoices, roomId, difficulty])
+    }, [roleConflict, matchId, isHost, room.users, roleChoices])
 
     // 役職決定画面からロビーへ戻る
-    const handleBackToLobby = useCallback(() => {
-        lobbyChannelRef.current?.send({ type: 'broadcast', event: 'goToLobby', payload: {} })
+    const handleBackToLobby = useCallback(async () => {
+        if (isHost && matchId) {
+            // Room.currentMatchId をクリアするなどしてタイトルに戻す（今回は played リストに入れておく）
+            addPlayedMatchId(matchId)
+        }
         setPhase('TITLE')
-    }, [])
+    }, [isHost, matchId, addPlayedMatchId])
 
     // ゲーム終了時
     const handleGameEnd = useCallback((result: GameResult, stats: GameStats, actualDifficulty?: Difficulty) => {

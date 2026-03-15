@@ -33,6 +33,8 @@ export { getTopRankings } from './rankingActions'
 export { getStarShieldPairRankings } from './starShieldRankingActions'
 export type { PairRanking } from './starShieldRankingActions'
 export {
+    createStarShieldSetupMatch,
+    updateStarShieldSetupMatch,
     startStarShieldMatch,
     saveStarShieldResult,
     getStarShieldMatchInfo,
