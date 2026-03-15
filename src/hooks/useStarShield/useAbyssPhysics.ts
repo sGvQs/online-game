@@ -2,19 +2,16 @@
 
 import { useEffect } from 'react'
 import type { Dispatch, MutableRefObject, SetStateAction } from 'react'
-import { STAR_TARGET_X, STAR_TARGET_Y, STAR_RADIUS } from '@/components/game/phases/starShieldGame/playing/protectedStar'
-import { SPAWN_INTERVALS_MS, ASTEROID_RADIUS, ABYSS_WAVE_DURATION_SECONDS } from '@/constants/starShieldGame/gameConfig'
+import { STAR_TARGET_X, STAR_TARGET_Y } from '@/components/game/phases/starShieldGame/playing/protectedStar'
+import { SPAWN_INTERVALS_MS, ABYSS_WAVE_DURATION_SECONDS } from '@/constants/starShieldGame/gameConfig'
 import {
     createAsteroid,
     createBossAsteroid,
-    computeCollisionResult,
-    applyHpUpdates,
-    getContactAsteroids,
-    getExpiredBulletIds,
-    getAsteroidPosition,
 } from '@/utils/starShieldGame'
 import { awardAbyssWavePoints } from '@/server/actions/game/starShieldActions'
 import type { Asteroid, Bullet, GameResult, NormalAttackLevel } from '@/types/starShieldGame'
+
+import { processPhysicsFrame } from './physicsUtils'
 
 type Score = { spawned: number; destroyed: number }
 type ChainHits = {
@@ -75,10 +72,14 @@ export function useAbyssPhysics({
     useEffect(() => {
         if (!isShooter) return
 
-        // 新ウェーブ開始時: 前ウェーブの残骸をクリア
+        // 新ウェーブ開始時: 前ウェーブの残骸と弾をクリア
         contactPendingRef.current = false
         setAsteroids(() => {
             asteroidsRef.current = []
+            return []
+        })
+        setBullets(() => {
+            bulletsRef.current = []
             return []
         })
 
@@ -143,112 +144,35 @@ export function useAbyssPhysics({
         // --- ゲームループ ---
         const gameLoop = () => {
             if (gameEndedRef.current || contactPendingRef.current) return
-            const now = Date.now()
-            const asts = asteroidsRef.current
-            const bts = bulletsRef.current
 
-            // 衝突判定
-            const result = computeCollisionResult({
-                asteroids: asts,
-                bullets: bts,
-                now,
-                level: levelRef.current,
-            })
-
-            if (result.hpUpdates.size > 0) {
-                // ボス撃破判定（state 更新前に実施）
-                const boss = asts.find((a) => a.isBoss && !a.destroyedAt)
-                const bossNewHp = boss ? (result.hpUpdates.get(boss.id) ?? boss.hp) : undefined
-                const bossJustDefeated = bossNewHp !== undefined && bossNewHp <= 0 && phase === 'boss'
-
-                setAsteroids((prev) => {
-                    const next = applyHpUpdates(prev, result, now, levelRef.current)
-                    asteroidsRef.current = next
-                    return next
-                })
-                setBullets((prev) => {
-                    const next = prev.filter((b) => !result.hitBulletIds.has(b.id))
-                    bulletsRef.current = next
-                    return next
-                })
-                if (result.chainHits) setChainHits(result.chainHits)
-                if (result.destroyedCount > 0) {
-                    setScore((prev) => {
-                        const next = { ...prev, destroyed: prev.destroyed + result.destroyedCount }
-                        scoreRef.current = next
-                        return next
-                    })
-                    sendGameState()
-                }
-
-                if (bossJustDefeated) {
+            processPhysicsFrame({
+                now: Date.now(),
+                asteroidsRef,
+                bulletsRef,
+                scoreRef,
+                starHpRef,
+                levelRef,
+                contactPendingRef,
+                setAsteroids,
+                setBullets,
+                setScore,
+                setStarHp,
+                setChainHits,
+                setContactExplosion,
+                playVoice,
+                sendGameState,
+                onBossDefeated: () => {
+                    if (phase !== 'boss') return
                     phase = 'boss_cleared'
                     void awardAbyssWavePoints(matchId).catch((e) => console.error('[ABYSS] ポイント付与失敗:', e))
                     setWaveNumber((n) => n + 1)
                     rafId = null
-                    return
-                }
-            }
-
-            // 期限切れ弾削除
-            const expiredIds = getExpiredBulletIds(bts, now)
-            if (expiredIds.size > 0) {
-                setBullets((prev) => {
-                    const next = prev.filter((b) => !expiredIds.has(b.id))
-                    bulletsRef.current = next
-                    return next
-                })
-            }
-
-            // 星への接触判定
-            const destroyedThisFrame = new Set(
-                [...result.hpUpdates.entries()].filter(([, newHp]) => newHp <= 0).map(([id]) => id)
-            )
-            const contacts = getContactAsteroids({
-                asteroids: asts,
-                now,
-                destroyedAsteroidIds: destroyedThisFrame,
-                starTargetX: STAR_TARGET_X,
-                starTargetY: STAR_TARGET_Y,
-                starRadius: STAR_RADIUS,
-                asteroidRadius: ASTEROID_RADIUS,
+                },
             })
 
-            if (contacts.length > 0 && !contactPendingRef.current) {
-                const bossContact = contacts.find((a) => a.isBoss)
-
-                if (bossContact) {
-                    // ボス接触 = 星HP に関わらず即ゲームオーバー
-                    contactPendingRef.current = true
-                    const ap = getAsteroidPosition(bossContact, now)
-                    setContactExplosion({ x: ap.x, y: ap.y, asteroidId: bossContact.id })
-                    return
-                }
-
-                // 通常隕石接触（通常フェーズのみ発生）
-                playVoice('star-damage')
-                const damage = contacts.length
-                const newStarHp = Math.max(0, starHpRef.current - damage)
-                starHpRef.current = newStarHp
-                setStarHp(newStarHp)
-                sendGameState(true)
-                setAsteroids((prev) => {
-                    const contactIds = new Set(contacts.map((c) => c.id))
-                    const next = prev.map((a) =>
-                        contactIds.has(a.id) ? { ...a, hasDamagedStar: true, destroyedAt: now } : a
-                    )
-                    asteroidsRef.current = next
-                    return next
-                })
-                if (newStarHp <= 0) {
-                    contactPendingRef.current = true
-                    const ap = getAsteroidPosition(contacts[0]!, now)
-                    setContactExplosion({ x: ap.x, y: ap.y, asteroidId: contacts[0]!.id })
-                    return
-                }
+            if (rafId !== null) {
+                rafId = requestAnimationFrame(gameLoop)
             }
-
-            rafId = requestAnimationFrame(gameLoop)
         }
         rafId = requestAnimationFrame(gameLoop)
 
@@ -257,5 +181,6 @@ export function useAbyssPhysics({
             if (waveTimer) clearTimeout(waveTimer)
             if (rafId) cancelAnimationFrame(rafId)
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [matchId, isShooter, waveNumber, sendGameState, endGame])
 }

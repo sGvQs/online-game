@@ -219,9 +219,9 @@ export function StarShieldGame({
         const p2 =
             shooterIdForUnlock && typistIdForUnlock && !roleConflict
                 ? Promise.all([
-                      getStarShieldProgress(shooterIdForUnlock).then(setShooterProgress),
-                      getStarShieldProgress(typistIdForUnlock).then(setTypistProgress),
-                  ])
+                    getStarShieldProgress(shooterIdForUnlock).then(setShooterProgress),
+                    getStarShieldProgress(typistIdForUnlock).then(setTypistProgress),
+                ])
                 : Promise.resolve()
         await Promise.all([p1, p2])
     }, [phase, shooterIdForUnlock, typistIdForUnlock, roleConflict])
@@ -279,7 +279,7 @@ export function StarShieldGame({
         if (playedMatchIdsRef.current.has(room.currentMatchId)) return
 
         const newMatchId = room.currentMatchId
-        getStarShieldMatchStatus(newMatchId).then((status) => {
+        getStarShieldMatchStatus(newMatchId).then(async (status) => {
             if (status.status === 'finished') {
                 addPlayedMatchId(newMatchId)
                 setGameResult(status.result)
@@ -287,6 +287,18 @@ export function StarShieldGame({
                 setGameResultDifficulty(status.difficulty)
                 setPhase('RESULT')
             } else if (status.status === 'playing') {
+                // ゲーム進行に必要な progress を取得してから画面遷移（ここで取らないと古いロードアウトになる）
+                const sId = status.shooterId
+                const tId = room.users.find(u => u.userId !== sId)?.userId
+                if (sId && tId) {
+                    const [freshShooter, freshTypist] = await Promise.all([
+                        getStarShieldProgress(sId),
+                        getStarShieldProgress(tId)
+                    ])
+                    setShooterProgress(freshShooter)
+                    setTypistProgress(freshTypist)
+                }
+
                 setMatchId(newMatchId)
                 setStartedAt(status.startedAt)
                 setShooterId(status.shooterId)
@@ -370,101 +382,100 @@ export function StarShieldGame({
     // 背景は (play) layout で描画（room ⇔ game 遷移時もアンマウントされない）
     return (
         <PresenceDuplicateWarning roomId={roomId} currentUserId={currentUserId}>
-        <div className="relative min-h-screen overflow-hidden">
-            {phase === 'TITLE' && (
-                <TitleScreen
-                    room={room}
-                    roomId={roomId}
-                    isHost={isHost}
-                    isReady={isReady}
-                    allUsersReady={allUsersReady}
-                    canStart={canStartLobby}
-                    onToggleReady={toggleReady}
-                    onStartGame={handleStartGame}
-                    onExit={handleExit}
-                    currentUserId={currentUserId}
-                    initialRankings={initialRankings}
-                    memberPairRank={memberPairRank}
-                />
-            )}
-            {phase === 'ROLE_SELECT' && (
-                <RoleSelectionScreen
-                    room={room}
-                    roleChoices={roleChoices}
-                    onRoleChange={handleRoleChange}
-                    roomId={roomId}
-                    roleConflict={roleConflict}
-                    canProceed={!roleConflict}
-                    onProceedToGame={handleProceedToGame}
-                    onBack={handleBackToLobby}
-                    currentUserId={currentUserId}
-                    difficulty={difficulty}
-                    onDifficultyChange={handleDifficultyChange}
-                    isHost={isHost}
-                    isHellUnlocked={hellUnlocked}
-                    isAbyssUnlocked={abyssUnlocked}
-                    autoAimNearest={autoAimNearest}
-                    onToggleAutoAim={() => setAutoAimNearest((prev) => !prev)}
-                    shooterProgress={shooterProgress}
-                    typistProgress={typistProgress}
-                    currentUserProgress={currentUserProgress}
-                    shooterId={shooterIdForUnlock ?? null}
-                    onShooterLoadoutUpdate={handleShooterLoadoutUpdate}
-                />
-            )}
-            {phase === 'PLAYING' && matchId && startedAt && shooterId && (() => {
-                const shooterOwned = shooterProgress ?? {
-                    normalAttacks: [{ techniqueId: 'red', level: 1 }],
-                    specialAttacks: [],
-                    healLevel: null,
-                }
-                const availableNormalAttacks = getAvailableNormalAttacks(shooterOwned)
-                const availableSpecialAttacks = getAvailableSpecialAttacks(shooterOwned)
-                const rawNormal = shooterProgress?.selectedNormalAttackId ?? 'red'
-                const selectedNormal: TechniqueId =
-                    availableNormalAttacks.some((a) => a.techniqueId === rawNormal) ? (rawNormal as TechniqueId) : (availableNormalAttacks[0]?.techniqueId ?? 'red')
-                const derivedLevel: NormalAttackLevel =
-                    (availableNormalAttacks.find((a) => a.techniqueId === selectedNormal)?.level ?? 1) as NormalAttackLevel
-                // Typist の healLevel === 6 なら all_destruction を自動適用（Shooter の選択より優先）
-                const typistHasAllDestruction = typistProgress?.healLevel === 6
-                const rawSpecial = shooterProgress?.selectedSpecialAttackId ?? 'spread'
-                const selectedSpecialId: SpecialAttackChoice = typistHasAllDestruction
-                    ? 'all_destruction'
-                    : availableSpecialAttacks.some((a) => a.specialAttackId === rawSpecial)
-                        ? (rawSpecial as SpecialAttackChoice)
-                        : (availableSpecialAttacks[0]?.specialAttackId ?? 'spread')
-                const typistSpecialAttackLevel = typistHasAllDestruction
-                    ? 1
-                    : (availableSpecialAttacks.find((a) => a.specialAttackId === selectedSpecialId)?.level ?? 1) as 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10
-                const typistHealLevel = typistProgress?.selectedHealLevel ?? null
-                const starHpLevel = typistProgress?.starHpLevel ?? 1
-                return (
-                    <GameScreen
-                        matchId={matchId}
-                        startedAt={startedAt}
-                        shooterId={shooterId}
-                        difficulty={difficulty}
+            <div className="relative min-h-screen overflow-hidden">
+                {phase === 'TITLE' && (
+                    <TitleScreen
+                        room={room}
+                        roomId={roomId}
+                        isHost={isHost}
+                        isReady={isReady}
+                        allUsersReady={allUsersReady}
+                        canStart={canStartLobby}
+                        onToggleReady={toggleReady}
+                        onStartGame={handleStartGame}
+                        onExit={handleExit}
                         currentUserId={currentUserId}
-                        onGameEnd={handleGameEnd}
-                        typistNormalAttack={selectedNormal}
-                        typistSpecialAttack={selectedSpecialId}
-                        typistSpecialAttackLevel={typistSpecialAttackLevel}
-                        typistHealLevel={typistHealLevel}
-                        starHpLevel={starHpLevel}
-                        level={derivedLevel}
-                        autoAimNearest={autoAimNearest}
+                        initialRankings={initialRankings}
+                        memberPairRank={memberPairRank}
                     />
-                )
-            })()}
-            {phase === 'RESULT' && gameResult && gameStats && (
-                <ResultScreen
-                    result={gameResult}
-                    stats={gameStats}
-                    difficulty={gameResultDifficulty ?? difficulty}
-                    onBackToTitle={handleBackToTitle}
-                />
-            )}
-        </div>
+                )}
+                {phase === 'ROLE_SELECT' && (
+                    <RoleSelectionScreen
+                        room={room}
+                        roleChoices={roleChoices}
+                        onRoleChange={handleRoleChange}
+                        roomId={roomId}
+                        roleConflict={roleConflict}
+                        canProceed={!roleConflict}
+                        onProceedToGame={handleProceedToGame}
+                        onBack={handleBackToLobby}
+                        currentUserId={currentUserId}
+                        difficulty={difficulty}
+                        onDifficultyChange={handleDifficultyChange}
+                        isHost={isHost}
+                        isHellUnlocked={hellUnlocked}
+                        isAbyssUnlocked={abyssUnlocked}
+                        autoAimNearest={autoAimNearest}
+                        onToggleAutoAim={() => setAutoAimNearest((prev) => !prev)}
+                        shooterProgress={shooterProgress}
+                        typistProgress={typistProgress}
+                        currentUserProgress={currentUserProgress}
+                        shooterId={shooterIdForUnlock ?? null}
+                        onShooterLoadoutUpdate={handleShooterLoadoutUpdate}
+                    />
+                )}
+                {phase === 'PLAYING' && matchId && startedAt && shooterId && (() => {
+                    const shooterOwned = shooterProgress ?? {
+                        normalAttacks: [{ techniqueId: 'red', level: 1 }],
+                        specialAttacks: [],
+                        healLevel: null,
+                    }
+                    const availableNormalAttacks = getAvailableNormalAttacks(shooterOwned)
+                    const availableSpecialAttacks = getAvailableSpecialAttacks(shooterOwned)
+                    const rawNormal = shooterProgress?.selectedNormalAttackId ?? 'red'
+                    const selectedNormal: TechniqueId =
+                        availableNormalAttacks.some((a) => a.techniqueId === rawNormal) ? (rawNormal as TechniqueId) : (availableNormalAttacks[0]?.techniqueId ?? 'red')
+                    const derivedLevel: NormalAttackLevel =
+                        (availableNormalAttacks.find((a) => a.techniqueId === selectedNormal)?.level ?? 1) as NormalAttackLevel
+                    // Typist の healLevel === 6 なら all_destruction を自動適用（Shooter の選択より優先）
+                    const typistHasAllDestruction = typistProgress?.healLevel === 6
+                    const rawSpecial = shooterProgress?.selectedSpecialAttackId ?? 'spread'
+                    const selectedSpecialId: SpecialAttackChoice = typistHasAllDestruction
+                        ? 'all_destruction'
+                        : availableSpecialAttacks.some((a) => a.specialAttackId === rawSpecial)
+                            ? (rawSpecial as SpecialAttackChoice)
+                            : (availableSpecialAttacks[0]?.specialAttackId ?? 'spread')
+                    const typistSpecialAttackLevel =
+                        (availableSpecialAttacks.find((a) => a.specialAttackId === rawSpecial)?.level ?? 1) as 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10
+                    const typistHealLevel = typistProgress?.selectedHealLevel ?? null
+                    const starHpLevel = typistProgress?.starHpLevel ?? 1
+                    return (
+                        <GameScreen
+                            matchId={matchId}
+                            startedAt={startedAt}
+                            shooterId={shooterId}
+                            difficulty={difficulty}
+                            currentUserId={currentUserId}
+                            onGameEnd={handleGameEnd}
+                            typistNormalAttack={selectedNormal}
+                            typistSpecialAttack={selectedSpecialId}
+                            typistSpecialAttackLevel={typistSpecialAttackLevel}
+                            typistHealLevel={typistHealLevel}
+                            starHpLevel={starHpLevel}
+                            level={derivedLevel}
+                            autoAimNearest={autoAimNearest}
+                        />
+                    )
+                })()}
+                {phase === 'RESULT' && gameResult && gameStats && (
+                    <ResultScreen
+                        result={gameResult}
+                        stats={gameStats}
+                        difficulty={gameResultDifficulty ?? difficulty}
+                        onBackToTitle={handleBackToTitle}
+                    />
+                )}
+            </div>
         </PresenceDuplicateWarning>
     )
 }

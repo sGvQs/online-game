@@ -23,6 +23,7 @@ import type {
 } from '@/types/starShieldGame'
 import { TECHNIQUES, type TechniqueId } from '@/constants/starShieldGame/techniques'
 import { useGameChannel } from './useGameChannel'
+import { useShooterActions } from './useShooterActions'
 import { useAsteroidPhysics } from './useAsteroidPhysics'
 import { useAbyssPhysics } from './useAbyssPhysics'
 
@@ -116,30 +117,43 @@ export function useStarShield({
     useEffect(() => { specialAttackLevelRef.current = selectedSpecialAttackLevel }, [selectedSpecialAttackLevel])
 
     // ============================================
+    // シューターアクション
+    // ============================================
+
+    const { onReceiveFire, clearTimeouts } = useShooterActions({
+        maxStarHp,
+        levelRef,
+        asteroidsRef,
+        bulletsRef,
+        scoreRef,
+        starHpRef,
+        aimRef,
+        autoAimNearestRef,
+        specialAttackLevelRef,
+        setAsteroids,
+        setBullets,
+        setScore,
+        setStarHp,
+        playVoice,
+        sendGameState: (immediate) => sendGameState(immediate),
+    })
+
+    // ============================================
     // Supabase チャンネル
     // ============================================
 
     const { sendGameState, sendGameEnd, sendFire } = useGameChannel({
         matchId,
         isShooter,
-        maxStarHp,
-        level,
-        asteroidsRef,
-        bulletsRef,
         scoreRef,
         starHpRef,
         fireCountRef,
-        levelRef,
-        aimRef,
-        autoAimNearestRef,
-        specialAttackLevelRef,
         gameEndedRef,
-        setAsteroids,
-        setBullets,
         setScore,
         setStarHp,
         setTypistFireCount,
         playVoice,
+        onReceiveFire,
         onGameEnd,
     })
 
@@ -273,6 +287,8 @@ export function useStarShield({
 
     const onKeyDown = useCallback((e: KeyboardEvent) => {
         if (gameEndedRef.current) return
+        if (e.isComposing || e.keyCode === 229) return // IME入力中は無視
+        if (e.key === 'Process' || e.key === 'Unidentified') return // 一部ブラウザのIME対策
         if (e.key.length !== 1) return
 
         const line = currentLine
@@ -321,6 +337,10 @@ export function useStarShield({
     // ============================================
     // 後処理
     // ============================================
+
+    useEffect(() => {
+        return () => clearTimeouts()
+    }, [clearTimeouts])
 
     const completeContactFail = useCallback(() => {
         setContactExplosion(null)

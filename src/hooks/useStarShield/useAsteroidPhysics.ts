@@ -2,18 +2,13 @@
 
 import { useEffect } from 'react'
 import type { Dispatch, MutableRefObject, SetStateAction } from 'react'
-import { STAR_TARGET_X, STAR_TARGET_Y, STAR_RADIUS } from '@/components/game/phases/starShieldGame/playing/protectedStar'
-import { SPAWN_INTERVALS_MS, ASTEROID_RADIUS } from '@/constants/starShieldGame/gameConfig'
-import {
-    createAsteroid,
-    computeCollisionResult,
-    applyHpUpdates,
-    getContactAsteroids,
-    getExpiredBulletIds,
-    getAsteroidPosition,
-} from '@/utils/starShieldGame'
+import { STAR_TARGET_X, STAR_TARGET_Y } from '@/components/game/phases/starShieldGame/playing/protectedStar'
+import { SPAWN_INTERVALS_MS } from '@/constants/starShieldGame/gameConfig'
+import { createAsteroid } from '@/utils/starShieldGame'
 import type { Asteroid, Bullet, Difficulty, GameResult } from '@/types/starShieldGame'
 import type { NormalAttackLevel } from '@/types/starShieldGame'
+
+import { processPhysicsFrame } from './physicsUtils'
 
 type Score = { spawned: number; destroyed: number }
 type ChainHits = {
@@ -97,85 +92,24 @@ export function useAsteroidPhysics({
 
         const gameLoop = () => {
             if (gameEndedRef.current || contactPendingRef.current) return
-            const now = Date.now()
-            const asts = asteroidsRef.current
-            const bts = bulletsRef.current
 
-            // 衝突判定
-            const result = computeCollisionResult({
-                asteroids: asts,
-                bullets: bts,
-                now,
-                level: levelRef.current,
+            processPhysicsFrame({
+                now: Date.now(),
+                asteroidsRef,
+                bulletsRef,
+                scoreRef,
+                starHpRef,
+                levelRef,
+                contactPendingRef,
+                setAsteroids,
+                setBullets,
+                setScore,
+                setStarHp,
+                setChainHits,
+                setContactExplosion,
+                playVoice,
+                sendGameState,
             })
-
-            if (result.hpUpdates.size > 0) {
-                setAsteroids((prev) => {
-                    const next = applyHpUpdates(prev, result, now, levelRef.current)
-                    asteroidsRef.current = next
-                    return next
-                })
-                setBullets((prev) => {
-                    const next = prev.filter((b) => !result.hitBulletIds.has(b.id))
-                    bulletsRef.current = next
-                    return next
-                })
-                if (result.chainHits) setChainHits(result.chainHits)
-                if (result.destroyedCount > 0) {
-                    setScore((prev) => {
-                        const next = { ...prev, destroyed: prev.destroyed + result.destroyedCount }
-                        scoreRef.current = next
-                        return next
-                    })
-                    sendGameState()
-                }
-            }
-
-            // 期限切れ弾削除
-            const expiredIds = getExpiredBulletIds(bts, now)
-            if (expiredIds.size > 0) {
-                setBullets((prev) => {
-                    const next = prev.filter((b) => !expiredIds.has(b.id))
-                    bulletsRef.current = next
-                    return next
-                })
-            }
-
-            // 星への接触判定
-            const destroyedThisFrame = new Set(
-                [...result.hpUpdates.entries()].filter(([, newHp]) => newHp <= 0).map(([id]) => id)
-            )
-            const contacts = getContactAsteroids({
-                asteroids: asts,
-                now,
-                destroyedAsteroidIds: destroyedThisFrame,
-                starTargetX: STAR_TARGET_X,
-                starTargetY: STAR_TARGET_Y,
-                starRadius: STAR_RADIUS,
-                asteroidRadius: ASTEROID_RADIUS,
-            })
-            if (contacts.length > 0 && !contactPendingRef.current) {
-                playVoice('star-damage')
-                const damage = contacts.length
-                const newStarHp = Math.max(0, starHpRef.current - damage)
-                starHpRef.current = newStarHp
-                setStarHp(newStarHp)
-                sendGameState(true)
-                setAsteroids((prev) => {
-                    const contactIds = new Set(contacts.map((c) => c.id))
-                    const next = prev.map((a) =>
-                        contactIds.has(a.id) ? { ...a, hasDamagedStar: true, destroyedAt: now } : a
-                    )
-                    asteroidsRef.current = next
-                    return next
-                })
-                if (newStarHp <= 0) {
-                    contactPendingRef.current = true
-                    const ap = getAsteroidPosition(contacts[0]!, now)
-                    setContactExplosion({ x: ap.x, y: ap.y, asteroidId: contacts[0]!.id })
-                    return
-                }
-            }
 
             rafId = requestAnimationFrame(gameLoop)
         }
@@ -185,5 +119,6 @@ export function useAsteroidPhysics({
             if (spawnTimer) clearInterval(spawnTimer)
             if (rafId) cancelAnimationFrame(rafId)
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [matchId, isShooter, difficulty, sendGameState, endGame])
 }
