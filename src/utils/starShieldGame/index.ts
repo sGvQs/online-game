@@ -17,14 +17,8 @@ export { createGameStats } from './gameEnd'
 export { aimToCenterAngle, aimToDirection } from './aim'
 export { createNormalAttackBullets } from './normalAttack'
 export { createSpecialAttackBullets } from './specialAttack'
-export {
-    getDebugNormalAttacks,
-    getAvailableNormalAttacks,
-    getAvailableSpecialAttacks,
-    getAvailableHealLevel,
-    ALL_DESTRUCTION_ID,
-} from './techniqueUnlock'
-export type { SelectableTechnique, SpecialAttackChoice, OwnedSkills } from './techniqueUnlock'
+export * from './techniqueUnlock'
+export * from './physics'
 export { getAsteroidPosition, getBulletPosition } from './position'
 
 import { toRomaji } from 'wanakana'

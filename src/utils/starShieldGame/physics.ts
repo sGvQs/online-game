@@ -1,6 +1,6 @@
 'use client'
 
-import type { Dispatch, MutableRefObject, SetStateAction } from 'react'
+import type { Dispatch, RefObject, SetStateAction } from 'react'
 import { STAR_TARGET_X, STAR_TARGET_Y, STAR_RADIUS } from '@/components/game/phases/starShieldGame/playing/protectedStar'
 import { ASTEROID_RADIUS } from '@/constants/starShieldGame/gameConfig'
 import {
@@ -8,8 +8,8 @@ import {
     applyHpUpdates,
     getContactAsteroids,
     getExpiredBulletIds,
-    getAsteroidPosition,
-} from '@/utils/starShieldGame'
+} from './collision'
+import { getAsteroidPosition } from './position'
 import type { Asteroid, Bullet, NormalAttackLevel } from '@/types/starShieldGame'
 
 type Score = { spawned: number; destroyed: number }
@@ -22,12 +22,12 @@ type ChainHits = {
 interface ProcessPhysicsFrameParams {
     now: number
     // Shared refs
-    asteroidsRef: MutableRefObject<Asteroid[]>
-    bulletsRef: MutableRefObject<Bullet[]>
-    scoreRef: MutableRefObject<Score>
-    starHpRef: MutableRefObject<number>
-    levelRef: MutableRefObject<NormalAttackLevel>
-    contactPendingRef: MutableRefObject<boolean>
+    asteroidsRef: RefObject<Asteroid[]>
+    bulletsRef: RefObject<Bullet[]>
+    scoreRef: RefObject<Score>
+    starHpRef: RefObject<number>
+    levelRef: RefObject<NormalAttackLevel>
+    contactPendingRef: RefObject<boolean>
     // State setters
     setAsteroids: Dispatch<SetStateAction<Asteroid[]>>
     setBullets: Dispatch<SetStateAction<Bullet[]>>

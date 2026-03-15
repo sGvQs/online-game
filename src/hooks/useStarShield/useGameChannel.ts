@@ -1,7 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useMemo, useRef } from 'react'
-import type { Dispatch, MutableRefObject, SetStateAction } from 'react'
+import type { Dispatch, RefObject, SetStateAction } from 'react'
 import { createClient } from '@/utils/supabase/client'
 import type { SpecialAttackLevel } from '@/constants/starShieldGame/gameConfig'
 import type {
@@ -23,10 +23,10 @@ type Score = { spawned: number; destroyed: number }
 interface UseGameChannelParams {
     matchId: string
     isShooter: boolean
-    scoreRef: MutableRefObject<Score>
-    starHpRef: MutableRefObject<number>
-    fireCountRef: MutableRefObject<number>
-    gameEndedRef: MutableRefObject<boolean>
+    scoreRef: RefObject<Score>
+    starHpRef: RefObject<number>
+    fireCountRef: RefObject<number>
+    gameEndedRef: RefObject<boolean>
     setScore: Dispatch<SetStateAction<Score>>
     setStarHp: Dispatch<SetStateAction<number>>
     setTypistFireCount: Dispatch<SetStateAction<number>>

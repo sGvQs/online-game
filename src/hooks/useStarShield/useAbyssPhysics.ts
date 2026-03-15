@@ -1,17 +1,16 @@
 'use client'
 
 import { useEffect } from 'react'
-import type { Dispatch, MutableRefObject, SetStateAction } from 'react'
+import type { Dispatch, RefObject, SetStateAction } from 'react'
 import { STAR_TARGET_X, STAR_TARGET_Y } from '@/components/game/phases/starShieldGame/playing/protectedStar'
 import { SPAWN_INTERVALS_MS, ABYSS_WAVE_DURATION_SECONDS } from '@/constants/starShieldGame/gameConfig'
 import {
     createAsteroid,
     createBossAsteroid,
+    processPhysicsFrame,
 } from '@/utils/starShieldGame'
 import { awardAbyssWavePoints } from '@/server/actions/game/starShieldActions'
 import type { Asteroid, Bullet, GameResult, NormalAttackLevel } from '@/types/starShieldGame'
-
-import { processPhysicsFrame } from './physicsUtils'
 
 type Score = { spawned: number; destroyed: number }
 type ChainHits = {
@@ -24,13 +23,13 @@ interface UseAbyssPhysicsParams {
     matchId: string
     isShooter: boolean
     // Shared refs
-    asteroidsRef: MutableRefObject<Asteroid[]>
-    bulletsRef: MutableRefObject<Bullet[]>
-    scoreRef: MutableRefObject<Score>
-    starHpRef: MutableRefObject<number>
-    levelRef: MutableRefObject<NormalAttackLevel>
-    gameEndedRef: MutableRefObject<boolean>
-    contactPendingRef: MutableRefObject<boolean>
+    asteroidsRef: RefObject<Asteroid[]>
+    bulletsRef: RefObject<Bullet[]>
+    scoreRef: RefObject<Score>
+    starHpRef: RefObject<number>
+    levelRef: RefObject<NormalAttackLevel>
+    gameEndedRef: RefObject<boolean>
+    contactPendingRef: RefObject<boolean>
     // React setters
     setAsteroids: Dispatch<SetStateAction<Asteroid[]>>
     setBullets: Dispatch<SetStateAction<Bullet[]>>

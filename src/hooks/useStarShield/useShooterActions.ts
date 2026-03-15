@@ -1,7 +1,7 @@
 'use client'
 
 import { useRef, useCallback, useMemo } from 'react'
-import type { Dispatch, MutableRefObject, SetStateAction } from 'react'
+import type { Dispatch, RefObject, SetStateAction } from 'react'
 import {
     DINO_X,
     DINO_Y,
@@ -26,14 +26,14 @@ type Score = { spawned: number; destroyed: number }
 
 interface UseShooterActionsParams {
     maxStarHp: number
-    levelRef: MutableRefObject<NormalAttackLevel>
-    asteroidsRef: MutableRefObject<Asteroid[]>
-    bulletsRef: MutableRefObject<Bullet[]>
-    scoreRef: MutableRefObject<Score>
-    starHpRef: MutableRefObject<number>
-    aimRef: MutableRefObject<{ x: number; y: number }>
-    autoAimNearestRef: MutableRefObject<boolean>
-    specialAttackLevelRef: MutableRefObject<SpecialAttackLevel>
+    levelRef: RefObject<NormalAttackLevel>
+    asteroidsRef: RefObject<Asteroid[]>
+    bulletsRef: RefObject<Bullet[]>
+    scoreRef: RefObject<Score>
+    starHpRef: RefObject<number>
+    aimRef: RefObject<{ x: number; y: number }>
+    autoAimNearestRef: RefObject<boolean>
+    specialAttackLevelRef: RefObject<SpecialAttackLevel>
     setAsteroids: Dispatch<SetStateAction<Asteroid[]>>
     setBullets: Dispatch<SetStateAction<Bullet[]>>
     setScore: Dispatch<SetStateAction<Score>>
@@ -45,7 +45,7 @@ interface UseShooterActionsParams {
 /** payload と ref から必殺技レベルを決定（1–10 クランプ込み） */
 function resolveSpecialAttackLevel(
     payload: FirePayload | undefined,
-    fallbackRef: MutableRefObject<SpecialAttackLevel>
+    fallbackRef: RefObject<SpecialAttackLevel>
 ): SpecialAttackLevel {
     const raw = payload?.specialAttackLevel ?? fallbackRef.current
     return Math.max(1, Math.min(10, raw ?? 1)) as SpecialAttackLevel
@@ -54,8 +54,8 @@ function resolveSpecialAttackLevel(
 /** 全破壊共通ロジック（heal lv6 / all_destruction） */
 function destroyNonBossAsteroids(
     ctx: {
-        asteroidsRef: MutableRefObject<Asteroid[]>
-        scoreRef: MutableRefObject<Score>
+        asteroidsRef: RefObject<Asteroid[]>
+        scoreRef: RefObject<Score>
         setAsteroids: Dispatch<SetStateAction<Asteroid[]>>
         setScore: Dispatch<SetStateAction<Score>>
         playVoice: (key: string) => void
