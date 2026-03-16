@@ -61,7 +61,11 @@ export function StarShieldGame({
     const [roleChoices, setRoleChoices] = useState<Record<string, RoleChoice>>({})
     const [autoAimNearest, setAutoAimNearest] = useState(false)
 
-    // 2人揃ったときに未選択のユーザーに初期値（ホスト=Shooter、他=Typist）を補完
+    /**
+     * 【初期役職の割り当て】
+     * 2人揃ったタイミングで、まだ役職が選択されていない場合に
+     * ホスト＝シューター、ゲスト＝タイピスト をデフォルトとして設定します。
+     */
     useEffect(() => {
         if (room.users.length !== 2) return
         const hostId = room.createdBy
@@ -105,7 +109,11 @@ export function StarShieldGame({
     const supabase = useMemo(() => createClient(), [])
     const allUsersReady = room.users.length > 0 && room.users.every((u) => u.isReady)
 
-    // ロビー用 broadcast: 難易度・役職変更の即時反映と全体進行
+    /**
+     * 【ロビー内リアルタイム同期】
+     * タイトル画面および役割選択画面において、難易度の変更、役職の選択、
+     * およびホストによるゲーム開始合図をリアルタイムで全プレイヤーに共有します。
+     */
     useEffect(() => {
         if (phase !== 'TITLE' && phase !== 'ROLE_SELECT') return
 
@@ -171,9 +179,14 @@ export function StarShieldGame({
         return choices[0] === choices[1]
     }, [room.users, roleChoices])
 
-    // 役職が揃ったときに HELL 解放状態を取得（ROLE_SELECT に遷移するたびに再取得し、クリア直後も解放を反映）
     const shooterIdForUnlock = room.users.find((u) => roleChoices[u.userId] === 'SHOOTER')?.userId
     const typistIdForUnlock = room.users.find((u) => roleChoices[u.userId] === 'TYPIST')?.userId
+
+    /**
+     * 【進行状況・難易度解放の取得】
+     * 役割選択画面において、現在選択されているペア（シューター＆タイピスト）に基づき
+     * HELL/ABYSS難易度が解放されているか、およびそれぞれの装備状況を取得します。
+     */
     useEffect(() => {
         if (phase !== 'ROLE_SELECT') return
         if (shooterIdForUnlock && typistIdForUnlock && !roleConflict) {
@@ -209,7 +222,10 @@ export function StarShieldGame({
         await Promise.all([p1, p2])
     }, [phase, shooterIdForUnlock, typistIdForUnlock, roleConflict])
 
-    // 役割選択画面表示時に自分の progress を取得（1人でも表示できるよう常に取得）
+    /**
+     * 【自分自信の進行状況取得】
+     * 役割選択画面において、自分が装備を変更できるよう、自身の最新の進行状況を取得します。
+     */
     useEffect(() => {
         if (phase !== 'ROLE_SELECT') return
         getMyStarShieldProgress().then(setCurrentUserProgress)
@@ -223,7 +239,11 @@ export function StarShieldGame({
         [refreshProgress]
     )
 
-    // HELL/ABYSS が未解放のときに選択されていたら EASY にリセット
+    /**
+     * 【難易度の自動リセット】
+     * 役割選択中に、まだ解放されていない難易度が選択状態になった場合（ペアの変更など）、
+     * 強制的に「EASY」へリセットし、整合性を保ちます。
+     */
     useEffect(() => {
         const needsReset = (!hellUnlocked && difficulty === 'HELL') || (!abyssUnlocked && difficulty === 'ABYSS')
         if (needsReset) {
@@ -259,7 +279,11 @@ export function StarShieldGame({
         [isHost, matchId, phase]
     )
 
-    // DB-Driven: Room.currentMatchId の変化を検知して Phase 等をステートに反映
+    /**
+     * 【データベース主導のフェーズ同期】
+     * Room.currentMatchId（DB上の現在のマッチID）を監視し、フェーズ遷移を制御します。
+     * リロード時や途中参加時でも、DBの状態に合わせて SETUP / PLAYING / RESULT / TITLE に同期します。
+     */
     useEffect(() => {
         if (!room.currentMatchId || playedMatchIdsRef.current.has(room.currentMatchId)) {
             // eslint-disable-next-line react-hooks/set-state-in-effect
