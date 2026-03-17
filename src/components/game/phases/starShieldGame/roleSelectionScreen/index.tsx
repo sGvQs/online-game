@@ -32,8 +32,6 @@ interface RoleSelectionScreenProps {
     isHost: boolean
     isHellUnlocked: boolean
     isAbyssUnlocked: boolean
-    autoAimNearest?: boolean
-    onToggleAutoAim?: () => void
     shooterProgress?: StarShieldProgress | null
     typistProgress?: StarShieldProgress | null
     currentUserProgress?: StarShieldProgress | null
@@ -55,8 +53,6 @@ export function RoleSelectionScreen({
     isHost,
     isHellUnlocked,
     isAbyssUnlocked,
-    autoAimNearest = false,
-    onToggleAutoAim,
     shooterProgress,
     typistProgress,
     currentUserProgress,
@@ -108,8 +104,8 @@ export function RoleSelectionScreen({
                                 const lockTitle = isHellLocked
                                     ? '隕石破壊数200以上のクリアで解放'
                                     : isAbyssLocked
-                                      ? '隕石破壊数500以上のクリアで解放'
-                                      : undefined
+                                        ? '隕石破壊数500以上のクリアで解放'
+                                        : undefined
                                 return (
                                     <button
                                         key={d}
@@ -127,8 +123,8 @@ export function RoleSelectionScreen({
                                             ['--diff-border' as string]: isActive
                                                 ? `1.5px solid ${meta.border}`
                                                 : isSelectableInactive
-                                                  ? '1.5px solid rgba(255,255,255,0.12)'
-                                                  : '1.5px solid rgba(255,255,255,0.07)',
+                                                    ? '1.5px solid rgba(255,255,255,0.12)'
+                                                    : '1.5px solid rgba(255,255,255,0.07)',
                                             ['--diff-glow' as string]: isActive ? meta.glow : 'none',
                                             ['--diff-color' as string]: isActive ? meta.text : isLocked ? COLORS.WHITE_15 : COLORS.WHITE_2,
                                             ['--diff-rate-color' as string]: isActive ? meta.text : COLORS.WHITE_15,
@@ -275,29 +271,6 @@ export function RoleSelectionScreen({
                     </motion.div>
                 </div>
 
-                <motion.div
-                    initial={{ opacity: 0, y: 8 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.5, delay: 0.19 }}
-                    className="rounded-2xl p-5 flex flex-col gap-3 bg-white/[0.03] border border-white/[0.08]"
-                >
-                    <p className={styles.difficultyCardTitle()}>[デバッグチェック]</p>
-                    {onToggleAutoAim && (
-                        <label
-                            htmlFor="auto-aim-debug"
-                            className="flex items-center gap-2 cursor-pointer select-none"
-                        >
-                            <input
-                                id="auto-aim-debug"
-                                type="checkbox"
-                                checked={autoAimNearest}
-                                onChange={onToggleAutoAim}
-                                className="w-3.5 h-3.5 rounded border-white/30 bg-white/5 accent-brand-500"
-                            />
-                            <span className="text-brand-500/60 text-xs">オートエイム</span>
-                        </label>
-                    )}
-                </motion.div>
 
                 <motion.div
                     initial={{ opacity: 0, y: 8 }}
@@ -327,10 +300,10 @@ export function RoleSelectionScreen({
                                         ['--player-name-color' as string]: isMe ? '#ffffff' : COLORS.WHITE_5,
                                         ...(roleMeta
                                             ? {
-                                                  ['--badge-color' as string]: roleMeta.text,
-                                                  ['--badge-bg' as string]: roleMeta.bg,
-                                                  ['--badge-border' as string]: `1px solid ${roleMeta.border}`,
-                                              }
+                                                ['--badge-color' as string]: roleMeta.text,
+                                                ['--badge-bg' as string]: roleMeta.bg,
+                                                ['--badge-border' as string]: `1px solid ${roleMeta.border}`,
+                                            }
                                             : {}),
                                     }}
                                 >

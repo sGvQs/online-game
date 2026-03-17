@@ -59,7 +59,6 @@ export function StarShieldGame({
     const [currentUserProgress, setCurrentUserProgress] = useState<Awaited<ReturnType<typeof getStarShieldProgress>> | null>(null)
 
     const [roleChoices, setRoleChoices] = useState<Record<string, RoleChoice>>({})
-    const [autoAimNearest, setAutoAimNearest] = useState(false)
 
     /**
      * 【初期役職の割り当て】
@@ -454,8 +453,6 @@ export function StarShieldGame({
                         isHost={isHost}
                         isHellUnlocked={hellUnlocked}
                         isAbyssUnlocked={abyssUnlocked}
-                        autoAimNearest={autoAimNearest}
-                        onToggleAutoAim={() => setAutoAimNearest((prev) => !prev)}
                         shooterProgress={shooterProgress}
                         typistProgress={typistProgress}
                         currentUserProgress={currentUserProgress}
@@ -502,7 +499,6 @@ export function StarShieldGame({
                             typistHealLevel={typistHealLevel}
                             starHpLevel={starHpLevel}
                             level={derivedLevel}
-                            autoAimNearest={autoAimNearest}
                         />
                     )
                 })()}

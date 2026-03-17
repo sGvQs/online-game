@@ -59,7 +59,7 @@ export function useStarShield({
     selectedHealLevel = null,
     starHpLevel,
     level = 1,
-    autoAimNearest = false,
+    autoAimNearest = process.env.NODE_ENV === 'development',
 }: UseStarShieldProps) {
     const { play } = useSE()
     const playVoiceRef = useRef(play)
@@ -112,7 +112,7 @@ export function useStarShield({
 
     // Sync props → refs
     useEffect(() => { starHpRef.current = starHp }, [starHp])
-    useEffect(() => { autoAimNearestRef.current = autoAimNearest }, [autoAimNearest])
+    useEffect(() => { autoAimNearestRef.current = process.env.NODE_ENV === 'development' }, [])
     useEffect(() => { levelRef.current = level }, [level])
     useEffect(() => { specialAttackLevelRef.current = selectedSpecialAttackLevel }, [selectedSpecialAttackLevel])
 
