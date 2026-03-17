@@ -68,17 +68,13 @@ function destroyNonBossAsteroids(
 
     ctx.playVoice('star-damage')
     const count = toDestroy.length
-    ctx.setAsteroids((prev) => {
-        const ids = new Set(toDestroy.map((a) => a.id))
-        const next = prev.map((a) => (ids.has(a.id) ? { ...a, destroyedAt: now, hp: 0 } : a))
-        ctx.asteroidsRef.current = next
-        return next
-    })
-    ctx.setScore((prev) => {
-        const next = { ...prev, destroyed: prev.destroyed + count }
-        ctx.scoreRef.current = next
-        return next
-    })
+    const ids = new Set(toDestroy.map((a) => a.id))
+    const nextAsteroids = ctx.asteroidsRef.current.map((a) => (ids.has(a.id) ? { ...a, destroyedAt: now, hp: 0 } : a))
+    ctx.asteroidsRef.current = nextAsteroids
+    ctx.setAsteroids(nextAsteroids)
+    const nextScore = { ...ctx.scoreRef.current, destroyed: ctx.scoreRef.current.destroyed + count }
+    ctx.scoreRef.current = nextScore
+    ctx.setScore(nextScore)
     ctx.sendGameState()
 }
 
@@ -162,11 +158,9 @@ export function useShooterActions({
                     normalAttackLevel: normalLv,
                     now: waveNow,
                 })
-                setBullets((prev) => {
-                    const next = [...prev, ...newBullets]
-                    bulletsRef.current = next
-                    return next
-                })
+                const nextBullets = [...bulletsRef.current, ...newBullets]
+                bulletsRef.current = nextBullets
+                setBullets(nextBullets)
             }
 
             if (waveCount <= 1) {
@@ -199,11 +193,9 @@ export function useShooterActions({
                 targetX: aim.x,
                 targetY: aim.y,
             })
-            setBullets((prev) => {
-                const next = [...prev, ...newBullets]
-                bulletsRef.current = next
-                return next
-            })
+            const nextBullets = [...bulletsRef.current, ...newBullets]
+            bulletsRef.current = nextBullets
+            setBullets(nextBullets)
         },
         [aimRef, levelRef, setBullets, bulletsRef]
     )

@@ -88,25 +88,21 @@ export function processPhysicsFrame({
             }
         }
 
-        setAsteroids((prev) => {
-            const next = applyHpUpdates(prev, result, now, levelRef.current)
-            asteroidsRef.current = next
-            return next
-        })
-        setBullets((prev) => {
-            const next = prev.filter((b) => !result.hitBulletIds.has(b.id))
-            bulletsRef.current = next
-            return next
-        })
+        const nextAsteroids = applyHpUpdates(asteroidsRef.current, result, now, levelRef.current)
+        asteroidsRef.current = nextAsteroids
+        setAsteroids(nextAsteroids)
+
+        const nextBullets = bulletsRef.current.filter((b) => !result.hitBulletIds.has(b.id))
+        bulletsRef.current = nextBullets
+        setBullets(nextBullets)
+
         if (result.chainHits) {
             setChainHits(result.chainHits)
         }
         if (result.destroyedCount > 0) {
-            setScore((prev) => {
-                const next = { ...prev, destroyed: prev.destroyed + result.destroyedCount }
-                scoreRef.current = next
-                return next
-            })
+            const nextScore = { ...scoreRef.current, destroyed: scoreRef.current.destroyed + result.destroyedCount }
+            scoreRef.current = nextScore
+            setScore(nextScore)
             sendGameState()
         }
 
@@ -119,11 +115,9 @@ export function processPhysicsFrame({
     // 期限切れ弾削除
     const expiredIds = getExpiredBulletIds(bts, now)
     if (expiredIds.size > 0) {
-        setBullets((prev) => {
-            const next = prev.filter((b) => !expiredIds.has(b.id))
-            bulletsRef.current = next
-            return next
-        })
+        const nextBullets = bulletsRef.current.filter((b) => !expiredIds.has(b.id))
+        bulletsRef.current = nextBullets
+        setBullets(nextBullets)
     }
 
     // 星への接触判定
@@ -157,14 +151,12 @@ export function processPhysicsFrame({
         setStarHp(newStarHp)
         sendGameState(true)
 
-        setAsteroids((prev) => {
-            const contactIds = new Set(contacts.map((c) => c.id))
-            const next = prev.map((a) =>
-                contactIds.has(a.id) ? { ...a, hasDamagedStar: true, destroyedAt: now } : a
-            )
-            asteroidsRef.current = next
-            return next
-        })
+        const contactIds = new Set(contacts.map((c) => c.id))
+        const nextAsteroids = asteroidsRef.current.map((a) =>
+            contactIds.has(a.id) ? { ...a, hasDamagedStar: true, destroyedAt: now } : a
+        )
+        asteroidsRef.current = nextAsteroids
+        setAsteroids(nextAsteroids)
 
         if (newStarHp <= 0) {
             contactPendingRef.current = true

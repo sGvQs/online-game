@@ -83,6 +83,7 @@ export interface GameStatePayload {
     destroyed: number
     fireCount: number
     starHp: number
+    waveNumber?: number  // ABYSS ウェーブ番号（typist 同期用）
 }
 
 /** game_end broadcast のペイロード */

@@ -26,10 +26,12 @@ interface UseGameChannelParams {
     scoreRef: RefObject<Score>
     starHpRef: RefObject<number>
     fireCountRef: RefObject<number>
+    waveNumberRef: RefObject<number>
     gameEndedRef: RefObject<boolean>
     setScore: Dispatch<SetStateAction<Score>>
     setStarHp: Dispatch<SetStateAction<number>>
     setTypistFireCount: Dispatch<SetStateAction<number>>
+    setWaveNumber: Dispatch<SetStateAction<number>>
     // Callbacks
     playVoice: (key: string) => void
     onReceiveFire: (payload: FirePayload) => void
@@ -50,10 +52,12 @@ export function useGameChannel({
     scoreRef,
     starHpRef,
     fireCountRef,
+    waveNumberRef,
     gameEndedRef,
     setScore,
     setStarHp,
     setTypistFireCount,
+    setWaveNumber,
     playVoice,
     onReceiveFire,
     onGameEnd,
@@ -81,6 +85,7 @@ export function useGameChannel({
                 destroyed: scoreRef.current.destroyed,
                 fireCount: fireCountRef.current,
                 starHp: starHpRef.current,
+                ...(waveNumberRef.current > 1 && { waveNumber: waveNumberRef.current }),
             } satisfies GameStatePayload,
         })
     }, [isShooter, scoreRef, fireCountRef, starHpRef])
@@ -129,6 +134,7 @@ export function useGameChannel({
                 setStarHp(payload.starHp)
                 fireCountRef.current = payload.fireCount
                 setTypistFireCount(payload.fireCount)
+                if (payload.waveNumber != null) setWaveNumber(payload.waveNumber)
             })
             .on('broadcast', { event: 'game_end' }, (message: unknown) => {
                 const payload = extractBroadcastPayload<GameEndPayload>(message)

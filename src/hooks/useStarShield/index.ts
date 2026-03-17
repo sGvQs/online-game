@@ -106,12 +106,15 @@ export function useStarShield({
     const autoAimNearestRef = useRef(autoAimNearest)
     const levelRef = useRef(level)
     const specialAttackLevelRef = useRef(selectedSpecialAttackLevel)
+    const waveNumberRef = useRef(1)
     const gameEndedRef = useRef(false)
     const contactPendingRef = useRef(false)
     const effectiveStartedAtRef = useRef<number | null>(null)
+    const endGameRef = useRef<(result: GameResult) => void>(() => {})
 
     // Sync props → refs
     useEffect(() => { starHpRef.current = starHp }, [starHp])
+    useEffect(() => { waveNumberRef.current = waveNumber }, [waveNumber])
     useEffect(() => { autoAimNearestRef.current = process.env.NODE_ENV === 'development' }, [])
     useEffect(() => { levelRef.current = level }, [level])
     useEffect(() => { specialAttackLevelRef.current = selectedSpecialAttackLevel }, [selectedSpecialAttackLevel])
@@ -148,10 +151,12 @@ export function useStarShield({
         scoreRef,
         starHpRef,
         fireCountRef,
+        waveNumberRef,
         gameEndedRef,
         setScore,
         setStarHp,
         setTypistFireCount,
+        setWaveNumber,
         playVoice,
         onReceiveFire,
         onGameEnd,
@@ -161,7 +166,7 @@ export function useStarShield({
     // ゲーム終了処理
     // ============================================
 
-    const endGame = useCallback(async (result: GameResult) => {
+    const endGame = useCallback((result: GameResult) => {
         if (gameEndedRef.current) return
         gameEndedRef.current = true
 
@@ -173,27 +178,35 @@ export function useStarShield({
             fireCount: fireCountRef.current,
         })
 
-        let actualDifficulty: Difficulty | undefined
-        if (isShooter) {
-            try {
-                const saved = await saveStarShieldResult(matchId, {
-                    spawnedCount: stats.spawnedCount,
-                    destroyedCount: stats.destroyedCount,
-                    fireCount: stats.fireCount,
-                    isCleared: result === 'CLEARED',
-                    failureReason: result !== 'CLEARED' ? result : undefined,
-                    durationSeconds: stats.durationSeconds,
-                    difficulty,
-                })
-                actualDifficulty = saved.difficulty
-            } catch (e) {
-                console.error('結果保存失敗:', e)
-            }
-            sendGameEnd(result, stats, actualDifficulty)
-        }
+        // 結果画面に即座に遷移（DB保存を待たない）
+        onGameEnd(result, stats, difficulty)
 
-        onGameEnd(result, stats, actualDifficulty)
-    }, [isShooter, matchId, startedAt, onGameEnd, difficulty, sendGameEnd])
+        // Shooter のみ: バックグラウンドで保存 + Typist に通知
+        if (isShooter) {
+            void (async () => {
+                let actualDifficulty: Difficulty = difficulty
+                try {
+                    const saved = await saveStarShieldResult(matchId, {
+                        spawnedCount: stats.spawnedCount,
+                        destroyedCount: stats.destroyedCount,
+                        fireCount: stats.fireCount,
+                        isCleared: result === 'CLEARED',
+                        failureReason: result !== 'CLEARED' ? result : undefined,
+                        durationSeconds: stats.durationSeconds,
+                        difficulty,
+                    })
+                    actualDifficulty = saved.difficulty
+                } catch (e) {
+                    console.error('結果保存失敗:', e)
+                }
+                sendGameEnd(result, stats, actualDifficulty)
+            })()
+        }
+    }, [isShooter, matchId, startedAt, difficulty, onGameEnd, sendGameEnd])
+
+    // 常に最新の endGame を指すが参照自体は安定
+    endGameRef.current = endGame
+    const stableEndGame = useCallback((result: GameResult) => endGameRef.current(result), [])
 
     // ============================================
     // 隕石スポーン + 衝突 ゲームループ
@@ -218,7 +231,7 @@ export function useStarShield({
         setChainHits,
         playVoice,
         sendGameState,
-        endGame,
+        endGame: stableEndGame,
     })
 
     useAbyssPhysics({
@@ -239,7 +252,7 @@ export function useStarShield({
         setChainHits,
         playVoice,
         sendGameState,
-        endGame,
+        endGame: stableEndGame,
         waveNumber,
         setWaveNumber,
     })

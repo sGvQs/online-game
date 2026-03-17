@@ -1,5 +1,5 @@
 import Image from 'next/image'
-import { cn } from '@/lib/utils'
+import { sectionDividerStyles } from './styles'
 
 export function SectionDivider({
     icon,
@@ -12,19 +12,13 @@ export function SectionDivider({
     color: 'indigo' | 'emerald'
     desc: string
 }) {
+    const s = sectionDividerStyles({ color })
     return (
-        <div className="flex items-center gap-2 mt-2">
-            <Image src={icon} alt={label} width={18} height={18} className="opacity-80 shrink-0" />
-            <span
-                className={cn(
-                    'font-bold font-cherry-bomb-one text-sm shrink-0',
-                    color === 'indigo' ? 'text-indigo-400' : 'text-emerald-400'
-                )}
-            >
-                {label}
-            </span>
-            <span className="text-white/30 text-xs font-dot-gothic-16 shrink-0">{desc}</span>
-            <div className="flex-1 h-px bg-white/8 ml-1" />
+        <div className={s.root()}>
+            <Image src={icon} alt={label} width={18} height={18} className={s.icon()} />
+            <span className={s.label()}>{label}</span>
+            <span className={s.desc()}>{desc}</span>
+            <div className={s.divider()} />
         </div>
     )
 }

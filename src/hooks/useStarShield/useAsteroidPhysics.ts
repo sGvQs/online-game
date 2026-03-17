@@ -41,7 +41,7 @@ interface UseAsteroidPhysicsParams {
     // Callbacks
     playVoice: (key: string) => void
     sendGameState: (immediate?: boolean) => void
-    endGame: (result: GameResult) => Promise<void>
+    endGame: (result: GameResult) => void
 }
 
 export function useAsteroidPhysics({
@@ -79,16 +79,12 @@ export function useAsteroidPhysics({
                 starTargetX: STAR_TARGET_X,
                 starTargetY: STAR_TARGET_Y,
             })
-            setAsteroids((prev) => {
-                const next = [...prev, asteroid]
-                asteroidsRef.current = next
-                return next
-            })
-            setScore((prev) => {
-                const next = { ...prev, spawned: prev.spawned + 1 }
-                scoreRef.current = next
-                return next
-            })
+            const nextAsteroids = [...asteroidsRef.current, asteroid]
+            asteroidsRef.current = nextAsteroids
+            setAsteroids(nextAsteroids)
+            const nextScore = { ...scoreRef.current, spawned: scoreRef.current.spawned + 1 }
+            scoreRef.current = nextScore
+            setScore(nextScore)
             sendGameState()
         }, spawnInterval)
 
@@ -122,5 +118,5 @@ export function useAsteroidPhysics({
             if (rafId) cancelAnimationFrame(rafId)
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [matchId, isShooter, difficulty, sendGameState, endGame])
+    }, [matchId, isShooter, difficulty, sendGameState])
 }

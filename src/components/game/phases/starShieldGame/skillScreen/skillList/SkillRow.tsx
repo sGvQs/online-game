@@ -1,5 +1,7 @@
 import { type CSSProperties } from 'react'
-import { cn } from '@/lib/utils'
+import { skillRowStyles } from './styles'
+
+const s = skillRowStyles()
 
 export function SkillRow({
     label,
@@ -17,28 +19,23 @@ export function SkillRow({
     progressBarColor: string
 }) {
     return (
-        <button
-            onClick={onClick}
-            className="w-full text-left flex items-center justify-between gap-3 py-2.5 border-b border-white/4 last:border-0 hover:bg-white/4 -mx-2 px-2 rounded-xl transition-colors cursor-pointer group"
-        >
-            <div className="flex items-center gap-2 min-w-0 flex-1">
-                <div className="flex flex-col min-w-0 flex-1">
-                    <span className="text-white/85 text-sm">{label}</span>
-                    {detail && (
-                        <span className="text-white/30 text-[10px] font-dot-gothic-16">{detail}</span>
-                    )}
+        <button onClick={onClick} className={s.root()}>
+            <div className={s.labelCol()}>
+                <div className={s.labelInner()}>
+                    <span className={s.labelText()}>{label}</span>
+                    {detail && <span className={s.detailText()}>{detail}</span>}
                     {currentLevel !== undefined && maxLevel !== undefined && (
-                        <div className="w-full mt-1.5 relative flex items-center gap-3">
-                            <div className="flex-1 h-1.5 rounded-full bg-white/10 overflow-hidden">
+                        <div className={s.levelBarWrapper()}>
+                            <div className={s.levelBarTrack()}>
                                 <div
-                                    className="h-full rounded-full transition-all duration-700 w-(--progress) bg-(--bar-color)"
+                                    className={s.levelBarFill()}
                                     style={{
                                         '--progress': `${(currentLevel / maxLevel) * 100}%`,
                                         '--bar-color': progressBarColor,
                                     } as CSSProperties}
                                 />
                             </div>
-                            <span className="text-[10px] tracking-wider text-white/40 font-dot-gothic-16 shrink-0 w-8 text-right">
+                            <span className={s.levelText()}>
                                 {currentLevel}/{maxLevel}
                             </span>
                         </div>
@@ -46,17 +43,11 @@ export function SkillRow({
                 </div>
             </div>
             {currentLevel === 0 ? (
-                <span className="text-[10px] text-white/40 shrink-0 font-dot-gothic-16 border border-white/20 bg-white/5 px-2 py-0.5 rounded tracking-widest">
-                    未入手
-                </span>
+                <span className={s.badgeNotOwned()}>未入手</span>
             ) : currentLevel === maxLevel ? (
-                <span className="text-[10px] text-amber-300 shrink-0 font-dot-gothic-16 border border-amber-500/30 bg-amber-500/10 px-2 py-0.5 rounded tracking-widest">
-                    MAX
-                </span>
+                <span className={s.badgeMaxed()}>MAX</span>
             ) : (
-                <span className="text-[10px] text-white/70 shrink-0 font-dot-gothic-16 border border-white/10 bg-white/5 px-2 py-0.5 rounded tracking-widest">
-                    Lv {currentLevel}
-                </span>
+                <span className={s.badgeLevel()}>Lv {currentLevel}</span>
             )}
         </button>
     )

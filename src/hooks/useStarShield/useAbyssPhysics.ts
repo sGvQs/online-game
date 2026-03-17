@@ -40,7 +40,7 @@ interface UseAbyssPhysicsParams {
     // Callbacks
     playVoice: (key: string) => void
     sendGameState: (immediate?: boolean) => void
-    endGame: (result: GameResult) => Promise<void>
+    endGame: (result: GameResult) => void
     // ABYSS ウェーブ管理
     waveNumber: number
     setWaveNumber: Dispatch<SetStateAction<number>>
@@ -73,14 +73,10 @@ export function useAbyssPhysics({
 
         // 新ウェーブ開始時: 前ウェーブの残骸と弾をクリア
         contactPendingRef.current = false
-        setAsteroids(() => {
-            asteroidsRef.current = []
-            return []
-        })
-        setBullets(() => {
-            bulletsRef.current = []
-            return []
-        })
+        asteroidsRef.current = []
+        setAsteroids([])
+        bulletsRef.current = []
+        setBullets([])
 
         const spawnInterval = SPAWN_INTERVALS_MS['ABYSS']
         const waveStartTime = Date.now()
@@ -99,16 +95,12 @@ export function useAbyssPhysics({
                 starTargetX: STAR_TARGET_X,
                 starTargetY: STAR_TARGET_Y,
             })
-            setAsteroids((prev) => {
-                const next = [...prev, asteroid]
-                asteroidsRef.current = next
-                return next
-            })
-            setScore((prev) => {
-                const next = { ...prev, spawned: prev.spawned + 1 }
-                scoreRef.current = next
-                return next
-            })
+            const nextAsteroids = [...asteroidsRef.current, asteroid]
+            asteroidsRef.current = nextAsteroids
+            setAsteroids(nextAsteroids)
+            const nextScore = { ...scoreRef.current, spawned: scoreRef.current.spawned + 1 }
+            scoreRef.current = nextScore
+            setScore(nextScore)
             sendGameState()
         }, spawnInterval)
 
@@ -127,16 +119,11 @@ export function useAbyssPhysics({
                 starTargetX: STAR_TARGET_X,
                 starTargetY: STAR_TARGET_Y,
             })
-            setAsteroids(() => {
-                const next = [boss]
-                asteroidsRef.current = next
-                return next
-            })
-            setScore((prev) => {
-                const next = { ...prev, spawned: prev.spawned + 1 }
-                scoreRef.current = next
-                return next
-            })
+            asteroidsRef.current = [boss]
+            setAsteroids([boss])
+            const nextScore = { ...scoreRef.current, spawned: scoreRef.current.spawned + 1 }
+            scoreRef.current = nextScore
+            setScore(nextScore)
             sendGameState()
         }, ABYSS_WAVE_DURATION_SECONDS * 1000)
 
@@ -181,5 +168,5 @@ export function useAbyssPhysics({
             if (rafId) cancelAnimationFrame(rafId)
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [matchId, isShooter, waveNumber, sendGameState, endGame])
+    }, [matchId, isShooter, waveNumber, sendGameState])
 }
