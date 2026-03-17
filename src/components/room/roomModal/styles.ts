@@ -25,7 +25,7 @@ export const roomModal = tv({
       'overflow-hidden',
     ],
     header: [
-      'bg-gradient-to-br from-[var(--brand-300)] to-[var(--brand-400)]',
+      'bg-linear-to-br from-[var(--brand-300)] to-[var(--brand-400)]',
       'text-white',
       'px-6 py-4',
       'flex justify-between items-center',

@@ -3,10 +3,10 @@
 import { Users } from 'lucide-react'
 import { RoomUserWithUser, UserRanking } from '@/types'
 import { MemberItem } from '../memberItem'
-import { memberListCard } from '../memberItem/styles'
+import { memberList } from './styles'
 import { Typography } from '@/components/ui/typography'
 
-const styles = memberListCard()
+const styles = memberList()
 
 interface MemberListViewProps {
     members: RoomUserWithUser[]

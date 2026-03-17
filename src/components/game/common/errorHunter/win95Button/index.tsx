@@ -25,6 +25,7 @@ const Win95Button = forwardRef<HTMLButtonElement, Win95ButtonProps>(
                     focused && WIN95_FOCUSED,
                     className,
                 )}
+                // onMouseLeave はホバー効果ではなく「ボタン押下中にマウスが離れた際のプレス状態キャンセル」用
                 onMouseDown={(e) => { setIsPressed(true); onMouseDown?.(e) }}
                 onMouseUp={(e) => { setIsPressed(false); onMouseUp?.(e) }}
                 onMouseLeave={(e) => { setIsPressed(false); onMouseLeave?.(e) }}

@@ -1,6 +1,6 @@
 'use client'
 
-import { ReactNode, useState } from 'react'
+import { ReactNode } from 'react'
 import { tooltip } from './tooltip.styles'
 
 interface TooltipProps {
@@ -10,24 +10,17 @@ interface TooltipProps {
 }
 
 export function Tooltip({ children, content, position = 'top' }: TooltipProps) {
-    const [isVisible, setIsVisible] = useState(false)
     const styles = tooltip({ position })
 
     return (
-        <div
-            className={styles.trigger()}
-            onMouseEnter={() => setIsVisible(true)}
-            onMouseLeave={() => setIsVisible(false)}
-        >
+        <div className={styles.trigger()}>
             {children}
-            {isVisible && (
-                <div className={styles.popover()}>
-                    <div className={styles.content()}>
-                        {content}
-                        <div className={styles.arrow()} />
-                    </div>
+            <div className={styles.popover()}>
+                <div className={styles.content()}>
+                    {content}
+                    <div className={styles.arrow()} />
                 </div>
-            )}
+            </div>
         </div>
     )
 }

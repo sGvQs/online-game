@@ -6,7 +6,7 @@ import { IconButton } from '@/components/ui/iconButton'
 import { Input } from '@/components/ui/input'
 import { useState } from 'react'
 import { Plus, X, Check } from 'lucide-react'
-import { createRoomForm } from './CreateRoomForm.styles'
+import { createRoomForm } from './createRoomForm.styles'
 
 const styles = createRoomForm()
 

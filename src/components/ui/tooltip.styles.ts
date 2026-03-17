@@ -2,8 +2,8 @@ import { tv } from 'tailwind-variants'
 
 export const tooltip = tv({
     slots: {
-        trigger: 'relative inline-flex',
-        popover: 'absolute z-50 pointer-events-none',
+        trigger: 'relative inline-flex group',
+        popover: 'absolute z-50 pointer-events-none invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-opacity duration-150',
         content: 'relative px-2.5 py-1.5 text-xs font-medium text-brand-900 bg-brand-100/90 backdrop-blur-md rounded-lg shadow-lg border border-brand-200/50 whitespace-nowrap',
         arrow: 'absolute w-0 h-0 border-4',
     },

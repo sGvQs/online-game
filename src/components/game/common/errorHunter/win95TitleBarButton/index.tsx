@@ -19,6 +19,7 @@ const Win95TitleBarButton = forwardRef<HTMLButtonElement, Win95TitleBarButtonPro
           isActive && 'border-t-[#808080] border-l-[#808080] border-r-white border-b-white bg-[#a0a0a0]',
           className
         )}
+        // onMouseLeave はホバー効果ではなく「ボタン押下中にマウスが離れた際のアクティブ状態キャンセル」用
         onMouseDown={() => setIsActive(true)}
         onMouseUp={() => setIsActive(false)}
         onMouseLeave={() => setIsActive(false)}

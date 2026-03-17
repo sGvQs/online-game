@@ -58,6 +58,7 @@ export function LevelProgressionBarChart({
                                 fill={barFill}
                                 stroke={barStroke}
                                 strokeWidth={1.5}
+                                // SVG <rect> は Tailwind hover: 不可。棒グラフの動的 tooltip 描画のため JS state を使用
                                 onMouseEnter={() => setHoveredLevel(level)}
                                 onMouseLeave={() => setHoveredLevel(null)}
                                 className="cursor-pointer"

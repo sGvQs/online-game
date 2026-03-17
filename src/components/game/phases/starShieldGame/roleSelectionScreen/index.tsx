@@ -115,7 +115,7 @@ export function RoleSelectionScreen({
                                         className={cn(
                                             styles.difficultyButton(),
                                             canSelect ? 'cursor-pointer hover:scale-[1.02] hover:brightness-110' : 'cursor-default',
-                                            isSelectableInactive && 'hover:bg-white/[0.05] hover:border-white/25',
+                                            isSelectableInactive && 'hover:bg-white/5 hover:border-white/25',
                                             isLocked && 'opacity-50',
                                         )}
                                         style={{
@@ -183,8 +183,8 @@ export function RoleSelectionScreen({
                                     <p className={styles.roleDescription()}>{meta.description}</p>
                                     <p className={styles.roleDetail()}>{meta.detail}</p>
                                     {isSelected && r === 'SHOOTER' && displayShooterProgress && (
-                                        <div className="mt-3 pt-3 border-t border-white/[0.06] min-h-[5.5rem]" onClick={(e) => e.stopPropagation()}>
-                                            <p className="text-[10px] mb-1.5 [font-family:var(--font-dot-gothic-16)] opacity-70">選択している色</p>
+                                        <div className="mt-3 pt-3 border-t border-white/6 min-h-[5.5rem]" onClick={(e) => e.stopPropagation()}>
+                                            <p className="text-[10px] mb-1.5 font-dot-gothic-16 opacity-70">選択している色</p>
                                             <div className="flex flex-wrap gap-1.5">
                                                 {availableNormal.map(({ techniqueId, level }) => {
                                                     const tech = TECHNIQUES[techniqueId]
@@ -200,7 +200,7 @@ export function RoleSelectionScreen({
                                                                 'flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] border-2 transition-all',
                                                                 canChange && 'cursor-pointer hover:brightness-110',
                                                                 !canChange && 'cursor-default opacity-70',
-                                                                isActive ? 'bg-white/15 shadow-[0_0_10px_rgba(255,255,255,0.2)]' : 'border-white/15 bg-white/[0.03]'
+                                                                isActive ? 'bg-white/15 shadow-[0_0_10px_rgba(255,255,255,0.2)]' : 'border-white/15 bg-white/3'
                                                             )}
                                                             style={isActive ? { borderColor: tech.color, boxShadow: `0 0 12px ${tech.color}80` } : undefined}
                                                         >
@@ -213,25 +213,25 @@ export function RoleSelectionScreen({
                                         </div>
                                     )}
                                     {isSelected && r === 'TYPIST' && displayTypistProgress && (
-                                        <div className="mt-3 pt-3 border-t border-white/[0.06] min-h-[5.5rem]">
+                                        <div className="mt-3 pt-3 border-t border-white/6 min-h-[5.5rem]">
                                             <div className="flex flex-col gap-1.5">
                                                 <div className="flex items-center gap-2">
-                                                    <span className="text-[10px] [font-family:var(--font-dot-gothic-16)] opacity-80">
+                                                    <span className="text-[10px] font-dot-gothic-16 opacity-80">
                                                         HP {LEVEL_STAR_HP[(displayTypistProgress.starHpLevel ?? 1) as 1 | 2 | 3 | 4 | 5]}
                                                     </span>
                                                     <div className="flex-1 min-w-0 h-1.5 rounded-full bg-white/5 overflow-hidden">
                                                         <div
-                                                            className="h-full rounded-full bg-gradient-to-r from-emerald-700 to-emerald-400 transition-all duration-300"
+                                                            className="h-full rounded-full bg-linear-to-r from-emerald-700 to-emerald-400 transition-all duration-300"
                                                             style={{ width: `${((displayTypistProgress.starHpLevel ?? 1) / 5) * 100}%` }}
                                                         />
                                                     </div>
-                                                    <span className="text-[9px] [font-family:var(--font-dot-gothic-16)] opacity-50 shrink-0">
+                                                    <span className="text-[9px] font-dot-gothic-16 opacity-50 shrink-0">
                                                         Lv{(displayTypistProgress.starHpLevel ?? 1)}/5
                                                     </span>
                                                 </div>
                                                 <div className="flex flex-col gap-1">
                                                     <div className="flex items-center gap-2">
-                                                        <span className="text-[10px] [font-family:var(--font-dot-gothic-16)] opacity-80 shrink-0">
+                                                        <span className="text-[10px] font-dot-gothic-16 opacity-80 shrink-0">
                                                             {displayTypistProgress.healLevel != null ? (
                                                                 displayTypistProgress.healLevel >= 5 ? (
                                                                     '回復: 全回復'
@@ -249,13 +249,13 @@ export function RoleSelectionScreen({
                                                                         className={cn(
                                                                             'h-full rounded-full transition-all duration-300',
                                                                             displayTypistProgress.healLevel === 6
-                                                                                ? 'bg-gradient-to-r from-amber-600 to-yellow-400'
-                                                                                : 'bg-gradient-to-r from-emerald-700 to-emerald-400'
+                                                                                ? 'bg-linear-to-r from-amber-600 to-yellow-400'
+                                                                                : 'bg-linear-to-r from-emerald-700 to-emerald-400'
                                                                         )}
                                                                         style={{ width: `${(displayTypistProgress.healLevel / 6) * 100}%` }}
                                                                     />
                                                                 </div>
-                                                                <span className="text-[9px] [font-family:var(--font-dot-gothic-16)] opacity-50 shrink-0">
+                                                                <span className="text-[9px] font-dot-gothic-16 opacity-50 shrink-0">
                                                                     Lv{displayTypistProgress.healLevel === 6 ? 'max' : displayTypistProgress.healLevel}/6
                                                                 </span>
                                                             </>

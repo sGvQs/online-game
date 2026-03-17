@@ -4,7 +4,7 @@ import { useState, useTransition } from 'react'
 import { setUserComment } from '@/server/actions/user/setUserComment'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
-import { userCommentForm } from './UserCommentForm.styles'
+import { userCommentForm } from './userCommentForm.styles'
 import { Typography } from '@/components/ui/typography'
 
 const styles = userCommentForm()
