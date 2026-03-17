@@ -171,7 +171,7 @@ export function LoadoutAnimPreview({ techniqueId, level }: { techniqueId: Techni
     void LEVEL_YELLOW_DAMAGE
 
     return (
-        <div className="relative mt-2 h-[88px] rounded-xl overflow-hidden border border-white/[0.07] bg-black/35">
+        <div className="relative mt-2 h-[88px] rounded-xl overflow-hidden border border-white/7 bg-black/35">
             <div className="absolute top-1/2 left-[38px] right-0 border-t border-dashed border-white/5 -translate-y-px" />
             <div className="absolute left-1.5 top-1/2 -translate-y-1/2 z-10 opacity-90 ptr-events-none">
                 <Image src={ICONS.DINO} alt="Dino" width={24} height={24} />
