@@ -436,6 +436,28 @@ export async function isAbyssUnlocked(shooterId: string, typistId: string): Prom
 }
 
 /**
+ * HELL・ABYSS の解放状態を1クエリで取得する
+ */
+export async function getUnlockStatus(
+    shooterId: string,
+    typistId: string
+): Promise<{ hellUnlocked: boolean; abyssUnlocked: boolean }> {
+    const rows = await prisma.$queryRaw<{ max_destroyed: number }[]>`
+        SELECT COALESCE(MAX(destroyed_count), 0) AS max_destroyed
+        FROM star_shield_clear_records
+        WHERE (
+            (shooter_id = ${shooterId} AND typist_id = ${typistId})
+            OR (shooter_id = ${typistId} AND typist_id = ${shooterId})
+        )
+    `
+    const max = rows[0]?.max_destroyed ?? 0
+    return {
+        hellUnlocked: max >= HELL_UNLOCK_THRESHOLD,
+        abyssUnlocked: max >= ABYSS_UNLOCK_THRESHOLD,
+    }
+}
+
+/**
  * ABYSS ボス撃破時にポイントを付与する（シューター側がウェーブ完了時に呼ぶ）
  */
 export async function awardAbyssWavePoints(matchId: string): Promise<void> {

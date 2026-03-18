@@ -5,13 +5,12 @@ import { createClient } from '@/utils/supabase/client'
 import { useGameRoom } from '@/hooks/useGameRoom'
 import { useLobbyChannel } from '@/hooks/useStarShield/useLobbyChannel'
 import { useMatchSync } from '@/hooks/useStarShield/useMatchSync'
-import { returnToRoom, resetAllReady } from '@/server/actions/room'
+import { returnToRoom, resetAllReady, clearCurrentMatch } from '@/server/actions/room'
 import {
     createStarShieldSetupMatch,
     updateStarShieldSetupMatch,
     startStarShieldMatch,
-    isHellUnlocked,
-    isAbyssUnlocked,
+    getUnlockStatus,
     getStarShieldProgress,
     getMyStarShieldProgress,
     updateLoadout,
@@ -95,30 +94,6 @@ export function StarShieldGame({
     }, [room.users, room.createdBy])
 
     // ============================================
-    // セッションストレージ（プレイ済みマッチ管理）
-    // ============================================
-
-    const STORAGE_KEY = `star-shield-played-${roomId}`
-    const initialPlayedMatchIds = useMemo(() => {
-        if (typeof window === 'undefined') return new Set<string>()
-        try {
-            const raw = sessionStorage.getItem(STORAGE_KEY)
-            return raw ? new Set<string>(JSON.parse(raw)) : new Set<string>()
-        } catch {
-            return new Set<string>()
-        }
-    }, [STORAGE_KEY])
-    const playedMatchIdsRef = useRef<Set<string>>(initialPlayedMatchIds)
-    const addPlayedMatchId = useCallback((id: string) => {
-        playedMatchIdsRef.current.add(id)
-        try {
-            sessionStorage.setItem(STORAGE_KEY, JSON.stringify([...playedMatchIdsRef.current]))
-        } catch {
-            /* ignore */
-        }
-    }, [STORAGE_KEY])
-
-    // ============================================
     // Supabase クライアント
     // ============================================
 
@@ -147,8 +122,6 @@ export function StarShieldGame({
     useMatchSync({
         currentMatchId: room.currentMatchId,
         phase,
-        playedMatchIdsRef,
-        addPlayedMatchId,
         setPhase,
         setMatchId,
         setDifficulty,
@@ -204,14 +177,22 @@ export function StarShieldGame({
         const { signal } = controller
 
         if (shooterIdForUnlock && typistIdForUnlock && !roleConflict) {
-            isHellUnlocked(shooterIdForUnlock, typistIdForUnlock).then((v) => { if (!signal.aborted) setHellUnlocked(v) })
-            isAbyssUnlocked(shooterIdForUnlock, typistIdForUnlock).then((v) => { if (!signal.aborted) setAbyssUnlocked(v) })
+            getUnlockStatus(shooterIdForUnlock, typistIdForUnlock).then(({ hellUnlocked, abyssUnlocked }) => {
+                if (!signal.aborted) {
+                    setHellUnlocked(hellUnlocked)
+                    setAbyssUnlocked(abyssUnlocked)
+                }
+            })
             getStarShieldProgress(shooterIdForUnlock).then((v) => { if (!signal.aborted) setShooterProgress(v) })
             getStarShieldProgress(typistIdForUnlock).then((v) => { if (!signal.aborted) setTypistProgress(v) })
         } else if (roleConflict && room.users.length >= 2) {
             const [u0, u1] = room.users
-            isHellUnlocked(u0.userId, u1.userId).then((v) => { if (!signal.aborted) setHellUnlocked(v) })
-            isAbyssUnlocked(u0.userId, u1.userId).then((v) => { if (!signal.aborted) setAbyssUnlocked(v) })
+            getUnlockStatus(u0.userId, u1.userId).then(({ hellUnlocked, abyssUnlocked }) => {
+                if (!signal.aborted) {
+                    setHellUnlocked(hellUnlocked)
+                    setAbyssUnlocked(abyssUnlocked)
+                }
+            })
             setShooterProgress(null)
             setTypistProgress(null)
         } else {
@@ -319,9 +300,13 @@ export function StarShieldGame({
     }, [roleConflict, matchId, isHost, room.users, roleChoices, lobbyChannelRef])
 
     const handleBackToLobby = useCallback(async () => {
-        if (isHost && matchId) addPlayedMatchId(matchId)
         setPhase('TITLE')
-    }, [isHost, matchId, addPlayedMatchId])
+        try {
+            await clearCurrentMatch(roomId)
+        } catch (e) {
+            console.error('ロビー戻り失敗:', e)
+        }
+    }, [roomId])
 
     const handleGameEnd = useCallback((result: GameResult, stats: GameStats, actualDifficulty?: Difficulty) => {
         setGameResult(result)
@@ -331,7 +316,6 @@ export function StarShieldGame({
     }, [])
 
     const handleBackToTitle = useCallback(async () => {
-        if (matchId) addPlayedMatchId(matchId)
         setMatchId(null)
         setStartedAt(null)
         setShooterId(null)
@@ -340,11 +324,14 @@ export function StarShieldGame({
         setGameResultDifficulty(null)
         setPhase('TITLE')
         try {
-            await resetAllReady(roomId)
+            await Promise.all([
+                resetAllReady(roomId),
+                clearCurrentMatch(roomId),
+            ])
         } catch (e) {
-            console.error('READYリセット失敗:', e)
+            console.error('タイトル戻り失敗:', e)
         }
-    }, [matchId, roomId, addPlayedMatchId])
+    }, [roomId])
 
     const handleExit = useCallback(async () => {
         await returnToRoom(roomId)

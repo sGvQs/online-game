@@ -39,8 +39,7 @@ export {
     saveStarShieldResult,
     getStarShieldMatchInfo,
     getStarShieldMatchStatus,
-    isHellUnlocked,
-    isAbyssUnlocked,
+    getUnlockStatus,
     awardAbyssWavePoints,
 } from './starShieldActions'
 export {

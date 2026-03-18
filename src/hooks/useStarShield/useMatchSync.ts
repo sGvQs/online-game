@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
-import type { Dispatch, RefObject, SetStateAction } from 'react'
+import type { Dispatch, SetStateAction } from 'react'
 import {
     getStarShieldMatchStatus,
     getStarShieldProgress,
@@ -14,8 +14,6 @@ interface UseMatchSyncParams {
     currentMatchId: string | null
     /** phase の現在値（ref で参照して deps に含めない） */
     phase: GamePhase
-    playedMatchIdsRef: RefObject<Set<string>>
-    addPlayedMatchId: (id: string) => void
     // setters
     setPhase: Dispatch<SetStateAction<GamePhase>>
     setMatchId: Dispatch<SetStateAction<string | null>>
@@ -33,8 +31,6 @@ interface UseMatchSyncParams {
 export function useMatchSync({
     currentMatchId,
     phase,
-    playedMatchIdsRef,
-    addPlayedMatchId,
     setPhase,
     setMatchId,
     setDifficulty,
@@ -56,7 +52,7 @@ export function useMatchSync({
     const progressFetchedForRef = useRef<string | null>(null)
 
     useEffect(() => {
-        if (!currentMatchId || playedMatchIdsRef.current.has(currentMatchId)) {
+        if (!currentMatchId) {
             if (phaseRef.current !== 'TITLE') setPhase('TITLE')
             return
         }
@@ -118,7 +114,6 @@ export function useMatchSync({
                 if (phaseRef.current !== 'PLAYING') setPhase('PLAYING')
 
             } else if (status.status === 'finished') {
-                addPlayedMatchId(newMatchId)
                 setGameResult(status.result)
                 setGameStats({ ...status.stats, fireCount: 0 })
                 setGameResultDifficulty(status.difficulty)
@@ -133,5 +128,5 @@ export function useMatchSync({
     //   - phase は phaseRef.current で参照
     //   - progress は progressFetchedForRef で重複フェッチを防止
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [currentMatchId, addPlayedMatchId])
+    }, [currentMatchId])
 }

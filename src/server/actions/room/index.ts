@@ -21,7 +21,7 @@ export {
 export { joinRoom, leaveRoom, kickUserFromRoom } from './joinLeaveRoom'
 
 // ゲーム関連
-export { selectGame, returnToRoom } from './gameActions'
+export { selectGame, returnToRoom, clearCurrentMatch } from './gameActions'
 
 // 準備完了関連
 export { toggleReady, getRoomWithReadyStatus, resetAllReady } from './readyActions'

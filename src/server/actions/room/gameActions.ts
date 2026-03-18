@@ -31,6 +31,18 @@ export async function selectGame(roomId: string, gameType: string) {
 }
 
 /**
+ * タイトルに戻るときに currentMatchId を null にリセットする
+ * これにより useMatchSync が TITLE に遷移し、sessionStorage 管理が不要になる
+ */
+export async function clearCurrentMatch(roomId: string): Promise<void> {
+    await getAuthenticatedUser()
+    await prisma.room.update({
+        where: { id: roomId },
+        data: { currentMatchId: null },
+    })
+}
+
+/**
  * ゲーム画面からルームに戻るときに呼び出される
  * activeGameTypeをnullに戻し、全員がルーム画面に遷移するトリガーとなる
  */
