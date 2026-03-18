@@ -70,7 +70,7 @@ export const ABYSS_MIN_DURATION_MS = 2000
 /** ボス隕石の到達時間（ms）。ゆっくり落下 */
 export const ABYSS_BOSS_DURATION_MS = 60000
 /** ウェーブごとのボスHP数列 */
-export const ABYSS_BOSS_HP_SEQUENCE = [1000, 2000, 3000, 5000, 10000] as const
+export const ABYSS_BOSS_HP_SEQUENCE = [1000, 2000, 3000, 5000, 10000, 100000, 1000000, 10000000, 100000000, 1000000000] as const
 /** ABYSS 解放に必要な隕石破壊数 */
 export const ABYSS_UNLOCK_THRESHOLD = 500
 /** ボス撃破ごとに付与するポイント */
@@ -151,11 +151,11 @@ export const LEVEL_YELLOW_DAMAGE: Record<NormalAttackLevel, number> = {
 }
 /** 青: レベル別減速倍率（隕石に付与。値が小さいほど遅くなる。0.5=半分） */
 export const LEVEL_BLUE_SLOW_MULTIPLIER: Record<NormalAttackLevel, number> = {
-    1: 0.8,
-    2: 0.5,
-    3: 0.2,
-    4: 0.1,
-    5: 0.01,
+    1: 0.5,
+    2: 0.4,
+    3: 0.3,
+    4: 0.2,
+    5: 0.1,
 }
 /** 紫: 球サイズ倍率（BULLET_RADIUS に乗算）。基本ダメージはレベルで変わらない */
 export const LEVEL_PURPLE_SIZE: Record<NormalAttackLevel, number> = {

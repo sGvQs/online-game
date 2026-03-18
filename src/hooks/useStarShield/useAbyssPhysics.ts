@@ -104,7 +104,8 @@ export function useAbyssPhysics({
             sendGameState()
         }, spawnInterval)
 
-        // --- 90秒後: ボスフェーズへ移行 ---
+        // --- ウェーブ毎に +30秒: ボスフェーズへ移行 ---
+        const waveDurationMs = (ABYSS_WAVE_DURATION_SECONDS + (waveNumber - 1) * 30) * 1000
         waveTimer = setTimeout(() => {
             if (gameEndedRef.current) return
             phase = 'boss'
@@ -125,7 +126,7 @@ export function useAbyssPhysics({
             scoreRef.current = nextScore
             setScore(nextScore)
             sendGameState()
-        }, ABYSS_WAVE_DURATION_SECONDS * 1000)
+        }, waveDurationMs)
 
         // --- ゲームループ ---
         const gameLoop = () => {
