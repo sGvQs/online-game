@@ -4,6 +4,9 @@
 
 export type Difficulty = 'EASY' | 'NORMAL' | 'HARD' | 'HELL' | 'ABYSS'
 
+export type GamePhase = 'TITLE' | 'ROLE_SELECT' | 'PLAYING' | 'RESULT'
+export type RoleChoice = 'SHOOTER' | 'TYPIST'
+
 /** 通常攻撃（tech=null）時の散弾数レベル。5 = Lv. .max */
 export type NormalAttackLevel = 1 | 2 | 3 | 4 | 5
 
