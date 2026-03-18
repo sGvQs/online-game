@@ -23,6 +23,8 @@ interface UseLobbyChannelParams {
     setPhase: Dispatch<SetStateAction<GamePhase>>
     setShooterProgress: Dispatch<SetStateAction<StarShieldProgress | null>>
     setTypistProgress: Dispatch<SetStateAction<StarShieldProgress | null>>
+    /** Shooter がロードアウトを更新したときに呼ばれるコールバック */
+    onLoadoutUpdated?: () => void
 }
 
 const VALID_DIFFICULTIES: Difficulty[] = ['EASY', 'NORMAL', 'HARD', 'HELL', 'ABYSS']
@@ -40,8 +42,11 @@ export function useLobbyChannel({
     setPhase,
     setShooterProgress,
     setTypistProgress,
+    onLoadoutUpdated,
 }: UseLobbyChannelParams): RefObject<Channel | null> {
     const lobbyChannelRef = useRef<Channel | null>(null)
+    const onLoadoutUpdatedRef = useRef(onLoadoutUpdated)
+    onLoadoutUpdatedRef.current = onLoadoutUpdated
 
     useEffect(() => {
         if (phase !== 'TITLE' && phase !== 'ROLE_SELECT') return
@@ -76,6 +81,9 @@ export function useLobbyChannel({
                     setShooterId(status.shooterId)
                     setPhase('PLAYING')
                 })
+            })
+            .on('broadcast', { event: 'loadout_updated' }, () => {
+                onLoadoutUpdatedRef.current?.()
             })
             .subscribe()
 
