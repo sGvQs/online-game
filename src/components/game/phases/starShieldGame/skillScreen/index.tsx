@@ -23,7 +23,7 @@ import type { OwnedSkills } from '@/utils/starShieldGame'
 import type { PreviewData } from './types'
 import { SkillCard } from './skillList/SkillCard'
 import { SkillRow } from './skillList/SkillRow'
-import { MaxedMessage } from './skillList/MaxedMessage'
+
 import { SectionDivider } from './skillList/SectionDivider'
 import { HealLoadoutPreview } from './loadout/HealLoadoutPreview'
 import { LoadoutAnimPreview } from './preview/LoadoutAnimPreview'

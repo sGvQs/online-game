@@ -9,6 +9,7 @@ import { DinosaurWithBalls } from '@/components/game/common/starShield/dinosaurW
 import { AuroraGlow } from '@/components/game/common/starShield/auroraGlow'
 import { roleSelectionScreen } from './styles'
 import { Button } from '@/components/ui/button'
+import { Typography } from '@/components/ui/typography'
 import { COLORS, DIFFICULTIES, DIFFICULTY_META, ROLE_META, type Difficulty, type RoleChoice } from '@/constants/starShieldGame/constants'
 import { TECHNIQUES, type TechniqueId } from '@/constants/starShieldGame/techniques'
 import { getAvailableNormalAttacks } from '@/utils/starShieldGame'
@@ -81,7 +82,9 @@ export function RoleSelectionScreen({
 
             <div className="relative z-10 w-full max-w-2xl mx-auto px-6 py-10 flex flex-col gap-7">
                 <motion.div initial={{ opacity: 0, y: -16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-                    <h2 className={styles.sectionTitle()}>[むずかしさ]と[やくわり]をきめよう。</h2>
+                    <Typography variant="h1" as="h2" className={styles.sectionTitle()}>
+                        [むずかしさ]と[やくわり]をきめよう。
+                    </Typography>
                 </motion.div>
 
                 <div className="grid grid-cols-[1fr_1fr] gap-5 items-stretch">
@@ -91,7 +94,9 @@ export function RoleSelectionScreen({
                         transition={{ duration: 0.5, delay: 0.1 }}
                         className={cn(styles.difficultyCard(), !isHost && 'opacity-70')}
                     >
-                        <p className={styles.difficultyCardTitle()}>むずかしさ</p>
+                        <Typography variant="small" as="p" font="cherry-bomb-one" className={styles.difficultyCardTitle()}>
+                            むずかしさ
+                        </Typography>
                         <div className="flex flex-col gap-2">
                             {DIFFICULTIES.map((d) => {
                                 const meta = DIFFICULTY_META[d]
@@ -107,16 +112,17 @@ export function RoleSelectionScreen({
                                         ? '隕石破壊数500以上のクリアで解放'
                                         : undefined
                                 return (
-                                    <button
+                                    <Button
                                         key={d}
+                                        screen="star-shield"
+                                        variant="solid"
                                         onClick={() => canSelect && onDifficultyChange(d)}
                                         disabled={!canSelect}
                                         title={lockTitle}
                                         className={cn(
                                             styles.difficultyButton(),
-                                            canSelect ? 'cursor-pointer hover:scale-[1.02] hover:brightness-110' : 'cursor-default',
+                                            'hover:scale-[1.02] hover:brightness-110',
                                             isSelectableInactive && 'hover:bg-white/5 hover:border-white/25',
-                                            isLocked && 'opacity-50',
                                         )}
                                         style={{
                                             ['--diff-bg' as string]: isActive ? meta.bg : 'transparent',
@@ -130,21 +136,40 @@ export function RoleSelectionScreen({
                                             ['--diff-rate-color' as string]: isActive ? meta.text : COLORS.WHITE_15,
                                         }}
                                     >
-                                        <span className="text-lg leading-none w-5 text-center shrink-0">{meta.emoji}</span>
-                                        <span className="text-sm font-bold flex-1 text-left">{meta.label}</span>
-                                        {isLocked && <span className={styles.hellLockLabel()}>解放条件</span>}
-                                        {!isLocked && <span className={styles.rateLabel()}>{meta.rate}</span>}
-                                    </button>
+                                        <Typography variant="body" as="span" className="text-lg leading-none w-5 text-center shrink-0">
+                                            {meta.emoji}
+                                        </Typography>
+                                        <Typography variant="body" as="span" font="cherry-bomb-one" className="font-bold flex-1 text-left">
+                                            {meta.label}
+                                        </Typography>
+                                        {isLocked && (
+                                            <Typography variant="caption" as="span" className={styles.hellLockLabel()}>
+                                                解放条件
+                                            </Typography>
+                                        )}
+                                        {!isLocked && (
+                                            <Typography variant="caption" as="span" className={styles.rateLabel()}>
+                                                {meta.rate}
+                                            </Typography>
+                                        )}
+                                    </Button>
                                 )
                             })}
                         </div>
-                        <p
+                        <Typography
+                            variant="caption"
+                            as="p"
+                            font="cherry-bomb-one"
                             className={styles.successHint()}
                             style={{ ['--diff-hint-color' as string]: activeDiffMeta.text }}
                         >
                             せいこうしたとき {activeDiffMeta.rate} もらえるよ。
-                        </p>
-                        {!isHost && <p className={styles.hostWaiting()}>ほすとがせんたくちゅう…</p>}
+                        </Typography>
+                        {!isHost && (
+                            <Typography variant="caption" as="p" font="cherry-bomb-one" className={styles.hostWaiting()}>
+                                ほすとがせんたくちゅう…
+                            </Typography>
+                        )}
                     </motion.div>
 
                     <motion.div
@@ -178,60 +203,66 @@ export function RoleSelectionScreen({
                                         <div className="relative w-6 h-6 shrink-0">
                                             <Image src={meta.iconSrc} alt={meta.label} fill className={styles.roleIcon()} />
                                         </div>
-                                        <span className={styles.roleTitle()}>{meta.label}</span>
+                                        <Typography variant="h3" as="span" className={styles.roleTitle()}>
+                                            {meta.label}
+                                        </Typography>
                                     </div>
-                                    <p className={styles.roleDescription()}>{meta.description}</p>
-                                    <p className={styles.roleDetail()}>{meta.detail}</p>
+                                    <Typography variant="small" as="p" className={styles.roleDescription()}>
+                                        {meta.description}
+                                    </Typography>
+                                    <Typography variant="caption" as="p" className={styles.roleDetail()}>
+                                        {meta.detail}
+                                    </Typography>
                                     {isSelected && r === 'SHOOTER' && displayShooterProgress && (
-                                        <div className="mt-3 pt-3 border-t border-white/6 min-h-[5.5rem]" onClick={(e) => e.stopPropagation()}>
-                                            <p className="text-[10px] mb-1.5 font-dot-gothic-16 opacity-70">選択している色</p>
+                                        <div className="mt-3 pt-3 border-t border-white/6 min-h-22" onClick={(e) => e.stopPropagation()}>
+                                            <Typography variant="caption" as="p" className="text-[10px] mb-1.5 opacity-70">
+                                                選択している色
+                                            </Typography>
                                             <div className="flex flex-wrap gap-1.5">
                                                 {availableNormal.map(({ techniqueId, level }) => {
                                                     const tech = TECHNIQUES[techniqueId]
                                                     const isActive = selNormal === techniqueId
                                                     const canChange = isSelected && r === 'SHOOTER' && onShooterLoadoutUpdate
                                                     return (
-                                                        <button
+                                                        <Button
                                                             key={techniqueId}
                                                             type="button"
                                                             onClick={() => canChange && onShooterLoadoutUpdate({ selectedNormalAttackId: techniqueId })}
                                                             disabled={!canChange}
                                                             className={cn(
-                                                                'flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] border-2 transition-all',
-                                                                canChange && 'cursor-pointer hover:brightness-110',
-                                                                !canChange && 'cursor-default opacity-70',
+                                                                'flex items-center gap-1 px-2 py-1 rounded-lg text-[10px] border-2 transition-all hover:brightness-110',
                                                                 isActive ? 'bg-white/15 shadow-[0_0_10px_rgba(255,255,255,0.2)]' : 'border-white/15 bg-white/3'
                                                             )}
                                                             style={isActive ? { borderColor: tech.color, boxShadow: `0 0 12px ${tech.color}80` } : undefined}
                                                         >
                                                             <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: tech.color }} />
-                                                            <span>Lv. {level}</span>
-                                                        </button>
+                                                            <Typography variant="caption" as="span">Lv. {level}</Typography>
+                                                        </Button>
                                                     )
                                                 })}
                                             </div>
                                         </div>
                                     )}
                                     {isSelected && r === 'TYPIST' && displayTypistProgress && (
-                                        <div className="mt-3 pt-3 border-t border-white/6 min-h-[5.5rem]">
+                                        <div className="mt-3 pt-3 border-t border-white/6 min-h-22">
                                             <div className="flex flex-col gap-1.5">
                                                 <div className="flex items-center gap-2">
-                                                    <span className="text-[10px] font-dot-gothic-16 opacity-80">
+                                                    <Typography variant="caption" as="span" className="text-[10px] opacity-80">
                                                         HP {LEVEL_STAR_HP[(displayTypistProgress.starHpLevel ?? 1) as 1 | 2 | 3 | 4 | 5]}
-                                                    </span>
+                                                    </Typography>
                                                     <div className="flex-1 min-w-0 h-1.5 rounded-full bg-white/5 overflow-hidden">
                                                         <div
                                                             className="h-full rounded-full bg-linear-to-r from-emerald-700 to-emerald-400 transition-all duration-300"
                                                             style={{ width: `${((displayTypistProgress.starHpLevel ?? 1) / 5) * 100}%` }}
                                                         />
                                                     </div>
-                                                    <span className="text-[9px] font-dot-gothic-16 opacity-50 shrink-0">
+                                                    <Typography variant="caption" as="span" className="opacity-50 shrink-0">
                                                         Lv{(displayTypistProgress.starHpLevel ?? 1)}/5
-                                                    </span>
+                                                    </Typography>
                                                 </div>
                                                 <div className="flex flex-col gap-1">
                                                     <div className="flex items-center gap-2">
-                                                        <span className="text-[10px] font-dot-gothic-16 opacity-80 shrink-0">
+                                                        <Typography variant="caption" as="span" className="text-[10px] opacity-80 shrink-0">
                                                             {displayTypistProgress.healLevel != null ? (
                                                                 displayTypistProgress.healLevel >= 5 ? (
                                                                     '回復: 全回復'
@@ -241,7 +272,7 @@ export function RoleSelectionScreen({
                                                             ) : (
                                                                 <span className="text-white/40">回復: 未所持</span>
                                                             )}
-                                                        </span>
+                                                        </Typography>
                                                         {displayTypistProgress.healLevel != null && (
                                                             <>
                                                                 <div className="flex-1 min-w-0 h-1.5 rounded-full bg-white/5 overflow-hidden">
@@ -255,9 +286,9 @@ export function RoleSelectionScreen({
                                                                         style={{ width: `${(displayTypistProgress.healLevel / 6) * 100}%` }}
                                                                     />
                                                                 </div>
-                                                                <span className="text-[9px] font-dot-gothic-16 opacity-50 shrink-0">
+                                                                <Typography variant="caption" as="span" className="opacity-50 shrink-0">
                                                                     Lv{displayTypistProgress.healLevel === 6 ? 'max' : displayTypistProgress.healLevel}/6
-                                                                </span>
+                                                                </Typography>
                                                             </>
                                                         )}
                                                     </div>
@@ -283,9 +314,9 @@ export function RoleSelectionScreen({
                         ['--status-message-color' as string]: canProceed ? 'rgba(134,239,172,0.95)' : 'rgba(248,113,113,0.95)',
                     }}
                 >
-                    <p className={styles.statusMessage()}>
+                    <Typography variant="body" as="p" font="cherry-bomb-one" className={styles.statusMessage()}>
                         {canProceed ? 'じゅんびがととのったよ' : 'ちがうやくわりをえらんでね'}
-                    </p>
+                    </Typography>
                     <div className="flex flex-col gap-3">
                         {room.users.map((u: RoomUserWithReadyStatus) => {
                             const isMe = u.userId === currentUserId
@@ -308,19 +339,25 @@ export function RoleSelectionScreen({
                                     }}
                                 >
                                     <div className={styles.statusDot()} />
-                                    <span className={styles.playerName()}>
+                                    <Typography variant="body" as="span" className={styles.playerName()}>
                                         {u.user?.name ?? '...'}
-                                        {isMe && <span className={styles.playerNameSuffix()}>(あなた)</span>}
-                                    </span>
+                                        {isMe && (
+                                            <Typography variant="small" as="span" className={styles.playerNameSuffix()}>
+                                                (あなた)
+                                            </Typography>
+                                        )}
+                                    </Typography>
                                     {roleMeta ? (
-                                        <span className={styles.roleBadge()}>
+                                        <Typography variant="small" as="span" font="cherry-bomb-one" className={styles.roleBadge()}>
                                             <span className="relative w-3.5 h-3.5 shrink-0 block">
                                                 <Image src={roleMeta.iconSrc} alt="" fill className="object-contain" />
                                             </span>
                                             {roleMeta.label}
-                                        </span>
+                                        </Typography>
                                     ) : (
-                                        <span className={styles.selectingLabel()}>せんたくちゅう…</span>
+                                        <Typography variant="small" as="span" font="cherry-bomb-one" className={styles.selectingLabel()}>
+                                            せんたくちゅう…
+                                        </Typography>
                                     )}
                                 </div>
                             )
