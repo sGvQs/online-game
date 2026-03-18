@@ -59,20 +59,20 @@ export const SPECIAL_ATTACK_MAX_LEVEL = 10
 export const SPECIAL_ATTACK_IDS = ['spread'] as const
 
 export const SPECIAL_ATTACK_UNLOCK_COSTS: Record<string, number> = {
-    spread: 500,
+    spread: 250,
 }
 
 /** 必殺技レベルアップコスト（2〜10） */
 export const SPECIAL_ATTACK_LEVEL_UP_COSTS: Record<2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10, number> = {
-    2: 1000,
-    3: 1500,
-    4: 3000,
-    5: 3500,
-    6: 4000,
-    7: 6000,
-    8: 9000,
-    9: 13000,
-    10: 20000,
+    2: 500,
+    3: 1000,
+    4: 1500,
+    5: 3000,
+    6: 6000,
+    7: 12000,
+    8: 24000,
+    9: 48000,
+    10: 100000,
 }
 
 // ============================================
@@ -101,10 +101,10 @@ export const HEAL_LEVEL_UP_COSTS: Record<2 | 3 | 4 | 5 | 6, number> = {
 // ヒール回復量（実数値・加算）
 // ============================================
 export const LEVEL_HEAL_RECOVERY: Record<1 | 2 | 3 | 4 | 5 | 6, number> = {
-    1: 0.1,
-    2: 0.2,
-    3: 0.4,
-    4: 1.6,
+    1: 1,
+    2: 2,
+    3: 4,
+    4: 8,
     5: 100,
     6: 100, // max: 全回復 + 全破壊
 }

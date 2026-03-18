@@ -86,11 +86,11 @@ export function getAbyssBossHp(waveNumber: number): number {
 
 /** 星HPレベル → 最大HP（スキルでレベルアップ可能。難易度には依存しない） */
 export const LEVEL_STAR_HP: Record<1 | 2 | 3 | 4 | 5, number> = {
-    1: 15,
-    2: 20,
-    3: 26,
-    4: 34,
-    5: 45,
+    1: 5,
+    2: 10,
+    3: 20,
+    4: 40,
+    5: 100,
 }
 
 /** 必殺技ID → 弾数（難易度非依存）。spread は SPECIAL_ATTACK_LEVEL_PARAMS で制御 */
@@ -110,16 +110,16 @@ export type SpecialAttackLevelParams = {
 export type SpecialAttackLevel = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10
 
 export const SPECIAL_ATTACK_LEVEL_PARAMS: Record<SpecialAttackLevel, SpecialAttackLevelParams> = {
-    1: { waveCount: 1, bulletsPerWave: 5, spreadDeg: 12, waveDelayMs: 0 },
-    2: { waveCount: 1, bulletsPerWave: 12, spreadDeg: 20, waveDelayMs: 0 },
-    3: { waveCount: 1, bulletsPerWave: 20, spreadDeg: 35, waveDelayMs: 0 },
-    4: { waveCount: 1, bulletsPerWave: 40, spreadDeg: 50, waveDelayMs: 0 },
-    5: { waveCount: 1, bulletsPerWave: 60, spreadDeg: 85, waveDelayMs: 0 },
-    6: { waveCount: 1, bulletsPerWave: 80, spreadDeg: 135, waveDelayMs: 0 },
-    7: { waveCount: 1, bulletsPerWave: 100, spreadDeg: 150, waveDelayMs: 0 },
-    8: { waveCount: 2, bulletsPerWave: 100, spreadDeg: 150, waveDelayMs: 80 },
-    9: { waveCount: 3, bulletsPerWave: 100, spreadDeg: 150, waveDelayMs: 80 },
-    10: { waveCount: 5, bulletsPerWave: 200, spreadDeg: 150, waveDelayMs: 70 },
+    1: { waveCount: 1, bulletsPerWave: 30, spreadDeg: 30, waveDelayMs: 0 },
+    2: { waveCount: 1, bulletsPerWave: 60, spreadDeg: 60, waveDelayMs: 0 },
+    3: { waveCount: 1, bulletsPerWave: 90, spreadDeg: 90, waveDelayMs: 0 },
+    4: { waveCount: 1, bulletsPerWave: 120, spreadDeg: 120, waveDelayMs: 0 },
+    5: { waveCount: 1, bulletsPerWave: 150, spreadDeg: 150, waveDelayMs: 0 },
+    6: { waveCount: 2, bulletsPerWave: 150, spreadDeg: 150, waveDelayMs: 100 },
+    7: { waveCount: 3, bulletsPerWave: 150, spreadDeg: 150, waveDelayMs: 100 },
+    8: { waveCount: 4, bulletsPerWave: 150, spreadDeg: 150, waveDelayMs: 100 },
+    9: { waveCount: 5, bulletsPerWave: 150, spreadDeg: 150, waveDelayMs: 100 },
+    10: { waveCount: 10, bulletsPerWave: 300, spreadDeg: 150, waveDelayMs: 100 },
 }
 
 // ========== 通常攻撃・レベル制 ==========

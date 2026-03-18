@@ -292,7 +292,7 @@ export function StarShieldSkill({ roomId, currentUserId: _currentUserId }: { roo
                                     </p>
                                     <div className="flex items-center gap-2 flex-row">
                                         <span className="text-lg font-bold text-emerald-400 font-dot-gothic-16 tabular-nums">
-                                            +{LEVEL_HEAL_RECOVERY[healLevel as 1 | 2 | 3 | 4 | 5 | 6] as number}HP
+                                            +{LEVEL_HEAL_RECOVERY[healLevel as 1 | 2 | 3 | 4 | 5 | 6] as number}HP {healLevel === 6 && '+全破壊'}
                                         </span>
                                     </div>
                                     <div className="mt-2">
@@ -303,13 +303,6 @@ export function StarShieldSkill({ roomId, currentUserId: _currentUserId }: { roo
                                             healLevel={healLevel}
                                         />
                                     </div>
-                                    {/* all_destruction ボーナス（heal Lv.max 限定） */}
-                                    {healLevel === 6 && (
-                                        <div className="mt-2 rounded-xl bg-amber-500/10 border border-amber-500/20 px-3 py-2 flex items-center gap-2">
-                                            <span className="text-amber-400 text-xs">⚡</span>
-                                            <span className="text-amber-300/80 text-[10px] font-dot-gothic-16">全破壊（heal Lv. max ボーナス）</span>
-                                        </div>
-                                    )}
                                 </div>
                             )}
                         </div>
@@ -445,7 +438,17 @@ export function StarShieldSkill({ roomId, currentUserId: _currentUserId }: { roo
                                 )
                             })()
                         ) : (
-                            <MaxedMessage>星のHP MAX レベル到達 🏆</MaxedMessage>
+                            <SkillRow
+                                label={
+                                    <span>
+                                        HP上限 <span className="text-emerald-400 font-bold">{LEVEL_STAR_HP[5]}</span>（MAX）
+                                    </span>
+                                }
+                                currentLevel={5}
+                                maxLevel={5}
+                                onClick={() => setPreview({ kind: 'starHp' })}
+                                progressBarColor="#34d399"
+                            />
                         )}
                     </SkillCard>
 
@@ -486,7 +489,17 @@ export function StarShieldSkill({ roomId, currentUserId: _currentUserId }: { roo
                                     )
                                 })()
                             ) : (
-                                <MaxedMessage>ヒール MAX レベル到達 🏆</MaxedMessage>
+                                <SkillRow
+                                    label={
+                                        <span>
+                                            全回復 <span className="text-emerald-400 font-bold">+ 全破壊ボーナス</span>（MAX）
+                                        </span>
+                                    }
+                                    currentLevel={6}
+                                    maxLevel={6}
+                                    onClick={() => setPreview({ kind: 'heal' })}
+                                    progressBarColor="#34d399"
+                                />
                             )
                         )}
                     </SkillCard>
