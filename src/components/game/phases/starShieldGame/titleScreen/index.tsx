@@ -149,12 +149,12 @@ export function TitleScreen({
                     <div className="w-px self-stretch bg-linear-to-b from-transparent via-brand-500/30 to-transparent" />
 
                     <motion.div
-                        className="flex flex-col gap-4"
+                        className="flex flex-col gap-6"
                         initial={{ opacity: 0, x: 20 }}
                         animate={{ opacity: 1, x: 0 }}
                         transition={{ duration: 0.8, delay: 0.6 }}
                     >
-                        <div className='flex justify-between gap-2'>
+                        <div className='flex justify-between gap-3'>
                         <Link href={`/game/${roomId}/star-shield/ranking`} 
                                 className={styles.pairRankBadge()} 
                                 onClick={async (e) => {
@@ -166,13 +166,13 @@ export function TitleScreen({
                                 }}>
                             {memberPairRank ? (
                                 <>
-                                    <span className="text-md text-purple-400/90 truncate">
+                                    <span className="text-md text-blue-400/90 truncate">
                                         {memberPairRank.user1Name}
                                     </span>
                                     <span className="text-md text-white-400/90 truncate">
                                         &amp;
                                     </span>
-                                    <span className="text-md text-purple-400/90 truncate">
+                                    <span className="text-md text-blue-400/90 truncate">
                                         {memberPairRank.user2Name}
                                     </span>
                                     <span className="text-md font-bold tabular-nums text-blue-400/90 shrink-0 ml-auto">{memberPairRank.bestDestroyedCount}</span>
