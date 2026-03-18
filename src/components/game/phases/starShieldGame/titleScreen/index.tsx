@@ -155,14 +155,27 @@ export function TitleScreen({
                         transition={{ duration: 0.8, delay: 0.6 }}
                     >
                         <div className='flex justify-between gap-2'>
-                        <Link href={`/game/${roomId}/star-shield/ranking`} className={styles.pairRankBadge()}>
+                        <Link href={`/game/${roomId}/star-shield/ranking`} 
+                                className={styles.pairRankBadge()} 
+                                onClick={async (e) => {
+                                    if (isReady) {
+                                        e.preventDefault()
+                                        await onToggleReady()
+                                        router.push(`/game/${roomId}/star-shield/ranking`)
+                                    }
+                                }}>
                             {memberPairRank ? (
                                 <>
-                                    <span className="text-xs font-bold tabular-nums text-purple-300 shrink-0">{memberPairRank.rank}位</span>
-                                    <span className="text-xs text-white/70 truncate">
-                                        {memberPairRank.user1Name} &amp; {memberPairRank.user2Name}
+                                    <span className="text-md text-purple-400/90 truncate">
+                                        {memberPairRank.user1Name}
                                     </span>
-                                    <span className="text-xs font-bold tabular-nums text-white/90 shrink-0 ml-auto">{memberPairRank.bestDestroyedCount}</span>
+                                    <span className="text-md text-white-400/90 truncate">
+                                        &amp;
+                                    </span>
+                                    <span className="text-md text-purple-400/90 truncate">
+                                        {memberPairRank.user2Name}
+                                    </span>
+                                    <span className="text-md font-bold tabular-nums text-blue-400/90 shrink-0 ml-auto">{memberPairRank.bestDestroyedCount}</span>
                                     <Image src={ICONS.METOR} alt="Typing" width={20} height={20} className="shrink-0 opacity-90" />
                                 </>
                             ) : (
@@ -171,7 +184,7 @@ export function TitleScreen({
                         </Link>
                         <div className="rounded-2xl p-4 bg-[rgba(129,140,248,0.05)] border border-[rgba(129,140,248,0.18)] flex items-center gap-3">
                             <Image src={ICONS.TYPIST} alt="Typing" width={28} height={28} className="shrink-0 opacity-90" />
-                            <span className="text-xl font-bold tabular-nums text-white/90">{typingCount.toLocaleString()}</span>
+                            <span className="text-md font-bold tabular-nums text-yellow-400/90">{typingCount.toLocaleString()}</span>
                         </div>
                         </div>
                         <div className={styles.playerCard()}>
