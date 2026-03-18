@@ -113,6 +113,8 @@ export function StarShieldGame({
         setStartedAt,
         setShooterId,
         setPhase,
+        setShooterProgress,
+        setTypistProgress,
     })
 
     // ============================================

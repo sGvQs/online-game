@@ -3,8 +3,8 @@
 import { useEffect, useRef } from 'react'
 import type { Dispatch, RefObject, SetStateAction } from 'react'
 import { createClient } from '@/utils/supabase/client'
-import { getStarShieldMatchStatus } from '@/server/actions/game'
-import type { Difficulty, GamePhase, RoleChoice } from '@/types/starShieldGame'
+import { getStarShieldMatchStatus, getStarShieldProgress } from '@/server/actions/game'
+import type { Difficulty, GamePhase, RoleChoice, StarShieldProgress } from '@/types/starShieldGame'
 
 type SupabaseClient = ReturnType<typeof createClient>
 type Channel = ReturnType<SupabaseClient['channel']>
@@ -21,6 +21,8 @@ interface UseLobbyChannelParams {
     setStartedAt: Dispatch<SetStateAction<number | null>>
     setShooterId: Dispatch<SetStateAction<string | null>>
     setPhase: Dispatch<SetStateAction<GamePhase>>
+    setShooterProgress: Dispatch<SetStateAction<StarShieldProgress | null>>
+    setTypistProgress: Dispatch<SetStateAction<StarShieldProgress | null>>
 }
 
 const VALID_DIFFICULTIES: Difficulty[] = ['EASY', 'NORMAL', 'HARD', 'HELL', 'ABYSS']
@@ -36,6 +38,8 @@ export function useLobbyChannel({
     setStartedAt,
     setShooterId,
     setPhase,
+    setShooterProgress,
+    setTypistProgress,
 }: UseLobbyChannelParams): RefObject<Channel | null> {
     const lobbyChannelRef = useRef<Channel | null>(null)
 
@@ -60,12 +64,17 @@ export function useLobbyChannel({
                 // matchIdRef.current を参照して deps に matchId を含めずに済む
                 const currentMatchId = matchIdRef.current
                 if (!currentMatchId) return
-                getStarShieldMatchStatus(currentMatchId).then((status) => {
-                    if (status.status === 'playing') {
-                        setStartedAt(status.startedAt)
-                        setShooterId(status.shooterId)
-                        setPhase('PLAYING')
-                    }
+                getStarShieldMatchStatus(currentMatchId).then(async (status) => {
+                    if (status.status !== 'playing') return
+                    const [freshShooter, freshTypist] = await Promise.all([
+                        getStarShieldProgress(status.shooterId),
+                        getStarShieldProgress(status.typistId),
+                    ])
+                    setShooterProgress(freshShooter)
+                    setTypistProgress(freshTypist)
+                    setStartedAt(status.startedAt)
+                    setShooterId(status.shooterId)
+                    setPhase('PLAYING')
                 })
             })
             .subscribe()
