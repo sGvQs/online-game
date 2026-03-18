@@ -126,13 +126,20 @@ export function TypistView({ dialogue, score, starHp, maxStarHp, typistFireCount
             <StarVisual position={TYPIST_STAR_POSITION} />
 
             <div className="w-full shrink-0 flex flex-col items-center gap-2 py-4 z-20 mt-10">
-                <Typography variant="label" as="span" className={typistView().scoreLabel()}>いんせきをかはいしたかず</Typography>
+                <Typography variant="label" as="span" font="cherry-bomb-one" className={typistView().scoreLabel()}>いんせきをかはいしたかず</Typography>
                 <div className="flex items-center gap-3">
                     <div className="relative w-10 h-10">
                         <Image src={ICONS.METOR} alt="" fill className="object-contain" />
                     </div>
                     <span className="text-white/60 text-2xl">×</span>
-                    <Typography variant="h3" as="span" className={typistView().scoreValue()}>{score.destroyed}</Typography>
+                    <motion.div
+                        key={score.destroyed}
+                        initial={{ scale: 1 }}
+                        animate={{ scale: [1, 2, 1], x: [0, -3, 3, -3, 3, 0] }}
+                        transition={{ duration: 0.25, ease: 'easeOut' }}
+                    >
+                        <Typography variant="h2" as="span" font="cherry-bomb-one" className={typistView().scoreValue()}>{score.destroyed}</Typography>
+                    </motion.div>
                 </div>
             </div>
 

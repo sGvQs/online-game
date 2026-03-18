@@ -1,6 +1,7 @@
 'use client'
 
 import { useStarShield } from '@/hooks/useStarShield'
+import { motion } from 'framer-motion'
 import type { Difficulty, GameResult, GameStats, NormalAttackLevel } from '@/types/starShieldGame'
 import type { TechniqueId } from '@/constants/starShieldGame/techniques'
 import type { SpecialAttackChoice } from '@/utils/starShieldGame'
@@ -100,7 +101,14 @@ export function GameScreen({ matchId, startedAt, shooterId, difficulty, currentU
                     <div className="flex items-center gap-2">
                         {isShooter && (
                             <>
-                                <Typography variant="h3" as="span" className="text-brand-500">{score.destroyed}</Typography>
+                                <motion.div
+                                    key={score.destroyed}
+                                    initial={{ scale: 1 }}
+                                    animate={{ scale: [1, 1.4, 1], x: [0, -2, 2, -2, 2, 0] }}
+                                    transition={{ duration: 0.2 }}
+                                >
+                                    <Typography variant="h3" as="span" className="text-brand-500">{score.destroyed}</Typography>
+                                </motion.div>
                                 <span className="text-white/30 text-sm">/</span>
                                 <span className="text-white/50 text-sm">{score.spawned}</span>
                                 <span className="text-white/30 text-xs ml-1 tracking-widest">DESTROYED</span>
