@@ -123,6 +123,46 @@ function RankUpAnimation({ beforeRank, afterRank }: { beforeRank: number; afterR
     )
 }
 
+function DestroyedCountAnimation({ count }: { count: number }) {
+    const [displayCount, setDisplayCount] = useState(0)
+
+    useEffect(() => {
+        // ワンテンポ遅れてカウントアップ開始
+        const controls = animate(0, count, {
+            duration: 1.2,
+            delay: 0.3,
+            ease: 'easeOut',
+            onUpdate: (v) => setDisplayCount(Math.floor(v)),
+        })
+        return () => controls.stop()
+    }, [count])
+
+    return (
+        <div className="flex flex-col items-center gap-1">
+            <motion.div
+                key={displayCount}
+                initial={{ scale: 1 }}
+                animate={{ scale: [1, 1.1, 1], rotate: [0, -1, 1, -1, 1, 0] }}
+                transition={{ duration: 0.15 }}
+                className="flex items-baseline gap-8"
+            >
+                <div className="flex items-center gap-0">
+                    <Image src={ICONS.METOR} alt="" width={40} height={40} className="object-contain" />
+                    <span className="text-lg font-cherry-bomb-one text-white drop-shadow-[0_0_30px_rgba(255,255,255,0.2)]">
+                        をこわしたかず
+                    </span>
+                </div>
+                <div className='flex gap-2 items-baseline'>
+                    <span className="text-6xl font-cherry-bomb-one text-white drop-shadow-[0_0_30px_rgba(255,255,255,0.2)]">
+                        {displayCount}
+                    </span>
+                    <span className="text-2xl text-white/40 ">個</span>
+                </div>
+            </motion.div>
+        </div>
+    )
+}
+
 const RESULT_CONFIG: Record<
     GameResult,
     {
@@ -262,24 +302,20 @@ export function ResultScreen({
                     </motion.div>
 
                     {result === 'CLEARED' && (
-                        <div className='flex gap-12 justify-center items-baseline'>
-                            {/* <RankUpAnimation
-                                beforeRank={beforeRanking.rank}
-                                afterRank={afterRanking?.rank ?? beforeRanking.rank}
-                            /> */}
-                            <RankUpAnimation
-                                beforeRank={10}
-                                afterRank={afterRanking?.rank ?? 10}
-                            />
-                            <PointGainAnimation
-                                before={4000}
-                                gain={parseInt(earnedPoints?.replace('+', '') || '0')}
-                            />
-
-                            {/* <PointGainAnimation
-                                before={beforeRanking.points}
-                                gain={parseInt(earnedPoints?.replace('+', '') || '0')}
-                            /> */}
+                        <div className="flex flex-col items-center gap-12">
+                            {/* 順位・ポイント (サブ) */}
+                            <div className='flex gap-16 justify-center items-baseline'>
+                                <RankUpAnimation
+                                    beforeRank={beforeRanking.rank}
+                                    afterRank={afterRanking?.rank ?? beforeRanking.rank}
+                                />
+                                <PointGainAnimation
+                                    before={beforeRanking.points}
+                                    gain={parseInt(earnedPoints?.replace('+', '') || '0')}
+                                />
+                            </div>
+                            {/* 壊した数 (メイン) */}
+                            <DestroyedCountAnimation count={stats.destroyedCount} />
                         </div>
                     )}
 
