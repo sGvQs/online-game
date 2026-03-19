@@ -51,6 +51,7 @@ export function StarShieldGame({
         gameResult,
         gameStats,
         gameResultDifficulty,
+        currentUserPointsBefore,
         allUsersReady,
         canStartLobby,
         handleRoleChange,
@@ -123,6 +124,7 @@ export function StarShieldGame({
                         stats={gameStats}
                         difficulty={gameResultDifficulty ?? difficulty}
                         onBackToTitle={handleBackToTitle}
+                        beforePoints={currentUserPointsBefore ?? 0}
                     />
                 )}
             </div>

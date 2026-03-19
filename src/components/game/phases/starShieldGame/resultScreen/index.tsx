@@ -8,12 +8,83 @@ import { AuroraGlow } from '@/components/game/common/starShield/auroraGlow'
 import { resultScreen } from './styles'
 import { Button } from '@/components/ui/button'
 import { ICONS, DIFFICULTY_META, type Difficulty } from '@/constants/starShieldGame/constants'
+import { useState, useEffect } from 'react'
+import { animate } from 'framer-motion'
+import { Typography } from '@/components/ui/typography'
 
 interface ResultScreenProps {
     result: GameResult
     stats: GameStats
     difficulty: Difficulty
     onBackToTitle: () => void
+    beforePoints: number
+}
+
+function PointGainAnimation({ before, gain }: { before: number; gain: number }) {
+    const [displayPoints, setDisplayPoints] = useState(before)
+    const [isMerging, setIsMerging] = useState(false)
+
+    useEffect(() => {
+        // 合体開始までの溜め
+        const timer = setTimeout(() => setIsMerging(true), 1200)
+
+        // カウントアップ開始
+        const controls = animate(before, before + gain, {
+            duration: 0.8,
+            delay: 1.5,
+            ease: 'easeOut',
+            onUpdate: (v) => setDisplayPoints(Math.floor(v)),
+        })
+
+        return () => {
+            clearTimeout(timer)
+            controls.stop()
+        }
+    }, [before, gain])
+
+    return (
+        <div className="flex flex-col items-center gap-6 my-4">
+            <div className="relative flex flex-col items-center">
+                <div className="flex items-end gap-2">
+                    <motion.div
+                        key={displayPoints}
+                        initial={{ scale: 1 }}
+                        animate={{ scale: [1, 1.2, 1], rotate: [0, -2, 2, -2, 2, 0] }}
+                        transition={{ duration: 0.25 }}
+                        className="flex items-baseline gap-1"
+                    >
+                        <span className="text-6xl font-cherry-bomb-one text-yellow-400 drop-shadow-[0_0_15px_rgba(250,204,21,0.5)]">
+                            {displayPoints.toLocaleString()}
+                        </span>
+                        <span className="text-2xl font-cherry-bomb-one text-yellow-400/80">pt</span>
+                    </motion.div>
+                </div>
+
+                {/* 獲得バッジの融合アニメーション */}
+                {!isMerging && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 30, scale: 0.5 }}
+                        animate={{ opacity: 1, y: 15, scale: 1 }}
+                        exit={{ opacity: 0, y: -20, scale: 0 }}
+                        className="absolute -bottom-10 whitespace-nowrap px-4 py-1 rounded-full bg-brand-500/20 border-2 border-brand-500/40 text-brand-300 font-bold"
+                    >
+                        かくとく：+{gain}pt
+                    </motion.div>
+                )}
+
+                {isMerging && displayPoints < before + gain && (
+                    <motion.div
+                        initial={{ scale: 1.5, opacity: 1, y: 20 }}
+                        animate={{ scale: 1, opacity: 0, y: 0 }}
+                        transition={{ duration: 0.4 }}
+                        className="absolute text-brand-400 font-bold text-3xl pointer-events-none"
+                    >
+                        +{gain}
+                    </motion.div>
+                )}
+            </div>
+        </div>
+    )
 }
 
 const RESULT_CONFIG: Record<
@@ -79,7 +150,13 @@ const STAT_ITEMS = (
         },
     ]
 
-export function ResultScreen({ result, stats, difficulty, onBackToTitle }: ResultScreenProps) {
+export function ResultScreen({
+    result,
+    stats,
+    difficulty,
+    onBackToTitle,
+    beforePoints,
+}: ResultScreenProps) {
     const config = RESULT_CONFIG[result]
     const accuracy =
         stats.spawnedCount > 0 ? Math.round((stats.destroyedCount / stats.spawnedCount) * 100) : 0
@@ -136,25 +213,14 @@ export function ResultScreen({ result, stats, difficulty, onBackToTitle }: Resul
                         <p className={styles.subtitle()}>{config.subtitle}</p>
                     </motion.div>
 
-                    {/* earned points badge */}
-                    {earnedPoints && (
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.85, y: 10 }}
-                            animate={{ opacity: 1, scale: 1, y: 0 }}
-                            transition={{ delay: 0.4, duration: 0.5, ease: [0.34, 1.56, 0.64, 1] }}
-                            className={styles.earnedBadge()}
-                            style={{
-                                ['--earned-bg' as string]: diffMeta.bg,
-                                ['--earned-border' as string]: `2px solid ${diffMeta.border}`,
-                                ['--earned-glow' as string]: `${diffMeta.glow}, inset 0 1px 0 rgba(255,255,255,0.08)`,
-                                ['--earned-text' as string]: diffMeta.text,
-                            }}
-                        >
-                            <span className="text-xl leading-none">{diffMeta.emoji}</span>
-                            <span className={styles.earnedValue()}>{earnedPoints}</span>
-                            <span className={styles.earnedSuffix()}>かくとく</span>
-                        </motion.div>
+                    {result === 'CLEARED' && (
+                        <PointGainAnimation
+                            before={beforePoints}
+                            gain={parseInt(earnedPoints?.replace('+', '') || '0')}
+                        />
                     )}
+
+                    {/* earned points badge */}
                 </div>
 
                 {/* ===== DINO MESSAGE ===== */}
