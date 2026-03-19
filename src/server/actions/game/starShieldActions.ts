@@ -25,16 +25,27 @@ const CLEAR_POINTS: Record<Difficulty, number> = {
 const HELL_UNLOCK_THRESHOLD = 200
 
 /**
- * 現在の月間ランキングポイントを取得
+ * 現在の月間ランキング情報（ポイントと順位）を取得
  */
-export async function getMonthlyPoints(userId: string): Promise<number> {
+export async function getMonthlyRankingInfo(userId: string): Promise<{ points: number; rank: number }> {
     const now = new Date()
     const year = now.getFullYear()
     const month = now.getMonth() + 1
     const ranking = await prisma.monthlyRanking.findUnique({
         where: { userId_year_month: { userId, year, month } },
     })
-    return ranking?.totalPoints ?? 0
+
+    if (!ranking) return { points: 0, rank: 0 }
+
+    const rank = await prisma.monthlyRanking.count({
+        where: {
+            year,
+            month,
+            totalPoints: { gt: ranking.totalPoints },
+        },
+    })
+
+    return { points: ranking.totalPoints, rank: rank + 1 }
 }
 /** ABYSS 解放に必要な隕石破壊数 */
 const ABYSS_UNLOCK_THRESHOLD = 500

@@ -41,7 +41,7 @@ export {
     getStarShieldMatchStatus,
     getUnlockStatus,
     awardAbyssWavePoints,
-    getMonthlyPoints,
+    getMonthlyRankingInfo,
 } from './starShieldActions'
 export {
     getStarShieldProgress,

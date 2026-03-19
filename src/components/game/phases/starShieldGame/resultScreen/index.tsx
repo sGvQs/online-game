@@ -11,22 +11,21 @@ import { ICONS, DIFFICULTY_META, type Difficulty } from '@/constants/starShieldG
 import { useState, useEffect } from 'react'
 import { animate } from 'framer-motion'
 import { Typography } from '@/components/ui/typography'
+import { getMonthlyRankingInfo } from '@/server/actions/game'
 
 interface ResultScreenProps {
     result: GameResult
     stats: GameStats
     difficulty: Difficulty
     onBackToTitle: () => void
-    beforePoints: number
+    beforeRanking: { points: number; rank: number }
+    currentUserId: string
 }
 
 function PointGainAnimation({ before, gain }: { before: number; gain: number }) {
     const [displayPoints, setDisplayPoints] = useState(before)
-    const [isMerging, setIsMerging] = useState(false)
 
     useEffect(() => {
-        // 合体開始までの溜め
-        const timer = setTimeout(() => setIsMerging(true), 1200)
 
         // カウントアップ開始
         const controls = animate(before, before + gain, {
@@ -37,7 +36,6 @@ function PointGainAnimation({ before, gain }: { before: number; gain: number }) 
         })
 
         return () => {
-            clearTimeout(timer)
             controls.stop()
         }
     }, [before, gain])
@@ -56,33 +54,71 @@ function PointGainAnimation({ before, gain }: { before: number; gain: number }) 
                         <span className="text-6xl font-cherry-bomb-one text-yellow-400 drop-shadow-[0_0_15px_rgba(250,204,21,0.5)]">
                             {displayPoints.toLocaleString()}
                         </span>
-                        <span className="text-2xl font-cherry-bomb-one text-yellow-400/80">pt</span>
+                        <span className="text-2xl text-yellow-400/80">pt</span>
                     </motion.div>
                 </div>
 
-                {/* 獲得バッジの融合アニメーション */}
-                {!isMerging && (
-                    <motion.div
-                        initial={{ opacity: 0, y: 30, scale: 0.5 }}
-                        animate={{ opacity: 1, y: 15, scale: 1 }}
-                        exit={{ opacity: 0, y: -20, scale: 0 }}
-                        className="absolute -bottom-10 whitespace-nowrap px-4 py-1 rounded-full bg-brand-500/20 border-2 border-brand-500/40 text-brand-300 font-bold"
-                    >
-                        かくとく：+{gain}pt
-                    </motion.div>
-                )}
+                <motion.div
+                    initial={{ opacity: 0, scale: 0, y: 10, rotate: -10 }}
+                    animate={{ opacity: 1, scale: 1, y: -35, rotate: 12 }}
+                    exit={{ opacity: 0, y: -20, scale: 0 }}
+                    transition={{ delay: 1.5 }}
+                    className="absolute right-0 top-6 bg-gradient-to-br from-yellow-300 to-orange-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full shadow-[0_4px_12px_rgba(249,115,22,0.4)] border border-white/20 whitespace-nowrap"
+                >
+                    +{gain}pt
+                </motion.div>
 
-                {isMerging && displayPoints < before + gain && (
+
+
+            </div>
+        </div>
+    )
+}
+
+function RankUpAnimation({ beforeRank, afterRank }: { beforeRank: number; afterRank: number }) {
+    const [displayRank, setDisplayRank] = useState(beforeRank)
+    const isRankUp = afterRank < beforeRank && afterRank > 0 && beforeRank > 0
+
+    useEffect(() => {
+        if (!isRankUp) return
+
+        // ポイントアニメーションの完了（約2.3s）後にランクアップ
+        const timer = setTimeout(() => {
+            setDisplayRank(afterRank)
+        }, 2800)
+
+        return () => clearTimeout(timer)
+    }, [isRankUp, afterRank, beforeRank])
+
+    return (
+        <div className="flex flex-col items-center mt-2">
+            <motion.div
+                key={displayRank}
+                initial={{ scale: 1 }}
+                animate={displayRank !== beforeRank ? {
+                    scale: [1, 1.4, 1],
+                    rotate: [0, -5, 5, -5, 5, 0]
+                } : {}}
+                transition={{ duration: 0.3 }}
+                className="relative flex items-center gap-2"
+            >
+                <div className="flex items-baseline gap-1">
+                    <span className="text-6xl font-cherry-bomb-one text-white drop-shadow-[0_0_12px_rgba(255,255,255,0.4)]">
+                        {displayRank > 0 ? displayRank : '--'}
+                    </span>
+                    <span className="text-2xl text-white/60">位</span>
+                </div>
+
+                {displayRank !== beforeRank && (
                     <motion.div
-                        initial={{ scale: 1.5, opacity: 1, y: 20 }}
-                        animate={{ scale: 1, opacity: 0, y: 0 }}
-                        transition={{ duration: 0.4 }}
-                        className="absolute text-brand-400 font-bold text-3xl pointer-events-none"
+                        initial={{ opacity: 0, scale: 0, y: 10, rotate: -10 }}
+                        animate={{ opacity: 1, scale: 1, y: -35, rotate: 12 }}
+                        className="absolute right-0 top-6 bg-gradient-to-br from-purple-300 to-purple-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full shadow-[0_4px_12px_rgba(249,115,22,0.4)] border border-white/20 whitespace-nowrap"
                     >
-                        +{gain}
+                        RANK UP!
                     </motion.div>
                 )}
-            </div>
+            </motion.div>
         </div>
     )
 }
@@ -155,8 +191,20 @@ export function ResultScreen({
     stats,
     difficulty,
     onBackToTitle,
-    beforePoints,
+    beforeRanking,
+    currentUserId,
 }: ResultScreenProps) {
+    const [afterRanking, setAfterRanking] = useState<{ points: number; rank: number } | null>(null)
+
+    useEffect(() => {
+        if (result === 'CLEARED') {
+            // 少し待ってから最新の順位を取得（DB更新完了を待つ）
+            const timer = setTimeout(() => {
+                getMonthlyRankingInfo(currentUserId).then(setAfterRanking)
+            }, 1000)
+            return () => clearTimeout(timer)
+        }
+    }, [result, currentUserId])
     const config = RESULT_CONFIG[result]
     const accuracy =
         stats.spawnedCount > 0 ? Math.round((stats.destroyedCount / stats.spawnedCount) * 100) : 0
@@ -214,17 +262,32 @@ export function ResultScreen({
                     </motion.div>
 
                     {result === 'CLEARED' && (
-                        <PointGainAnimation
-                            before={beforePoints}
-                            gain={parseInt(earnedPoints?.replace('+', '') || '0')}
-                        />
+                        <div className='flex gap-12 justify-center items-baseline'>
+                            {/* <RankUpAnimation
+                                beforeRank={beforeRanking.rank}
+                                afterRank={afterRanking?.rank ?? beforeRanking.rank}
+                            /> */}
+                            <RankUpAnimation
+                                beforeRank={10}
+                                afterRank={afterRanking?.rank ?? 10}
+                            />
+                            <PointGainAnimation
+                                before={4000}
+                                gain={parseInt(earnedPoints?.replace('+', '') || '0')}
+                            />
+
+                            {/* <PointGainAnimation
+                                before={beforeRanking.points}
+                                gain={parseInt(earnedPoints?.replace('+', '') || '0')}
+                            /> */}
+                        </div>
                     )}
 
                     {/* earned points badge */}
                 </div>
 
                 {/* ===== DINO MESSAGE ===== */}
-                <motion.div
+                {/* <motion.div
                     className="w-full"
                     initial={{ opacity: 0, y: 16 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -245,7 +308,7 @@ export function ResultScreen({
                             <p className={styles.dinoMessageText()}>{config.message}</p>
                         </div>
                     </div>
-                </motion.div>
+                </motion.div> */}
 
                 {/* ===== STATS ===== */}
                 <motion.div

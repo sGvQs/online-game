@@ -12,7 +12,7 @@ import {
     getStarShieldProgress,
     getMyStarShieldProgress,
     updateLoadout,
-    getMonthlyPoints,
+    getMonthlyRankingInfo,
 } from '@/server/actions/game'
 import { clearCurrentMatch, resetAllReady } from '@/server/actions/room'
 import type { RoomWithUsersAndReadyStatus } from '@/types'
@@ -59,7 +59,7 @@ export interface UseStarShieldLobbyReturn {
     gameResult: GameResult | null
     gameStats: GameStats | null
     gameResultDifficulty: Difficulty | null
-    currentUserPointsBefore: number | null
+    currentUserRankingBefore: { points: number; rank: number } | null
     allUsersReady: boolean
     canStartLobby: boolean
     handleRoleChange: (role: RoleChoice) => Promise<void>
@@ -97,7 +97,7 @@ export function useStarShieldLobby({
     const [shooterProgress, setShooterProgress] = useState<StarShieldProgress | null>(null)
     const [typistProgress, setTypistProgress] = useState<StarShieldProgress | null>(null)
     const [currentUserProgress, setCurrentUserProgress] = useState<StarShieldProgress | null>(null)
-    const [initialPoints, setInitialPoints] = useState<number | null>(null)
+    const [initialRanking, setInitialRanking] = useState<{ points: number; rank: number } | null>(null)
     const [roleChoices, setRoleChoices] = useState<Record<string, RoleChoice>>({})
 
     // matchId を ref でも保持（lobbyChannel が deps なしで参照するため）
@@ -230,7 +230,7 @@ export function useStarShieldLobby({
     useEffect(() => {
         if (phase !== 'ROLE_SELECT') return
         getMyStarShieldProgress().then(setCurrentUserProgress)
-        getMonthlyPoints(currentUserId).then(setInitialPoints)
+        getMonthlyRankingInfo(currentUserId).then(setInitialRanking)
     }, [phase, currentUserId])
 
     // ============================================
@@ -432,7 +432,7 @@ export function useStarShieldLobby({
         shooterProgress,
         typistProgress,
         currentUserProgress,
-        currentUserPointsBefore: initialPoints,
+        currentUserRankingBefore: initialRanking,
         playingProps,
         gameResult,
         gameStats,
