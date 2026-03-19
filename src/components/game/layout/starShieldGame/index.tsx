@@ -41,6 +41,7 @@ export function StarShieldGame({
         difficulty,
         roleChoices,
         roleConflict,
+        shooterId,
         shooterIdForUnlock,
         hellUnlocked,
         abyssUnlocked,
@@ -126,6 +127,7 @@ export function StarShieldGame({
                         onBackToTitle={handleBackToTitle}
                         beforeRanking={currentUserRankingBefore ?? { points: 0, rank: 0 }}
                         currentUserId={currentUserId}
+                        isShooter={currentUserId === shooterId}
                     />
                 )}
             </div>

@@ -20,6 +20,7 @@ interface ResultScreenProps {
     onBackToTitle: () => void
     beforeRanking: { points: number; rank: number }
     currentUserId: string
+    isShooter: boolean
 }
 
 function PointGainAnimation({ before, gain }: { before: number; gain: number }) {
@@ -123,40 +124,51 @@ function RankUpAnimation({ beforeRank, afterRank }: { beforeRank: number; afterR
     )
 }
 
-function DestroyedCountAnimation({ count }: { count: number }) {
-    const [displayCount, setDisplayCount] = useState(0)
+function StatResultRow({
+    icon,
+    label,
+    value,
+    suffix,
+    delay = 0.3
+}: {
+    icon: string;
+    label: string;
+    value: number;
+    suffix: string;
+    delay?: number;
+}) {
+    const [displayValue, setDisplayValue] = useState(0)
 
     useEffect(() => {
-        // ワンテンポ遅れてカウントアップ開始
-        const controls = animate(0, count, {
+        const controls = animate(0, value, {
             duration: 1.2,
-            delay: 0.3,
+            delay,
             ease: 'easeOut',
-            onUpdate: (v) => setDisplayCount(Math.floor(v)),
+            onUpdate: (v) => setDisplayValue(Math.floor(v)),
         })
         return () => controls.stop()
-    }, [count])
+    }, [value, delay])
 
     return (
         <div className="flex flex-col items-center gap-1">
             <motion.div
-                key={displayCount}
+                key={displayValue}
                 initial={{ scale: 1 }}
                 animate={{ scale: [1, 1.1, 1], rotate: [0, -1, 1, -1, 1, 0] }}
                 transition={{ duration: 0.15 }}
                 className="flex items-baseline gap-8"
             >
                 <div className="flex items-center gap-0">
-                    <Image src={ICONS.METOR} alt="" width={40} height={40} className="object-contain" />
+                    <Image src={icon} alt="" width={40} height={40} className="object-contain" />
                     <span className="text-lg font-cherry-bomb-one text-white drop-shadow-[0_0_30px_rgba(255,255,255,0.2)]">
-                        をこわしたかず
+                        {label}
                     </span>
                 </div>
-                <div className='flex gap-2 items-baseline'>
+                <div className='flex gap-2 items-baseline min-w-[120px]'>
                     <span className="text-6xl font-cherry-bomb-one text-white drop-shadow-[0_0_30px_rgba(255,255,255,0.2)]">
-                        {displayCount}
+                        {displayValue.toLocaleString()}
                     </span>
-                    <span className="text-2xl text-white/40 ">個</span>
+                    <span className="text-2xl text-white/40 font-cherry-bomb-one">{suffix}</span>
                 </div>
             </motion.div>
         </div>
@@ -233,6 +245,7 @@ export function ResultScreen({
     onBackToTitle,
     beforeRanking,
     currentUserId,
+    isShooter,
 }: ResultScreenProps) {
     const [afterRanking, setAfterRanking] = useState<{ points: number; rank: number } | null>(null)
 
@@ -315,7 +328,21 @@ export function ResultScreen({
                                 />
                             </div>
                             {/* 壊した数 */}
-                            <DestroyedCountAnimation count={stats.destroyedCount} />
+                            <StatResultRow
+                                icon={ICONS.METOR}
+                                label="をこわしたかず"
+                                value={stats.destroyedCount}
+                                suffix="個"
+                                delay={0.3}
+                            />
+                            {/* 役職ごとの結果 */}
+                            <StatResultRow
+                                icon={isShooter ? ICONS.TARGET_CIRCLE : ICONS.TYPIST}
+                                label={isShooter ? "きみの めいちゅうど" : "きみの タイプすう"}
+                                value={isShooter ? accuracy : stats.fireCount}
+                                suffix={isShooter ? "%" : "文字"}
+                                delay={0.8}
+                            />
                         </div>
                     )}
 
