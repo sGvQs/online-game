@@ -302,8 +302,8 @@ export function ResultScreen({
                     </motion.div>
 
                     {result === 'CLEARED' && (
-                        <div className="flex flex-col items-center gap-12">
-                            {/* 順位・ポイント (サブ) */}
+                        <div className="flex flex-col items-center gap-8">
+                            {/* 順位・ポイント */}
                             <div className='flex gap-16 justify-center items-baseline'>
                                 <RankUpAnimation
                                     beforeRank={beforeRanking.rank}
@@ -314,7 +314,7 @@ export function ResultScreen({
                                     gain={parseInt(earnedPoints?.replace('+', '') || '0')}
                                 />
                             </div>
-                            {/* 壊した数 (メイン) */}
+                            {/* 壊した数 */}
                             <DestroyedCountAnimation count={stats.destroyedCount} />
                         </div>
                     )}
