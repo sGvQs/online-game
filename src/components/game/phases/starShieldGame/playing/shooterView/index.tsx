@@ -10,6 +10,7 @@ import { BULLET_RADIUS, DINO_X, DINO_Y } from '@/constants/starShieldGame/gameCo
 import { DEFAULT_BULLET_COLOR, TECHNIQUES } from '@/constants/starShieldGame/techniques'
 import { ProtectedStar } from '../protectedStar'
 import { ICONS } from '@/constants/starShieldGame/constants'
+import { StarHpBar } from '../typistView/StarHpBar'
 
 interface ShooterViewProps {
     asteroids: Asteroid[]
@@ -340,19 +341,15 @@ export function ShooterView({
         <div className="absolute inset-0 cursor-none overflow-hidden" onMouseMove={onMouseMove}>
             <ProtectedStar />
             <Dinosaur aimRef={aimRef} />
-            <AnimatePresence>
                 {activeAsteroids.map((a) => (
                     <AsteroidCircle key={a.id} asteroid={a} maxHp={maxHp} />
                 ))}
-            </AnimatePresence>
             {bullets.map((b) => (
                 <BulletCircle key={b.id} bullet={b} />
             ))}
-            <AnimatePresence>
-                {destroyedAsteroids.map((a) => (
-                    <ExplosionEffect key={`exp-${a.id}`} asteroid={a} />
-                ))}
-            </AnimatePresence>
+            {destroyedAsteroids.map((a) => (
+                <ExplosionEffect key={`exp-${a.id}`} asteroid={a} />
+            ))}
             {contactExplosion && (
                 <ContactExplosionEffect
                     pos={{ x: contactExplosion.x, y: contactExplosion.y }}
@@ -363,9 +360,6 @@ export function ShooterView({
                 <ChainHitsEffect chainHits={chainHits} onComplete={onChainHitsComplete} />
             )}
             <Crosshair aimRef={aimRef} />
-            <div className="absolute bottom-8 left-1/2 -translate-x-1/2 text-brand-500/50 text-xs tracking-widest">
-                SHOOTER MODE — aim with mouse, fire when typist types
-            </div>
         </div>
     )
 }

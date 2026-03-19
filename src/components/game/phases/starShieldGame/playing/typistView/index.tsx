@@ -9,6 +9,7 @@ import { StarVisual } from '@/components/game/common/starShield/starVisual'
 import { AuroraGlow } from '@/components/game/common/starShield/auroraGlow'
 import { typistView } from './styles'
 import { Typography } from '@/components/ui/typography'
+import { StarHpBar } from './StarHpBar'
 import { ICONS, AURORA_GRADIENT_TYPIST } from '@/constants/starShieldGame/constants'
 import { DEFAULT_BULLET_COLOR, TECHNIQUES } from '@/constants/starShieldGame/techniques'
 import type { TechniqueId } from '@/constants/starShieldGame/techniques'
@@ -85,23 +86,12 @@ function TypingDisplay({ line, charIndex }: { line: DialogueLine; charIndex: num
 
 export function TypistView({ dialogue, score, starHp, maxStarHp, typistFireCount, selectedNormalAttack, healLevel, healRecoveryText }: TypistViewProps) {
     const inputRef = useRef<HTMLInputElement>(null)
-    const prevStarHpRef = useRef(maxStarHp)
     const prevTypistFireCountRef = useRef(typistFireCount)
-    const [damageWidth, setDamageWidth] = useState(0)
     const [bullets, setBullets] = useState<{ id: string; color: string }[]>([])
 
     useEffect(() => {
         inputRef.current?.focus()
     }, [])
-
-    useEffect(() => {
-        const prev = prevStarHpRef.current
-        if (starHp < prev && maxStarHp > 0) {
-            const lost = ((prev - starHp) / maxStarHp) * 100
-            setDamageWidth((w) => w + lost)
-        }
-        prevStarHpRef.current = starHp
-    }, [starHp, maxStarHp])
 
     const bulletColor =
         selectedNormalAttack && selectedNormalAttack in TECHNIQUES
@@ -165,36 +155,8 @@ export function TypistView({ dialogue, score, starHp, maxStarHp, typistFireCount
 
             <div className="w-full shrink-0 flex flex-col items-center gap-2 py-4 z-20">
                 <Typography variant="label" font="cherry-bomb-one" as="span" className={typistView().hpLabel()}>ほしのたいりょく</Typography>
-                <div className="flex items-center gap-2">
-                    <Typography variant="caption" as="span" font="dot-gothic-16" className="text-white/50 tabular-nums">
-                        HP {starHp}
-                    </Typography>
-                    <div
-                        className="relative h-3 rounded-full bg-stone-600/80 overflow-hidden shrink-0"
-                        style={{
-                            width: `${Math.max(12, Math.min(28, 12 + ((maxStarHp - 15) * 16) / 30))}rem`,
-                        }}
-                    >
-                        <div
-                            className={typistView().hpBar()}
-                            style={{ ['--hp-pct' as string]: `${Math.max(0, (starHp / maxStarHp) * 100)}%` }}
-                        />
-                        {damageWidth > 0 && (
-                            <motion.div
-                                key={`dmg-${damageWidth}`}
-                                className={typistView().damageFlash()}
-                                style={{ ['--hp-pct' as string]: `${Math.max(0, (starHp / maxStarHp) * 100)}%` }}
-                                initial={{ width: `${damageWidth}%` }}
-                                animate={{ width: '0%' }}
-                                transition={{ duration: 0.6, ease: 'easeOut' }}
-                                onAnimationComplete={() => setDamageWidth(0)}
-                            />
-                        )}
-                    </div>
-                </div>
+                <StarHpBar starHp={starHp} maxStarHp={maxStarHp} />
             </div>
-
-            <div className="shrink-0 pb-8 text-brand-500/50 text-xs tracking-widest">TYPIST MODE — type the romaji to fire</div>
         </div>
     )
 }
