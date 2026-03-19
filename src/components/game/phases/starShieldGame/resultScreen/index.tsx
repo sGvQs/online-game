@@ -52,10 +52,10 @@ function PointGainAnimation({ before, gain }: { before: number; gain: number }) 
                         transition={{ duration: 0.25 }}
                         className="flex items-baseline gap-1"
                     >
-                        <span className="text-6xl font-cherry-bomb-one text-yellow-400 drop-shadow-[0_0_15px_rgba(250,204,21,0.5)]">
+                        <span className="text-3xl font-cherry-bomb-one text-yellow-400 drop-shadow-[0_0_15px_rgba(250,204,21,0.5)]">
                             {displayPoints.toLocaleString()}
                         </span>
-                        <span className="text-2xl text-yellow-400/80">pt</span>
+                        <span className="text-lg text-yellow-400/80">pt</span>
                     </motion.div>
                 </div>
 
@@ -104,10 +104,10 @@ function RankUpAnimation({ beforeRank, afterRank }: { beforeRank: number; afterR
                 className="relative flex items-center gap-2"
             >
                 <div className="flex items-baseline gap-1">
-                    <span className="text-6xl font-cherry-bomb-one text-white drop-shadow-[0_0_12px_rgba(255,255,255,0.4)]">
+                    <span className="text-3xl font-cherry-bomb-one text-white drop-shadow-[0_0_12px_rgba(255,255,255,0.4)]">
                         {displayRank > 0 ? displayRank : '--'}
                     </span>
-                    <span className="text-2xl text-white/60">位</span>
+                    <span className="text-lg text-white/60">位</span>
                 </div>
 
                 {displayRank !== beforeRank && (
@@ -150,28 +150,26 @@ function StatResultRow({
     }, [value, delay])
 
     return (
-        <div className="flex flex-col items-center gap-1">
-            <motion.div
-                key={displayValue}
-                initial={{ scale: 1 }}
-                animate={{ scale: [1, 1.1, 1], rotate: [0, -1, 1, -1, 1, 0] }}
-                transition={{ duration: 0.15 }}
-                className="flex items-baseline gap-8"
-            >
-                <div className="flex items-center gap-0">
-                    <Image src={icon} alt="" width={40} height={40} className="object-contain" />
-                    <span className="text-lg font-cherry-bomb-one text-white drop-shadow-[0_0_30px_rgba(255,255,255,0.2)]">
-                        {label}
-                    </span>
-                </div>
-                <div className='flex gap-2 items-baseline min-w-[120px]'>
-                    <span className="text-6xl font-cherry-bomb-one text-white drop-shadow-[0_0_30px_rgba(255,255,255,0.2)]">
-                        {displayValue.toLocaleString()}
-                    </span>
-                    <span className="text-2xl text-white/40 font-cherry-bomb-one">{suffix}</span>
-                </div>
-            </motion.div>
-        </div>
+        <motion.div
+            key={displayValue}
+            initial={{ scale: 1 }}
+            animate={{ scale: [1, 1.1, 1], rotate: [0, -1, 1, -1, 1, 0] }}
+            transition={{ duration: 0.15 }}
+            className="flex items-center gap-8"
+        >
+            <div className="flex items-center gap-2">
+                <Image src={icon} alt="" width={40} height={40} className="object-contain" />
+                <span className="text-sm font-cherry-bomb-one text-white drop-shadow-[0_0_30px_rgba(255,255,255,0.2)]">
+                    {label}
+                </span>
+            </div>
+            <div className='flex gap-2 items-baseline'>
+                <span className="text-3xl font-cherry-bomb-one text-white drop-shadow-[0_0_30px_rgba(255,255,255,0.2)]">
+                    {displayValue.toLocaleString()}
+                </span>
+                <span className="text-md text-white/40">{suffix}</span>
+            </div>
+        </motion.div>
     )
 }
 
@@ -212,32 +210,6 @@ const RESULT_CONFIG: Record<
     },
 }
 
-const STAT_ITEMS = (
-    destroyedCount: number,
-    accuracy: number,
-    fireCount: number,
-    color: string,
-) => [
-        {
-            label: '壊した数',
-            value: String(destroyedCount),
-            icon: ICONS.METOR,
-            color,
-        },
-        {
-            label: '正確性',
-            value: `${accuracy}%`,
-            icon: ICONS.TARGET_CIRCLE,
-            color,
-        },
-        {
-            label: '文字数',
-            value: String(fireCount),
-            icon: ICONS.TYPIST,
-            color,
-        },
-    ]
-
 export function ResultScreen({
     result,
     stats,
@@ -262,10 +234,8 @@ export function ResultScreen({
     const accuracy =
         stats.spawnedCount > 0 ? Math.round((stats.destroyedCount / stats.spawnedCount) * 100) : 0
     const diffMeta = DIFFICULTY_META[difficulty]
-    const earnedPoints = result === 'CLEARED' ? diffMeta.rate : null
+    const earnedPoints = diffMeta.rate
     const isCleared = result === 'CLEARED'
-
-    const statItems = STAT_ITEMS(stats.destroyedCount, accuracy, stats.fireCount, config.color)
     const styles = resultScreen()
 
     return (
@@ -298,7 +268,7 @@ export function ResultScreen({
                 transition={{ duration: 0.5 }}
             >
                 {/* ===== HERO ===== */}
-                <div className="flex flex-col items-center gap-5 w-full">
+                <div className="flex flex-col items-center gap-6 w-full">
                     {/* title */}
                     <motion.div
                         className="text-center"
@@ -314,102 +284,50 @@ export function ResultScreen({
                         <p className={styles.subtitle()}>{config.subtitle}</p>
                     </motion.div>
 
-                    {result === 'CLEARED' && (
-                        <div className="flex flex-col items-center gap-8">
-                            {/* 順位・ポイント */}
-                            <div className='flex gap-16 justify-center items-baseline'>
-                                <RankUpAnimation
-                                    beforeRank={beforeRanking.rank}
-                                    afterRank={afterRanking?.rank ?? beforeRanking.rank}
-                                />
-                                <PointGainAnimation
-                                    before={beforeRanking.points}
-                                    gain={parseInt(earnedPoints?.replace('+', '') || '0')}
-                                />
-                            </div>
-                            {/* 壊した数 */}
-                            <StatResultRow
-                                icon={ICONS.METOR}
-                                label="をこわしたかず"
-                                value={stats.destroyedCount}
-                                suffix="個"
-                                delay={0.3}
-                            />
-                            {/* 役職ごとの結果 */}
-                            <StatResultRow
-                                icon={isShooter ? ICONS.TARGET_CIRCLE : ICONS.TYPIST}
-                                label={isShooter ? "きみの めいちゅうど" : "きみの タイプすう"}
-                                value={isShooter ? accuracy : stats.fireCount}
-                                suffix={isShooter ? "%" : "文字"}
-                                delay={0.8}
-                            />
-                        </div>
-                    )}
-
-                    {/* earned points badge */}
+                    <div className='flex gap-8 justify-center items-baseline mt-6'>
+                        {/* 順位・ポイント */}
+                        <RankUpAnimation
+                            beforeRank={beforeRanking.rank}
+                            afterRank={afterRanking?.rank ?? beforeRanking.rank}
+                        />
+                        <PointGainAnimation
+                            before={beforeRanking.points}
+                            gain={parseInt(earnedPoints?.replace('+', '') || '0')}
+                        />
+                    </div>
+                    {/* 壊した数 */}
+                    <StatResultRow
+                        icon={ICONS.METOR}
+                        label="をこわしたかず"
+                        value={stats.destroyedCount}
+                        suffix="個"
+                        delay={0.3}
+                    />
+                    {/* 役職ごとの結果 */}
+                    <StatResultRow
+                        icon={isShooter ? ICONS.TARGET_CIRCLE : ICONS.TYPIST}
+                        label={isShooter ? "めいちゅうりつ" : "たいぷしたかず"}
+                        value={isShooter ? accuracy : stats.fireCount}
+                        suffix={isShooter ? "%" : "文字"}
+                        delay={0.8}
+                    />
                 </div>
 
-                {/* ===== DINO MESSAGE ===== */}
-                {/* <motion.div
-                    className="w-full"
-                    initial={{ opacity: 0, y: 16 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.45, duration: 0.55 }}
-                >
-                    <div
-                        className={styles.dinoMessage()}
-                        style={{
-                            ['--dino-message-border' as string]: isCleared
-                                ? '1px solid rgba(129,140,248,0.18)'
-                                : '1px solid rgba(239,68,68,0.18)',
-                        }}
-                    >
-                        <div className="relative w-12 h-12 shrink-0 mt-0.5">
-                            <Image src={ICONS.DINO} alt="" fill className="object-contain" />
-                        </div>
-                        <div className="flex-1">
-                            <p className={styles.dinoMessageText()}>{config.message}</p>
-                        </div>
-                    </div>
-                </motion.div> */}
-
-                {/* ===== STATS ===== */}
-                <motion.div
-                    className="w-full grid grid-cols-3 gap-3"
-                    initial={{ opacity: 0, y: 16 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.6, duration: 0.55 }}
-                >
-                    {statItems.map(({ label, value, icon }, i) => (
-                        <motion.div
-                            key={label}
-                            className={styles.statCard()}
-                            style={{
-                                ['--stat-color' as string]: config.color,
-                                ['--stat-glow' as string]: config.glowColor,
-                            }}
-                            initial={{ opacity: 0, y: 12 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ delay: 0.65 + i * 0.07, duration: 0.45 }}
-                        >
-                            {icon && (
-                                <div className="relative w-5 h-5 opacity-50">
-                                    <Image src={icon} alt="" fill className="object-contain" />
-                                </div>
-                            )}
-                            <div className={styles.statValue()}>{value}</div>
-                            <div className={styles.statLabel()}>{label}</div>
-                        </motion.div>
-                    ))}
-                </motion.div>
 
                 {/* ===== BUTTON ===== */}
                 <motion.div
                     initial={{ opacity: 0, y: 12 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.85, duration: 0.5 }}
+                    className="mt-6"
                 >
-                    <Button variant="success" onClick={onBackToTitle} className="font-cherry-bomb-one text-base">
+                    <Button
+                        screen="star-shield"
+                        variant={'success'}
+                        size="lg"
+                        onClick={onBackToTitle}
+                        className="w-full justify-start"
+                    >
                         ▶ BACK TO TITLE
                     </Button>
                 </motion.div>
