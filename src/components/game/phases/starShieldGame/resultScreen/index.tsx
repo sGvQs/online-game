@@ -59,25 +59,25 @@ const STAT_ITEMS = (
     fireCount: number,
     color: string,
 ) => [
-    {
-        label: '壊した数',
-        value: String(destroyedCount),
-        icon: ICONS.METOR,
-        color,
-    },
-    {
-        label: '正確性',
-        value: `${accuracy}%`,
-        icon: ICONS.TARGET_CIRCLE,
-        color,
-    },
-    {
-        label: '文字数',
-        value: String(fireCount),
-        icon: ICONS.TYPIST,
-        color,
-    },
-]
+        {
+            label: '壊した数',
+            value: String(destroyedCount),
+            icon: ICONS.METOR,
+            color,
+        },
+        {
+            label: '正確性',
+            value: `${accuracy}%`,
+            icon: ICONS.TARGET_CIRCLE,
+            color,
+        },
+        {
+            label: '文字数',
+            value: String(fireCount),
+            icon: ICONS.TYPIST,
+            color,
+        },
+    ]
 
 export function ResultScreen({ result, stats, difficulty, onBackToTitle }: ResultScreenProps) {
     const config = RESULT_CONFIG[result]
@@ -108,8 +108,8 @@ export function ResultScreen({ result, stats, difficulty, onBackToTitle }: Resul
                     isCleared
                         ? 'radial-gradient(ellipse at 50% 60%, rgba(192,132,252,0.7) 0%, rgba(99,102,241,0.4) 40%, transparent 70%)'
                         : result === 'FAILED_CONTACT'
-                          ? 'radial-gradient(ellipse at 50% 60%, rgba(239,68,68,0.7) 0%, rgba(185,28,28,0.3) 40%, transparent 70%)'
-                          : 'radial-gradient(ellipse at 50% 60%, rgba(249,115,22,0.7) 0%, rgba(194,65,12,0.3) 40%, transparent 70%)'
+                            ? 'radial-gradient(ellipse at 50% 60%, rgba(239,68,68,0.7) 0%, rgba(185,28,28,0.3) 40%, transparent 70%)'
+                            : 'radial-gradient(ellipse at 50% 60%, rgba(249,115,22,0.7) 0%, rgba(194,65,12,0.3) 40%, transparent 70%)'
                 }
             />
 
@@ -121,32 +121,6 @@ export function ResultScreen({ result, stats, difficulty, onBackToTitle }: Resul
             >
                 {/* ===== HERO ===== */}
                 <div className="flex flex-col items-center gap-5 w-full">
-                    {/* icon */}
-                    <motion.div
-                        className="relative"
-                        initial={{ scale: 0.6, opacity: 0 }}
-                        animate={{ scale: 1, opacity: 1 }}
-                        transition={{ duration: 0.6, ease: [0.34, 1.56, 0.64, 1] }}
-                    >
-                        {isCleared ? (
-                            <div className="relative w-24 h-24">
-                                <div className={styles.iconGlowCleared()} />
-                                <Image src={ICONS.TARGET_CIRCLE} alt="" fill className="object-contain relative z-10 drop-shadow-[0_0_20px_rgba(129,140,248,0.8)]" />
-                            </div>
-                        ) : (
-                            <div
-                                className="relative w-24 h-24"
-                                style={{
-                                    ['--result-icon-glow' as string]: config.glowColor,
-                                    ['--result-icon-color' as string]: config.color,
-                                }}
-                            >
-                                <div className={styles.iconGlowFailed()} />
-                                <Image src={ICONS.FIRE} alt="" fill className={styles.iconImageFailed()} />
-                            </div>
-                        )}
-                    </motion.div>
-
                     {/* title */}
                     <motion.div
                         className="text-center"
