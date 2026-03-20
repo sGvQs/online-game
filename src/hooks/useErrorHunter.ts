@@ -36,7 +36,6 @@ interface ErrorEventRow {
 	closed_by: string | null;
 	position_x: number;
 	position_y: number;
-	room_id: string;
 }
 
 /** matches テーブルの型（snake_case） */
@@ -503,16 +502,15 @@ export function useErrorHunter({
 				{
 					event: "INSERT",
 					schema: "public",
-					table: "error_events",
+					table: "matches",
 					filter: `room_id=eq.${roomId}`,
 				},
-				async (payload: RealtimePostgresChangesPayload<ErrorEventRow>) => {
-					// ゲーム開始検知: 新しいエラーイベントが作成されたらゲームをセットアップ
-					const matchId = payload.new.match_id;
-					const appearanceAt = payload.new.appearance_at;
+				async (payload: RealtimePostgresChangesPayload<MatchRow>) => {
+					// ゲーム開始検知: Error Hunter のマッチが作成されたらゲームをセットアップ
+					if (payload.new.game_type !== "ERROR_HUNTER") return;
 
+					const matchId = payload.new.id;
 					if (!matchId) return;
-					if (!appearanceAt) return;
 
 					// レースコンディション対策: 最初の1つだけを処理（アトミックチェック&セット）
 					if (isSetupGameStatusRef.current) return;
@@ -520,11 +518,15 @@ export function useErrorHunter({
 
 					// ゲーム状態の初期化
 					matchIdRef.current = matchId;
-					const progressData = await getMatchProgress(matchId);
+					const [progressData, matchData] = await Promise.all([
+						getMatchProgress(matchId),
+						getMatchWithEvents(matchId),
+					]);
 					setProgress(progressData);
-					const matchData = await getMatchWithEvents(matchId);
 					setMatch(matchData);
-					setupAppearanceTimer(appearanceAt);
+					if (matchData?.errorEvents[0]) {
+						setupAppearanceTimer(matchData.errorEvents[0].appearanceAt);
+					}
 				},
 			)
 			.on(
