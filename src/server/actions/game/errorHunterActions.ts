@@ -1,8 +1,9 @@
 "use server";
 
 import { prisma } from "@/server/lib/prisma";
+import { GameType, MatchStatus } from "@prisma/client";
 import { getAuthenticatedUser } from "../_helpers/getAuthenticatedUser";
-import { ErrorEventWithUser, ErrorEvent } from "@/types";
+import type { ErrorEventWithUser, ErrorEvent } from "@/types";
 
 /**
  * ゲーム開始: Match + ErrorEvent を作成し、ランダムな出現時刻を設定する
@@ -27,8 +28,8 @@ export async function startGame(roomId: string) {
 	const match = await prisma.match.create({
 		data: {
 			roomId: roomId,
-			gameType: "error-hunter",
-			status: "PLAYING",
+			gameType: GameType.ERROR_HUNTER,
+			status: MatchStatus.PLAYING,
 		},
 	});
 
@@ -38,7 +39,6 @@ export async function startGame(roomId: string) {
 		appearanceAt: appearanceAt,
 		positionX: Math.random() * 60 + 20, // 20-80の範囲
 		positionY: Math.random() * 75 + 10, // 10-85の範囲
-		roomId: roomId,
 	}));
 
 	await prisma.errorEvent.createMany({ data: errorEvents });
@@ -208,7 +208,7 @@ export async function finishGame(matchId: string, roomId: string) {
 	await prisma.match.update({
 		where: { id: matchId },
 		data: {
-			status: "FINISHED",
+			status: MatchStatus.FINISHED,
 			winnerId: winnerId,
 		},
 	});

@@ -1,14 +1,14 @@
 "use server";
 
 import { prisma } from "@/server/lib/prisma";
+import { GameType, MatchStatus } from "@prisma/client";
 import { getAuthenticatedUser } from "../_helpers/getAuthenticatedUser";
-import {
+import type {
 	JankenEventWithGuests,
 	HostStats,
-	HandType,
-	HostChoice,
 	MatchScoreWithUser,
 } from "@/types";
+import { HandType, HostChoice } from "@/types";
 
 // ============================================
 // ユーティリティ
@@ -105,8 +105,15 @@ export async function startJankenMatch(roomId: string) {
 		const newMatch = await tx.match.create({
 			data: {
 				roomId: roomId,
-				gameType: "null-hand",
-				status: "PLAYING",
+				gameType: GameType.NULL_HAND,
+				status: MatchStatus.PLAYING,
+			},
+		});
+
+		// NullHand 専用メタデータを作成
+		await tx.nullHandMatch.create({
+			data: {
+				matchId: newMatch.id,
 				currentTurnIndex: 1,
 				totalTurns: participants.length,
 			},
@@ -475,11 +482,9 @@ export async function startNextTurn(eventId: string) {
 			},
 		});
 
-		await prisma.match.update({
-			where: { id: event.matchId },
-			data: {
-				currentTurnIndex: event.turnNumber + 1,
-			},
+		await prisma.nullHandMatch.update({
+			where: { matchId: event.matchId },
+			data: { currentTurnIndex: event.turnNumber + 1 },
 		});
 		return;
 	}
@@ -502,11 +507,9 @@ export async function startNextTurn(eventId: string) {
 		},
 	});
 
-	await prisma.match.update({
-		where: { id: event.matchId },
-		data: {
-			currentTurnIndex: event.turnNumber + 1,
-		},
+	await prisma.nullHandMatch.update({
+		where: { matchId: event.matchId },
+		data: { currentTurnIndex: event.turnNumber + 1 },
 	});
 }
 
@@ -523,7 +526,7 @@ export async function getJankenEvent(
 	const event = await prisma.jankenEvent.findUnique({
 		where: { id: eventId },
 		include: {
-			match: true,
+			match: { include: { nullHandMatch: true } },
 			guestHands: {
 				include: {
 					user: true,
@@ -547,7 +550,7 @@ export async function getLatestJankenEvent(
 		where: { matchId },
 		orderBy: { turnNumber: "desc" },
 		include: {
-			match: true,
+			match: { include: { nullHandMatch: true } },
 			guestHands: {
 				include: { user: true },
 			},
@@ -569,7 +572,7 @@ export async function getLatestJankenEventWithStats(
 		where: { matchId },
 		orderBy: { turnNumber: "desc" },
 		include: {
-			match: true,
+			match: { include: { nullHandMatch: true } },
 			guestHands: {
 				include: { user: true },
 			},
@@ -659,7 +662,7 @@ export async function finishJanken(matchId: string, roomId: string) {
 		},
 	});
 
-	if (!match || match.status === "FINISHED") return;
+	if (!match || match.status === MatchStatus.FINISHED) return;
 
 	const now = new Date();
 	const year = now.getFullYear();
@@ -670,7 +673,7 @@ export async function finishJanken(matchId: string, roomId: string) {
 		// 1. マッチを終了状態に更新
 		await tx.match.update({
 			where: { id: matchId },
-			data: { status: "FINISHED" },
+			data: { status: MatchStatus.FINISHED },
 		});
 
 		await tx.room.update({

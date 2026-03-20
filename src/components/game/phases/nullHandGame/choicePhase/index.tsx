@@ -119,7 +119,7 @@ export function ChoicePhase({
 							: ""
 				}
 				currentTurn={jankenEvent?.turnNumber}
-				totalTurns={jankenEvent?.match.totalTurns}
+				totalTurns={jankenEvent?.match.nullHandMatch?.totalTurns}
 			/>
 
 			{/* ホストの統計情報 / 演出中のテキスト */}

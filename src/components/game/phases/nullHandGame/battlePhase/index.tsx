@@ -98,7 +98,7 @@ export function BattlePhase({
 					}
 					subLabel={""}
 					currentTurn={jankenEvent?.turnNumber}
-					totalTurns={jankenEvent?.match.totalTurns}
+					totalTurns={jankenEvent?.match.nullHandMatch?.totalTurns}
 				/>
 
 				{/* ホストの統計情報 (ChoicePhaseを踏襲したスタイル) */}
@@ -203,7 +203,7 @@ export function BattlePhase({
 					title="しばらくお待ちください"
 					subLabel=""
 					currentTurn={jankenEvent?.turnNumber}
-					totalTurns={jankenEvent?.match.totalTurns}
+					totalTurns={jankenEvent?.match.nullHandMatch?.totalTurns}
 				/>
 
 				<div className="flex flex-col items-center mt-6 mb-2 w-full">

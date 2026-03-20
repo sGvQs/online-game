@@ -80,7 +80,7 @@ export type MatchScore = Prisma.MatchScoreGetPayload<{}>;
 /** JankenEvent with GuestHands including User */
 export type JankenEventWithGuests = Prisma.JankenEventGetPayload<{
 	include: {
-		match: true;
+		match: { include: { nullHandMatch: true } };
 		guestHands: {
 			include: {
 				user: true;

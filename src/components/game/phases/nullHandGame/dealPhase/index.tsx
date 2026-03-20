@@ -92,7 +92,7 @@ export function DealPhase({
 				title="システムが手を配布"
 				subLabel="OBSERVE THE DEAL"
 				currentTurn={jankenEvent?.turnNumber}
-				totalTurns={jankenEvent?.match.totalTurns}
+				totalTurns={jankenEvent?.match.nullHandMatch?.totalTurns}
 			/>
 
 			<div className="flex-1 flex flex-col items-center justify-center gap-8">

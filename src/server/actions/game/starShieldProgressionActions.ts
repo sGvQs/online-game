@@ -20,26 +20,23 @@ import type { StarShieldProgress } from "@/types/starShieldGame";
 export async function getStarShieldProgress(
 	userId: string,
 ): Promise<StarShieldProgress> {
-	const [progress, normalAttacks, specialAttacks, heal] = await Promise.all([
+	const [progress, normalAttacks, specialAttacks] = await Promise.all([
 		prisma.starShieldUserProgress.findUnique({ where: { userId } }),
 		prisma.starShieldUserNormalAttack.findMany({ where: { userId } }),
 		prisma.starShieldUserSpecialAttack.findMany({ where: { userId } }),
-		prisma.starShieldUserHeal.findUnique({ where: { userId } }),
 	]);
-
-	const normalList = normalAttacks.map((a) => ({
-		techniqueId: a.techniqueId,
-		level: a.level,
-	}));
 
 	return {
 		totalTypingCount: progress?.totalTypingCount ?? 0,
-		normalAttacks: normalList,
+		normalAttacks: normalAttacks.map((a) => ({
+			techniqueId: a.techniqueId,
+			level: a.level,
+		})),
 		specialAttacks: specialAttacks.map((a) => ({
 			specialAttackId: a.specialAttackId,
 			level: a.level,
 		})),
-		healLevel: heal?.level ?? null,
+		healLevel: progress?.healLevel ?? null,
 		starHpLevel: progress?.starHpLevel ?? 1,
 		selectedNormalAttackId: progress?.selectedNormalAttackId ?? null,
 		selectedSpecialAttackId: progress?.selectedSpecialAttackId ?? null,
@@ -365,18 +362,15 @@ export async function purchaseHealUnlock(): Promise<{
 	if (totalTypingCount < cost)
 		return { ok: false, error: "typing 数が不足しています" };
 
-	const existing = await prisma.starShieldUserHeal.findUnique({
+	const existing = await prisma.starShieldUserProgress.findUnique({
 		where: { userId: user.id },
 	});
-	if (existing) return { ok: false, error: "既に所持しています" };
+	if (existing?.healLevel != null) return { ok: false, error: "既に所持しています" };
 
 	await prisma.$transaction([
 		prisma.starShieldUserProgress.update({
 			where: { userId: user.id },
-			data: { totalTypingCount: { decrement: cost } },
-		}),
-		prisma.starShieldUserHeal.create({
-			data: { userId: user.id, level: 1 },
+			data: { totalTypingCount: { decrement: cost }, healLevel: 1 },
 		}),
 		prisma.starShieldPurchaseHistory.create({
 			data: {
@@ -399,27 +393,25 @@ export async function purchaseHealLevelUp(
 	const cost = HEAL_LEVEL_UP_COSTS[targetLevel];
 	if (cost === undefined) return { ok: false, error: "無効なレベル" };
 
-	const existing = await prisma.starShieldUserHeal.findUnique({
+	const { totalTypingCount } = await ensureProgress(user.id);
+	const current = await prisma.starShieldUserProgress.findUnique({
 		where: { userId: user.id },
+		select: { healLevel: true },
 	});
-	if (!existing) return { ok: false, error: "ヒールを所持していません" };
-	if (existing.level >= targetLevel)
+	const currentHealLevel = current?.healLevel ?? null;
+	if (currentHealLevel == null) return { ok: false, error: "ヒールを所持していません" };
+	if (currentHealLevel >= targetLevel)
 		return { ok: false, error: "既にそのレベル以上です" };
-	if (existing.level !== targetLevel - 1)
+	if (currentHealLevel !== targetLevel - 1)
 		return { ok: false, error: "前のレベルを先に購入してください" };
 
-	const { totalTypingCount } = await ensureProgress(user.id);
 	if (totalTypingCount < cost)
 		return { ok: false, error: "typing 数が不足しています" };
 
 	await prisma.$transaction([
 		prisma.starShieldUserProgress.update({
 			where: { userId: user.id },
-			data: { totalTypingCount: { decrement: cost } },
-		}),
-		prisma.starShieldUserHeal.update({
-			where: { userId: user.id },
-			data: { level: targetLevel },
+			data: { totalTypingCount: { decrement: cost }, healLevel: targetLevel },
 		}),
 		prisma.starShieldPurchaseHistory.create({
 			data: {

@@ -1,6 +1,7 @@
 "use server";
 
 import { prisma } from "@/server/lib/prisma";
+import { GameType, MatchStatus } from "@prisma/client";
 import { getAuthenticatedUser } from "../_helpers/getAuthenticatedUser";
 
 type Difficulty = "EASY" | "NORMAL" | "HARD" | "HELL" | "ABYSS";
@@ -88,8 +89,8 @@ export async function createStarShieldSetupMatch(
 	const match = await prisma.match.create({
 		data: {
 			roomId,
-			gameType: "star-shield",
-			status: "SETUP",
+			gameType: GameType.STAR_SHIELD,
+			status: MatchStatus.SETUP,
 		},
 	});
 
@@ -121,7 +122,7 @@ export async function updateStarShieldSetupMatch(
 ): Promise<void> {
 	await getAuthenticatedUser();
 	const match = await prisma.match.findUnique({ where: { id: matchId } });
-	if (!match || match.status !== "SETUP") return; // 無視
+	if (!match || match.status !== MatchStatus.SETUP) return; // 無視
 
 	await prisma.typingShootMatch.update({
 		where: { matchId },
@@ -150,7 +151,7 @@ export async function startStarShieldMatch(
 	if (!match) throw new Error("マッチが見つかりません");
 	if (match.room.createdBy !== user.id)
 		throw new Error("ゲームを開始する権限がありません（ホストのみ）");
-	if (match.status !== "SETUP") throw new Error("既に開始されています");
+	if (match.status !== MatchStatus.SETUP) throw new Error("既に開始されています");
 
 	const tsm = await prisma.typingShootMatch.findUnique({ where: { matchId } });
 	if (!tsm) throw new Error("TypingShootMatchが見つかりません");
@@ -182,7 +183,7 @@ export async function startStarShieldMatch(
 
 	await prisma.match.update({
 		where: { id: matchId },
-		data: { status: "PLAYING" },
+		data: { status: MatchStatus.PLAYING },
 	});
 
 	await prisma.typingShootMatch.update({
@@ -262,7 +263,7 @@ export async function getStarShieldMatchStatus(matchId: string): Promise<
 		};
 	}
 
-	if (match.status === "SETUP") {
+	if (match.status === MatchStatus.SETUP) {
 		return {
 			status: "setup",
 			shooterId: tsm.shooterId,
@@ -391,7 +392,7 @@ export async function saveStarShieldResult(
 
 	await prisma.match.update({
 		where: { id: matchId },
-		data: { status: "FINISHED" },
+		data: { status: MatchStatus.FINISHED },
 	});
 
 	// ABYSS: クリア概念なし。ゲームオーバー時にランキング用記録を保存

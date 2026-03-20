@@ -40,11 +40,15 @@ function createMockEvent(): JankenEventWithGuests {
 			id: "lp-demo-match",
 			roomId: "lp-demo-room",
 			gameType: "NULL_HAND",
-			status: "CHOICE",
+			status: "PLAYING",
 			winnerId: null,
 			createdAt: new Date(),
-			currentTurnIndex: 1,
-			totalTurns: 1,
+			nullHandMatch: {
+				id: "lp-demo-null-hand-match",
+				matchId: "lp-demo-match",
+				currentTurnIndex: 1,
+				totalTurns: 1,
+			},
 		},
 		guestHands: [],
 	} as JankenEventWithGuests;

@@ -179,7 +179,7 @@ export function ResultPhase({
 									: "cyan"
 							}
 							currentTurn={jankenEvent?.turnNumber}
-							totalTurns={jankenEvent?.match.totalTurns}
+							totalTurns={jankenEvent?.match.nullHandMatch?.totalTurns}
 						/>
 
 						<RewardFeedback />
@@ -264,7 +264,7 @@ export function ResultPhase({
 							}
 							subLabel=""
 							currentTurn={jankenEvent?.turnNumber}
-							totalTurns={jankenEvent?.match.totalTurns}
+							totalTurns={jankenEvent?.match.nullHandMatch?.totalTurns}
 						/>
 
 						<div className="flex-1 flex flex-col items-center justify-center">
@@ -386,7 +386,7 @@ export function ResultPhase({
 						>
 							{isReady
 								? `WAITING (${readyCount}/${totalCount})`
-								: jankenEvent?.turnNumber === jankenEvent?.match.totalTurns
+								: jankenEvent?.turnNumber === jankenEvent?.match.nullHandMatch?.totalTurns
 									? "FINAL RESULT"
 									: "NEXT ROUND"}
 						</GameButton>
