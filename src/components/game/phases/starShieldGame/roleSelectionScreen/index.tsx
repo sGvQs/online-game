@@ -14,6 +14,7 @@ import {
 	COLORS,
 	DIFFICULTIES,
 	DIFFICULTY_META,
+	ICONS,
 	ROLE_META,
 	type Difficulty,
 	type RoleChoice,
@@ -561,24 +562,55 @@ export function RoleSelectionScreen({
 				>
 					{isHost && (
 						<Button
-							variant="success"
-							size="lg"
-							onClick={onBack}
-							className="shrink-0 font-cherry-bomb-one"
+						screen="star-shield"
+						variant="success"
+						size="lg"
+						onClick={onBack}
+						className="w-full justify-start flex-1"
 						>
-							← EXIT
+						<Image
+							src={ICONS.EXIT}
+							alt="icon exit"
+							width={40}
+							height={40}
+							className="mr-2"
+						/>
+						<span>EXIT</span>
 						</Button>
 					)}
 					{isHost && (
 						<Button
-							variant="primary"
-							size="lg"
-							disabled={!canProceed}
-							onClick={() => canProceed && onProceedToGame()}
-							className="flex-1 font-cherry-bomb-one"
-						>
-							{canProceed ? "🚀 START GAME" : "🔒 START GAME"}
-						</Button>
+						screen="star-shield"
+						variant={canProceed ? "primary" : "solid"}
+						size="lg"
+						onClick={() => canProceed && onProceedToGame()}
+						disabled={!canProceed}
+						className="w-full justify-center flex-4"
+					>
+						{canProceed ? (
+							<>
+								<Image
+									src={ICONS.START}
+									alt="icon start"
+									width={40}
+									height={40}
+									className="mr-2"
+								/>
+								<span>GAME START</span>
+							</>
+						) : (
+							<>
+								<Image
+									src={ICONS.NOT_START}
+									alt="icon not start"
+									width={40}
+									height={40}
+									className="mr-2"
+								/>
+								<span>GAME START</span>
+							</>
+						)}
+					</Button>
 					)}
 				</motion.div>
 			</div>

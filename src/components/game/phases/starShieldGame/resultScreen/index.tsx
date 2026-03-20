@@ -356,22 +356,22 @@ export function ResultScreen({
 					transition={{ delay: delay.button, duration: 0.5 }}
 					className="mt-6"
 				>
-					<Button
-						screen="star-shield"
-						variant={"success"}
-						size="lg"
-						onClick={onBackToTitle}
-						className="w-full justify-start"
-					>
-						<Image
-							src={ICONS.EXIT}
-							alt="arrow right"
-							width={20}
-							height={20}
-							className="mr-2"
-						/>
-						BACK TO TITLE
-					</Button>
+                    <Button
+                        screen="star-shield"
+                        variant="success"
+                        size="lg"
+                        onClick={onBackToTitle}
+                        className="w-full justify-start"
+                    >
+                        <Image
+                            src={ICONS.EXIT}
+                            alt="arrow right"
+                            width={40}
+                            height={40}
+                            className="mr-2"
+                        />
+                        <span>BACK TO TITLE</span>
+                    </Button>
 				</motion.div>
 			</motion.div>
 		</div>

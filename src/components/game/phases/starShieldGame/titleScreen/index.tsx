@@ -114,14 +114,14 @@ export function TitleScreen({
 						</motion.div>
 
 						<motion.div
-							className="flex flex-col gap-2"
+							className="grid grid-cols-2 gap-4 mt-10"
 							initial={{ opacity: 0 }}
 							animate={{ opacity: 1 }}
 							transition={{ duration: 0.8, delay: 0.4 }}
 						>
 							<Button
 								screen="star-shield"
-								variant={isReady ? "primary" : "solid"}
+								variant={"primary"}
 								size="lg"
 								onClick={() => !isReady && onToggleReady()}
 								disabled={isReady}
@@ -170,6 +170,7 @@ export function TitleScreen({
 												className="mr-2"
 											/>
 											<span>START</span>
+                                            <span className="ml-auto">{readyCount}/{totalUsers}</span>
 										</>
 									) : (
 										<>
@@ -181,8 +182,27 @@ export function TitleScreen({
 												className="mr-2"
 											/>
 											<span>START</span>
+                                            <span className="ml-auto">{readyCount}/{totalUsers}</span>
 										</>
 									)}
+								</Button>
+							)}
+                            {isHost && (
+								<Button
+									screen="star-shield"
+									variant="success"
+									size="lg"
+									onClick={onExit}
+									className="w-full justify-start"
+								>
+									<Image
+										src={ICONS.EXIT}
+										alt="arrow right"
+										width={40}
+										height={40}
+										className="mr-2"
+									/>
+									<span>EXIT</span>
 								</Button>
 							)}
 							<Link
@@ -205,24 +225,6 @@ export function TitleScreen({
 								/>
 								<span>SKILL</span>
 							</Link>
-							{isHost && (
-								<Button
-									screen="star-shield"
-									variant="success"
-									size="lg"
-									onClick={onExit}
-									className="w-full justify-start"
-								>
-									<Image
-										src={ICONS.EXIT}
-										alt="arrow right"
-										width={40}
-										height={40}
-										className="mr-2"
-									/>
-									<span>EXIT</span>
-								</Button>
-							)}
 						</motion.div>
 					</div>
 
