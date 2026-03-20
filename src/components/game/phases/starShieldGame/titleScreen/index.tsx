@@ -104,7 +104,23 @@ export function TitleScreen({
                                 disabled={isReady}
                                 className="w-full justify-start"
                             >
-                                {isReady ? '✓ READY' : '▶ READY'}
+                                {isReady ? <>
+                                    <Image
+                                    src={ICONS.READY}
+                                    alt="icon ready"
+                                    width={40}
+                                    height={40}
+                                    className="mr-2"
+                                    />
+                                    <span>READY</span></>: <>
+                                    <Image
+                                    src={ICONS.NOT_READY}
+                                    alt="icon not ready"
+                                    width={40}
+                                    height={40}
+                                    className="mr-2"
+                                    />
+                                    <span>READY</span></>}
                             </Button>
                             {isHost && (
                                 <Button
@@ -115,7 +131,23 @@ export function TitleScreen({
                                     disabled={!canStart}
                                     className="w-full justify-start"
                                 >
-                                    {canStart ? '🚀 START' : '🔒 START'}
+                                    {canStart ? <>
+                                    <Image
+                                    src={ICONS.START}
+                                    alt="icon start"
+                                    width={40}
+                                    height={40}
+                                    className="mr-2"
+                                    />
+                                    <span>START</span></> : <>
+                                    <Image
+                                    src={ICONS.NOT_START}
+                                    alt="icon not start"
+                                    width={40}
+                                    height={40}
+                                    className="mr-2"
+                                    />
+                                    <span>START</span></>}
                                 </Button>
                             )}
                             <Link
@@ -129,8 +161,14 @@ export function TitleScreen({
                                 }}
                                 className="flex w-full items-center justify-start gap-2 py-3 px-6 rounded-2xl font-bold transition-all font-cherry-bomb-one text-left bg-amber-600/30 border-2 border-amber-500/50 text-amber-200 hover:bg-amber-500/40 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
                             >
-                                <span>⚙️</span>
-                                <span>SKILL</span>
+                                <Image
+                                    src={ICONS.SKILL}
+                                    alt="icon skill"
+                                    width={40}
+                                    height={40}
+                                    className="mr-2"
+                                    />
+                                    <span>SKILL</span>
                             </Link>
                             {isHost && (
                                 <Button
@@ -140,7 +178,14 @@ export function TitleScreen({
                                     onClick={onExit}
                                     className="w-full justify-start"
                                 >
-                                    ← EXIT
+                                    <Image
+                                        src={ICONS.EXIT}
+                                        alt="arrow right"
+                                        width={40}
+                                        height={40}
+                                        className="mr-2"
+                                        />
+                                        <span>EXIT</span>
                                 </Button>
                             )}
                         </motion.div>

@@ -329,7 +329,14 @@ export function ResultScreen({
                         onClick={onBackToTitle}
                         className="w-full justify-start"
                     >
-                        ▶ BACK TO TITLE
+                        <Image
+                        src={ICONS.EXIT}
+                        alt="arrow right"
+                        width={20}
+                        height={20}
+                        className="mr-2"
+                        />
+                        BACK TO TITLE
                     </Button>
                 </motion.div>
             </motion.div>

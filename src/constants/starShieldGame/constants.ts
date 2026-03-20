@@ -53,6 +53,12 @@ export const ICONS = {
     FIRE: '/svg/object/collision.svg',
     METOR: '/svg/object/metor.svg',
     TARGET_CIRCLE: '/svg/object/target-circle.svg',
+    START: '/svg/starShield/start.svg',
+    NOT_START: '/svg/starShield/not-start.svg',
+    READY: '/svg/starShield/ready.svg',
+    NOT_READY: '/svg/starShield/not-ready.svg',
+    EXIT: '/svg/starShield/exit.svg',
+    SKILL: '/svg/starShield/skill.svg',
 } as const
 
 // ========== 恐竜・球アニメ ==========
