@@ -2,7 +2,7 @@
  * Room関連の型定義
  * Prisma schema を元に生成された型定義
  */
-import { Prisma, RoomStatus as PrismaRoomStatus } from '@prisma/client';
+import { Prisma, RoomStatus as PrismaRoomStatus } from "@prisma/client";
 
 // ============================================
 // Enums from Prisma
@@ -13,9 +13,9 @@ export type RoomStatus = PrismaRoomStatus;
 
 // Re-export for convenience
 export const RoomStatus = {
-    LOBBY: 'LOBBY' as const,
-    PLAYING: 'PLAYING' as const,
-    FINISHED: 'FINISHED' as const,
+	LOBBY: "LOBBY" as const,
+	PLAYING: "PLAYING" as const,
+	FINISHED: "FINISHED" as const,
 } as const;
 
 // ============================================
@@ -34,7 +34,7 @@ export type RoomUser = Prisma.RoomUserGetPayload<{}>;
 
 /** RoomUser with User relation */
 export type RoomUserWithUser = Prisma.RoomUserGetPayload<{
-    include: { user: true }
+	include: { user: true };
 }>;
 
 /** RoomUser with ready status (includes isReady field from Prisma) */
@@ -46,25 +46,25 @@ export type RoomUserWithReadyStatus = RoomUserWithUser;
 
 /** Room with Users and Creator */
 export type RoomWithUsers = Prisma.RoomGetPayload<{
-    include: {
-        users: {
-            include: { user: true }
-        }
-        creator: true
-    }
+	include: {
+		users: {
+			include: { user: true };
+		};
+		creator: true;
+	};
 }>;
 
 /** Room with Users including ready status */
 export type RoomWithUsersAndReadyStatus = Prisma.RoomGetPayload<{
-    include: {
-        users: {
-            include: { user: true }
-        }
-        creator: true
-    }
+	include: {
+		users: {
+			include: { user: true };
+		};
+		creator: true;
+	};
 }>;
 
 /** Room with Matches */
 export type RoomWithMatches = Prisma.RoomGetPayload<{
-    include: { matches: true }
+	include: { matches: true };
 }>;

@@ -1,48 +1,51 @@
-'use client'
+"use client";
 
-import { useState, ReactNode } from 'react'
-import { usePresenceDuplicateWarning } from '@/hooks/usePresenceDuplicateWarning'
-import { AlertTriangle, X } from 'lucide-react'
-import { presenceDuplicateWarning } from './PresenceDuplicateWarning.styles'
-import { Typography } from '@/components/ui/typography'
+import { useState, ReactNode } from "react";
+import { usePresenceDuplicateWarning } from "@/hooks/usePresenceDuplicateWarning";
+import { AlertTriangle, X } from "lucide-react";
+import { presenceDuplicateWarning } from "./PresenceDuplicateWarning.styles";
+import { Typography } from "@/components/ui/typography";
 
-const styles = presenceDuplicateWarning()
+const styles = presenceDuplicateWarning();
 
 interface PresenceDuplicateWarningProps {
-    roomId: string
-    currentUserId: string
-    children: ReactNode
+	roomId: string;
+	currentUserId: string;
+	children: ReactNode;
 }
 
 export function PresenceDuplicateWarning({
-    roomId,
-    currentUserId,
-    children,
+	roomId,
+	currentUserId,
+	children,
 }: PresenceDuplicateWarningProps) {
-    const { isDuplicate } = usePresenceDuplicateWarning({ roomId, currentUserId })
-    const [dismissed, setDismissed] = useState(false)
+	const { isDuplicate } = usePresenceDuplicateWarning({
+		roomId,
+		currentUserId,
+	});
+	const [dismissed, setDismissed] = useState(false);
 
-    const showWarning = isDuplicate && !dismissed
+	const showWarning = isDuplicate && !dismissed;
 
-    return (
-        <>
-            {children}
-            {showWarning && (
-                <div className={styles.banner()}>
-                    <AlertTriangle className="w-5 h-5 shrink-0" />
-                    <Typography variant="small" className={styles.message()}>
-                        同じルームが別のタブで開かれています。ゲームの動作が不安定になる可能性があります。
-                    </Typography>
-                    <button
-                        type="button"
-                        onClick={() => setDismissed(true)}
-                        className={styles.dismissButton()}
-                        aria-label="閉じる"
-                    >
-                        <X className="w-4 h-4" />
-                    </button>
-                </div>
-            )}
-        </>
-    )
+	return (
+		<>
+			{children}
+			{showWarning && (
+				<div className={styles.banner()}>
+					<AlertTriangle className="w-5 h-5 shrink-0" />
+					<Typography variant="small" className={styles.message()}>
+						同じルームが別のタブで開かれています。ゲームの動作が不安定になる可能性があります。
+					</Typography>
+					<button
+						type="button"
+						onClick={() => setDismissed(true)}
+						className={styles.dismissButton()}
+						aria-label="閉じる"
+					>
+						<X className="w-4 h-4" />
+					</button>
+				</div>
+			)}
+		</>
+	);
 }

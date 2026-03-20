@@ -1,3 +1,3 @@
-import { tv } from 'tailwind-variants'
+import { tv } from "tailwind-variants";
 
-export const nullHandGame = tv({ slots: {} })
+export const nullHandGame = tv({ slots: {} });

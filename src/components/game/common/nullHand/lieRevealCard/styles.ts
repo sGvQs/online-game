@@ -1,3 +1,3 @@
-import { tv } from 'tailwind-variants'
+import { tv } from "tailwind-variants";
 
-export const lieRevealCard = tv({ slots: {} })
+export const lieRevealCard = tv({ slots: {} });

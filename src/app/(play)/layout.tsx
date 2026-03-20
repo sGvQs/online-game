@@ -3,9 +3,9 @@
  * StarfieldBackground は ThemeProvider（root layout）で全ページ共通に描画されている。
  */
 export default function PlayLayout({
-    children,
+	children,
 }: {
-    children: React.ReactNode
+	children: React.ReactNode;
 }) {
-    return <div className="relative min-h-screen">{children}</div>
+	return <div className="relative min-h-screen">{children}</div>;
 }

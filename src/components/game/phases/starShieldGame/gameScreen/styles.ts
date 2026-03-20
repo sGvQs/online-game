@@ -1,3 +1,3 @@
-import { tv } from 'tailwind-variants'
+import { tv } from "tailwind-variants";
 
-export const gameScreen = tv({ slots: {} })
+export const gameScreen = tv({ slots: {} });

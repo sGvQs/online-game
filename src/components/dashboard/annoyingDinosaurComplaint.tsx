@@ -1,15 +1,15 @@
-'use client'
+"use client";
 
-import { useEffect, useState } from 'react'
-import { motion } from 'framer-motion'
-import Image from 'next/image'
-import { useSE } from '@/hooks/useSE'
-import { annoyingDinosaurComplaint } from './annoyingDinosaurComplaint.styles'
+import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import Image from "next/image";
+import { useSE } from "@/hooks/useSE";
+import { annoyingDinosaurComplaint } from "./annoyingDinosaurComplaint.styles";
 
-const styles = annoyingDinosaurComplaint()
-const ENTER_DURATION = 3
-const IDLE_DURATION = 8
-const EXIT_DURATION = 3
+const styles = annoyingDinosaurComplaint();
+const ENTER_DURATION = 3;
+const IDLE_DURATION = 8;
+const EXIT_DURATION = 3;
 
 /**
  * ダッシュボード用：ルーム削除の文句を言いにくるAnnoyingDinosaur
@@ -18,126 +18,133 @@ const EXIT_DURATION = 3
  * typingMode: true のとき、吹き出しに message を表示しつつ textToType を onTypeIntoInput で一文字ずつ渡す
  */
 export function AnnoyingDinosaurComplaint({
-    message,
-    onComplete,
-    position = 'bottom',
-    triggerExit = false,
-    typingMode = false,
-    textToType,
-    onTypeIntoInput,
+	message,
+	onComplete,
+	position = "bottom",
+	triggerExit = false,
+	typingMode = false,
+	textToType,
+	onTypeIntoInput,
 }: {
-    message: string
-    onComplete: () => void
-    position?: 'bottom' | 'center'
-    /**  true で退場アニメーション（喋りながら下へフェードアウト）を開始 */
-    triggerExit?: boolean
-    typingMode?: boolean
-    textToType?: string
-    onTypeIntoInput?: (text: string) => void
+	message: string;
+	onComplete: () => void;
+	position?: "bottom" | "center";
+	/**  true で退場アニメーション（喋りながら下へフェードアウト）を開始 */
+	triggerExit?: boolean;
+	typingMode?: boolean;
+	textToType?: string;
+	onTypeIntoInput?: (text: string) => void;
 }) {
-    const { play } = useSE()
-    const [phase, setPhase] = useState<'entering' | 'idle' | 'exiting'>('entering')
-    const [displayedText, setDisplayedText] = useState('')
+	const { play } = useSE();
+	const [phase, setPhase] = useState<"entering" | "idle" | "exiting">(
+		"entering",
+	);
+	const [displayedText, setDisplayedText] = useState("");
 
-    useEffect(() => {
-        // idle のときのみタイピング・音声を実行。exiting では停止（キャンセル時も音が出ないように）
-        if (phase !== 'idle') return
+	useEffect(() => {
+		// idle のときのみタイピング・音声を実行。exiting では停止（キャンセル時も音が出ないように）
+		if (phase !== "idle") return;
 
-        /** 音を出さない文字（句読点・記号など） */
-        const isSilentChar = (c: string) => /^[。、．，….\s「」『』（）]$/.test(c)
+		/** 音を出さない文字（句読点・記号など） */
+		const isSilentChar = (c: string) => /^[。、．，….\s「」『』（）]$/.test(c);
 
-        let speechIndex = displayedText.length
-        let typeIndex = 0
-        const typeInterval = setInterval(() => {
-            if (speechIndex < message.length) {
-                const nextChar = message[speechIndex]
-                if (nextChar && !isSilentChar(nextChar)) {
-                    play('dinosaur')
-                }
-                setDisplayedText(message.slice(0, speechIndex + 1))
-                speechIndex++
-            }
-            if (typingMode && textToType && onTypeIntoInput && typeIndex < textToType.length) {
-                typeIndex++
-                const newText = textToType.slice(0, typeIndex)
-                onTypeIntoInput(newText)
-            }
-        }, 150)
-        return () => clearInterval(typeInterval)
-    }, [phase, message, play, typingMode, textToType, onTypeIntoInput])
+		let speechIndex = displayedText.length;
+		let typeIndex = 0;
+		const typeInterval = setInterval(() => {
+			if (speechIndex < message.length) {
+				const nextChar = message[speechIndex];
+				if (nextChar && !isSilentChar(nextChar)) {
+					play("dinosaur");
+				}
+				setDisplayedText(message.slice(0, speechIndex + 1));
+				speechIndex++;
+			}
+			if (
+				typingMode &&
+				textToType &&
+				onTypeIntoInput &&
+				typeIndex < textToType.length
+			) {
+				typeIndex++;
+				const newText = textToType.slice(0, typeIndex);
+				onTypeIntoInput(newText);
+			}
+		}, 150);
+		return () => clearInterval(typeInterval);
+	}, [phase, message, play, typingMode, textToType, onTypeIntoInput]);
 
-    useEffect(() => {
-        if (phase !== 'entering') return
-        const t = setTimeout(() => setPhase('idle'), ENTER_DURATION * 1000)
-        return () => clearTimeout(t)
-    }, [phase])
+	useEffect(() => {
+		if (phase !== "entering") return;
+		const t = setTimeout(() => setPhase("idle"), ENTER_DURATION * 1000);
+		return () => clearTimeout(t);
+	}, [phase]);
 
-    useEffect(() => {
-        if (phase !== 'idle') return
-        const t = setTimeout(() => setPhase('exiting'), IDLE_DURATION * 1000)
-        return () => clearTimeout(t)
-    }, [phase])
+	useEffect(() => {
+		if (phase !== "idle") return;
+		const t = setTimeout(() => setPhase("exiting"), IDLE_DURATION * 1000);
+		return () => clearTimeout(t);
+	}, [phase]);
 
-    useEffect(() => {
-        if (triggerExit && (phase === 'entering' || phase === 'idle')) {
-            setPhase('exiting')
-        }
-    }, [triggerExit, phase])
+	useEffect(() => {
+		if (triggerExit && (phase === "entering" || phase === "idle")) {
+			setPhase("exiting");
+		}
+	}, [triggerExit, phase]);
 
-    useEffect(() => {
-        if (phase !== 'exiting') return
-        const t = setTimeout(() => {
-            onComplete()
-        }, EXIT_DURATION * 1000)
-        return () => clearTimeout(t)
-    }, [phase, onComplete])
+	useEffect(() => {
+		if (phase !== "exiting") return;
+		const t = setTimeout(() => {
+			onComplete();
+		}, EXIT_DURATION * 1000);
+		return () => clearTimeout(t);
+	}, [phase, onComplete]);
 
-    const isCenter = position === 'center'
-    const initialY = '100%'
-    const idleY = isCenter ? '-50%' : 0
-    const exitY = '100%'
+	const isCenter = position === "center";
+	const initialY = "100%";
+	const idleY = isCenter ? "-50%" : 0;
+	const exitY = "100%";
 
-    return (
-        <motion.div
-            className={`fixed left-1/2 z-0 flex items-end pointer-events-none ${isCenter ? 'top-1/2' : 'bottom-0'}`}
-            style={{ width: 'min(260px, 90vw)' }}
-            initial={{ x: '-50%', y: initialY }}
-            animate={
-                phase === 'entering'
-                    ? { x: '-50%', y: idleY }
-                    : phase === 'exiting'
-                      ? { x: '-50%', y: exitY }
-                      : { x: '-50%', y: idleY }
-            }
-            transition={{
-                duration: phase === 'exiting' ? EXIT_DURATION : ENTER_DURATION,
-                ease: phase === 'exiting' ? 'easeIn' : 'easeOut',
-            }}
-        >
-            <div className={styles.inner()}>
-                <div className={styles.imageWrapper()}>
-                    <Image
-                        src="/svg/charactor/annoying-dinosaur.svg"
-                        alt="Annoying Dinosaur"
-                        fill
-                        sizes="64px"
-                        className="object-contain"
-                    />
-                </div>
-                {phase !== 'entering' && (
-                    <motion.div
-                        className={styles.bubbleWrapper()}
-                        initial={{ opacity: 0, scale: 0.9 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ duration: 0.4, delay: 0.2 }}
-                    >
-                        <div className={styles.bubble()}>
-                            <span className={styles.bubbleText()}>{displayedText}</span>
-                            <div className={styles.bubbleTail()} aria-hidden />
-                        </div>
-                    </motion.div>
-                )}
-            </div>
-        </motion.div>
-    )
+	return (
+		<motion.div
+			className={`fixed left-1/2 z-0 flex items-end pointer-events-none ${isCenter ? "top-1/2" : "bottom-0"}`}
+			style={{ width: "min(260px, 90vw)" }}
+			initial={{ x: "-50%", y: initialY }}
+			animate={
+				phase === "entering"
+					? { x: "-50%", y: idleY }
+					: phase === "exiting"
+						? { x: "-50%", y: exitY }
+						: { x: "-50%", y: idleY }
+			}
+			transition={{
+				duration: phase === "exiting" ? EXIT_DURATION : ENTER_DURATION,
+				ease: phase === "exiting" ? "easeIn" : "easeOut",
+			}}
+		>
+			<div className={styles.inner()}>
+				<div className={styles.imageWrapper()}>
+					<Image
+						src="/svg/charactor/annoying-dinosaur.svg"
+						alt="Annoying Dinosaur"
+						fill
+						sizes="64px"
+						className="object-contain"
+					/>
+				</div>
+				{phase !== "entering" && (
+					<motion.div
+						className={styles.bubbleWrapper()}
+						initial={{ opacity: 0, scale: 0.9 }}
+						animate={{ opacity: 1, scale: 1 }}
+						transition={{ duration: 0.4, delay: 0.2 }}
+					>
+						<div className={styles.bubble()}>
+							<span className={styles.bubbleText()}>{displayedText}</span>
+							<div className={styles.bubbleTail()} aria-hidden />
+						</div>
+					</motion.div>
+				)}
+			</div>
+		</motion.div>
+	);
 }

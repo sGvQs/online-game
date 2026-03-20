@@ -7,53 +7,56 @@
 
 // ログイン画面
 export {
-    DIALOGUE_MESSAGES_CACHE_RESET,
-    DIALOGUE_MESSAGES_INCOGNITO,
-    DIALOGUE_MESSAGES_VISIT_0,
-    DIALOGUE_MESSAGES_VISIT_1_PLUS,
-    DIALOGUE_MESSAGES_RETURNING,
-    LP_DINOSAUR_MESSAGES,
-} from '../login/dinosaurLoginMessages'
+	DIALOGUE_MESSAGES_CACHE_RESET,
+	DIALOGUE_MESSAGES_INCOGNITO,
+	DIALOGUE_MESSAGES_VISIT_0,
+	DIALOGUE_MESSAGES_VISIT_1_PLUS,
+	DIALOGUE_MESSAGES_RETURNING,
+	LP_DINOSAUR_MESSAGES,
+} from "../login/dinosaurLoginMessages";
 
 // ルーム作成時
-export { CREATE_ROOM_MESSAGES, getRandomCreateRoomMessage } from '../room/createRoomMessages'
+export {
+	CREATE_ROOM_MESSAGES,
+	getRandomCreateRoomMessage,
+} from "../room/createRoomMessages";
 
 // ルーム入室時
 export {
-    SELF_ENTRY_MESSAGES,
-    OTHER_JOIN_MESSAGES,
-    getRandomSelfEntryMessage,
-    getRandomOtherJoinMessage,
-} from '../room/roomEntryMessages'
+	SELF_ENTRY_MESSAGES,
+	OTHER_JOIN_MESSAGES,
+	getRandomSelfEntryMessage,
+	getRandomOtherJoinMessage,
+} from "../room/roomEntryMessages";
 
 // ルーム削除時
-export { getComplaintMessageForRoomName } from './roomDeletedComplaints'
+export { getComplaintMessageForRoomName } from "./roomDeletedComplaints";
 
 // タイピングイベント用
-export { getRandomDinosaurRoomName } from '../room/dinosaurTypingRoomNames'
+export { getRandomDinosaurRoomName } from "../room/dinosaurTypingRoomNames";
 
 export const TYPING_MODE_MESSAGES = [
-    'もじ。',
-    'なんか。',
-    'でてる。',
-    '……。',
-    'カタ。',
-    'カタカタ。',
-    'ひかってる。',
-    'たぶん。',
-    'あ。',
-    'へへ。',
-    'まだ。',
-    'あ、もじが。',
-    'キーが。',
-    'なにか。',
-    'なんかうってる。',
-]
+	"もじ。",
+	"なんか。",
+	"でてる。",
+	"……。",
+	"カタ。",
+	"カタカタ。",
+	"ひかってる。",
+	"たぶん。",
+	"あ。",
+	"へへ。",
+	"まだ。",
+	"あ、もじが。",
+	"キーが。",
+	"なにか。",
+	"なんかうってる。",
+];
 
 /**
  * 配列からメッセージをランダムに取得する
  */
 export const getRandomTypingMessage = () => {
-    const randomIndex = Math.floor(Math.random() * TYPING_MODE_MESSAGES.length);
-    return TYPING_MODE_MESSAGES[randomIndex];
+	const randomIndex = Math.floor(Math.random() * TYPING_MODE_MESSAGES.length);
+	return TYPING_MODE_MESSAGES[randomIndex];
 };
