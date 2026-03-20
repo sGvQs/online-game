@@ -12,7 +12,7 @@ export type NormalAttackLevel = 1 | 2 | 3 | 4 | 5
 
 export type { DialogueLine } from '@/constants/starShieldGame/dialogues'
 
-export type GameResult = 'CLEARED' | 'FAILED_CONTACT' | 'FAILED_TIMEOUT'
+export type GameResult = 'CLEARED' | 'FAILED_CONTACT'
 
 export interface GameStats {
     spawnedCount: number

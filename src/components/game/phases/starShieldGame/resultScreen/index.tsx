@@ -10,7 +10,6 @@ import { Button } from '@/components/ui/button'
 import { ICONS, DIFFICULTY_META, type Difficulty } from '@/constants/starShieldGame/constants'
 import { useState, useEffect } from 'react'
 import { animate } from 'framer-motion'
-import { Typography } from '@/components/ui/typography'
 import { getMonthlyRankingInfo } from '@/server/actions/game'
 
 interface ResultScreenProps {
@@ -23,7 +22,7 @@ interface ResultScreenProps {
     isShooter: boolean
 }
 
-function PointGainAnimation({ before, gain }: { before: number; gain: number }) {
+function PointGainAnimation({ before, gain, delay }: { before: number; gain: number, delay: number }) {
     const [displayPoints, setDisplayPoints] = useState(before)
 
     useEffect(() => {
@@ -31,7 +30,7 @@ function PointGainAnimation({ before, gain }: { before: number; gain: number }) 
         // カウントアップ開始
         const controls = animate(before, before + gain, {
             duration: 0.8,
-            delay: 1.5,
+            delay: delay,
             ease: 'easeOut',
             onUpdate: (v) => setDisplayPoints(Math.floor(v)),
         })
@@ -39,7 +38,7 @@ function PointGainAnimation({ before, gain }: { before: number; gain: number }) 
         return () => {
             controls.stop()
         }
-    }, [before, gain])
+    }, [before, gain, delay])
 
     return (
         <div className="flex flex-col items-center gap-6 my-4">
@@ -63,8 +62,8 @@ function PointGainAnimation({ before, gain }: { before: number; gain: number }) 
                     initial={{ opacity: 0, scale: 0, y: 10, rotate: -10 }}
                     animate={{ opacity: 1, scale: 1, y: -35, rotate: 12 }}
                     exit={{ opacity: 0, y: -20, scale: 0 }}
-                    transition={{ delay: 1.5 }}
-                    className="absolute right-0 top-6 bg-gradient-to-br from-yellow-300 to-orange-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full shadow-[0_4px_12px_rgba(249,115,22,0.4)] border border-white/20 whitespace-nowrap"
+                    transition={{ delay: delay }}
+                    className="absolute right-0 top-6 bg-linear-to-br from-yellow-300 to-orange-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full shadow-[0_4px_12px_rgba(249,115,22,0.4)] border border-white/20 whitespace-nowrap"
                 >
                     +{gain}pt
                 </motion.div>
@@ -76,30 +75,30 @@ function PointGainAnimation({ before, gain }: { before: number; gain: number }) 
     )
 }
 
-function RankUpAnimation({ beforeRank, afterRank }: { beforeRank: number; afterRank: number }) {
+function RankUpAnimation({ beforeRank, afterRank, delay}: { beforeRank: number; afterRank: number, delay: number }) {
     const [displayRank, setDisplayRank] = useState(beforeRank)
     const isRankUp = afterRank < beforeRank && afterRank > 0 && beforeRank > 0
 
     useEffect(() => {
         if (!isRankUp) return
 
-        // ポイントアニメーションの完了（約2.3s）後にランクアップ
         const timer = setTimeout(() => {
             setDisplayRank(afterRank)
-        }, 2800)
+        }, delay * 1000)
 
         return () => clearTimeout(timer)
-    }, [isRankUp, afterRank, beforeRank])
+    }, [isRankUp, afterRank, beforeRank, delay])
 
     return (
         <div className="flex flex-col items-center mt-2">
             <motion.div
                 key={displayRank}
-                initial={{ scale: 1 }}
+                initial={{ scale: 1}}
                 animate={displayRank !== beforeRank ? {
                     scale: [1, 1.4, 1],
-                    rotate: [0, -5, 5, -5, 5, 0]
-                } : {}}
+                    rotate: [0, -5, 5, -5, 5, 0],
+                } : {
+                }}
                 transition={{ duration: 0.3 }}
                 className="relative flex items-center gap-2"
             >
@@ -114,7 +113,7 @@ function RankUpAnimation({ beforeRank, afterRank }: { beforeRank: number; afterR
                     <motion.div
                         initial={{ opacity: 0, scale: 0, y: 10, rotate: -10 }}
                         animate={{ opacity: 1, scale: 1, y: -35, rotate: 12 }}
-                        className="absolute right-0 top-6 bg-gradient-to-br from-purple-300 to-purple-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full shadow-[0_4px_12px_rgba(249,115,22,0.4)] border border-white/20 whitespace-nowrap"
+                        className="absolute right-0 top-6 bg-linear-to-br from-purple-300 to-purple-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full shadow-[0_4px_12px_rgba(249,115,22,0.4)] border border-white/20 whitespace-nowrap"
                     >
                         RANK UP!
                     </motion.div>
@@ -200,14 +199,6 @@ const RESULT_CONFIG: Record<
         message: 'まあ、こういう日もあるよ。でも、きみがいなかったらもっと大変だった。',
         gradient: 'linear-gradient(135deg, #fca5a5 0%, #ef4444 60%, #b91c1c 100%)',
     },
-    FAILED_TIMEOUT: {
-        title: 'FAILED',
-        subtitle: "Time's Up",
-        color: '#f97316',
-        glowColor: 'rgba(249,115,22,0.5)',
-        message: 'まあ、こういう日もあるよ。でも、きみがいなかったらもっと大変だった。',
-        gradient: 'linear-gradient(135deg, #fdba74 0%, #f97316 60%, #c2410c 100%)',
-    },
 }
 
 export function ResultScreen({
@@ -238,6 +229,16 @@ export function ResultScreen({
     const isCleared = result === 'CLEARED'
     const styles = resultScreen()
 
+    const delay = {
+        wrapper: 0,
+        title: 0,
+        rank: 1.5,
+        points: 1.5,
+        destory: 3,
+        role: 3.5,
+        button: 4.0,
+    }
+
     return (
         <div className="relative min-h-screen overflow-hidden flex flex-col items-center justify-center">
             <ProtectedStar />
@@ -250,14 +251,12 @@ export function ResultScreen({
             <AuroraGlow
                 width={800}
                 height={400}
-                opacity={isCleared ? 0.18 : 0.1}
+                opacity={0.2}
                 blur={60}
                 gradient={
                     isCleared
                         ? 'radial-gradient(ellipse at 50% 60%, rgba(192,132,252,0.7) 0%, rgba(99,102,241,0.4) 40%, transparent 70%)'
-                        : result === 'FAILED_CONTACT'
-                            ? 'radial-gradient(ellipse at 50% 60%, rgba(239,68,68,0.7) 0%, rgba(185,28,28,0.3) 40%, transparent 70%)'
-                            : 'radial-gradient(ellipse at 50% 60%, rgba(249,115,22,0.7) 0%, rgba(194,65,12,0.3) 40%, transparent 70%)'
+                        : 'radial-gradient(ellipse at 50% 60%, rgba(239,68,68,0.7) 0%, rgba(185,28,28,0.3) 40%, transparent 70%)'
                 }
             />
 
@@ -265,7 +264,7 @@ export function ResultScreen({
                 className="relative z-10 w-full max-w-lg mx-auto px-6 py-10 flex flex-col items-center gap-10"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                transition={{ duration: 0.5 }}
+                transition={{ duration: delay.wrapper }}
             >
                 {/* ===== HERO ===== */}
                 <div className="flex flex-col items-center gap-6 w-full">
@@ -274,7 +273,7 @@ export function ResultScreen({
                         className="text-center"
                         initial={{ y: 20, opacity: 0 }}
                         animate={{ y: 0, opacity: 1 }}
-                        transition={{ delay: 0.15, duration: 0.6, ease: 'easeOut' }}
+                        transition={{ delay: delay.title, duration: 0.6, ease: 'easeOut' }}
                         style={{
                             ['--result-title-color' as string]: config.color,
                             ['--result-title-glow' as string]: config.glowColor,
@@ -289,10 +288,12 @@ export function ResultScreen({
                         <RankUpAnimation
                             beforeRank={beforeRanking.rank}
                             afterRank={afterRanking?.rank ?? beforeRanking.rank}
+                            delay={delay.rank}
                         />
                         <PointGainAnimation
                             before={beforeRanking.points}
                             gain={parseInt(earnedPoints?.replace('+', '') || '0')}
+                            delay={delay.points}
                         />
                     </div>
                     {/* 壊した数 */}
@@ -301,7 +302,7 @@ export function ResultScreen({
                         label="をこわしたかず"
                         value={stats.destroyedCount}
                         suffix="個"
-                        delay={0.3}
+                        delay={delay.destory}
                     />
                     {/* 役職ごとの結果 */}
                     <StatResultRow
@@ -309,7 +310,7 @@ export function ResultScreen({
                         label={isShooter ? "めいちゅうりつ" : "たいぷしたかず"}
                         value={isShooter ? accuracy : stats.fireCount}
                         suffix={isShooter ? "%" : "文字"}
-                        delay={0.8}
+                        delay={delay.role}
                     />
                 </div>
 
@@ -318,7 +319,7 @@ export function ResultScreen({
                 <motion.div
                     initial={{ opacity: 0, y: 12 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.85, duration: 0.5 }}
+                    transition={{ delay: delay.button, duration: 0.5 }}
                     className="mt-6"
                 >
                     <Button
