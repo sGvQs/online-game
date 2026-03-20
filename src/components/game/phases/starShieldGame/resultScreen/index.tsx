@@ -318,6 +318,7 @@ export function ResultScreen({
 						<p className={styles.subtitle()}>{config.subtitle}</p>
 					</motion.div>
 
+                    {(result === "CLEARED" || difficulty === "ABYSS") && (
 					<div className="flex gap-8 justify-center items-baseline mt-6">
 						{/* 順位・ポイント */}
 						<RankUpAnimation
@@ -331,6 +332,8 @@ export function ResultScreen({
 							delay={delay.points}
 						/>
 					</div>
+                    )}
+
 					{/* 壊した数 */}
 					<StatResultRow
 						icon={ICONS.METOR}
