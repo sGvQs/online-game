@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Cherry+Bomb+One&family=Coral+Pixels&family=DotGothic16&family=Geist+Mono:wght@400&family=Geist:wght@400;500;700&family=Honk&family=Kaisei+Opti:wght@400;500;700&family=Rubik+Puddles&family=Sixtyfour+Convergence&family=Yusei+Magic&family=Zen+Maru+Gothic:wght@300;400;500;700;900&family=Bitcount+Grid+Double+Ink&display=swap');
 @import "tailwindcss";
 
 html {
@@ -10,6 +11,20 @@ html {
   /* Slate 950 - Void Black/Blue */
   --foreground: #f8fafc;
   /* Slate 50 */
+
+  /* Font stacks - loaded via Google Fonts @import above */
+  --font-geist-sans: "Geist", system-ui, arial, sans-serif;
+  --font-geist-mono: "Geist Mono", monospace;
+  --font-kaisei-opti: "Kaisei Opti", serif;
+  --font-zen-maru-gothic: "Zen Maru Gothic", sans-serif;
+  --font-dot-gothic-16: "DotGothic16", sans-serif;
+  --font-yusei-magic: "Yusei Magic", sans-serif;
+  --font-honk: "Honk", sans-serif;
+  --font-coral-pixels: "Coral Pixels", sans-serif;
+  --font-sixtyfour-convergence: "Sixtyfour Convergence", sans-serif;
+  --font-bitcount-grid-double-ink: "Bitcount Grid Double Ink", sans-serif;
+  --font-rubik-puddles: "Rubik Puddles", sans-serif;
+  --font-cherry-bomb-one: "Cherry Bomb One", sans-serif;
 
   /* Deep Space Brand Colors (Neon Indigo/Violet) */
   --brand-50: #0f172a;
@@ -56,9 +71,10 @@ html {
   --font-sans: var(--font-geist-sans), "Inter", sans-serif;
   --font-mono: var(--font-geist-mono), "Fira Code", monospace;
   --font-zen-maru-gothic: var(--font-zen-maru-gothic), "Zen Maru Gothic", sans-serif;
-  --font-dot-gothic-16: var(--font-dot-gothic-16), "DotGothic16", sans-serif;
-  --font-yusei-magic: var(--font-yusei-magic), "Yusei Magic", sans-serif;
-  --font-cherry-bomb-one: var(--font-cherry-bomb-one), "Cherry Bomb One", sans-serif;
+  --font-dot-gothic-16: "DotGothic16", sans-serif;
+  --font-yusei-magic: "Yusei Magic", sans-serif;
+  --font-cherry-bomb-one: "Cherry Bomb One", sans-serif;
+  --font-rubik-puddles: "Rubik Puddles", sans-serif;
 
   /* Map brand colors */
   --color-brand-50: var(--brand-50);
