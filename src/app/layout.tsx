@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { ThemeProvider } from "@/lib/theme-context";
-import BGMPlayer from "@/components/ui/bGMPlayer";
+import BGMPlayer from "@/components/ui/bgmPlayer";
 import { SoundProvider } from "@/lib/sound-context";
 import { DebugComplaintKeyListener } from "@/components/dashboard/debugComplaintKeyListener";
 import { OldPCFloating } from "@/components/decorations/oldPCFloating";

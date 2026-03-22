@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { lpHero } from "./lpHero.styles";
-import { button } from "@/components/ui/button";
 import { Typography } from "@/components/ui/typography";
 import { PukapukaLogo } from "@/components/common/logo/pukapukaLogo";
 
