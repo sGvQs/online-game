@@ -232,7 +232,7 @@ export async function getStarShieldMatchStatus(matchId: string): Promise<
 			status: "finished";
 			startedAt: number;
 			shooterId: string;
-			result: "CLEARED" | "FAILED_CONTACT" | "FAILED_TIMEOUT";
+			result: "CLEARED" | "FAILED_CONTACT";
 			stats: {
 				spawnedCount: number;
 				destroyedCount: number;
@@ -283,11 +283,9 @@ export async function getStarShieldMatchStatus(matchId: string): Promise<
 		};
 	}
 
-	const result: "CLEARED" | "FAILED_CONTACT" | "FAILED_TIMEOUT" = tsm.isCleared
+	const result: "CLEARED" | "FAILED_CONTACT" = tsm.isCleared
 		? "CLEARED"
-		: tsm.failureReason === "FAILED_CONTACT"
-			? "FAILED_CONTACT"
-			: "FAILED_TIMEOUT";
+		: "FAILED_CONTACT";
 
 	return {
 		status: "finished",
