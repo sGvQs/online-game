@@ -19,6 +19,7 @@ import { DashboardHeaderProfile } from "@/components/dashboard/dashboardHeaderPr
 import { DashboardComplaintWrapper } from "@/components/dashboard/dashboardComplaintWrapper";
 import { RankingCard } from "@/components/dashboard/rankingCard";
 import { Typography } from "@/components/ui/typography";
+import { PukapukaLogo } from "@/components/common/logo/pukapukaLogo";
 
 export default async function DashboardPage({
 	searchParams,
@@ -52,75 +53,8 @@ export default async function DashboardPage({
 		DEFAULT_FACE_ICON;
 
 	return (
-		<div className="min-h-screen p-8 bg-transparent text-foreground">
-			<SetLoginFlag />
-			<DashboardComplaintWrapper
-				notifications={roomDeletedNotifications.map(
-					(n: { id: string; roomName: string }) => ({
-						id: n.id,
-						roomName: n.roomName,
-					}),
-				)}
-			/>
-			<div className="max-w-7xl mx-auto space-y-8">
-				{params.error === "game_in_progress" && (
-					<div className="rounded-lg bg-amber-100 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800 px-4 py-2 text-sm text-amber-800 dark:text-amber-200">
-						ゲーム中は参加できません
-					</div>
-				)}
-				{/* Header Section */}
-				<header className="glass-card flex justify-between items-center p-6 rounded-2xl shadow-sm">
-					<div>
-						<DashboardHeaderTitle />
-						<Typography
-							variant="body"
-							className="text-brand-900 font-medium mt-1 opacity-80"
-						>
-							Music By Dream or Real?
-						</Typography>
-					</div>
-					<div className="flex gap-4 items-center">
-						<DashboardHeaderProfile
-							name={dashboardUser.user.name}
-							comment={dashboardUser.user.comment}
-							faceIcon={initialFaceIcon}
-							rank={monthlyRanking?.rank ?? null}
-							totalPoints={monthlyRanking?.totalPoints ?? 0}
-						/>
-						<LogoutButton />
-					</div>
-				</header>
-
-				{/* Main Content Area */}
-				<main className="flex flex-col lg:flex-row gap-6">
-					{/* 左: 順位（上） + ルーム作成（下）縦並び */}
-					<div className="flex flex-col gap-6 lg:w-[400px] shrink-0">
-						<RankingCard
-							rankings={topRankings}
-							currentUserId={dashboardUser.user.id}
-						/>
-						<DashboardSidebar
-							isTop5User={topRankings.some(
-								(r: { userId: string }) => r.userId === dashboardUser.user.id,
-							)}
-						/>
-					</div>
-
-					{/* 右: ルーム一覧 */}
-					<section className="flex-1 min-w-0">
-						<div className="flex items-center justify-between mb-3">
-							<h2 className="text-1xl font-bold text-brand-800 flex items-center gap-2">
-								<Boxes className="w-4 h-4" />
-								アクティブなルーム
-							</h2>
-							<span className="text-sm font-medium px-3 py-1 bg-brand-300 text-brand-700 rounded-full">
-								{rooms.length}件
-							</span>
-						</div>
-						<RoomList initialRooms={rooms} userId={dashboardUser.user.id} />
-					</section>
-				</main>
-			</div>
+		<div className="flex justify-center items-center h-screen w-full">
+			<PukapukaLogo />
 		</div>
 	);
 }
