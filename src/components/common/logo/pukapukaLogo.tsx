@@ -18,6 +18,7 @@ export function PukapukaLogo({ className }: PukapukaLogoProps) {
                 className={`inline-block py-4 px-4 cursor-pointer select-none ${className}`}
                 animate={{
                     y: [0, -8, 0],
+                    rotate: [0, index % 2 === 0 ? 5 : -5, 0],
                 }}
                 whileHover={{
                     scale: 1.5,
@@ -31,6 +32,12 @@ export function PukapukaLogo({ className }: PukapukaLogoProps) {
                         repeat: Infinity,
                         ease: "easeInOut",
                         delay: index * 0.15,
+                    },
+                    rotate: {
+                        duration: 4 + (index % 2) * 1,
+                        repeat: Infinity,
+                        ease: "easeInOut",
+                        delay: index * 0.2,
                     },
                     scale: { type: "spring", stiffness: 400, damping: 10 },
                     zIndex: { duration: 0 }
