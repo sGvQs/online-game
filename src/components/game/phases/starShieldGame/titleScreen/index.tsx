@@ -69,7 +69,7 @@ export function TitleScreen({
 	useEffect(() => {
 		getMyStarShieldProgress()
 			.then((p) => setTypingCount(p.totalTypingCount ?? 0))
-			.catch(() => {});
+			.catch(() => { });
 	}, []);
 
 	return (
@@ -170,7 +170,7 @@ export function TitleScreen({
 												className="mr-2"
 											/>
 											<span>START</span>
-                                            <span className="ml-auto">{readyCount}/{totalUsers}</span>
+											<span className="ml-auto">{readyCount}/{totalUsers}</span>
 										</>
 									) : (
 										<>
@@ -182,12 +182,12 @@ export function TitleScreen({
 												className="mr-2"
 											/>
 											<span>START</span>
-                                            <span className="ml-auto">{readyCount}/{totalUsers}</span>
+											<span className="ml-auto">{readyCount}/{totalUsers}</span>
 										</>
 									)}
 								</Button>
 							)}
-                            {isHost && (
+							{isHost && (
 								<Button
 									screen="star-shield"
 									variant="success"

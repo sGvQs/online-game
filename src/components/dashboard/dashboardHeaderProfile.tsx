@@ -186,11 +186,10 @@ function ProfileEditForm({
 							type="button"
 							onClick={() => setSelectedFaceIcon(option.value)}
 							disabled={isPending}
-							className={`relative w-full aspect-square rounded-xl border-2 transition-all overflow-hidden ${
-								selectedFaceIcon === option.value
-									? "border-brand-500 bg-brand-100 dark:bg-brand-900/50"
-									: "border-transparent bg-white/10 hover:bg-white/20"
-							}`}
+							className={`relative w-full aspect-square rounded-xl border-2 transition-all overflow-hidden ${selectedFaceIcon === option.value
+								? "border-brand-500 bg-brand-100 dark:bg-brand-900/50"
+								: "border-transparent bg-white/10 hover:bg-white/20"
+								}`}
 						>
 							<Image
 								src={FACE_ICON_PATHS[option.value]}

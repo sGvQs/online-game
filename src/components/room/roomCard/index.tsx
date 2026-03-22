@@ -40,9 +40,8 @@ export function RoomCard({ room, isOwner, onJoin, onDelete }: RoomCardProps) {
 				</Typography>
 				<div className={styles.meta()}>
 					<span
-						className={`${styles.statusBadge()} ${
-							isPlaying ? styles.statusPlaying() : styles.statusLobby()
-						}`}
+						className={`${styles.statusBadge()} ${isPlaying ? styles.statusPlaying() : styles.statusLobby()
+							}`}
 					>
 						{isPlaying ? "ゲーム中" : "待機中"}
 					</span>

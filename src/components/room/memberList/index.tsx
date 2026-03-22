@@ -57,10 +57,10 @@ export function MemberList({
 					.map((member: RoomUserWithUser) => {
 						const showKickButton = Boolean(
 							isHost &&
-								roomCreatorId &&
-								currentUserId &&
-								member.userId !== roomCreatorId &&
-								member.userId !== currentUserId,
+							roomCreatorId &&
+							currentUserId &&
+							member.userId !== roomCreatorId &&
+							member.userId !== currentUserId,
 						);
 						return (
 							<MemberItem

@@ -147,7 +147,7 @@ export function RoleSelectionScreen({
 											styles.difficultyButton(),
 											"hover:scale-[1.02] hover:brightness-110",
 											isSelectableInactive &&
-												"hover:bg-white/5 hover:border-white/25",
+											"hover:bg-white/5 hover:border-white/25",
 										)}
 										style={{
 											["--diff-bg" as string]: isActive
@@ -340,9 +340,9 @@ export function RoleSelectionScreen({
 															style={
 																isActive
 																	? {
-																			borderColor: tech.color,
-																			boxShadow: `0 0 12px ${tech.color}80`,
-																		}
+																		borderColor: tech.color,
+																		boxShadow: `0 0 12px ${tech.color}80`,
+																	}
 																	: undefined
 															}
 														>
@@ -371,12 +371,12 @@ export function RoleSelectionScreen({
 														HP{" "}
 														{
 															LEVEL_STAR_HP[
-																(displayTypistProgress.starHpLevel ?? 1) as
-																	| 1
-																	| 2
-																	| 3
-																	| 4
-																	| 5
+															(displayTypistProgress.starHpLevel ?? 1) as
+															| 1
+															| 2
+															| 3
+															| 4
+															| 5
 															]
 														}
 													</Typography>
@@ -497,10 +497,10 @@ export function RoleSelectionScreen({
 											: COLORS.WHITE_5,
 										...(roleMeta
 											? {
-													["--badge-color" as string]: roleMeta.text,
-													["--badge-bg" as string]: roleMeta.bg,
-													["--badge-border" as string]: `1px solid ${roleMeta.border}`,
-												}
+												["--badge-color" as string]: roleMeta.text,
+												["--badge-bg" as string]: roleMeta.bg,
+												["--badge-border" as string]: `1px solid ${roleMeta.border}`,
+											}
 											: {}),
 									}}
 								>
@@ -562,55 +562,55 @@ export function RoleSelectionScreen({
 				>
 					{isHost && (
 						<Button
-						screen="star-shield"
-						variant="success"
-						size="lg"
-						onClick={onBack}
-						className="w-full justify-start flex-1"
+							screen="star-shield"
+							variant="success"
+							size="lg"
+							onClick={onBack}
+							className="w-full justify-start flex-1"
 						>
-						<Image
-							src={ICONS.EXIT}
-							alt="icon exit"
-							width={40}
-							height={40}
-							className="mr-2"
-						/>
-						<span>EXIT</span>
+							<Image
+								src={ICONS.EXIT}
+								alt="icon exit"
+								width={40}
+								height={40}
+								className="mr-2"
+							/>
+							<span>EXIT</span>
 						</Button>
 					)}
 					{isHost && (
 						<Button
-						screen="star-shield"
-						variant={canProceed ? "primary" : "solid"}
-						size="lg"
-						onClick={() => canProceed && onProceedToGame()}
-						disabled={!canProceed}
-						className="w-full justify-center flex-4"
-					>
-						{canProceed ? (
-							<>
-								<Image
-									src={ICONS.START}
-									alt="icon start"
-									width={40}
-									height={40}
-									className="mr-2"
-								/>
-								<span>GAME START</span>
-							</>
-						) : (
-							<>
-								<Image
-									src={ICONS.NOT_START}
-									alt="icon not start"
-									width={40}
-									height={40}
-									className="mr-2"
-								/>
-								<span>GAME START</span>
-							</>
-						)}
-					</Button>
+							screen="star-shield"
+							variant={canProceed ? "primary" : "solid"}
+							size="lg"
+							onClick={() => canProceed && onProceedToGame()}
+							disabled={!canProceed}
+							className="w-full justify-center flex-4"
+						>
+							{canProceed ? (
+								<>
+									<Image
+										src={ICONS.START}
+										alt="icon start"
+										width={40}
+										height={40}
+										className="mr-2"
+									/>
+									<span>GAME START</span>
+								</>
+							) : (
+								<>
+									<Image
+										src={ICONS.NOT_START}
+										alt="icon not start"
+										width={40}
+										height={40}
+										className="mr-2"
+									/>
+									<span>GAME START</span>
+								</>
+							)}
+						</Button>
 					)}
 				</motion.div>
 			</div>

@@ -353,7 +353,7 @@ export function NullHandDemo() {
 						hostStats={mockHostStats}
 						isCurrentHost={false}
 						isProcessing={false}
-						onChoice={async () => {}}
+						onChoice={async () => { }}
 						hostName="開発者"
 						hostFaceIcon="LADY_FACE"
 						currentScores={scores}
