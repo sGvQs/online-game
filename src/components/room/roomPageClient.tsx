@@ -234,20 +234,9 @@ export function RoomPageClientWrapper({
 						document.body,
 					)}
 				<div className={styles.layout()}>
-					{/* Game Board Area */}
-					<div className={styles.mainArea()}>
+					{/* 左上: ロゴ+RoomID、その下にメンバーリスト */}
+					<div className={styles.leftColumn()}>
 						{children}
-
-						{/* Game Selection for Host */}
-						<GameSelectionCard
-							onSelectGame={handleSelectGame}
-							isPending={isPending}
-							isHost={isHost}
-						/>
-					</div>
-
-					{/* Sidebar / Members */}
-					<div className={styles.sidebar()}>
 						<MemberList
 							members={members}
 							rankingsMap={rankingsMap}
@@ -256,6 +245,15 @@ export function RoomPageClientWrapper({
 							roomCreatorId={room.createdBy}
 							onKick={handleKick}
 							kickingUserId={kickingUserId}
+						/>
+					</div>
+
+					{/* 右側: ゲーム一覧 */}
+					<div className={styles.rightColumn()}>
+						<GameSelectionCard
+							onSelectGame={handleSelectGame}
+							isPending={isPending}
+							isHost={isHost}
 						/>
 					</div>
 				</div>
