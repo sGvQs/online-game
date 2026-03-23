@@ -47,9 +47,24 @@ export default async function RoomPage({
 	return (
 		<div className="flex justify-center items-center flex-col h-screen w-full">
 			<PukapukaLogo />
-			<Typography variant="label" className="font-bold bg-[linear-gradient(135deg,#fef3c7_0%,#fb923c_60%,#e879f9_100%)] bg-clip-text text-transparent drop-shadow-[0_0_30px_rgba(251,146,60,0.5)]" font="cherry-bomb-one">
-				Music by Dream or real?
+			<Typography variant="body" gradientColor="RedToPurple" className="font-bold mt-5">
+				RoomID: {room.id}
 			</Typography>
+			{/* {room.users.map(user => {
+				return(
+					<div key={user.id} className="flex items-center gap-2">
+						<Typography variant="small">
+							{user.user.name}
+						</Typography>
+						<Typography variant="small">
+							{initialRankings.find(r => r.userId === user.userId)?.rank ?? "--"}位
+						</Typography>
+						<Typography variant="small">
+							{initialRankings.find(r => r.userId === user.userId)?.points ?? 0}pt
+						</Typography>
+					</div>
+				)
+			})} */}
 		</div>
 	);
 }
