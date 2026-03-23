@@ -166,6 +166,15 @@ export function GameCarouselSection({
 				</div>
 			</div>
 
+			<div className={styles.kvContainer()}>
+				<Image
+					src={GAMES[activeIndex].icon}
+					alt={GAMES[activeIndex].title}
+					fill
+					className="object-contain p-6"
+				/>
+			</div>
+
 			<p className={styles.ruleDesc()}>{GAMES[activeIndex].shortDesc}</p>
 
 			<div className="flex items-center gap-4">

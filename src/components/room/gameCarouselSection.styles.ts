@@ -41,6 +41,8 @@ export const gameCarouselSection = tv({
 			"px-2 py-0.5 rounded-full text-xs font-bold bg-teal-700/30 text-teal-300 border border-teal-600/50",
 		modeTagCompetitive:
 			"px-2 py-0.5 rounded-full text-xs font-bold bg-red-900/30 text-red-400 border border-red-600/50",
+		kvContainer:
+			"relative w-full max-w-xs aspect-video rounded-xl overflow-hidden bg-white/5 border border-white/10",
 		ruleDesc: "text-xs text-center text-brand-600 max-w-xs leading-relaxed px-2",
 	},
 });
