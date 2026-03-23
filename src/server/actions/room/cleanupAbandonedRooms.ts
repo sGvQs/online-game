@@ -24,14 +24,13 @@ export async function cleanupAbandonedRooms() {
 		where: {
 			updatedAt: { lt: threshold },
 		},
-		include: { creator: true },
+		select: { id: true, createdBy: true },
 	});
 
 	if (abandonedRooms.length > 0) {
 		await prisma.roomDeletedNotification.createMany({
 			data: abandonedRooms.map((room) => ({
 				userId: room.createdBy,
-				roomName: room.name,
 			})),
 		});
 

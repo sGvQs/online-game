@@ -42,19 +42,43 @@ export async function joinRoom(roomId: string) {
 }
 
 /**
- * ルームから退出
+ * ルームから退出。
+ * 作成者が退出した場合はルームを削除し、他メンバー全員に通知を作成する。
+ * 他メンバーはリアルタイム購読でルーム削除を検知してダッシュボードへ遷移する。
  */
 export async function leaveRoom(roomId: string) {
 	const user = await getAuthenticatedUser();
 
-	await prisma.roomUser.deleteMany({
-		where: {
-			roomId,
-			userId: user.id,
-		},
+	const room = await prisma.room.findUnique({
+		where: { id: roomId },
+		include: { users: true },
 	});
 
-	revalidatePath(`/room/${roomId}`);
+	if (!room) {
+		redirect("/dashboard");
+	}
+
+	if (room.createdBy === user.id) {
+		// 作成者退出 → 他メンバーへ通知を作成しルームを削除
+		const otherMemberIds = room.users
+			.filter((u) => u.userId !== user.id)
+			.map((u) => u.userId);
+
+		await prisma.$transaction([
+			prisma.roomDeletedNotification.createMany({
+				data: otherMemberIds.map((userId) => ({ userId })),
+			}),
+			// RoomUser は onDelete: Cascade で連動削除される
+			prisma.room.delete({ where: { id: roomId } }),
+		]);
+	} else {
+		// 一般メンバー退出 → 自分の RoomUser レコードのみ削除
+		await prisma.roomUser.deleteMany({
+			where: { roomId, userId: user.id },
+		});
+	}
+
+	revalidatePath("/dashboard");
 	redirect("/dashboard");
 }
 

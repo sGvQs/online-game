@@ -3,10 +3,10 @@
 import { useEffect, useState } from "react";
 import { DEBUG_COMPLAINT_EVENT } from "./debugComplaintKeyListener";
 import { AnnoyingDinosaurComplaint } from "./annoyingDinosaurComplaint";
-import { getComplaintMessageForRoomName } from "@/constants/dashboard/roomDeletedComplaints";
+import { getRandomComplaintMessage } from "@/constants/dashboard/roomDeletedComplaints";
 import { markRoomDeletedNotificationsAsRead } from "@/server/actions";
 
-type Notification = { id: string; roomName: string };
+type Notification = { id: string };
 
 /**
  * デバッグコマンド実行時のメッセージ
@@ -62,7 +62,7 @@ export function DashboardComplaintWrapper({
 	const isDebug = !hasNotifications;
 	const message = isDebug
 		? DEBUG_MESSAGES[Math.floor(Math.random() * DEBUG_MESSAGES.length)]!
-		: getComplaintMessageForRoomName(notifications[0]!.roomName);
+		: getRandomComplaintMessage();
 	const ids = notifications.map((n) => n.id);
 
 	const handleComplete = async () => {

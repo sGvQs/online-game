@@ -1,28 +1,5 @@
 /**
- * ルーム名に応じた文句メッセージ
- * 修正方針：
- * - ひらがなとカタカナのみ
- * - 説教しない
- * - 褒めない
- * - 感情を語らない
- * - 短く、未完成
- * - ただそこにいるだけ
- */
-
-const ROOM_NAME_SPECIFIC_COMPLAINTS: Record<string, string[]> = {
-	test: [
-		"てすと、か。",
-		"あたらしいことをためしてたんだ。",
-		"はじめてみたんだ。",
-	],
-	テスト: ["テスト。", "なにか、ためしてた。", "そういうときもあるんだ。"],
-	とりあえず: ["とりあえず。", "そっか、そっか。", "まあ、いいか。"],
-	あああ: ["あああ、か。", "……。", "そういうきもちもある。"],
-	123: ["いちにさん。", "いっこずつ。", "かぞえてたんだ。"],
-};
-
-/**
- * ルーム削除時の汎用メッセージ
+ * ルーム削除時のメッセージ
  * 修正方針：
  * - ひらがなとカタカナのみ
  * - 相手を分析しない
@@ -30,7 +7,7 @@ const ROOM_NAME_SPECIFIC_COMPLAINTS: Record<string, string[]> = {
  * - 断片的
  */
 
-const GENERAL_COMPLAINTS = [
+const COMPLAINTS = [
 	"へやが、なくなった。",
 	"あのへや。",
 	"だれも、こなかったんだ。",
@@ -46,20 +23,6 @@ const GENERAL_COMPLAINTS = [
 	"あ。",
 ];
 
-/**
- * ルーム名に応じた文句メッセージを1つ返す
- */
-export function getComplaintMessageForRoomName(roomName: string): string {
-	const normalized = roomName.trim().toLowerCase();
-	const specific =
-		ROOM_NAME_SPECIFIC_COMPLAINTS[normalized] ??
-		ROOM_NAME_SPECIFIC_COMPLAINTS[roomName.trim()];
-
-	if (specific && specific.length > 0) {
-		return specific[Math.floor(Math.random() * specific.length)]!;
-	}
-
-	return GENERAL_COMPLAINTS[
-		Math.floor(Math.random() * GENERAL_COMPLAINTS.length)
-	]!;
+export function getRandomComplaintMessage(): string {
+	return COMPLAINTS[Math.floor(Math.random() * COMPLAINTS.length)]!;
 }

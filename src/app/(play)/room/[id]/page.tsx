@@ -60,7 +60,7 @@ export default async function RoomPage({
 						</div>
 						<h1 className="text-3xl font-black mt-2 text-brand-900 flex items-center gap-4">
 							<Gamepad2 className="w-12 h-12" />
-							{room.name}
+							ゲームルーム
 						</h1>
 					</div>
 					<form action={leaveRoom.bind(null, room.id)}>

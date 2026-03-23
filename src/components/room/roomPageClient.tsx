@@ -98,7 +98,12 @@ export function RoomPageClientWrapper({
 	const handleRoomChange = useCallback(async () => {
 		try {
 			const newRoom = await getRoom(room.id);
-			if (newRoom?.activeGameType) {
+			// ルームが削除された場合（ホスト退出等）はダッシュボードへ
+			if (!newRoom) {
+				router.push("/dashboard");
+				return;
+			}
+			if (newRoom.activeGameType) {
 				router.push(`/game/${room.id}/${newRoom.activeGameType}`);
 			}
 		} catch (error) {
