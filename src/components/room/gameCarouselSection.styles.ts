@@ -35,5 +35,11 @@ export const gameCarouselSection = tv({
 		errorModalText: "text-brand-700",
 		errorModalSub: "text-brand-600",
 		errorModalActions: "flex justify-end",
+		infoPanel: "flex items-center gap-4 text-sm text-brand-600",
+		infoItem: "flex items-center gap-1.5",
+		modeTagCooperative:
+			"px-2 py-0.5 rounded-full text-xs font-bold bg-teal-700/30 text-teal-300 border border-teal-600/50",
+		modeTagCompetitive:
+			"px-2 py-0.5 rounded-full text-xs font-bold bg-red-900/30 text-red-400 border border-red-600/50",
 	},
 });

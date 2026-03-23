@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import Image from "next/image";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Users } from "lucide-react";
 import { gameCarouselSection } from "./gameCarouselSection.styles";
 import { GameDescriptionModal } from "./gameDescriptionModal";
 import { RoomModal } from "./roomModal";
@@ -27,6 +27,7 @@ const GAMES = [
 		icon: "/svg/object/old-pc.svg",
 		hostDesc: "バグを見つけて潰せ！",
 		guestDesc: "クリックでルールを表示",
+		mode: "competitive",
 	},
 	{
 		type: "null-hand",
@@ -34,6 +35,7 @@ const GAMES = [
 		icon: "/svg/object/null-hand.svg",
 		hostDesc: "心理戦で相手を欺け",
 		guestDesc: "クリックでルールを表示",
+		mode: "competitive",
 	},
 	{
 		type: "star-shield",
@@ -41,6 +43,7 @@ const GAMES = [
 		icon: "/svg/object/target-circle.svg",
 		hostDesc: "90秒生き延びて星を守れ",
 		guestDesc: "クリックでルールを表示",
+		mode: "cooperative",
 	},
 ] as const;
 
@@ -141,6 +144,20 @@ export function GameCarouselSection({
 						</div>
 					);
 				})}
+			</div>
+
+			<div className={styles.infoPanel()}>
+				<div className={styles.infoItem()}>
+					<Users className="w-4 h-4" />
+					<span>{getPlayerRangeLabel(GAMES[activeIndex].type)}</span>
+				</div>
+				<div className={styles.infoItem()}>
+					{GAMES[activeIndex].mode === "cooperative" ? (
+						<span className={styles.modeTagCooperative()}>協力</span>
+					) : (
+						<span className={styles.modeTagCompetitive()}>対戦</span>
+					)}
+				</div>
 			</div>
 
 			<div className="flex items-center gap-4">
