@@ -28,6 +28,8 @@ const GAMES = [
 		hostDesc: "バグを見つけて潰せ！",
 		guestDesc: "クリックでルールを表示",
 		mode: "competitive",
+		shortDesc:
+			"エラーダイアログが突然出現！最速で「×」ボタンを押した人が勝利。フライングは無効。",
 	},
 	{
 		type: "null-hand",
@@ -36,6 +38,8 @@ const GAMES = [
 		hostDesc: "心理戦で相手を欺け",
 		guestDesc: "クリックでルールを表示",
 		mode: "competitive",
+		shortDesc:
+			"ホストは裏で手を選択。ゲストはその心理を読んで勝て。統計情報を活かせ。",
 	},
 	{
 		type: "star-shield",
@@ -44,6 +48,8 @@ const GAMES = [
 		hostDesc: "90秒生き延びて星を守れ",
 		guestDesc: "クリックでルールを表示",
 		mode: "cooperative",
+		shortDesc:
+			"タイピスト＆シューターの2人協力。タイピングで弾を撃ち、90秒間星を守り切れ！",
 	},
 ] as const;
 
@@ -159,6 +165,8 @@ export function GameCarouselSection({
 					)}
 				</div>
 			</div>
+
+			<p className={styles.ruleDesc()}>{GAMES[activeIndex].shortDesc}</p>
 
 			<div className="flex items-center gap-4">
 				<button
