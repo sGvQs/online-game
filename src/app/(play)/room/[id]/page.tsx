@@ -6,6 +6,8 @@ import { IconButton } from "@/components/ui/iconButton";
 import { leaveRoom } from "@/server/actions";
 import { Undo2, Gamepad2 } from "lucide-react";
 import { RoomUserWithReadyStatus } from "@/types";
+import { PukapukaLogo } from "@/components/common/logo/pukapukaLogo";
+import { Typography } from "@/components/ui/typography";
 
 export default async function RoomPage({
 	params,
@@ -43,50 +45,11 @@ export default async function RoomPage({
 	const initialRankings = await getNullHandRankings(userIds);
 
 	return (
-		<div className="min-h-screen p-8 bg-transparent text-foreground">
-			<div className="max-w-6xl mx-auto space-y-6">
-				{/* Header */}
-				<header className="glass-card flex justify-between items-center p-6 rounded-2xl">
-					<div>
-						<div className="flex items-center gap-3">
-							<span className="bg-brand-300 text-brand-600 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide">
-								ゲームルーム
-							</span>
-							{isHost && (
-								<span className="bg-yellow-500 text-yellow-900 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide">
-									ホスト
-								</span>
-							)}
-						</div>
-						<h1 className="text-3xl font-black mt-2 text-brand-900 flex items-center gap-4">
-							<Gamepad2 className="w-12 h-12" />
-							ゲームルーム
-						</h1>
-					</div>
-					<form action={leaveRoom.bind(null, room.id)}>
-						<IconButton
-							type="submit"
-							variant="default"
-							size="md"
-							icon={<Undo2 className="w-10 h-10" />}
-							tooltip="ルーム退出"
-						/>
-					</form>
-				</header>
-
-				{/* 
-                  RoomPageClientWrapper: 
-                  - 1つの統合チャンネルでrooms + room_usersを監視
-                  - グリッドレイアウト（左: ゲームエリア、右: メンバーリスト）
-                */}
-				<RoomPageClientWrapper
-					room={room}
-					initialMembers={room.users}
-					initialRankings={initialRankings}
-					isHost={isHost}
-					currentUserId={currentUser.user.id}
-				/>
-			</div>
+		<div className="flex justify-center items-center flex-col h-screen w-full">
+			<PukapukaLogo />
+			<Typography variant="label" className="font-bold bg-[linear-gradient(135deg,#fef3c7_0%,#fb923c_60%,#e879f9_100%)] bg-clip-text text-transparent drop-shadow-[0_0_30px_rgba(251,146,60,0.5)]" font="cherry-bomb-one">
+				Music by Dream or real?
+			</Typography>
 		</div>
 	);
 }

@@ -4,11 +4,24 @@ import { motion } from "framer-motion";
 import { Typography } from "@/components/ui/typography";
 import type { GradientColor } from "@/components/ui/typography/styles";
 
+const PukapukaLogoSize = {
+    medium: {
+        variant: "h1",
+        padding: "py-1 px-1",
+    },
+    large: {
+        variant: "display",
+        padding: "py-2 px-3",
+    },
+} as const;
+
 interface PukapukaLogoProps {
     className?: string;
+    size?: keyof typeof PukapukaLogoSize;
 }
 
-export function PukapukaLogo({ className }: PukapukaLogoProps) {
+export function PukapukaLogo({ className, size = "medium" }: PukapukaLogoProps) {
+    const sizeProps = PukapukaLogoSize[size];
     const renderChars = (text: string, gradient: GradientColor) => {
         return text.split("").map((char, index) => {
             const motionProps = {
@@ -43,10 +56,11 @@ export function PukapukaLogo({ className }: PukapukaLogoProps) {
             return (
                 <Typography
                     as={motion.span}
-                    variant="display"
+                    variant={sizeProps.variant}
+                    font="rubik-puddles"
                     gradientColor={gradient}
                     key={`${text}-${index}`}
-                    className="inline-block py-2 px-3 cursor-pointer select-none"
+                    className={`inline-block ${sizeProps.padding} cursor-pointer select-none font-bold`}
                     {...(motionProps as any)}
                 >
                     {char}
