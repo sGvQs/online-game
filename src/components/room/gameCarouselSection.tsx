@@ -2,9 +2,8 @@
 
 import { useState, useEffect, useTransition } from "react";
 import Image from "next/image";
-import { ChevronLeft, ChevronRight, Users } from "lucide-react";
+import { Users } from "lucide-react";
 import { gameCarouselSection } from "./gameCarouselSection.styles";
-import { GameDescriptionModal } from "./gameDescriptionModal";
 import { RoomModal } from "./roomModal";
 import { Button } from "@/components/ui/button";
 import { Typography } from "@/components/ui/typography";
@@ -25,8 +24,7 @@ const GAMES = [
 		type: "error-hunter",
 		title: "ERROR HUNTER",
 		icon: "/svg/object/old-pc.svg",
-		hostDesc: "バグを見つけて潰せ！",
-		guestDesc: "クリックでルールを表示",
+		desc: "バグを見つけて潰せ！",
 		mode: "competitive",
 		shortDesc:
 			"エラーダイアログが突然出現！最速で「×」ボタンを押した人が勝利。フライングは無効。",
@@ -36,8 +34,7 @@ const GAMES = [
 		type: "null-hand",
 		title: "NULL HAND",
 		icon: "/svg/object/null-hand.svg",
-		hostDesc: "心理戦で相手を欺け",
-		guestDesc: "クリックでルールを表示",
+		desc: "心理戦で相手を欺け",
 		mode: "competitive",
 		shortDesc:
 			"ホストは裏で手を選択。ゲストはその心理を読んで勝て。統計情報を活かせ。",
@@ -47,8 +44,7 @@ const GAMES = [
 		type: "star-shield",
 		title: "STAR SHIELD",
 		icon: "/svg/object/target-circle.svg",
-		hostDesc: "90秒生き延びて星を守れ",
-		guestDesc: "クリックでルールを表示",
+		desc: "90秒生き延びて星を守れ",
 		mode: "cooperative",
 		shortDesc:
 			"タイピスト&シューターの2人協力。タイピングで弾を撃ち、90秒間星を守り切れ！",
@@ -74,13 +70,11 @@ export function GameCarouselSection({
 	const styles = gameCarouselSection();
 	const [activeIndex, setActiveIndex] = useState(0);
 	const [selectedRoleIndex, setSelectedRoleIndex] = useState(0);
-	const [isPending, startTransition] = useTransition();
+	const [, startTransition] = useTransition();
 
 	useEffect(() => {
 		setSelectedRoleIndex(0);
 	}, [activeIndex]);
-	const [showGameDescription, setShowGameDescription] = useState(false);
-	const [selectedGameType, setSelectedGameType] = useState<string>("");
 	const [showGameStartError, setShowGameStartError] = useState(false);
 	const [gameStartErrorType, setGameStartErrorType] = useState<string>("");
 
@@ -91,39 +85,27 @@ export function GameCarouselSection({
 		return "left";
 	};
 
-	const handlePrev = () => {
-		setActiveIndex((prev) => (prev - 1 + GAMES.length) % GAMES.length);
-	};
-
-	const handleNext = () => {
-		setActiveIndex((prev) => (prev + 1) % GAMES.length);
-	};
-
 	const handleCardClick = (i: number) => {
 		const pos = getPosition(i);
 		if (pos !== "center") {
 			setActiveIndex(i);
 			return;
 		}
+		if (!isHost) return;
 		const game = GAMES[i];
-		if (isHost) {
-			if (
-				!isPlayerCountValid(
-					game.type as "error-hunter" | "null-hand" | "star-shield",
-					memberCount,
-				)
-			) {
-				setGameStartErrorType(game.type);
-				setShowGameStartError(true);
-				return;
-			}
-			startTransition(async () => {
-				await selectGame(roomId, game.type);
-			});
-		} else {
-			setSelectedGameType(game.type);
-			setShowGameDescription(true);
+		if (
+			!isPlayerCountValid(
+				game.type as "error-hunter" | "null-hand" | "star-shield",
+				memberCount,
+			)
+		) {
+			setGameStartErrorType(game.type);
+			setShowGameStartError(true);
+			return;
 		}
+		startTransition(async () => {
+			await selectGame(roomId, game.type);
+		});
 	};
 
 	const positionClass = {
@@ -155,7 +137,7 @@ export function GameCarouselSection({
 								{game.title}
 							</Typography>
 							<Typography variant="small" as="div" className={styles.gameDesc()}>
-								{isHost ? game.hostDesc : game.guestDesc}
+								{game.desc}
 							</Typography>
 						</div>
 					);
@@ -207,12 +189,6 @@ export function GameCarouselSection({
 			<Typography variant="small" className={styles.ruleDesc()}>
 				{GAMES[activeIndex].shortDesc}
 			</Typography>
-
-			<GameDescriptionModal
-				isOpen={showGameDescription}
-				onClose={() => setShowGameDescription(false)}
-				gameType={selectedGameType}
-			/>
 
 			<RoomModal
 				isOpen={showGameStartError}
