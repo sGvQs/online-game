@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { kickUserFromRoom } from "@/server/actions/room";
 import { RoomUserWithUser, UserRanking } from "@/types";
 import { MemberItem } from "@/components/room/memberItem";
@@ -23,14 +22,12 @@ export function MemberListSection({
 	roomId,
 }: MemberListSectionProps) {
 	const styles = memberListSection();
-	const router = useRouter();
 	const [kickingUserId, setKickingUserId] = useState<string | null>(null);
 
 	const handleKick = async (targetUserId: string) => {
 		setKickingUserId(targetUserId);
 		try {
 			await kickUserFromRoom(roomId, targetUserId);
-			router.refresh();
 		} finally {
 			setKickingUserId(null);
 		}

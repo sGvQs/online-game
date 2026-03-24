@@ -2,11 +2,7 @@ import { redirect } from "next/navigation";
 import { getCurrentUser, getRoomWithUsers } from "@/server/actions";
 import { RoomUserWithReadyStatus } from "@/types";
 import { getNullHandRankings } from "@/server/actions/game/rankingActions";
-import { PukapukaLogo } from "@/components/common/logo/pukapukaLogo";
-import { RoomIdCopy } from "@/components/room/roomIdCopy";
-import { Typography } from "@/components/ui/typography";
-import { MemberListSection } from "@/components/room/memberListSection";
-import { GameCarouselSection } from "@/components/room/gameCarouselSection";
+import { RoomClient } from "@/components/room/roomClient";
 
 export default async function RoomPage({
 	params,
@@ -35,36 +31,15 @@ export default async function RoomPage({
 	}
 
 	const rankings = await getNullHandRankings(room.users.map((u) => u.userId));
-	const rankingsMap = new Map(rankings.map((r) => [r.userId, r]));
 	const isHost = room.createdBy === currentUser.user.id;
 
 	return (
-		<div className="flex justify-center items-center gap-2 p-8 min-h-screen">
-			<div className="flex">
-				<div className="flex flex-col items-center justify-baseline gap-6 px-8 py-4 ">
-					<PukapukaLogo />
-					<RoomIdCopy roomId={room.id} />
-					<div className="flex flex-col gap-2">
-						<Typography variant="small" className="text-brand-600 font-medium">
-							メンバー
-						</Typography>
-						<MemberListSection
-							members={room.users}
-							rankingsMap={rankingsMap}
-							isHost={isHost}
-							currentUserId={currentUser.user.id}
-							roomId={room.id}
-						/>
-					</div>
-				</div>
-				<div className="flex flex-col items-center gap-6 px-8 py-12 w-[600px]">
-					<GameCarouselSection
-						roomId={room.id}
-						memberCount={room.users.length}
-						isHost={isHost}
-					/>
-				</div>
-			</div>
-		</div>
+		<RoomClient
+			roomId={room.id}
+			currentUserId={currentUser.user.id}
+			isHost={isHost}
+			initialMembers={room.users}
+			initialRankings={rankings}
+		/>
 	);
 }
