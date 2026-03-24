@@ -36,13 +36,6 @@ export function MemberItem({
 	const faceIcon = member.user.faceIcon ?? DEFAULT_FACE_ICON;
 	const faceIconPath = FACE_ICON_PATHS[faceIcon];
 
-	const handleKickClick = () => {
-		if (!onKick) return;
-		if (confirm(`${member.user.name} をルームから追放しますか？`)) {
-			onKick();
-		}
-	};
-
 	return (
 		<li className={styles.wrapper()}>
 			<div className={`${styles.avatar()} relative overflow-hidden`}>
