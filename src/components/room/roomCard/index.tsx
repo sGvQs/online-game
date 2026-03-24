@@ -1,4 +1,4 @@
-import type { Room, RoomUser } from "@/types";
+import type { Room, RoomUser, User } from "@/types";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { IconButton } from "@/components/ui/iconButton";
@@ -6,7 +6,10 @@ import { Trash2, Play, Users } from "lucide-react";
 import { roomCard, emptyState } from "./styles";
 import { Typography } from "@/components/ui/typography";
 
-export type RoomWithUsers = Room & { users: RoomUser[] };
+export type RoomWithUsers = Room & {
+	users: RoomUser[];
+	creator: Pick<User, "name">;
+};
 
 interface RoomCardProps {
 	room: RoomWithUsers;
@@ -31,6 +34,10 @@ export function RoomCard({ room, isOwner, onJoin, onDelete }: RoomCardProps) {
 			<div className={styles.glowOverlay()} />
 
 			<div className={styles.main()}>
+				<div className={styles.info()}>
+					<span className={styles.creatorName()}>{room.creator.name}</span>
+					<span className={styles.roomId()}>{room.id}</span>
+				</div>
 				<div className={styles.meta()}>
 					<span
 						className={`${styles.statusBadge()} ${isPlaying ? styles.statusPlaying() : styles.statusLobby()

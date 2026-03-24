@@ -3,7 +3,7 @@
  */
 
 // 取得系
-export { getRooms } from "./getRooms";
+export { getRooms, getRoomsWithCreator } from "./getRooms";
 export { getRoom, getRoomWithUsers, getRoomUsers } from "./getRoom";
 
 // 作成・削除

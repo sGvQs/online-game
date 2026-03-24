@@ -22,6 +22,7 @@ export type {
 	RoomWithUsers,
 	RoomWithUsersAndReadyStatus,
 	RoomWithMatches,
+	RoomWithCreator,
 } from "./prisma/room";
 export { RoomStatus } from "./prisma/room";
 export type { RoomStatus as RoomStatusType } from "./prisma/room";
