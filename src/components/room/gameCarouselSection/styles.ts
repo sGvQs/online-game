@@ -21,7 +21,8 @@ export const gameCarouselSection = tv({
 		gameIcon: "w-10 h-10 relative",
 		gameTitle: "font-black text-xl tracking-widest",
 		gameDesc: "text-xs opacity-70 font-mono tracking-wider",
-		actionRow: "flex flex-col items-center gap-2",
+		cardInfo: "flex items-center gap-2 text-[10px] opacity-80 mt-auto",
+		actionRow: "flex items-center gap-3",
 		errorHunterCard: "border-teal-600 bg-teal-700/80 text-white",
 		nullHandCard: [
 			"border-[#FF4444] bg-black/80 text-[#FF4444]",
@@ -35,12 +36,10 @@ export const gameCarouselSection = tv({
 		errorModalText: "text-brand-700",
 		errorModalSub: "text-brand-600",
 		errorModalActions: "flex justify-end",
-		infoPanel: "flex items-center gap-4 text-sm text-brand-600",
-		infoItem: "flex items-center gap-1.5",
 		modeTagCooperative:
-			"px-2 py-0.5 rounded-full text-xs font-bold bg-teal-700/30 text-teal-300 border border-teal-600/50",
+			"px-2 py-0.5 rounded-full text-xs font-bold bg-teal-900/80 text-teal-300 border border-teal-300",
 		modeTagCompetitive:
-			"px-2 py-0.5 rounded-full text-xs font-bold bg-red-900/30 text-red-400 border border-red-600/50",
+			"px-2 py-0.5 rounded-full text-xs font-bold bg-red-900/40 text-red-500 border border-red-500",
 		kvContainer:
 			"relative w-full max-w-xs aspect-video rounded-xl overflow-hidden bg-white/5 border border-white/10",
 		kvTabsOverlay: "absolute top-2 left-2 flex gap-1 z-10",

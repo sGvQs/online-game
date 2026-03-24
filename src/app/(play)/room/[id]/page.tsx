@@ -6,7 +6,6 @@ import { PukapukaLogo } from "@/components/common/logo/pukapukaLogo";
 import { RoomIdCopy } from "@/components/room/roomIdCopy";
 import { Typography } from "@/components/ui/typography";
 import { MemberListSection } from "@/components/room/memberListSection";
-import { LeaveRoomButton } from "@/components/room/leaveRoomButton";
 import { GameCarouselSection } from "@/components/room/gameCarouselSection";
 
 export default async function RoomPage({
@@ -57,7 +56,6 @@ export default async function RoomPage({
 							roomId={room.id}
 						/>
 					</div>
-					<LeaveRoomButton roomId={room.id} isHost={isHost} />
 				</div>
 				<div className="flex flex-col items-center gap-6 px-8 py-12 w-[600px]">
 					<GameCarouselSection

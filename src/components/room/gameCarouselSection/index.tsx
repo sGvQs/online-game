@@ -5,6 +5,7 @@ import Image from "next/image";
 import { Users } from "lucide-react";
 import { gameCarouselSection } from "./styles";
 import { RoomModal } from "../roomModal";
+import { LeaveRoomButton } from "../leaveRoomButton";
 import { Button } from "@/components/ui/button";
 import { Typography } from "@/components/ui/typography";
 import { selectGame } from "@/server/actions/room";
@@ -70,7 +71,7 @@ export function GameCarouselSection({
 	const styles = gameCarouselSection();
 	const [activeIndex, setActiveIndex] = useState(0);
 	const [selectedRoleIndex, setSelectedRoleIndex] = useState(0);
-	const [, startTransition] = useTransition();
+	const [isPending, startTransition] = useTransition();
 
 	useEffect(() => {
 		setSelectedRoleIndex(0);
@@ -91,8 +92,10 @@ export function GameCarouselSection({
 			setActiveIndex(i);
 			return;
 		}
-		if (!isHost) return;
-		const game = GAMES[i];
+	};
+
+	const handleGameStart = () => {
+		const game = GAMES[activeIndex];
 		if (
 			!isPlayerCountValid(
 				game.type as "error-hunter" | "null-hand" | "star-shield",
@@ -139,6 +142,17 @@ export function GameCarouselSection({
 							<Typography variant="small" as="div" className={styles.gameDesc()}>
 								{game.desc}
 							</Typography>
+							<div className={styles.cardInfo()}>
+								<span className="flex items-center gap-0.5">
+									<Users className="w-3 h-3" />
+									{getPlayerRangeLabel(game.type)}
+								</span>
+								{game.mode === "cooperative" ? (
+									<span className={styles.modeTagCooperative()}>協力</span>
+								) : (
+									<span className={styles.modeTagCompetitive()}>対戦</span>
+								)}
+							</div>
 						</div>
 					);
 				})}
@@ -170,25 +184,23 @@ export function GameCarouselSection({
 				/>
 			</div>
 
-			<div className={styles.infoPanel()}>
-				<div className={styles.infoItem()}>
-					<Users className="w-4 h-4" />
-					<Typography variant="small" as="span">
-						{getPlayerRangeLabel(GAMES[activeIndex].type)}
-					</Typography>
-				</div>
-				<div className={styles.infoItem()}>
-					{GAMES[activeIndex].mode === "cooperative" ? (
-						<span className={styles.modeTagCooperative()}>協力</span>
-					) : (
-						<span className={styles.modeTagCompetitive()}>対戦</span>
-					)}
-				</div>
-			</div>
-
-			<Typography variant="small" className={styles.ruleDesc()}>
+			<Typography variant="small" font="dot-gothic-16" className={styles.ruleDesc()}>
 				{GAMES[activeIndex].shortDesc}
 			</Typography>
+
+			<div className={styles.actionRow()}>
+				<LeaveRoomButton roomId={roomId} isHost={isHost} />
+				{isHost && (
+					<Button
+						variant="primary"
+						onClick={handleGameStart}
+						disabled={isPending}
+						className="font-cherry-bomb-one"
+					>
+						{isPending ? "処理中..." : `はじめる`}
+					</Button>
+				)}
+			</div>
 
 			<RoomModal
 				isOpen={showGameStartError}

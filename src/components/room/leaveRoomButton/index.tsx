@@ -20,12 +20,12 @@ export function LeaveRoomButton({ roomId, isHost }: LeaveRoomButtonProps) {
 
 	return (
 		<Button
-			variant="solid"
+			variant="success"
 			className="font-cherry-bomb-one"
 			onClick={handleLeave}
 			disabled={isLeaving}
 		>
-			{isLeaving ? "処理中..." : isHost ? "ルームをかいさんする" : "ルームをでる"}
+			{isLeaving ? "処理中..." : isHost ? "かいさんする" : "ルームをでる"}
 		</Button>
 	);
 }
