@@ -3,8 +3,8 @@
 import { createClient } from "@/utils/supabase/client";
 import { useEffect, useState, useCallback, useRef } from "react";
 import { joinRoom, deleteRoom, getRooms } from "@/server/actions/room";
-import { RoomCard, RoomListEmptyState, type RoomWithUsers } from "./roomCard";
-import { roomList } from "./roomList.styles";
+import { RoomCard, RoomListEmptyState, type RoomWithUsers } from "../roomCard";
+import { roomList } from "./styles";
 
 const styles = roomList();
 

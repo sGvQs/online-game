@@ -3,8 +3,8 @@
 import { useState, useEffect, useTransition } from "react";
 import Image from "next/image";
 import { Users } from "lucide-react";
-import { gameCarouselSection } from "./gameCarouselSection.styles";
-import { RoomModal } from "./roomModal";
+import { gameCarouselSection } from "./styles";
+import { RoomModal } from "../roomModal";
 import { Button } from "@/components/ui/button";
 import { Typography } from "@/components/ui/typography";
 import { selectGame } from "@/server/actions/room";
@@ -133,7 +133,7 @@ export function GameCarouselSection({
 									className="object-contain"
 								/>
 							</div>
-							<Typography variant="h3" as="div" className={styles.gameTitle()}>
+							<Typography variant="h2" font="dot-gothic-16" as="div" className={styles.gameTitle()}>
 								{game.title}
 							</Typography>
 							<Typography variant="small" as="div" className={styles.gameDesc()}>

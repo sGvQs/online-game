@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import { joinRoom, deleteRoom } from "@/server/actions/room";
-import { RoomCard } from "./roomCard";
-import { roomSearchList } from "./roomSearchList.styles";
+import { RoomCard } from "../roomCard";
+import { roomSearchList } from "./styles";
 import { Typography } from "@/components/ui/typography";
 import type { RoomWithCreator } from "@/types";
 

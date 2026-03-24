@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { kickUserFromRoom } from "@/server/actions/room";
 import { RoomUserWithUser, UserRanking } from "@/types";
 import { MemberItem } from "@/components/room/memberItem";
+import { memberListSection } from "./styles";
 
 interface MemberListSectionProps {
 	members: RoomUserWithUser[];
@@ -21,6 +22,7 @@ export function MemberListSection({
 	currentUserId,
 	roomId,
 }: MemberListSectionProps) {
+	const styles = memberListSection();
 	const router = useRouter();
 	const [kickingUserId, setKickingUserId] = useState<string | null>(null);
 
@@ -35,7 +37,7 @@ export function MemberListSection({
 	};
 
 	return (
-		<ul className="flex flex-col gap-1 min-w-[300px]">
+		<ul className={styles.list()}>
 			{members.map((member) => (
 				<MemberItem
 					key={member.id}

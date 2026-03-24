@@ -3,12 +3,14 @@
 import { useState, useCallback } from "react";
 import { Clipboard, ClipboardCheck } from "lucide-react";
 import { Typography } from "@/components/ui/typography";
+import { roomIdCopy } from "./styles";
 
 interface RoomIdCopyProps {
 	roomId: string;
 }
 
 export function RoomIdCopy({ roomId }: RoomIdCopyProps) {
+	const styles = roomIdCopy();
 	const [copied, setCopied] = useState(false);
 
 	const handleCopy = useCallback(async () => {
@@ -25,7 +27,7 @@ export function RoomIdCopy({ roomId }: RoomIdCopyProps) {
 		<button
 			type="button"
 			onClick={handleCopy}
-			className="flex items-center gap-2 border border-brand-200 rounded-lg px-4 py-2 hover:bg-brand-50 cursor-pointer transition-colors"
+			className={styles.button()}
 		>
 			<Typography variant="body" gradientColor="RedToPurple" className="font-bold">
 				RoomID: {roomId}
