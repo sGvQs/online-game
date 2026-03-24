@@ -160,20 +160,6 @@ export function GameCarouselSection({
 				})}
 			</div>
 
-			<div className={styles.infoPanel()}>
-				<div className={styles.infoItem()}>
-					<Users className="w-4 h-4" />
-					<span>{getPlayerRangeLabel(GAMES[activeIndex].type)}</span>
-				</div>
-				<div className={styles.infoItem()}>
-					{GAMES[activeIndex].mode === "cooperative" ? (
-						<span className={styles.modeTagCooperative()}>協力</span>
-					) : (
-						<span className={styles.modeTagCompetitive()}>対戦</span>
-					)}
-				</div>
-			</div>
-
 			<div className={styles.kvContainer()}>
 				{GAMES[activeIndex].roles && (
 					<div className={styles.kvTabsOverlay()}>
@@ -200,44 +186,21 @@ export function GameCarouselSection({
 				/>
 			</div>
 
-			<p className={styles.ruleDesc()}>{GAMES[activeIndex].shortDesc}</p>
-
-			<div className="flex items-center gap-4">
-				<button
-					className={styles.navButton()}
-					onClick={handlePrev}
-					aria-label="前のゲーム"
-				>
-					<ChevronLeft className="w-5 h-5" />
-				</button>
-
-				{isHost && (
-					<Button
-						variant="solid"
-						disabled={isPending}
-						onClick={() => handleCardClick(activeIndex)}
-					>
-						{isPending ? "開始中..." : "ゲームスタート"}
-					</Button>
-				)}
-
-				{!isHost && (
-					<Button
-						variant="ghost"
-						onClick={() => handleCardClick(activeIndex)}
-					>
-						ルールを見る
-					</Button>
-				)}
-
-				<button
-					className={styles.navButton()}
-					onClick={handleNext}
-					aria-label="次のゲーム"
-				>
-					<ChevronRight className="w-5 h-5" />
-				</button>
+			<div className={styles.infoPanel()}>
+				<div className={styles.infoItem()}>
+					<Users className="w-4 h-4" />
+					<span>{getPlayerRangeLabel(GAMES[activeIndex].type)}</span>
+				</div>
+				<div className={styles.infoItem()}>
+					{GAMES[activeIndex].mode === "cooperative" ? (
+						<span className={styles.modeTagCooperative()}>協力</span>
+					) : (
+						<span className={styles.modeTagCompetitive()}>対戦</span>
+					)}
+				</div>
 			</div>
+
+			<p className={styles.ruleDesc()}>{GAMES[activeIndex].shortDesc}</p>
 
 			<GameDescriptionModal
 				isOpen={showGameDescription}
