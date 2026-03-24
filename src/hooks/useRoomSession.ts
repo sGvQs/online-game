@@ -8,11 +8,7 @@ import { getNullHandRankings } from "@/server/actions/game/rankingActions";
 import type { RoomUserWithUser, UserRanking } from "@/types";
 
 interface RoomRecord {
-	activeGameType?: string;
-}
-
-interface RoomUserRecord {
-	userId?: string;
+	active_game_type?: string;
 }
 
 export function useRoomSession({
@@ -35,7 +31,15 @@ export function useRoomSession({
 	useEffect(() => {
 		refreshRef.current = async () => {
 			const room = await getRoomWithUsers(roomId);
-			if (!room) return;
+			if (!room) {
+				router.push("/dashboard");
+				return;
+			}
+			const isMember = room.users.some((u) => u.userId === currentUserId);
+			if (!isMember) {
+				router.push("/dashboard");
+				return;
+			}
 			const rankings = await getNullHandRankings(
 				room.users.map((u) => u.userId),
 			);
@@ -56,8 +60,8 @@ export function useRoomSession({
 					filter: `id=eq.${roomId}`,
 				},
 				(payload: { new: RoomRecord }) => {
-					if (payload.new.activeGameType) {
-						router.push(`/game/${roomId}/${payload.new.activeGameType}`);
+					if (payload.new.active_game_type) {
+						router.push(`/game/${roomId}/${payload.new.active_game_type}`);
 					}
 				},
 			)
@@ -81,14 +85,7 @@ export function useRoomSession({
 					table: "room_users",
 					filter: `room_id=eq.${roomId}`,
 				},
-				(payload: { eventType: string; old: RoomUserRecord }) => {
-					if (
-						payload.eventType === "DELETE" &&
-						payload.old.userId === currentUserId
-					) {
-						router.push("/dashboard");
-						return;
-					}
+				() => {
 					refreshRef.current();
 				},
 			)
