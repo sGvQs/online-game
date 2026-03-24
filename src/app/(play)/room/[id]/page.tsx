@@ -41,29 +41,31 @@ export default async function RoomPage({
 
 	return (
 		<div className="flex justify-center items-center gap-2 p-8 min-h-screen">
-			<div className="flex flex-col items-center justify-baseline gap-6 p-8">
-				<PukapukaLogo />
-				<RoomIdCopy roomId={room.id} />
-				<div className="flex flex-col gap-2">
-					<Typography variant="small" className="text-brand-600 font-medium">
-						メンバー
-					</Typography>
-					<MemberListSection
-						members={room.users}
-						rankingsMap={rankingsMap}
-						isHost={isHost}
-						currentUserId={currentUser.user.id}
+			<div className="flex">
+				<div className="flex flex-col items-center justify-baseline gap-6 px-8 py-4 ">
+					<PukapukaLogo />
+					<RoomIdCopy roomId={room.id} />
+					<div className="flex flex-col gap-2">
+						<Typography variant="small" className="text-brand-600 font-medium">
+							メンバー
+						</Typography>
+						<MemberListSection
+							members={room.users}
+							rankingsMap={rankingsMap}
+							isHost={isHost}
+							currentUserId={currentUser.user.id}
+							roomId={room.id}
+						/>
+					</div>
+					<LeaveRoomButton roomId={room.id} isHost={isHost} />
+				</div>
+				<div className="flex flex-col items-center gap-6 px-8 py-12 w-[600px]">
+					<GameCarouselSection
 						roomId={room.id}
+						memberCount={room.users.length}
+						isHost={isHost}
 					/>
 				</div>
-				<LeaveRoomButton roomId={room.id} isHost={isHost} />
-			</div>
-			<div className="flex flex-col items-center gap-6 p-8 w-[600px]">
-				<GameCarouselSection
-					roomId={room.id}
-					memberCount={room.users.length}
-					isHost={isHost}
-				/>
 			</div>
 		</div>
 	);
