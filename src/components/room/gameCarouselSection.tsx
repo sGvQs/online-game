@@ -151,10 +151,12 @@ export function GameCarouselSection({
 									className="object-contain"
 								/>
 							</div>
-							<div className={styles.gameTitle()}>{game.title}</div>
-							<div className={styles.gameDesc()}>
+							<Typography variant="h3" as="div" className={styles.gameTitle()}>
+								{game.title}
+							</Typography>
+							<Typography variant="small" as="div" className={styles.gameDesc()}>
 								{isHost ? game.hostDesc : game.guestDesc}
-							</div>
+							</Typography>
 						</div>
 					);
 				})}
@@ -189,7 +191,9 @@ export function GameCarouselSection({
 			<div className={styles.infoPanel()}>
 				<div className={styles.infoItem()}>
 					<Users className="w-4 h-4" />
-					<span>{getPlayerRangeLabel(GAMES[activeIndex].type)}</span>
+					<Typography variant="small" as="span">
+						{getPlayerRangeLabel(GAMES[activeIndex].type)}
+					</Typography>
 				</div>
 				<div className={styles.infoItem()}>
 					{GAMES[activeIndex].mode === "cooperative" ? (
@@ -200,7 +204,9 @@ export function GameCarouselSection({
 				</div>
 			</div>
 
-			<p className={styles.ruleDesc()}>{GAMES[activeIndex].shortDesc}</p>
+			<Typography variant="small" className={styles.ruleDesc()}>
+				{GAMES[activeIndex].shortDesc}
+			</Typography>
 
 			<GameDescriptionModal
 				isOpen={showGameDescription}
