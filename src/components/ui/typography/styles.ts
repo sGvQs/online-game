@@ -20,8 +20,8 @@ export type TypographyFont =
 export const typography = tv({
     variants: {
         variant: {
-            display: "text-6xl md:text-8xl font-black tracking-tight leading-none",
-            h1: "text-4xl",
+            display: "text-8xl font-black tracking-tight leading-none",
+            h1: "text-6xl",
             h2: "text-2xl",
             h3: "text-xl",
             h4: "text-sm font-bold uppercase tracking-wider",

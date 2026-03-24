@@ -7,7 +7,7 @@ import type { GradientColor } from "@/components/ui/typography/styles";
 const PukapukaLogoSize = {
     medium: {
         variant: "h1",
-        padding: "py-1 px-1",
+        padding: "py-2 px-2",
     },
     large: {
         variant: "display",
