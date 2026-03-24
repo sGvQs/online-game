@@ -43,6 +43,10 @@ export const gameCarouselSection = tv({
 			"px-2 py-0.5 rounded-full text-xs font-bold bg-red-900/30 text-red-400 border border-red-600/50",
 		kvContainer:
 			"relative w-full max-w-xs aspect-video rounded-xl overflow-hidden bg-white/5 border border-white/10",
+		kvTabsOverlay: "absolute top-2 left-2 flex gap-1 z-10",
+		kvTab: "px-2.5 py-0.5 rounded-full text-xs font-bold tracking-wider transition-colors border cursor-pointer",
+		kvTabActive: "bg-white/20 border-white/40 text-white",
+		kvTabInactive: "bg-black/30 border-white/10 text-white/40 hover:text-white/70",
 		ruleDesc: "text-xs text-center text-brand-600 max-w-xs leading-relaxed px-2",
 	},
 });

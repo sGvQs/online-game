@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useEffect, useTransition } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight, Users } from "lucide-react";
 import { gameCarouselSection } from "./gameCarouselSection.styles";
@@ -30,6 +30,7 @@ const GAMES = [
 		mode: "competitive",
 		shortDesc:
 			"エラーダイアログが突然出現！最速で「×」ボタンを押した人が勝利。フライングは無効。",
+		roles: null,
 	},
 	{
 		type: "null-hand",
@@ -40,6 +41,7 @@ const GAMES = [
 		mode: "competitive",
 		shortDesc:
 			"ホストは裏で手を選択。ゲストはその心理を読んで勝て。統計情報を活かせ。",
+		roles: ["HOST", "GUEST"] as const,
 	},
 	{
 		type: "star-shield",
@@ -49,7 +51,8 @@ const GAMES = [
 		guestDesc: "クリックでルールを表示",
 		mode: "cooperative",
 		shortDesc:
-			"タイピスト＆シューターの2人協力。タイピングで弾を撃ち、90秒間星を守り切れ！",
+			"タイピスト&シューターの2人協力。タイピングで弾を撃ち、90秒間星を守り切れ！",
+		roles: ["SHOOTER", "TYPIST"] as const,
 	},
 ] as const;
 
@@ -70,7 +73,12 @@ export function GameCarouselSection({
 }: GameCarouselSectionProps) {
 	const styles = gameCarouselSection();
 	const [activeIndex, setActiveIndex] = useState(0);
+	const [selectedRoleIndex, setSelectedRoleIndex] = useState(0);
 	const [isPending, startTransition] = useTransition();
+
+	useEffect(() => {
+		setSelectedRoleIndex(0);
+	}, [activeIndex]);
 	const [showGameDescription, setShowGameDescription] = useState(false);
 	const [selectedGameType, setSelectedGameType] = useState<string>("");
 	const [showGameStartError, setShowGameStartError] = useState(false);
@@ -167,6 +175,23 @@ export function GameCarouselSection({
 			</div>
 
 			<div className={styles.kvContainer()}>
+				{GAMES[activeIndex].roles && (
+					<div className={styles.kvTabsOverlay()}>
+						{GAMES[activeIndex].roles.map((role, i) => (
+							<button
+								key={role}
+								className={`${styles.kvTab()} ${
+									i === selectedRoleIndex
+										? styles.kvTabActive()
+										: styles.kvTabInactive()
+								}`}
+								onClick={() => setSelectedRoleIndex(i)}
+							>
+								{role}
+							</button>
+						))}
+					</div>
+				)}
 				<Image
 					src={GAMES[activeIndex].icon}
 					alt={GAMES[activeIndex].title}
