@@ -37,6 +37,7 @@ export default async function RoomPage({
 		<RoomClient
 			roomId={room.id}
 			currentUserId={currentUser.user.id}
+			hostUserId={room.createdBy}
 			isHost={isHost}
 			initialMembers={room.users}
 			initialRankings={rankings}

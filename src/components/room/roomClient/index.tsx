@@ -13,6 +13,7 @@ import type { RoomUserWithUser, UserRanking } from "@/types";
 interface RoomClientProps {
 	roomId: string;
 	currentUserId: string;
+	hostUserId: string;
 	isHost: boolean;
 	initialMembers: RoomUserWithUser[];
 	initialRankings: UserRanking[];
@@ -21,6 +22,7 @@ interface RoomClientProps {
 export function RoomClient({
 	roomId,
 	currentUserId,
+	hostUserId,
 	isHost,
 	initialMembers,
 	initialRankings,
@@ -47,13 +49,14 @@ export function RoomClient({
 					<RoomIdCopy roomId={roomId} />
 					<div className={styles.memberSection()}>
 						<Typography variant="small" className="text-brand-600 font-medium">
-							メンバー
+							メンバー {members.length}/8人
 						</Typography>
 						<MemberListSection
 							members={members}
 							rankingsMap={rankingsMap}
 							isHost={isHost}
 							currentUserId={currentUserId}
+							hostUserId={hostUserId}
 							roomId={roomId}
 						/>
 					</div>

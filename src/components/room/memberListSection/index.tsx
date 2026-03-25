@@ -11,6 +11,7 @@ interface MemberListSectionProps {
 	rankingsMap: Map<string, UserRanking>;
 	isHost: boolean;
 	currentUserId: string;
+	hostUserId: string;
 	roomId: string;
 }
 
@@ -19,6 +20,7 @@ export function MemberListSection({
 	rankingsMap,
 	isHost,
 	currentUserId,
+	hostUserId,
 	roomId,
 }: MemberListSectionProps) {
 	const styles = memberListSection();
@@ -40,6 +42,7 @@ export function MemberListSection({
 					key={member.id}
 					member={member}
 					ranking={rankingsMap.get(member.userId)}
+					isHostMember={member.userId === hostUserId}
 					showKickButton={isHost && member.userId !== currentUserId}
 					onKick={() => handleKick(member.userId)}
 					isKicking={kickingUserId === member.userId}

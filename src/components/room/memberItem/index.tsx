@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { UserMinus } from "lucide-react";
+import { Crown, UserMinus, UserRound } from "lucide-react";
 import { RoomUserWithUser, UserRanking } from "@/types";
 import {
 	FACE_ICON_PATHS,
@@ -13,6 +13,7 @@ const styles = memberItem();
 interface MemberItemProps {
 	member: RoomUserWithUser;
 	ranking?: UserRanking;
+	isHostMember?: boolean;
 	showKickButton?: boolean;
 	onKick?: () => void;
 	isKicking?: boolean;
@@ -25,6 +26,7 @@ interface MemberItemProps {
 export function MemberItem({
 	member,
 	ranking,
+	isHostMember,
 	showKickButton,
 	onKick,
 	isKicking,
@@ -47,7 +49,13 @@ export function MemberItem({
 				/>
 			</div>
 			<div className={styles.info()}>
-				<p className={styles.name()}>{member.user.name}</p>
+				<p className={styles.name()}>
+					{isHostMember
+						? <Crown className={styles.hostIcon()} />
+						: <UserRound className={styles.guestIcon()} />
+					}
+					{member.user.name}
+				</p>
 				<p className={styles.status()}>{statusText}</p>
 			</div>
 			{showKickButton ? (

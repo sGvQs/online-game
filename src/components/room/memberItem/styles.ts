@@ -22,5 +22,7 @@ export const memberItem = tv({
 			"w-2 h-2 rounded-full bg-green-400 m-3",
 			"shadow-[0_0_8px_rgba(74,222,128,0.5)] animate-pulse",
 		],
+		hostIcon: "inline w-3 h-3 mr-1 text-yellow-400 shrink-0",
+		guestIcon: "inline w-3 h-3 mr-1 text-brand-400 shrink-0",
 	},
 });

@@ -5,6 +5,8 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { getAuthenticatedUser } from "../_helpers/getAuthenticatedUser";
 
+const ROOM_MAX_PLAYERS = 8;
+
 /**
  * ルームに参加
  */
@@ -19,6 +21,12 @@ export async function joinRoom(roomId: string) {
 	if (room.status === "PLAYING") {
 		revalidatePath("/home");
 		redirect("/home?error=game_in_progress");
+	}
+
+	const memberCount = await prisma.roomUser.count({ where: { roomId } });
+	if (memberCount >= ROOM_MAX_PLAYERS) {
+		revalidatePath("/home");
+		redirect("/home?error=room_full");
 	}
 
 	const existingMembership = await prisma.roomUser.findFirst({
