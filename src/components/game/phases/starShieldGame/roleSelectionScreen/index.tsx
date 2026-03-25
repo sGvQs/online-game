@@ -131,7 +131,7 @@ export function RoleSelectionScreen({
 								const canSelect = isHost && !isLocked;
 								const isSelectableInactive = canSelect && !isActive;
 								const lockTitle = isHellLocked
-									? "隕石破壊数200以上のクリアで解放"
+									? "隕石破壊数100以上のクリアで解放"
 									: isAbyssLocked
 										? "隕石破壊数500以上のクリアで解放"
 										: undefined;
