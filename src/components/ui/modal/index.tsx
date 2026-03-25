@@ -2,7 +2,7 @@
 
 import React, { useEffect } from "react";
 import { createPortal } from "react-dom";
-import { modal } from "./modal.styles";
+import { modal } from "./styles";
 import { Button } from "@/components/ui/button";
 import { Typography } from "@/components/ui/typography";
 
