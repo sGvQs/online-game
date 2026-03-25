@@ -2,17 +2,7 @@ import { tv } from "tailwind-variants";
 
 export const titleScreen = tv({
 	slots: {
-		titleStar: [
-			"block text-[5.5rem] font-black leading-none",
-			"bg-linear-to-br from-white via-purple-400 to-pink-400 bg-clip-text text-transparent",
-			"[filter:drop-shadow(0_0_30px_rgba(192,132,252,0.6))]",
-		],
-		titleShield: [
-			"block text-[5.5rem] font-black leading-none -mt-2",
-			"bg-linear-to-br from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent",
-			"[filter:drop-shadow(0_0_30px_rgba(129,140,248,0.6))]",
-		],
-		subtitle: "flex gap-2 text-sm mt-3 text-[rgba(167,139,250,0.7)]",
+		subtitle: "flex gap-2 text-sm mt-6 text-brand-500 font-bold w-full justify-center",
 		playerCard:
 			"rounded-2xl p-5 bg-[rgba(129,140,248,0.05)] border border-[rgba(129,140,248,0.18)]",
 		playerCardTitle:

@@ -15,6 +15,7 @@ export type TypographyFont =
     | "cherry-bomb-one"
     | "dot-gothic-16"
     | "rubik-puddles"
+    | "honk"
     | "sans";
 
 export const typography = tv({
@@ -34,6 +35,7 @@ export const typography = tv({
             "cherry-bomb-one": "font-cherry-bomb-one",
             "dot-gothic-16": "font-dot-gothic-16",
             "rubik-puddles": "font-rubik-puddles",
+            honk: "font-honk",
             sans: "font-sans",
         },
     },
