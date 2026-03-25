@@ -39,6 +39,7 @@ export const homeProfile = tv({
 		],
 		iconOptionSelected: "border-brand-500 ring-2 ring-brand-400 scale-110",
 		inputWrapper: "flex flex-col gap-1",
+		nameInput: "bg-white/5 text-white border-brand-300 placeholder:text-brand-400",
 		nameCounter: "text-[10px] text-brand-400 text-right",
 		commentArea: [
 			"w-full rounded-lg border border-brand-300 bg-white/5 px-3 py-2 text-sm",

@@ -144,6 +144,7 @@ export function HomeProfile({
 								<div className={styles.inputWrapper()}>
 									<p className={styles.sectionLabel()}>なまえ</p>
 									<Input
+										className={styles.nameInput()}
 										value={name}
 										onChange={(e) => setName(e.target.value)}
 										maxLength={10}
