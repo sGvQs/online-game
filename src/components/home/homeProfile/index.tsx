@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Modal } from "@/components/ui/modal";
 import { FACE_ICON_PATHS, FACE_ICON_OPTIONS } from "@/constants/common/faceIcon";
 import { updateProfile } from "@/server/actions/user/updateProfile";
-import { homeProfile } from "./homeProfile.styles";
+import { homeProfile } from "./styles";
 
 interface HomeProfileProps {
 	initialName: string;
@@ -141,18 +141,22 @@ export function HomeProfile({
 
 					<div className={styles.actions()}>
 						<Button
-							variant="outline"
+							variant="success"
 							onClick={closeModal}
 							disabled={isPending}
 						>
-							キャンセル
+							<Typography variant="label" font="cherry-bomb-one" className="font-bold">
+								キャンセル	
+							</Typography>
 						</Button>
 						<Button
 							variant="primary"
 							onClick={handleSave}
 							disabled={isPending}
 						>
-							{isPending ? "保存中..." : "保存する"}
+							<Typography variant="label" font="cherry-bomb-one" className="font-bold">
+								{isPending ? "..." : "セーブ"}
+							</Typography>
 						</Button>
 					</div>
 				</div>
