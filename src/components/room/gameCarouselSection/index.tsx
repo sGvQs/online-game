@@ -78,20 +78,13 @@ export function GameCarouselSection({
 	}, [activeIndex]);
 	const [showGameStartError, setShowGameStartError] = useState(false);
 	const [gameStartErrorType, setGameStartErrorType] = useState<string>("");
+	const [showHostOnlyModal, setShowHostOnlyModal] = useState(false);
 
 	const getPosition = (i: number): "center" | "left" | "right" => {
 		const diff = ((i - activeIndex) % 3 + 3) % 3;
 		if (diff === 0) return "center";
 		if (diff === 1) return "right";
 		return "left";
-	};
-
-	const handleCardClick = (i: number) => {
-		const pos = getPosition(i);
-		if (pos !== "center") {
-			setActiveIndex(i);
-			return;
-		}
 	};
 
 	const handleGameStart = () => {
@@ -109,6 +102,19 @@ export function GameCarouselSection({
 		startTransition(async () => {
 			await selectGame(roomId, game.type);
 		});
+	};
+
+	const handleCardClick = (i: number) => {
+		const pos = getPosition(i);
+		if (pos !== "center") {
+			setActiveIndex(i);
+			return;
+		}
+		if (isHost) {
+			handleGameStart();
+		} else {
+			setShowHostOnlyModal(true);
+		}
 	};
 
 	const positionClass = {
@@ -231,6 +237,30 @@ export function GameCarouselSection({
 					</div>
 				</div>
 			</RoomModal>
+
+		<RoomModal
+			isOpen={showHostOnlyModal}
+			onClose={() => setShowHostOnlyModal(false)}
+			title="ゲームを開始できません"
+			showCloseButton
+		>
+			<div className={styles.errorModalContent()}>
+				<Typography variant="body" className={styles.errorModalText()}>
+					ゲームの開始はホストのみが行えます。
+				</Typography>
+				<Typography variant="small" className={styles.errorModalSub()}>
+					ホストに開始してもらいましょう。
+				</Typography>
+				<div className={styles.errorModalActions()}>
+					<Button
+						variant="danger"
+						onClick={() => setShowHostOnlyModal(false)}
+					>
+						OK
+					</Button>
+				</div>
+			</div>
+		</RoomModal>
 		</div>
 	);
 }
