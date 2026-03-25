@@ -2,11 +2,11 @@
 
 import React, { useEffect } from "react";
 import { createPortal } from "react-dom";
-import { roomModal } from "./styles";
+import { modal } from "./modal.styles";
 import { Button } from "@/components/ui/button";
 import { Typography } from "@/components/ui/typography";
 
-interface RoomModalProps {
+interface ModalProps {
 	isOpen: boolean;
 	onClose: () => void;
 	title: string;
@@ -15,19 +15,18 @@ interface RoomModalProps {
 }
 
 /**
- * Room画面用の共通モーダルコンポーネント
+ * 共通モーダルコンポーネント
  *
  * glassmorphismデザインで、画面の縦横60%のサイズで中央に浮遊表示される。
- * room画面の雰囲気（space theme + neon accents）に合わせたデザイン。
  */
-export function RoomModal({
+export function Modal({
 	isOpen,
 	onClose,
 	title,
 	children,
 	showCloseButton = true,
-}: RoomModalProps) {
-	const styles = roomModal();
+}: ModalProps) {
+	const styles = modal();
 
 	// ESCキーでモーダルを閉じる
 	useEffect(() => {
@@ -63,7 +62,7 @@ export function RoomModal({
 			<div className={styles.content()} onClick={(e) => e.stopPropagation()}>
 				{/* ヘッダー */}
 				<div className={styles.header()}>
-					<Typography variant="h2" className={styles.title()}>
+					<Typography variant="h2" font="dot-gothic-16" className={styles.title()}>
 						{title}
 					</Typography>
 					{showCloseButton && (

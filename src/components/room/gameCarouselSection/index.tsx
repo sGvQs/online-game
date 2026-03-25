@@ -4,7 +4,7 @@ import { useState, useEffect, useTransition } from "react";
 import Image from "next/image";
 import { Users } from "lucide-react";
 import { gameCarouselSection } from "./styles";
-import { RoomModal } from "../roomModal";
+import { Modal } from "@/components/ui/modal";
 import { LeaveRoomButton } from "../leaveRoomButton";
 import { Button } from "@/components/ui/button";
 import { Typography } from "@/components/ui/typography";
@@ -208,7 +208,7 @@ export function GameCarouselSection({
 				)}
 			</div>
 
-			<RoomModal
+			<Modal
 				isOpen={showGameStartError}
 				onClose={() => setShowGameStartError(false)}
 				title="ゲームを開始できません"
@@ -236,9 +236,9 @@ export function GameCarouselSection({
 						</Button>
 					</div>
 				</div>
-			</RoomModal>
+			</Modal>
 
-		<RoomModal
+		<Modal
 			isOpen={showHostOnlyModal}
 			onClose={() => setShowHostOnlyModal(false)}
 			title="ゲームを開始できません"
@@ -260,7 +260,7 @@ export function GameCarouselSection({
 					</Button>
 				</div>
 			</div>
-		</RoomModal>
+		</Modal>
 		</div>
 	);
 }

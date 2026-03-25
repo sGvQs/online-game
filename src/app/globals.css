@@ -207,7 +207,7 @@ body {
   transition: background-color 5000s ease-in-out 0s;
 }
 
-/* Custom animations for RoomModal and Win95 components */
+/* Custom animations for Modal and Win95 components */
 @keyframes fadeIn {
   from { 
     opacity: 0; 

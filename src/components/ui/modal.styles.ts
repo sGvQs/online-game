@@ -1,10 +1,10 @@
 import { tv } from "tailwind-variants";
 
 /**
- * RoomModal コンポーネントのスタイル定義
+ * Modal コンポーネントのスタイル定義
  * glassmorphismデザイン、画面の縦横60%のサイズ
  */
-export const roomModal = tv({
+export const modal = tv({
 	slots: {
 		overlay: [
 			"fixed inset-0",
