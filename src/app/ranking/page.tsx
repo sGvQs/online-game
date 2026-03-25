@@ -18,13 +18,13 @@ export default async function RankingPage() {
 	const homeUser = await getHomeUser();
 	if (!homeUser) return <div>User not found in DB</div>;
 
-	const rankings = await getTopRankings();
+	const rankings = await getTopRankings(10);
 
 	return (
 		<div className="flex flex-col items-center min-h-screen py-12 px-8 gap-8">
 			<PukapukaLogo />
 
-			<Typography variant="h1" font="cherry-bomb-one" className="text-white">
+			<Typography variant="h2" font="cherry-bomb-one" className="text-white">
 				ランキング
 			</Typography>
 
@@ -32,8 +32,10 @@ export default async function RankingPage() {
 				<RankingList rankings={rankings} currentUserId={homeUser.user.id} />
 			</div>
 
-			<Link href="/home" className={button({ variant: "primary", size: "lg" })}>
+			<Link href="/home" className={button({ variant: "success", size: "lg" })}>
+				<Typography variant="label" font="cherry-bomb-one" className="text-white">
 				ホームにもどる
+				</Typography>
 			</Link>
 		</div>
 	);

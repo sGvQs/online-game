@@ -39,10 +39,10 @@ export function RankingList({ rankings, currentUserId }: RankingListProps) {
 									: styles.item()
 							}
 						>
-							<Typography variant="small" font="dot-gothic-16" className={styles.rank()}>
+							<Typography variant="h4" className={styles.rank()}>
 								{r.rank}位
 							</Typography>
-							<Typography variant="small" className={styles.name()}>
+							<Typography variant="h4" className={styles.name()}>
 								{r.name}
 							</Typography>
 							<Typography variant="small" className={styles.points()}>

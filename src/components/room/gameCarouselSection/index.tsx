@@ -203,7 +203,7 @@ export function GameCarouselSection({
 						disabled={isPending}
 						className="font-cherry-bomb-one"
 					>
-						{isPending ? "処理中..." : `はじめる`}
+						{isPending ? "..." : `はじめる`}
 					</Button>
 				)}
 			</div>
