@@ -20,10 +20,10 @@ export default async function RoomSearchPage() {
 				<RoomSearchList initialRooms={rooms} userId={currentUser.user.id} />
 			</div>
 			<Link
-				href="/dashboard"
+				href="/home"
 				className="text-xs text-brand-600 hover:text-brand-400 transition-colors"
 			>
-				← ダッシュボードに戻る
+				← ホームに戻る
 			</Link>
 		</div>
 	);

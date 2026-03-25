@@ -38,5 +38,5 @@ export async function updateProfile(data: {
 		},
 	});
 
-	revalidatePath("/dashboard");
+	revalidatePath("/home");
 }

@@ -16,14 +16,14 @@ export default async function RoomPage({
 
 	const room = await getRoomWithUsers(id);
 	if (!room) {
-		redirect("/dashboard");
+		redirect("/home");
 	}
 
 	const isMember = room.users.some(
 		(u: RoomUserWithReadyStatus) => u.userId === currentUser.user.id,
 	);
 	if (!isMember) {
-		redirect("/dashboard");
+		redirect("/home");
 	}
 
 	if (room.activeGameType) {

@@ -1,7 +1,6 @@
 import { Suspense } from "react";
 import Link from "next/link";
 import AuthForm from "@/components/auth/authForm";
-import { DashboardHeaderTitle } from "@/components/dashboard/dashboardHeaderTitle";
 import { AnnoyingDinosaur } from "@/components/login/annoyingDinosaur";
 import { Typography } from "@/components/ui/typography";
 
@@ -18,7 +17,6 @@ export default function LoginPage() {
 
 			<div className="relative z-10 w-full max-w-sm flex flex-col items-center gap-7">
 				{/* ロゴ */}
-				<DashboardHeaderTitle />
 
 				{/* フレーバーテキスト */}
 				<Typography

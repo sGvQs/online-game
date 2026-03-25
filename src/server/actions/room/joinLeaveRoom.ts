@@ -13,12 +13,12 @@ export async function joinRoom(roomId: string) {
 
 	const room = await prisma.room.findUnique({ where: { id: roomId } });
 	if (!room) {
-		revalidatePath("/dashboard");
-		redirect("/dashboard");
+		revalidatePath("/home");
+		redirect("/home");
 	}
 	if (room.status === "PLAYING") {
-		revalidatePath("/dashboard");
-		redirect("/dashboard?error=game_in_progress");
+		revalidatePath("/home");
+		redirect("/home?error=game_in_progress");
 	}
 
 	const existingMembership = await prisma.roomUser.findFirst({
@@ -37,14 +37,14 @@ export async function joinRoom(roomId: string) {
 		});
 	}
 
-	revalidatePath("/dashboard");
+	revalidatePath("/home");
 	redirect(`/room/${roomId}`);
 }
 
 /**
  * ルームから退出。
  * 作成者が退出した場合はルームを削除し、他メンバー全員に通知を作成する。
- * 他メンバーはリアルタイム購読でルーム削除を検知してダッシュボードへ遷移する。
+ * 他メンバーはリアルタイム購読でルーム削除を検知してホームへ遷移する。
  */
 export async function leaveRoom(roomId: string) {
 	const user = await getAuthenticatedUser();
@@ -55,7 +55,7 @@ export async function leaveRoom(roomId: string) {
 	});
 
 	if (!room) {
-		redirect("/dashboard");
+		redirect("/home");
 	}
 
 	if (room.createdBy === user.id) {
@@ -78,8 +78,8 @@ export async function leaveRoom(roomId: string) {
 		});
 	}
 
-	revalidatePath("/dashboard");
-	redirect("/dashboard");
+	revalidatePath("/home");
+	redirect("/home");
 }
 
 /**

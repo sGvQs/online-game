@@ -32,12 +32,12 @@ export function useRoomSession({
 		refreshRef.current = async () => {
 			const room = await getRoomWithUsers(roomId);
 			if (!room) {
-				router.push("/dashboard");
+				router.push("/home");
 				return;
 			}
 			const isMember = room.users.some((u) => u.userId === currentUserId);
 			if (!isMember) {
-				router.push("/dashboard");
+				router.push("/home");
 				return;
 			}
 			const rankings = await getNullHandRankings(
@@ -74,7 +74,7 @@ export function useRoomSession({
 					filter: `id=eq.${roomId}`,
 				},
 				() => {
-					router.push("/dashboard");
+					router.push("/home");
 				},
 			)
 			.on(

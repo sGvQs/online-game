@@ -16,12 +16,12 @@ export default async function StarShieldRankingPage({
 	const { roomId } = await params;
 
 	const room = await getRoomWithReadyStatus(roomId);
-	if (!room) redirect("/dashboard");
+	if (!room) redirect("/home");
 
 	const isMember = room.users.some(
 		(u: RoomUserWithReadyStatus) => u.userId === currentUser.user.id,
 	);
-	if (!isMember) redirect("/dashboard");
+	if (!isMember) redirect("/home");
 
 	const rankings = await getStarShieldPairRankings(50);
 	const memberUserIds = room.users.map(

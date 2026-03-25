@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Typography } from "@/components/ui/typography";
 import { createRoom } from "@/server/actions/room";
 
-export function DashboardActions() {
+export function HomeActions() {
     const router = useRouter();
     return (
         <div className="flex items-center gap-10 mt-20">

@@ -22,5 +22,5 @@ export async function deleteRoom(roomId: string) {
 		where: { id: roomId },
 	});
 
-	revalidatePath("/dashboard");
+	revalidatePath("/home");
 }

@@ -1,34 +1,22 @@
 import { createClient } from "@/server/lib/supabase/server";
 import { redirect } from "next/navigation";
 import {
-	getDashboardUser,
-	getRooms,
+	getHomeUser,
 	cleanupAbandonedRooms,
-	getUnreadRoomDeletedNotifications,
 	getMonthlyRanking,
-	getTopRankings,
 } from "@/server/actions";
-import { RoomList } from "@/components/room/roomList";
-import { DashboardSidebar } from "@/components/dashboard/dashboardSidebar";
-import { LogoutButton } from "@/components/auth/logoutButton";
-import { SetLoginFlag } from "@/components/auth/setLoginFlag";
-import { Boxes } from "lucide-react";
 import { DEFAULT_FACE_ICON, FaceIcon, FACE_ICON_PATHS } from "@/constants/common/faceIcon";
 import Image from "next/image";
-import { DashboardHeaderTitle } from "@/components/dashboard/dashboardHeaderTitle";
-import { DashboardHeaderProfile } from "@/components/dashboard/dashboardHeaderProfile";
-import { DashboardComplaintWrapper } from "@/components/dashboard/dashboardComplaintWrapper";
-import { RankingCard } from "@/components/dashboard/rankingCard";
 import { Typography } from "@/components/ui/typography";
 import { PukapukaLogo } from "@/components/common/logo/pukapukaLogo";
-import { DashboardActions } from "@/components/dashboard/dashboardActions";
+import { HomeActions } from "@/components/home/homeActions";
 
-export default async function DashboardPage({
+export default async function HomePage({
 	searchParams,
 }: {
 	searchParams: Promise<{ error?: string }>;
 }) {
-	const params = await searchParams;
+	await searchParams;
 	const supabase = await createClient();
 	const {
 		data: { user },
@@ -36,22 +24,17 @@ export default async function DashboardPage({
 
 	if (!user) redirect("/");
 
-	// 放置ルームのクリーンアップ（ダッシュボード訪問者なら誰でも実行）
+	// 放置ルームのクリーンアップ（訪問者なら誰でも実行）
 	await cleanupAbandonedRooms();
 
 	// Server Action経由でDB取得
-	const dashboardUser = await getDashboardUser();
-	if (!dashboardUser) return <div>User not found in DB</div>;
+	const homeUser = await getHomeUser();
+	if (!homeUser) return <div>User not found in DB</div>;
 
-	const [rooms, roomDeletedNotifications, monthlyRanking, topRankings] =
-		await Promise.all([
-			getRooms(),
-			getUnreadRoomDeletedNotifications(),
-			getMonthlyRanking(dashboardUser.user.id),
-			getTopRankings(5),
-		]);
+	const monthlyRanking = await getMonthlyRanking(homeUser.user.id);
+
 	const initialFaceIcon: FaceIcon =
-		(dashboardUser.user as { faceIcon?: FaceIcon }).faceIcon ??
+		(homeUser.user as { faceIcon?: FaceIcon }).faceIcon ??
 		DEFAULT_FACE_ICON;
 
 	return (
@@ -63,7 +46,7 @@ export default async function DashboardPage({
 			<div className="flex items-center gap-1 mt-5">
 				<Image src={FACE_ICON_PATHS[initialFaceIcon]} alt="face icon" width={20} height={20} />
 				<Typography variant="small">
-					{dashboardUser.user.name}
+					{homeUser.user.name}
 				</Typography>
 				<Typography variant="small">
 					{monthlyRanking?.rank}位
@@ -72,7 +55,7 @@ export default async function DashboardPage({
 					{monthlyRanking?.totalPoints}pt
 				</Typography>
 			</div>
-			<DashboardActions />
+			<HomeActions />
 		</div >
 	);
 }

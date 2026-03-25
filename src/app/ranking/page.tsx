@@ -1,7 +1,7 @@
 import { createClient } from "@/server/lib/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { getDashboardUser, getTopRankings } from "@/server/actions";
+import { getHomeUser, getTopRankings } from "@/server/actions";
 import { Trophy, ArrowLeft } from "lucide-react";
 
 export default async function RankingPage() {
@@ -12,8 +12,8 @@ export default async function RankingPage() {
 
 	if (!user) redirect("/");
 
-	const dashboardUser = await getDashboardUser();
-	if (!dashboardUser) return <div>User not found in DB</div>;
+	const homeUser = await getHomeUser();
+	if (!homeUser) return <div>User not found in DB</div>;
 
 	const rankings = await getTopRankings();
 
@@ -26,11 +26,11 @@ export default async function RankingPage() {
 						ランキング
 					</h1>
 					<Link
-						href="/dashboard"
+						href="/home"
 						className="flex items-center gap-2 text-sm font-medium text-brand-600 hover:text-brand-500 transition-colors"
 					>
 						<ArrowLeft className="w-4 h-4" />
-						ダッシュボードに戻る
+						ホームに戻る
 					</Link>
 				</header>
 
@@ -45,7 +45,7 @@ export default async function RankingPage() {
 								<li
 									key={r.userId}
 									className={`flex items-center justify-between py-4 px-4 rounded-lg text-sm transition-colors ${
-										dashboardUser.user.id === r.userId
+										homeUser.user.id === r.userId
 											? "bg-brand-300/20 border border-brand-200/30"
 											: "hover:bg-white/5"
 									}`}

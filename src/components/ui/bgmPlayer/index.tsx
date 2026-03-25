@@ -21,7 +21,7 @@ const BGM_CONFIG = {
     },
     MAIN_SYSTEM: {
         check: (path: string) =>
-            path.includes("/dashboard") || path.includes("/room/"),
+            path.includes("/home") || path.includes("/room/"),
         srcs: [
             "/music/title-sleep.mp3",
             "/music/title-sky.mp3",

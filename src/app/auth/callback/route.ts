@@ -9,11 +9,11 @@ export async function GET(request: Request) {
 
 	// if "next" is in param, use it as the redirect URL
 	// セキュリティ: 相対パスのみ許可（オープンリダイレクト防止）
-	const rawNext = searchParams.get("next") ?? "/dashboard";
+	const rawNext = searchParams.get("next") ?? "/home";
 	const next =
 		rawNext.startsWith("/") && !rawNext.startsWith("//")
 			? rawNext
-			: "/dashboard";
+			: "/home";
 
 	if (code) {
 		const supabase = await createClient();
