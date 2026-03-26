@@ -15,6 +15,7 @@ import { NullHandLogo } from "@/components/game/common/nullHand/nullHandLogo";
 import { useSE } from "@/hooks/useSE";
 import { RewardSystem } from "@/components/game/common/nullHand/rewardSystem";
 import { NEON_PALETTE } from "@/constants/nullHandGame";
+import { Typography } from "@/components/ui/typography";
 
 interface TitleScreenProps {
 	room: RoomWithUsersAndReadyStatus;
@@ -385,7 +386,9 @@ export function TitleScreen({
 									setShowAbout(false);
 								}}
 							>
-								OK
+								<Typography variant="label" font="cherry-bomb-one" className="font-bold">
+								とじる
+								</Typography>
 							</Button>
 						</div>
 					</motion.div>

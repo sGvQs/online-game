@@ -2,7 +2,7 @@ import { tv } from "tailwind-variants";
 
 export const gameCarouselSection = tv({
 	slots: {
-		wrapper: "flex flex-col items-center gap-6 w-full",
+		wrapper: "flex flex-col items-center gap-4 w-full",
 		stage:
 			"relative flex items-center justify-center w-full h-56 [perspective:1200px]",
 		cardBase: [
@@ -11,7 +11,7 @@ export const gameCarouselSection = tv({
 			"[transform-style:preserve-3d]",
 		],
 		cardCenter:
-			"scale-100 opacity-100 z-20 [transform:rotateY(0deg)_translateX(0)]",
+			"scale-100 opacity-100 z-20 [transform:rotateY(0deg)_translateX(0)] hover:scale-110",
 		cardLeft:
 			"scale-75 opacity-50 z-10 [transform:rotateY(20deg)_translateX(-80%)]",
 		cardRight:
@@ -41,7 +41,7 @@ export const gameCarouselSection = tv({
 		modeTagCompetitive:
 			"px-2 py-0.5 rounded-full text-xs font-bold bg-red-900/40 text-red-500 border border-red-500",
 		kvContainer:
-			"relative w-full max-w-xs aspect-video rounded-xl overflow-hidden bg-white/5 border border-white/10",
+			"relative w-full max-w-md aspect-video rounded-xl overflow-hidden bg-white/5 border border-white/10",
 		kvTabsOverlay: "absolute top-2 left-2 flex gap-1 z-10",
 		kvTab: "px-2.5 py-0.5 rounded-full text-xs font-bold tracking-wider transition-colors border cursor-pointer",
 		kvTabActive: "bg-white/20 border-white/40 text-white",

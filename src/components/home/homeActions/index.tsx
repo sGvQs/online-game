@@ -6,8 +6,10 @@ import { Button } from "@/components/ui/button";
 import { Typography } from "@/components/ui/typography";
 import { createRoom } from "@/server/actions/room";
 import { signOut } from "@/server/actions/auth";
+import { useLoading } from "@/lib/loading-context";
 
 export function HomeActions() {
+    const { showLoading, hideLoading } = useLoading();
     const router = useRouter();
     const [isPending, startTransition] = useTransition();
     return (
@@ -16,17 +18,29 @@ export function HomeActions() {
                 variant="success"
                 size="lg"
                 disabled={isPending}
-                onClick={() => startTransition(() => signOut())}
+                onClick={async () => {
+                    showLoading();
+                    try {
+                        startTransition(() => signOut());
+                    } finally {
+                        hideLoading();
+                    }
+                }}
             >
                 <Typography variant="label" font="cherry-bomb-one" className="font-bold">
-                    {isPending ? "..." : "ログアウト"}
+                    ログアウト
                 </Typography>
             </Button>
             <Button
                 variant="primary"
                 size="lg"
                 onClick={async () => {
-                    await createRoom();
+                    showLoading();
+                    try {
+                        await createRoom();
+                    } finally {
+                        hideLoading();
+                    }
                 }}
             >
                 <Typography variant="label" font="cherry-bomb-one" className="font-bold">ルームをつくる</Typography>

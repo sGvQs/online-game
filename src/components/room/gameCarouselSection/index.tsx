@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, useTransition } from "react";
+import { useState, useEffect } from "react";
+import { useLoading } from "@/lib/loading-context";
 import Image from "next/image";
 import { Users } from "lucide-react";
 import { gameCarouselSection } from "./styles";
@@ -18,6 +19,7 @@ interface GameCarouselSectionProps {
 	roomId: string;
 	memberCount: number;
 	isHost: boolean;
+	onLeaveRoom: () => void;
 }
 
 const GAMES = [
@@ -25,11 +27,12 @@ const GAMES = [
 		type: "error-hunter",
 		title: "ERROR HUNTER",
 		icon: "/svg/object/old-pc.svg",
-		desc: "バグを見つけて潰せ！",
+		desc: "バグを最速で潰せ！",
 		mode: "competitive",
 		shortDesc:
-			"エラーダイアログが突然出現！最速で「×」ボタンを押した人が勝利。フライングは無効。",
+			"エラーダイアログが突然出現！最速でエラーをたくさん潰した人が勝ち！",
 		roles: null,
+		videos: ["/mp4/error-hunter.mp4"] as const,
 	},
 	{
 		type: "null-hand",
@@ -38,18 +41,20 @@ const GAMES = [
 		desc: "心理戦で相手を欺け",
 		mode: "competitive",
 		shortDesc:
-			"ホストは裏で手を選択。ゲストはその心理を読んで勝て。統計情報を活かせ。",
+			"ホストは裏で手を選択。ゲストはその心理を読んで勝て。その確率本当に信じていいのかな？",
 		roles: ["HOST", "GUEST"] as const,
+		videos: ["/mp4/null-hand-host.mp4", "/mp4/null-hand-guest.mp4"] as const,
 	},
 	{
 		type: "star-shield",
 		title: "STAR SHIELD",
 		icon: "/svg/object/target-circle.svg",
-		desc: "90秒生き延びて星を守れ",
+		desc: "90秒間星を守りきれ！",
 		mode: "cooperative",
 		shortDesc:
-			"タイピスト&シューターの2人協力。タイピングで弾を撃ち、90秒間星を守り切れ！",
+			"タイピングで弾を撃ち、シューティングで狙い撃ち、90秒間星を守り切れ！",
 		roles: ["SHOOTER", "TYPIST"] as const,
+		videos: ["/mp4/shooting.mp4", "/mp4/typing.mp4"] as const,
 	},
 ] as const;
 
@@ -67,11 +72,12 @@ export function GameCarouselSection({
 	roomId,
 	memberCount,
 	isHost,
+	onLeaveRoom,
 }: GameCarouselSectionProps) {
 	const styles = gameCarouselSection();
+	const { showLoading, hideLoading } = useLoading();
 	const [activeIndex, setActiveIndex] = useState(0);
 	const [selectedRoleIndex, setSelectedRoleIndex] = useState(0);
-	const [isPending, startTransition] = useTransition();
 
 	useEffect(() => {
 		setSelectedRoleIndex(0);
@@ -87,7 +93,7 @@ export function GameCarouselSection({
 		return "left";
 	};
 
-	const handleGameStart = () => {
+	const handleGameStart = async () => {
 		const game = GAMES[activeIndex];
 		if (
 			!isPlayerCountValid(
@@ -99,9 +105,12 @@ export function GameCarouselSection({
 			setShowGameStartError(true);
 			return;
 		}
-		startTransition(async () => {
+		showLoading();
+		try {
 			await selectGame(roomId, game.type);
-		});
+		} finally {
+			hideLoading();
+		}
 	};
 
 	const handleCardClick = (i: number) => {
@@ -182,11 +191,14 @@ export function GameCarouselSection({
 						))}
 					</div>
 				)}
-				<Image
-					src={GAMES[activeIndex].icon}
-					alt={GAMES[activeIndex].title}
-					fill
-					className="object-contain p-6"
+				<video
+					key={GAMES[activeIndex].videos[selectedRoleIndex]}
+					src={GAMES[activeIndex].videos[selectedRoleIndex]}
+					autoPlay
+					loop
+					muted
+					playsInline
+					className="w-full h-full object-cover"
 				/>
 			</div>
 
@@ -195,15 +207,14 @@ export function GameCarouselSection({
 			</Typography>
 
 			<div className={styles.actionRow()}>
-				<LeaveRoomButton roomId={roomId} isHost={isHost} />
+				<LeaveRoomButton roomId={roomId} isHost={isHost} onLeaveRoom={onLeaveRoom} />
 				{isHost && (
 					<Button
 						variant="primary"
 						onClick={handleGameStart}
-						disabled={isPending}
 						className="font-cherry-bomb-one"
 					>
-						{isPending ? "..." : `はじめる`}
+						はじめる
 					</Button>
 				)}
 			</div>
@@ -229,10 +240,12 @@ export function GameCarouselSection({
 					</Typography>
 					<div className={styles.errorModalActions()}>
 						<Button
-							variant="danger"
+							variant="success"
 							onClick={() => setShowGameStartError(false)}
 						>
-							OK
+							<Typography variant="label" font="cherry-bomb-one" className="font-bold">
+								とじる
+							</Typography>
 						</Button>
 					</div>
 				</div>
@@ -253,10 +266,12 @@ export function GameCarouselSection({
 				</Typography>
 				<div className={styles.errorModalActions()}>
 					<Button
-						variant="danger"
+						variant="success"
 						onClick={() => setShowHostOnlyModal(false)}
 					>
-						OK
+						<Typography variant="label" font="cherry-bomb-one" className="font-bold">
+							とじる
+						</Typography>
 					</Button>
 				</div>
 			</div>

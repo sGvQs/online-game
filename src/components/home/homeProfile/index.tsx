@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition, useCallback } from "react";
+import { useState, useCallback } from "react";
 import Image from "next/image";
 import { Pencil } from "lucide-react";
 import { FaceIcon } from "@prisma/client";
@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Modal } from "@/components/ui/modal";
 import { FACE_ICON_PATHS, FACE_ICON_OPTIONS } from "@/constants/common/faceIcon";
 import { updateProfile } from "@/server/actions/user/updateProfile";
+import { useLoading } from "@/lib/loading-context";
 import { homeProfile } from "./styles";
 
 interface HomeProfileProps {
@@ -28,12 +29,12 @@ export function HomeProfile({
 	totalPoints,
 }: HomeProfileProps) {
 	const styles = homeProfile();
+	const { showLoading, hideLoading } = useLoading();
 	const [isOpen, setIsOpen] = useState(false);
 	const [name, setName] = useState(initialName);
 	const [faceIcon, setFaceIcon] = useState<FaceIcon>(initialFaceIcon);
 	const [comment, setComment] = useState(initialComment);
 	const [error, setError] = useState("");
-	const [isPending, startTransition] = useTransition();
 
 	const openModal = () => {
 		setName(initialName);
@@ -44,11 +45,10 @@ export function HomeProfile({
 	};
 
 	const closeModal = useCallback(() => {
-		if (isPending) return;
 		setIsOpen(false);
-	}, [isPending]);
+	}, []);
 
-	const handleSave = () => {
+	const handleSave = async () => {
 		if (name.trim().length === 0) {
 			setError("名前を入力してください");
 			return;
@@ -58,14 +58,15 @@ export function HomeProfile({
 			return;
 		}
 		setError("");
-		startTransition(async () => {
-			try {
-				await updateProfile({ name: name.trim(), faceIcon, comment });
-				setIsOpen(false);
-			} catch (e) {
-				setError(e instanceof Error ? e.message : "保存に失敗しました");
-			}
-		});
+		showLoading();
+		try {
+			await updateProfile({ name: name.trim(), faceIcon, comment });
+			setIsOpen(false);
+		} catch (e) {
+			setError(e instanceof Error ? e.message : "保存に失敗しました");
+		} finally {
+			hideLoading();
+		}
 	};
 
 	return (
@@ -87,7 +88,7 @@ export function HomeProfile({
 				isOpen={isOpen}
 				onClose={closeModal}
 				title="プロフィール編集"
-				showCloseButton={!isPending}
+				showCloseButton
 			>
 				<div className="flex flex-col gap-5">
 					{/* アイコン選択 */}
@@ -143,19 +144,17 @@ export function HomeProfile({
 						<Button
 							variant="success"
 							onClick={closeModal}
-							disabled={isPending}
 						>
 							<Typography variant="label" font="cherry-bomb-one" className="font-bold">
-								キャンセル	
+								キャンセル
 							</Typography>
 						</Button>
 						<Button
 							variant="primary"
 							onClick={handleSave}
-							disabled={isPending}
 						>
 							<Typography variant="label" font="cherry-bomb-one" className="font-bold">
-								{isPending ? "..." : "セーブ"}
+								セーブ
 							</Typography>
 						</Button>
 					</div>

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { joinRoom, deleteRoom } from "@/server/actions/room";
+import { useLoading } from "@/lib/loading-context";
 import { RoomCard } from "../roomCard";
 import { roomSearchList } from "./styles";
 import { Typography } from "@/components/ui/typography";
@@ -14,7 +15,26 @@ interface RoomSearchListProps {
 
 export function RoomSearchList({ initialRooms, userId }: RoomSearchListProps) {
 	const styles = roomSearchList();
+	const { showLoading, hideLoading } = useLoading();
 	const [query, setQuery] = useState("");
+
+	const handleJoin = async (roomId: string) => {
+		showLoading();
+		try {
+			await joinRoom(roomId);
+		} finally {
+			hideLoading();
+		}
+	};
+
+	const handleDelete = async (roomId: string) => {
+		showLoading();
+		try {
+			await deleteRoom(roomId);
+		} finally {
+			hideLoading();
+		}
+	};
 
 	const trimmedQuery = query.trim();
 	const filtered = trimmedQuery
@@ -48,8 +68,8 @@ export function RoomSearchList({ initialRooms, userId }: RoomSearchListProps) {
 								key={room.id}
 								room={room}
 								isOwner={room.createdBy === userId}
-								onJoin={joinRoom.bind(null, room.id)}
-								onDelete={deleteRoom.bind(null, room.id)}
+								onJoin={() => handleJoin(room.id)}
+								onDelete={() => handleDelete(room.id)}
 							/>
 						))
 					)}
