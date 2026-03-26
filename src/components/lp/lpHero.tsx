@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { lpHero } from "./lpHero.styles";
-import { button } from "@/components/ui/button";
 import { Typography } from "@/components/ui/typography";
+import { PukapukaLogo } from "@/components/common/logo/pukapukaLogo";
 
 const styles = lpHero();
 
@@ -40,10 +40,7 @@ export function LPHero() {
 			</div>
 
 			{/* メインタイトル */}
-			<Typography variant="display" className={styles.titleBlock()}>
-				<span className={styles.titleSpanWhite()}>Pukapuka</span>
-				<span className={styles.titleSpanPurple()}>Space</span>
-			</Typography>
+			<PukapukaLogo />
 
 			{/* キャッチコピー */}
 			<Typography variant="body" className={styles.catchCopy()}>

@@ -9,12 +9,6 @@ export const lpHero = tv({
 			"flex items-center gap-2.5 px-4 py-2.5 rounded-xl transition-all duration-300 hover:scale-105 bg-brand-500/6 border border-brand-500/20",
 		specBadgeTitle: "text-[11px] font-bold text-brand-400 tracking-wide",
 		specBadgeSub: "text-[9px] text-brand-600 mt-0.5",
-		titleBlock:
-			"text-6xl md:text-8xl font-black tracking-tight leading-none mb-2 font-rubik-puddles",
-		titleSpanWhite:
-			"block bg-[linear-gradient(135deg,#ffffff_0%,#818cf8_50%,#a78bfa_100%)] bg-clip-text text-transparent drop-shadow-[0_0_30px_rgba(129,140,248,0.5)]",
-		titleSpanPurple:
-			"block bg-[linear-gradient(135deg,#818cf8_0%,#c084fc_60%,#f472b6_100%)] bg-clip-text text-transparent drop-shadow-[0_0_30px_rgba(192,132,252,0.5)]",
 		catchCopy:
 			"mt-8 text-brand-700 text-base md:text-lg max-w-md leading-relaxed",
 		ctaPulse: "w-1.5 h-1.5 rounded-full bg-brand-400 animate-pulse",

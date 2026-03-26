@@ -11,7 +11,7 @@
 // User関連
 export { getCurrentUser } from "./user/getCurrentUser";
 export { getMe } from "./user/getMe";
-export { getDashboardUser, updateName } from "./user";
+export { getHomeUser, updateName } from "./user";
 
 // Room関連
 export {

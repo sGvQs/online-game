@@ -17,7 +17,7 @@ export default async function NullHandPage({
 
 	const room = await getRoomWithReadyStatus(roomId);
 	if (!room) {
-		redirect("/dashboard");
+		redirect("/home");
 	}
 
 	// ユーザーがメンバーかチェック
@@ -25,7 +25,7 @@ export default async function NullHandPage({
 		(u: RoomUserWithReadyStatus) => u.userId === currentUser.user.id,
 	);
 	if (!isMember) {
-		redirect("/dashboard");
+		redirect("/home");
 	}
 
 	// ゲームが何もしていなかったらroomに戻る

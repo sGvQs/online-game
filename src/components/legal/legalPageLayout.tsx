@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { DashboardHeaderTitle } from "@/components/dashboard/dashboardHeaderTitle";
+// import { HomeHeaderTitle } from "@/components/home/homeHeaderTitle";
 
 interface LegalPageLayoutProps {
 	title: string;
@@ -9,7 +9,7 @@ interface LegalPageLayoutProps {
 export function LegalPageLayout({ title, children }: LegalPageLayoutProps) {
 	return (
 		<div className="min-h-screen flex flex-col items-center p-8 bg-transparent">
-			<DashboardHeaderTitle />
+			{/* <HomeHeaderTitle /> */}
 			<div className="glass-card max-w-2xl w-full p-8 rounded-2xl mt-6 text-foreground">
 				<h1 className="text-2xl font-bold mb-6 text-brand-900">{title}</h1>
 				<div className="max-w-none text-sm leading-relaxed space-y-4 text-brand-800">

@@ -5,10 +5,10 @@ import { createClient } from "@/server/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 
 /**
- * ダッシュボード用ユーザー情報取得
+ * ホーム用ユーザー情報取得
  * ユーザー名表示のためにIDPとuserを返す
  */
-export async function getDashboardUser() {
+export async function getHomeUser() {
 	const supabase = await createClient();
 	const {
 		data: { user },
@@ -51,5 +51,5 @@ export async function updateName(newName: string) {
 		where: { id: idp.userId },
 		data: { name: newName },
 	});
-	revalidatePath("/dashboard");
+	revalidatePath("/home");
 }

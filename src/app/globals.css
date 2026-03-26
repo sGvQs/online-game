@@ -75,6 +75,7 @@ html {
   --font-yusei-magic: "Yusei Magic", sans-serif;
   --font-cherry-bomb-one: "Cherry Bomb One", sans-serif;
   --font-rubik-puddles: "Rubik Puddles", sans-serif;
+  --font-honk: "Honk", sans-serif;
 
   /* Map brand colors */
   --color-brand-50: var(--brand-50);
@@ -207,7 +208,7 @@ body {
   transition: background-color 5000s ease-in-out 0s;
 }
 
-/* Custom animations for RoomModal and Win95 components */
+/* Custom animations for Modal and Win95 components */
 @keyframes fadeIn {
   from { 
     opacity: 0; 

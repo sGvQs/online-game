@@ -443,7 +443,7 @@ export function AnnoyingDinosaur() {
 					setEnterFrom("bottom");
 					setDialogueMessages([
 						SUCKED_IN_AFTERMATH_MESSAGES[
-							Math.floor(Math.random() * SUCKED_IN_AFTERMATH_MESSAGES.length)
+						Math.floor(Math.random() * SUCKED_IN_AFTERMATH_MESSAGES.length)
 						]!,
 					]);
 					setDialogueIndex(0);
@@ -520,14 +520,14 @@ export function AnnoyingDinosaur() {
 								{displayedText.length <
 									(
 										dialogueMessages[
-											Math.min(dialogueIndex, dialogueMessages.length - 1)
+										Math.min(dialogueIndex, dialogueMessages.length - 1)
 										] ?? ""
 									).length && (
-									<span
-										className="inline-block w-0.5 h-3 ml-0.5 bg-current animate-pulse"
-										aria-hidden
-									/>
-								)}
+										<span
+											className="inline-block w-0.5 h-3 ml-0.5 bg-current animate-pulse"
+											aria-hidden
+										/>
+									)}
 							</Typography>
 							{/* 口方向へのしっぽ（吹き出しの左からキャラへ向かう） */}
 							<div

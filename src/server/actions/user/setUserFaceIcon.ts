@@ -34,5 +34,5 @@ export async function setUserFaceIcon(faceIcon: FaceIcon) {
 		data: { faceIcon },
 	});
 
-	revalidatePath("/dashboard");
+	revalidatePath("/home");
 }

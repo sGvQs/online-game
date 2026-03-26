@@ -83,24 +83,7 @@ export const PROGRESSION_DEBUG =
 
 ---
 
-## 4. 必殺技 ※ Shooter 用
-
-**目的**: 各必殺技の解放コストを設定する。
-
-### 変更箇所
-
-- ファイル: `src/constants/starShieldGame/shopConfig.ts`
-- 定数: `SPECIAL_ATTACK_UNLOCK_COSTS`
-
-| スキルID | デフォルト |
-|----------|------------|
-| spread_small | 20 |
-| spread_medium | 50 |
-| spread_large | 100 |
-
----
-
-## 5. ヒールスキル ※ Typist 用
+## 4. ヒールスキル ※ Typist 用
 
 **目的**: ヒールの解放コストとレベルアップコストを設定する。
 

@@ -68,3 +68,8 @@ export type RoomWithUsersAndReadyStatus = Prisma.RoomGetPayload<{
 export type RoomWithMatches = Prisma.RoomGetPayload<{
 	include: { matches: true };
 }>;
+
+/** Room with Creator (検索画面用) */
+export type RoomWithCreator = Prisma.RoomGetPayload<{
+	include: { users: true; creator: true };
+}>;

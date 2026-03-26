@@ -11,6 +11,7 @@ import type { PairRanking } from "@/server/actions/game/starShieldRankingActions
 import { Button } from "@/components/ui/button";
 import { ProtectedStar } from "../playing/protectedStar";
 import { DinosaurWithBalls } from "@/components/game/common/starShield/dinosaurWithBalls";
+import { StarShieldTitle } from "@/components/game/common/starShield/starShieldTitle";
 import { AuroraGlow } from "@/components/game/common/starShield/auroraGlow";
 import { titleScreen } from "./styles";
 import { Typography } from "@/components/ui/typography";
@@ -69,7 +70,7 @@ export function TitleScreen({
 	useEffect(() => {
 		getMyStarShieldProgress()
 			.then((p) => setTypingCount(p.totalTypingCount ?? 0))
-			.catch(() => {});
+			.catch(() => { });
 	}, []);
 
 	return (
@@ -86,13 +87,7 @@ export function TitleScreen({
 							animate={{ opacity: 1, y: 0 }}
 							transition={{ duration: 0.8, ease: "easeOut" }}
 						>
-							<Typography
-								variant="display"
-								className="leading-none select-none"
-							>
-								<span className={styles.titleStar()}>STAR</span>
-								<span className={styles.titleShield()}>SHIELD</span>
-							</Typography>
+							<StarShieldTitle />
 							<Typography variant="small" className={styles.subtitle()}>
 								<Image
 									src={ICONS.TARGET_CIRCLE}
@@ -114,7 +109,7 @@ export function TitleScreen({
 						</motion.div>
 
 						<motion.div
-							className="grid grid-cols-2 gap-4 mt-10"
+							className="grid grid-cols-2 gap-4 mt-6"
 							initial={{ opacity: 0 }}
 							animate={{ opacity: 1 }}
 							transition={{ duration: 0.8, delay: 0.4 }}
@@ -170,7 +165,7 @@ export function TitleScreen({
 												className="mr-2"
 											/>
 											<span>START</span>
-                                            <span className="ml-auto">{readyCount}/{totalUsers}</span>
+											<span className="ml-auto">{readyCount}/{totalUsers}</span>
 										</>
 									) : (
 										<>
@@ -182,12 +177,12 @@ export function TitleScreen({
 												className="mr-2"
 											/>
 											<span>START</span>
-                                            <span className="ml-auto">{readyCount}/{totalUsers}</span>
+											<span className="ml-auto">{readyCount}/{totalUsers}</span>
 										</>
 									)}
 								</Button>
 							)}
-                            {isHost && (
+							{isHost && (
 								<Button
 									screen="star-shield"
 									variant="success"

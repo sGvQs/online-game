@@ -3,15 +3,7 @@ import { tv } from "tailwind-variants";
 export const rankingScreen = tv({
 	slots: {
 		container:
-			"relative min-h-screen flex flex-col items-center justify-start px-6 py-10",
-		inner: "w-full max-w-2xl flex flex-col gap-6",
-		header: "flex items-center gap-4",
-		backButton: [
-			"flex items-center gap-1.5 text-sm text-white/50 hover:text-white/90",
-			"transition-colors duration-200",
-		],
-		title: "text-2xl font-black text-white",
-		subtitle: "text-xs text-white/40 mt-0.5",
+			"relative flex flex-col items-center min-h-screen py-12 px-8 gap-8",
 		list: "flex flex-col gap-2",
 		rankRow: [
 			"flex items-center gap-3 rounded-2xl px-4 py-3",

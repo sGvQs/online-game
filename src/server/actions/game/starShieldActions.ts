@@ -23,7 +23,7 @@ const CLEAR_POINTS: Record<Difficulty, number> = {
 };
 
 /** HELL 解放に必要な隕石破壊数 */
-const HELL_UNLOCK_THRESHOLD = 200;
+const HELL_UNLOCK_THRESHOLD = 100;
 
 /**
  * 現在の月間ランキング情報（ポイントと順位）を取得
@@ -163,7 +163,7 @@ export async function startStarShieldMatch(
 		const unlocked = await isHellUnlocked(shooterId, typistId);
 		if (!unlocked) {
 			throw new Error(
-				"HELL難易度は解放されていません（隕石破壊数200以上のクリアで解放）",
+				"HELL難易度は解放されていません（隕石破壊数100以上のクリアで解放）",
 			);
 		}
 	}

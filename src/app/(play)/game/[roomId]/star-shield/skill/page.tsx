@@ -16,14 +16,14 @@ export default async function StarShieldSkillPage({
 
 	const room = await getRoomWithReadyStatus(roomId);
 	if (!room) {
-		redirect("/dashboard");
+		redirect("/home");
 	}
 
 	const isMember = room.users.some(
 		(u: RoomUserWithReadyStatus) => u.userId === currentUser.user.id,
 	);
 	if (!isMember) {
-		redirect("/dashboard");
+		redirect("/home");
 	}
 
 	return (

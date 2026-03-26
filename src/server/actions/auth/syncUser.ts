@@ -21,7 +21,17 @@ export async function syncUser({ supabaseUid, email, name }: SyncUserParams) {
 		});
 
 		if (existingIdp) {
-			// 既存ユーザー
+			// 既存ユーザー：spread lv1 行がなければ作成（バックフィル）
+			await prisma.starShieldUserSpecialAttack.upsert({
+				where: {
+					userId_specialAttackId: {
+						userId: existingIdp.userId,
+						specialAttackId: "spread",
+					},
+				},
+				create: { userId: existingIdp.userId, specialAttackId: "spread", level: 1 },
+				update: {},
+			});
 			return { success: true, isNew: false, user: existingIdp.user };
 		}
 
@@ -53,6 +63,9 @@ export async function syncUser({ supabaseUid, email, name }: SyncUserParams) {
 				});
 				await tx.starShieldUserNormalAttack.create({
 					data: { userId: newUser.id, techniqueId: "red", level: 1 },
+				});
+				await tx.starShieldUserSpecialAttack.create({
+					data: { userId: newUser.id, specialAttackId: "spread", level: 1 },
 				});
 			}
 

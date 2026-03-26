@@ -51,7 +51,7 @@ game/ 直下は役割ディレクトリのみ:
 
 ## 非ゲーム系コンポーネントのスタイル規約
 
-`auth/`, `dashboard/`, `room/`, `ui/`, `lp/`, `common/`, `decorations/` 配下のコンポーネントも同様に styles が必須。
+`auth/`, `home/`, `room/`, `ui/`, `lp/`, `common/`, `decorations/` 配下のコンポーネントも同様に styles が必須。
 
 ### ファイル構成方針
 

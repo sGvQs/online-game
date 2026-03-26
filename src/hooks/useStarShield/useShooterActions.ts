@@ -268,7 +268,7 @@ export function useShooterActions({
 				console.error("[handleHealEffect]", e);
 			}
 
-			if (payload?.special) {
+			if (payload?.special && (payload.specialAttackLevel ?? 0) >= 1) {
 				handleSpreadSpecialAttack(payload, now);
 				return;
 			}

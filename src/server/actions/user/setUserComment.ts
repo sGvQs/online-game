@@ -27,6 +27,6 @@ export async function setUserComment(comment: string) {
 		},
 	});
 
-	// ダッシュボードページを再検証
-	revalidatePath("/dashboard");
+	// ホームページを再検証
+	revalidatePath("/home");
 }

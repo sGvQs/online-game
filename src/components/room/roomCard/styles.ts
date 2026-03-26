@@ -21,6 +21,9 @@ export const roomCard = tv({
 			"transition-colors group-hover:text-glow",
 		],
 		meta: "flex items-center gap-2 text-sm text-brand-600 dark:text-brand-400",
+		info: "flex flex-col gap-0.5",
+		creatorName: "text-xs text-brand-500 font-mono",
+		roomId: "text-[10px] text-brand-700 font-mono",
 		statusBadge: ["px-2 py-1 rounded-md text-xs font-medium"],
 		statusLobby:
 			"bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300",
