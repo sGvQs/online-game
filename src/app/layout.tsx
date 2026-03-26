@@ -3,6 +3,8 @@ import "./globals.css";
 import { ThemeProvider } from "@/lib/theme-context";
 import BGMPlayer from "@/components/ui/bgmPlayer";
 import { SoundProvider } from "@/lib/sound-context";
+import { LoadingProvider } from "@/lib/loading-context";
+import { LoadingOverlay } from "@/components/ui/loadingOverlay";
 import { OldPCFloating } from "@/components/decorations/oldPCFloating";
 
 export const metadata: Metadata = {
@@ -20,11 +22,14 @@ export default function RootLayout({
 		<html lang="ja" suppressHydrationWarning>
 			<body className="antialiased" suppressHydrationWarning>
 				<SoundProvider>
-					<ThemeProvider>
-						<OldPCFloating />
-						{children}
-						<BGMPlayer />
-					</ThemeProvider>
+					<LoadingProvider>
+						<ThemeProvider>
+							<OldPCFloating />
+							{children}
+							<BGMPlayer />
+							<LoadingOverlay />
+						</ThemeProvider>
+					</LoadingProvider>
 				</SoundProvider>
 			</body>
 		</html>
