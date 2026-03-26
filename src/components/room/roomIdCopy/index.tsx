@@ -30,7 +30,7 @@ export function RoomIdCopy({ roomId }: RoomIdCopyProps) {
 			className={styles.button()}
 		>
 			<Typography variant="body" gradientColor="RedToPurple" className="font-bold">
-				RoomID: {roomId}
+				ルームID: {roomId}
 			</Typography>
 			{copied ? (
 				<ClipboardCheck className="w-4 h-4 text-brand-600 shrink-0" />

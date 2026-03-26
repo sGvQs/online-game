@@ -19,6 +19,7 @@ interface GameCarouselSectionProps {
 	roomId: string;
 	memberCount: number;
 	isHost: boolean;
+	onLeaveRoom: () => void;
 }
 
 const GAMES = [
@@ -51,6 +52,7 @@ const GAMES = [
 		shortDesc:
 			"タイピスト&シューターの2人協力。タイピングで弾を撃ち、90秒間星を守り切れ！",
 		roles: ["SHOOTER", "TYPIST"] as const,
+		videos: ["/mp4/shooting.mp4", "/mp4/typing.mp4"] as const,
 	},
 ] as const;
 
@@ -68,6 +70,7 @@ export function GameCarouselSection({
 	roomId,
 	memberCount,
 	isHost,
+	onLeaveRoom,
 }: GameCarouselSectionProps) {
 	const styles = gameCarouselSection();
 	const { showLoading, hideLoading } = useLoading();
@@ -186,12 +189,24 @@ export function GameCarouselSection({
 						))}
 					</div>
 				)}
-				<Image
-					src={GAMES[activeIndex].icon}
-					alt={GAMES[activeIndex].title}
-					fill
-					className="object-contain p-6"
-				/>
+				{"videos" in GAMES[activeIndex] ? (
+					<video
+						key={GAMES[activeIndex].videos[selectedRoleIndex]}
+						src={GAMES[activeIndex].videos[selectedRoleIndex]}
+						autoPlay
+						loop
+						muted
+						playsInline
+						className="w-full h-full object-cover"
+					/>
+				) : (
+					<Image
+						src={GAMES[activeIndex].icon}
+						alt={GAMES[activeIndex].title}
+						fill
+						className="object-contain p-6"
+					/>
+				)}
 			</div>
 
 			<Typography variant="small" font="dot-gothic-16" className={styles.ruleDesc()}>
@@ -199,7 +214,7 @@ export function GameCarouselSection({
 			</Typography>
 
 			<div className={styles.actionRow()}>
-				<LeaveRoomButton roomId={roomId} isHost={isHost} />
+				<LeaveRoomButton roomId={roomId} isHost={isHost} onLeaveRoom={onLeaveRoom} />
 				{isHost && (
 					<Button
 						variant="primary"

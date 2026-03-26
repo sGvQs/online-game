@@ -10,9 +10,10 @@ import { useLoading } from "@/lib/loading-context";
 interface LeaveRoomButtonProps {
 	roomId: string;
 	isHost: boolean;
+	onLeaveRoom: () => void;
 }
 
-export function LeaveRoomButton({ roomId, isHost }: LeaveRoomButtonProps) {
+export function LeaveRoomButton({ roomId, isHost, onLeaveRoom }: LeaveRoomButtonProps) {
 	const { showLoading, hideLoading } = useLoading();
 	const [showConfirm, setShowConfirm] = useState(false);
 
@@ -21,7 +22,9 @@ export function LeaveRoomButton({ roomId, isHost }: LeaveRoomButtonProps) {
 		showLoading();
 		try {
 			await leaveRoom(roomId);
-		} finally {
+			// leaveRoom はリダイレクトしない。ナビゲーションは hasNavigatedRef で一元管理
+			onLeaveRoom();
+		} catch {
 			hideLoading();
 		}
 	};
