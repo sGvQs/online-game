@@ -232,10 +232,12 @@ export function GameCarouselSection({
 					</Typography>
 					<div className={styles.errorModalActions()}>
 						<Button
-							variant="danger"
+							variant="success"
 							onClick={() => setShowGameStartError(false)}
 						>
-							OK
+							<Typography variant="label" font="cherry-bomb-one" className="font-bold">
+								とじる
+							</Typography>
 						</Button>
 					</div>
 				</div>
@@ -256,10 +258,12 @@ export function GameCarouselSection({
 				</Typography>
 				<div className={styles.errorModalActions()}>
 					<Button
-						variant="danger"
+						variant="success"
 						onClick={() => setShowHostOnlyModal(false)}
 					>
-						OK
+						<Typography variant="label" font="cherry-bomb-one" className="font-bold">
+							とじる
+						</Typography>
 					</Button>
 				</div>
 			</div>

@@ -39,14 +39,14 @@ export function LeaveRoomButton({ roomId, isHost }: LeaveRoomButtonProps) {
 			<Modal
 				isOpen={showConfirm}
 				onClose={() => setShowConfirm(false)}
-				title="ほんとうにでる？"
+				title="本当に退出しますか？"
 				showCloseButton
 			>
 				<div className="flex flex-col gap-5">
 					<Typography variant="body" className="text-white/80">
 						{isHost
-							? "かいさんすると、ルームがさくじょされるよ"
-							: "ルームからでるよ"}
+							? "解散すると、ルーム内のプレイヤーは自動的にルームから退出します。"
+							: "ルームから退出します。"}
 					</Typography>
 					<div className="flex justify-end gap-3">
 						<Button
@@ -54,7 +54,7 @@ export function LeaveRoomButton({ roomId, isHost }: LeaveRoomButtonProps) {
 							onClick={() => setShowConfirm(false)}
 						>
 							<Typography variant="label" font="cherry-bomb-one" className="font-bold">
-								やめる
+								とじる
 							</Typography>
 						</Button>
 						<Button

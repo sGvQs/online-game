@@ -14,7 +14,7 @@ export const modal = tv({
 			"animate-[fadeIn_0.2s_ease-out]",
 		],
 		content: [
-			"w-[min(60vw,600px)] h-[60vh] max-h-[calc(100vh-2rem)]",
+			"w-[min(60vw,600px)] h-auto max-h-[60vh]",
 			"bg-slate-800/95",
 			"border border-solid border-[var(--brand-500)]",
 			"rounded-2xl",
