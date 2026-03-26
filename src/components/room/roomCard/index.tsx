@@ -14,8 +14,8 @@ export type RoomWithUsers = Room & {
 interface RoomCardProps {
 	room: RoomWithUsers;
 	isOwner: boolean;
-	onJoin: () => void;
-	onDelete: () => void;
+	onJoin: () => Promise<void> | void;
+	onDelete: () => Promise<void> | void;
 }
 
 const styles = roomCard();
@@ -54,30 +54,26 @@ export function RoomCard({ room, isOwner, onJoin, onDelete }: RoomCardProps) {
 
 			<div className={styles.actions()}>
 				{isOwner ? (
-					<form action={onDelete}>
-						<IconButton
-							type="submit"
-							variant="danger"
-							size="sm"
-							icon={<Trash2 className="w-4 h-4" />}
-							tooltip="削除"
-						/>
-					</form>
+					<IconButton
+						variant="danger"
+						size="sm"
+						icon={<Trash2 className="w-4 h-4" />}
+						tooltip="削除"
+						onClick={onDelete}
+					/>
 				) : (
 					<div />
 				)}
-				<form action={onJoin}>
-					<Button
-						type="submit"
-						size="sm"
-						disabled={isPlaying}
-						title={isPlaying ? "ゲーム中は参加できません" : undefined}
-						className={`${styles.joinButton()} ${isPlaying ? styles.joinButtonDisabled() : ""}`}
-					>
-						<Play className="w-3 h-3 fill-current" />
-						参加
-					</Button>
-				</form>
+				<Button
+					size="sm"
+					disabled={isPlaying}
+					title={isPlaying ? "ゲーム中は参加できません" : undefined}
+					className={`${styles.joinButton()} ${isPlaying ? styles.joinButtonDisabled() : ""}`}
+					onClick={onJoin}
+				>
+					<Play className="w-3 h-3 fill-current" />
+					参加
+				</Button>
 			</div>
 		</div>
 	);

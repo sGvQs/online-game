@@ -27,17 +27,28 @@ export function useRoomSession({
 	const [members, setMembers] = useState(initialMembers);
 	const [rankingsMap, setRankingsMap] = useState(initialRankingsMap);
 
+	const hasNavigatedRef = useRef(false);
+
+	const navigateHome = useRef(() => {});
+	useEffect(() => {
+		navigateHome.current = () => {
+			if (hasNavigatedRef.current) return;
+			hasNavigatedRef.current = true;
+			router.push("/home");
+		};
+	});
+
 	const refreshRef = useRef(async () => {});
 	useEffect(() => {
 		refreshRef.current = async () => {
 			const room = await getRoomWithUsers(roomId);
 			if (!room) {
-				router.push("/home");
+				navigateHome.current();
 				return;
 			}
 			const isMember = room.users.some((u) => u.userId === currentUserId);
 			if (!isMember) {
-				router.push("/home");
+				navigateHome.current();
 				return;
 			}
 			const rankings = await getNullHandRankings(
@@ -74,7 +85,7 @@ export function useRoomSession({
 					filter: `id=eq.${roomId}`,
 				},
 				() => {
-					router.push("/home");
+					navigateHome.current();
 				},
 			)
 			.on(
@@ -97,5 +108,5 @@ export function useRoomSession({
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [roomId]);
 
-	return { members, rankingsMap };
+	return { members, rankingsMap, navigateToHome: navigateHome.current };
 }

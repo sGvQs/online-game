@@ -63,7 +63,7 @@ export async function leaveRoom(roomId: string) {
 	});
 
 	if (!room) {
-		redirect("/home");
+		return;
 	}
 
 	if (room.createdBy === user.id) {
@@ -87,7 +87,6 @@ export async function leaveRoom(roomId: string) {
 	}
 
 	revalidatePath("/home");
-	redirect("/home");
 }
 
 /**

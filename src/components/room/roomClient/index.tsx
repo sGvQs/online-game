@@ -34,7 +34,7 @@ export function RoomClient({
 		[],
 	);
 
-	const { members, rankingsMap } = useRoomSession({
+	const { members, rankingsMap, navigateToHome } = useRoomSession({
 		roomId,
 		currentUserId,
 		initialMembers,
@@ -66,6 +66,7 @@ export function RoomClient({
 						roomId={roomId}
 						memberCount={members.length}
 						isHost={isHost}
+						onLeaveRoom={navigateToHome}
 					/>
 				</div>
 			</div>
