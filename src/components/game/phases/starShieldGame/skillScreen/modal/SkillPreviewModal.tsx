@@ -6,8 +6,7 @@ import { TECHNIQUES } from "@/constants/starShieldGame/techniques";
 import {
 	NORMAL_ATTACK_UNLOCK_COSTS,
 	NORMAL_ATTACK_LEVEL_UP_COSTS,
-	SPECIAL_ATTACK_UNLOCK_COSTS,
-	SPECIAL_ATTACK_LEVEL_UP_COSTS,
+SPECIAL_ATTACK_LEVEL_UP_COSTS,
 	HEAL_UNLOCK_COST,
 	HEAL_LEVEL_UP_COSTS,
 	STAR_HP_LEVEL_UP_COSTS,
@@ -15,8 +14,7 @@ import {
 import {
 	purchaseNormalAttackUnlock,
 	purchaseNormalAttackLevelUp,
-	purchaseSpecialAttackUnlock,
-	purchaseSpecialAttackLevelUp,
+purchaseSpecialAttackLevelUp,
 	purchaseHealUnlock,
 	purchaseHealLevelUp,
 	purchaseStarHpLevelUp,
@@ -24,11 +22,6 @@ import {
 import type { StarShieldProgress } from "@/types/starShieldGame";
 import type { PreviewData } from "../types";
 import { PreviewContent } from "./PreviewContent";
-
-const SPECIAL_LABELS: Record<string, string> = {
-	spread: "広範囲弾（スプレッド）",
-	all_destruction: "全破壊",
-};
 
 export function SkillPreviewModal({
 	preview,
@@ -79,12 +72,7 @@ export function SkillPreviewModal({
 		);
 		currentLevel = ownedSA ? ownedSA.level : 0;
 		maxLevel = 10;
-		if (currentLevel === 0) {
-			nextCost = SPECIAL_ATTACK_UNLOCK_COSTS[preview.id as "spread"] ?? 0;
-			purchaseLabel = "解放する";
-			purchaseFn = () => purchaseSpecialAttackUnlock(preview.id as "spread");
-			purchaseLabelForFn = SPECIAL_LABELS[preview.id] ?? preview.id;
-		} else if (currentLevel < maxLevel) {
+		if (currentLevel < maxLevel) {
 			const nl = (currentLevel +
 				1) as keyof typeof SPECIAL_ATTACK_LEVEL_UP_COSTS;
 			nextCost = SPECIAL_ATTACK_LEVEL_UP_COSTS[nl] ?? 0;

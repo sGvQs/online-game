@@ -59,9 +59,6 @@ export const NORMAL_ATTACK_LEVEL_UP_COSTS: Record<string, LevelUpCosts> = {
 export const SPECIAL_ATTACK_MAX_LEVEL = 10;
 export const SPECIAL_ATTACK_IDS = ["spread"] as const;
 
-export const SPECIAL_ATTACK_UNLOCK_COSTS: Record<string, number> = {
-	spread: 250,
-};
 
 /** 必殺技レベルアップコスト（2〜10） */
 export const SPECIAL_ATTACK_LEVEL_UP_COSTS: Record<

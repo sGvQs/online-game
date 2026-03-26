@@ -5,8 +5,7 @@ import { getAuthenticatedUser } from "../_helpers/getAuthenticatedUser";
 import {
 	NORMAL_ATTACK_UNLOCK_COSTS,
 	NORMAL_ATTACK_LEVEL_UP_COSTS,
-	SPECIAL_ATTACK_UNLOCK_COSTS,
-	SPECIAL_ATTACK_LEVEL_UP_COSTS,
+SPECIAL_ATTACK_LEVEL_UP_COSTS,
 	HEAL_UNLOCK_COST,
 	HEAL_LEVEL_UP_COSTS,
 	STAR_HP_LEVEL_UP_COSTS,
@@ -223,45 +222,6 @@ export async function purchaseNormalAttackLevelUp(
 	return { ok: true };
 }
 
-/** 必殺技を解放（spread 1種類のみ） */
-export async function purchaseSpecialAttackUnlock(
-	specialAttackId: string,
-): Promise<{ ok: boolean; error?: string }> {
-	const user = await getAuthenticatedUser();
-	if (specialAttackId !== "spread")
-		return { ok: false, error: "all_destruction はヒール Lv.  max で獲得" };
-	const cost = SPECIAL_ATTACK_UNLOCK_COSTS[specialAttackId];
-	if (cost === undefined) return { ok: false, error: "無効なスキルID" };
-
-	const { totalTypingCount } = await ensureProgress(user.id);
-	if (totalTypingCount < cost)
-		return { ok: false, error: "typing 数が不足しています" };
-
-	const existing = await prisma.starShieldUserSpecialAttack.findUnique({
-		where: { userId_specialAttackId: { userId: user.id, specialAttackId } },
-	});
-	if (existing) return { ok: false, error: "既に所持しています" };
-
-	await prisma.$transaction([
-		prisma.starShieldUserProgress.update({
-			where: { userId: user.id },
-			data: { totalTypingCount: { decrement: cost } },
-		}),
-		prisma.starShieldUserSpecialAttack.create({
-			data: { userId: user.id, specialAttackId, level: 1 },
-		}),
-		prisma.starShieldPurchaseHistory.create({
-			data: {
-				userId: user.id,
-				purchaseType: "SKILL_UNLOCK",
-				targetSkillId: specialAttackId,
-				typingCost: cost,
-				totalTypingBefore: totalTypingCount,
-			},
-		}),
-	]);
-	return { ok: true };
-}
 
 /** 必殺技のレベル上げ（spread のみ） */
 export async function purchaseSpecialAttackLevelUp(
