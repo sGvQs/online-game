@@ -1,6 +1,7 @@
 "use client";
 
-import { createContext, useContext, useState, type ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, type ReactNode } from "react";
+import { usePathname } from "next/navigation";
 
 interface LoadingContextType {
 	isLoading: boolean;
@@ -12,6 +13,13 @@ const LoadingContext = createContext<LoadingContextType | undefined>(undefined);
 
 export function LoadingProvider({ children }: { children: ReactNode }) {
 	const [isLoading, setIsLoading] = useState(false);
+	const pathname = usePathname();
+
+	// ナビゲーション完了時に必ずリセット（Server Action の redirect + Supabase realtime の
+	// 競合でローディングが残るケースへの安全策）
+	useEffect(() => {
+		setIsLoading(false);
+	}, [pathname]);
 
 	const showLoading = () => setIsLoading(true);
 	const hideLoading = () => setIsLoading(false);
