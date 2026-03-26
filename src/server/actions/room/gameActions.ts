@@ -1,33 +1,46 @@
-'use server'
+"use server";
 
-import { prisma } from '@/server/lib/prisma'
-import { revalidatePath } from 'next/cache'
-import { getAuthenticatedUser } from '../_helpers/getAuthenticatedUser'
-import { RoomStatus } from '@/types'
+import { prisma } from "@/server/lib/prisma";
+import { revalidatePath } from "next/cache";
+import { getAuthenticatedUser } from "../_helpers/getAuthenticatedUser";
+import { RoomStatus } from "@/types";
 
 /**
  * ホストがゲームを選択したときに呼び出される
  * activeGameTypeを更新し、全員がゲーム画面に遷移するトリガーとなる
  */
 export async function selectGame(roomId: string, gameType: string) {
-    const user = await getAuthenticatedUser()
+	const user = await getAuthenticatedUser();
 
-    const room = await prisma.room.findUnique({
-        where: { id: roomId }
-    })
+	const room = await prisma.room.findUnique({
+		where: { id: roomId },
+	});
 
-    if (!room) throw new Error('ルームが見つかりません')
-    if (room.createdBy !== user.id) throw new Error('ゲームを選択する権限がありません（ホストのみ）')
+	if (!room) throw new Error("ルームが見つかりません");
+	if (room.createdBy !== user.id)
+		throw new Error("ゲームを選択する権限がありません（ホストのみ）");
 
-    await prisma.room.update({
-        where: { id: roomId },
-        data: {
-            activeGameType: gameType,
-            status: RoomStatus.PLAYING
-        }
-    })
+	await prisma.room.update({
+		where: { id: roomId },
+		data: {
+			activeGameType: gameType,
+			status: RoomStatus.PLAYING,
+		},
+	});
 
-    revalidatePath(`/room/${roomId}`)
+	revalidatePath(`/room/${roomId}`);
+}
+
+/**
+ * タイトルに戻るときに currentMatchId を null にリセットする
+ * これにより useMatchSync が TITLE に遷移し、sessionStorage 管理が不要になる
+ */
+export async function clearCurrentMatch(roomId: string): Promise<void> {
+	await getAuthenticatedUser();
+	await prisma.room.update({
+		where: { id: roomId },
+		data: { currentMatchId: null },
+	});
 }
 
 /**
@@ -35,26 +48,27 @@ export async function selectGame(roomId: string, gameType: string) {
  * activeGameTypeをnullに戻し、全員がルーム画面に遷移するトリガーとなる
  */
 export async function returnToRoom(roomId: string) {
-    const user = await getAuthenticatedUser()
+	const user = await getAuthenticatedUser();
 
-    const room = await prisma.room.findUnique({
-        where: { id: roomId }
-    })
+	const room = await prisma.room.findUnique({
+		where: { id: roomId },
+	});
 
-    if (!room) throw new Error('ルームが見つかりません')
-    if (room.createdBy !== user.id) throw new Error('ルームに戻る権限がありません（ホストのみ）')
+	if (!room) throw new Error("ルームが見つかりません");
+	if (room.createdBy !== user.id)
+		throw new Error("ルームに戻る権限がありません（ホストのみ）");
 
-    await prisma.room.update({
-        where: { id: roomId },
-        data: {
-            activeGameType: null,
-            status: RoomStatus.LOBBY
-        }
-    })
+	await prisma.room.update({
+		where: { id: roomId },
+		data: {
+			activeGameType: null,
+			status: RoomStatus.LOBBY,
+		},
+	});
 
-    await prisma.match.deleteMany({
-        where: { roomId }
-    })
+	await prisma.match.deleteMany({
+		where: { roomId },
+	});
 
-    revalidatePath(`/room/${roomId}`)
+	revalidatePath(`/room/${roomId}`);
 }

@@ -27,7 +27,7 @@ Next.js 13+ のApp Routerに準拠したルーティング構造。
 app/
 ├── api/                  # API Routes
 ├── auth/                 # 認証関連ページ
-├── dashboard/            # ダッシュボードページ
+├── home/            # ダッシュボードページ
 ├── game/                 # ゲーム関連ページ
 │   └── [roomId]/
 │       └── error-hunter/

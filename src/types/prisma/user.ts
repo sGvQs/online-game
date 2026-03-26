@@ -2,7 +2,7 @@
  * User関連の型定義
  * Prisma schema を元に生成された型定義
  */
-import { Prisma } from '@prisma/client';
+import { Prisma } from "@prisma/client";
 
 // ============================================
 // Base model types from Prisma
@@ -19,9 +19,9 @@ export type UserIDP = Prisma.UserIDPGetPayload<{}>;
 // ============================================
 
 /** User with minimal info for display purposes */
-export type UserBasic = Pick<User, 'id' | 'name' | 'email'>;
+export type UserBasic = Pick<User, "id" | "name" | "email">;
 
 /** UserIDP with User relation */
 export type UserIDPWithUser = Prisma.UserIDPGetPayload<{
-    include: { user: true }
+	include: { user: true };
 }>;

@@ -1,42 +1,45 @@
-'use client'
-import { gameButton } from './styles'
-import { useSE } from '@/hooks/useSE'
+"use client";
+import { type ButtonHTMLAttributes } from "react";
+import { Button } from "@/components/ui/button";
+import { useSE } from "@/hooks/useSE";
 
-import { motion } from 'framer-motion'
+type NullHandVariant = "primary" | "secondary" | "danger" | "cyan";
 
-interface GameButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-    variant?: 'primary' | 'secondary' | 'danger' | 'cyan'
-    fullWidth?: boolean
-    size?: 'sm' | 'md' | 'lg'
+const VARIANT_MAP = {
+	primary: "primary",
+	secondary: "solid",
+	danger: "danger",
+	cyan: "success",
+} as const;
+
+interface GameButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
+	variant?: NullHandVariant;
+	fullWidth?: boolean;
+	size?: "sm" | "md" | "lg";
 }
 
 export const GameButton = ({
-    className,
-    variant = 'primary',
-    fullWidth = false,
-    size = 'md',
-    children,
-    onClick,
-    ...props
+	variant = "primary",
+	fullWidth,
+	size = "md",
+	onClick,
+	...props
 }: GameButtonProps) => {
-    const { play } = useSE()
+	const { play } = useSE();
 
-    return (
-        <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className={gameButton({ variant, size, fullWidth, className })}
-            onClick={(e) => {
-                if (variant === 'danger' || variant === 'primary') {
-                    play('submit')
-                } else {
-                    play('select')
-                }
-                if (onClick) onClick(e as any)
-            }}
-            {...props as any}
-        >
-            {children}
-        </motion.button>
-    )
-}
+	return (
+		<Button
+			screen="null-hand"
+			variant={VARIANT_MAP[variant]}
+			size={size}
+			fullWidth={fullWidth}
+			onClick={(e) => {
+				play(
+					variant === "primary" || variant === "danger" ? "submit" : "select",
+				);
+				onClick?.(e);
+			}}
+			{...props}
+		/>
+	);
+};

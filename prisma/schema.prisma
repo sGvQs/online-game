@@ -16,6 +16,19 @@ enum FaceIcon {
   BUG_FACE
 }
 
+enum GameType {
+  STAR_SHIELD
+  NULL_HAND
+  ERROR_HUNTER
+}
+
+enum MatchStatus {
+  SETUP
+  WAITING
+  PLAYING
+  FINISHED
+}
+
 model User {
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   name      String
@@ -40,6 +53,10 @@ model User {
   typingShootTypistMatches  TypingShootMatch[] @relation("TypingShootTypist")
   starShieldClearAsShooter  StarShieldClearRecord[] @relation("StarShieldClearShooter")
   starShieldClearAsTypist   StarShieldClearRecord[] @relation("StarShieldClearTypist")
+  starShieldProgress       StarShieldUserProgress?
+  starShieldNormalAttacks  StarShieldUserNormalAttack[]
+  starShieldSpecialAttacks StarShieldUserSpecialAttack[]
+  starShieldPurchaseHistory StarShieldPurchaseHistory[]
 
   @@map("users")
 }
@@ -47,7 +64,6 @@ model User {
 model RoomDeletedNotification {
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   userId    String   @map("user_id") @db.Uuid
-  roomName  String   @map("room_name")
   deletedAt DateTime @default(now()) @map("deleted_at")
   isRead    Boolean  @default(false) @map("is_read")
 
@@ -64,7 +80,6 @@ enum RoomStatus {
 
 model Room {
   id             String     @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  name           String
   createdAt      DateTime   @default(now()) @map("created_at")
   updatedAt      DateTime   @updatedAt @map("updated_at")
   createdBy      String     @map("created_by") @db.Uuid
@@ -75,7 +90,7 @@ model Room {
   matches Match[]
   users   RoomUser[]
 
-  creator User @relation("CreatedRooms", fields: [createdBy], references: [id])
+  creator User @relation("CreatedRooms", fields: [createdBy], references: [id], onDelete: Restrict)
 
   @@map("rooms")
 }
@@ -91,6 +106,7 @@ model RoomUser {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([roomId, userId])
+  @@index([userId])
   @@map("room_users")
 }
 
@@ -101,6 +117,7 @@ model UserIDP {
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([userId])
   @@map("user_idp")
 }
 
@@ -112,35 +129,48 @@ model ErrorEvent {
   closedBy     String?   @map("closed_by") @db.Uuid
   positionX    Float     @map("position_x") // 画面上の位置
   positionY    Float     @map("position_y") // 画面上の位置
-  roomId       String    @map("room_id") @db.Uuid
   user         User?     @relation(fields: [closedBy], references: [id])
   match        Match     @relation(fields: [matchId], references: [id], onDelete: Cascade)
 
+  @@index([matchId])
+  @@index([matchId, closedAt])
   @@map("error_events")
 }
 
 model Match {
-  id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  roomId           String   @map("room_id") @db.Uuid
-  gameType         String   @map("game_type")
-  status           String   @default("WAITING")
-  winnerId         String?  @map("winner_id") @db.Uuid
-  createdAt        DateTime @default(now()) @map("created_at")
-  currentTurnIndex Int      @default(1) @map("current_turn_index")
-  totalTurns       Int      @default(1) @map("total_turns")
+  id        String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  roomId    String      @map("room_id") @db.Uuid
+  gameType  GameType    @map("game_type")
+  status    MatchStatus @default(WAITING)
+  winnerId  String?     @map("winner_id") @db.Uuid
+  createdAt DateTime    @default(now()) @map("created_at")
 
   errorEvents      ErrorEvent[]
   jankenEvents     JankenEvent[]
   jankenLogs       JankenLog[]
   matchScores      MatchScore[]
+  nullHandMatch    NullHandMatch?
   typingShootMatch TypingShootMatch?
   room             Room              @relation(fields: [roomId], references: [id], onDelete: Cascade)
-  winner           User?             @relation(fields: [winnerId], references: [id])
+  winner           User?             @relation(fields: [winnerId], references: [id], onDelete: SetNull)
 
+  @@index([roomId])
   @@map("matches")
 }
 
 // NULL HAND ゲーム用モデル
+
+// Null Hand 専用のマッチメタデータ（Match の extension table）
+model NullHandMatch {
+  id               String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  matchId          String @unique @map("match_id") @db.Uuid
+  currentTurnIndex Int    @default(1) @map("current_turn_index")
+  totalTurns       Int    @default(1) @map("total_turns")
+
+  match Match @relation(fields: [matchId], references: [id], onDelete: Cascade)
+
+  @@map("null_hand_matches")
+}
 
 // 1ターンの状態管理
 model JankenEvent {
@@ -170,7 +200,7 @@ model GuestHand {
   isConfirmed   Boolean @default(false) @map("is_confirmed")
 
   jankenEvent JankenEvent @relation(fields: [jankenEventId], references: [id], onDelete: Cascade)
-  user        User        @relation(fields: [userId], references: [id])
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([jankenEventId, userId])
   @@map("guest_hands")
@@ -189,7 +219,7 @@ model JankenLog {
 
   match       Match?       @relation(fields: [matchId], references: [id], onDelete: SetNull)
   jankenEvent JankenEvent? @relation(fields: [jankenEventId], references: [id], onDelete: SetNull)
-  user        User         @relation(fields: [userId], references: [id])
+  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, isHost])
   @@map("janken_logs")
@@ -205,7 +235,7 @@ model MatchScore {
   createdAt DateTime @default(now()) @map("created_at")
 
   match Match @relation(fields: [matchId], references: [id], onDelete: Cascade)
-  user  User  @relation(fields: [userId], references: [id])
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([matchId, userId])
   @@map("match_scores")
@@ -291,4 +321,72 @@ model StarShieldClearRecord {
   @@index([shooterId, typistId])
   @@index([typistId, shooterId])
   @@map("star_shield_clear_records")
+}
+
+// -------------------------------------------------------------------------------------------------
+// Star Shield プログレッション（typing 通貨・ショップ）
+// -------------------------------------------------------------------------------------------------
+
+// 総合typing数（通貨）+ loadout（Shooter/Typist 時に使用するスキル）+ ヒールスキル
+model StarShieldUserProgress {
+  id                      String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId                  String   @unique @map("user_id") @db.Uuid
+  totalTypingCount        Int      @default(0) @map("total_typing_count")
+  selectedNormalAttackId  String?  @map("selected_normal_attack_id") @db.Text
+  selectedSpecialAttackId String?  @map("selected_special_attack_id") @db.Text
+  selectedHealLevel       Int?     @map("selected_heal_level")
+  starHpLevel             Int      @default(1) @map("star_hp_level") // 1-5
+  healLevel               Int?     @map("heal_level") // 1-6（null=未所持）
+  updatedAt               DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("star_shield_user_progress")
+}
+
+// 通常攻撃スキル所持（技ごとに level 1-5）
+model StarShieldUserNormalAttack {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId       String   @map("user_id") @db.Uuid
+  techniqueId  String   @map("technique_id") // red, blue, yellow_beam, purple, orange
+  level        Int      @default(1) // 1-5
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, techniqueId])
+  @@map("star_shield_user_normal_attacks")
+}
+
+// 必殺技所持（spread_small, spread_medium, spread_large のみ。all_destruction はヒール max で獲得）
+model StarShieldUserSpecialAttack {
+  id              String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId          String   @map("user_id") @db.Uuid
+  specialAttackId String   @map("special_attack_id")
+  level           Int      @default(1) // 1-10
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, specialAttackId])
+  @@map("star_shield_user_special_attacks")
+}
+
+// 購入履歴
+model StarShieldPurchaseHistory {
+  id                 String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  userId             String   @map("user_id") @db.Uuid
+  purchaseType       String   @map("purchase_type") // SKILL_UNLOCK, LEVEL_UP
+  targetSkillId      String?  @map("target_skill_id")
+  targetLevel        Int?     @map("target_level")
+  typingCost         Int      @map("typing_cost")
+  totalTypingBefore  Int?     @map("total_typing_before")
+  createdAt          DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("star_shield_purchase_history")
 }

@@ -1,28 +1,23 @@
-'use server'
+"use server";
 
-import { prisma } from '@/server/lib/prisma'
-import { revalidatePath } from 'next/cache'
-import { getAuthenticatedUser } from '../_helpers/getAuthenticatedUser'
+import { prisma } from "@/server/lib/prisma";
+import { redirect } from "next/navigation";
+import { getAuthenticatedUser } from "../_helpers/getAuthenticatedUser";
 
 /**
- * 新しいルームを作成
+ * 新しいルームを作成し、作成者をメンバーとして登録した上でルーム画面へ遷移
  */
-const ROOM_NAME_MAX_LENGTH = 15
+export async function createRoom() {
+	const user = await getAuthenticatedUser();
 
-export async function createRoom(formData: FormData) {
-    const rawName = formData.get('name') as string
-    const name = rawName?.trim().slice(0, ROOM_NAME_MAX_LENGTH)
-    if (!name) return
+	const room = await prisma.room.create({
+		data: {
+			createdBy: user.id,
+			users: {
+				create: { userId: user.id },
+			},
+		},
+	});
 
-    const user = await getAuthenticatedUser()
-
-    const room = await prisma.room.create({
-        data: {
-            name,
-            createdBy: user.id,
-        },
-    })
-
-    revalidatePath('/dashboard')
-    return room
+	redirect(`/room/${room.id}`);
 }

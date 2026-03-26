@@ -1,0 +1,70 @@
+{
+	"$schema": "https://biomejs.dev/schemas/2.4.8/schema.json",
+	"files": {
+		"includes": ["src/**", "!node_modules", "!.next", "!prisma/migrations"]
+	},
+	"formatter": {
+		"enabled": true,
+		"indentStyle": "tab"
+	},
+	"linter": {
+		"enabled": true,
+		"rules": {
+			"recommended": true,
+			"a11y": {
+				"noSvgWithoutTitle": "off",
+				"noStaticElementInteractions": "off",
+				"useKeyWithClickEvents": "off",
+				"useButtonType": "warn",
+				"noAriaHiddenOnFocusable": "warn",
+				"useMediaCaption": "off",
+				"useSemanticElements": "off"
+			},
+			"correctness": {
+				"useExhaustiveDependencies": "warn",
+				"noUnusedImports": "warn",
+				"noUnusedVariables": "warn",
+				"noUnusedFunctionParameters": "off"
+			},
+			"style": {
+				"useImportType": "warn",
+				"noNonNullAssertion": "off"
+			},
+			"complexity": {
+				"noBannedTypes": "warn",
+				"noImportantStyles": "off",
+				"noUselessFragments": "warn"
+			},
+			"suspicious": {
+				"noArrayIndexKey": "warn",
+				"noExplicitAny": "warn",
+				"useIterableCallbackReturn": "warn"
+			}
+		}
+	},
+	"assist": {
+		"enabled": true,
+		"actions": {
+			"source": {
+				"organizeImports": {
+					"level": "off"
+				}
+			}
+		}
+	},
+	"css": {
+		"formatter": {
+			"enabled": false
+		},
+		"parser": {
+			"tailwindDirectives": true,
+			"allowWrongLineComments": true
+		}
+	},
+	"javascript": {
+		"formatter": {
+			"quoteStyle": "double",
+			"semicolons": "always"
+		}
+	}
+}

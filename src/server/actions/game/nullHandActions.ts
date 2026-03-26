@@ -1,14 +1,14 @@
-'use server'
+"use server";
 
-import { prisma } from '@/server/lib/prisma'
-import { getAuthenticatedUser } from '../_helpers/getAuthenticatedUser'
-import {
-    JankenEventWithGuests,
-    HostStats,
-    HandType,
-    HostChoice,
-    MatchScoreWithUser,
-} from '@/types'
+import { prisma } from "@/server/lib/prisma";
+import { GameType, MatchStatus } from "@prisma/client";
+import { getAuthenticatedUser } from "../_helpers/getAuthenticatedUser";
+import type {
+	JankenEventWithGuests,
+	HostStats,
+	MatchScoreWithUser,
+} from "@/types";
+import { HandType, HostChoice } from "@/types";
 
 // ============================================
 // ユーティリティ
@@ -18,12 +18,12 @@ import {
  * Fisher-Yates シャッフル（配列をランダムに並べ替え）
  */
 function shuffleArray<T>(array: T[]): T[] {
-    const shuffled = [...array]
-    for (let i = shuffled.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
-    }
-    return shuffled
+	const shuffled = [...array];
+	for (let i = shuffled.length - 1; i > 0; i--) {
+		const j = Math.floor(Math.random() * (i + 1));
+		[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+	}
+	return shuffled;
 }
 
 // ============================================
@@ -33,16 +33,19 @@ function shuffleArray<T>(array: T[]): T[] {
 /**
  * じゃんけんの勝敗を判定
  */
-function judgeHand(hostHand: HandType, guestHand: HandType): 'HOST_WIN' | 'GUEST_WIN' | 'DRAW' {
-    if (hostHand === guestHand) return 'DRAW'
+function judgeHand(
+	hostHand: HandType,
+	guestHand: HandType,
+): "HOST_WIN" | "GUEST_WIN" | "DRAW" {
+	if (hostHand === guestHand) return "DRAW";
 
-    const winPatterns: Record<HandType, HandType> = {
-        [HandType.ROCK]: HandType.SCISSORS,
-        [HandType.SCISSORS]: HandType.PAPER,
-        [HandType.PAPER]: HandType.ROCK,
-    }
+	const winPatterns: Record<HandType, HandType> = {
+		[HandType.ROCK]: HandType.SCISSORS,
+		[HandType.SCISSORS]: HandType.PAPER,
+		[HandType.PAPER]: HandType.ROCK,
+	};
 
-    return winPatterns[hostHand] === guestHand ? 'HOST_WIN' : 'GUEST_WIN'
+	return winPatterns[hostHand] === guestHand ? "HOST_WIN" : "GUEST_WIN";
 }
 
 /**
@@ -52,20 +55,20 @@ function judgeHand(hostHand: HandType, guestHand: HandType): 'HOST_WIN' | 'GUEST
  * REAL: PAPER → BLUFF: ROCK
  */
 function getBluffHand(realHand: HandType): HandType {
-    const bluffMap: Record<HandType, HandType> = {
-        [HandType.ROCK]: HandType.SCISSORS,
-        [HandType.SCISSORS]: HandType.PAPER,
-        [HandType.PAPER]: HandType.ROCK,
-    }
-    return bluffMap[realHand]
+	const bluffMap: Record<HandType, HandType> = {
+		[HandType.ROCK]: HandType.SCISSORS,
+		[HandType.SCISSORS]: HandType.PAPER,
+		[HandType.PAPER]: HandType.ROCK,
+	};
+	return bluffMap[realHand];
 }
 
 /**
  * ランダムなREAL手を生成
  */
 function generateRandomHand(): HandType {
-    const hands = Object.values(HandType)
-    return hands[Math.floor(Math.random() * hands.length)]
+	const hands = Object.values(HandType);
+	return hands[Math.floor(Math.random() * hands.length)];
 }
 
 // ============================================
@@ -79,82 +82,89 @@ function generateRandomHand(): HandType {
  * 全参加者のMatchScoreを初期化
  */
 export async function startJankenMatch(roomId: string) {
-    const user = await getAuthenticatedUser()
+	const user = await getAuthenticatedUser();
 
-    const room = await prisma.room.findUnique({
-        where: { id: roomId },
-        include: {
-            users: true
-        }
-    })
+	const room = await prisma.room.findUnique({
+		where: { id: roomId },
+		include: {
+			users: true,
+		},
+	});
 
-    if (!room) throw new Error('ルームが見つかりません')
-    if (room.createdBy !== user.id) throw new Error('ゲームを開始する権限がありません（ホストのみ）')
+	if (!room) throw new Error("ルームが見つかりません");
+	if (room.createdBy !== user.id)
+		throw new Error("ゲームを開始する権限がありません（ホストのみ）");
 
-    // 参加者リストを取得し、シャッフルしてホスト順をランダム化
-    const participants = shuffleArray(room.users.map(ru => ru.userId))
-    if (participants.length < 2) throw new Error('最低2人のプレイヤーが必要です')
+	// 参加者リストを取得し、シャッフルしてホスト順をランダム化
+	const participants = shuffleArray(room.users.map((ru) => ru.userId));
+	if (participants.length < 2) throw new Error("最低2人のプレイヤーが必要です");
 
-    // トランザクションで一括実行して、不整合を防ぐ
-    const match = await prisma.$transaction(async (tx) => {
-        // Matchを作成
-        const newMatch = await tx.match.create({
-            data: {
-                roomId: roomId,
-                gameType: 'null-hand',
-                status: 'PLAYING',
-                currentTurnIndex: 1,
-                totalTurns: participants.length,
-            }
-        })
+	// トランザクションで一括実行して、不整合を防ぐ
+	const match = await prisma.$transaction(async (tx) => {
+		// Matchを作成
+		const newMatch = await tx.match.create({
+			data: {
+				roomId: roomId,
+				gameType: GameType.NULL_HAND,
+				status: MatchStatus.PLAYING,
+			},
+		});
 
-        // 全参加者のMatchScoreを初期化（シャッフルされた順序を保存）
-        await Promise.all(
-            participants.map((userId, index) =>
-                tx.matchScore.create({
-                    data: {
-                        matchId: newMatch.id,
-                        userId: userId,
-                        points: 0,
-                        turnOrder: index, // シャッフル順を永続化
-                    }
-                })
-            )
-        )
+		// NullHand 専用メタデータを作成
+		await tx.nullHandMatch.create({
+			data: {
+				matchId: newMatch.id,
+				currentTurnIndex: 1,
+				totalTurns: participants.length,
+			},
+		});
 
-        const systemRealHand = generateRandomHand()
-        const systemBluffHand = getBluffHand(systemRealHand)
+		// 全参加者のMatchScoreを初期化（シャッフルされた順序を保存）
+		await Promise.all(
+			participants.map((userId, index) =>
+				tx.matchScore.create({
+					data: {
+						matchId: newMatch.id,
+						userId: userId,
+						points: 0,
+						turnOrder: index, // シャッフル順を永続化
+					},
+				}),
+			),
+		);
 
-        // 最初のターンを作成（CHOICEフェーズから開始）
-        await tx.jankenEvent.create({
-            data: {
-                matchId: newMatch.id,
-                currentHostId: participants[0],
-                turnNumber: 1,
-                phase: 'CHOICE',
-                systemRealHand,
-                systemBluffHand,
-            }
-        })
+		const systemRealHand = generateRandomHand();
+		const systemBluffHand = getBluffHand(systemRealHand);
 
-        // Roomを更新
-        await tx.room.update({
-            where: { id: roomId },
-            data: {
-                currentMatchId: newMatch.id,
-            }
-        })
+		// 最初のターンを作成（CHOICEフェーズから開始）
+		await tx.jankenEvent.create({
+			data: {
+				matchId: newMatch.id,
+				currentHostId: participants[0],
+				turnNumber: 1,
+				phase: "CHOICE",
+				systemRealHand,
+				systemBluffHand,
+			},
+		});
 
-        return newMatch
-    })
+		// Roomを更新
+		await tx.room.update({
+			where: { id: roomId },
+			data: {
+				currentMatchId: newMatch.id,
+			},
+		});
 
-    const { revalidatePath } = await import('next/cache')
-    revalidatePath(`/room/${roomId}`)
-    revalidatePath(`/game/${roomId}/null-hand`)
+		return newMatch;
+	});
 
-    return match
+	const { revalidatePath } = await import("next/cache");
+	revalidatePath(`/room/${roomId}`);
+	revalidatePath(`/game/${roomId}/null-hand`);
+
+	return match;
 }
-
 
 // ============================================
 // 統計データ取得
@@ -164,31 +174,38 @@ export async function startJankenMatch(roomId: string) {
  * ホストの統計データを取得
  * JankenLogからホスト時のREVERSE回数を集計
  */
-export async function getHostStats(userId: string, excludeJankenEventId?: string): Promise<HostStats> {
-    const logs = await prisma.jankenLog.findMany({
-        where: {
-            userId,
-            isHost: true,
-            ...(excludeJankenEventId ? { jankenEventId: { not: excludeJankenEventId } } : {}),
-        },
-        orderBy: { createdAt: 'desc' },
-        take: 50,
-    })
+export async function getHostStats(
+	userId: string,
+	excludeJankenEventId?: string,
+): Promise<HostStats> {
+	const logs = await prisma.jankenLog.findMany({
+		where: {
+			userId,
+			isHost: true,
+			...(excludeJankenEventId
+				? { jankenEventId: { not: excludeJankenEventId } }
+				: {}),
+		},
+		orderBy: { createdAt: "desc" },
+		take: 50,
+	});
 
-    if (logs.length === 0) {
-        return {
-            reverseRate: null,
-            totalHostCount: 0,
-        }
-    }
+	if (logs.length === 0) {
+		return {
+			reverseRate: null,
+			totalHostCount: 0,
+		};
+	}
 
-    const reverseCount = logs.filter(log => log.hostChoice === 'REVERSE').length
-    const reverseRate = Math.round((reverseCount / logs.length) * 100)
+	const reverseCount = logs.filter(
+		(log) => log.hostChoice === "REVERSE",
+	).length;
+	const reverseRate = Math.round((reverseCount / logs.length) * 100);
 
-    return {
-        reverseRate,
-        totalHostCount: logs.length,
-    }
+	return {
+		reverseRate,
+		totalHostCount: logs.length,
+	};
 }
 
 // ============================================
@@ -202,87 +219,86 @@ export async function getHostStats(userId: string, excludeJankenEventId?: string
  * CHOICE → BATTLE フェーズへ遷移
  */
 export async function setHostChoice(eventId: string, choice: HostChoice) {
-    const user = await getAuthenticatedUser()
+	const user = await getAuthenticatedUser();
 
-    const event = await prisma.jankenEvent.findUnique({ where: { id: eventId } })
-    if (!event) throw new Error('イベントが見つかりません')
-    if (event.currentHostId !== user.id) throw new Error('ホストではありません')
-    if (event.phase !== 'CHOICE') throw new Error('CHOICEフェーズではありません')
-    if (!event.systemRealHand || !event.systemBluffHand) throw new Error('システム手が設定されていません')
+	const event = await prisma.jankenEvent.findUnique({ where: { id: eventId } });
+	if (!event) throw new Error("イベントが見つかりません");
+	if (event.currentHostId !== user.id) throw new Error("ホストではありません");
+	if (event.phase !== "CHOICE") throw new Error("CHOICEフェーズではありません");
+	if (!event.systemRealHand || !event.systemBluffHand)
+		throw new Error("システム手が設定されていません");
 
-    // STAYならREAL手、REVERSEならBLUFF手が最終手
-    const finalHostHand = choice === 'STAY' ? event.systemRealHand : event.systemBluffHand
+	// STAYならREAL手、REVERSEならBLUFF手が最終手
+	const finalHostHand =
+		choice === "STAY" ? event.systemRealHand : event.systemBluffHand;
 
-    await prisma.jankenEvent.update({
-        where: { id: eventId },
-        data: {
-            hostChoice: choice,
-            finalHostHand,
-            phase: 'BATTLE',
-        }
-    })
+	await prisma.jankenEvent.update({
+		where: { id: eventId },
+		data: {
+			hostChoice: choice,
+			finalHostHand,
+			phase: "BATTLE",
+		},
+	});
 }
 
 /**
  * ゲストの手を入力
  * 全ゲスト入力完了で勝敗判定 → RESULT フェーズへ
  */
-export async function setGuestHand(
-    eventId: string,
-    hand: HandType
-) {
-    const currentUser = await getAuthenticatedUser()
-    const userId = currentUser.id
+export async function setGuestHand(eventId: string, hand: HandType) {
+	const currentUser = await getAuthenticatedUser();
+	const userId = currentUser.id;
 
-    // hand のバリデーション
-    const validHands = Object.values(HandType)
-    if (!validHands.includes(hand)) throw new Error('無効な手です')
+	// hand のバリデーション
+	const validHands = Object.values(HandType);
+	if (!validHands.includes(hand)) throw new Error("無効な手です");
 
-    await prisma.guestHand.upsert({
-        where: {
-            jankenEventId_userId: {
-                jankenEventId: eventId,
-                userId: userId
-            }
-        },
-        create: {
-            jankenEventId: eventId,
-            userId: userId,
-            hand: hand,
-            isConfirmed: true
-        },
-        update: {
-            hand: hand,
-            isConfirmed: true
-        }
-    })
+	await prisma.guestHand.upsert({
+		where: {
+			jankenEventId_userId: {
+				jankenEventId: eventId,
+				userId: userId,
+			},
+		},
+		create: {
+			jankenEventId: eventId,
+			userId: userId,
+			hand: hand,
+			isConfirmed: true,
+		},
+		update: {
+			hand: hand,
+			isConfirmed: true,
+		},
+	});
 
-    // 全ゲストが入力したかチェック
-    const event = await prisma.jankenEvent.findUnique({
-        where: { id: eventId },
-        include: {
-            match: {
-                include: {
-                    room: {
-                        include: { users: true }
-                    }
-                }
-            },
-            guestHands: true
-        }
-    })
+	// 全ゲストが入力したかチェック
+	const event = await prisma.jankenEvent.findUnique({
+		where: { id: eventId },
+		include: {
+			match: {
+				include: {
+					room: {
+						include: { users: true },
+					},
+				},
+			},
+			guestHands: true,
+		},
+	});
 
-    if (!event) throw new Error('イベントが見つかりません')
+	if (!event) throw new Error("イベントが見つかりません");
 
-    const participants = event.match.room.users.map(ru => ru.userId)
-    const guests = participants.filter(p => p !== event.currentHostId)
+	const participants = event.match.room.users.map((ru) => ru.userId);
+	const guests = participants.filter((p) => p !== event.currentHostId);
 
-    const submittedHands = event.guestHands.filter(gh => gh.isConfirmed)
+	const submittedHands = event.guestHands.filter((gh) => gh.isConfirmed);
 
-    if (submittedHands.length >= guests.length) {
-        // 全員入力完了 → 勝敗判定
-        await judgeRound(eventId)
-    }
+	if (submittedHands.length >= guests.length) {
+		// 全員入力完了 → 勝敗判定
+		await judgeRound(eventId);
+	}
 }
 
 // ============================================
@@ -299,202 +315,202 @@ export async function setGuestHand(
  * - ホスト完全勝利（全員負けorあいこ）: ホスト+2pt
  */
 async function judgeRound(eventId: string) {
-    const event = await prisma.jankenEvent.findUnique({
-        where: { id: eventId },
-        include: {
-            match: {
-                include: {
-                    room: {
-                        include: { users: true }
-                    }
-                }
-            },
-            guestHands: {
-                include: { user: true }
-            }
-        }
-    })
+	const event = await prisma.jankenEvent.findUnique({
+		where: { id: eventId },
+		include: {
+			match: {
+				include: {
+					room: {
+						include: { users: true },
+					},
+				},
+			},
+			guestHands: {
+				include: { user: true },
+			},
+		},
+	});
 
-    if (!event) throw new Error('イベントが見つかりません')
-    if (!event.finalHostHand) throw new Error('ホストの手が設定されていません')
-    if (!event.hostChoice) throw new Error('ホストの選択が設定されていません')
+	if (!event) throw new Error("イベントが見つかりません");
+	if (!event.finalHostHand) throw new Error("ホストの手が設定されていません");
+	if (!event.hostChoice) throw new Error("ホストの選択が設定されていません");
 
-    const hostHand = event.finalHostHand as HandType
-    const hostChoice = event.hostChoice as HostChoice
+	const hostHand = event.finalHostHand as HandType;
+	const hostChoice = event.hostChoice as HostChoice;
 
-    // 各ゲストの勝敗を判定
-    const guestWinners: string[] = []
-    let allDraw = true
+	// 各ゲストの勝敗を判定
+	const guestWinners: string[] = [];
+	let allDraw = true;
 
-    for (const guestHand of event.guestHands) {
-        const result = judgeHand(hostHand, guestHand.hand as HandType)
-        if (result === 'GUEST_WIN') {
-            guestWinners.push(guestHand.userId)
-        }
-        if (result !== 'DRAW') {
-            allDraw = false
-        }
-    }
+	for (const guestHand of event.guestHands) {
+		const result = judgeHand(hostHand, guestHand.hand as HandType);
+		if (result === "GUEST_WIN") {
+			guestWinners.push(guestHand.userId);
+		}
+		if (result !== "DRAW") {
+			allDraw = false;
+		}
+	}
 
-    // ===== 新ルール スコア判定 =====
-    // ゲストの人数を取得
-    const guestCount = event.guestHands.length
+	// ===== 新ルール スコア判定 =====
+	// ゲストの人数を取得
+	const guestCount = event.guestHands.length;
 
-    // 1. Null Hand判定: ゲスト全員がホストと**同じ手**を出した（全ゲストの結果がDRAW）
-    // ※ゲストが1人の場合はスキップ（必ずfalse）
-    const isNullHand = guestCount > 1 && allDraw
+	// 1. Null Hand判定: ゲスト全員がホストと**同じ手**を出した（全ゲストの結果がDRAW）
+	// ※ゲストが1人の場合はスキップ（必ずfalse）
+	const isNullHand = guestCount > 1 && allDraw;
 
-    // 2. ゲスト勝利判定: 1(NullHand)に該当せず、かつホストに勝ったゲストが1人以上いる
-    const isGuestWin = !isNullHand && guestWinners.length > 0
+	// 2. ゲスト勝利判定: 1(NullHand)に該当せず、かつホストに勝ったゲストが1人以上いる
+	const isGuestWin = !isNullHand && guestWinners.length > 0;
 
-    // 3. ホスト完全勝利判定: 1(NullHand)に該当せず、ゲスト全員に勝利した（ゲスト勝利がおらず、かつ引き分けもいない）
-    // ※今回は「無敗（引き分け含む）」ではなく「完全勝利（全員負け）」が条件
-    // ※ゲストが1人の場合はスキップ（必ずfalse）
-    const guestDraws = event.guestHands.filter(gh => judgeHand(hostHand, gh.hand as HandType) === 'DRAW')
-    const isHostPerfectWin = guestCount > 1 && !isNullHand && guestWinners.length === 0 && guestDraws.length === 0
+	// 3. ホスト完全勝利判定: 1(NullHand)に該当せず、ゲスト全員に勝利した（ゲスト勝利がおらず、かつ引き分けもいない）
+	// ※今回は「無敗（引き分け含む）」ではなく「完全勝利（全員負け）」が条件
+	// ※ゲストが1人の場合はスキップ（必ずfalse）
+	const guestDraws = event.guestHands.filter(
+		(gh) => judgeHand(hostHand, gh.hand as HandType) === "DRAW",
+	);
+	const isHostPerfectWin =
+		guestCount > 1 &&
+		!isNullHand &&
+		guestWinners.length === 0 &&
+		guestDraws.length === 0;
 
-    // スコア付与の実行
-    if (isNullHand) {
-        // Null Hand: ホスト+5pt
-        await prisma.matchScore.update({
-            where: {
-                matchId_userId: {
-                    matchId: event.matchId,
-                    userId: event.currentHostId
-                }
-            },
-            data: { points: { increment: 5 } }
-        })
-    } else if (isGuestWin) {
-        // ゲスト勝利: 勝ったゲスト全員に各+3pt
-        await Promise.all(
-            guestWinners.map(winnerId =>
-                prisma.matchScore.update({
-                    where: {
-                        matchId_userId: {
-                            matchId: event.matchId,
-                            userId: winnerId
-                        }
-                    },
-                    data: { points: { increment: 3 } }
-                })
-            )
-        )
-    } else if (isHostPerfectWin) {
-        // ホスト完全勝利判定: ホスト+3pt
-        await prisma.matchScore.update({
-            where: {
-                matchId_userId: {
-                    matchId: event.matchId,
-                    userId: event.currentHostId
-                }
-            },
-            data: { points: { increment: 3 } }
-        })
-    }
-    // ドロー（該当なし）は何もしない（全員 0pt）
+	// スコア付与の実行
+	if (isNullHand) {
+		// Null Hand: ホスト+5pt
+		await prisma.matchScore.update({
+			where: {
+				matchId_userId: {
+					matchId: event.matchId,
+					userId: event.currentHostId,
+				},
+			},
+			data: { points: { increment: 5 } },
+		});
+	} else if (isGuestWin) {
+		// ゲスト勝利: 勝ったゲスト全員に各+3pt
+		await Promise.all(
+			guestWinners.map((winnerId) =>
+				prisma.matchScore.update({
+					where: {
+						matchId_userId: {
+							matchId: event.matchId,
+							userId: winnerId,
+						},
+					},
+					data: { points: { increment: 3 } },
+				}),
+			),
+		);
+	} else if (isHostPerfectWin) {
+		// ホスト完全勝利判定: ホスト+3pt
+		await prisma.matchScore.update({
+			where: {
+				matchId_userId: {
+					matchId: event.matchId,
+					userId: event.currentHostId,
+				},
+			},
+			data: { points: { increment: 3 } },
+		});
+	}
+	// ドロー（該当なし）は何もしない（全員 0pt）
 
-    // ホストのJankenLogを記録（REVERSE統計用）
-    await prisma.jankenLog.create({
-        data: {
-            userId: event.currentHostId,
-            isHost: true,
-            hostChoice: hostChoice,
-            matchId: event.matchId,
-            jankenEventId: event.id,
-            isWinning: isNullHand || isHostPerfectWin,
-        }
-    })
+	// ホストのJankenLogを記録（REVERSE統計用）
+	await prisma.jankenLog.create({
+		data: {
+			userId: event.currentHostId,
+			isHost: true,
+			hostChoice: hostChoice,
+			matchId: event.matchId,
+			jankenEventId: event.id,
+			isWinning: isNullHand || isHostPerfectWin,
+		},
+	});
 
-    // ゲストのJankenLogを記録
-    for (const guestHand of event.guestHands) {
-        const isGuestWin = guestWinners.includes(guestHand.userId)
-        await prisma.jankenLog.create({
-            data: {
-                userId: guestHand.userId,
-                isHost: false,
-                matchId: event.matchId,
-                jankenEventId: event.id,
-                isWinning: isGuestWin,
-            }
-        })
-    }
+	// ゲストのJankenLogを記録
+	await prisma.jankenLog.createMany({
+		data: event.guestHands.map((guestHand) => ({
+			userId: guestHand.userId,
+			isHost: false,
+			matchId: event.matchId,
+			jankenEventId: event.id,
+			isWinning: guestWinners.includes(guestHand.userId),
+		})),
+	});
 
-    // RESULTフェーズへ遷移
-    await prisma.jankenEvent.update({
-        where: { id: eventId },
-        data: {
-            phase: 'RESULT',
-        }
-    })
+	// RESULTフェーズへ遷移
+	await prisma.jankenEvent.update({
+		where: { id: eventId },
+		data: {
+			phase: "RESULT",
+		},
+	});
 }
 
 /**
  * 次のターンを開始
  */
 export async function startNextTurn(eventId: string) {
-    await getAuthenticatedUser()
-    const event = await prisma.jankenEvent.findUnique({
-        where: { id: eventId },
-        include: {
-            match: {
-                include: {
-                    matchScores: {
-                        orderBy: { turnOrder: 'asc' }
-                    }
-                }
-            }
-        }
-    })
+	await getAuthenticatedUser();
+	const event = await prisma.jankenEvent.findUnique({
+		where: { id: eventId },
+		include: {
+			match: {
+				include: {
+					matchScores: {
+						orderBy: { turnOrder: "asc" },
+					},
+				},
+			},
+		},
+	});
 
-    if (!event) throw new Error('イベントが見つかりません')
-    if (!event.match.matchScores.length) throw new Error('参加者データが見つかりません')
+	if (!event) throw new Error("イベントが見つかりません");
+	if (!event.match.matchScores.length)
+		throw new Error("参加者データが見つかりません");
 
-    const participants = event.match.matchScores.map(ms => ms.userId)
-    const totalTurns = participants.length
+	const participants = event.match.matchScores.map((ms) => ms.userId);
+	const totalTurns = participants.length;
 
-    if (event.turnNumber >= totalTurns) {
-        // 全ターン終了 → GAME_OVER フェーズへ
-        await prisma.jankenEvent.update({
-            where: { id: eventId },
-            data: {
-                phase: 'GAME_OVER',
-            }
-        })
+	if (event.turnNumber >= totalTurns) {
+		// 全ターン終了 → GAME_OVER フェーズへ
+		await prisma.jankenEvent.update({
+			where: { id: eventId },
+			data: {
+				phase: "GAME_OVER",
+			},
+		});
 
-        await prisma.match.update({
-            where: { id: event.matchId },
-            data: {
-                currentTurnIndex: event.turnNumber + 1
-            }
-        })
-        return
-    }
+		await prisma.nullHandMatch.update({
+			where: { matchId: event.matchId },
+			data: { currentTurnIndex: event.turnNumber + 1 },
+		});
+		return;
+	}
 
-    // 次のホストを決定
-    const nextHostIndex = event.turnNumber
-    const nextHostId = participants[nextHostIndex]
+	// 次のホストを決定
+	const nextHostIndex = event.turnNumber;
+	const nextHostId = participants[nextHostIndex];
 
-    const systemRealHand = generateRandomHand()
-    const systemBluffHand = getBluffHand(systemRealHand)
+	const systemRealHand = generateRandomHand();
+	const systemBluffHand = getBluffHand(systemRealHand);
 
-    await prisma.jankenEvent.create({
-        data: {
-            matchId: event.matchId,
-            currentHostId: nextHostId,
-            turnNumber: event.turnNumber + 1,
-            phase: 'CHOICE',
-            systemRealHand,
-            systemBluffHand,
-        }
-    })
+	await prisma.jankenEvent.create({
+		data: {
+			matchId: event.matchId,
+			currentHostId: nextHostId,
+			turnNumber: event.turnNumber + 1,
+			phase: "CHOICE",
+			systemRealHand,
+			systemBluffHand,
+		},
+	});
 
-    await prisma.match.update({
-        where: { id: event.matchId },
-        data: {
-            currentTurnIndex: event.turnNumber + 1
-        }
-    })
+	await prisma.nullHandMatch.update({
+		where: { matchId: event.matchId },
+		data: { currentTurnIndex: event.turnNumber + 1 },
+	});
 }
 
 // ============================================
@@ -504,71 +520,77 @@ export async function startNextTurn(eventId: string) {
 /**
  * JankenEventデータ取得（ゲストハンド含む）
  */
-export async function getJankenEvent(eventId: string): Promise<JankenEventWithGuests | null> {
-    const event = await prisma.jankenEvent.findUnique({
-        where: { id: eventId },
-        include: {
-            match: true,
-            guestHands: {
-                include: {
-                    user: true
-                }
-            }
-        }
-    })
+export async function getJankenEvent(
+	eventId: string,
+): Promise<JankenEventWithGuests | null> {
+	const event = await prisma.jankenEvent.findUnique({
+		where: { id: eventId },
+		include: {
+			match: { include: { nullHandMatch: true } },
+			guestHands: {
+				include: {
+					user: true,
+				},
+			},
+		},
+	});
 
-    return event
+	return event;
 }
 
 /**
  * マッチIDから最新のJankenEventを取得
  */
-export async function getLatestJankenEvent(matchId: string): Promise<JankenEventWithGuests | null> {
-    if (!matchId) return null
+export async function getLatestJankenEvent(
+	matchId: string,
+): Promise<JankenEventWithGuests | null> {
+	if (!matchId) return null;
 
-    const event = await prisma.jankenEvent.findFirst({
-        where: { matchId },
-        orderBy: { turnNumber: 'desc' },
-        include: {
-            match: true,
-            guestHands: {
-                include: { user: true }
-            }
-        }
-    })
+	const event = await prisma.jankenEvent.findFirst({
+		where: { matchId },
+		orderBy: { turnNumber: "desc" },
+		include: {
+			match: { include: { nullHandMatch: true } },
+			guestHands: {
+				include: { user: true },
+			},
+		},
+	});
 
-    return event
+	return event;
 }
 
 /**
  * マッチIDから最新の JankenEvent と HostStats を一度に取得
  */
 export async function getLatestJankenEventWithStats(
-    matchId: string
+	matchId: string,
 ): Promise<{ event: JankenEventWithGuests; stats: HostStats } | null> {
-    if (!matchId) return null
+	if (!matchId) return null;
 
-    const event = await prisma.jankenEvent.findFirst({
-        where: { matchId },
-        orderBy: { turnNumber: 'desc' },
-        include: {
-            match: true,
-            guestHands: {
-                include: { user: true }
-            }
-        }
-    })
+	const event = await prisma.jankenEvent.findFirst({
+		where: { matchId },
+		orderBy: { turnNumber: "desc" },
+		include: {
+			match: { include: { nullHandMatch: true } },
+			guestHands: {
+				include: { user: true },
+			},
+		},
+	});
 
-    if (!event) return null
+	if (!event) return null;
 
-    const needsStats = ['DEAL', 'CHOICE', 'BATTLE', 'RESULT'].includes(event.phase)
-    // RESULT フェーズでは現在のラウンド (JankenEvent) のログを除外して「このラウンド前」の統計を返す
-    const excludeJankenEventId = event.phase === 'RESULT' ? event.id : undefined
-    const stats = needsStats
-        ? await getHostStats(event.currentHostId, excludeJankenEventId)
-        : { reverseRate: null, totalHostCount: 0 }
+	const needsStats = ["DEAL", "CHOICE", "BATTLE", "RESULT"].includes(
+		event.phase,
+	);
+	// RESULT フェーズでは現在のラウンド (JankenEvent) のログを除外して「このラウンド前」の統計を返す
+	const excludeJankenEventId = event.phase === "RESULT" ? event.id : undefined;
+	const stats = needsStats
+		? await getHostStats(event.currentHostId, excludeJankenEventId)
+		: { reverseRate: null, totalHostCount: 0 };
 
-    return { event, stats }
+	return { event, stats };
 }
 
 /**
@@ -576,52 +598,53 @@ export async function getLatestJankenEventWithStats(
  * 全員準備完了したら次のターンを開始
  */
 export async function markNextRoundReady(roomId: string, matchId: string) {
-    const currentUser = await getAuthenticatedUser()
-    const userId = currentUser.id
+	const currentUser = await getAuthenticatedUser();
+	const userId = currentUser.id;
 
-    await prisma.roomUser.update({
-        where: { roomId_userId: { roomId, userId } },
-        data: { isReady: true }
-    })
+	await prisma.roomUser.update({
+		where: { roomId_userId: { roomId, userId } },
+		data: { isReady: true },
+	});
 
-    const roomUsers = await prisma.roomUser.findMany({
-        where: { roomId }
-    })
+	const roomUsers = await prisma.roomUser.findMany({
+		where: { roomId },
+	});
 
-    const allReady = roomUsers.every(u => u.isReady)
+	const allReady = roomUsers.every((u) => u.isReady);
 
-    if (allReady) {
-        const event = await prisma.jankenEvent.findFirst({
-            where: { matchId },
-            orderBy: { turnNumber: 'desc' },
-        })
+	if (allReady) {
+		const event = await prisma.jankenEvent.findFirst({
+			where: { matchId },
+			orderBy: { turnNumber: "desc" },
+		});
 
-        if (event) {
-            await startNextTurn(event.id)
-            await prisma.roomUser.updateMany({
-                where: { roomId },
-                data: { isReady: false }
-            })
-        }
-    }
+		if (event) {
+			await startNextTurn(event.id);
+			await prisma.roomUser.updateMany({
+				where: { roomId },
+				data: { isReady: false },
+			});
+		}
+	}
 }
-
 
 /**
  * マッチの現在のスコアを取得
  */
-export async function getMatchScores(matchId: string): Promise<MatchScoreWithUser[]> {
-    const scores = await prisma.matchScore.findMany({
-        where: { matchId },
-        include: {
-            user: true
-        },
-        orderBy: {
-            points: 'desc'
-        }
-    })
+export async function getMatchScores(
+	matchId: string,
+): Promise<MatchScoreWithUser[]> {
+	const scores = await prisma.matchScore.findMany({
+		where: { matchId },
+		include: {
+			user: true,
+		},
+		orderBy: {
+			points: "desc",
+		},
+	});
 
-    return scores
+	return scores;
 }
 
 /**
@@ -630,69 +653,66 @@ export async function getMatchScores(matchId: string): Promise<MatchScoreWithUse
  * - 獲得したポイントを月間ランキングに反映（世界ランキング用）
  */
 export async function finishJanken(matchId: string, roomId: string) {
-    await getAuthenticatedUser()
+	await getAuthenticatedUser();
 
-    const match = await prisma.match.findUnique({
-        where: { id: matchId },
-        include: {
-            matchScores: true // 最終スコアを取得
-        }
-    })
+	const match = await prisma.match.findUnique({
+		where: { id: matchId },
+		include: {
+			matchScores: true, // 最終スコアを取得
+		},
+	});
 
-    if (!match || match.status === 'FINISHED') return
+	if (!match || match.status === MatchStatus.FINISHED) return;
 
-    const now = new Date()
-    const year = now.getFullYear()
-    const month = now.getMonth() + 1 // 1〜12
+	const now = new Date();
+	const year = now.getFullYear();
+	const month = now.getMonth() + 1; // 1〜12
 
-    // トランザクションで一括処理
-    await prisma.$transaction(async (tx) => {
-        // 1. マッチを終了状態に更新
-        await tx.match.update({
-            where: { id: matchId },
-            data: { status: 'FINISHED' }
-        })
+	// トランザクションで一括処理
+	await prisma.$transaction(async (tx) => {
+		// 1. マッチを終了状態に更新
+		await tx.match.update({
+			where: { id: matchId },
+			data: { status: MatchStatus.FINISHED },
+		});
 
-        await tx.room.update({
-            where: { id: roomId },
-            data: { currentMatchId: null }
-        })
+		await tx.room.update({
+			where: { id: roomId },
+			data: { currentMatchId: null },
+		});
 
-        // 2. 月間ランキングとポイント履歴の更新
-        for (const score of match.matchScores) {
-            if (score.points > 0) {
-                // 月間ランキングを加算（または新規作成）
-                await tx.monthlyRanking.upsert({
-                    where: {
-                        userId_year_month: {
-                            userId: score.userId,
-                            year,
-                            month
-                        }
-                    },
-                    update: {
-                        totalPoints: { increment: score.points }
-                    },
-                    create: {
-                        userId: score.userId,
-                        year,
-                        month,
-                        totalPoints: score.points
-                    }
-                })
-
-                // 獲得履歴を記録
-                await tx.pointLog.create({
-                    data: {
-                        userId: score.userId,
-                        amount: score.points,
-                        gameType: 'NULL_HAND',
-                        reason: `MATCH_REWARD_${matchId}`
-                    }
-                })
-            }
-        }
-    })
+		// 2. 月間ランキングとポイント履歴の更新
+		await Promise.all(
+			match.matchScores
+				.filter((score) => score.points > 0)
+				.flatMap((score) => [
+					tx.monthlyRanking.upsert({
+						where: {
+							userId_year_month: {
+								userId: score.userId,
+								year,
+								month,
+							},
+						},
+						update: { totalPoints: { increment: score.points } },
+						create: {
+							userId: score.userId,
+							year,
+							month,
+							totalPoints: score.points,
+						},
+					}),
+					tx.pointLog.create({
+						data: {
+							userId: score.userId,
+							amount: score.points,
+							gameType: "NULL_HAND",
+							reason: `MATCH_REWARD_${matchId}`,
+						},
+					}),
+				]),
+		);
+	});
 }
 
 // ============================================
@@ -700,54 +720,56 @@ export async function finishJanken(matchId: string, roomId: string) {
 // ============================================
 
 export type UserRankingInfo = {
-    rank: number;
-    totalPoints: number;
-    year: number;
-    month: number;
-}
+	rank: number;
+	totalPoints: number;
+	year: number;
+	month: number;
+};
 
 /**
  * ユーザーの現在の月間ランキングと累計ポイントを取得
  */
-export async function getMonthlyRanking(userId: string): Promise<UserRankingInfo | null> {
-    const now = new Date()
-    const year = now.getFullYear()
-    const month = now.getMonth() + 1
+export async function getMonthlyRanking(
+	userId: string,
+): Promise<UserRankingInfo | null> {
+	const now = new Date();
+	const year = now.getFullYear();
+	const month = now.getMonth() + 1;
 
-    const userRanking = await prisma.monthlyRanking.findUnique({
-        where: {
-            userId_year_month: {
-                userId,
-                year,
-                month
-            }
-        }
-    })
+	const userRanking = await prisma.monthlyRanking.findUnique({
+		where: {
+			userId_year_month: {
+				userId,
+				year,
+				month,
+			},
+		},
+	});
 
-    if (!userRanking) {
-        return {
-            rank: 0,
-            totalPoints: 0,
-            year,
-            month
-        }
-    }
+	if (!userRanking) {
+		return {
+			rank: 0,
+			totalPoints: 0,
+			year,
+			month,
+		};
+	}
 
-    // 自分より高いポイントを持っている人の数を数える（+1で順位になる）
-    const higherRankingCount = await prisma.monthlyRanking.count({
-        where: {
-            year,
-            month,
-            totalPoints: {
-                gt: userRanking.totalPoints
-            }
-        }
-    })
+	// 自分より高いポイントを持っている人の数を数える（+1で順位になる）
+	const higherRankingCount = await prisma.monthlyRanking.count({
+		where: {
+			year,
+			month,
+			totalPoints: {
+				gt: userRanking.totalPoints,
+			},
+		},
+	});
 
-    return {
-        rank: higherRankingCount + 1,
-        totalPoints: userRanking.totalPoints,
-        year,
-        month
-    }
+	return {
+		rank: higherRankingCount + 1,
+		totalPoints: userRanking.totalPoints,
+		year,
+		month,
+	};
 }

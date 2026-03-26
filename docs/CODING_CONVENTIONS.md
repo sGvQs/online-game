@@ -48,3 +48,34 @@ game/ 直下は役割ディレクトリのみ:
 - ゲーム固有の定数は `src/constants/{gameName}/` に配置する（例: `src/constants/nullHandGame/`）
 - ゲーム固有のユーティリティは `src/utils/{gameName}/` に配置する（例: `src/utils/nullHandGame/`）
 - コンポーネントフォルダ内に constants.ts や utils.ts を置かない
+
+## 非ゲーム系コンポーネントのスタイル規約
+
+`auth/`, `home/`, `room/`, `ui/`, `lp/`, `common/`, `decorations/` 配下のコンポーネントも同様に styles が必須。
+
+### ファイル構成方針
+
+- **フォルダ型コンポーネント**（ゲーム系の慣例）: `componentName/index.tsx` + `componentName/styles.ts`
+- **フラット型コンポーネント**（非ゲーム系の現状）: `componentName.tsx` + `componentName.styles.ts`（コロケーション）
+
+いずれの場合も `tailwind-variants` の `tv()` でスタイルを定義し、JSX 内の className 文字列は styles からのみ参照する。
+
+### Tailwind v4 canonical class 記法
+
+以下の旧記法・非推奨記法を禁止し、canonical 記法に統一する:
+
+| 旧記法 | canonical |
+|---|---|
+| `[font-family:var(--font-dot-gothic-16)]` | `font-dot-gothic-16` |
+| `[font-family:var(--font-cherry-bomb-one)]` | `font-cherry-bomb-one` |
+| `[font-family:var(--font-rubik-puddles)]` | `font-rubik-puddles` |
+| `style={{ fontFamily: 'var(--font-xxx)' }}` | 上記 Tailwind クラスに置換 |
+| `bg-gradient-to-*` | `bg-linear-to-*` |
+| `bg-white/[0.0x]` | `bg-white/x`（例: `bg-white/[0.02]` → `bg-white/2`） |
+| `border-white/[0.0x]` | `border-white/x` |
+
+### インライン style の扱い
+
+- **禁止**: 静的な CSS 値の直接記述（例: `style={{ color: 'var(--brand-900)' }}`）
+- **禁止**: JS の hover ハンドラ（`onMouseEnter`/`onMouseLeave`）でのスタイル書き換え → Tailwind `hover:` クラスへ移行
+- **許可**: props/state 由来の動的値を CSS カスタムプロパティとして注入する場合のみ: `style={{ '--user-color': userColor } as React.CSSProperties}`

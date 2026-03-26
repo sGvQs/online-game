@@ -2,7 +2,7 @@
  * Game関連の型定義
  * Prisma schema を元に生成された型定義
  */
-import { Prisma } from '@prisma/client';
+import { Prisma } from "@prisma/client";
 
 // ============================================
 // Base model types from Prisma
@@ -20,12 +20,12 @@ export type Match = Prisma.MatchGetPayload<{}>;
 
 /** Match with ErrorEvents */
 export type MatchWithErrorEvents = Prisma.MatchGetPayload<{
-    include: { errorEvents: true }
+	include: { errorEvents: true };
 }>;
 
 /** Match with Room */
 export type MatchWithRoom = Prisma.MatchGetPayload<{
-    include: { room: true }
+	include: { room: true };
 }>;
 
 // ============================================
@@ -34,19 +34,19 @@ export type MatchWithRoom = Prisma.MatchGetPayload<{
 
 /** ErrorEvent with Match */
 export type ErrorEventWithMatch = Prisma.ErrorEventGetPayload<{
-    include: { match: true }
+	include: { match: true };
 }>;
 
 /** ErrorEvent with User (winner info) */
 export type ErrorEventWithUser = Prisma.ErrorEventGetPayload<{
-    include: { user: true }
+	include: { user: true };
 }>;
 
 /** Match with ErrorEvents including User */
 export type MatchWithErrorEventsAndUsers = Prisma.MatchGetPayload<{
-    include: {
-        errorEvents: { include: { user: true } }
-    }
+	include: {
+		errorEvents: { include: { user: true } };
+	};
 }>;
 
 // ============================================
@@ -55,10 +55,10 @@ export type MatchWithErrorEventsAndUsers = Prisma.MatchGetPayload<{
 
 /** Match progress information */
 export interface MatchProgress {
-    totalErrors: number
-    closedErrors: number
-    scores: Record<string, number>
-    events: ErrorEventWithUser[]
+	totalErrors: number;
+	closedErrors: number;
+	scores: Record<string, number>;
+	events: ErrorEventWithUser[];
 }
 
 // ============================================
@@ -79,76 +79,82 @@ export type MatchScore = Prisma.MatchScoreGetPayload<{}>;
 
 /** JankenEvent with GuestHands including User */
 export type JankenEventWithGuests = Prisma.JankenEventGetPayload<{
-    include: {
-        match: true,
-        guestHands: {
-            include: {
-                user: true
-            }
-        }
-    }
+	include: {
+		match: { include: { nullHandMatch: true } };
+		guestHands: {
+			include: {
+				user: true;
+			};
+		};
+	};
 }>;
 
 /** Match with JankenEvents */
 export type MatchWithJankenEvents = Prisma.MatchGetPayload<{
-    include: { jankenEvents: true }
+	include: { jankenEvents: true };
 }>;
 
 /** Match with Scores */
 export type MatchWithScores = Prisma.MatchGetPayload<{
-    include: {
-        matchScores: {
-            include: {
-                user: true
-            }
-        }
-    }
+	include: {
+		matchScores: {
+			include: {
+				user: true;
+			};
+		};
+	};
 }>;
 
 /** MatchScore with User */
 export type MatchScoreWithUser = Prisma.MatchScoreGetPayload<{
-    include: { user: true }
+	include: { user: true };
 }>;
 
 /** ホストの統計データ（Binary Reverseシステム用） */
 export interface HostStats {
-    reverseRate: number | null  // REVERSE率 (0-100)、null = 初プレイヤー
-    totalHostCount: number      // ホストを担当した回数
+	reverseRate: number | null; // REVERSE率 (0-100)、null = 初プレイヤー
+	totalHostCount: number; // ホストを担当した回数
 }
 
 /** ラウンド結果 */
 export interface RoundResult {
-    hostId: string
-    hostHand: HandType
-    hostChoice: HostChoice
-    winners: Array<{
-        userId: string
-        userName: string
-        hand: HandType
-    }>
-    isNullHand: boolean
-    hostWonAll: boolean
+	hostId: string;
+	hostHand: HandType;
+	hostChoice: HostChoice;
+	winners: Array<{
+		userId: string;
+		userName: string;
+		hand: HandType;
+	}>;
+	isNullHand: boolean;
+	hostWonAll: boolean;
 }
 
 /** じゃんけんのフェーズ */
-export type JankenPhase = 'TITLE' | 'DEAL' | 'CHOICE' | 'BATTLE' | 'RESULT' | 'GAME_OVER';
+export type JankenPhase =
+	| "TITLE"
+	| "DEAL"
+	| "CHOICE"
+	| "BATTLE"
+	| "RESULT"
+	| "GAME_OVER";
 
 /** 手の種類 */
 export enum HandType {
-    ROCK = 'ROCK',
-    SCISSORS = 'SCISSORS',
-    PAPER = 'PAPER',
+	ROCK = "ROCK",
+	SCISSORS = "SCISSORS",
+	PAPER = "PAPER",
 }
 
 /** ホストの選択（STAY: REALをそのまま / REVERSE: BLUFFに変更） */
-export type HostChoice = 'STAY' | 'REVERSE';
+export type HostChoice = "STAY" | "REVERSE";
 
 export type UserRanking = {
-    userId: string
-    name: string
-    wins: number
-    totalGames: number
-    winRate: number
-    points: number
-    rank: number
-}
+	userId: string;
+	name: string;
+	wins: number;
+	totalGames: number;
+	winRate: number;
+	points: number;
+	rank: number;
+};

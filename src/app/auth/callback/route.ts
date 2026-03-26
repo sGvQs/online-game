@@ -1,42 +1,49 @@
-import { createClient } from '@/server/lib/supabase/server'
-import { syncUser } from '@/server/actions'
-import { NextResponse } from 'next/server'
+import { createClient } from "@/server/lib/supabase/server";
+import { syncUser } from "@/server/actions";
+import { NextResponse } from "next/server";
 
 export async function GET(request: Request) {
-    const { searchParams, origin } = new URL(request.url)
-    const url = new URL(request.url)
-    const code = searchParams.get('code') || url.searchParams.get('code')
+	const { searchParams, origin } = new URL(request.url);
+	const url = new URL(request.url);
+	const code = searchParams.get("code") || url.searchParams.get("code");
 
-    // if "next" is in param, use it as the redirect URL
-    // セキュリティ: 相対パスのみ許可（オープンリダイレクト防止）
-    const rawNext = searchParams.get('next') ?? '/dashboard'
-    const next = rawNext.startsWith('/') && !rawNext.startsWith('//') ? rawNext : '/dashboard'
+	// if "next" is in param, use it as the redirect URL
+	// セキュリティ: 相対パスのみ許可（オープンリダイレクト防止）
+	const rawNext = searchParams.get("next") ?? "/home";
+	const next =
+		rawNext.startsWith("/") && !rawNext.startsWith("//")
+			? rawNext
+			: "/home";
 
-    if (code) {
-        const supabase = await createClient()
-        const { error, data } = await supabase.auth.exchangeCodeForSession(code)
+	if (code) {
+		const supabase = await createClient();
+		const { error, data } = await supabase.auth.exchangeCodeForSession(code);
 
-        if (!error && data?.user) {
-            // Server Action経由でユーザー同期
-            const supabaseUid = data.user.id
-            const email = data.user.email
-            const name = data.user.user_metadata.full_name || data.user.user_metadata.name || email?.split('@')[0] || 'Unknown'
+		if (!error && data?.user) {
+			// Server Action経由でユーザー同期
+			const supabaseUid = data.user.id;
+			const email = data.user.email;
+			const name =
+				data.user.user_metadata.full_name ||
+				data.user.user_metadata.name ||
+				email?.split("@")[0] ||
+				"Unknown";
 
-            await syncUser({ supabaseUid, email, name })
+			await syncUser({ supabaseUid, email, name });
 
-            const forwardedHost = request.headers.get('x-forwarded-host') // original origin before load balancer
-            const isLocalEnv = process.env.NODE_ENV === 'development'
-            if (isLocalEnv) {
-                // we can be sure that there is no load balancer in between, so no need to watch for X-Forwarded-Host
-                return NextResponse.redirect(`${origin}${next}`)
-            } else if (forwardedHost) {
-                return NextResponse.redirect(`https://${forwardedHost}${next}`)
-            } else {
-                return NextResponse.redirect(`${origin}${next}`)
-            }
-        }
-    }
+			const forwardedHost = request.headers.get("x-forwarded-host"); // original origin before load balancer
+			const isLocalEnv = process.env.NODE_ENV === "development";
+			if (isLocalEnv) {
+				// we can be sure that there is no load balancer in between, so no need to watch for X-Forwarded-Host
+				return NextResponse.redirect(`${origin}${next}`);
+			} else if (forwardedHost) {
+				return NextResponse.redirect(`https://${forwardedHost}${next}`);
+			} else {
+				return NextResponse.redirect(`${origin}${next}`);
+			}
+		}
+	}
 
-    // return the user to an error page with instructions
-    return NextResponse.redirect(`${origin}/auth/auth-code-error`)
+	// return the user to an error page with instructions
+	return NextResponse.redirect(`${origin}/auth/auth-code-error`);
 }

@@ -1,80 +1,201 @@
-'use client'
+"use client";
 
-import { useStarShield } from '@/hooks/useStarShield'
-import type { Difficulty, GameResult, GameStats } from '@/types/starShieldGame'
-import { ASTEROID_HP, STAR_HP } from '@/constants/starShieldGame/gameConfig'
-import { ShooterView } from '../playing/shooterView'
-import { TypistView } from '../playing/typistView'
+import { useStarShield } from "@/hooks/useStarShield";
+import { motion } from "framer-motion";
+import type {
+	Difficulty,
+	GameResult,
+	GameStats,
+	NormalAttackLevel,
+} from "@/types/starShieldGame";
+import type { TechniqueId } from "@/constants/starShieldGame/techniques";
+import type { SpecialAttackChoice } from "@/utils/starShieldGame";
+import type { SpecialAttackLevel } from "@/constants/starShieldGame/gameConfig";
+import {
+	ASTEROID_HP,
+	LEVEL_STAR_HP,
+	getAbyssBossHp,
+} from "@/constants/starShieldGame/gameConfig";
+import { LEVEL_HEAL_RECOVERY } from "@/constants/starShieldGame/skillConfig";
+import { ShooterView } from "../playing/shooterView";
+import { Typography } from "@/components/ui/typography";
+import { TypistView } from "../playing/typistView";
+import { StarHpBar } from "../playing/typistView/StarHpBar";
 
 interface GameScreenProps {
-    matchId: string
-    startedAt: number
-    shooterId: string
-    difficulty: Difficulty
-    currentUserId: string
-    onGameEnd: (result: GameResult, stats: GameStats) => void
-    playersTotalPoints: number
+	matchId: string;
+	startedAt: number;
+	shooterId: string;
+	difficulty: Difficulty;
+	currentUserId: string;
+	onGameEnd: (result: GameResult, stats: GameStats) => void;
+	typistNormalAttack?: TechniqueId | null;
+	typistSpecialAttack?: SpecialAttackChoice;
+	typistSpecialAttackLevel?: SpecialAttackLevel;
+	typistHealLevel?: number | null;
+	starHpLevel?: number;
+	level?: NormalAttackLevel;
 }
 
 function TimerDisplay({ timer }: { timer: number }) {
-    const minutes = Math.floor(timer / 60)
-    const seconds = timer % 60
-    const isUrgent = timer <= 10
-    return (
-        <span className={isUrgent ? 'text-red-400 animate-pulse' : 'text-white'}>
-            {String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')}
-        </span>
-    )
+	const minutes = Math.floor(timer / 60);
+	const seconds = timer % 60;
+	const isUrgent = timer <= 10;
+	return (
+		<span className={isUrgent ? "text-red-400 animate-pulse" : "text-white"}>
+			{String(minutes).padStart(2, "0")}:{String(seconds).padStart(2, "0")}
+		</span>
+	);
 }
 
-export function GameScreen({ matchId, startedAt, shooterId, difficulty, currentUserId, onGameEnd, playersTotalPoints }: GameScreenProps) {
-    const isShooter = shooterId === currentUserId
-    const { asteroids, bullets, timer, score, starHp, aimRef, onMouseMove, dialogue, typistFireCount, contactExplosion, completeContactFail } =
-        useStarShield({ matchId, startedAt, isShooter, difficulty, currentUserId, onGameEnd, playersTotalPoints })
+export function GameScreen({
+	matchId,
+	startedAt,
+	shooterId,
+	difficulty,
+	currentUserId,
+	onGameEnd,
+	typistNormalAttack,
+	typistSpecialAttack = "spread",
+	typistSpecialAttackLevel = 1,
+	typistHealLevel = null,
+	starHpLevel,
+	level = 1,
+}: GameScreenProps) {
+	const isShooter = shooterId === currentUserId;
+	const {
+		asteroids,
+		bullets,
+		timer,
+		score,
+		starHp,
+		aimRef,
+		onMouseMove,
+		dialogue,
+		typistFireCount,
+		contactExplosion,
+		completeContactFail,
+		chainHits,
+		clearChainHits,
+		waveNumber,
+	} = useStarShield({
+		matchId,
+		startedAt,
+		isShooter,
+		difficulty,
+		currentUserId,
+		onGameEnd,
+		selectedNormalAttack: typistNormalAttack,
+		selectedSpecialAttack: typistSpecialAttack,
+		selectedSpecialAttackLevel: typistSpecialAttackLevel,
+		selectedHealLevel: typistHealLevel,
+		starHpLevel,
+		level,
+		autoAimNearest: process.env.NODE_ENV === "development",
+	});
+	const effectiveStarHpLevel =
+		starHpLevel != null && starHpLevel >= 1 && starHpLevel <= 5
+			? (starHpLevel as 1 | 2 | 3 | 4 | 5)
+			: 1;
+	const maxStarHp = LEVEL_STAR_HP[effectiveStarHpLevel];
 
-    return (
-        <div className="relative min-h-screen overflow-hidden">
-            {isShooter ? (
-                <ShooterView
-                    asteroids={asteroids}
-                    bullets={bullets}
-                    aimRef={aimRef}
-                    onMouseMove={onMouseMove}
-                    maxHp={ASTEROID_HP[difficulty]}
-                    contactExplosion={contactExplosion}
-                    onContactExplosionComplete={completeContactFail}
-                />
-            ) : (
-                <TypistView
-                    dialogue={dialogue}
-                    score={score}
-                    starHp={starHp}
-                    maxStarHp={STAR_HP[difficulty]}
-                    typistFireCount={typistFireCount}
-                />
-            )}
+	const healRecoveryText =
+		typistHealLevel != null && typistHealLevel >= 1
+			? typistHealLevel >= 5
+				? "全回復"
+				: `+${LEVEL_HEAL_RECOVERY[typistHealLevel as 1 | 2 | 3 | 4]}`
+			: null;
 
-            <div className="absolute top-0 left-0 right-0 z-30 pointer-events-none">
-                <div className="flex items-center justify-between px-6 py-3 backdrop-blur-sm border-b bg-[rgba(30,41,59,0.4)] border-[rgba(129,140,248,0.2)]">
-                    <div className="flex items-center gap-2">
-                        <span className="text-brand-500/60 text-xs tracking-widest">TIME</span>
-                        <span className="text-xl font-bold text-white">
-                            <TimerDisplay timer={timer} />
-                        </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        {isShooter && (
-                            <>
-                                <span className="text-brand-500 font-bold text-xl">{score.destroyed}</span>
-                                <span className="text-white/30 text-sm">/</span>
-                                <span className="text-white/50 text-sm">{score.spawned}</span>
-                                <span className="text-white/30 text-xs ml-1 tracking-widest">DESTROYED</span>
-                            </>
-                        )}
-                    </div>
-                    <div className="text-xs tracking-widest text-brand-500/50">{difficulty}</div>
-                </div>
-            </div>
-        </div>
-    )
+	return (
+		<div className="relative min-h-screen overflow-hidden">
+			{isShooter ? (
+				<ShooterView
+					asteroids={asteroids}
+					bullets={bullets}
+					aimRef={aimRef}
+					onMouseMove={onMouseMove}
+					maxHp={ASTEROID_HP[difficulty]}
+					contactExplosion={contactExplosion}
+					onContactExplosionComplete={completeContactFail}
+					chainHits={chainHits}
+					onChainHitsComplete={clearChainHits}
+				/>
+			) : (
+				<TypistView
+					dialogue={dialogue}
+					score={score}
+					starHp={starHp}
+					maxStarHp={maxStarHp}
+					typistFireCount={typistFireCount}
+					selectedNormalAttack={typistNormalAttack}
+					healLevel={typistHealLevel ?? undefined}
+					healRecoveryText={healRecoveryText}
+				/>
+			)}
+
+			<div className="absolute top-0 left-0 right-0 z-30 pointer-events-none">
+				<div className="flex items-center justify-between px-6 py-3 backdrop-blur-sm border-b bg-[rgba(30,41,59,0.4)] border-[rgba(129,140,248,0.2)]">
+					<div className="flex items-center gap-2 w-20">
+						{difficulty === "ABYSS" ? (
+							<>
+								<Typography
+									variant="caption"
+									as="span"
+									className="text-purple-400/60 tracking-widest"
+								>
+									WAVE
+								</Typography>
+								<Typography variant="h3" as="span" className="text-purple-300">
+									{waveNumber}
+								</Typography>
+							</>
+						) : (
+							<>
+								<Typography
+									variant="caption"
+									as="span"
+									className="text-brand-500/60 tracking-widest"
+								>
+									TIME
+								</Typography>
+								<Typography variant="h3" as="span" className="text-white">
+									<TimerDisplay timer={timer} />
+								</Typography>
+							</>
+						)}
+					</div>
+
+					{isShooter && <StarHpBar starHp={starHp} maxStarHp={maxStarHp} />}
+					<div className="text-xs tracking-widest text-brand-500/50">
+						{difficulty}
+					</div>
+				</div>
+				{difficulty === "ABYSS" &&
+					(() => {
+						const boss = asteroids.find((a) => a.isBoss && !a.destroyedAt);
+						if (!boss) return null;
+						const bossMaxHp = getAbyssBossHp(waveNumber);
+						const pct = Math.max(0, (boss.hp / bossMaxHp) * 100);
+						return (
+							<div className="px-6 py-2 bg-black/40 border-b border-purple-500/30 flex flex-col gap-1">
+								<div className="flex items-center justify-between text-xs">
+									<span className="text-purple-300 font-bold tracking-widest animate-pulse">
+										⚠ 巨大隕石接近
+									</span>
+									<span className="text-purple-200/70 tabular-nums">
+										{boss.hp} / {bossMaxHp}
+									</span>
+								</div>
+								<div className="h-2 rounded-full bg-white/10 overflow-hidden">
+									<div
+										className="h-full rounded-full bg-linear-to-r from-purple-800 to-purple-400 transition-all duration-300"
+										style={{ width: `${pct}%` }}
+									/>
+								</div>
+							</div>
+						);
+					})()}
+			</div>
+		</div>
+	);
 }

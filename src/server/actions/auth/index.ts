@@ -1,2 +1,2 @@
-export { syncUser } from './syncUser'
-export { signOut } from './signOut'
+export { syncUser } from "./syncUser";
+export { signOut } from "./signOut";
