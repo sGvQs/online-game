@@ -28,7 +28,7 @@ export function HomeActions() {
                 }}
             >
                 <Typography variant="label" font="cherry-bomb-one" className="font-bold">
-                    {isPending ? "..." : "ログアウト"}
+                    ログアウト
                 </Typography>
             </Button>
             <Button
@@ -48,28 +48,14 @@ export function HomeActions() {
             <Button
                 variant="primary"
                 size="lg"
-                onClick={async () => {
-                    showLoading();
-                    try {
-                        router.push("/room/search");
-                    } finally {
-                        hideLoading();
-                    }
-                }}
+                onClick={() => router.push("/room/search")}
             >
                 <Typography variant="label" font="cherry-bomb-one" className="font-bold">ルームをさがす</Typography>
             </Button>
             <Button
                 variant="outline"
                 size="lg"
-                onClick={async () => {
-                    showLoading();
-                    try {
-                        router.push("/ranking");
-                    } finally {
-                        hideLoading();
-                    }
-                }}
+                onClick={() => router.push("/ranking")}
             >
                 <Typography variant="label" font="cherry-bomb-one" className="font-bold">ランキング</Typography>
             </Button>

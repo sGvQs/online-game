@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect, useTransition } from "react";
+import { useState, useEffect } from "react";
+import { useLoading } from "@/lib/loading-context";
 import Image from "next/image";
 import { Users } from "lucide-react";
 import { gameCarouselSection } from "./styles";
@@ -69,9 +70,9 @@ export function GameCarouselSection({
 	isHost,
 }: GameCarouselSectionProps) {
 	const styles = gameCarouselSection();
+	const { showLoading, hideLoading } = useLoading();
 	const [activeIndex, setActiveIndex] = useState(0);
 	const [selectedRoleIndex, setSelectedRoleIndex] = useState(0);
-	const [isPending, startTransition] = useTransition();
 
 	useEffect(() => {
 		setSelectedRoleIndex(0);
@@ -87,7 +88,7 @@ export function GameCarouselSection({
 		return "left";
 	};
 
-	const handleGameStart = () => {
+	const handleGameStart = async () => {
 		const game = GAMES[activeIndex];
 		if (
 			!isPlayerCountValid(
@@ -99,9 +100,12 @@ export function GameCarouselSection({
 			setShowGameStartError(true);
 			return;
 		}
-		startTransition(async () => {
+		showLoading();
+		try {
 			await selectGame(roomId, game.type);
-		});
+		} finally {
+			hideLoading();
+		}
 	};
 
 	const handleCardClick = (i: number) => {
@@ -200,10 +204,9 @@ export function GameCarouselSection({
 					<Button
 						variant="primary"
 						onClick={handleGameStart}
-						disabled={isPending}
 						className="font-cherry-bomb-one"
 					>
-						{isPending ? "..." : `はじめる`}
+						はじめる
 					</Button>
 				)}
 			</div>
