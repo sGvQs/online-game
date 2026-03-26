@@ -45,6 +45,7 @@ export const FONT_VARIANTS = {
     "rubik-puddles": ["display"],
     "cherry-bomb-one": ["h1", "h2", "h3"],
     "dot-gothic-16": ["h4", "body", "small", "label", "caption"],
+    honk: [],
     sans: [],
 } as const satisfies Record<TypographyFont, readonly TypographyVariant[]>;
 
