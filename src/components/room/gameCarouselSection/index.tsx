@@ -27,11 +27,12 @@ const GAMES = [
 		type: "error-hunter",
 		title: "ERROR HUNTER",
 		icon: "/svg/object/old-pc.svg",
-		desc: "バグを見つけて潰せ！",
+		desc: "バグを最速で潰せ！",
 		mode: "competitive",
 		shortDesc:
-			"エラーダイアログが突然出現！最速で「×」ボタンを押した人が勝利。フライングは無効。",
+			"エラーダイアログが突然出現！最速でエラーをたくさん潰した人が勝ち！",
 		roles: null,
+		videos: ["/mp4/error-hunter.mp4"] as const,
 	},
 	{
 		type: "null-hand",
@@ -40,17 +41,18 @@ const GAMES = [
 		desc: "心理戦で相手を欺け",
 		mode: "competitive",
 		shortDesc:
-			"ホストは裏で手を選択。ゲストはその心理を読んで勝て。統計情報を活かせ。",
+			"ホストは裏で手を選択。ゲストはその心理を読んで勝て。その確率本当に信じていいのかな？",
 		roles: ["HOST", "GUEST"] as const,
+		videos: ["/mp4/null-hand-host.mp4", "/mp4/null-hand-guest.mp4"] as const,
 	},
 	{
 		type: "star-shield",
 		title: "STAR SHIELD",
 		icon: "/svg/object/target-circle.svg",
-		desc: "90秒生き延びて星を守れ",
+		desc: "90秒間星を守りきれ！",
 		mode: "cooperative",
 		shortDesc:
-			"タイピスト&シューターの2人協力。タイピングで弾を撃ち、90秒間星を守り切れ！",
+			"タイピングで弾を撃ち、シューティングで狙い撃ち、90秒間星を守り切れ！",
 		roles: ["SHOOTER", "TYPIST"] as const,
 		videos: ["/mp4/shooting.mp4", "/mp4/typing.mp4"] as const,
 	},
@@ -189,24 +191,15 @@ export function GameCarouselSection({
 						))}
 					</div>
 				)}
-				{"videos" in GAMES[activeIndex] ? (
-					<video
-						key={GAMES[activeIndex].videos[selectedRoleIndex]}
-						src={GAMES[activeIndex].videos[selectedRoleIndex]}
-						autoPlay
-						loop
-						muted
-						playsInline
-						className="w-full h-full object-cover"
-					/>
-				) : (
-					<Image
-						src={GAMES[activeIndex].icon}
-						alt={GAMES[activeIndex].title}
-						fill
-						className="object-contain p-6"
-					/>
-				)}
+				<video
+					key={GAMES[activeIndex].videos[selectedRoleIndex]}
+					src={GAMES[activeIndex].videos[selectedRoleIndex]}
+					autoPlay
+					loop
+					muted
+					playsInline
+					className="w-full h-full object-cover"
+				/>
 			</div>
 
 			<Typography variant="small" font="dot-gothic-16" className={styles.ruleDesc()}>
