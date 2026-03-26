@@ -78,10 +78,15 @@ export function GameCarouselSection({
 	const { showLoading, hideLoading } = useLoading();
 	const [activeIndex, setActiveIndex] = useState(0);
 	const [selectedRoleIndex, setSelectedRoleIndex] = useState(0);
+	const [isVideoLoading, setIsVideoLoading] = useState(true);
 
 	useEffect(() => {
 		setSelectedRoleIndex(0);
 	}, [activeIndex]);
+
+	useEffect(() => {
+		setIsVideoLoading(true);
+	}, [activeIndex, selectedRoleIndex]);
 	const [showGameStartError, setShowGameStartError] = useState(false);
 	const [gameStartErrorType, setGameStartErrorType] = useState<string>("");
 	const [showHostOnlyModal, setShowHostOnlyModal] = useState(false);
@@ -199,7 +204,13 @@ export function GameCarouselSection({
 					muted
 					playsInline
 					className="w-full h-full object-cover"
+					onCanPlay={() => setIsVideoLoading(false)}
 				/>
+				{isVideoLoading && (
+					<div className="absolute inset-0 flex items-center justify-center bg-black/40">
+						<div className="w-8 h-8 rounded-full border-2 border-white/20 border-t-white animate-spin" />
+					</div>
+				)}
 			</div>
 
 			<Typography variant="small" font="dot-gothic-16" className={styles.ruleDesc()}>
