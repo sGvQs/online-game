@@ -11,7 +11,7 @@ export const gameCarouselSection = tv({
 			"[transform-style:preserve-3d]",
 		],
 		cardCenter:
-			"scale-100 opacity-100 z-20 [transform:rotateY(0deg)_translateX(0)]",
+			"scale-100 opacity-100 z-20 [transform:rotateY(0deg)_translateX(0)] hover:scale-130",
 		cardLeft:
 			"scale-75 opacity-50 z-10 [transform:rotateY(20deg)_translateX(-80%)]",
 		cardRight:
