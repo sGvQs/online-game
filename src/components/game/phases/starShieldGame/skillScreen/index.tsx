@@ -32,6 +32,9 @@ import { HealLoadoutPreview } from "./loadout/HealLoadoutPreview";
 import { LoadoutAnimPreview } from "./preview/LoadoutAnimPreview";
 import { SpecialAttackLoadoutPreview } from "./preview/SpecialAttackLoadoutPreview";
 import { SkillPreviewModal } from "./modal/SkillPreviewModal";
+import { StarShieldTitle } from "@/components/game/common/starShield/starShieldTitle";
+import { Typography } from "@/components/ui/typography";
+import { button } from "@/components/ui/button/styles";
 
 // ============================================================
 // 定数
@@ -172,27 +175,18 @@ export function StarShieldSkill({
 			<ProtectedStar />
 			<AuroraGlow width={800} height={400} opacity={0.2} blur={60} />
 
+
 			<div className="relative z-10 w-full max-w-2xl mx-auto px-4 pt-8 pb-20 flex flex-col gap-5">
+				<StarShieldTitle size="md" />
 				{/* ヘッダー */}
 				<motion.div
 					initial={{ opacity: 0, y: -16 }}
 					animate={{ opacity: 1, y: 0 }}
-					className="flex items-center justify-between"
+					className="flex items-center justify-center gap-4 flex-col"
 				>
-					<div>
-						<h1 className="text-2xl font-black font-dot-gothic-16 bg-linear-to-br from-purple-400 to-pink-400 bg-clip-text text-transparent [-webkit-background-clip:text] [-webkit-text-fill-color:transparent]">
-							SKILL
-						</h1>
-						<p className="text-white/35 text-xs mt-0.5 font-dot-gothic-16">
-							スキルを強化して星を守る力を高めよう
-						</p>
-					</div>
-					<Link
-						href={`/game/${roomId}/star-shield`}
-						className="px-4 py-2 rounded-xl bg-white/10 border border-white/20 text-white/80 text-sm hover:bg-white/15 transition-colors font-dot-gothic-16"
-					>
-						← もどる
-					</Link>
+					<Typography variant="h2" font="cherry-bomb-one" className="text-white">
+					スキルショップ
+					</Typography>
 				</motion.div>
 
 				{/* 所持 typing 数 */}
@@ -200,20 +194,30 @@ export function StarShieldSkill({
 					initial={{ opacity: 0, y: 8 }}
 					animate={{ opacity: 1, y: 0 }}
 					transition={{ delay: 0.05 }}
-					className="rounded-2xl px-5 py-4 bg-white/3 border border-white/8 flex items-center justify-between"
+					className="flex items-center justify-center gap-4"
 				>
-					<div className="flex items-center gap-4">
-						<Image
-							src={ICONS.TYPIST}
-							alt="Typing"
-							width={36}
-							height={36}
-							className="select-none"
-						/>
-						<p className="text-3xl font-bold text-white tabular-nums">
+					<div className="rounded-2xl px-4 py-2 bg-white/3 border border-white/8 w-full">
+						<div className="flex items-center gap-4">
+							<Image
+								src={ICONS.TYPIST}
+								alt="Typing"
+								width={24}
+								height={24}
+								className="select-none"
+							/>
+							<Typography variant="h2" font="dot-gothic-16" className="text-yellow-400 font-bold">
 							{typingCount.toLocaleString()}
-						</p>
+							</Typography>
+						</div>
 					</div>
+					<Link
+						href={`/game/${roomId}/star-shield`}
+						className={button({ variant: "success", size: "lg" })}
+					>
+						<Typography variant="label" font="cherry-bomb-one" className="text-white whitespace-nowrap">
+							タイトルにもどる
+						</Typography>
+					</Link>
 				</motion.div>
 
 				{error && (
