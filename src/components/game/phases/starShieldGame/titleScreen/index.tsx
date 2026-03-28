@@ -115,89 +115,30 @@ export function TitleScreen({
 							transition={{ duration: 0.8, delay: 0.4 }}
 						>
 							<Button
-								screen="star-shield"
-								variant={"primary"}
-								size="lg"
+								variant="cyan"
 								onClick={() => !isReady && onToggleReady()}
 								disabled={isReady}
-								className="w-full justify-start"
+								className="w-full"
 							>
-								{isReady ? (
-									<>
-										<Image
-											src={ICONS.READY}
-											alt="icon ready"
-											width={40}
-											height={40}
-											className="mr-2"
-										/>
-										<span>READY</span>
-									</>
-								) : (
-									<>
-										<Image
-											src={ICONS.NOT_READY}
-											alt="icon not ready"
-											width={40}
-											height={40}
-											className="mr-2"
-										/>
-										<span>READY</span>
-									</>
-								)}
+								READY
 							</Button>
 							{isHost && (
 								<Button
-									screen="star-shield"
 									variant={canStart ? "primary" : "solid"}
-									size="lg"
 									onClick={() => canStart && onStartGame()}
 									disabled={!canStart}
-									className="w-full justify-start"
+									className="w-full"
 								>
-									{canStart ? (
-										<>
-											<Image
-												src={ICONS.START}
-												alt="icon start"
-												width={40}
-												height={40}
-												className="mr-2"
-											/>
-											<span>START</span>
-											<span className="ml-auto">{readyCount}/{totalUsers}</span>
-										</>
-									) : (
-										<>
-											<Image
-												src={ICONS.NOT_START}
-												alt="icon not start"
-												width={40}
-												height={40}
-												className="mr-2"
-											/>
-											<span>START</span>
-											<span className="ml-auto">{readyCount}/{totalUsers}</span>
-										</>
-									)}
+									START {readyCount}/{totalUsers}
 								</Button>
 							)}
 							{isHost && (
 								<Button
-									screen="star-shield"
 									variant="success"
-									size="lg"
 									onClick={onExit}
-									className="w-full justify-start"
+									className="w-full"
 								>
-									<Image
-										src={ICONS.EXIT}
-										alt="arrow right"
-										width={40}
-										height={40}
-										className="mr-2"
-									/>
-									<span>EXIT</span>
+									EXIT
 								</Button>
 							)}
 							<Link
@@ -209,16 +150,9 @@ export function TitleScreen({
 										router.push(`/game/${roomId}/star-shield/skill`);
 									}
 								}}
-								className="flex w-full items-center justify-start gap-2 py-3 px-6 rounded-2xl font-bold transition-all font-cherry-bomb-one text-left bg-amber-600/30 border-2 border-amber-500/50 text-amber-200 hover:bg-amber-500/40 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+								className="inline-flex w-full items-center justify-center text-sm px-4 py-2 rounded-lg font-bold transition-all duration-200 bg-amber-500/90 text-white border border-amber-400/50 shadow-[0_0_15px_rgba(245,158,11,0.3)] hover:shadow-[0_0_25px_rgba(245,158,11,0.5)] hover:scale-105 active:scale-95"
 							>
-								<Image
-									src={ICONS.SKILL}
-									alt="icon skill"
-									width={40}
-									height={40}
-									className="mr-2"
-								/>
-								<span>SKILL</span>
+								SKILL
 							</Link>
 						</motion.div>
 					</div>

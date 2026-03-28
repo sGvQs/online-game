@@ -360,20 +360,11 @@ export function ResultScreen({
 					className="mt-6"
 				>
                     <Button
-                        screen="star-shield"
                         variant="success"
-                        size="lg"
                         onClick={onBackToTitle}
-                        className="w-full justify-start"
+                        className="w-full"
                     >
-                        <Image
-                            src={ICONS.EXIT}
-                            alt="arrow right"
-                            width={40}
-                            height={40}
-                            className="mr-2"
-                        />
-                        <span>BACK TO TITLE</span>
+                        BACK TO TITLE
                     </Button>
 				</motion.div>
 			</motion.div>
