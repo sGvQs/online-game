@@ -9,11 +9,22 @@ import {
 import { ICONS } from "@/constants/starShieldGame/constants";
 import {
 	LEVEL_BULLET_COUNT,
-	PINK_ROCKET_BURST_COUNT,
+	LEVEL_PINK_COUNT,
+	PINK_CURVE_BULGE_FRACTION,
+	PINK_CURVE_PEAK_T,
+	PINK_ROCKET_SPREAD_HALF_DEG,
 	LEVEL_SPREAD_DEG,
 	LEVEL_PURPLE_SIZE,
 	LEVEL_YELLOW_DAMAGE,
 } from "@/constants/starShieldGame/gameConfig";
+
+type PinkBezier = {
+	p0: { x: number; y: number };
+	p1: { x: number; y: number };
+	p2: { x: number; y: number };
+	t0: number;
+	durationMs: number;
+};
 
 type Bullet = {
 	x: number;
@@ -23,6 +34,7 @@ type Bullet = {
 	color: string;
 	alpha: number;
 	radius: number;
+	pinkBezier?: PinkBezier;
 };
 
 const EFFECT_LABEL: Partial<Record<TechniqueId, string>> = {
@@ -30,7 +42,7 @@ const EFFECT_LABEL: Partial<Record<TechniqueId, string>> = {
 	yellow_beam: "ビーム（30連射）",
 	purple: "貫通",
 	orange: "一段連鎖",
-	pink: "追尾ロケット（5発）",
+	pink: "丸軌道ベジェ（レベルで 9〜144 発・均等扇）",
 };
 
 export function LoadoutAnimPreview({
@@ -55,7 +67,7 @@ export function LoadoutAnimPreview({
 			techniqueId === "red"
 				? LEVEL_BULLET_COUNT[lvl]
 				: techniqueId === "pink"
-					? PINK_ROCKET_BURST_COUNT
+					? LEVEL_PINK_COUNT[lvl]
 					: 1;
 		const spreadDeg = techniqueId === "red" ? LEVEL_SPREAD_DEG[lvl] : 0;
 		const purpleRadius =
@@ -73,24 +85,53 @@ export function LoadoutAnimPreview({
 		let lastFire = -FIRE_INTERVAL;
 		let animId: number;
 
-		function fire() {
+		function fire(nowMs: number) {
 			if (techniqueId === "pink") {
-				const startX = DINO_X + 18;
-				const spreadHalfDeg = 15;
-				const step =
-					bulletCount > 1 ? (2 * spreadHalfDeg) / (bulletCount - 1) : 0;
+				const p0x = DINO_X + 18;
+				const p0y = ORIGIN_Y;
+				const p2x = W - 24;
+				const p2y = ORIGIN_Y;
+				let chordLen = Math.hypot(p2x - p0x, p2y - p0y);
+				const ux =
+					chordLen < 1e-6 ? 1 : (p2x - p0x) / chordLen;
+				const uy =
+					chordLen < 1e-6 ? 0 : (p2y - p0y) / chordLen;
+				if (chordLen < 1e-6) chordLen = 1;
+				const nx = -uy;
+				const ny = ux;
+				const spreadHalfRad =
+					(PINK_ROCKET_SPREAD_HALF_DEG * Math.PI) / 180;
+				const bMax =
+					PINK_CURVE_BULGE_FRACTION > 0
+						? chordLen *
+							Math.tan(spreadHalfRad) *
+							PINK_CURVE_BULGE_FRACTION
+						: 0;
+				const tPeak = PINK_CURVE_PEAK_T;
+				const denom = Math.max(1e-9, 2 * (1 - tPeak) * tPeak);
+				const durationMs = 1000;
 				for (let i = 0; i < bulletCount; i++) {
-					const deg = bulletCount > 1 ? -spreadHalfDeg + i * step : 0;
-					const theta = (deg * Math.PI) / 180;
-					const speed = 2.8;
+					const s = bulletCount > 1 ? (2 * i) / (bulletCount - 1) - 1 : 0;
+					const p1Off = (s * bMax) / denom;
+					const p1 = {
+						x: 0.5 * (p0x + p2x) + nx * p1Off,
+						y: 0.5 * (p0y + p2y) + ny * p1Off,
+					};
 					bullets.push({
-						x: startX,
-						y: ORIGIN_Y,
-						vx: speed * Math.cos(theta),
-						vy: speed * Math.sin(theta),
+						x: p0x,
+						y: p0y,
+						vx: 0,
+						vy: 0,
 						color: tech.color,
 						alpha: 0.9,
 						radius: 2.2,
+						pinkBezier: {
+							p0: { x: p0x, y: p0y },
+							p1,
+							p2: { x: p2x, y: p2y },
+							t0: nowMs,
+							durationMs,
+						},
 					});
 				}
 				return;
@@ -149,7 +190,7 @@ export function LoadoutAnimPreview({
 			c.clearRect(0, 0, W, H);
 
 			if (now - lastFire >= FIRE_INTERVAL) {
-				fire();
+				fire(now);
 				lastFire = now;
 			}
 
@@ -172,11 +213,25 @@ export function LoadoutAnimPreview({
 
 			for (let i = bullets.length - 1; i >= 0; i--) {
 				const b = bullets[i]!;
-				if (techniqueId === "pink") {
-					b.vy += 0.012 * (ORIGIN_Y - b.y);
+				if (b.pinkBezier) {
+					const pb = b.pinkBezier;
+					const te = Math.min(
+						1,
+						Math.max(0, (now - pb.t0) / pb.durationMs),
+					);
+					const u = 1 - te;
+					b.x =
+						u * u * pb.p0.x +
+						2 * u * te * pb.p1.x +
+						te * te * pb.p2.x;
+					b.y =
+						u * u * pb.p0.y +
+						2 * u * te * pb.p1.y +
+						te * te * pb.p2.y;
+				} else {
+					b.x += b.vx;
+					b.y += b.vy;
 				}
-				b.x += b.vx;
-				b.y += b.vy;
 				b.alpha -= techniqueId === "yellow_beam" ? 0.028 : 0.015;
 
 				if (b.alpha <= 0 || b.x > W + 12 || b.y < -12 || b.y > H + 12) {

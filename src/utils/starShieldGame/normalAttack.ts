@@ -13,10 +13,10 @@ import {
 	BULLET_SPAWN_OFFSET_Y,
 	LEVEL_BULLET_COUNT,
 	LEVEL_ORANGE_DAMAGE,
-	PINK_ROCKET_BURST_COUNT,
-	PINK_ROCKET_CONTROL_LEN_RATIO,
+	LEVEL_PINK_COUNT,
+	PINK_CURVE_BULGE_FRACTION,
+	PINK_CURVE_PEAK_T,
 	PINK_ROCKET_SPREAD_HALF_DEG,
-	PINK_ROCKET_STAGGER_MS,
 	LEVEL_PURPLE_SIZE,
 	LEVEL_SPREAD_DEG,
 	LEVEL_YELLOW_DAMAGE,
@@ -110,7 +110,7 @@ export function createDefaultSpreadBullets(params: {
 
 /**
  * 通常攻撃の弾を生成する（純粋関数）
- * pink のベジェ軌道（照準へ向かうロケット）用に targetX, targetY（照準座標）を渡すこと
+ * pink は照準が有効なときのみ（恐竜口元共通出発・二次ベジェで照準へ）。targetX, targetY 必須
  */
 export function createNormalAttackBullets(params: {
 	tech: TechniqueConfig | null;
@@ -123,17 +123,17 @@ export function createNormalAttackBullets(params: {
 	targetX?: number;
 	targetY?: number;
 }): Bullet[] {
-	const { tech, dirX, dirY, level, now, targetX, targetY } = params;
+	const { tech, dirX, dirY, level, now, targetX, targetY, centerAngle } =
+		params;
 
-	// ピンク: 照準へ向かうロケット。同一終点・30° 扇を弾数で等分割・10ms ずつ発射（弾数は暫定固定）
+	// ピンク: 口元共通 p0、二次ベジェで照準 p2。PINK_CURVE_PEAK_T で横膨らみピーク、p1 は解析式で決定
 	if (
 		tech &&
 		(tech.id as TechniqueId) === "pink" &&
 		targetX != null &&
 		targetY != null
 	) {
-		const count = PINK_ROCKET_BURST_COUNT;
-		const result: Bullet[] = [];
+		const count = LEVEL_PINK_COUNT[level];
 		const p0 = {
 			x: DINO_X + dirX * BULLET_SPAWN_OFFSET_X,
 			y: DINO_Y + dirY * BULLET_SPAWN_OFFSET_Y,
@@ -152,32 +152,35 @@ export function createNormalAttackBullets(params: {
 			ux = chordX / chordLen;
 			uy = chordY / chordLen;
 		}
+		const nx = -uy;
+		const ny = ux;
 		const spreadHalfRad = (PINK_ROCKET_SPREAD_HALF_DEG * Math.PI) / 180;
-		const step =
-			count > 1 ? (2 * spreadHalfRad) / (count - 1) : 0;
-		const controlLen = chordLen * PINK_ROCKET_CONTROL_LEN_RATIO;
-
+		const bMax =
+			PINK_CURVE_BULGE_FRACTION > 0 && chordLen >= 1e-6
+				? chordLen *
+					Math.tan(spreadHalfRad) *
+					PINK_CURVE_BULGE_FRACTION
+				: 0;
+		const tPeak = PINK_CURVE_PEAK_T;
+		const denom = Math.max(1e-9, 2 * (1 - tPeak) * tPeak);
+		const speedMult = tech.speed ?? 1;
+		const curveDurationMs =
+			(chordLen * 1.3) / (BULLET_SPEED * speedMult);
+		const result: Bullet[] = [];
 		for (let i = 0; i < count; i++) {
-			const theta = count > 1 ? -spreadHalfRad + i * step : 0;
-			const cos = Math.cos(theta);
-			const sin = Math.sin(theta);
-			const dix = ux * cos - uy * sin;
-			const diy = ux * sin + uy * cos;
+			const s = count > 1 ? (2 * i) / (count - 1) - 1 : 0;
+			const p1Off = (s * bMax) / denom;
 			const p1 = {
-				x: p0.x + controlLen * dix,
-				y: p0.y + controlLen * diy,
+				x: 0.5 * (p0.x + p2.x) + nx * p1Off,
+				y: 0.5 * (p0.y + p2.y) + ny * p1Off,
 			};
-			const curveDurationMs = (chordLen * 1.3) / BULLET_SPEED;
-
 			const bullet = createBaseBullet(
-				{ dirX: 1, dirY: 0, startX: p0.x, startY: p0.y },
+				{ dirX: ux, dirY: uy, startX: p0.x, startY: p0.y },
 				tech,
 				now,
-				tech.damage,
 			);
 			result.push({
 				...bullet,
-				firedAt: now + i * PINK_ROCKET_STAGGER_MS,
 				curveType: "bezier" as const,
 				curveP0: p0,
 				curveP1: p1,

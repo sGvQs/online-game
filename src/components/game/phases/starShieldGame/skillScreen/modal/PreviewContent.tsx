@@ -8,7 +8,7 @@ import {
 import {
 	LEVEL_STAR_HP,
 	LEVEL_BULLET_COUNT,
-	PINK_ROCKET_BURST_COUNT,
+	LEVEL_PINK_COUNT,
 	LEVEL_SPREAD_DEG,
 	LEVEL_BLUE_SLOW_MULTIPLIER,
 	LEVEL_YELLOW_DAMAGE,
@@ -84,7 +84,7 @@ export function PreviewContent({
 				label: "連鎖数 / ダメージ",
 				value: `${LEVEL_ORANGE_CHAIN_COUNT[displayLevel]}体 / ${LEVEL_ORANGE_DAMAGE[displayLevel]}x`,
 			},
-			pink: { label: "弾数", value: `${PINK_ROCKET_BURST_COUNT} 発` },
+			pink: { label: "弾数", value: `${LEVEL_PINK_COUNT[displayLevel]} 発` },
 		};
 		const trait = traitByTech[preview.techniqueId];
 
@@ -97,7 +97,7 @@ export function PreviewContent({
 			orange: { label: "一段連鎖", desc: "直撃から近隣に一段連鎖" },
 			pink: {
 				label: "追尾ロケット",
-				desc: "照準へ向かうロケットが 5 発、わずかに時間差で扇状に発射される",
+				desc: "照準へ丸み軌道で飛ぶロケット。レベルで 9→144 発まで扇状に均等配置",
 			},
 		};
 		const fx = specialEffects[preview.techniqueId];
@@ -172,7 +172,7 @@ export function PreviewContent({
 						yellow_beam: normLevels.map((l) => LEVEL_YELLOW_DAMAGE[l] * 30),
 						purple: normLevels.map((l) => LEVEL_PURPLE_SIZE[l]),
 						orange: normLevels.map((l) => LEVEL_ORANGE_CHAIN_COUNT[l]),
-						pink: normLevels.map(() => PINK_ROCKET_BURST_COUNT),
+						pink: normLevels.map((l) => LEVEL_PINK_COUNT[l]),
 					};
 					const formatByTech: Record<TechniqueId, (v: number) => string> = {
 						red: (v) => `${v} 発`,

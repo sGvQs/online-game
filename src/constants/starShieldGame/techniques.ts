@@ -52,9 +52,9 @@ export const TECHNIQUES: Record<TechniqueId, TechniqueConfig> = {
 		id: "pink",
 		label: "ピンクの球",
 		damage: 0.5,
-		speed: 1,
+		speed: 0.5,
 		color: "#ec4899",
-		count: 5,
+		count: 9,
 	},
 	// 黄色：　ダメージ ⭐️⭐️⭐️⭐️⭐️, 当てやすさ ⭐️⭐️, サポート ⭐️, 必殺技との相性　⭐️, かっこよさ ⭐️⭐️⭐️,
 	yellow_beam: {

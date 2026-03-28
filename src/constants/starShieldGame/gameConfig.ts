@@ -172,25 +172,25 @@ export const LEVEL_PURPLE_SIZE: Record<NormalAttackLevel, number> = {
 	4: 4,
 	5: 5,
 };
-/**
- * ピンク（レベル設計見直しまでのレガシー想定）。通常攻撃の実弾数は PINK_ROCKET_* を使用。
- */
+/** ピンク通常：レベル別弾数（扇状ベジェを均等配置） */
 export const LEVEL_PINK_COUNT: Record<NormalAttackLevel, number> = {
-	1: 5,
-	2: 20,
-	3: 40,
-	4: 80,
-	5: 160,
+	1: 9,
+	2: 18,
+	3: 36,
+	4: 72,
+	5: 144,
 };
 
-/** ピンク通常：ロケット弾数（暫定固定） */
-export const PINK_ROCKET_BURST_COUNT = 5;
-/** ピンク通常：発射間隔（ms）。0.01s ずらし */
-export const PINK_ROCKET_STAGGER_MS = 10;
 /** ピンク通常：扇の半角（度）。総幅は 2× ここ（±15° = 30°） */
 export const PINK_ROCKET_SPREAD_HALF_DEG = 15;
-/** ベジェ制御点を弦方向にどれだけ離すか（弦長に対する比） */
-export const PINK_ROCKET_CONTROL_LEN_RATIO = 0.35;
+/**
+ * ピンク通常：二次ベジェの横膨らみ。B_max = 弦長 × tan(扇半角) × この値。0 で膨らみなし
+ */
+export const PINK_CURVE_BULGE_FRACTION = 1;
+/**
+ * ピンク通常：曲線パラメータ t で横膨らみが最大になる位置（0〜1）。0.2 なら出発から曲線上 20% 付近
+ */
+export const PINK_CURVE_PEAK_T = 0.2;
 
 /** オレンジ: 連鎖範囲（正規化座標。固定） */
 export const ORANGE_CHAIN_RADIUS = 0.5;
