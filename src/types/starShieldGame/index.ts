@@ -66,6 +66,8 @@ export interface Bullet {
 	curveP1?: { x: number; y: number };
 	curveP2?: { x: number; y: number };
 	curveDurationMs?: number;
+	/** true のときベジェ終了後に接線方向へ直進し、寿命は BULLET_MAX_AGE_MS 基準 */
+	curveContinueStraight?: boolean;
 }
 
 /** fire broadcast のペイロード（Typist が送信） */

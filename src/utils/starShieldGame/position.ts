@@ -63,11 +63,30 @@ export function getBulletPosition(
 		bullet.curveP2 &&
 		bullet.curveDurationMs != null
 	) {
-		const t = Math.max(
-			0,
-			Math.min(1, elapsed / bullet.curveDurationMs),
-		);
-		return bezierQuadratic(t, bullet.curveP0, bullet.curveP1, bullet.curveP2);
+		const { curveP0: p0, curveP1: p1, curveP2: p2, curveDurationMs: dur } =
+			bullet;
+		if (bullet.curveContinueStraight && elapsed > dur) {
+			const tx = 2 * (p2.x - p1.x);
+			const ty = 2 * (p2.y - p1.y);
+			const tLen = Math.hypot(tx, ty);
+			let ux: number;
+			let uy: number;
+			if (tLen < 1e-9) {
+				ux = bullet.dirX;
+				uy = bullet.dirY;
+			} else {
+				ux = tx / tLen;
+				uy = ty / tLen;
+			}
+			const speedMult = bullet.speed ?? 1;
+			const extraDist = BULLET_SPEED * speedMult * (elapsed - dur);
+			return {
+				x: p2.x + ux * extraDist,
+				y: p2.y + uy * extraDist,
+			};
+		}
+		const t = Math.max(0, Math.min(1, elapsed / dur));
+		return bezierQuadratic(t, p0, p1, p2);
 	}
 
 	const speedMult = bullet.speed ?? 1;

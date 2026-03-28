@@ -186,6 +186,7 @@ export function createNormalAttackBullets(params: {
 				curveP1: p1,
 				curveP2: p2,
 				curveDurationMs,
+				curveContinueStraight: true,
 			});
 		}
 		return result;

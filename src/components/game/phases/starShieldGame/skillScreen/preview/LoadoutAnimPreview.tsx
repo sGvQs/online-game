@@ -24,6 +24,9 @@ type PinkBezier = {
 	p2: { x: number; y: number };
 	t0: number;
 	durationMs: number;
+	/** t=1 での接線方向（正規化） */
+	exitVx: number;
+	exitVy: number;
 };
 
 type Bullet = {
@@ -117,6 +120,11 @@ export function LoadoutAnimPreview({
 						x: 0.5 * (p0x + p2x) + nx * p1Off,
 						y: 0.5 * (p0y + p2y) + ny * p1Off,
 					};
+					const tgx = 2 * (p2x - p1.x);
+					const tgy = 2 * (p2y - p1.y);
+					const tgLen = Math.hypot(tgx, tgy);
+					const exitVx = tgLen < 1e-9 ? ux : tgx / tgLen;
+					const exitVy = tgLen < 1e-9 ? uy : tgy / tgLen;
 					bullets.push({
 						x: p0x,
 						y: p0y,
@@ -131,6 +139,8 @@ export function LoadoutAnimPreview({
 							p2: { x: p2x, y: p2y },
 							t0: nowMs,
 							durationMs,
+							exitVx,
+							exitVy,
 						},
 					});
 				}
@@ -215,19 +225,24 @@ export function LoadoutAnimPreview({
 				const b = bullets[i]!;
 				if (b.pinkBezier) {
 					const pb = b.pinkBezier;
-					const te = Math.min(
-						1,
-						Math.max(0, (now - pb.t0) / pb.durationMs),
-					);
-					const u = 1 - te;
-					b.x =
-						u * u * pb.p0.x +
-						2 * u * te * pb.p1.x +
-						te * te * pb.p2.x;
-					b.y =
-						u * u * pb.p0.y +
-						2 * u * te * pb.p1.y +
-						te * te * pb.p2.y;
+					const elapsed = now - pb.t0;
+					if (elapsed <= pb.durationMs) {
+						const te = Math.max(0, elapsed / pb.durationMs);
+						const u = 1 - te;
+						b.x =
+							u * u * pb.p0.x +
+							2 * u * te * pb.p1.x +
+							te * te * pb.p2.x;
+						b.y =
+							u * u * pb.p0.y +
+							2 * u * te * pb.p1.y +
+							te * te * pb.p2.y;
+					} else {
+						const extra = elapsed - pb.durationMs;
+						const speedPx = 0.45;
+						b.x = pb.p2.x + pb.exitVx * speedPx * extra;
+						b.y = pb.p2.y + pb.exitVy * speedPx * extra;
+					}
 				} else {
 					b.x += b.vx;
 					b.y += b.vy;
