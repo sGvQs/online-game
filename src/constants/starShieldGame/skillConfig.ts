@@ -25,10 +25,10 @@ export const PROGRESSION_DEBUG =
 export const NORMAL_ATTACK_UNLOCK_COSTS: Record<string, number> = {
 	red: 0, // 初期所持
 	blue: 200,
-	pink: 400,
-	yellow_beam: 600,
-	purple: 600,
-	orange: 600,
+	pink: 800,
+	yellow_beam: 400,
+	purple: 400,
+	orange: 400,
 };
 
 // ============================================
@@ -72,7 +72,7 @@ export const SPECIAL_ATTACK_LEVEL_UP_COSTS: Record<
 	6: 1500,
 	7: 1750,
 	8: 2000,
-	9: 3000,
+	9: 2500,
 	10: 5000,
 };
 

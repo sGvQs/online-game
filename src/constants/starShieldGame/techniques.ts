@@ -51,7 +51,7 @@ export const TECHNIQUES: Record<TechniqueId, TechniqueConfig> = {
 	pink: {
 		id: "pink",
 		label: "ピンクの球",
-		damage: 0.5,
+		damage: 5,
 		speed: 0.5,
 		color: "#ec4899",
 		count: 9,

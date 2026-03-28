@@ -196,7 +196,7 @@ export const PINK_CURVE_PEAK_T = 0.2;
  * ピンク弾の見た目：進行方向に対する長さ倍率（カプセル長 = 直径 × この値）。
  * 当たり判定は BULLET_RADIUS ベースの円のまま
  */
-export const PINK_ROCKET_VISUAL_LENGTH_RATIO = 5;
+export const PINK_ROCKET_VISUAL_LENGTH_RATIO = 3;
 
 /** オレンジ: 連鎖範囲（正規化座標。固定） */
 export const ORANGE_CHAIN_RADIUS = 0.5;
