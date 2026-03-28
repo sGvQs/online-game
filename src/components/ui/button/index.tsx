@@ -10,7 +10,7 @@ type ButtonVariant =
     | "primary"
     | "success"
     | "danger"
-    | "cyan"
+    | "secondary"
     | "amber";
 type ButtonSize = "sm" | "md" | "lg" | "xl";
 

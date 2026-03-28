@@ -115,7 +115,7 @@ export function TitleScreen({
 							transition={{ duration: 0.8, delay: 0.4 }}
 						>
 							<Button
-								variant="cyan"
+								variant="secondary"
 								onClick={() => !isReady && onToggleReady()}
 								disabled={isReady}
 								className="w-full"

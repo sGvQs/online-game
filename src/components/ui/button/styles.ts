@@ -20,7 +20,7 @@ const button = tv({
             primary: "",
             success: "",
             danger: "",
-            cyan: "",
+            secondary: "",
             amber: "",
         },
         size: {
@@ -71,15 +71,15 @@ const button = tv({
         },
         {
             screen: "default",
-            variant: "cyan",
+            variant: "secondary",
             class:
-                "bg-cyan-500/90 text-white border border-cyan-400/50 shadow-[0_0_15px_rgba(6,182,212,0.3)] hover:shadow-[0_0_25px_rgba(6,182,212,0.5)] hover:scale-105 active:scale-95",
+                "bg-linear-to-r from-yellow-200 to-pink-500 text-white shadow-[0_0_20px_rgba(245,158,11,0.35)] hover:shadow-[0_0_30px_rgba(236,72,153,0.5)] hover:scale-105 active:scale-95",
         },
         {
             screen: "default",
             variant: "amber",
             class:
-                "bg-amber-500/90 text-white border border-amber-400/50 shadow-[0_0_15px_rgba(245,158,11,0.3)] hover:shadow-[0_0_25px_rgba(245,158,11,0.5)] hover:scale-105 active:scale-95",
+                "bg-pink-500/90 text-white border border-pink-400/50 shadow-[0_0_15px_rgba(245,158,11,0.3)] hover:shadow-[0_0_25px_rgba(245,158,11,0.5)] hover:scale-105 active:scale-95",
         },
 
         // --- null-hand ---
