@@ -63,7 +63,10 @@ export function getBulletPosition(
 		bullet.curveP2 &&
 		bullet.curveDurationMs != null
 	) {
-		const t = Math.min(1, elapsed / bullet.curveDurationMs);
+		const t = Math.max(
+			0,
+			Math.min(1, elapsed / bullet.curveDurationMs),
+		);
 		return bezierQuadratic(t, bullet.curveP0, bullet.curveP1, bullet.curveP2);
 	}
 

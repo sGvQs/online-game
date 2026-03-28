@@ -13,7 +13,10 @@ import {
 	BULLET_SPAWN_OFFSET_Y,
 	LEVEL_BULLET_COUNT,
 	LEVEL_ORANGE_DAMAGE,
-	LEVEL_PINK_COUNT,
+	PINK_ROCKET_BURST_COUNT,
+	PINK_ROCKET_CONTROL_LEN_RATIO,
+	PINK_ROCKET_SPREAD_HALF_DEG,
+	PINK_ROCKET_STAGGER_MS,
 	LEVEL_PURPLE_SIZE,
 	LEVEL_SPREAD_DEG,
 	LEVEL_YELLOW_DAMAGE,
@@ -107,7 +110,7 @@ export function createDefaultSpreadBullets(params: {
 
 /**
  * 通常攻撃の弾を生成する（純粋関数）
- * pink の円弧軌道用に targetX, targetY（照準座標）を渡すこと
+ * pink のベジェ軌道（照準へ向かうロケット）用に targetX, targetY（照準座標）を渡すこと
  */
 export function createNormalAttackBullets(params: {
 	tech: TechniqueConfig | null;
@@ -116,39 +119,54 @@ export function createNormalAttackBullets(params: {
 	dirY: number;
 	level: NormalAttackLevel;
 	now: number;
-	/** 照準座標（pink の円弧終点用） */
+	/** 照準座標（pink の終着点） */
 	targetX?: number;
 	targetY?: number;
 }): Bullet[] {
-	const { tech, centerAngle, dirX, dirY, level, now, targetX, targetY } =
-		params;
+	const { tech, dirX, dirY, level, now, targetX, targetY } = params;
 
-	// ピンク: 円弧軌道。恐竜の口から発射 → 弧を描いてターゲットへ
+	// ピンク: 照準へ向かうロケット。同一終点・30° 扇を弾数で等分割・10ms ずつ発射（弾数は暫定固定）
 	if (
 		tech &&
 		(tech.id as TechniqueId) === "pink" &&
 		targetX != null &&
 		targetY != null
 	) {
-		const count = LEVEL_PINK_COUNT[level];
-		const perpX = -dirY;
-		const perpY = dirX;
+		const count = PINK_ROCKET_BURST_COUNT;
 		const result: Bullet[] = [];
 		const p0 = {
 			x: DINO_X + dirX * BULLET_SPAWN_OFFSET_X,
 			y: DINO_Y + dirY * BULLET_SPAWN_OFFSET_Y,
 		};
 		const p2 = { x: targetX, y: targetY };
+		const chordX = p2.x - p0.x;
+		const chordY = p2.y - p0.y;
+		let chordLen = Math.hypot(chordX, chordY);
+		let ux: number;
+		let uy: number;
+		if (chordLen < 1e-6) {
+			ux = dirX;
+			uy = dirY;
+			chordLen = 1e-3;
+		} else {
+			ux = chordX / chordLen;
+			uy = chordY / chordLen;
+		}
+		const spreadHalfRad = (PINK_ROCKET_SPREAD_HALF_DEG * Math.PI) / 180;
+		const step =
+			count > 1 ? (2 * spreadHalfRad) / (count - 1) : 0;
+		const controlLen = chordLen * PINK_ROCKET_CONTROL_LEN_RATIO;
+
 		for (let i = 0; i < count; i++) {
-			const sign = Math.random() > 0.5 ? 1 : -1;
-			const arcStrength = 0.15 + Math.random() * 0.3;
-			const midX = (p0.x + p2.x) / 2;
-			const midY = (p0.y + p2.y) / 2;
+			const theta = count > 1 ? -spreadHalfRad + i * step : 0;
+			const cos = Math.cos(theta);
+			const sin = Math.sin(theta);
+			const dix = ux * cos - uy * sin;
+			const diy = ux * sin + uy * cos;
 			const p1 = {
-				x: midX + sign * arcStrength * perpX,
-				y: midY + sign * arcStrength * perpY,
+				x: p0.x + controlLen * dix,
+				y: p0.y + controlLen * diy,
 			};
-			const chordLen = Math.hypot(p2.x - p0.x, p2.y - p0.y);
 			const curveDurationMs = (chordLen * 1.3) / BULLET_SPEED;
 
 			const bullet = createBaseBullet(
@@ -159,6 +177,7 @@ export function createNormalAttackBullets(params: {
 			);
 			result.push({
 				...bullet,
+				firedAt: now + i * PINK_ROCKET_STAGGER_MS,
 				curveType: "bezier" as const,
 				curveP0: p0,
 				curveP1: p1,

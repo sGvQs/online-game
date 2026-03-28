@@ -9,7 +9,7 @@ import {
 import { ICONS } from "@/constants/starShieldGame/constants";
 import {
 	LEVEL_BULLET_COUNT,
-	LEVEL_PINK_COUNT,
+	PINK_ROCKET_BURST_COUNT,
 	LEVEL_SPREAD_DEG,
 	LEVEL_PURPLE_SIZE,
 	LEVEL_YELLOW_DAMAGE,
@@ -30,7 +30,7 @@ const EFFECT_LABEL: Partial<Record<TechniqueId, string>> = {
 	yellow_beam: "ビーム（30連射）",
 	purple: "貫通",
 	orange: "一段連鎖",
-	pink: "円弧軌道",
+	pink: "追尾ロケット（5発）",
 };
 
 export function LoadoutAnimPreview({
@@ -55,7 +55,7 @@ export function LoadoutAnimPreview({
 			techniqueId === "red"
 				? LEVEL_BULLET_COUNT[lvl]
 				: techniqueId === "pink"
-					? LEVEL_PINK_COUNT[lvl]
+					? PINK_ROCKET_BURST_COUNT
 					: 1;
 		const spreadDeg = techniqueId === "red" ? LEVEL_SPREAD_DEG[lvl] : 0;
 		const purpleRadius =
@@ -75,15 +75,19 @@ export function LoadoutAnimPreview({
 
 		function fire() {
 			if (techniqueId === "pink") {
-				const displayCount = Math.min(bulletCount, 8);
 				const startX = DINO_X + 18;
-				for (let i = 0; i < displayCount; i++) {
-					const sign = i % 2 === 0 ? 1 : -1;
+				const spreadHalfDeg = 15;
+				const step =
+					bulletCount > 1 ? (2 * spreadHalfDeg) / (bulletCount - 1) : 0;
+				for (let i = 0; i < bulletCount; i++) {
+					const deg = bulletCount > 1 ? -spreadHalfDeg + i * step : 0;
+					const theta = (deg * Math.PI) / 180;
+					const speed = 2.8;
 					bullets.push({
 						x: startX,
 						y: ORIGIN_Y,
-						vx: 2.8,
-						vy: -sign * 0.4,
+						vx: speed * Math.cos(theta),
+						vy: speed * Math.sin(theta),
 						color: tech.color,
 						alpha: 0.9,
 						radius: 2.2,

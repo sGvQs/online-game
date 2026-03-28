@@ -60,7 +60,7 @@ function getTechEffectLabel(techniqueId: TechniqueId): string {
 		yellow_beam: "ビーム状",
 		purple: "貫通効果",
 		orange: "連鎖",
-		pink: "円弧軌道",
+		pink: "追尾ロケット",
 	};
 	return effects[techniqueId] ?? "";
 }
