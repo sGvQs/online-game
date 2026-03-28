@@ -4,12 +4,17 @@ import { useEffect, useRef, useCallback } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import type { Asteroid, Bullet } from "@/types/starShieldGame";
-import { getAsteroidPosition, getBulletPosition } from "@/utils/starShieldGame";
+import {
+	getAsteroidPosition,
+	getBulletPosition,
+	getBulletTravelDirection,
+} from "@/utils/starShieldGame";
 import { shooterView } from "./styles";
 import {
 	BULLET_RADIUS,
 	DINO_X,
 	DINO_Y,
+	PINK_ROCKET_VISUAL_LENGTH_RATIO,
 } from "@/constants/starShieldGame/gameConfig";
 import {
 	DEFAULT_BULLET_COLOR,
@@ -130,12 +135,19 @@ function AsteroidCircle({
 
 function BulletCircle({ bullet }: { bullet: Bullet }) {
 	const divRef = useRef<HTMLDivElement>(null);
+	const isPink = bullet.technique === "pink";
 	const update = useCallback(() => {
 		if (!divRef.current) return;
-		const pos = getBulletPosition(bullet, Date.now());
-		divRef.current.style.left = `${pos.x * 100}%`;
-		divRef.current.style.top = `${pos.y * 100}%`;
-	}, [bullet]);
+		const t = Date.now();
+		const pos = getBulletPosition(bullet, t);
+		const el = divRef.current;
+		el.style.left = `${pos.x * 100}%`;
+		el.style.top = `${pos.y * 100}%`;
+		if (isPink) {
+			const d = getBulletTravelDirection(bullet, t);
+			el.style.transform = `translate(-50%, -50%) rotate(${Math.atan2(d.y, d.x)}rad)`;
+		}
+	}, [bullet, isPink]);
 	useEffect(() => {
 		let rafId: number;
 		const loop = () => {
@@ -147,11 +159,33 @@ function BulletCircle({ bullet }: { bullet: Bullet }) {
 	}, [update]);
 	const bulletRadius = bullet.radius ?? BULLET_RADIUS;
 	const sizePx = Math.max(8, bulletRadius * 400);
+	const lengthPx = sizePx * PINK_ROCKET_VISUAL_LENGTH_RATIO;
 	const bulletColor =
 		bullet.technique && bullet.technique in TECHNIQUES
 			? TECHNIQUES[bullet.technique as keyof typeof TECHNIQUES].color
 			: DEFAULT_BULLET_COLOR;
 	const styles = shooterView();
+	if (isPink) {
+		return (
+			<div
+				ref={divRef}
+				className="absolute pointer-events-none z-10"
+				style={{
+					transform: "translate(-50%, -50%)",
+					boxShadow: `0 0 ${Math.max(6, sizePx * 0.2)}px ${bulletColor}aa`,
+				}}
+			>
+				<div
+					className="rounded-full"
+					style={{
+						width: `${lengthPx}px`,
+						height: `${sizePx}px`,
+						backgroundColor: bulletColor,
+					}}
+				/>
+			</div>
+		);
+	}
 	return (
 		<div
 			ref={divRef}

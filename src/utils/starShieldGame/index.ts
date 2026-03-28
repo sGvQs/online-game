@@ -22,7 +22,11 @@ export { createNormalAttackBullets } from "./normalAttack";
 export { createSpecialAttackBullets } from "./specialAttack";
 export * from "./techniqueUnlock";
 export * from "./physics";
-export { getAsteroidPosition, getBulletPosition } from "./position";
+export {
+	getAsteroidPosition,
+	getBulletPosition,
+	getBulletTravelDirection,
+} from "./position";
 
 import { toRomaji } from "wanakana";
 
