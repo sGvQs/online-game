@@ -8,12 +8,13 @@ import { AMMO_MAX, HomeAmmoProvider } from "@/lib/home-ammo-context";
 import { orbitBridge } from "@/components/home/orbitBridge";
 
 const BALL_W = 6; // 球の幅 (px)
-const BALL_H = 22; // 球の高さ (px) — 細長い形状
-const BALL_LONG_H = BALL_H * 5; // クリック時の黄弾（赤の5倍）
+const BALL_H = 22; // 基準の高さ (px)
+const BALL_RED_H = BALL_H * 5; // キーボード赤（従来の赤の5倍）
+const BALL_LONG_H = BALL_H * 5; // クリック黄（赤と同じ倍率の細長い弾）
 const BALL_DURATION = 0.45; // 飛行時間 (秒)
 
 const DAMAGE_KEYBOARD = 1;
-const DAMAGE_CLICK = 30;
+const DAMAGE_CLICK = 5;
 
 // 【当たり判定半径】カーソル位置と星の距離がこの値以内ならヒット (px)
 const HIT_RADIUS = 40;
@@ -107,7 +108,7 @@ export function HomeCursor({ children }: { children: React.ReactNode }) {
 				setAmmo(ammoRef.current);
 			}
 			const damage = isClick ? DAMAGE_CLICK : DAMAGE_KEYBOARD;
-			const ballHeight = isClick ? BALL_LONG_H : BALL_H;
+			const ballHeight = isClick ? BALL_LONG_H : BALL_RED_H;
 			const bulletClassName = isClick
 				? "bg-yellow-400 shadow-[0_0_6px_rgba(250,204,21,0.55)]"
 				: "bg-red-500";
