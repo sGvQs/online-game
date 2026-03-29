@@ -6,7 +6,7 @@
 export type TechniqueId =
 	| "red"
 	| "blue"
-	| "yellow_beam"
+	| "yellow"
 	| "purple"
 	| "orange"
 	| "pink";
@@ -60,12 +60,12 @@ export const TECHNIQUES: Record<TechniqueId, TechniqueConfig> = {
 		count: 9,
 		specialEffect: {
 			label: "追尾ロケット",
-			desc: "照準へ丸み軌道で飛ぶロケット。レベルで 9→144 発まで扇状に均等配置",
+			desc: "照準へ丸み軌道で飛ぶ",
 		},
 	},
 	// 黄色：　ダメージ ⭐️⭐️⭐️⭐️⭐️, 当てやすさ ⭐️⭐️, サポート ⭐️, 必殺技との相性　⭐️, かっこよさ ⭐️⭐️⭐️,
-	yellow_beam: {
-		id: "yellow_beam",
+	yellow: {
+		id: "yellow",
 		label: "黄色いビーム",
 		damage: 0.1,
 		speed: 1,
@@ -99,7 +99,7 @@ export const TECHNIQUES: Record<TechniqueId, TechniqueConfig> = {
 export const TECHNIQUE_IDS: TechniqueId[] = [
 	"red",
 	"blue",
-	"yellow_beam",
+	"yellow",
 	"purple",
 	"orange",
 	"pink",
@@ -117,14 +117,8 @@ export type TechniqueStats = {
 export const TECHNIQUE_STATS: Record<TechniqueId, TechniqueStats> = {
 	red: { damage: 2, hitEase: 4, support: 1, specialCombo: 1, coolness: 3 },
 	blue: { damage: 1, hitEase: 1, support: 5, specialCombo: 3, coolness: 1 },
-	pink: { damage: 5, hitEase: 1, support: 1, specialCombo: 1, coolness: 5 },
-	yellow_beam: {
-		damage: 5,
-		hitEase: 2,
-		support: 1,
-		specialCombo: 1,
-		coolness: 3,
-	},
+	pink: { damage: 5, hitEase: 2, support: 1, specialCombo: 3, coolness: 5 },
+	yellow: { damage: 5, hitEase: 2, support: 1, specialCombo: 1, coolness: 3 },
 	purple: { damage: 2, hitEase: 2, support: 1, specialCombo: 5, coolness: 1 },
 	orange: { damage: 4, hitEase: 1, support: 1, specialCombo: 5, coolness: 2 },
 };

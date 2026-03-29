@@ -43,7 +43,7 @@ import { RoleBadge } from "@/components/game/common/starShield/roleBadge";
 const NORMAL_ATTACK_IDS: TechniqueId[] = [
 	"red",
 	"blue",
-	"yellow_beam",
+	"yellow",
 	"purple",
 	"orange",
 	"pink",
@@ -54,17 +54,6 @@ const SPECIAL_LABELS: Record<string, string> = {
 	all_destruction: "全破壊",
 };
 
-function getTechEffectLabel(techniqueId: TechniqueId): string {
-	const effects: Partial<Record<TechniqueId, string>> = {
-		red: "スタンダード",
-		blue: "スロー効果",
-		yellow_beam: "ビーム状",
-		purple: "貫通効果",
-		orange: "連鎖",
-		pink: "追尾ロケット",
-	};
-	return effects[techniqueId] ?? "";
-}
 
 // ============================================================
 // Main Component
@@ -455,7 +444,7 @@ export function StarShieldSkill({
 												</span>
 											</div>
 										}
-										detail={getTechEffectLabel(techniqueId)}
+										detail={TECHNIQUES[techniqueId].specialEffect?.label ?? "スタンダード"}
 										currentLevel={currentLevel}
 										maxLevel={5}
 										onClick={() =>

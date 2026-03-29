@@ -72,7 +72,7 @@ export function PreviewContent({
 				label: "減速割合",
 				value: `${Math.round((1 - LEVEL_BLUE_SLOW_MULTIPLIER[displayLevel]) * 100)}%`,
 			},
-			yellow_beam: {
+			yellow: {
 				label: "火力",
 				value: `${LEVEL_YELLOW_DAMAGE[displayLevel]} × 30発`,
 			},
@@ -157,7 +157,7 @@ export function PreviewContent({
 						blue: normLevels.map((l) =>
 							Math.round((1 - LEVEL_BLUE_SLOW_MULTIPLIER[l]) * 100),
 						),
-						yellow_beam: normLevels.map((l) => LEVEL_YELLOW_DAMAGE[l] * 30),
+						yellow: normLevels.map((l) => LEVEL_YELLOW_DAMAGE[l] * 30),
 						purple: normLevels.map((l) => LEVEL_PURPLE_SIZE[l]),
 						orange: normLevels.map((l) => LEVEL_ORANGE_CHAIN_COUNT[l]),
 						pink: normLevels.map((l) => LEVEL_PINK_COUNT[l]),
@@ -165,7 +165,7 @@ export function PreviewContent({
 					const formatByTech: Record<TechniqueId, (v: number) => string> = {
 						red: (v) => `${v} 発`,
 						blue: (v) => `${v}%`,
-						yellow_beam: (v) => `${v}`,
+						yellow: (v) => `${v}`,
 						purple: (v) => `${v}x`,
 						orange: (v) => `${v} 体`,
 						pink: (v) => `${v} 発`,

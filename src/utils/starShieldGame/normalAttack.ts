@@ -195,7 +195,7 @@ export function createNormalAttackBullets(params: {
 	if (tech?.count && tech.count > 1) {
 		const verticalOffset = tech.verticalOffset ?? 0;
 		const yellowDamage =
-			(tech.id as TechniqueId) === "yellow_beam"
+			(tech.id as TechniqueId) === "yellow"
 				? LEVEL_YELLOW_DAMAGE[level]
 				: undefined;
 		const result: Bullet[] = [];
@@ -223,7 +223,7 @@ export function createNormalAttackBullets(params: {
 	}
 
 	const yellowDamage =
-		(tech.id as TechniqueId) === "yellow_beam"
+		(tech.id as TechniqueId) === "yellow"
 			? LEVEL_YELLOW_DAMAGE[level]
 			: undefined;
 	const orangeDamage =

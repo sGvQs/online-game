@@ -40,13 +40,6 @@ type Bullet = {
 	pinkBezier?: PinkBezier;
 };
 
-const EFFECT_LABEL: Partial<Record<TechniqueId, string>> = {
-	blue: "スロー効果",
-	yellow_beam: "ビーム（30連射）",
-	purple: "貫通",
-	orange: "一段連鎖",
-	pink: "丸軌道ベジェ（レベルで 9〜144 発・均等扇）",
-};
 
 export function LoadoutAnimPreview({
 	techniqueId,
@@ -147,7 +140,7 @@ export function LoadoutAnimPreview({
 				return;
 			}
 
-			if (techniqueId === "yellow_beam") {
+			if (techniqueId === "yellow") {
 				const count = 12;
 				for (let i = 0; i < count; i++) {
 					const delay = i * 40;
@@ -247,7 +240,7 @@ export function LoadoutAnimPreview({
 					b.x += b.vx;
 					b.y += b.vy;
 				}
-				b.alpha -= techniqueId === "yellow_beam" ? 0.028 : 0.015;
+				b.alpha -= techniqueId === "yellow" ? 0.028 : 0.015;
 
 				if (b.alpha <= 0 || b.x > W + 12 || b.y < -12 || b.y > H + 12) {
 					bullets.splice(i, 1);
@@ -311,9 +304,8 @@ export function LoadoutAnimPreview({
 					className="w-1.5 h-1.5 rounded-full shrink-0"
 					style={{ backgroundColor: tech.color }}
 				/>
-				<span className="text-[9px] text-white/25 font-dot-gothic-16">
-					{tech.label} Lv. {level}
-					{EFFECT_LABEL[techniqueId] ? ` · ${EFFECT_LABEL[techniqueId]}` : ""}
+				<span className="text-[9px] text-white font-dot-gothic-16">
+					{tech.specialEffect ? tech.specialEffect.label: tech.label} Lv.{level}
 				</span>
 			</div>
 		</div>

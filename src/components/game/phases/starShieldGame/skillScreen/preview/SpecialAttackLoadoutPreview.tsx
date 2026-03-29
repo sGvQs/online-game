@@ -132,8 +132,6 @@ export function SpecialAttackLoadoutPreview({
 		waveDelayMs,
 	]);
 
-	const label = specialAttackId === "all_destruction" ? "全破壊" : "扇状散弾";
-
 	return (
 		<div className="relative mt-2 h-[88px] rounded-xl overflow-hidden border border-white/7 bg-black/35">
 			<div className="absolute top-1/2 left-[38px] right-0 border-t border-dashed border-white/5 -translate-y-px" />
@@ -157,7 +155,7 @@ export function SpecialAttackLoadoutPreview({
 					}
 				/>
 				<span className="text-[9px] text-white font-dot-gothic-16">
-					{label} Lv{level}
+					必殺技 Lv.{level}
 				</span>
 			</div>
 		</div>
