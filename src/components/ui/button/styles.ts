@@ -5,7 +5,7 @@ const button = tv({
     base: "inline-flex items-center justify-center rounded-lg transition-all duration-200 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed focus-visible:outline-2 focus-visible:outline-brand-500",
     variants: {
         screen: {
-            default: "",
+            default: "font-cherry-bomb-one",
             "null-hand":
                 "border-2 bg-black/20 font-black uppercase tracking-[0.3em] flex-col backdrop-blur-sm",
             "error-hunter":
@@ -21,7 +21,7 @@ const button = tv({
             success: "",
             danger: "",
             secondary: "",
-            amber: "",
+            yellow: "",
         },
         size: {
             sm: "text-xs px-3 py-1.5",
@@ -38,7 +38,7 @@ const button = tv({
         {
             screen: "default",
             variant: "solid",
-            class: "bg-brand-300 text-white hover:bg-brand-400",
+            class: "bg-brand-300 text-white shadow-[0_0_15px_rgba(67,56,202,0.3)] hover:shadow-[0_0_25px_rgba(67,56,202,0.5)] hover:scale-105 active:scale-95",
         },
         {
             screen: "default",
@@ -77,9 +77,9 @@ const button = tv({
         },
         {
             screen: "default",
-            variant: "amber",
+            variant: "yellow",
             class:
-                "bg-pink-500/90 text-white border border-pink-400/50 shadow-[0_0_15px_rgba(245,158,11,0.3)] hover:shadow-[0_0_25px_rgba(245,158,11,0.5)] hover:scale-105 active:scale-95",
+                "bg-amber-400/90 text-white border border-amber-300/50 shadow-[0_0_15px_rgba(251,191,36,0.3)] hover:shadow-[0_0_25px_rgba(251,191,36,0.5)] hover:scale-105 active:scale-95",
         },
 
         // --- null-hand ---
@@ -131,26 +131,6 @@ const button = tv({
             variant: "danger",
             class:
                 "text-[#808080] [text-shadow:1px_1px_0_#ffffff] cursor-not-allowed",
-        },
-
-        // --- star-shield ---
-        {
-            screen: "star-shield",
-            variant: "solid",
-            class:
-                "bg-[rgba(45,42,66,0.92)] border-2 border-[#4a4a6a] text-gray-400 hover:scale-[1.02] hover:brightness-110 active:scale-[0.98]",
-        },
-        {
-            screen: "star-shield",
-            variant: "primary",
-            class:
-                "bg-[rgba(79,70,229,0.92)] border-2 border-indigo-400 text-indigo-100 shadow-[0_0_20px_rgba(99,102,241,0.5)] hover:scale-[1.02] hover:brightness-110 active:scale-[0.98]",
-        },
-        {
-            screen: "star-shield",
-            variant: "success",
-            class:
-                "bg-[rgba(34,197,94,0.9)] border-2 border-green-400 text-green-100 shadow-[0_0_16px_rgba(34,197,94,0.4)] hover:scale-105 active:scale-95",
         },
     ],
     defaultVariants: {

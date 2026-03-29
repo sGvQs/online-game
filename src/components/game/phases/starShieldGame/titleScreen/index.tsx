@@ -9,6 +9,8 @@ import { RoomWithUsersAndReadyStatus, RoomUserWithReadyStatus } from "@/types";
 import type { UserRanking } from "@/types";
 import type { PairRanking } from "@/server/actions/game/starShieldRankingActions";
 import { Button } from "@/components/ui/button";
+import { button } from "@/components/ui/button/styles";
+import { Modal } from "@/components/ui/modal";
 import { ProtectedStar } from "../playing/protectedStar";
 import { DinosaurWithBalls } from "@/components/game/common/starShield/dinosaurWithBalls";
 import { StarShieldTitle } from "@/components/game/common/starShield/starShieldTitle";
@@ -66,6 +68,7 @@ export function TitleScreen({
 	const totalUsers = room.users.length;
 	const styles = titleScreen();
 	const [typingCount, setTypingCount] = useState<number>(0);
+	const [showCannotStartModal, setShowCannotStartModal] = useState(false);
 
 	useEffect(() => {
 		getMyStarShieldProgress()
@@ -74,6 +77,7 @@ export function TitleScreen({
 	}, []);
 
 	return (
+		<>
 		<div className="relative min-h-screen overflow-hidden flex flex-col items-center justify-center">
 			<ProtectedStar />
 			<DinosaurWithBalls size="w-28 h-28" />
@@ -118,27 +122,30 @@ export function TitleScreen({
 								variant="secondary"
 								onClick={() => !isReady && onToggleReady()}
 								disabled={isReady}
-								className="w-full"
+								size="lg"
 							>
-								READY
+								じゅんびかんりょう
 							</Button>
-							{isHost && (
-								<Button
-									variant={canStart ? "primary" : "solid"}
-									onClick={() => canStart && onStartGame()}
-									disabled={!canStart}
-									className="w-full"
-								>
-									START {readyCount}/{totalUsers}
-								</Button>
-							)}
+							<Link
+								href={`/game/${roomId}/star-shield/ranking`}
+								onClick={async (e) => {
+									if (isReady) {
+										e.preventDefault();
+										await onToggleReady();
+										router.push(`/game/${roomId}/star-shield/ranking`);
+									}
+								}}
+								className={button({ variant: "solid", fullWidth: true , size: "lg" })}
+							>
+								ランキング
+							</Link>
 							{isHost && (
 								<Button
 									variant="success"
 									onClick={onExit}
-									className="w-full"
+									size="lg"
 								>
-									EXIT
+									もどる
 								</Button>
 							)}
 							<Link
@@ -150,10 +157,20 @@ export function TitleScreen({
 										router.push(`/game/${roomId}/star-shield/skill`);
 									}
 								}}
-								className="inline-flex w-full items-center justify-center text-sm px-4 py-2 rounded-lg font-bold transition-all duration-200 bg-amber-500/90 text-white border border-amber-400/50 shadow-[0_0_15px_rgba(245,158,11,0.3)] hover:shadow-[0_0_25px_rgba(245,158,11,0.5)] hover:scale-105 active:scale-95"
+								className={button({ variant: "yellow", fullWidth: true , size: "lg" })}
 							>
-								SKILL
+								スキル
 							</Link>
+							{isHost && (
+								<Button
+									variant="primary"
+									onClick={() => canStart ? onStartGame() : setShowCannotStartModal(true)}
+									size="lg"
+									className="col-span-2"
+								>
+									スタート
+								</Button>
+							)}
 						</motion.div>
 					</div>
 
@@ -328,5 +345,25 @@ export function TitleScreen({
 				</div>
 			</div>
 		</div>
+		<Modal
+			isOpen={showCannotStartModal}
+			onClose={() => setShowCannotStartModal(false)}
+			title="まだはじめられないよ"
+		>
+			<div className="flex flex-col gap-4">
+				<Typography variant="body" className="text-white/80">
+					ぜんいんが「じゅんびかんりょう」になるとスタートできるよ。
+				</Typography>
+				<Typography variant="body" className="text-white/60">
+					いまのじょうきょう：{readyCount} / {totalUsers} にん じゅんびずみ
+				</Typography>
+				<div className="flex justify-end">
+					<Button variant="primary" onClick={() => setShowCannotStartModal(false)}>
+						とじる
+					</Button>
+				</div>
+			</div>
+		</Modal>
+		</>
 	);
 }

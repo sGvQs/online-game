@@ -565,7 +565,7 @@ export function RoleSelectionScreen({
 							onClick={onBack}
 							className="flex-1"
 						>
-							EXIT
+							もどる
 						</Button>
 					)}
 					{isHost && (
@@ -575,7 +575,7 @@ export function RoleSelectionScreen({
 							disabled={!canProceed}
 							className="flex-4"
 						>
-							GAME START
+							ゲームスタート
 						</Button>
 					)}
 				</motion.div>

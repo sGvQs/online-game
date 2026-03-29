@@ -364,7 +364,7 @@ export function ResultScreen({
                         onClick={onBackToTitle}
                         className="w-full"
                     >
-                        BACK TO TITLE
+                        タイトルへ
                     </Button>
 				</motion.div>
 			</motion.div>

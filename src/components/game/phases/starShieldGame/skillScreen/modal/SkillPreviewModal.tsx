@@ -56,13 +56,13 @@ export function SkillPreviewModal({
 		const tech = TECHNIQUES[preview.techniqueId];
 		if (currentLevel === 0) {
 			nextCost = NORMAL_ATTACK_UNLOCK_COSTS[preview.techniqueId] ?? 0;
-			purchaseLabel = "解放する";
+			purchaseLabel = "かいほうする";
 			purchaseFn = () => purchaseNormalAttackUnlock(preview.techniqueId);
 			purchaseLabelForFn = tech.label;
 		} else if (currentLevel < maxLevel) {
 			const nl = (currentLevel + 1) as 2 | 3 | 4 | 5;
 			nextCost = NORMAL_ATTACK_LEVEL_UP_COSTS[preview.techniqueId]?.[nl] ?? 0;
-			purchaseLabel = `Lv ${nl} に上げる`;
+			purchaseLabel = `レベル ${nl} に上げる`;
 			purchaseFn = () => purchaseNormalAttackLevelUp(preview.techniqueId, nl);
 			purchaseLabelForFn = "通常攻撃レベル上げ";
 		}
@@ -76,7 +76,7 @@ export function SkillPreviewModal({
 			const nl = (currentLevel +
 				1) as keyof typeof SPECIAL_ATTACK_LEVEL_UP_COSTS;
 			nextCost = SPECIAL_ATTACK_LEVEL_UP_COSTS[nl] ?? 0;
-			purchaseLabel = `Lv ${nl} に上げる`;
+			purchaseLabel = `レベル ${nl} に上げる`;
 			purchaseFn = () =>
 				purchaseSpecialAttackLevelUp(preview.id as "spread", nl);
 			purchaseLabelForFn = "必殺技レベル上げ";
@@ -87,7 +87,7 @@ export function SkillPreviewModal({
 		if (currentLevel < maxLevel) {
 			const nl = (currentLevel + 1) as 2 | 3 | 4 | 5;
 			nextCost = STAR_HP_LEVEL_UP_COSTS[nl];
-			purchaseLabel = `Lv ${nl} に上げる`;
+			purchaseLabel = `レベル ${nl} に上げる`;
 			purchaseFn = () => purchaseStarHpLevelUp(nl);
 			purchaseLabelForFn = "星のHPレベル上げ";
 		}
@@ -96,13 +96,13 @@ export function SkillPreviewModal({
 		maxLevel = 6;
 		if (currentLevel === 0) {
 			nextCost = HEAL_UNLOCK_COST;
-			purchaseLabel = "解放する";
+			purchaseLabel = "かいほうする";
 			purchaseFn = () => purchaseHealUnlock();
 			purchaseLabelForFn = "ヒール解放";
 		} else if (currentLevel < maxLevel) {
 			const nl = (currentLevel + 1) as 2 | 3 | 4 | 5 | 6;
 			nextCost = HEAL_LEVEL_UP_COSTS[nl];
-			purchaseLabel = nl === 6 ? "MAX に上げる" : `Lv ${nl} に上げる`;
+			purchaseLabel = nl === 6 ? "さいだいに上げる" : `レベル ${nl} に上げる`;
 			purchaseFn = () => purchaseHealLevelUp(nl);
 			purchaseLabelForFn = "ヒールレベル上げ";
 		}
@@ -193,7 +193,7 @@ export function SkillPreviewModal({
 								if (purchaseFn) handlePurchase(purchaseFn, purchaseLabelForFn);
 							}}
 							className={cn(
-								"w-full py-3.5 px-4 rounded-xl font-bold text-[15px] flex items-center justify-center gap-3 transition-all font-dot-gothic-16",
+								"w-full py-3.5 px-4 rounded-xl font-bold text-[15px] flex items-center justify-center gap-3 transition-all font-cherry-bomb-one",
 								canAfford
 									? isStarHp
 										? "bg-emerald-500 hover:bg-emerald-400 text-white shadow-lg shadow-emerald-500/25 active:scale-[0.98]"
