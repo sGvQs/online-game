@@ -19,8 +19,7 @@ export const gameCarouselSection = tv({
 		navButton:
 			"p-2 rounded-full glass-card text-brand-600 hover:text-brand-900 transition-colors",
 		gameIcon: "w-10 h-10 relative",
-		gameTitle: "font-black text-2xl tracking-widest leading-tight text-center",
-		gameDesc: "text-xs opacity-70 font-mono tracking-wider",
+		gameDesc: "text-xs opacity-70 tracking-wider",
 		cardInfo: "flex items-center gap-2 text-[10px] opacity-80 mt-auto",
 		actionRow: "flex items-center gap-3",
 		errorHunterCard: "border-teal-600 bg-teal-700/80 text-white",

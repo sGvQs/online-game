@@ -8,7 +8,6 @@ import { Modal } from "@/components/ui/modal";
 import { LeaveRoomButton } from "../leaveRoomButton";
 import { Button } from "@/components/ui/button";
 import { Typography } from "@/components/ui/typography";
-import type { TypographyFont } from "@/components/ui/typography/styles";
 import { ASCII_ART } from "@/constants/errorHunterGame/constants";
 import { selectGame } from "@/server/actions/room";
 import {
@@ -26,7 +25,6 @@ interface GameCarouselSectionProps {
 const GAMES = [
 	{
 		type: "error-hunter",
-		font: "dot-gothic-16" as TypographyFont,
 		title: "ERROR HUNTER",
 		icon: "/svg/object/old-pc.svg",
 		desc: "バグを最速で潰せ！",
@@ -38,7 +36,6 @@ const GAMES = [
 	},
 	{
 		type: "null-hand",
-		font: "sans" as TypographyFont,
 		title: "NULL HAND",
 		icon: "/svg/object/null-hand.svg",
 		desc: "心理戦で相手を欺け",
@@ -63,6 +60,34 @@ const GAMES = [
 ] as const;
 
 type GameType = (typeof GAMES)[number]["type"];
+
+function renderGameTitle(type: GameType) {
+	switch (type) {
+		case "error-hunter":
+			return (
+				<pre className="font-['Courier_New',monospace] text-[5px] leading-[1.2] font-bold whitespace-pre overflow-hidden mx-auto">
+					{ASCII_ART}
+				</pre>
+			);
+		case "star-shield":
+			return (
+				<div className="select-none flex flex-col items-center">
+					<Typography variant="display" font="honk" as="span" className="text-6xl block leading-[0.6]">
+						STAR
+					</Typography>
+					<Typography variant="display" font="honk" as="span" className="text-6xl block leading-[0.6]">
+						SHIELD
+					</Typography>
+				</div>
+			);
+		case "null-hand":
+			return (
+				<Typography variant="display" font="sans" as="div" className="font-black text-3xl tracking-widest text-center drop-shadow-[2px_2px_0_rgba(255,68,68,0.4)] leading-loose">
+					NULL HAND
+				</Typography>
+			);
+	}
+}
 
 const CARD_THEME: Record<GameType, string> = {
 	"error-hunter": "border-teal-600 bg-teal-700/80 text-white",
@@ -152,24 +177,7 @@ export function GameCarouselSection({
 							className={`${styles.cardBase()} ${positionClass[pos]} ${CARD_THEME[game.type]}`}
 							onClick={() => handleCardClick(i)}
 						>
-							{game.type === "error-hunter" ? (
-								<pre className="font-['Courier_New',monospace] text-[5px] leading-[1.2] font-bold whitespace-pre overflow-hidden mx-auto">
-									{ASCII_ART}
-								</pre>
-							) : game.type === "star-shield" ? (
-								<div className="select-none flex flex-col items-center">
-									<Typography variant="display" font="honk" as="span" className="text-6xl block leading-[0.6]">
-										STAR
-									</Typography>
-									<Typography variant="display" font="honk" as="span" className="text-6xl block leading-[0.6]">
-										SHIELD
-									</Typography>
-								</div>
-							) : (
-								<Typography variant="display" font={game.font} as="div" className={`${styles.gameTitle()} drop-shadow-[2px_2px_0_rgba(255,68,68,0.4)]`}>
-									{game.title}
-								</Typography>
-							)}
+							{renderGameTitle(game.type)}
 							<Typography variant="small" as="div" className={styles.gameDesc()}>
 								{game.desc}
 							</Typography>
