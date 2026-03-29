@@ -4,6 +4,7 @@ import { useContext, useEffect, useRef, useState, useCallback } from "react";
 import Image from "next/image";
 import { PukapukaLogo } from "@/components/common/logo/pukapukaLogo";
 import { SoundContext } from "@/lib/sound-context";
+import { orbitBridge } from "@/components/home/orbitBridge";
 
 const OBJECTS = [
 	{ src: "/svg/object/blue-star.svg", label: "blue-star" },
@@ -58,12 +59,34 @@ export function LogoWithOrbit() {
 	const lastTimeRef = useRef<number | null>(null);
 	const rafRef = useRef<number | null>(null);
 
+	const handleClick = useCallback(() => {
+		const nextIndex = (currentIndex + 1) % OBJECTS.length;
+		setCurrentIndex(nextIndex);
+
+		const nextIsPlaying = !sound?.isPlaying;
+		sound?.setIsPlaying(nextIsPlaying);
+
+		if (nextIsPlaying) {
+			const audio = new Audio("/se/switch-se.mp3");
+			audio.volume = 0.1;
+			audio.play().catch(() => {});
+		}
+	}, [currentIndex, sound]);
+
+	// orbitBridge に triggerHit をセット・クリーンアップ
+	useEffect(() => {
+		orbitBridge.triggerHit = handleClick;
+		return () => {
+			orbitBridge.triggerHit = null;
+		};
+	}, [handleClick]);
+
 	useEffect(() => {
 		const animate = (time: number) => {
 			if (lastTimeRef.current !== null) {
 				const delta = time - lastTimeRef.current;
 				const speedMult = Math.sin(angleRef.current) > 0 ? SPEED_LEFT : SPEED_RIGHT;
-			angleRef.current += (delta / PERIOD) * 2 * Math.PI * speedMult;
+				angleRef.current += (delta / PERIOD) * 2 * Math.PI * speedMult;
 			}
 			lastTimeRef.current = time;
 
@@ -85,6 +108,14 @@ export function LogoWithOrbit() {
 			if (objectRef.current) {
 				objectRef.current.style.transform = `translate(calc(-50% + ${x}px), calc(-50% + ${y}px)) scale(${scale})`;
 				objectRef.current.style.zIndex = String(zIndex);
+
+				// 当たり判定用に星の画面座標を orbitBridge に書き込む
+				const containerEl = objectRef.current.parentElement;
+				const rect = containerEl?.getBoundingClientRect();
+				if (rect) {
+					orbitBridge.clientX = rect.left + rect.width / 2 + x;
+					orbitBridge.clientY = rect.top + rect.height / 2 + y;
+				}
 			}
 
 			rafRef.current = requestAnimationFrame(animate);
@@ -98,20 +129,6 @@ export function LogoWithOrbit() {
 		};
 	}, []);
 
-	const handleClick = useCallback(() => {
-		const nextIndex = (currentIndex + 1) % OBJECTS.length;
-		setCurrentIndex(nextIndex);
-
-		const nextIsPlaying = !sound?.isPlaying;
-		sound?.setIsPlaying(nextIsPlaying);
-
-		if (nextIsPlaying) {
-			const audio = new Audio("/se/switch-se.mp3");
-			audio.volume = 0.1;
-			audio.play().catch(() => {});
-		}
-	}, [currentIndex, sound]);
-
 	const currentObject = OBJECTS[currentIndex];
 
 	return (
@@ -120,8 +137,7 @@ export function LogoWithOrbit() {
 			<PukapukaLogo size="large" className="relative z-5" />
 			<div
 				ref={objectRef}
-				className="absolute top-1/2 left-1/2 w-12 h-12 cursor-pointer opacity-100"
-				onClick={handleClick}
+				className="absolute top-1/2 left-1/2 w-12 h-12 opacity-100"
 			>
 				<Image
 					src={currentObject.src}
