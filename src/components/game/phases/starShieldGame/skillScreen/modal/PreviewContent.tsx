@@ -157,18 +157,10 @@ export function PreviewContent({
 						blue: normLevels.map((l) =>
 							Math.round((1 - LEVEL_BLUE_SLOW_MULTIPLIER[l]) * 100),
 						),
-						yellow: normLevels.map((l) => LEVEL_YELLOW_DAMAGE[l] * 30),
+						yellow: normLevels.map((l) => LEVEL_YELLOW_DAMAGE[l]),
 						purple: normLevels.map((l) => LEVEL_PURPLE_SIZE[l]),
 						orange: normLevels.map((l) => LEVEL_ORANGE_CHAIN_COUNT[l]),
 						pink: normLevels.map((l) => LEVEL_PINK_COUNT[l]),
-					};
-					const formatByTech: Record<TechniqueId, (v: number) => string> = {
-						red: (v) => `${v} 発`,
-						blue: (v) => `${v}%`,
-						yellow: (v) => `${v}`,
-						purple: (v) => `${v}x`,
-						orange: (v) => `${v} 体`,
-						pink: (v) => `${v} 発`,
 					};
 					return (
 						<div className="mt-4 rounded-2xl bg-indigo-500/5 border border-indigo-500/20 p-4 flex justify-center">
@@ -177,7 +169,7 @@ export function PreviewContent({
 								currentLevel={displayLevel}
 								maxLevel={5}
 								color={tech.color}
-								formatValue={(v, _l) => formatByTech[preview.techniqueId](v)}
+								formatValue={(v) => `${v}${tech.levelUnit}`}
 							/>
 						</div>
 					);

@@ -82,41 +82,36 @@ export function LevelProgressionBarChart({
 						</g>
 					);
 				})}
-				{hoveredLevel !== null && hoveredLevel <= barCount && (
-					<g>
-						<rect
-							x={
-								padding.left +
-								(hoveredLevel - 1) * (barTotalW + barGap) +
-								barTotalW / 2 -
-								36
-							}
-							y={padding.top - 20}
-							width={72}
-							height={16}
-							rx={4}
-							ry={4}
-							fill="rgba(0,0,0,0.75)"
-							stroke="rgba(255,255,255,0.2)"
-							strokeWidth={1}
-						/>
-						<text
-							x={
-								padding.left +
-								(hoveredLevel - 1) * (barTotalW + barGap) +
-								barTotalW / 2
-							}
-							y={padding.top - 10}
-							textAnchor="middle"
-							fontSize="10"
-							fill="white"
-							fontFamily="var(--font-dot-gothic-16)"
-						>
-							Lv{hoveredLevel}:{" "}
-							{formatValue(values[hoveredLevel - 1] ?? 0, hoveredLevel)}
-						</text>
-					</g>
-				)}
+				{hoveredLevel !== null && hoveredLevel <= barCount && (() => {
+					const tipText = `Lv${hoveredLevel}: ${formatValue(values[hoveredLevel - 1] ?? 0, hoveredLevel)}`;
+					const tipW = Math.max(60, tipText.length * 7 + 12);
+					const tipX = padding.left + (hoveredLevel - 1) * (barTotalW + barGap) + barTotalW / 2;
+					return (
+						<g>
+							<rect
+								x={tipX - tipW / 2}
+								y={padding.top - 20}
+								width={tipW}
+								height={16}
+								rx={4}
+								ry={4}
+								fill="rgba(0,0,0,0.75)"
+								stroke="rgba(255,255,255,0.2)"
+								strokeWidth={1}
+							/>
+							<text
+								x={tipX}
+								y={padding.top - 10}
+								textAnchor="middle"
+								fontSize="10"
+								fill="white"
+								fontFamily="var(--font-dot-gothic-16)"
+							>
+								{tipText}
+							</text>
+						</g>
+					);
+				})()}
 			</svg>
 			{currentLevel > 0 && currentLevel <= barCount && (
 				<p className="text-white text-[10px] font-dot-gothic-16">

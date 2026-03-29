@@ -29,6 +29,8 @@ export interface TechniqueConfig {
 	chainRadius?: number;
 	/** スキル画面に表示する特殊効果の説明 */
 	specialEffect?: { label: string; desc: string };
+	/** レベル推移チャートの値に付けるサフィックス（例: " 発", "%", "x"） */
+	levelUnit: string;
 }
 
 export const TECHNIQUES: Record<TechniqueId, TechniqueConfig> = {
@@ -39,6 +41,7 @@ export const TECHNIQUES: Record<TechniqueId, TechniqueConfig> = {
 		damage: 1,
 		speed: 1,
 		color: "#ef4444",
+		levelUnit: " 発",
 	},
 	// 青：　ダメージ ⭐️, 当てやすさ ⭐️, サポート ⭐️⭐️⭐️⭐️⭐️, 必殺技との相性　⭐️⭐️⭐️, かっこよさ ⭐️,
 	blue: {
@@ -48,6 +51,7 @@ export const TECHNIQUES: Record<TechniqueId, TechniqueConfig> = {
 		speed: 1,
 		color: "#3b82f6",
 		slowOnHit: true,
+		levelUnit: "%",
 		specialEffect: { label: "スロー", desc: "命中した隕石の速度を下げる" },
 	},
 	// ピンク：　ダメージ ⭐️⭐️⭐️⭐️⭐️, 当てやすさ ⭐️, サポート ⭐️, 必殺技との相性　⭐️, かっこよさ ⭐️⭐️⭐️⭐️⭐️,
@@ -58,6 +62,7 @@ export const TECHNIQUES: Record<TechniqueId, TechniqueConfig> = {
 		speed: 0.5,
 		color: "#ec4899",
 		count: 9,
+		levelUnit: " 発",
 		specialEffect: {
 			label: "追尾ロケット",
 			desc: "照準へ丸み軌道で飛ぶ",
@@ -72,6 +77,7 @@ export const TECHNIQUES: Record<TechniqueId, TechniqueConfig> = {
 		color: "#eab308",
 		count: 30,
 		verticalOffset: 0.01, // 進行方向に沿って3発オフセット（ビーム状）
+		levelUnit: " ダメージ/発",
 		specialEffect: { label: "ビーム", desc: "30発が前方に連続して飛ぶ" },
 	},
 	// 紫：　ダメージ ⭐️⭐️, 当てやすさ ⭐️⭐️, サポート ⭐️, 必殺技との相性　⭐️⭐️⭐️⭐️⭐️, かっこよさ ⭐️,
@@ -82,6 +88,7 @@ export const TECHNIQUES: Record<TechniqueId, TechniqueConfig> = {
 		speed: 1,
 		color: "#a855f7",
 		piercing: true,
+		levelUnit: "x",
 		specialEffect: { label: "貫通", desc: "隕石を貫通し複数を同時に攻撃" },
 	},
 	// オレンジ：　ダメージ ⭐️⭐️⭐️⭐️, 当てやすさ ⭐️, サポート ⭐️, 必殺技との相性　⭐️⭐️⭐️⭐️⭐️, かっこよさ ⭐️⭐️,
@@ -92,6 +99,7 @@ export const TECHNIQUES: Record<TechniqueId, TechniqueConfig> = {
 		speed: 1,
 		color: "#f97316",
 		chainRadius: 0.1,
+		levelUnit: " 体",
 		specialEffect: { label: "一段連鎖", desc: "直撃から近隣に一段連鎖" },
 	},
 };
@@ -115,10 +123,10 @@ export type TechniqueStats = {
 };
 
 export const TECHNIQUE_STATS: Record<TechniqueId, TechniqueStats> = {
-	red: { damage: 2, hitEase: 4, support: 1, specialCombo: 1, coolness: 3 },
+	red: { damage: 3, hitEase: 4, support: 1, specialCombo: 1, coolness: 3 },
 	blue: { damage: 1, hitEase: 1, support: 5, specialCombo: 3, coolness: 1 },
 	pink: { damage: 5, hitEase: 2, support: 1, specialCombo: 3, coolness: 5 },
-	yellow: { damage: 5, hitEase: 2, support: 1, specialCombo: 1, coolness: 3 },
+	yellow: { damage: 5, hitEase: 3, support: 1, specialCombo: 2, coolness: 3 },
 	purple: { damage: 2, hitEase: 2, support: 1, specialCombo: 5, coolness: 1 },
 	orange: { damage: 4, hitEase: 1, support: 1, specialCombo: 5, coolness: 2 },
 };
