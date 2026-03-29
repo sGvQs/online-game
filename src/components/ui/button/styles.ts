@@ -22,6 +22,7 @@ const button = tv({
             danger: "",
             secondary: "",
             yellow: "",
+            blue: "",
         },
         size: {
             sm: "text-xs px-3 py-1.5",
@@ -80,6 +81,12 @@ const button = tv({
             variant: "yellow",
             class:
                 "bg-amber-400/90 text-white border border-amber-300/50 shadow-[0_0_15px_rgba(251,191,36,0.3)] hover:shadow-[0_0_25px_rgba(251,191,36,0.5)] hover:scale-105 active:scale-95",
+        },
+        {
+            screen: "default",
+            variant: "blue",
+            class:
+                "bg-blue-500/90 text-white border border-blue-400/50 shadow-[0_0_15px_rgba(59,130,246,0.3)] hover:shadow-[0_0_25px_rgba(59,130,246,0.5)] hover:scale-105 active:scale-95",
         },
 
         // --- null-hand ---

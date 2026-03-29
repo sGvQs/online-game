@@ -141,7 +141,7 @@ export function TitleScreen({
 										router.push(`/game/${roomId}/star-shield/ranking`);
 									}
 								}}
-								className={button({ variant: "solid", fullWidth: true , size: "lg" })}
+								className={button({ variant: "blue", fullWidth: true , size: "lg" })}
 							>
 								ランキング
 							</Link>

@@ -11,7 +11,8 @@ type ButtonVariant =
     | "success"
     | "danger"
     | "secondary"
-    | "yellow";
+    | "yellow"
+    | "blue";
 type ButtonSize = "sm" | "md" | "lg" | "xl";
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
