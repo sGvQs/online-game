@@ -63,6 +63,7 @@ export function LeaveRoomButton({ roomId, isHost, onLeaveRoom }: LeaveRoomButton
 						<Button
 							variant="danger"
 							onClick={handleConfirm}
+							se="submit"
 						>
 							<Typography variant="label" font="cherry-bomb-one" className="font-bold">
 								{isHost ? "かいさんする" : "ルームをでる"}

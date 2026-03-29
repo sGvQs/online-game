@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
+import { Link } from "@/components/ui/link";
 import { useRouter } from "next/navigation";
 import { motion, animate } from "framer-motion";
 import Image from "next/image";
@@ -157,6 +157,7 @@ export function TitleScreen({
 									variant="success"
 									onClick={onExit}
 									size="lg"
+									se="submit"
 								>
 									もどる
 								</Button>
@@ -178,6 +179,7 @@ export function TitleScreen({
 								<FloatGlow active={canStart} variant={GlowVariant.Primary} className="col-span-2">
 									<Button
 										variant="primary"
+										se="submit"
 										onClick={() => canStart ? onStartGame() : setShowCannotStartModal(true)}
 										size="lg"
 										className="w-full"

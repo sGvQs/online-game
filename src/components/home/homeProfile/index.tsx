@@ -151,6 +151,7 @@ export function HomeProfile({
 						</Button>
 						<Button
 							variant="primary"
+							se="submit"
 							onClick={handleSave}
 						>
 							<Typography variant="label" font="cherry-bomb-one" className="font-bold">

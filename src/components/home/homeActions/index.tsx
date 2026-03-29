@@ -34,6 +34,7 @@ export function HomeActions() {
             <Button
                 variant="primary"
                 size="lg"
+                se="submit"
                 onClick={async () => {
                     showLoading();
                     try {
@@ -48,6 +49,7 @@ export function HomeActions() {
             <Button
                 variant="primary"
                 size="lg"
+                se="submit"
                 onClick={() => router.push("/room/search")}
             >
                 <Typography variant="label" font="cherry-bomb-one" className="font-bold">ルームをさがす</Typography>

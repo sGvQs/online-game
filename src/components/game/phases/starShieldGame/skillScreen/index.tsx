@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, type CSSProperties } from "react";
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from "@/components/ui/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { ProtectedStar } from "../playing/protectedStar";
 import { AuroraGlow } from "@/components/game/common/starShield/auroraGlow";

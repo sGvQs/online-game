@@ -1,7 +1,9 @@
 "use client";
 
+import { useContext } from "react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import { SoundContext } from "@/lib/sound-context";
 import { TECHNIQUES } from "@/constants/starShieldGame/techniques";
 import {
 	NORMAL_ATTACK_UNLOCK_COSTS,
@@ -39,6 +41,7 @@ export function SkillPreviewModal({
 	) => Promise<void>;
 	onClose: () => void;
 }) {
+	const sound = useContext(SoundContext);
 	let currentLevel = 0;
 	let maxLevel = 1;
 	let nextCost: number | null = null;
@@ -190,7 +193,14 @@ export function SkillPreviewModal({
 						<button
 							disabled={!canAfford || !purchaseFn}
 							onClick={() => {
-								if (purchaseFn) handlePurchase(purchaseFn, purchaseLabelForFn);
+								if (purchaseFn) {
+									if (sound?.isPlaying) {
+										const audio = new Audio("/se/buy-se.mp3");
+										audio.volume = 0.1;
+										audio.play().catch(() => {});
+									}
+									handlePurchase(purchaseFn, purchaseLabelForFn);
+								}
 							}}
 							className={cn(
 								"w-full py-3.5 px-4 rounded-xl font-bold text-[15px] flex items-center justify-center gap-3 transition-all font-cherry-bomb-one",

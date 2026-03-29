@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { useLoading } from "@/lib/loading-context";
+import { SoundContext } from "@/lib/sound-context";
 import { Users } from "lucide-react";
 import { gameCarouselSection } from "./styles";
 import { Modal } from "@/components/ui/modal";
@@ -104,6 +105,14 @@ export function GameCarouselSection({
 }: GameCarouselSectionProps) {
 	const styles = gameCarouselSection();
 	const { showLoading, hideLoading } = useLoading();
+	const sound = useContext(SoundContext);
+
+	const playSE = (file: string) => {
+		if (!sound?.isPlaying) return;
+		const audio = new Audio(file);
+		audio.volume = 0.1;
+		audio.play().catch(() => {});
+	};
 	const [activeIndex, setActiveIndex] = useState(0);
 	const [selectedRoleIndex, setSelectedRoleIndex] = useState(0);
 	const [isVideoLoading, setIsVideoLoading] = useState(true);
@@ -149,9 +158,11 @@ export function GameCarouselSection({
 	const handleCardClick = (i: number) => {
 		const pos = getPosition(i);
 		if (pos !== "center") {
+			playSE("/se/change-slide-se.mp3");
 			setActiveIndex(i);
 			return;
 		}
+		playSE("/se/submit-se.mp3");
 		if (isHost) {
 			handleGameStart();
 		} else {
@@ -242,6 +253,7 @@ export function GameCarouselSection({
 						variant="primary"
 						onClick={handleGameStart}
 						className="font-cherry-bomb-one"
+						se="submit"
 					>
 						はじめる
 					</Button>

@@ -33,6 +33,7 @@ export const GameButton = ({
 			variant={VARIANT_MAP[variant]}
 			size={size}
 			fullWidth={fullWidth}
+			se={null}
 			onClick={(e) => {
 				play(
 					variant === "primary" || variant === "danger" ? "submit" : "select",
