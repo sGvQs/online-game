@@ -251,6 +251,37 @@ export function LoadoutAnimPreview({
 					.toString(16)
 					.padStart(2, "0");
 
+				if (b.pinkBezier) {
+					const pb = b.pinkBezier;
+					const elapsed = now - pb.t0;
+					let dx: number, dy: number;
+					if (elapsed <= pb.durationMs) {
+						const te = Math.max(0, elapsed / pb.durationMs);
+						dx = 2 * (1 - te) * (pb.p1.x - pb.p0.x) + 2 * te * (pb.p2.x - pb.p1.x);
+						dy = 2 * (1 - te) * (pb.p1.y - pb.p0.y) + 2 * te * (pb.p2.y - pb.p1.y);
+					} else {
+						dx = pb.exitVx;
+						dy = pb.exitVy;
+					}
+					const angle = Math.atan2(dy, dx);
+					const capsuleLen = b.radius * 3;
+					const alpha = Math.max(0, b.alpha);
+					c.save();
+					c.translate(b.x, b.y);
+					c.rotate(angle);
+					c.shadowBlur = 8;
+					c.shadowColor = b.color;
+					const grad = c.createLinearGradient(-capsuleLen / 2, 0, capsuleLen / 2, 0);
+					grad.addColorStop(0, `rgba(254,249,195,${alpha})`);
+					grad.addColorStop(1, `rgba(236,72,153,${alpha})`);
+					c.beginPath();
+					c.roundRect(-capsuleLen / 2, -b.radius, capsuleLen, b.radius * 2, b.radius);
+					c.fillStyle = grad;
+					c.fill();
+					c.restore();
+					continue;
+				}
+
 				c.save();
 				c.shadowBlur = techniqueId === "purple" ? 16 : 8;
 				c.shadowColor = b.color;

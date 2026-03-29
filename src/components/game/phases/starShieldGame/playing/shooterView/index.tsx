@@ -180,7 +180,7 @@ function BulletCircle({ bullet }: { bullet: Bullet }) {
 					style={{
 						width: `${lengthPx}px`,
 						height: `${sizePx}px`,
-						backgroundColor: bulletColor,
+						background: `linear-gradient(to right, #fef9c3, ${bulletColor})`,
 					}}
 				/>
 			</div>
