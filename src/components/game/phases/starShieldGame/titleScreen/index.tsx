@@ -10,6 +10,7 @@ import type { UserRanking } from "@/types";
 import type { PairRanking } from "@/server/actions/game/starShieldRankingActions";
 import { Button } from "@/components/ui/button";
 import { button } from "@/components/ui/button/styles";
+import { FloatGlow, GlowVariant } from "@/components/ui/floatGlow";
 import { Modal } from "@/components/ui/modal";
 import { ProtectedStar } from "../playing/protectedStar";
 import { DinosaurWithBalls } from "@/components/game/common/starShield/dinosaurWithBalls";
@@ -48,40 +49,6 @@ const HOW_TO_PLAY = [
 	{ iconSrc: ICONS.FIRE, text: "隕石が星に直撃するとゲームオーバー" },
 ];
 
-function FloatingCTA({
-	active,
-	className,
-	glowColor = "rgba(99,102,241,0.5)",
-	children,
-}: {
-	active: boolean;
-	className?: string;
-	glowColor?: string;
-	children: React.ReactNode;
-}) {
-	return (
-		<motion.div
-			className={className ? `rounded-lg ${className}` : "rounded-lg"}
-			animate={
-				active
-					? {
-							y: [0, -2, 0],
-							boxShadow: [
-								`0 0 0px ${glowColor}`,
-								`0 0 20px ${glowColor}`,
-								`0 0 0px ${glowColor}`,
-							],
-						}
-					: { y: 0, boxShadow: "0 0 0px transparent" }
-			}
-			transition={
-				active ? { repeat: Infinity, duration: 1.6, ease: "easeInOut" } : {}
-			}
-		>
-			{children}
-		</motion.div>
-	);
-}
 
 export function TitleScreen({
 	room,
@@ -153,7 +120,7 @@ export function TitleScreen({
 							animate={{ opacity: 1 }}
 							transition={{ duration: 0.8, delay: 0.4 }}
 						>
-							<FloatingCTA active={!isReady} glowColor="rgba(236,72,153,0.5)">
+							<FloatGlow active={!isReady} variant={GlowVariant.Secondary}>
 								<Button
 									variant="secondary"
 									onClick={() => !isReady && onToggleReady()}
@@ -163,7 +130,7 @@ export function TitleScreen({
 								>
 									じゅんびかんりょう
 								</Button>
-							</FloatingCTA>
+							</FloatGlow>
 							<Link
 								href={`/game/${roomId}/star-shield/ranking`}
 								onClick={async (e) => {
@@ -200,7 +167,7 @@ export function TitleScreen({
 								スキル
 							</Link>
 							{isHost && (
-								<FloatingCTA active={canStart} className="col-span-2" glowColor="rgba(99,102,241,0.5)">
+								<FloatGlow active={canStart} variant={GlowVariant.Primary} className="col-span-2">
 									<Button
 										variant="primary"
 										onClick={() => canStart ? onStartGame() : setShowCannotStartModal(true)}
@@ -209,7 +176,7 @@ export function TitleScreen({
 									>
 										スタート
 									</Button>
-								</FloatingCTA>
+								</FloatGlow>
 							)}
 						</motion.div>
 					</div>
