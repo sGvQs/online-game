@@ -27,6 +27,11 @@ const ORBIT_CENTER_X = 0;
 // 【公転速度】PERIOD (ms, 大きくすると遅くなる)
 const PERIOD = 10000;
 
+// 【左右速度倍率】左移動(手前)と右移動(奥)で速度を変える
+// 大きくすると速くなる。PERIOD で全体ベースを調整した上で倍率をかける
+const SPEED_LEFT = 1.2;   // 左移動(手前通過側) ← ここで調整
+const SPEED_RIGHT = 0.8;  // 右移動(奥通過側)  ← ここで調整
+
 // 【軌道サイズ】A=長半径(px), B=短半径(px)
 //   A を大きくすると右下↔左上方向に広がる。
 //   B を大きくすると垂直方向の振れ幅が増す（薄くすると線に近くなる）。
@@ -36,12 +41,9 @@ const B = 20;
 // 【スケール範囲】SCALE_MIN〜SCALE_MAX
 //   SCALE_MAX = 右下(手前)での最大サイズ倍率
 //   SCALE_MIN = 左上(奥)での最小サイズ倍率
-const SCALE_MIN = 0.5;
-const SCALE_MAX = 5;
+const SCALE_MIN = 1;
+const SCALE_MAX = 4;
 
-// 【透明度範囲】OPACITY_MIN〜OPACITY_MAX
-const OPACITY_MIN = 1.0;
-const OPACITY_MAX = 1.0;
 // ─────────────────────────────────────────────────────────────
 
 const TILT = -Math.PI / 6; // -45°（右下↔左上の軌道傾き）
@@ -60,7 +62,8 @@ export function LogoWithOrbit() {
 		const animate = (time: number) => {
 			if (lastTimeRef.current !== null) {
 				const delta = time - lastTimeRef.current;
-				angleRef.current += (delta / PERIOD) * 2 * Math.PI;
+				const speedMult = Math.sin(angleRef.current) > 0 ? SPEED_LEFT : SPEED_RIGHT;
+			angleRef.current += (delta / PERIOD) * 2 * Math.PI * speedMult;
 			}
 			lastTimeRef.current = time;
 
@@ -75,14 +78,12 @@ export function LogoWithOrbit() {
 			//   t=3π/2 (中心を右移動中) → depth=0 → 最小スケール (Pukapuka の "ap" あたり)
 			const depth = (Math.sin(t) + 1) / 2;
 			const scale = SCALE_MIN + depth * (SCALE_MAX - SCALE_MIN);
-			const opacity = OPACITY_MIN + depth * (OPACITY_MAX - OPACITY_MIN);
 			// z-index は速度方向で判定: sin(t)>0 = 左移動中 = 前面, sin(t)≤0 = 右移動中 = 背面
 			// ※切り替わりタイミングを調整したい場合は 0 の部分を ±0.1〜0.3 で微調整する
 			const zIndex = Math.sin(t) > 0 ? 10 : 1;
 
 			if (objectRef.current) {
 				objectRef.current.style.transform = `translate(calc(-50% + ${x}px), calc(-50% + ${y}px)) scale(${scale})`;
-				objectRef.current.style.opacity = String(opacity);
 				objectRef.current.style.zIndex = String(zIndex);
 			}
 
@@ -119,7 +120,7 @@ export function LogoWithOrbit() {
 			<PukapukaLogo size="large" className="relative z-5" />
 			<div
 				ref={objectRef}
-				className="absolute top-1/2 left-1/2 w-12 h-12 cursor-pointer"
+				className="absolute top-1/2 left-1/2 w-12 h-12 cursor-pointer opacity-100"
 				onClick={handleClick}
 			>
 				<Image
