@@ -47,7 +47,6 @@ const GAMES = [
 	},
 	{
 		type: "star-shield",
-		font: "honk" as TypographyFont,
 		title: "STAR SHIELD",
 		icon: "/svg/object/target-circle.svg",
 		desc: "90秒間星を守りきれ！",
