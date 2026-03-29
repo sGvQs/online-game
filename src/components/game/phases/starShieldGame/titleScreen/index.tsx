@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
+import { motion, animate } from "framer-motion";
 import Image from "next/image";
 import { RoomWithUsersAndReadyStatus, RoomUserWithReadyStatus } from "@/types";
 import type { UserRanking } from "@/types";
@@ -74,8 +74,16 @@ export function TitleScreen({
 
 	useEffect(() => {
 		getMyStarShieldProgress()
-			.then((p) => setTypingCount(p.totalTypingCount ?? 0))
-			.catch(() => { });
+			.then((p) => {
+				const target = p.totalTypingCount ?? 0;
+				const controls = animate(0, target, {
+					duration: 1.8,
+					ease: [0.16, 1, 0.3, 1],
+					onUpdate: (v) => setTypingCount(Math.round(v)),
+				});
+				return () => controls.stop();
+			})
+			.catch(() => {});
 	}, []);
 
 	return (
