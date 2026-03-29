@@ -9,5 +9,5 @@ export const orbitBridge = {
 	/** 当たり判定の半径 (px) */
 	hitRadius: 32,
 	/** 命中時に呼ぶコールバック - LogoWithOrbit がセット */
-	triggerHit: null as (() => void) | null,
+	triggerHit: null as ((damage: number) => void) | null,
 };

@@ -7,12 +7,15 @@ import { SoundContext } from "@/lib/sound-context";
 import { AMMO_MAX, HomeAmmoProvider } from "@/lib/home-ammo-context";
 import { orbitBridge } from "@/components/home/orbitBridge";
 
-const BALL_W = 6;           // 球の幅 (px)
-const BALL_H = 22;          // 球の高さ (px) — 細長い形状
+const BALL_W = 6; // 球の幅 (px)
+const BALL_H = 22; // 球の高さ (px) — 細長い形状
+const BALL_LONG_H = BALL_H * 5; // クリック時の黄弾（赤の5倍）
 const BALL_DURATION = 0.45; // 飛行時間 (秒)
 
+const DAMAGE_KEYBOARD = 1;
+const DAMAGE_CLICK = 30;
+
 // 【当たり判定半径】カーソル位置と星の距離がこの値以内ならヒット (px)
-// 小さくするほどシビアになる
 const HIT_RADIUS = 40;
 
 interface Ball {
@@ -22,6 +25,8 @@ interface Ball {
 	toX: number;
 	toY: number;
 	angle: number;
+	height: number;
+	bulletClassName: string;
 }
 
 interface Collision {
@@ -80,7 +85,10 @@ export function HomeCursor({ children }: { children: React.ReactNode }) {
 		(
 			toX: number,
 			toY: number,
-			options?: { syntheticClickTarget?: HTMLElement },
+			options?: {
+				syntheticClickTarget?: HTMLElement;
+				mode?: "keyboard" | "click";
+			},
 		): boolean => {
 			const rect = containerRef.current?.getBoundingClientRect();
 			if (!rect) return false;
@@ -88,13 +96,21 @@ export function HomeCursor({ children }: { children: React.ReactNode }) {
 			const w = rect.width;
 			const h = rect.height;
 
-			const inside =
-				toX >= 0 && toY >= 0 && toX <= w && toY <= h;
+			const inside = toX >= 0 && toY >= 0 && toX <= w && toY <= h;
 			if (!inside) return false;
 
-			if (ammoRef.current <= 0) return false;
-			ammoRef.current -= 1;
-			setAmmo(ammoRef.current);
+			const mode = options?.mode ?? "keyboard";
+			const isClick = mode === "click";
+			if (!isClick) {
+				if (ammoRef.current <= 0) return false;
+				ammoRef.current -= 1;
+				setAmmo(ammoRef.current);
+			}
+			const damage = isClick ? DAMAGE_CLICK : DAMAGE_KEYBOARD;
+			const ballHeight = isClick ? BALL_LONG_H : BALL_H;
+			const bulletClassName = isClick
+				? "bg-yellow-400 shadow-[0_0_6px_rgba(250,204,21,0.55)]"
+				: "bg-red-500";
 
 			const sources = [
 				{ fromX: 0, fromY: h },
@@ -107,6 +123,8 @@ export function HomeCursor({ children }: { children: React.ReactNode }) {
 				toX,
 				toY,
 				angle: Math.atan2(toY - fromY, toX - fromX) * (180 / Math.PI) + 90,
+				height: ballHeight,
+				bulletClassName,
 			}));
 			setBalls((prev) => [...prev, ...newBalls]);
 
@@ -122,7 +140,7 @@ export function HomeCursor({ children }: { children: React.ReactNode }) {
 				const starY = orbitBridge.clientY - rect.top;
 				const dist = Math.hypot(toX - starX, toY - starY);
 				if (dist < HIT_RADIUS) {
-					orbitBridge.triggerHit?.();
+					orbitBridge.triggerHit?.(damage);
 					const colId = nextId++;
 					setCollisions((prev) => [...prev, { id: colId, x: toX, y: toY }]);
 					setTimeout(() => {
@@ -151,7 +169,10 @@ export function HomeCursor({ children }: { children: React.ReactNode }) {
 
 			const toX = e.clientX - rect.left;
 			const toY = e.clientY - rect.top;
-			fireToward(toX, toY, { syntheticClickTarget: e.target as HTMLElement });
+			fireToward(toX, toY, {
+				syntheticClickTarget: e.target as HTMLElement,
+				mode: "click",
+			});
 		},
 		[fireToward],
 	);
@@ -174,7 +195,7 @@ export function HomeCursor({ children }: { children: React.ReactNode }) {
 
 			const toX = cursorX.get();
 			const toY = cursorY.get();
-			if (fireToward(toX, toY)) {
+			if (fireToward(toX, toY, { mode: "keyboard" })) {
 				e.preventDefault();
 			}
 		};
@@ -240,10 +261,22 @@ export function HomeCursor({ children }: { children: React.ReactNode }) {
 			{balls.map((b) => (
 				<motion.div
 					key={b.id}
-					className="absolute top-0 left-0 pointer-events-none z-9998 bg-red-500 rounded-full"
-					style={{ width: BALL_W, height: BALL_H, rotate: b.angle }}
-					initial={{ x: b.fromX - BALL_W / 2, y: b.fromY - BALL_H / 2, scale: 2.5 }}
-					animate={{ x: b.toX - BALL_W / 2, y: b.toY - BALL_H / 2, scale: 0 }}
+					className={`absolute top-0 left-0 pointer-events-none z-9998 rounded-full ${b.bulletClassName}`}
+					style={{
+						width: BALL_W,
+						height: b.height,
+						rotate: b.angle,
+					}}
+					initial={{
+						x: b.fromX - BALL_W / 2,
+						y: b.fromY - b.height / 2,
+						scale: 2.5,
+					}}
+					animate={{
+						x: b.toX - BALL_W / 2,
+						y: b.toY - b.height / 2,
+						scale: 0,
+					}}
 					transition={{ duration: BALL_DURATION, ease: "linear" }}
 					onAnimationComplete={() => removeBall(b.id)}
 				/>

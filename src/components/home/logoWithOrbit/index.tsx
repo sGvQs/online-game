@@ -90,7 +90,7 @@ export function LogoWithOrbit() {
 	// 爆発時に表示する星のsrcを保持（exploding中にcurrentIndexが変わっても表示が崩れないよう）
 	const explodingSrcRef = useRef<(typeof OBJECTS)[number]["src"]>(OBJECTS[0].src);
 
-	const handleHit = useCallback(() => {
+	const handleHit = useCallback((damage: number) => {
 		if (explodingRef.current) return;
 
 		// 音はONのみ（OFFにはしない）
@@ -101,8 +101,8 @@ export function LogoWithOrbit() {
 			audio.play().catch(() => {});
 		}
 
-		hpRef.current -= 1;
-		setDisplayHp(hpRef.current);
+		hpRef.current -= damage;
+		setDisplayHp(Math.max(0, hpRef.current));
 		if (hpRef.current <= 0) {
 			// 爆発開始
 			explodingRef.current = true;
