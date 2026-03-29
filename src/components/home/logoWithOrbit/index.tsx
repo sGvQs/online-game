@@ -51,23 +51,35 @@ const TILT = -Math.PI / 6;
 const COS_TILT = Math.cos(TILT);
 const SIN_TILT = Math.sin(TILT);
 
-// ── HP ────────────────────────────────────────────────────────
-const RESPAWN_DELAY = 2000; // ms
-const PARTICLE_COLORS = [
-	"bg-yellow-300",
-	"bg-orange-400",
-	"bg-yellow-100",
-	"bg-white",
-	"bg-red-400",
-	"bg-yellow-400",
-];
+// ── HP / 破壊演出（微調整用）──────────────────────────────────
+const RESPAWN_DELAY_MS = 2000;
+
+/** 中央の星が膨らんで消えるアニメ */
+const EXPLOSION_STAR_SIZE_PX = 48; // 旧 w-12
+const EXPLOSION_STAR_SCALE_END = 4;
+const EXPLOSION_STAR_DURATION_SEC = 0.5;
+
+/** 飛び散る隕石 SVG */
+const METEOR_SRC = "/svg/object/metor.svg";
+const METEOR_COUNT = 100;
+const METEOR_BOX_PX = 32; // 1個あたりの表示枠（旧 w-8）
+const METEOR_DIST_MIN_PX = 45;
+const METEOR_DIST_SPREAD_PX = 140; // 上に加算するランダム幅
+const METEOR_SPIN_RANGE_DEG = 1080; // (random - 0.5) * これ
+const METEOR_DURATION_MIN_SEC = 0.5;
+const METEOR_DURATION_SPREAD_SEC = 0.55;
+const METEOR_START_SCALE_MIN = 0.45;
+const METEOR_START_SCALE_SPREAD = 0.75;
+const METEOR_MOTION_EASE = "easeOut" as const;
 // ─────────────────────────────────────────────────────────────
 
-interface Particle {
+interface MeteorParticle {
 	id: number;
-	angle: number;
+	angleRad: number;
 	dist: number;
-	color: string;
+	spinDeg: number;
+	duration: number;
+	startScale: number;
 }
 
 export function LogoWithOrbit() {
@@ -86,7 +98,7 @@ export function LogoWithOrbit() {
 	const explodingRef = useRef(false);
 	const [exploding, setExploding] = useState(false);
 	const lastPosRef = useRef({ x: 0, y: 0 });
-	const [particles, setParticles] = useState<Particle[]>([]);
+	const [meteors, setMeteors] = useState<MeteorParticle[]>([]);
 	// 爆発時に表示する星のsrcを保持（exploding中にcurrentIndexが変わっても表示が崩れないよう）
 	const explodingSrcRef = useRef<(typeof OBJECTS)[number]["src"]>(OBJECTS[0].src);
 
@@ -114,13 +126,23 @@ export function LogoWithOrbit() {
 			dmgAudio.volume = 0.3;
 			dmgAudio.play().catch(() => {});
 
-			const newParticles: Particle[] = Array.from({ length: 12 }, (_, i) => ({
-				id: i,
-				angle: (i / 12) * 360,
-				dist: 60 + Math.random() * 50,
-				color: PARTICLE_COLORS[i % PARTICLE_COLORS.length],
-			}));
-			setParticles(newParticles);
+			const newMeteors: MeteorParticle[] = Array.from(
+				{ length: METEOR_COUNT },
+				(_, i) => ({
+					id: i,
+					angleRad: Math.random() * Math.PI * 2,
+					dist:
+						METEOR_DIST_MIN_PX + Math.random() * METEOR_DIST_SPREAD_PX,
+					spinDeg: (Math.random() - 0.5) * METEOR_SPIN_RANGE_DEG,
+					duration:
+						METEOR_DURATION_MIN_SEC +
+						Math.random() * METEOR_DURATION_SPREAD_SEC,
+					startScale:
+						METEOR_START_SCALE_MIN +
+						Math.random() * METEOR_START_SCALE_SPREAD,
+				}),
+			);
+			setMeteors(newMeteors);
 			setExploding(true);
 
 			setTimeout(() => {
@@ -133,9 +155,9 @@ export function LogoWithOrbit() {
 				});
 				explodingRef.current = false;
 				setExploding(false);
-				setParticles([]);
+				setMeteors([]);
 				if (objectRef.current) objectRef.current.style.visibility = "visible";
-			}, RESPAWN_DELAY);
+			}, RESPAWN_DELAY_MS);
 		}
 	}, [sound, currentIndex]);
 
@@ -222,16 +244,24 @@ export function LogoWithOrbit() {
 				<>
 					{/* 星がドカンと膨らんで消える */}
 					<div
-						className="absolute top-1/2 left-1/2 w-12 h-12 pointer-events-none z-20"
+						className="absolute top-1/2 left-1/2 pointer-events-none z-20"
 						style={{
+							width: EXPLOSION_STAR_SIZE_PX,
+							height: EXPLOSION_STAR_SIZE_PX,
 							transform: `translate(calc(-50% + ${explosionPos.x}px), calc(-50% + ${explosionPos.y}px))`,
 						}}
 					>
 						<motion.div
 							className="w-full h-full"
 							initial={{ scale: 1, opacity: 1 }}
-							animate={{ scale: 4, opacity: 0 }}
-							transition={{ duration: 0.5, ease: "easeOut" }}
+							animate={{
+								scale: EXPLOSION_STAR_SCALE_END,
+								opacity: 0,
+							}}
+							transition={{
+								duration: EXPLOSION_STAR_DURATION_SEC,
+								ease: METEOR_MOTION_EASE,
+							}}
 						>
 							<Image
 								src={explodingSrcRef.current}
@@ -242,26 +272,45 @@ export function LogoWithOrbit() {
 						</motion.div>
 					</div>
 
-					{/* パーティクル */}
-					{particles.map((p) => (
+					{/* 隕石パーティクル */}
+					{meteors.map((p) => (
 						<div
 							key={p.id}
-							className="absolute top-1/2 left-1/2 w-2 h-2 pointer-events-none z-20"
+							className="absolute top-1/2 left-1/2 pointer-events-none z-20"
 							style={{
+								width: METEOR_BOX_PX,
+								height: METEOR_BOX_PX,
 								transform: `translate(calc(-50% + ${explosionPos.x}px), calc(-50% + ${explosionPos.y}px))`,
 							}}
 						>
 							<motion.div
-								className={`w-full h-full rounded-full ${p.color}`}
-								initial={{ x: 0, y: 0, opacity: 1, scale: 1 }}
+								className="relative w-full h-full"
+								initial={{
+									x: 0,
+									y: 0,
+									opacity: 1,
+									scale: p.startScale,
+									rotate: 0,
+								}}
 								animate={{
-									x: Math.cos((p.angle * Math.PI) / 180) * p.dist,
-									y: Math.sin((p.angle * Math.PI) / 180) * p.dist,
+									x: Math.cos(p.angleRad) * p.dist,
+									y: Math.sin(p.angleRad) * p.dist,
 									opacity: 0,
 									scale: 0,
+									rotate: p.spinDeg,
 								}}
-								transition={{ duration: 0.8, ease: "easeOut" }}
-							/>
+								transition={{
+									duration: p.duration,
+									ease: METEOR_MOTION_EASE,
+								}}
+							>
+								<Image
+									src={METEOR_SRC}
+									alt=""
+									fill
+									className="object-contain"
+								/>
+							</motion.div>
 						</div>
 					))}
 				</>
