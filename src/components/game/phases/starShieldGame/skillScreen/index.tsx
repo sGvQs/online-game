@@ -35,6 +35,7 @@ import { SkillPreviewModal } from "./modal/SkillPreviewModal";
 import { StarShieldTitle } from "@/components/game/common/starShield/starShieldTitle";
 import { Typography } from "@/components/ui/typography";
 import { button } from "@/components/ui/button/styles";
+import { RoleBadge } from "@/components/game/common/starShield/roleBadge";
 
 // ============================================================
 // 定数
@@ -242,16 +243,9 @@ export function StarShieldSkill({
 					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 						{/* ===================== ATTACK COLUMN ===================== */}
 						<div className="flex flex-col gap-4 p-4 rounded-xl bg-indigo-500/5 border border-indigo-500/10 overflow-hidden h-full">
-							<h3 className="text-indigo-400 text-xs font-bold flex items-center gap-2 font-dot-gothic-16 mb-1">
-								<Image
-									src={ICONS.SHOOTER}
-									alt="Shooter"
-									width={16}
-									height={16}
-									className="opacity-80"
-								/>
-								ATTACK（Shooter）
-							</h3>
+							<div className="flex items-center gap-2 mb-1.5">
+								<RoleBadge role="SHOOTER" />
+							</div>
 
 							{/* 通常攻撃 */}
 							<div>
@@ -302,16 +296,9 @@ export function StarShieldSkill({
 
 						{/* ===================== DEFENCE COLUMN ===================== */}
 						<div className="flex flex-col gap-4 p-4 rounded-xl bg-emerald-500/5 border border-emerald-500/10 overflow-hidden h-full">
-							<h3 className="text-emerald-400 text-xs font-bold flex items-center gap-2 font-dot-gothic-16 mb-1">
-								<Image
-									src={ICONS.TYPIST}
-									alt="Typist"
-									width={16}
-									height={16}
-									className="opacity-80"
-								/>
-								DEFENCE（Typist）
-							</h3>
+							<div className="flex items-center gap-2 mb-1.5">
+								<RoleBadge role="TYPIST" />
+							</div>
 
 							{/* 星のHP */}
 							<div>
@@ -441,7 +428,7 @@ export function StarShieldSkill({
 						icon={ICONS.SHOOTER}
 						label="ATTACK"
 						color="indigo"
-						desc="Shooter・攻撃担当"
+						desc="攻撃担当"
 					/>
 
 					{/* 通常攻撃 */}
@@ -512,7 +499,7 @@ export function StarShieldSkill({
 						icon={ICONS.TYPIST}
 						label="DEFENCE"
 						color="emerald"
-						desc="Typist・守護担当"
+						desc="守護担当"
 					/>
 
 					{/* 星のHP */}

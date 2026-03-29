@@ -6,6 +6,7 @@ import { RoomWithUsersAndReadyStatus, RoomUserWithReadyStatus } from "@/types";
 import { cn } from "@/lib/utils";
 import { ProtectedStar } from "../playing/protectedStar";
 import { DinosaurWithBalls } from "@/components/game/common/starShield/dinosaurWithBalls";
+import { RoleBadge } from "@/components/game/common/starShield/roleBadge";
 import { AuroraGlow } from "@/components/game/common/starShield/auroraGlow";
 import { roleSelectionScreen } from "./styles";
 import { Button } from "@/components/ui/button";
@@ -495,13 +496,6 @@ export function RoleSelectionScreen({
 										["--player-name-color" as string]: isMe
 											? "#ffffff"
 											: COLORS.WHITE_5,
-										...(roleMeta
-											? {
-												["--badge-color" as string]: roleMeta.text,
-												["--badge-bg" as string]: roleMeta.bg,
-												["--badge-border" as string]: `1px solid ${roleMeta.border}`,
-											}
-											: {}),
 									}}
 								>
 									<div className={styles.statusDot()} />
@@ -521,33 +515,7 @@ export function RoleSelectionScreen({
 											</Typography>
 										)}
 									</Typography>
-									{roleMeta ? (
-										<Typography
-											variant="small"
-											as="span"
-											font="cherry-bomb-one"
-											className={styles.roleBadge()}
-										>
-											<span className="relative w-3.5 h-3.5 shrink-0 block">
-												<Image
-													src={roleMeta.iconSrc}
-													alt=""
-													fill
-													className="object-contain"
-												/>
-											</span>
-											{roleMeta.label}
-										</Typography>
-									) : (
-										<Typography
-											variant="small"
-											as="span"
-											font="cherry-bomb-one"
-											className={styles.selectingLabel()}
-										>
-											せんたくちゅう…
-										</Typography>
-									)}
+									{role && <RoleBadge role={role} />}
 								</div>
 							);
 						})}
