@@ -27,6 +27,8 @@ export interface TechniqueConfig {
 	slowOnHit?: boolean;
 	/** 連鎖攻撃（一段。オレンジのみ。範囲・数は gameConfig で制御） */
 	chainRadius?: number;
+	/** スキル画面に表示する特殊効果の説明 */
+	specialEffect?: { label: string; desc: string };
 }
 
 export const TECHNIQUES: Record<TechniqueId, TechniqueConfig> = {
@@ -46,6 +48,7 @@ export const TECHNIQUES: Record<TechniqueId, TechniqueConfig> = {
 		speed: 1,
 		color: "#3b82f6",
 		slowOnHit: true,
+		specialEffect: { label: "スロー", desc: "命中した隕石の速度を下げる" },
 	},
 	// ピンク：　ダメージ ⭐️⭐️⭐️⭐️⭐️, 当てやすさ ⭐️, サポート ⭐️, 必殺技との相性　⭐️, かっこよさ ⭐️⭐️⭐️⭐️⭐️,
 	pink: {
@@ -55,6 +58,10 @@ export const TECHNIQUES: Record<TechniqueId, TechniqueConfig> = {
 		speed: 0.5,
 		color: "#ec4899",
 		count: 9,
+		specialEffect: {
+			label: "追尾ロケット",
+			desc: "照準へ丸み軌道で飛ぶロケット。レベルで 9→144 発まで扇状に均等配置",
+		},
 	},
 	// 黄色：　ダメージ ⭐️⭐️⭐️⭐️⭐️, 当てやすさ ⭐️⭐️, サポート ⭐️, 必殺技との相性　⭐️, かっこよさ ⭐️⭐️⭐️,
 	yellow_beam: {
@@ -65,6 +72,7 @@ export const TECHNIQUES: Record<TechniqueId, TechniqueConfig> = {
 		color: "#eab308",
 		count: 30,
 		verticalOffset: 0.01, // 進行方向に沿って3発オフセット（ビーム状）
+		specialEffect: { label: "ビーム", desc: "30発が前方に連続して飛ぶ" },
 	},
 	// 紫：　ダメージ ⭐️⭐️, 当てやすさ ⭐️⭐️, サポート ⭐️, 必殺技との相性　⭐️⭐️⭐️⭐️⭐️, かっこよさ ⭐️,
 	purple: {
@@ -74,6 +82,7 @@ export const TECHNIQUES: Record<TechniqueId, TechniqueConfig> = {
 		speed: 1,
 		color: "#a855f7",
 		piercing: true,
+		specialEffect: { label: "貫通", desc: "隕石を貫通し複数を同時に攻撃" },
 	},
 	// オレンジ：　ダメージ ⭐️⭐️⭐️⭐️, 当てやすさ ⭐️, サポート ⭐️, 必殺技との相性　⭐️⭐️⭐️⭐️⭐️, かっこよさ ⭐️⭐️,
 	orange: {
@@ -83,6 +92,7 @@ export const TECHNIQUES: Record<TechniqueId, TechniqueConfig> = {
 		speed: 1,
 		color: "#f97316",
 		chainRadius: 0.1,
+		specialEffect: { label: "一段連鎖", desc: "直撃から近隣に一段連鎖" },
 	},
 };
 

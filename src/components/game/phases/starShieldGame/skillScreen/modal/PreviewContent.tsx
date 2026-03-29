@@ -88,19 +88,7 @@ export function PreviewContent({
 		};
 		const trait = traitByTech[preview.techniqueId];
 
-		const specialEffects: Partial<
-			Record<TechniqueId, { label: string; desc: string }>
-		> = {
-			blue: { label: "スロー", desc: "命中した隕石の速度を下げる" },
-			yellow_beam: { label: "ビーム", desc: "30発が前方に連続して飛ぶ" },
-			purple: { label: "貫通", desc: "隕石を貫通し複数を同時に攻撃" },
-			orange: { label: "一段連鎖", desc: "直撃から近隣に一段連鎖" },
-			pink: {
-				label: "追尾ロケット",
-				desc: "照準へ丸み軌道で飛ぶロケット。レベルで 9→144 発まで扇状に均等配置",
-			},
-		};
-		const fx = specialEffects[preview.techniqueId];
+		const fx = tech.specialEffect;
 
 		return (
 			<div>
