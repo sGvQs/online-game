@@ -2,13 +2,14 @@
 
 import { useState, useEffect } from "react";
 import { useLoading } from "@/lib/loading-context";
-import Image from "next/image";
 import { Users } from "lucide-react";
 import { gameCarouselSection } from "./styles";
 import { Modal } from "@/components/ui/modal";
 import { LeaveRoomButton } from "../leaveRoomButton";
 import { Button } from "@/components/ui/button";
 import { Typography } from "@/components/ui/typography";
+import type { TypographyFont } from "@/components/ui/typography/styles";
+import { ASCII_ART } from "@/constants/errorHunterGame/constants";
 import { selectGame } from "@/server/actions/room";
 import {
 	isPlayerCountValid,
@@ -25,6 +26,7 @@ interface GameCarouselSectionProps {
 const GAMES = [
 	{
 		type: "error-hunter",
+		font: "dot-gothic-16" as TypographyFont,
 		title: "ERROR HUNTER",
 		icon: "/svg/object/old-pc.svg",
 		desc: "バグを最速で潰せ！",
@@ -36,6 +38,7 @@ const GAMES = [
 	},
 	{
 		type: "null-hand",
+		font: "sans" as TypographyFont,
 		title: "NULL HAND",
 		icon: "/svg/object/null-hand.svg",
 		desc: "心理戦で相手を欺け",
@@ -47,6 +50,7 @@ const GAMES = [
 	},
 	{
 		type: "star-shield",
+		font: "honk" as TypographyFont,
 		title: "STAR SHIELD",
 		icon: "/svg/object/target-circle.svg",
 		desc: "90秒間星を守りきれ！",
@@ -148,17 +152,24 @@ export function GameCarouselSection({
 							className={`${styles.cardBase()} ${positionClass[pos]} ${CARD_THEME[game.type]}`}
 							onClick={() => handleCardClick(i)}
 						>
-							<div className={styles.gameIcon()}>
-								<Image
-									src={game.icon}
-									alt={game.title}
-									fill
-									className="object-contain"
-								/>
-							</div>
-							<Typography variant="h2" font="dot-gothic-16" as="div" className={styles.gameTitle()}>
-								{game.title}
-							</Typography>
+							{game.type === "error-hunter" ? (
+								<pre className="font-['Courier_New',monospace] text-[5px] leading-[1.2] font-bold whitespace-pre overflow-hidden mx-auto">
+									{ASCII_ART}
+								</pre>
+							) : game.type === "star-shield" ? (
+								<div className="select-none flex flex-col items-center">
+									<Typography variant="display" font="honk" as="span" className="text-6xl block leading-[0.6]">
+										STAR
+									</Typography>
+									<Typography variant="display" font="honk" as="span" className="text-6xl block leading-[0.6]">
+										SHIELD
+									</Typography>
+								</div>
+							) : (
+								<Typography variant="display" font={game.font} as="div" className={`${styles.gameTitle()} drop-shadow-[2px_2px_0_rgba(255,68,68,0.4)]`}>
+									{game.title}
+								</Typography>
+							)}
 							<Typography variant="small" as="div" className={styles.gameDesc()}>
 								{game.desc}
 							</Typography>
