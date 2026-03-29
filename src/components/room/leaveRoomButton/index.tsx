@@ -33,6 +33,7 @@ export function LeaveRoomButton({ roomId, isHost, onLeaveRoom }: LeaveRoomButton
 		<>
 			<Button
 				variant="success"
+				se={null}
 				className="font-cherry-bomb-one"
 				onClick={() => setShowConfirm(true)}
 			>
@@ -63,7 +64,7 @@ export function LeaveRoomButton({ roomId, isHost, onLeaveRoom }: LeaveRoomButton
 						<Button
 							variant="danger"
 							onClick={handleConfirm}
-							se="submit"
+							se="leave"
 						>
 							<Typography variant="label" font="cherry-bomb-one" className="font-bold">
 								{isHost ? "かいさんする" : "ルームをでる"}

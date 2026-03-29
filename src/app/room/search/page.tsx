@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import Link from "next/link";
+import { Link } from "@/components/ui/link";
 import { getCurrentUser } from "@/server/actions";
 import { getRoomsWithCreator } from "@/server/actions/room";
 import { RoomSearchList } from "@/components/room/roomSearchList";

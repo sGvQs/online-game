@@ -104,7 +104,7 @@ export function TitleScreen({
 					<div
 						className={styles.menuItem()}
 						onClick={() => {
-							play("select");
+							play("modal");
 							setShowAbout(true);
 						}}
 					>
@@ -382,7 +382,6 @@ export function TitleScreen({
 								fullWidth
 								className="max-w-xs"
 								onClick={() => {
-									play("submit");
 									setShowAbout(false);
 								}}
 							>

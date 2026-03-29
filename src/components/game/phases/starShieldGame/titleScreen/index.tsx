@@ -179,7 +179,7 @@ export function TitleScreen({
 								<FloatGlow active={canStart} variant={GlowVariant.Primary} className="col-span-2">
 									<Button
 										variant="primary"
-										se="submit"
+										se={canStart ? "submit" : null}
 										onClick={() => canStart ? onStartGame() : setShowCannotStartModal(true)}
 										size="lg"
 										className="w-full"

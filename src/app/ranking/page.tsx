@@ -1,6 +1,6 @@
 import { createClient } from "@/server/lib/supabase/server";
 import { redirect } from "next/navigation";
-import Link from "next/link";
+import { Link } from "@/components/ui/link";
 import { getHomeUser, getTopRankings } from "@/server/actions";
 import { PukapukaLogo } from "@/components/common/logo/pukapukaLogo";
 import { Typography } from "@/components/ui/typography";

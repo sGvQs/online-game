@@ -147,6 +147,7 @@ export function GameCarouselSection({
 			setShowGameStartError(true);
 			return;
 		}
+		playSE("/se/submit-se.mp3");
 		showLoading();
 		try {
 			await selectGame(roomId, game.type);
@@ -162,7 +163,6 @@ export function GameCarouselSection({
 			setActiveIndex(i);
 			return;
 		}
-		playSE("/se/submit-se.mp3");
 		if (isHost) {
 			handleGameStart();
 		} else {
@@ -218,7 +218,10 @@ export function GameCarouselSection({
 										? styles.kvTabActive()
 										: styles.kvTabInactive()
 								}`}
-								onClick={() => setSelectedRoleIndex(i)}
+								onClick={() => {
+									playSE("/se/switch-se.mp3");
+									setSelectedRoleIndex(i);
+								}}
 							>
 								{role}
 							</button>
@@ -253,7 +256,7 @@ export function GameCarouselSection({
 						variant="primary"
 						onClick={handleGameStart}
 						className="font-cherry-bomb-one"
-						se="submit"
+						se={null}
 					>
 						はじめる
 					</Button>

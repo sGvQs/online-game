@@ -1,8 +1,10 @@
 "use client";
 
+import { useContext } from "react";
 import { motion } from "framer-motion";
 import { Typography } from "@/components/ui/typography";
 import type { GradientColor } from "@/components/ui/typography/styles";
+import { SoundContext } from "@/lib/sound-context";
 
 const PukapukaLogoSize = {
     medium: {
@@ -20,8 +22,17 @@ interface PukapukaLogoProps {
     size?: keyof typeof PukapukaLogoSize;
 }
 
+
 export function PukapukaLogo({ className, size = "medium" }: PukapukaLogoProps) {
     const sizeProps = PukapukaLogoSize[size];
+    const sound = useContext(SoundContext);
+
+    const playSE = (file: string, volume = 0.1) => {
+        if (!sound?.isPlaying) return;
+        const audio = new Audio(file);
+        audio.volume = volume;
+        audio.play().catch(() => {});
+    };
     const renderChars = (text: string, gradient: GradientColor) => {
         return text.split("").map((char, index) => {
             const motionProps = {
@@ -61,6 +72,7 @@ export function PukapukaLogo({ className, size = "medium" }: PukapukaLogoProps) 
                     gradientColor={gradient}
                     key={`${text}-${index}`}
                     className={`inline-block ${sizeProps.padding} cursor-pointer select-none font-bold`}
+                    onMouseEnter={() => playSE("/se/logo-hover-se.mp3", 0.01)}
                     {...(motionProps as any)}
                 >
                     {char}
@@ -70,7 +82,10 @@ export function PukapukaLogo({ className, size = "medium" }: PukapukaLogoProps) 
     };
 
     return (
-        <div className={`flex flex-col items-center justify-center pb-4 mb-2 ${className || ""}`}>
+        <div
+            className={`flex flex-col items-center justify-center pb-4 mb-2 ${className || ""}`}
+            onClick={() => playSE("/se/get-se.mp3", 0.03)}
+        >
             <div className="flex">
                 {renderChars("Pukapuka", "whiteToBlue")}
             </div>

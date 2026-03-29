@@ -58,6 +58,7 @@ export function HomeActions() {
                 variant="outline"
                 size="lg"
                 onClick={() => router.push("/ranking")}
+                se="buy"
             >
                 <Typography variant="label" font="cherry-bomb-one" className="font-bold">ランキング</Typography>
             </Button>
