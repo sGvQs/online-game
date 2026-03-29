@@ -14,7 +14,7 @@ export const titleScreen = tv({
 		playerRank: "text-xs shrink-0 tabular-nums text-[rgba(192,132,252,0.8)]",
 		readyBadge:
 			"text-xs px-2 py-0.5 rounded-full text-indigo-400 bg-[rgba(129,140,248,0.15)] border border-[rgba(129,140,248,0.4)]",
-		waitingBadge: "text-xs text-white/20",
+		waitingBadge: "text-xs px-2 py-0.5 rounded-full text-white/20 border border-white/10",
 		progressTrack: "mt-4 h-1 rounded-full overflow-hidden bg-white/6",
 		progressBar:
 			"h-full rounded-full transition-all duration-500 [width:var(--progress-pct)] bg-linear-to-r from-indigo-400 to-purple-400 [box-shadow:0_0_8px_rgba(129,140,248,0.6)]",

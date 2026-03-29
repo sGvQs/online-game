@@ -168,14 +168,20 @@ export function TitleScreen({
 								スキル
 							</Link>
 							{isHost && (
-								<Button
-									variant="primary"
-									onClick={() => canStart ? onStartGame() : setShowCannotStartModal(true)}
-									size="lg"
+								<motion.div
 									className="col-span-2"
+									animate={canStart ? { y: [0, -6, 0] } : { y: 0 }}
+									transition={canStart ? { repeat: Infinity, duration: 1.6, ease: "easeInOut" } : {}}
 								>
-									スタート
-								</Button>
+									<Button
+										variant="primary"
+										onClick={() => canStart ? onStartGame() : setShowCannotStartModal(true)}
+										size="lg"
+										className="w-full"
+									>
+										スタート
+									</Button>
+								</motion.div>
 							)}
 						</motion.div>
 					</div>
@@ -295,23 +301,13 @@ export function TitleScreen({
 											>
 												{rankDisplay}
 											</Typography>
-											{u.isReady ? (
-												<Typography
-													variant="label"
-													as="span"
-													className={styles.readyBadge()}
-												>
-													READY
-												</Typography>
-											) : (
-												<Typography
-													variant="label"
-													as="span"
-													className={styles.waitingBadge()}
-												>
-													---
-												</Typography>
-											)}
+											<Typography
+												variant="label"
+												as="span"
+												className={u.isReady ? styles.readyBadge() : styles.waitingBadge()}
+											>
+												READY
+											</Typography>
 										</div>
 									);
 								})}
