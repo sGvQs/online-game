@@ -118,14 +118,20 @@ export function TitleScreen({
 							animate={{ opacity: 1 }}
 							transition={{ duration: 0.8, delay: 0.4 }}
 						>
-							<Button
-								variant="secondary"
-								onClick={() => !isReady && onToggleReady()}
-								disabled={isReady}
-								size="lg"
+							<motion.div
+								animate={!isReady ? { y: [0, -6, 0] } : { y: 0 }}
+								transition={!isReady ? { repeat: Infinity, duration: 1.6, ease: "easeInOut" } : {}}
 							>
-								じゅんびかんりょう
-							</Button>
+								<Button
+									variant="secondary"
+									onClick={() => !isReady && onToggleReady()}
+									disabled={isReady}
+									size="lg"
+									className="w-full"
+								>
+									じゅんびかんりょう
+								</Button>
+							</motion.div>
 							<Link
 								href={`/game/${roomId}/star-shield/ranking`}
 								onClick={async (e) => {
@@ -195,31 +201,35 @@ export function TitleScreen({
 								}}
 							>
 								{memberPairRank ? (
-									<>
-										<span className="text-md text-blue-400/90 truncate">
-											{memberPairRank.user1Name}
-										</span>
-										<span className="text-md text-white-400/90 truncate">
-											&amp;
-										</span>
-										<span className="text-md text-blue-400/90 truncate">
-											{memberPairRank.user2Name}
-										</span>
-										<span className="text-md font-bold tabular-nums text-blue-400/90 shrink-0 ml-auto">
-											{memberPairRank.bestDestroyedCount}
-										</span>
-										<Image
-											src={ICONS.METOR}
-											alt="Typing"
-											width={20}
-											height={20}
-											className="shrink-0 opacity-90"
-										/>
-									</>
+									<div className="flex items-center justify-between w-full">
+										<div className="flex items-baseline">
+											<Image
+												src={ICONS.METOR}
+												alt="Typing"
+												width={28}
+												height={28}
+												className="shrink-0 opacity-90 mt-auto"
+											/>
+											<Typography variant="h3" font="cherry-bomb-one" as="span" className="font-bold tabular-nums text-blue-400 shrink-0 ml-2">
+												{memberPairRank.rank}
+											</Typography>
+											<Typography variant="body" font="dot-gothic-16" as="span" className="text-blue-400 shrink-0">
+												位
+											</Typography>
+										</div>
+										<div className="flex items-baseline">
+											<Typography variant="h3" font="cherry-bomb-one" as="span" className="font-bold tabular-nums text-blue-400 shrink-0 ml-auto">
+												{memberPairRank.bestDestroyedCount}
+											</Typography>
+											<Typography variant="body" font="dot-gothic-16" as="span" className="text-blue-400 shrink-0">
+												個
+											</Typography>
+										</div>
+									</div>
 								) : (
-									<span className="text-xs text-white/60 group-hover:text-white/80 transition-colors">
+									<Typography variant="small" font="dot-gothic-16" as="span" className="text-white/60 group-hover:text-white/80 transition-colors">
 										ランキングを見る →
-									</span>
+									</Typography>
 								)}
 							</Link>
 							<div className="rounded-2xl p-4 bg-[rgba(129,140,248,0.05)] border border-[rgba(129,140,248,0.18)] flex items-center gap-3">
@@ -230,9 +240,9 @@ export function TitleScreen({
 									height={28}
 									className="shrink-0 opacity-90"
 								/>
-								<span className="text-md font-bold tabular-nums text-yellow-400/90">
+								<Typography variant="h3" font="cherry-bomb-one" as="span" className="font-bold tabular-nums text-yellow-400/90">
 									{typingCount.toLocaleString()}
-								</span>
+								</Typography>
 							</div>
 						</div>
 						<div className={styles.playerCard()}>
@@ -358,7 +368,7 @@ export function TitleScreen({
 					いまのじょうきょう：{readyCount} / {totalUsers} にん じゅんびずみ
 				</Typography>
 				<div className="flex justify-end">
-					<Button variant="primary" onClick={() => setShowCannotStartModal(false)}>
+					<Button variant="success" onClick={() => setShowCannotStartModal(false)}>
 						とじる
 					</Button>
 				</div>
