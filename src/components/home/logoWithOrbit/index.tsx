@@ -4,20 +4,41 @@ import { useContext, useEffect, useRef, useState, useCallback } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { PukapukaLogo } from "@/components/common/logo/pukapukaLogo";
+import { StarHpBar } from "@/components/game/phases/starShieldGame/playing/typistView/StarHpBar";
 import { SoundContext } from "@/lib/sound-context";
+import { useHomeAmmo } from "@/lib/home-ammo-context";
 import { orbitBridge } from "@/components/home/orbitBridge";
 
 const OBJECTS = [
-	{ src: "/svg/object/blue-star.svg", label: "blue-star" },
-	{ src: "/svg/object/earth.svg", label: "earth" },
-	{ src: "/svg/object/moon.svg", label: "moon" },
-	{ src: "/svg/object/purple-star.svg", label: "purple-star" },
+	{
+		src: "/svg/object/blue-star.svg",
+		label: "blue-star",
+		maxHp: 100,
+		periodMs: 10000,
+	},
+	{
+		src: "/svg/object/earth.svg",
+		label: "earth",
+		maxHp: 120,
+		periodMs: 12000,
+	},
+	{
+		src: "/svg/object/moon.svg",
+		label: "moon",
+		maxHp: 80,
+		periodMs: 8000,
+	},
+	{
+		src: "/svg/object/purple-star.svg",
+		label: "purple-star",
+		maxHp: 300,
+		periodMs: 14000,
+	},
 ] as const;
 
 // ── 軌道チューニング定数 ──────────────────────────────────────
 const ORBIT_CENTER_Y = 0;
 const ORBIT_CENTER_X = 0;
-const PERIOD = 10000;
 const SPEED_LEFT = 1.2;
 const SPEED_RIGHT = 0.8;
 const A = 400;
@@ -31,7 +52,6 @@ const COS_TILT = Math.cos(TILT);
 const SIN_TILT = Math.sin(TILT);
 
 // ── HP ────────────────────────────────────────────────────────
-const MAX_HP = 10;
 const RESPAWN_DELAY = 2000; // ms
 const PARTICLE_COLORS = [
 	"bg-yellow-300",
@@ -52,15 +72,17 @@ interface Particle {
 
 export function LogoWithOrbit() {
 	const sound = useContext(SoundContext);
+	const homeAmmo = useHomeAmmo();
 	const [currentIndex, setCurrentIndex] = useState(0);
+	const currentIndexRef = useRef(0);
 	const objectRef = useRef<HTMLDivElement>(null);
 	const angleRef = useRef(0);
 	const lastTimeRef = useRef<number | null>(null);
 	const rafRef = useRef<number | null>(null);
 
 	// HP system
-	const hpRef = useRef(MAX_HP);
-	const [displayHp, setDisplayHp] = useState(MAX_HP);
+	const hpRef = useRef<number>(OBJECTS[0].maxHp);
+	const [displayHp, setDisplayHp] = useState<number>(OBJECTS[0].maxHp);
 	const explodingRef = useRef(false);
 	const [exploding, setExploding] = useState(false);
 	const lastPosRef = useRef({ x: 0, y: 0 });
@@ -102,9 +124,13 @@ export function LogoWithOrbit() {
 			setExploding(true);
 
 			setTimeout(() => {
-				hpRef.current = MAX_HP;
-				setDisplayHp(MAX_HP);
-				setCurrentIndex((prev) => (prev + 1) % OBJECTS.length);
+				setCurrentIndex((prev) => {
+					const next = (prev + 1) % OBJECTS.length;
+					const maxHp = OBJECTS[next].maxHp;
+					hpRef.current = maxHp;
+					setDisplayHp(maxHp);
+					return next;
+				});
 				explodingRef.current = false;
 				setExploding(false);
 				setParticles([]);
@@ -122,11 +148,16 @@ export function LogoWithOrbit() {
 	}, [handleHit]);
 
 	useEffect(() => {
+		currentIndexRef.current = currentIndex;
+	}, [currentIndex]);
+
+	useEffect(() => {
 		const animate = (time: number) => {
 			if (lastTimeRef.current !== null) {
 				const delta = time - lastTimeRef.current;
 				const speedMult = Math.sin(angleRef.current) > 0 ? SPEED_LEFT : SPEED_RIGHT;
-				angleRef.current += (delta / PERIOD) * 2 * Math.PI * speedMult;
+				const periodMs = OBJECTS[currentIndexRef.current].periodMs;
+				angleRef.current += (delta / periodMs) * 2 * Math.PI * speedMult;
 			}
 			lastTimeRef.current = time;
 
@@ -237,19 +268,24 @@ export function LogoWithOrbit() {
 			)}
 		</div>
 
-		{/* HP インジケーター */}
-		<div className="flex gap-1.5">
-			{Array.from({ length: MAX_HP }, (_, i) => (
-				<div
-					key={i}
-					className={`w-2 h-2 rounded-full transition-all duration-200 ${
-						i < displayHp
-							? "bg-yellow-300 shadow-[0_0_4px_rgba(253,224,71,0.8)]"
-							: "bg-white/20"
-					}`}
-				/>
-			))}
-		</div>
+		<StarHpBar starHp={displayHp} maxStarHp={currentObject.maxHp} />
+		{homeAmmo && (
+			<div
+				className="flex flex-wrap justify-center gap-1 mt-1 max-w-[min(100%,14rem)]"
+				aria-hidden
+			>
+				{Array.from({ length: homeAmmo.ammoMax }, (_, i) => (
+					<span
+						key={i}
+						className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+							i < homeAmmo.ammo
+								? "bg-red-500 shadow-[0_0_4px_rgba(239,68,68,0.55)]"
+								: "bg-white/15"
+						}`}
+					/>
+				))}
+			</div>
+		)}
 		</div>
 	);
 }

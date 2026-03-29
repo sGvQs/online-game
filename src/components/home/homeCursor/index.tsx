@@ -1,9 +1,10 @@
 "use client";
 
-import { useCallback, useContext, useRef, useState } from "react";
+import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { motion, useMotionValue } from "framer-motion";
 import { SoundContext } from "@/lib/sound-context";
+import { AMMO_MAX, HomeAmmoProvider } from "@/lib/home-ammo-context";
 import { orbitBridge } from "@/components/home/orbitBridge";
 
 const BALL_W = 6;           // 球の幅 (px)
@@ -31,12 +32,32 @@ interface Collision {
 
 let nextId = 0;
 
+function isEditableFocusTarget(el: EventTarget | null): boolean {
+	if (!(el instanceof HTMLElement)) return false;
+	const tag = el.tagName;
+	if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return true;
+	return el.isContentEditable;
+}
+
+const MODIFIER_ONLY_CODES = new Set([
+	"ControlLeft",
+	"ControlRight",
+	"ShiftLeft",
+	"ShiftRight",
+	"AltLeft",
+	"AltRight",
+	"MetaLeft",
+	"MetaRight",
+]);
+
 export function HomeCursor({ children }: { children: React.ReactNode }) {
 	const sound = useContext(SoundContext);
 	const cursorX = useMotionValue(-100);
 	const cursorY = useMotionValue(-100);
 	const [balls, setBalls] = useState<Ball[]>([]);
 	const [collisions, setCollisions] = useState<Collision[]>([]);
+	const [ammo, setAmmo] = useState(AMMO_MAX);
+	const ammoRef = useRef(AMMO_MAX);
 	const containerRef = useRef<HTMLDivElement>(null);
 	const delayedClickRef = useRef(false);
 
@@ -55,23 +76,29 @@ export function HomeCursor({ children }: { children: React.ReactNode }) {
 		cursorY.set(-100);
 	}, [cursorX, cursorY]);
 
-	const handleClickCapture = useCallback(
-		(e: React.MouseEvent) => {
-			if (delayedClickRef.current) return; // 遅延再発火は素通り
-			e.stopPropagation();
-
+	const fireToward = useCallback(
+		(
+			toX: number,
+			toY: number,
+			options?: { syntheticClickTarget?: HTMLElement },
+		): boolean => {
 			const rect = containerRef.current?.getBoundingClientRect();
-			if (!rect) return;
+			if (!rect) return false;
 
-			const toX = e.clientX - rect.left;
-			const toY = e.clientY - rect.top;
 			const w = rect.width;
 			const h = rect.height;
 
-			// 弾を即座に生成
+			const inside =
+				toX >= 0 && toY >= 0 && toX <= w && toY <= h;
+			if (!inside) return false;
+
+			if (ammoRef.current <= 0) return false;
+			ammoRef.current -= 1;
+			setAmmo(ammoRef.current);
+
 			const sources = [
-				{ fromX: 0, fromY: h },  // 左下
-				{ fromX: w, fromY: h },  // 右下
+				{ fromX: 0, fromY: h },
+				{ fromX: w, fromY: h },
 			];
 			const newBalls: Ball[] = sources.map(({ fromX, fromY }) => ({
 				id: nextId++,
@@ -83,22 +110,19 @@ export function HomeCursor({ children }: { children: React.ReactNode }) {
 			}));
 			setBalls((prev) => [...prev, ...newBalls]);
 
-			// shooting SE は即時再生
 			if (sound?.isPlaying) {
 				const audio = new Audio("/se/shooting-se.mp3");
 				audio.volume = 0.1;
 				audio.play().catch(() => {});
 			}
 
-			// 着弾タイミングで orbit ヒット + ネイティブクリック再発火
-			const target = e.target as HTMLElement;
+			const target = options?.syntheticClickTarget;
 			setTimeout(() => {
 				const starX = orbitBridge.clientX - rect.left;
 				const starY = orbitBridge.clientY - rect.top;
 				const dist = Math.hypot(toX - starX, toY - starY);
 				if (dist < HIT_RADIUS) {
 					orbitBridge.triggerHit?.();
-					// ヒット位置に collision.svg を一瞬表示
 					const colId = nextId++;
 					setCollisions((prev) => [...prev, { id: colId, x: toX, y: toY }]);
 					setTimeout(() => {
@@ -106,13 +130,58 @@ export function HomeCursor({ children }: { children: React.ReactNode }) {
 					}, 600);
 				}
 
-				delayedClickRef.current = true;
-				target.click();
-				delayedClickRef.current = false;
+				if (target) {
+					delayedClickRef.current = true;
+					target.click();
+					delayedClickRef.current = false;
+				}
 			}, BALL_DURATION * 1000);
+			return true;
 		},
 		[sound],
 	);
+
+	const handleClickCapture = useCallback(
+		(e: React.MouseEvent) => {
+			if (delayedClickRef.current) return;
+			e.stopPropagation();
+
+			const rect = containerRef.current?.getBoundingClientRect();
+			if (!rect) return;
+
+			const toX = e.clientX - rect.left;
+			const toY = e.clientY - rect.top;
+			fireToward(toX, toY, { syntheticClickTarget: e.target as HTMLElement });
+		},
+		[fireToward],
+	);
+
+	useEffect(() => {
+		const onKeyDown = (e: KeyboardEvent) => {
+			if (isEditableFocusTarget(document.activeElement)) return;
+
+			if (e.code === "Space" || e.key === " ") {
+				if (e.repeat) return;
+				e.preventDefault();
+				ammoRef.current = AMMO_MAX;
+				setAmmo(AMMO_MAX);
+				return;
+			}
+
+			if (e.repeat) return;
+			if (e.code === "Tab") return;
+			if (MODIFIER_ONLY_CODES.has(e.code)) return;
+
+			const toX = cursorX.get();
+			const toY = cursorY.get();
+			if (fireToward(toX, toY)) {
+				e.preventDefault();
+			}
+		};
+
+		window.addEventListener("keydown", onKeyDown);
+		return () => window.removeEventListener("keydown", onKeyDown);
+	}, [cursorX, cursorY, fireToward]);
 
 	const removeBall = useCallback((id: number) => {
 		setBalls((prev) => prev.filter((b) => b.id !== id));
@@ -126,7 +195,9 @@ export function HomeCursor({ children }: { children: React.ReactNode }) {
 			onMouseLeave={handleMouseLeave}
 			onClickCapture={handleClickCapture}
 		>
-			{children}
+			<HomeAmmoProvider ammo={ammo} ammoMax={AMMO_MAX}>
+				{children}
+			</HomeAmmoProvider>
 
 			{/* target cursor */}
 			<motion.div
