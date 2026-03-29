@@ -48,6 +48,41 @@ const HOW_TO_PLAY = [
 	{ iconSrc: ICONS.FIRE, text: "隕石が星に直撃するとゲームオーバー" },
 ];
 
+function FloatingCTA({
+	active,
+	className,
+	glowColor = "rgba(99,102,241,0.5)",
+	children,
+}: {
+	active: boolean;
+	className?: string;
+	glowColor?: string;
+	children: React.ReactNode;
+}) {
+	return (
+		<motion.div
+			className={className ? `rounded-lg ${className}` : "rounded-lg"}
+			animate={
+				active
+					? {
+							y: [0, -2, 0],
+							boxShadow: [
+								`0 0 0px ${glowColor}`,
+								`0 0 20px ${glowColor}`,
+								`0 0 0px ${glowColor}`,
+							],
+						}
+					: { y: 0, boxShadow: "0 0 0px transparent" }
+			}
+			transition={
+				active ? { repeat: Infinity, duration: 1.6, ease: "easeInOut" } : {}
+			}
+		>
+			{children}
+		</motion.div>
+	);
+}
+
 export function TitleScreen({
 	room,
 	roomId,
@@ -118,10 +153,7 @@ export function TitleScreen({
 							animate={{ opacity: 1 }}
 							transition={{ duration: 0.8, delay: 0.4 }}
 						>
-							<motion.div
-								animate={!isReady ? { y: [0, -6, 0] } : { y: 0 }}
-								transition={!isReady ? { repeat: Infinity, duration: 1.6, ease: "easeInOut" } : {}}
-							>
+							<FloatingCTA active={!isReady} glowColor="rgba(236,72,153,0.5)">
 								<Button
 									variant="secondary"
 									onClick={() => !isReady && onToggleReady()}
@@ -131,7 +163,7 @@ export function TitleScreen({
 								>
 									じゅんびかんりょう
 								</Button>
-							</motion.div>
+							</FloatingCTA>
 							<Link
 								href={`/game/${roomId}/star-shield/ranking`}
 								onClick={async (e) => {
@@ -168,11 +200,7 @@ export function TitleScreen({
 								スキル
 							</Link>
 							{isHost && (
-								<motion.div
-									className="col-span-2"
-									animate={canStart ? { y: [0, -6, 0] } : { y: 0 }}
-									transition={canStart ? { repeat: Infinity, duration: 1.6, ease: "easeInOut" } : {}}
-								>
+								<FloatingCTA active={canStart} className="col-span-2" glowColor="rgba(99,102,241,0.5)">
 									<Button
 										variant="primary"
 										onClick={() => canStart ? onStartGame() : setShowCannotStartModal(true)}
@@ -181,7 +209,7 @@ export function TitleScreen({
 									>
 										スタート
 									</Button>
-								</motion.div>
+								</FloatingCTA>
 							)}
 						</motion.div>
 					</div>
