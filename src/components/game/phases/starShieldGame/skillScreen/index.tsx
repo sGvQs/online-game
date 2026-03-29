@@ -195,7 +195,7 @@ export function StarShieldSkill({
 								height={24}
 								className="select-none"
 							/>
-							<Typography variant="h2" font="dot-gothic-16" className="text-yellow-400 font-bold">
+							<Typography variant="h3" font="cherry-bomb-one" className="text-yellow-400 font-bold">
 							{typingCount.toLocaleString()}
 							</Typography>
 						</div>

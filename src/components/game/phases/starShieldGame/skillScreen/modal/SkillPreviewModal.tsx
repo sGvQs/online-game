@@ -62,7 +62,7 @@ export function SkillPreviewModal({
 		} else if (currentLevel < maxLevel) {
 			const nl = (currentLevel + 1) as 2 | 3 | 4 | 5;
 			nextCost = NORMAL_ATTACK_LEVEL_UP_COSTS[preview.techniqueId]?.[nl] ?? 0;
-			purchaseLabel = `レベル ${nl} に上げる`;
+			purchaseLabel = `レベル ${nl} にあげる`;
 			purchaseFn = () => purchaseNormalAttackLevelUp(preview.techniqueId, nl);
 			purchaseLabelForFn = "通常攻撃レベル上げ";
 		}
@@ -76,7 +76,7 @@ export function SkillPreviewModal({
 			const nl = (currentLevel +
 				1) as keyof typeof SPECIAL_ATTACK_LEVEL_UP_COSTS;
 			nextCost = SPECIAL_ATTACK_LEVEL_UP_COSTS[nl] ?? 0;
-			purchaseLabel = `レベル ${nl} に上げる`;
+			purchaseLabel = `レベル ${nl} にあげる`;
 			purchaseFn = () =>
 				purchaseSpecialAttackLevelUp(preview.id as "spread", nl);
 			purchaseLabelForFn = "必殺技レベル上げ";
@@ -87,7 +87,7 @@ export function SkillPreviewModal({
 		if (currentLevel < maxLevel) {
 			const nl = (currentLevel + 1) as 2 | 3 | 4 | 5;
 			nextCost = STAR_HP_LEVEL_UP_COSTS[nl];
-			purchaseLabel = `レベル ${nl} に上げる`;
+			purchaseLabel = `レベル ${nl} にあげる`;
 			purchaseFn = () => purchaseStarHpLevelUp(nl);
 			purchaseLabelForFn = "星のHPレベル上げ";
 		}
@@ -102,7 +102,7 @@ export function SkillPreviewModal({
 		} else if (currentLevel < maxLevel) {
 			const nl = (currentLevel + 1) as 2 | 3 | 4 | 5 | 6;
 			nextCost = HEAL_LEVEL_UP_COSTS[nl];
-			purchaseLabel = nl === 6 ? "さいだいに上げる" : `レベル ${nl} に上げる`;
+			purchaseLabel = nl === 6 ? "さいだいにあげる" : `レベル ${nl} にあげる`;
 			purchaseFn = () => purchaseHealLevelUp(nl);
 			purchaseLabelForFn = "ヒールレベル上げ";
 		}
