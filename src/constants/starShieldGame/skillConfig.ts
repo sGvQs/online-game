@@ -89,7 +89,7 @@ export const STAR_HP_LEVEL_UP_COSTS: Record<2 | 3 | 4 | 5, number> = {
 // ============================================
 // ヒールスキル ※ Typist 用
 // ============================================
-export const HEAL_UNLOCK_COST = 3000;
+export const HEAL_UNLOCK_COST = 500;
 export const HEAL_LEVEL_UP_COSTS: Record<2 | 3 | 4 | 5 | 6, number> = {
 	2: 500,
 	3: 1000,
