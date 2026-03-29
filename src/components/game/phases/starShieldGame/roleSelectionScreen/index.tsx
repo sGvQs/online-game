@@ -27,6 +27,7 @@ import type { OwnedSkills } from "@/utils/starShieldGame";
 import type { StarShieldProgress } from "@/types/starShieldGame";
 import { LEVEL_STAR_HP } from "@/constants/starShieldGame/gameConfig";
 import { LEVEL_HEAL_RECOVERY } from "@/constants/starShieldGame/skillConfig";
+import { FloatGlow, GlowVariant } from "@/components/ui/floatGlow";
 
 interface RoleSelectionScreenProps {
 	room: RoomWithUsersAndReadyStatus;
@@ -564,19 +565,23 @@ export function RoleSelectionScreen({
 							variant="success"
 							onClick={onBack}
 							className="flex-1"
+							size="lg"
 						>
 							もどる
 						</Button>
 					)}
 					{isHost && (
-						<Button
-							variant={canProceed ? "primary" : "solid"}
-							onClick={() => canProceed && onProceedToGame()}
-							disabled={!canProceed}
-							className="flex-4"
-						>
-							ゲームスタート
-						</Button>
+						<FloatGlow active={canProceed} variant={GlowVariant.Primary} className="flex-4">
+							<Button
+								variant={"primary"}
+								onClick={() => canProceed && onProceedToGame()}
+								disabled={!canProceed}
+								size="lg"
+								className="w-full"
+							>
+								ゲームスタート
+							</Button>
+						</FloatGlow>
 					)}
 				</motion.div>
 			</div>

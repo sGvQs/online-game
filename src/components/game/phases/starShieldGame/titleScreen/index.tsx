@@ -128,7 +128,7 @@ export function TitleScreen({
 									size="lg"
 									className="w-full"
 								>
-									じゅんびかんりょう
+									いけます！
 								</Button>
 							</FloatGlow>
 							<Link
@@ -353,10 +353,10 @@ export function TitleScreen({
 		>
 			<div className="flex flex-col gap-4">
 				<Typography variant="body" className="text-white/80">
-					ぜんいんが「じゅんびかんりょう」になるとスタートできるよ。
+					二人が「READY」になるとスタートできるよ。
 				</Typography>
 				<Typography variant="body" className="text-white/60">
-					いまのじょうきょう：{readyCount} / {totalUsers} にん じゅんびずみ
+					いまの状況：{readyCount} / {totalUsers} にん 「READY」になっている
 				</Typography>
 				<div className="flex justify-end">
 					<Button variant="success" onClick={() => setShowCannotStartModal(false)}>
