@@ -5,6 +5,10 @@ import Image from "next/image";
 import { motion, useMotionValue } from "framer-motion";
 import { SoundContext } from "@/lib/sound-context";
 import { AMMO_MAX, HomeAmmoProvider } from "@/lib/home-ammo-context";
+import {
+	HomeModalOpenProvider,
+	useHomeModalOpen,
+} from "@/lib/home-modal-context";
 import { orbitBridge } from "@/components/home/orbitBridge";
 
 const BALL_W = 6; // 球の幅 (px)
@@ -61,6 +65,15 @@ const MODIFIER_ONLY_CODES = new Set([
 ]);
 
 export function HomeCursor({ children }: { children: React.ReactNode }) {
+	return (
+		<HomeModalOpenProvider>
+			<HomeCursorInner>{children}</HomeCursorInner>
+		</HomeModalOpenProvider>
+	);
+}
+
+function HomeCursorInner({ children }: { children: React.ReactNode }) {
+	const { isModalOpen } = useHomeModalOpen();
 	const sound = useContext(SoundContext);
 	const cursorX = useMotionValue(-100);
 	const cursorY = useMotionValue(-100);
@@ -73,18 +86,20 @@ export function HomeCursor({ children }: { children: React.ReactNode }) {
 
 	const handleMouseMove = useCallback(
 		(e: React.MouseEvent) => {
+			if (isModalOpen) return;
 			const rect = containerRef.current?.getBoundingClientRect();
 			if (!rect) return;
 			cursorX.set(e.clientX - rect.left);
 			cursorY.set(e.clientY - rect.top);
 		},
-		[cursorX, cursorY],
+		[cursorX, cursorY, isModalOpen],
 	);
 
 	const handleMouseLeave = useCallback(() => {
+		if (isModalOpen) return;
 		cursorX.set(-100);
 		cursorY.set(-100);
-	}, [cursorX, cursorY]);
+	}, [cursorX, cursorY, isModalOpen]);
 
 	const fireToward = useCallback(
 		(
@@ -173,6 +188,7 @@ export function HomeCursor({ children }: { children: React.ReactNode }) {
 
 	const handleClickCapture = useCallback(
 		(e: React.MouseEvent) => {
+			if (isModalOpen) return;
 			if (delayedClickRef.current) return;
 			e.stopPropagation();
 
@@ -186,11 +202,12 @@ export function HomeCursor({ children }: { children: React.ReactNode }) {
 				mode: "click",
 			});
 		},
-		[fireToward],
+		[fireToward, isModalOpen],
 	);
 
 	useEffect(() => {
 		const onKeyDown = (e: KeyboardEvent) => {
+			if (isModalOpen) return;
 			if (isEditableFocusTarget(document.activeElement)) return;
 
 			if (e.code === "Space" || e.key === " ") {
@@ -219,7 +236,7 @@ export function HomeCursor({ children }: { children: React.ReactNode }) {
 
 		window.addEventListener("keydown", onKeyDown);
 		return () => window.removeEventListener("keydown", onKeyDown);
-	}, [cursorX, cursorY, fireToward, sound]);
+	}, [cursorX, cursorY, fireToward, isModalOpen, sound]);
 
 	const removeBall = useCallback((id: number) => {
 		setBalls((prev) => prev.filter((b) => b.id !== id));
@@ -228,7 +245,7 @@ export function HomeCursor({ children }: { children: React.ReactNode }) {
 	return (
 		<div
 			ref={containerRef}
-			className="relative h-screen w-full cursor-none outline-none select-none"
+			className={`relative h-screen w-full outline-none select-none ${isModalOpen ? "cursor-auto" : "cursor-none"}`}
 			onMouseMove={handleMouseMove}
 			onMouseLeave={handleMouseLeave}
 			onClickCapture={handleClickCapture}
@@ -238,22 +255,24 @@ export function HomeCursor({ children }: { children: React.ReactNode }) {
 			</HomeAmmoProvider>
 
 			{/* target cursor */}
-			<motion.div
-				className="absolute top-0 left-0 w-12 h-12 pointer-events-none z-9999"
-				style={{
-					x: cursorX,
-					y: cursorY,
-					translateX: "-50%",
-					translateY: "-50%",
-				}}
-			>
-				<Image
-					src="/svg/object/target-circle.svg"
-					alt="cursor"
-					fill
-					className="object-contain"
-				/>
-			</motion.div>
+			{!isModalOpen && (
+				<motion.div
+					className="absolute top-0 left-0 w-12 h-12 pointer-events-none z-9999"
+					style={{
+						x: cursorX,
+						y: cursorY,
+						translateX: "-50%",
+						translateY: "-50%",
+					}}
+				>
+					<Image
+						src="/svg/object/target-circle.svg"
+						alt="cursor"
+						fill
+						className="object-contain"
+					/>
+				</motion.div>
+			)}
 
 			{/* collision effects */}
 			{collisions.map((c) => (
