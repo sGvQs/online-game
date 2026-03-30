@@ -16,6 +16,10 @@ const BALL_DURATION = 0.45; // 飛行時間 (秒)
 const DAMAGE_KEYBOARD = 1;
 const DAMAGE_CLICK = 5;
 
+const SE_SHOOT = "/se/shooting-se.mp3";
+const SE_CANNOT_SHOOT = "/se/cannot-shoot-se.mp3";
+const SE_RELOAD = "/se/reload-se.mp3";
+
 // 【当たり判定半径】カーソル位置と星の距離がこの値以内ならヒット (px)
 const HIT_RADIUS = 40;
 
@@ -103,7 +107,14 @@ export function HomeCursor({ children }: { children: React.ReactNode }) {
 			const mode = options?.mode ?? "keyboard";
 			const isClick = mode === "click";
 			if (!isClick) {
-				if (ammoRef.current <= 0) return false;
+				if (ammoRef.current <= 0) {
+					if (sound?.isPlaying) {
+						const audio = new Audio(SE_CANNOT_SHOOT);
+						audio.volume = 0.12;
+						audio.play().catch(() => {});
+					}
+					return false;
+				}
 				ammoRef.current -= 1;
 				setAmmo(ammoRef.current);
 			}
@@ -130,7 +141,7 @@ export function HomeCursor({ children }: { children: React.ReactNode }) {
 			setBalls((prev) => [...prev, ...newBalls]);
 
 			if (sound?.isPlaying) {
-				const audio = new Audio("/se/shooting-se.mp3");
+				const audio = new Audio(SE_SHOOT);
 				audio.volume = 0.1;
 				audio.play().catch(() => {});
 			}
@@ -187,6 +198,11 @@ export function HomeCursor({ children }: { children: React.ReactNode }) {
 				e.preventDefault();
 				ammoRef.current = AMMO_MAX;
 				setAmmo(AMMO_MAX);
+				if (sound?.isPlaying) {
+					const audio = new Audio(SE_RELOAD);
+					audio.volume = 0.12;
+					audio.play().catch(() => {});
+				}
 				return;
 			}
 
@@ -203,7 +219,7 @@ export function HomeCursor({ children }: { children: React.ReactNode }) {
 
 		window.addEventListener("keydown", onKeyDown);
 		return () => window.removeEventListener("keydown", onKeyDown);
-	}, [cursorX, cursorY, fireToward]);
+	}, [cursorX, cursorY, fireToward, sound]);
 
 	const removeBall = useCallback((id: number) => {
 		setBalls((prev) => prev.filter((b) => b.id !== id));
