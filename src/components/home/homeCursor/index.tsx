@@ -24,9 +24,6 @@ const SE_SHOOT = "/se/shooting-se.mp3";
 const SE_CANNOT_SHOOT = "/se/cannot-shoot-se.mp3";
 const SE_RELOAD = "/se/reload-se.mp3";
 
-// 【当たり判定半径】カーソル位置と星の距離がこの値以内ならヒット (px)
-const HIT_RADIUS = 40;
-
 interface Ball {
 	id: number;
 	fromX: number;
@@ -166,7 +163,7 @@ function HomeCursorInner({ children }: { children: React.ReactNode }) {
 				const starX = orbitBridge.clientX - rect.left;
 				const starY = orbitBridge.clientY - rect.top;
 				const dist = Math.hypot(toX - starX, toY - starY);
-				if (dist < HIT_RADIUS) {
+				if (dist < orbitBridge.hitRadius) {
 					orbitBridge.triggerHit?.(damage);
 					const colId = nextId++;
 					setCollisions((prev) => [...prev, { id: colId, x: toX, y: toY }]);

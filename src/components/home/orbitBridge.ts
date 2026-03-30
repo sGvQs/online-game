@@ -6,8 +6,8 @@ export const orbitBridge = {
 	/** 星の画面上の座標 (clientX/Y) - LogoWithOrbit の RAF が毎フレーム更新 */
 	clientX: -1000,
 	clientY: -1000,
-	/** 当たり判定の半径 (px) */
-	hitRadius: 32,
+	/** 当たり判定の半径 (px)。LogoWithOrbit の RAF が毎フレーム更新（未マウント時の仮値） */
+	hitRadius: 40,
 	/** 命中時に呼ぶコールバック - LogoWithOrbit がセット */
 	triggerHit: null as ((damage: number) => void) | null,
 };

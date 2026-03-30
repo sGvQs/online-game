@@ -253,6 +253,14 @@ export function LogoWithOrbit({
 					if (!explodingRef.current) {
 						orbitBridge.clientX = rect.left + rect.width / 2 + x;
 						orbitBridge.clientY = rect.top + rect.height / 2 + y;
+						const list = objectsRef.current;
+						const idx = currentIndexRef.current % list.length;
+						const entry = list[idx];
+						if (entry) {
+							// 見た目の外接正方形の半分を半径（深度 scale 込み）
+							orbitBridge.hitRadius =
+								(resolveStarBaseSizePx(entry) * scale) / 2;
+						}
 					}
 					lastPosRef.current = { x, y };
 				}
