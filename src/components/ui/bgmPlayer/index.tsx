@@ -111,7 +111,15 @@ export default function BGMPlayer() {
             />
             <button
                 className={styles.button()}
-                onClick={() => setIsPlaying(!isPlaying)}>
+                onClick={() => {
+                    const next = !isPlaying;
+                    if (next) {
+                        const audio = new Audio("/se/switch-se.mp3");
+                        audio.volume = 0.1;
+                        audio.play().catch(() => {});
+                    }
+                    setIsPlaying(next);
+                }}>
                 {!isPlaying ? <VolumeOff /> : <Volume2 />}
             </button>
         </div>

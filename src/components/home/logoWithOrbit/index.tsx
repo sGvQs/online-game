@@ -148,12 +148,9 @@ export function LogoWithOrbit({
 		(damage: number) => {
 			if (explodingRef.current) return;
 
-			// 音はONのみ（OFFにはしない）
+			// 音はONのみ（OFFにはしない）。switch-se は BGM 音量ボタン ON 時のみ
 			if (!sound?.isPlaying) {
 				sound?.setIsPlaying(true);
-				const audio = new Audio("/se/switch-se.mp3");
-				audio.volume = 0.1;
-				audio.play().catch(() => {});
 			}
 
 			const list = objectsRef.current;
