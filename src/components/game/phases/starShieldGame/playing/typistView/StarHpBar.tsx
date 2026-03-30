@@ -23,8 +23,10 @@ export function getStarHpBarTrackWidthRemUnbounded(maxStarHp: number): number {
 	return Math.max(0, starHpBarTrackWidthRemLinear(maxStarHp));
 }
 
-/** ホーム軌道用: トラックの幅・高さをゲーム本番相当からこの倍率で表示 */
-const HOME_VISUAL_SCALE = 0.1;
+/** ホーム軌道用: トラックの高さをゲーム本番相当（h-5）からこの倍率で表示 */
+const HOME_TRACK_HEIGHT_SCALE = 0.1;
+/** ホーム軌道用: トラックの幅のみさらに細く見せる倍率（高さより小さくする） */
+const HOME_TRACK_WIDTH_SCALE = 0.05;
 /** `variant="home"` 時のトラック基準高さ（h-5 = 1.25rem） */
 const HOME_TRACK_BASE_HEIGHT_REM = 1.25;
 
@@ -47,7 +49,7 @@ export function StarHpBar({
 	const styles = typistView();
 	const isHome = variant === "home";
 	const trackWidthRem = isHome
-		? getStarHpBarTrackWidthRemUnbounded(maxStarHp) * HOME_VISUAL_SCALE
+		? getStarHpBarTrackWidthRemUnbounded(maxStarHp) * HOME_TRACK_WIDTH_SCALE
 		: getStarHpBarTrackWidthRem(maxStarHp);
 
 	const hpPct =
@@ -85,7 +87,7 @@ export function StarHpBar({
 				style={{
 					width: `${trackWidthRem}rem`,
 					...(isHome
-						? { height: `${HOME_TRACK_BASE_HEIGHT_REM * HOME_VISUAL_SCALE}rem` }
+						? { height: `${HOME_TRACK_BASE_HEIGHT_REM * HOME_TRACK_HEIGHT_SCALE}rem` }
 						: {}),
 				}}
 			>
