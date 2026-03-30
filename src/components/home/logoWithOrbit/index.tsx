@@ -7,7 +7,6 @@ import { PukapukaLogo } from "@/components/common/logo/pukapukaLogo";
 import { StarHpBar } from "@/components/game/phases/starShieldGame/playing/typistView/StarHpBar";
 import { SoundContext } from "@/lib/sound-context";
 import { useHomeAmmo } from "@/lib/home-ammo-context";
-import { useHomeModalOpen } from "@/lib/home-modal-context";
 import { HomeShooterLegend } from "@/components/home/homeShooterLegend";
 import { orbitBridge } from "@/components/home/orbitBridge";
 
@@ -123,7 +122,6 @@ export function LogoWithOrbit({
 
 	const sound = useContext(SoundContext);
 	const homeAmmo = useHomeAmmo();
-	const { isModalOpen } = useHomeModalOpen();
 	const [currentIndex, setCurrentIndex] = useState(0);
 	const currentIndexRef = useRef(0);
 	const objectRef = useRef<HTMLDivElement>(null);
@@ -402,7 +400,7 @@ export function LogoWithOrbit({
 						/>
 					))}
 				</div>
-				{!isModalOpen && <HomeShooterLegend />}
+				<HomeShooterLegend />
 			</div>
 		)}
 		</div>
