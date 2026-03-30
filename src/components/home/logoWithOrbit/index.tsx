@@ -7,6 +7,8 @@ import { PukapukaLogo } from "@/components/common/logo/pukapukaLogo";
 import { StarHpBar } from "@/components/game/phases/starShieldGame/playing/typistView/StarHpBar";
 import { SoundContext } from "@/lib/sound-context";
 import { useHomeAmmo } from "@/lib/home-ammo-context";
+import { useHomeModalOpen } from "@/lib/home-modal-context";
+import { HomeShooterLegend } from "@/components/home/homeShooterLegend";
 import { orbitBridge } from "@/components/home/orbitBridge";
 
 /** ホーム軌道上の1オブジェクト（SVG・HP・公転周期・基準サイズ） */
@@ -121,6 +123,7 @@ export function LogoWithOrbit({
 
 	const sound = useContext(SoundContext);
 	const homeAmmo = useHomeAmmo();
+	const { isModalOpen } = useHomeModalOpen();
 	const [currentIndex, setCurrentIndex] = useState(0);
 	const currentIndexRef = useRef(0);
 	const objectRef = useRef<HTMLDivElement>(null);
@@ -383,20 +386,23 @@ export function LogoWithOrbit({
 		<StarHpBar starHp={displayHp} maxStarHp={currentObject.maxHp} />
 
 		{homeAmmo && (
-			<div
-				className="flex flex-wrap justify-center gap-1 mt-1"
-				aria-hidden
-			>
-				{Array.from({ length: homeAmmo.ammoMax }, (_, i) => (
-					<span
-						key={i}
-						className={`w-1.5 h-6 rounded-full shrink-0 ${
-							i < homeAmmo.ammo
-								? "bg-red-500 shadow-[0_0_4px_rgba(239,68,68,0.55)]"
-								: "bg-white/15"
-						}`}
-					/>
-				))}
+			<div className="mt-1 flex w-full flex-col items-center gap-1.5">
+				<div
+					className="flex flex-wrap justify-center gap-1"
+					aria-hidden
+				>
+					{Array.from({ length: homeAmmo.ammoMax }, (_, i) => (
+						<span
+							key={i}
+							className={`w-1.5 h-6 rounded-full shrink-0 ${
+								i < homeAmmo.ammo
+									? "bg-red-500 shadow-[0_0_4px_rgba(239,68,68,0.55)]"
+									: "bg-white/15"
+							}`}
+						/>
+					))}
+				</div>
+				{!isModalOpen && <HomeShooterLegend />}
 			</div>
 		)}
 		</div>
