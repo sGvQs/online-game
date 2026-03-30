@@ -15,6 +15,8 @@ export interface HomeOrbitObject {
 	label: string;
 	maxHp: number;
 	periodMs: number;
+	/** 何msごとにHPを+1回復するか（星ごとに調整用） */
+	healIntervalMs: number;
 	/** 軌道上の基準サイズ（px）。{@link resolveStarBaseSizePx} で 24〜128 に収める */
 	starBaseSizePx: number;
 }
@@ -37,6 +39,7 @@ export const HOME_ORBIT_OBJECTS = [
 		label: "blue-star",
 		maxHp: 150,
 		periodMs: 15000,
+		healIntervalMs: 1000,
 		starBaseSizePx: 50,
 	},
 	{
@@ -44,6 +47,7 @@ export const HOME_ORBIT_OBJECTS = [
 		label: "earth",
 		maxHp: 80,
 		periodMs: 8000,
+		healIntervalMs: 500,
 		starBaseSizePx: 25,
 	},
 	{
@@ -51,6 +55,7 @@ export const HOME_ORBIT_OBJECTS = [
 		label: "moon",
 		maxHp: 30,
 		periodMs: 3000,
+		healIntervalMs: 1000,
 		starBaseSizePx: 10,
 	},
 	{
@@ -58,6 +63,7 @@ export const HOME_ORBIT_OBJECTS = [
 		label: "purple-star",
 		maxHp: 300,
 		periodMs: 30000,
+		healIntervalMs: 10,
 		starBaseSizePx: 100,
 	},
 ] as const satisfies readonly HomeOrbitObject[];
@@ -216,6 +222,27 @@ export function LogoWithOrbit({
 			orbitBridge.triggerHit = null;
 		};
 	}, [handleHit]);
+
+	// 現在の星を自動回復（+1 / healIntervalMs）
+	useEffect(() => {
+		const entry = objects[currentIndex];
+		if (!entry) return;
+		const intervalMs =
+			Number.isFinite(entry.healIntervalMs) && entry.healIntervalMs > 0
+				? entry.healIntervalMs
+				: 1000;
+
+		const id = window.setInterval(() => {
+			if (explodingRef.current) return;
+			const maxHp = entry.maxHp;
+			const next = Math.min(maxHp, hpRef.current + 1);
+			if (next === hpRef.current) return;
+			hpRef.current = next;
+			setDisplayHp(next);
+		}, intervalMs);
+
+		return () => window.clearInterval(id);
+	}, [objects, currentIndex]);
 
 	useEffect(() => {
 		currentIndexRef.current = currentIndex;
