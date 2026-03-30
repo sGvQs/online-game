@@ -7,6 +7,7 @@ import { PukapukaLogo } from "@/components/common/logo/pukapukaLogo";
 import { SoundContext } from "@/lib/sound-context";
 import { useSyncHomeOrbitHud } from "@/lib/home-orbit-hud-context";
 import { orbitBridge } from "@/components/home/orbitBridge";
+import { StarHpBar } from "@/components/game/phases/starShieldGame/playing/typistView/StarHpBar";
 
 /** ホーム軌道上の1オブジェクト（SVG・HP・公転周期・基準サイズ） */
 export interface HomeOrbitObject {
@@ -313,6 +314,13 @@ export function LogoWithOrbit({
 					fill
 					className="object-contain"
 				/>
+				<div className="pointer-events-none absolute bottom-full left-1/2 z-10 flex -translate-x-1/2 justify-center whitespace-nowrap">
+					<StarHpBar
+						variant="home"
+						starHp={displayHp}
+						maxStarHp={currentObject.maxHp}
+					/>
+				</div>
 			</div>
 
 			{/* 爆発オーバーレイ */}

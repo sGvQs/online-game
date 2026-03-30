@@ -1,24 +1,10 @@
 "use client";
 
-import { StarHpBar } from "@/components/game/phases/starShieldGame/playing/typistView/StarHpBar";
 import { useHomeAmmo } from "@/lib/home-ammo-context";
 import { useHomeOrbitHudState } from "@/lib/home-orbit-hud-context";
 import { HomeShooterLegend } from "@/components/home/homeShooterLegend";
 
-/** 軌道星の HP（LogoWithOrbit がコンテキストへ同期）。画面上部に固定 */
-export function HomeOrbitHpDock() {
-	const hud = useHomeOrbitHudState();
-
-	if (!hud) return null;
-
-	return (
-		<div className="pointer-events-none fixed top-0 left-0 right-0 z-40 flex justify-center pt-3 pb-2 px-4">
-			<StarHpBar starHp={hud.starHp} maxStarHp={hud.maxStarHp} />
-		</div>
-	);
-}
-
-/** 弾数・射撃凡例（下部ドック用） */
+/** 弾数・射撃凡例（下部ドック用）。HP は LogoWithOrbit 内の StarHpBar を参照 */
 export function HomeOrbitHud() {
 	const hud = useHomeOrbitHudState();
 	const homeAmmo = useHomeAmmo();
