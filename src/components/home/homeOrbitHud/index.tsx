@@ -5,7 +5,20 @@ import { useHomeAmmo } from "@/lib/home-ammo-context";
 import { useHomeOrbitHudState } from "@/lib/home-orbit-hud-context";
 import { HomeShooterLegend } from "@/components/home/homeShooterLegend";
 
-/** 軌道星の HP・弾数・射撃凡例（LogoWithOrbit がコンテキストへ同期） */
+/** 軌道星の HP（LogoWithOrbit がコンテキストへ同期）。画面上部に固定 */
+export function HomeOrbitHpDock() {
+	const hud = useHomeOrbitHudState();
+
+	if (!hud) return null;
+
+	return (
+		<div className="pointer-events-none fixed top-0 left-0 right-0 z-40 flex justify-center pt-3 pb-2 px-4">
+			<StarHpBar starHp={hud.starHp} maxStarHp={hud.maxStarHp} />
+		</div>
+	);
+}
+
+/** 弾数・射撃凡例（下部ドック用） */
 export function HomeOrbitHud() {
 	const hud = useHomeOrbitHudState();
 	const homeAmmo = useHomeAmmo();
@@ -14,7 +27,6 @@ export function HomeOrbitHud() {
 
 	return (
 		<div className="flex w-full flex-col items-center gap-1.5">
-			<StarHpBar starHp={hud.starHp} maxStarHp={hud.maxStarHp} />
 			{homeAmmo && (
 				<>
 					<div
