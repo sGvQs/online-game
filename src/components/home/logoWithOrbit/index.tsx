@@ -318,15 +318,16 @@ export function LogoWithOrbit() {
 		</div>
 
 		<StarHpBar starHp={displayHp} maxStarHp={currentObject.maxHp} />
+
 		{homeAmmo && (
 			<div
-				className="flex flex-wrap justify-center gap-1 mt-1 max-w-[min(100%,14rem)]"
+				className="flex flex-wrap justify-center gap-1 mt-1"
 				aria-hidden
 			>
 				{Array.from({ length: homeAmmo.ammoMax }, (_, i) => (
 					<span
 						key={i}
-						className={`w-1.5 h-1.5 rounded-full shrink-0 ${
+						className={`w-1.5 h-6 rounded-full shrink-0 ${
 							i < homeAmmo.ammo
 								? "bg-red-500 shadow-[0_0_4px_rgba(239,68,68,0.55)]"
 								: "bg-white/15"

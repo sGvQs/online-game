@@ -42,9 +42,6 @@ export default async function HomePage({
 		<HomeCursor>
 			<div className="flex justify-center items-center flex-col h-screen w-full">
 				<LogoWithOrbit />
-				<Typography variant="label" className="font-bold bg-[linear-gradient(135deg,#fef3c7_0%,#fb923c_60%,#e879f9_100%)] bg-clip-text text-transparent drop-shadow-[0_0_30px_rgba(251,146,60,0.5)]" font="cherry-bomb-one">
-					Music by Dream or real?
-				</Typography>
 				<HomeProfile
 					initialName={homeUser.user.name}
 					initialFaceIcon={initialFaceIcon}
@@ -53,6 +50,9 @@ export default async function HomePage({
 					totalPoints={monthlyRanking?.totalPoints}
 				/>
 				<HomeActions />
+				<Typography variant="label" className="font-bold bg-[linear-gradient(135deg,#fef3c7_0%,#fb923c_60%,#e879f9_100%)] bg-clip-text text-transparent drop-shadow-[0_0_30px_rgba(251,146,60,0.5)] mt-10" font="cherry-bomb-one">
+					Music by Dream or real?
+				</Typography>
 			</div>
 		</HomeCursor>
 	);

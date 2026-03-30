@@ -2,7 +2,7 @@
 
 import { createContext, useContext, type ReactNode } from "react";
 
-export const AMMO_MAX = 22;
+export const AMMO_MAX =  35;
 
 export interface HomeAmmoContextValue {
 	ammo: number;

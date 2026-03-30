@@ -13,7 +13,7 @@ const PukapukaLogoSize = {
     },
     large: {
         variant: "display",
-        padding: "py-2 px-3",
+        padding: "py-4 px-3",
     },
 } as const;
 
@@ -86,7 +86,7 @@ export function PukapukaLogo({ className, size = "medium", disableInteraction = 
 
     return (
         <div
-            className={`flex flex-col items-center justify-center pb-4 mb-2 ${className || ""}`}
+            className={`flex flex-col items-center justify-center ${className || ""}`}
             onClick={disableInteraction ? undefined : () => playSE("/se/get-se.mp3", 0.03)}
         >
             <div className="flex">
