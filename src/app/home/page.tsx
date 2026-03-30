@@ -11,6 +11,8 @@ import { LogoWithOrbit } from "@/components/home/logoWithOrbit";
 import { HomeActions } from "@/components/home/homeActions";
 import { HomeProfile } from "@/components/home/homeProfile";
 import { HomeCursor } from "@/components/home/homeCursor";
+import { HomeOrbitHudProvider } from "@/lib/home-orbit-hud-context";
+import { HomeOrbitHud } from "@/components/home/homeOrbitHud";
 
 export default async function HomePage({
 	searchParams,
@@ -40,20 +42,32 @@ export default async function HomePage({
 
 	return (
 		<HomeCursor>
-			<div className="flex justify-center items-center flex-col h-screen w-full">
-				<LogoWithOrbit />
-				<HomeProfile
-					initialName={homeUser.user.name}
-					initialFaceIcon={initialFaceIcon}
-					initialComment={homeUser.user.comment ?? ""}
-					rank={monthlyRanking?.rank}
-					totalPoints={monthlyRanking?.totalPoints}
-				/>
-				<HomeActions />
-				<Typography variant="label" className="font-bold bg-[linear-gradient(135deg,#fef3c7_0%,#fb923c_60%,#e879f9_100%)] bg-clip-text text-transparent drop-shadow-[0_0_30px_rgba(251,146,60,0.5)] mt-10" font="cherry-bomb-one">
-					Music by Dream or real?
-				</Typography>
-			</div>
+			<HomeOrbitHudProvider>
+				<div className="flex min-h-screen w-full flex-col">
+					<div className="flex flex-1 flex-col items-center justify-center px-4">
+						<LogoWithOrbit>
+							<Typography
+								variant="label"
+								className="font-bold bg-[linear-gradient(135deg,#fef3c7_0%,#fb923c_60%,#e879f9_100%)] bg-clip-text text-transparent drop-shadow-[0_0_30px_rgba(251,146,60,0.5)]"
+								font="cherry-bomb-one"
+							>
+								Music by Dream or real?
+							</Typography>
+						</LogoWithOrbit>
+						<HomeProfile
+							initialName={homeUser.user.name}
+							initialFaceIcon={initialFaceIcon}
+							initialComment={homeUser.user.comment ?? ""}
+							rank={monthlyRanking?.rank}
+							totalPoints={monthlyRanking?.totalPoints}
+						/>
+						<HomeActions />
+					</div>
+					<div className="shrink-0 w-full pb-4 pt-2">
+						<HomeOrbitHud />
+					</div>
+				</div>
+			</HomeOrbitHudProvider>
 		</HomeCursor>
 	);
 }

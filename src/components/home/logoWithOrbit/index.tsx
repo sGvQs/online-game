@@ -1,13 +1,11 @@
 "use client";
 
-import { useContext, useEffect, useRef, useState, useCallback } from "react";
+import { useContext, useEffect, useRef, useState, useCallback, type ReactNode } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { PukapukaLogo } from "@/components/common/logo/pukapukaLogo";
-import { StarHpBar } from "@/components/game/phases/starShieldGame/playing/typistView/StarHpBar";
 import { SoundContext } from "@/lib/sound-context";
-import { useHomeAmmo } from "@/lib/home-ammo-context";
-import { HomeShooterLegend } from "@/components/home/homeShooterLegend";
+import { useSyncHomeOrbitHud } from "@/lib/home-orbit-hud-context";
 import { orbitBridge } from "@/components/home/orbitBridge";
 
 /** ホーム軌道上の1オブジェクト（SVG・HP・公転周期・基準サイズ） */
@@ -110,10 +108,13 @@ interface MeteorParticle {
 export interface LogoWithOrbitProps {
 	/** 省略時は {@link HOME_ORBIT_OBJECTS} */
 	objects?: readonly HomeOrbitObject[];
+	/** ロゴ・軌道の直下（旧 HP ブロック位置）に表示するノード（例: タグライン） */
+	children?: ReactNode;
 }
 
 export function LogoWithOrbit({
 	objects: objectsProp = HOME_ORBIT_OBJECTS,
+	children,
 }: LogoWithOrbitProps) {
 	const objects =
 		objectsProp.length > 0 ? objectsProp : HOME_ORBIT_OBJECTS;
@@ -121,7 +122,7 @@ export function LogoWithOrbit({
 	objectsRef.current = objects;
 
 	const sound = useContext(SoundContext);
-	const homeAmmo = useHomeAmmo();
+	const setOrbitHud = useSyncHomeOrbitHud();
 	const [currentIndex, setCurrentIndex] = useState(0);
 	const currentIndexRef = useRef(0);
 	const objectRef = useRef<HTMLDivElement>(null);
@@ -279,6 +280,17 @@ export function LogoWithOrbit({
 	}, []);
 
 	const currentObject = objects[currentIndex];
+	useEffect(() => {
+		if (!setOrbitHud) return;
+		setOrbitHud({ starHp: displayHp, maxStarHp: currentObject.maxHp });
+	}, [setOrbitHud, displayHp, currentObject.maxHp]);
+
+	useEffect(() => {
+		return () => {
+			setOrbitHud?.(null);
+		};
+	}, [setOrbitHud]);
+
 	const orbitStarSizePx = resolveStarBaseSizePx(currentObject);
 	const explosionMeteorBoxPx = Math.round(
 		METEOR_BOX_PX * (explosionStarDisplayPx / DEFAULT_STAR_BASE_SIZE_PX),
@@ -381,28 +393,7 @@ export function LogoWithOrbit({
 			)}
 		</div>
 
-		<StarHpBar starHp={displayHp} maxStarHp={currentObject.maxHp} />
-
-		{homeAmmo && (
-			<div className="mt-1 flex w-full flex-col items-center gap-1.5">
-				<div
-					className="flex flex-wrap justify-center gap-1"
-					aria-hidden
-				>
-					{Array.from({ length: homeAmmo.ammoMax }, (_, i) => (
-						<span
-							key={i}
-							className={`w-1.5 h-6 rounded-full shrink-0 ${
-								i < homeAmmo.ammo
-									? "bg-red-500 shadow-[0_0_4px_rgba(239,68,68,0.55)]"
-									: "bg-white/15"
-							}`}
-						/>
-					))}
-				</div>
-				<HomeShooterLegend />
-			</div>
-		)}
+		{children}
 		</div>
 	);
 }
