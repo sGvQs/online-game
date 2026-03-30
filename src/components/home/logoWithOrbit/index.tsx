@@ -9,32 +9,58 @@ import { SoundContext } from "@/lib/sound-context";
 import { useHomeAmmo } from "@/lib/home-ammo-context";
 import { orbitBridge } from "@/components/home/orbitBridge";
 
-const OBJECTS = [
+/** ホーム軌道上の1オブジェクト（SVG・HP・公転周期・基準サイズ） */
+export interface HomeOrbitObject {
+	src: string;
+	label: string;
+	maxHp: number;
+	periodMs: number;
+	/** 軌道上の基準サイズ（px）。{@link resolveStarBaseSizePx} で 24〜128 に収める */
+	starBaseSizePx: number;
+}
+
+/** デフォルトの星ベース幅・高さ（px）。比例計算の基準にも使う */
+export const DEFAULT_STAR_BASE_SIZE_PX = 48;
+
+function clampStarBaseSizePx(px: number): number {
+	return Math.round(Math.min(128, Math.max(24, px)));
+}
+
+/** `entry.starBaseSizePx` を 24〜128px に収めて返す */
+export function resolveStarBaseSizePx(entry: HomeOrbitObject): number {
+	return clampStarBaseSizePx(entry.starBaseSizePx);
+}
+
+export const HOME_ORBIT_OBJECTS = [
 	{
 		src: "/svg/object/blue-star.svg",
 		label: "blue-star",
-		maxHp: 100,
-		periodMs: 10000,
+		maxHp: 150,
+		periodMs: 15000,
+		starBaseSizePx: 50,
 	},
 	{
 		src: "/svg/object/earth.svg",
 		label: "earth",
-		maxHp: 120,
-		periodMs: 12000,
+		maxHp: 80,
+		periodMs: 8000,
+		starBaseSizePx: 25,
 	},
 	{
 		src: "/svg/object/moon.svg",
 		label: "moon",
-		maxHp: 80,
-		periodMs: 8000,
+		maxHp: 30,
+		periodMs: 3000,
+		starBaseSizePx: 10,
 	},
 	{
 		src: "/svg/object/purple-star.svg",
 		label: "purple-star",
 		maxHp: 300,
-		periodMs: 14000,
+		periodMs: 30000,
+		starBaseSizePx: 100,
 	},
-] as const;
+] as const satisfies readonly HomeOrbitObject[];
 
 // ── 軌道チューニング定数 ──────────────────────────────────────
 const ORBIT_CENTER_Y = 0;
@@ -54,8 +80,6 @@ const SIN_TILT = Math.sin(TILT);
 // ── HP / 破壊演出（微調整用）──────────────────────────────────
 const RESPAWN_DELAY_MS = 2000;
 
-/** 中央の星が膨らんで消えるアニメ */
-const EXPLOSION_STAR_SIZE_PX = 48; // 旧 w-12
 const EXPLOSION_STAR_SCALE_END = 4;
 const EXPLOSION_STAR_DURATION_SEC = 0.5;
 
@@ -82,7 +106,19 @@ interface MeteorParticle {
 	startScale: number;
 }
 
-export function LogoWithOrbit() {
+export interface LogoWithOrbitProps {
+	/** 省略時は {@link HOME_ORBIT_OBJECTS} */
+	objects?: readonly HomeOrbitObject[];
+}
+
+export function LogoWithOrbit({
+	objects: objectsProp = HOME_ORBIT_OBJECTS,
+}: LogoWithOrbitProps) {
+	const objects =
+		objectsProp.length > 0 ? objectsProp : HOME_ORBIT_OBJECTS;
+	const objectsRef = useRef(objects);
+	objectsRef.current = objects;
+
 	const sound = useContext(SoundContext);
 	const homeAmmo = useHomeAmmo();
 	const [currentIndex, setCurrentIndex] = useState(0);
@@ -93,73 +129,85 @@ export function LogoWithOrbit() {
 	const rafRef = useRef<number | null>(null);
 
 	// HP system
-	const hpRef = useRef<number>(OBJECTS[0].maxHp);
-	const [displayHp, setDisplayHp] = useState<number>(OBJECTS[0].maxHp);
+	const hpRef = useRef<number>(objects[0].maxHp);
+	const [displayHp, setDisplayHp] = useState<number>(objects[0].maxHp);
 	const explodingRef = useRef(false);
 	const [exploding, setExploding] = useState(false);
 	const lastPosRef = useRef({ x: 0, y: 0 });
 	const [meteors, setMeteors] = useState<MeteorParticle[]>([]);
 	// 爆発時に表示する星のsrcを保持（exploding中にcurrentIndexが変わっても表示が崩れないよう）
-	const explodingSrcRef = useRef<(typeof OBJECTS)[number]["src"]>(OBJECTS[0].src);
+	const explodingSrcRef = useRef<string>(objects[0].src);
+	const [explosionStarDisplayPx, setExplosionStarDisplayPx] = useState(() =>
+		resolveStarBaseSizePx(objects[0]),
+	);
 
-	const handleHit = useCallback((damage: number) => {
-		if (explodingRef.current) return;
+	const handleHit = useCallback(
+		(damage: number) => {
+			if (explodingRef.current) return;
 
-		// 音はONのみ（OFFにはしない）
-		if (!sound?.isPlaying) {
-			sound?.setIsPlaying(true);
-			const audio = new Audio("/se/switch-se.mp3");
-			audio.volume = 0.1;
-			audio.play().catch(() => {});
-		}
+			// 音はONのみ（OFFにはしない）
+			if (!sound?.isPlaying) {
+				sound?.setIsPlaying(true);
+				const audio = new Audio("/se/switch-se.mp3");
+				audio.volume = 0.1;
+				audio.play().catch(() => {});
+			}
 
-		hpRef.current -= damage;
-		setDisplayHp(Math.max(0, hpRef.current));
-		if (hpRef.current <= 0) {
-			// 爆発開始
-			explodingRef.current = true;
-			explodingSrcRef.current = OBJECTS[currentIndex].src;
-			if (objectRef.current) objectRef.current.style.visibility = "hidden";
+			const list = objectsRef.current;
+			const idx = currentIndex;
 
-			// 爆発SE
-			const dmgAudio = new Audio("/se/star-damage-se.mp3");
-			dmgAudio.volume = 0.3;
-			dmgAudio.play().catch(() => {});
+			hpRef.current -= damage;
+			setDisplayHp(Math.max(0, hpRef.current));
+			if (hpRef.current <= 0) {
+				// 爆発開始
+				explodingRef.current = true;
+				const hitObject = list[idx];
+				explodingSrcRef.current = hitObject.src;
+				setExplosionStarDisplayPx(resolveStarBaseSizePx(hitObject));
+				if (objectRef.current) objectRef.current.style.visibility = "hidden";
 
-			const newMeteors: MeteorParticle[] = Array.from(
-				{ length: METEOR_COUNT },
-				(_, i) => ({
-					id: i,
-					angleRad: Math.random() * Math.PI * 2,
-					dist:
-						METEOR_DIST_MIN_PX + Math.random() * METEOR_DIST_SPREAD_PX,
-					spinDeg: (Math.random() - 0.5) * METEOR_SPIN_RANGE_DEG,
-					duration:
-						METEOR_DURATION_MIN_SEC +
-						Math.random() * METEOR_DURATION_SPREAD_SEC,
-					startScale:
-						METEOR_START_SCALE_MIN +
-						Math.random() * METEOR_START_SCALE_SPREAD,
-				}),
-			);
-			setMeteors(newMeteors);
-			setExploding(true);
+				// 爆発SE
+				const dmgAudio = new Audio("/se/star-damage-se.mp3");
+				dmgAudio.volume = 0.3;
+				dmgAudio.play().catch(() => {});
 
-			setTimeout(() => {
-				setCurrentIndex((prev) => {
-					const next = (prev + 1) % OBJECTS.length;
-					const maxHp = OBJECTS[next].maxHp;
-					hpRef.current = maxHp;
-					setDisplayHp(maxHp);
-					return next;
-				});
-				explodingRef.current = false;
-				setExploding(false);
-				setMeteors([]);
-				if (objectRef.current) objectRef.current.style.visibility = "visible";
-			}, RESPAWN_DELAY_MS);
-		}
-	}, [sound, currentIndex]);
+				const newMeteors: MeteorParticle[] = Array.from(
+					{ length: METEOR_COUNT },
+					(_, i) => ({
+						id: i,
+						angleRad: Math.random() * Math.PI * 2,
+						dist:
+							METEOR_DIST_MIN_PX + Math.random() * METEOR_DIST_SPREAD_PX,
+						spinDeg: (Math.random() - 0.5) * METEOR_SPIN_RANGE_DEG,
+						duration:
+							METEOR_DURATION_MIN_SEC +
+							Math.random() * METEOR_DURATION_SPREAD_SEC,
+						startScale:
+							METEOR_START_SCALE_MIN +
+							Math.random() * METEOR_START_SCALE_SPREAD,
+					}),
+				);
+				setMeteors(newMeteors);
+				setExploding(true);
+
+				setTimeout(() => {
+					setCurrentIndex((prev) => {
+						const len = objectsRef.current.length;
+						const next = (prev + 1) % len;
+						const maxHp = objectsRef.current[next].maxHp;
+						hpRef.current = maxHp;
+						setDisplayHp(maxHp);
+						return next;
+					});
+					explodingRef.current = false;
+					setExploding(false);
+					setMeteors([]);
+					if (objectRef.current) objectRef.current.style.visibility = "visible";
+				}, RESPAWN_DELAY_MS);
+			}
+		},
+		[sound, currentIndex],
+	);
 
 	// orbitBridge に triggerHit をセット・クリーンアップ
 	useEffect(() => {
@@ -178,7 +226,9 @@ export function LogoWithOrbit() {
 			if (lastTimeRef.current !== null) {
 				const delta = time - lastTimeRef.current;
 				const speedMult = Math.sin(angleRef.current) > 0 ? SPEED_LEFT : SPEED_RIGHT;
-				const periodMs = OBJECTS[currentIndexRef.current].periodMs;
+				const list = objectsRef.current;
+				const idx = currentIndexRef.current % list.length;
+				const periodMs = list[idx]?.periodMs ?? 10000;
 				angleRef.current += (delta / periodMs) * 2 * Math.PI * speedMult;
 			}
 			lastTimeRef.current = time;
@@ -219,7 +269,11 @@ export function LogoWithOrbit() {
 		};
 	}, []);
 
-	const currentObject = OBJECTS[currentIndex];
+	const currentObject = objects[currentIndex];
+	const orbitStarSizePx = resolveStarBaseSizePx(currentObject);
+	const explosionMeteorBoxPx = Math.round(
+		METEOR_BOX_PX * (explosionStarDisplayPx / DEFAULT_STAR_BASE_SIZE_PX),
+	);
 	const explosionPos = lastPosRef.current;
 
 	return (
@@ -229,7 +283,8 @@ export function LogoWithOrbit() {
 			<PukapukaLogo size="large" className="relative z-5" disableInteraction />
 			<div
 				ref={objectRef}
-				className="absolute top-1/2 left-1/2 w-12 h-12 opacity-100"
+				className="absolute top-1/2 left-1/2 opacity-100"
+				style={{ width: orbitStarSizePx, height: orbitStarSizePx }}
 			>
 				<Image
 					src={currentObject.src}
@@ -246,8 +301,8 @@ export function LogoWithOrbit() {
 					<div
 						className="absolute top-1/2 left-1/2 pointer-events-none z-20"
 						style={{
-							width: EXPLOSION_STAR_SIZE_PX,
-							height: EXPLOSION_STAR_SIZE_PX,
+							width: explosionStarDisplayPx,
+							height: explosionStarDisplayPx,
 							transform: `translate(calc(-50% + ${explosionPos.x}px), calc(-50% + ${explosionPos.y}px))`,
 						}}
 					>
@@ -278,8 +333,8 @@ export function LogoWithOrbit() {
 							key={p.id}
 							className="absolute top-1/2 left-1/2 pointer-events-none z-20"
 							style={{
-								width: METEOR_BOX_PX,
-								height: METEOR_BOX_PX,
+								width: explosionMeteorBoxPx,
+								height: explosionMeteorBoxPx,
 								transform: `translate(calc(-50% + ${explosionPos.x}px), calc(-50% + ${explosionPos.y}px))`,
 							}}
 						>
