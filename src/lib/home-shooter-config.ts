@@ -18,7 +18,7 @@ export const HOME_SHOOTER_SE = {
 
 /** HOME下部HUDの弾数（段数）表示で使うアクティブ色 */
 export const HOME_AMMO_BAR_ACTIVE_CLASSNAME =
-	"bg-brand-300 shadow-[0_0_4px_rgba(239,68,68,0.55)]";
+	"bg-brand-300";
 
 const BALL_W_PX = 6;
 const BALL_H_BASE_PX = 22;
@@ -50,29 +50,29 @@ export const HOME_SHOOTER_MODES = {
 		ball: {
 			widthPx: BALL_W_PX,
 			heightPx: BALL_HEIGHT_LONG_PX,
-			initialScale: 2.5,
+			initialScale: 1.5,
 			ease: "linear" as const,
 		},
-		bulletClassName: "bg-brand-300",
+		bulletClassName: "bg-brand-400",
 		legendChipClassName:
-			"h-1.5 w-5 shrink-0 rounded-full bg-brand-300 shadow-[0_0_4px_rgba(239,68,68,0.6)]",
+			"h-1.5 w-5 shrink-0 rounded-full bg-brand-400",
 		legendInput: "keyboard" as const,
 		ammo: { consumes: true as const, cost: 1 },
 		a11yBulletLabel: "濃い紫の球はキーボード",
 	},
 	click: {
 		damage: 5,
-		durationSec: 0.45,
+		durationSec: 0.6,
 		ball: {
 			widthPx: BALL_W_PX,
 			heightPx: BALL_HEIGHT_LONG_PX,
-			initialScale: 2.5,
+			initialScale: 3,
 			ease: "linear" as const,
 		},
 		bulletClassName:
-			"bg-brand-600 shadow-[0_0_4px_rgba(239,68,68,0.6)]",
+			"bg-brand-8 00",
 		legendChipClassName:
-			"h-1.5 w-5 shrink-0 rounded-full bg-brand-600 shadow-[0_0_4px_rgba(239,68,68,0.6)]",
+			"h-1.5 w-5 shrink-0 rounded-full bg-brand-800",
 		legendInput: "mouse" as const,
 		ammo: { consumes: false as const },
 		a11yBulletLabel: "黄色い球はクリック",
