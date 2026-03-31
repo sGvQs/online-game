@@ -1,14 +1,17 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Link from "next/link";
+import { Link } from "@/components/ui/link";
 import { useRouter } from "next/navigation";
-import { motion } from "framer-motion";
+import { motion, animate } from "framer-motion";
 import Image from "next/image";
 import { RoomWithUsersAndReadyStatus, RoomUserWithReadyStatus } from "@/types";
 import type { UserRanking } from "@/types";
 import type { PairRanking } from "@/server/actions/game/starShieldRankingActions";
 import { Button } from "@/components/ui/button";
+import { button } from "@/components/ui/button/styles";
+import { FloatGlow, GlowVariant } from "@/components/ui/floatGlow";
+import { Modal } from "@/components/ui/modal";
 import { ProtectedStar } from "../playing/protectedStar";
 import { DinosaurWithBalls } from "@/components/game/common/starShield/dinosaurWithBalls";
 import { StarShieldTitle } from "@/components/game/common/starShield/starShieldTitle";
@@ -46,6 +49,7 @@ const HOW_TO_PLAY = [
 	{ iconSrc: ICONS.FIRE, text: "隕石が星に直撃するとゲームオーバー" },
 ];
 
+
 export function TitleScreen({
 	room,
 	roomId,
@@ -66,14 +70,24 @@ export function TitleScreen({
 	const totalUsers = room.users.length;
 	const styles = titleScreen();
 	const [typingCount, setTypingCount] = useState<number>(0);
+	const [showCannotStartModal, setShowCannotStartModal] = useState(false);
 
 	useEffect(() => {
 		getMyStarShieldProgress()
-			.then((p) => setTypingCount(p.totalTypingCount ?? 0))
-			.catch(() => { });
+			.then((p) => {
+				const target = p.totalTypingCount ?? 0;
+				const controls = animate(0, target, {
+					duration: 1.8,
+					ease: [0.16, 1, 0.3, 1],
+					onUpdate: (v) => setTypingCount(Math.round(v)),
+				});
+				return () => controls.stop();
+			})
+			.catch(() => {});
 	}, []);
 
 	return (
+		<>
 		<div className="relative min-h-screen overflow-hidden flex flex-col items-center justify-center">
 			<ProtectedStar />
 			<DinosaurWithBalls size="w-28 h-28" />
@@ -114,90 +128,38 @@ export function TitleScreen({
 							animate={{ opacity: 1 }}
 							transition={{ duration: 0.8, delay: 0.4 }}
 						>
-							<Button
-								screen="star-shield"
-								variant={"primary"}
-								size="lg"
-								onClick={() => !isReady && onToggleReady()}
-								disabled={isReady}
-								className="w-full justify-start"
-							>
-								{isReady ? (
-									<>
-										<Image
-											src={ICONS.READY}
-											alt="icon ready"
-											width={40}
-											height={40}
-											className="mr-2"
-										/>
-										<span>READY</span>
-									</>
-								) : (
-									<>
-										<Image
-											src={ICONS.NOT_READY}
-											alt="icon not ready"
-											width={40}
-											height={40}
-											className="mr-2"
-										/>
-										<span>READY</span>
-									</>
-								)}
-							</Button>
-							{isHost && (
+							<FloatGlow active={!isReady} variant={GlowVariant.Secondary}>
 								<Button
-									screen="star-shield"
-									variant={canStart ? "primary" : "solid"}
+									variant="secondary"
+									onClick={() => !isReady && onToggleReady()}
+									disabled={isReady}
 									size="lg"
-									onClick={() => canStart && onStartGame()}
-									disabled={!canStart}
-									className="w-full justify-start"
+									className="w-full"
 								>
-									{canStart ? (
-										<>
-											<Image
-												src={ICONS.START}
-												alt="icon start"
-												width={40}
-												height={40}
-												className="mr-2"
-											/>
-											<span>START</span>
-											<span className="ml-auto">{readyCount}/{totalUsers}</span>
-										</>
-									) : (
-										<>
-											<Image
-												src={ICONS.NOT_START}
-												alt="icon not start"
-												width={40}
-												height={40}
-												className="mr-2"
-											/>
-											<span>START</span>
-											<span className="ml-auto">{readyCount}/{totalUsers}</span>
-										</>
-									)}
+									いけます！
 								</Button>
-							)}
+							</FloatGlow>
+							<Link
+								href={`/game/${roomId}/star-shield/ranking`}
+								onClick={async (e) => {
+									if (isReady) {
+										e.preventDefault();
+										await onToggleReady();
+										router.push(`/game/${roomId}/star-shield/ranking`);
+									}
+								}}
+								className={button({ variant: "blue", fullWidth: true , size: "lg" })}
+							>
+								ランキング
+							</Link>
 							{isHost && (
 								<Button
-									screen="star-shield"
 									variant="success"
-									size="lg"
 									onClick={onExit}
-									className="w-full justify-start"
+									size="lg"
+									se="submit"
 								>
-									<Image
-										src={ICONS.EXIT}
-										alt="arrow right"
-										width={40}
-										height={40}
-										className="mr-2"
-									/>
-									<span>EXIT</span>
+									もどる
 								</Button>
 							)}
 							<Link
@@ -209,17 +171,23 @@ export function TitleScreen({
 										router.push(`/game/${roomId}/star-shield/skill`);
 									}
 								}}
-								className="flex w-full items-center justify-start gap-2 py-3 px-6 rounded-2xl font-bold transition-all font-cherry-bomb-one text-left bg-amber-600/30 border-2 border-amber-500/50 text-amber-200 hover:bg-amber-500/40 hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
+								className={button({ variant: "yellow", fullWidth: true , size: "lg" })}
 							>
-								<Image
-									src={ICONS.SKILL}
-									alt="icon skill"
-									width={40}
-									height={40}
-									className="mr-2"
-								/>
-								<span>SKILL</span>
+								スキル
 							</Link>
+							{isHost && (
+								<FloatGlow active={canStart} variant={GlowVariant.Primary} className="col-span-2">
+									<Button
+										variant="primary"
+										se={canStart ? "submit" : null}
+										onClick={() => canStart ? onStartGame() : setShowCannotStartModal(true)}
+										size="lg"
+										className="w-full"
+									>
+										スタート
+									</Button>
+								</FloatGlow>
+							)}
 						</motion.div>
 					</div>
 
@@ -244,31 +212,35 @@ export function TitleScreen({
 								}}
 							>
 								{memberPairRank ? (
-									<>
-										<span className="text-md text-blue-400/90 truncate">
-											{memberPairRank.user1Name}
-										</span>
-										<span className="text-md text-white-400/90 truncate">
-											&amp;
-										</span>
-										<span className="text-md text-blue-400/90 truncate">
-											{memberPairRank.user2Name}
-										</span>
-										<span className="text-md font-bold tabular-nums text-blue-400/90 shrink-0 ml-auto">
-											{memberPairRank.bestDestroyedCount}
-										</span>
-										<Image
-											src={ICONS.METOR}
-											alt="Typing"
-											width={20}
-											height={20}
-											className="shrink-0 opacity-90"
-										/>
-									</>
+									<div className="flex items-center justify-between w-full">
+										<div className="flex items-baseline">
+											<Image
+												src={ICONS.METOR}
+												alt="Typing"
+												width={28}
+												height={28}
+												className="shrink-0 opacity-90 mt-auto"
+											/>
+											<Typography variant="h3" font="cherry-bomb-one" as="span" className="font-bold tabular-nums text-blue-400 shrink-0 ml-2">
+												{memberPairRank.rank}
+											</Typography>
+											<Typography variant="body" font="dot-gothic-16" as="span" className="text-blue-400 shrink-0">
+												位
+											</Typography>
+										</div>
+										<div className="flex items-baseline">
+											<Typography variant="h3" font="cherry-bomb-one" as="span" className="font-bold tabular-nums text-blue-400 shrink-0 ml-auto">
+												{memberPairRank.bestDestroyedCount}
+											</Typography>
+											<Typography variant="body" font="dot-gothic-16" as="span" className="text-blue-400 shrink-0">
+												個
+											</Typography>
+										</div>
+									</div>
 								) : (
-									<span className="text-xs text-white/60 group-hover:text-white/80 transition-colors">
+									<Typography variant="small" font="dot-gothic-16" as="span" className="text-white/60 group-hover:text-white/80 transition-colors">
 										ランキングを見る →
-									</span>
+									</Typography>
 								)}
 							</Link>
 							<div className="rounded-2xl p-4 bg-[rgba(129,140,248,0.05)] border border-[rgba(129,140,248,0.18)] flex items-center gap-3">
@@ -279,9 +251,9 @@ export function TitleScreen({
 									height={28}
 									className="shrink-0 opacity-90"
 								/>
-								<span className="text-md font-bold tabular-nums text-yellow-400/90">
+								<Typography variant="h3" font="cherry-bomb-one" as="span" className="font-bold tabular-nums text-yellow-400/90">
 									{typingCount.toLocaleString()}
-								</span>
+								</Typography>
 							</div>
 						</div>
 						<div className={styles.playerCard()}>
@@ -334,23 +306,13 @@ export function TitleScreen({
 											>
 												{rankDisplay}
 											</Typography>
-											{u.isReady ? (
-												<Typography
-													variant="label"
-													as="span"
-													className={styles.readyBadge()}
-												>
-													READY
-												</Typography>
-											) : (
-												<Typography
-													variant="label"
-													as="span"
-													className={styles.waitingBadge()}
-												>
-													---
-												</Typography>
-											)}
+											<Typography
+												variant="label"
+												as="span"
+												className={u.isReady ? styles.readyBadge() : styles.waitingBadge()}
+											>
+												READY
+											</Typography>
 										</div>
 									);
 								})}
@@ -394,5 +356,25 @@ export function TitleScreen({
 				</div>
 			</div>
 		</div>
+		<Modal
+			isOpen={showCannotStartModal}
+			onClose={() => setShowCannotStartModal(false)}
+			title="まだはじめられないよ"
+		>
+			<div className="flex flex-col gap-4">
+				<Typography variant="body" className="text-white/80">
+					二人が「READY」になるとスタートできるよ。
+				</Typography>
+				<Typography variant="body" className="text-white/60">
+					いまの状況：{readyCount} / {totalUsers} にん 「READY」になっている
+				</Typography>
+				<div className="flex justify-end">
+					<Button variant="success" onClick={() => setShowCannotStartModal(false)}>
+						とじる
+					</Button>
+				</div>
+			</div>
+		</Modal>
+		</>
 	);
 }

@@ -5,21 +5,16 @@ export const skillCardStyles = tv({
 		root: "rounded-2xl p-5 bg-white/2 border flex flex-col gap-3",
 		header: "flex items-center justify-between",
 		title: "text-[13px] font-bold tracking-wider font-dot-gothic-16",
-		badge:
-			"text-[10px] px-2 py-0.5 rounded-full border tracking-wide font-dot-gothic-16",
-		badgeInner: "flex items-center gap-1",
 	},
 	variants: {
 		jurisdiction: {
 			attack: {
 				root: "border-indigo-500/20",
 				title: "text-indigo-400",
-				badge: "bg-indigo-500/15 border-indigo-500/30 text-indigo-300",
 			},
 			defence: {
 				root: "border-emerald-500/20",
 				title: "text-emerald-400",
-				badge: "bg-emerald-500/15 border-emerald-500/30 text-emerald-300",
 			},
 		},
 	},

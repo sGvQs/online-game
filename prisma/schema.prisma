@@ -348,7 +348,7 @@ model StarShieldUserProgress {
 model StarShieldUserNormalAttack {
   id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   userId       String   @map("user_id") @db.Uuid
-  techniqueId  String   @map("technique_id") // red, blue, yellow_beam, purple, orange
+  techniqueId  String   @map("technique_id") // red, blue, yellow, purple, orange
   level        Int      @default(1) // 1-5
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")

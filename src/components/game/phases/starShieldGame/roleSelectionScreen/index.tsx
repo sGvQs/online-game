@@ -6,6 +6,7 @@ import { RoomWithUsersAndReadyStatus, RoomUserWithReadyStatus } from "@/types";
 import { cn } from "@/lib/utils";
 import { ProtectedStar } from "../playing/protectedStar";
 import { DinosaurWithBalls } from "@/components/game/common/starShield/dinosaurWithBalls";
+import { RoleBadge } from "@/components/game/common/starShield/roleBadge";
 import { AuroraGlow } from "@/components/game/common/starShield/auroraGlow";
 import { roleSelectionScreen } from "./styles";
 import { Button } from "@/components/ui/button";
@@ -14,7 +15,6 @@ import {
 	COLORS,
 	DIFFICULTIES,
 	DIFFICULTY_META,
-	ICONS,
 	ROLE_META,
 	type Difficulty,
 	type RoleChoice,
@@ -28,6 +28,8 @@ import type { OwnedSkills } from "@/utils/starShieldGame";
 import type { StarShieldProgress } from "@/types/starShieldGame";
 import { LEVEL_STAR_HP } from "@/constants/starShieldGame/gameConfig";
 import { LEVEL_HEAL_RECOVERY } from "@/constants/starShieldGame/skillConfig";
+import { FloatGlow, GlowVariant } from "@/components/ui/floatGlow";
+import { DifficultyOrbitIcon } from "@/components/game/common/starShield/difficultyOrbitIcon";
 
 interface RoleSelectionScreenProps {
 	room: RoomWithUsersAndReadyStatus;
@@ -169,13 +171,11 @@ export function RoleSelectionScreen({
 												: COLORS.WHITE_15,
 										}}
 									>
-										<Typography
-											variant="body"
-											as="span"
-											className="text-lg leading-none w-5 text-center shrink-0"
-										>
-											{meta.emoji}
-										</Typography>
+										<DifficultyOrbitIcon
+											src={meta.orbitIconSrc}
+											glowBoxShadow={isActive ? meta.glow : undefined}
+											dimmed={isLocked}
+										/>
 										<Typography
 											variant="body"
 											as="span"
@@ -495,13 +495,6 @@ export function RoleSelectionScreen({
 										["--player-name-color" as string]: isMe
 											? "#ffffff"
 											: COLORS.WHITE_5,
-										...(roleMeta
-											? {
-												["--badge-color" as string]: roleMeta.text,
-												["--badge-bg" as string]: roleMeta.bg,
-												["--badge-border" as string]: `1px solid ${roleMeta.border}`,
-											}
-											: {}),
 									}}
 								>
 									<div className={styles.statusDot()} />
@@ -521,33 +514,7 @@ export function RoleSelectionScreen({
 											</Typography>
 										)}
 									</Typography>
-									{roleMeta ? (
-										<Typography
-											variant="small"
-											as="span"
-											font="cherry-bomb-one"
-											className={styles.roleBadge()}
-										>
-											<span className="relative w-3.5 h-3.5 shrink-0 block">
-												<Image
-													src={roleMeta.iconSrc}
-													alt=""
-													fill
-													className="object-contain"
-												/>
-											</span>
-											{roleMeta.label}
-										</Typography>
-									) : (
-										<Typography
-											variant="small"
-											as="span"
-											font="cherry-bomb-one"
-											className={styles.selectingLabel()}
-										>
-											せんたくちゅう…
-										</Typography>
-									)}
+									{role && <RoleBadge role={role} />}
 								</div>
 							);
 						})}
@@ -562,55 +529,26 @@ export function RoleSelectionScreen({
 				>
 					{isHost && (
 						<Button
-							screen="star-shield"
 							variant="success"
-							size="lg"
 							onClick={onBack}
-							className="w-full justify-start flex-1"
+							className="flex-1"
+							size="lg"
 						>
-							<Image
-								src={ICONS.EXIT}
-								alt="icon exit"
-								width={40}
-								height={40}
-								className="mr-2"
-							/>
-							<span>EXIT</span>
+							もどる
 						</Button>
 					)}
 					{isHost && (
-						<Button
-							screen="star-shield"
-							variant={canProceed ? "primary" : "solid"}
-							size="lg"
-							onClick={() => canProceed && onProceedToGame()}
-							disabled={!canProceed}
-							className="w-full justify-center flex-4"
-						>
-							{canProceed ? (
-								<>
-									<Image
-										src={ICONS.START}
-										alt="icon start"
-										width={40}
-										height={40}
-										className="mr-2"
-									/>
-									<span>GAME START</span>
-								</>
-							) : (
-								<>
-									<Image
-										src={ICONS.NOT_START}
-										alt="icon not start"
-										width={40}
-										height={40}
-										className="mr-2"
-									/>
-									<span>GAME START</span>
-								</>
-							)}
-						</Button>
+						<FloatGlow active={canProceed} variant={GlowVariant.Primary} className="flex-4">
+							<Button
+								variant={"primary"}
+								onClick={() => canProceed && onProceedToGame()}
+								disabled={!canProceed}
+								size="lg"
+								className="w-full"
+							>
+								ゲームスタート
+							</Button>
+						</FloatGlow>
 					)}
 				</motion.div>
 			</div>

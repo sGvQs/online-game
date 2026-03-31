@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/components/ui/link";
 import { lpHero } from "./lpHero.styles";
 import { Typography } from "@/components/ui/typography";
 import { PukapukaLogo } from "@/components/common/logo/pukapukaLogo";

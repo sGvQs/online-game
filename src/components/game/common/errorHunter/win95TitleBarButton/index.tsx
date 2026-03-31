@@ -1,8 +1,9 @@
 "use client";
 
-import { ButtonHTMLAttributes, forwardRef, useState } from "react";
+import { ButtonHTMLAttributes, forwardRef, useCallback, useContext, useState } from "react";
 import { cn } from "@/lib/utils";
 import { win95TitleBarButton } from "./styles";
+import { SoundContext } from "@/lib/sound-context";
 
 export interface Win95TitleBarButtonProps
 	extends ButtonHTMLAttributes<HTMLButtonElement> {}
@@ -10,9 +11,22 @@ export interface Win95TitleBarButtonProps
 const Win95TitleBarButton = forwardRef<
 	HTMLButtonElement,
 	Win95TitleBarButtonProps
->(({ className, children, ...props }, ref) => {
+>(({ className, children, onClick, ...props }, ref) => {
 	const styles = win95TitleBarButton();
 	const [isActive, setIsActive] = useState(false);
+	const sound = useContext(SoundContext);
+
+	const handleClick = useCallback(
+		(e: React.MouseEvent<HTMLButtonElement>) => {
+			if (sound?.isPlaying) {
+				const audio = new Audio("/se/click-se.mp3");
+				audio.volume = 0.1;
+				audio.play().catch(() => {});
+			}
+			onClick?.(e);
+		},
+		[sound, onClick],
+	);
 
 	return (
 		<button
@@ -27,6 +41,7 @@ const Win95TitleBarButton = forwardRef<
 			onMouseDown={() => setIsActive(true)}
 			onMouseUp={() => setIsActive(false)}
 			onMouseLeave={() => setIsActive(false)}
+			onClick={handleClick}
 			{...props}
 		>
 			{children}

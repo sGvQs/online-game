@@ -1,8 +1,10 @@
 "use client";
 
+import { useContext } from "react";
 import { motion } from "framer-motion";
 import { Typography } from "@/components/ui/typography";
 import type { GradientColor } from "@/components/ui/typography/styles";
+import { SoundContext } from "@/lib/sound-context";
 
 const PukapukaLogoSize = {
     medium: {
@@ -11,17 +13,27 @@ const PukapukaLogoSize = {
     },
     large: {
         variant: "display",
-        padding: "py-2 px-3",
+        padding: "py-4 px-3",
     },
 } as const;
 
 interface PukapukaLogoProps {
     className?: string;
     size?: keyof typeof PukapukaLogoSize;
+    disableInteraction?: boolean;
 }
 
-export function PukapukaLogo({ className, size = "medium" }: PukapukaLogoProps) {
+
+export function PukapukaLogo({ className, size = "medium", disableInteraction = false }: PukapukaLogoProps) {
     const sizeProps = PukapukaLogoSize[size];
+    const sound = useContext(SoundContext);
+
+    const playSE = (file: string, volume = 0.1) => {
+        if (!sound?.isPlaying) return;
+        const audio = new Audio(file);
+        audio.volume = volume;
+        audio.play().catch(() => {});
+    };
     const renderChars = (text: string, gradient: GradientColor) => {
         return text.split("").map((char, index) => {
             const motionProps = {
@@ -29,12 +41,14 @@ export function PukapukaLogo({ className, size = "medium" }: PukapukaLogoProps) 
                     y: [0, -8, 0],
                     rotate: [0, index % 2 === 0 ? 5 : -5, 0],
                 },
-                whileHover: {
-                    scale: 1.5,
-                    y: -15,
-                    filter: "brightness(1.2) drop-shadow(0 0 15px rgba(255,255,255,0.4))",
-                    zIndex: 20,
-                },
+                ...(!disableInteraction && {
+                    whileHover: {
+                        scale: 1.5,
+                        y: -15,
+                        filter: "brightness(1.2) drop-shadow(0 0 15px rgba(255,255,255,0.4))",
+                        zIndex: 20,
+                    },
+                }),
                 transition: {
                     y: {
                         duration: 3 + (index % 3) * 0.5,
@@ -60,7 +74,8 @@ export function PukapukaLogo({ className, size = "medium" }: PukapukaLogoProps) 
                     font="rubik-puddles"
                     gradientColor={gradient}
                     key={`${text}-${index}`}
-                    className={`inline-block ${sizeProps.padding} cursor-pointer select-none font-bold`}
+                    className={`inline-block ${sizeProps.padding} ${disableInteraction ? "cursor-none" : "cursor-pointer"} select-none font-bold`}
+                    onMouseEnter={disableInteraction ? undefined : () => playSE("/se/logo-hover-se.mp3", 0.01)}
                     {...(motionProps as any)}
                 >
                     {char}
@@ -70,7 +85,10 @@ export function PukapukaLogo({ className, size = "medium" }: PukapukaLogoProps) 
     };
 
     return (
-        <div className={`flex flex-col items-center justify-center pb-4 mb-2 ${className || ""}`}>
+        <div
+            className={`flex flex-col items-center justify-center ${className || ""}`}
+            onClick={disableInteraction ? undefined : () => playSE("/se/get-se.mp3", 0.03)}
+        >
             <div className="flex">
                 {renderChars("Pukapuka", "whiteToBlue")}
             </div>

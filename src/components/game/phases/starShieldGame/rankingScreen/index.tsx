@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/components/ui/link";
 import { motion } from "framer-motion";
 import { AuroraGlow } from "@/components/game/common/starShield/auroraGlow";
 import { StarShieldTitle } from "@/components/game/common/starShield/starShieldTitle";

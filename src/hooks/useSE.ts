@@ -9,16 +9,22 @@ type SEName =
 	| "submit"
 	| "dinosaur"
 	| "shooting"
-	| "star-damage";
+	| "star-damage"
+	| "heal"
+	| "modal";
 
 const DEFAULT_VOLUME = 0.1;
 const VOICE_VOLUME = 0.01;
+
+const SE_VOLUMES: Partial<Record<SEName, number>> = {
+	heal: 0.03,
+};
 
 const DINOSAUR_POOL_SIZE = 3;
 
 /** 恐竜ボイス用のプリロード済みAudioプール（本番で連続再生時の途切れ防止） */
 function getDinosaurPool(): HTMLAudioElement[] {
-	const url = "/se/dinosaur-voice.mp3";
+	const url = "/se/dinosaur-voice-se.mp3";
 	const pool: HTMLAudioElement[] = [];
 	for (let i = 0; i < DINOSAUR_POOL_SIZE; i++) {
 		const audio = new Audio(url);
@@ -45,7 +51,7 @@ function getNextDinosaurAudio(): HTMLAudioElement | null {
 const SHOOTING_POOL_SIZE = 5;
 
 function getShootingPool(): HTMLAudioElement[] {
-	const url = "/se/shooting.mp3";
+	const url = "/se/shooting-se.mp3";
 	const pool: HTMLAudioElement[] = [];
 	for (let i = 0; i < SHOOTING_POOL_SIZE; i++) {
 		const audio = new Audio(url);
@@ -90,9 +96,11 @@ export const useSE = () => {
 				tada: "/se/tada-se.mp3",
 				select: "/se/select-se.mp3",
 				submit: "/se/submit-se.mp3",
-				dinosaur: "/se/dinosaur-voice.mp3",
-				shooting: "/se/shooting.mp3",
-				"star-damage": "/se/star-damage.mp3",
+				heal: "/se/heal-se.mp3",
+				modal: "/se/modal-se.mp3",
+				dinosaur: "/se/dinosaur-voice-se.mp3",
+				shooting: "/se/shooting-se.mp3",
+				"star-damage": "/se/star-damage-se.mp3",
 			};
 
 			if (name === "dinosaur") {
@@ -114,7 +122,7 @@ export const useSE = () => {
 			}
 
 			const audio = new Audio(files[name]);
-			audio.volume = DEFAULT_VOLUME;
+			audio.volume = SE_VOLUMES[name] ?? DEFAULT_VOLUME;
 			audio.play().catch(() => {});
 		},
 		[isPlaying],

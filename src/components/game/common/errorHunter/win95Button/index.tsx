@@ -33,6 +33,7 @@ const Win95Button = forwardRef<HTMLButtonElement, Win95ButtonProps>(
 			<Button
 				ref={ref}
 				screen="error-hunter"
+				se="click"
 				className={cn(
 					(pressed || isPressed) && WIN95_PRESSED,
 					focused && WIN95_FOCUSED,

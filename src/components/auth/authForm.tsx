@@ -1,6 +1,6 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/components/ui/link";
 import { createClient } from "@/utils/supabase/client";
 import { useState } from "react";
 import { authForm } from "./authForm.styles";
@@ -58,6 +58,7 @@ export default function AuthForm() {
 				variant="primary"
 				size="lg"
 				fullWidth
+				se="submit"
 				onClick={handleGoogleLogin}
 				disabled={loading}
 			>

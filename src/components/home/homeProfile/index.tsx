@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import Image from "next/image";
 import { Pencil } from "lucide-react";
 import { FaceIcon } from "@prisma/client";
@@ -11,6 +11,7 @@ import { Modal } from "@/components/ui/modal";
 import { FACE_ICON_PATHS, FACE_ICON_OPTIONS } from "@/constants/common/faceIcon";
 import { updateProfile } from "@/server/actions/user/updateProfile";
 import { useLoading } from "@/lib/loading-context";
+import { useHomeModalOpen } from "@/lib/home-modal-context";
 import { homeProfile } from "./styles";
 
 interface HomeProfileProps {
@@ -30,7 +31,12 @@ export function HomeProfile({
 }: HomeProfileProps) {
 	const styles = homeProfile();
 	const { showLoading, hideLoading } = useLoading();
+	const { setModalOpen } = useHomeModalOpen();
 	const [isOpen, setIsOpen] = useState(false);
+
+	useEffect(() => {
+		setModalOpen(isOpen);
+	}, [isOpen, setModalOpen]);
 	const [name, setName] = useState(initialName);
 	const [faceIcon, setFaceIcon] = useState<FaceIcon>(initialFaceIcon);
 	const [comment, setComment] = useState(initialComment);
@@ -151,6 +157,7 @@ export function HomeProfile({
 						</Button>
 						<Button
 							variant="primary"
+							se="submit"
 							onClick={handleSave}
 						>
 							<Typography variant="label" font="cherry-bomb-one" className="font-bold">

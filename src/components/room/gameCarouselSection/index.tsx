@@ -1,14 +1,15 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { useLoading } from "@/lib/loading-context";
-import Image from "next/image";
+import { SoundContext } from "@/lib/sound-context";
 import { Users } from "lucide-react";
 import { gameCarouselSection } from "./styles";
 import { Modal } from "@/components/ui/modal";
 import { LeaveRoomButton } from "../leaveRoomButton";
 import { Button } from "@/components/ui/button";
 import { Typography } from "@/components/ui/typography";
+import { ASCII_ART } from "@/constants/errorHunterGame/constants";
 import { selectGame } from "@/server/actions/room";
 import {
 	isPlayerCountValid,
@@ -60,6 +61,34 @@ const GAMES = [
 
 type GameType = (typeof GAMES)[number]["type"];
 
+function renderGameTitle(type: GameType) {
+	switch (type) {
+		case "error-hunter":
+			return (
+				<pre className="font-['Courier_New',monospace] text-[5px] leading-[1.2] font-bold whitespace-pre overflow-hidden mx-auto">
+					{ASCII_ART}
+				</pre>
+			);
+		case "star-shield":
+			return (
+				<div className="select-none flex flex-col items-center">
+					<Typography variant="display" font="honk" as="span" className="text-6xl block leading-[0.6]">
+						STAR
+					</Typography>
+					<Typography variant="display" font="honk" as="span" className="text-6xl block leading-[0.6]">
+						SHIELD
+					</Typography>
+				</div>
+			);
+		case "null-hand":
+			return (
+				<Typography variant="display" font="sans" as="div" className="font-black text-3xl tracking-widest text-center drop-shadow-[2px_2px_0_rgba(255,68,68,0.4)] leading-loose">
+					NULL HAND
+				</Typography>
+			);
+	}
+}
+
 const CARD_THEME: Record<GameType, string> = {
 	"error-hunter": "border-teal-600 bg-teal-700/80 text-white",
 	"null-hand":
@@ -76,6 +105,14 @@ export function GameCarouselSection({
 }: GameCarouselSectionProps) {
 	const styles = gameCarouselSection();
 	const { showLoading, hideLoading } = useLoading();
+	const sound = useContext(SoundContext);
+
+	const playSE = (file: string) => {
+		if (!sound?.isPlaying) return;
+		const audio = new Audio(file);
+		audio.volume = 0.1;
+		audio.play().catch(() => {});
+	};
 	const [activeIndex, setActiveIndex] = useState(0);
 	const [selectedRoleIndex, setSelectedRoleIndex] = useState(0);
 	const [isVideoLoading, setIsVideoLoading] = useState(true);
@@ -110,6 +147,7 @@ export function GameCarouselSection({
 			setShowGameStartError(true);
 			return;
 		}
+		playSE("/se/submit-se.mp3");
 		showLoading();
 		try {
 			await selectGame(roomId, game.type);
@@ -121,6 +159,7 @@ export function GameCarouselSection({
 	const handleCardClick = (i: number) => {
 		const pos = getPosition(i);
 		if (pos !== "center") {
+			playSE("/se/change-slide-se.mp3");
 			setActiveIndex(i);
 			return;
 		}
@@ -148,17 +187,7 @@ export function GameCarouselSection({
 							className={`${styles.cardBase()} ${positionClass[pos]} ${CARD_THEME[game.type]}`}
 							onClick={() => handleCardClick(i)}
 						>
-							<div className={styles.gameIcon()}>
-								<Image
-									src={game.icon}
-									alt={game.title}
-									fill
-									className="object-contain"
-								/>
-							</div>
-							<Typography variant="h2" font="dot-gothic-16" as="div" className={styles.gameTitle()}>
-								{game.title}
-							</Typography>
+							{renderGameTitle(game.type)}
 							<Typography variant="small" as="div" className={styles.gameDesc()}>
 								{game.desc}
 							</Typography>
@@ -189,7 +218,10 @@ export function GameCarouselSection({
 										? styles.kvTabActive()
 										: styles.kvTabInactive()
 								}`}
-								onClick={() => setSelectedRoleIndex(i)}
+								onClick={() => {
+									playSE("/se/switch-se.mp3");
+									setSelectedRoleIndex(i);
+								}}
 							>
 								{role}
 							</button>
@@ -224,6 +256,7 @@ export function GameCarouselSection({
 						variant="primary"
 						onClick={handleGameStart}
 						className="font-cherry-bomb-one"
+						se={null}
 					>
 						はじめる
 					</Button>

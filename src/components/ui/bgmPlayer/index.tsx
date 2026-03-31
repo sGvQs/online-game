@@ -67,6 +67,16 @@ export default function BGMPlayer() {
         }
     }, [activeConfig.label]);
 
+    // isPlaying の外部変更（LogoWithOrbit 等）にも追従して play/pause
+    useEffect(() => {
+        if (!audioRef.current) return;
+        if (isPlaying) {
+            audioRef.current.play().catch(console.error);
+        } else {
+            audioRef.current.pause();
+        }
+    }, [isPlaying]);
+
     // ソースの切り替えと再生
     useEffect(() => {
         if (!audioRef.current) return;
@@ -101,16 +111,15 @@ export default function BGMPlayer() {
             />
             <button
                 className={styles.button()}
-                onClick={
-                    () => {
-                        if (isPlaying) {
-                            audioRef.current?.pause();
-                        } else {
-                            audioRef.current?.play();
-                        }
-                        setIsPlaying(!isPlaying);
+                onClick={() => {
+                    const next = !isPlaying;
+                    if (next) {
+                        const audio = new Audio("/se/switch-se.mp3");
+                        audio.volume = 0.1;
+                        audio.play().catch(() => {});
                     }
-                }>
+                    setIsPlaying(next);
+                }}>
                 {!isPlaying ? <VolumeOff /> : <Volume2 />}
             </button>
         </div>
