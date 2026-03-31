@@ -63,15 +63,15 @@ export const HOME_ORBIT_OBJECTS = [
 		label: "neptune",
 		maxHp: 300,
 		periodMs: 30000,
-		healIntervalMs: 100,
+		healIntervalMs: 30,
 		starBaseSizePx: 100,
 	},
 	{
 		src: "/svg/object/death-star.svg",
 		label: "death-star",
 		maxHp: 30,
-		periodMs: 2000,
-		healIntervalMs: 100,
+		periodMs: 3000,
+		healIntervalMs: 200,
 		starBaseSizePx: 30,
 	},
 ] as const satisfies readonly HomeOrbitObject[];
