@@ -2,6 +2,7 @@
 
 import { useHomeAmmo } from "@/lib/home-ammo-context";
 import { useHomeOrbitHudState } from "@/lib/home-orbit-hud-context";
+import { HOME_AMMO_BAR_ACTIVE_CLASSNAME } from "@/lib/home-shooter-config";
 import { HomeShooterLegend } from "@/components/home/homeShooterLegend";
 
 /** 弾数・射撃凡例（下部ドック用）。HP は LogoWithOrbit 内の StarHpBar を参照 */
@@ -24,7 +25,7 @@ export function HomeOrbitHud() {
 								key={i}
 								className={`w-1.5 h-6 rounded-full shrink-0 ${
 									i < homeAmmo.ammo
-										? "bg-red-500 shadow-[0_0_4px_rgba(239,68,68,0.55)]"
+										? HOME_AMMO_BAR_ACTIVE_CLASSNAME
 										: "bg-white/15"
 								}`}
 							/>
