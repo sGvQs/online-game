@@ -64,7 +64,7 @@ export const HOME_ORBIT_OBJECTS = [
 		healIntervalMs: 10000,
 		starBaseSizePx: 90,
 		achievement: {
-			id: "enemy-of-humanity",
+			id: "ice-age-onset",
 			toastMessage: "氷河期時代の到来",
 		},
 	},
@@ -76,8 +76,8 @@ export const HOME_ORBIT_OBJECTS = [
 		healIntervalMs: 1000,
 		starBaseSizePx: 50,
 		achievement: {
-			id: "enemy-of-humanity",
-			toastMessage: "未来の地球の破壊",
+			id: "future-earth-destruction",
+			toastMessage: "残された文明の道の破壊",
 		},
 	},
 	{
@@ -88,7 +88,7 @@ export const HOME_ORBIT_OBJECTS = [
 		healIntervalMs: 50,
 		starBaseSizePx: 100,
 		achievement: {
-			id: "enemy-of-humanity",
+			id: "rapid-tap-master",
 			toastMessage: "連打の達人",
 		},
 	},
@@ -100,7 +100,7 @@ export const HOME_ORBIT_OBJECTS = [
 		healIntervalMs: 200,
 		starBaseSizePx: 30,
 		achievement: {
-			id: "enemy-of-humanity",
+			id: "sniping-master",
 			toastMessage: "狙撃の達人",
 		},
 	},

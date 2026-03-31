@@ -3,13 +3,13 @@
  * キー文字列は export しない。
  */
 
-const LOCAL_KEY_HAS_LOGGED_IN = "zero-g-has-logged-in";
-const LOCAL_KEY_LOGIN_VISIT_COUNT = "zero-g-login-visit-count";
-const LOCAL_KEY_HAS_VISITED = "zero-g-has-visited";
+const LOCAL_KEY_HAS_LOGGED_IN = "pukapuka-space-has-logged-in";
+const LOCAL_KEY_LOGIN_VISIT_COUNT = "pukapuka-space-login-visit-count";
+const LOCAL_KEY_HAS_VISITED = "pukapuka-space-has-visited";
 const LOCAL_KEY_NULLHAND_USER_COLOR = "nullhand_user_color";
 
-/** 実績 ID ごとに `zero-g-achievement-{id}`（キー文字列は export しない） */
-const ACHIEVEMENT_KEY_PREFIX = "zero-g-achievement-";
+/** 実績 ID ごとに `pukapuka-space-achievement-{id}`（キー文字列は export しない） */
+const ACHIEVEMENT_KEY_PREFIX = "pukapuka-space-achievement-";
 
 function getLocalStorage(): Storage | null {
 	if (typeof window === "undefined") return null;
