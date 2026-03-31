@@ -63,7 +63,7 @@ export const HOME_ORBIT_OBJECTS = [
 		label: "neptune",
 		maxHp: 300,
 		periodMs: 30000,
-		healIntervalMs: 30,
+		healIntervalMs: 50,
 		starBaseSizePx: 100,
 	},
 	{
