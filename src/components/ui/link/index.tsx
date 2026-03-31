@@ -8,6 +8,9 @@ import type { ButtonSE } from "@/components/ui/button";
 const SE_FILES: Record<Exclude<ButtonSE, null>, string> = {
     push: "/se/select-se.mp3",
     submit: "/se/submit-se.mp3",
+    click: "/se/click-se.mp3",
+    buy: "/se/buy-se.mp3",
+    leave: "/se/leave-se.mp3",
 };
 
 export interface LinkProps extends ComponentProps<typeof NextLink> {
