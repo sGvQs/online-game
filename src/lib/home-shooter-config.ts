@@ -70,11 +70,11 @@ export const HOME_SHOOTER_MODES = {
 			ease: "linear" as const,
 		},
 		bulletClassName:
-			"bg-brand-8 00",
+			"bg-brand-800",
 		legendChipClassName:
 			"h-1.5 w-5 shrink-0 rounded-full bg-brand-800",
 		legendInput: "mouse" as const,
 		ammo: { consumes: false as const },
-		a11yBulletLabel: "黄色い球はクリック",
+		a11yBulletLabel: "白い球はクリック",
 	},
 } as const satisfies Record<HomeShooterModeKey, HomeShooterModeConfig>;
