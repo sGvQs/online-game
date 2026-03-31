@@ -7,7 +7,9 @@ import { PukapukaLogo } from "@/components/common/logo/pukapukaLogo";
 import { SoundContext } from "@/lib/sound-context";
 import { useSyncHomeOrbitHud } from "@/lib/home-orbit-hud-context";
 import { orbitBridge } from "@/components/home/orbitBridge";
+import { HomeAchievementToast } from "@/components/home/homeAchievementToast";
 import { StarHpBar } from "@/components/game/phases/starShieldGame/playing/typistView/StarHpBar";
+import { tryUnlockEnemyOfHumanityAchievement } from "@/lib/local-storage-bridge";
 
 /** ホーム軌道上の1オブジェクト（SVG・HP・公転周期・基準サイズ） */
 export interface HomeOrbitObject {
@@ -157,6 +159,10 @@ export function LogoWithOrbit({
 	const [explosionStarDisplayPx, setExplosionStarDisplayPx] = useState(() =>
 		resolveStarBaseSizePx(objects[0]),
 	);
+	const [achievementToastOpen, setAchievementToastOpen] = useState(false);
+	const dismissAchievementToast = useCallback(() => {
+		setAchievementToastOpen(false);
+	}, []);
 
 	const handleHit = useCallback(
 		(damage: number) => {
@@ -178,6 +184,12 @@ export function LogoWithOrbit({
 				const hitObject = list[idx];
 				explodingSrcRef.current = hitObject.src;
 				setExplosionStarDisplayPx(resolveStarBaseSizePx(hitObject));
+				if (
+					hitObject.label === "earth" &&
+					tryUnlockEnemyOfHumanityAchievement()
+				) {
+					setAchievementToastOpen(true);
+				}
 				if (objectRef.current) objectRef.current.style.visibility = "hidden";
 
 				// 爆発SE
@@ -332,6 +344,11 @@ export function LogoWithOrbit({
 
 	return (
 		<div className="flex flex-col items-center gap-3">
+			<HomeAchievementToast
+				open={achievementToastOpen}
+				message="「人類の敵」を獲得しました。"
+				onDismiss={dismissAchievementToast}
+			/>
 		<div className="relative inline-flex items-center justify-center">
 			{/* z-5: ロゴ文字のスタッキングコンテキスト */}
 			<PukapukaLogo size="large" className="relative z-5" disableInteraction />

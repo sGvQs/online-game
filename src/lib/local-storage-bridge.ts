@@ -7,6 +7,8 @@ const LOCAL_KEY_HAS_LOGGED_IN = "zero-g-has-logged-in";
 const LOCAL_KEY_LOGIN_VISIT_COUNT = "zero-g-login-visit-count";
 const LOCAL_KEY_HAS_VISITED = "zero-g-has-visited";
 const LOCAL_KEY_NULLHAND_USER_COLOR = "nullhand_user_color";
+const LOCAL_KEY_ACHIEVEMENT_ENEMY_OF_HUMANITY =
+	"zero-g-achievement-enemy-of-humanity";
 
 function getLocalStorage(): Storage | null {
 	if (typeof window === "undefined") return null;
@@ -75,4 +77,15 @@ export function setNullHandUserColor(color: string): void {
 	const s = getLocalStorage();
 	if (!s) return;
 	s.setItem(LOCAL_KEY_NULLHAND_USER_COLOR, color);
+}
+
+/** 初回解除時のみ `true`（スナックバー表示用）。既に解除済みなら `false` */
+export function tryUnlockEnemyOfHumanityAchievement(): boolean { 
+	const s = getLocalStorage();
+	if (!s) return false;
+	if (s.getItem(LOCAL_KEY_ACHIEVEMENT_ENEMY_OF_HUMANITY) === "true") {
+		return false;
+	}
+	s.setItem(LOCAL_KEY_ACHIEVEMENT_ENEMY_OF_HUMANITY, "true");
+	return true;
 }
