@@ -14,12 +14,13 @@ import {
 	LP_DINOSAUR_MESSAGES,
 	SUCKED_IN_AFTERMATH_MESSAGES,
 } from "@/constants/login/dinosaurLoginMessages";
-import { LOCAL_KEY_HAS_VISITED } from "@/constants/common/storage";
 import {
 	getHasLoggedInSession,
+	getHasVisitedSite,
 	getLoginVisitCount,
+	setHasVisitedSite,
 	setLoginVisitCount,
-} from "@/lib/session-storage-bridge";
+} from "@/lib/local-storage-bridge";
 import { useSE } from "@/hooks/useSE";
 import { Typography } from "@/components/ui/typography";
 const ENTER_DURATION = 3;
@@ -43,8 +44,8 @@ function getDialogueMessages(): string[] {
 		return DIALOGUE_MESSAGES_RETURNING;
 	}
 	const count = getLoginVisitCount();
-	// キャッシュリセット検出：sessionStorageは0だがlocalStorageに訪問履歴あり
-	if (count === 0 && localStorage.getItem(LOCAL_KEY_HAS_VISITED) === "true") {
+	// キャッシュリセット検出：訪問回数が0だが訪問履歴フラグあり
+	if (count === 0 && getHasVisitedSite()) {
 		return DIALOGUE_MESSAGES_CACHE_RESET;
 	}
 	return count === 0
@@ -54,7 +55,7 @@ function getDialogueMessages(): string[] {
 
 function markAsVisited(): void {
 	if (typeof window === "undefined") return;
-	localStorage.setItem(LOCAL_KEY_HAS_VISITED, "true");
+	setHasVisitedSite(true);
 }
 
 function incrementVisitCount(): void {

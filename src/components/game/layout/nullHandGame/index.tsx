@@ -19,6 +19,10 @@ import { ResultPhase } from "@/components/game/phases/nullHandGame/resultPhase";
 import { GameOverPhase } from "@/components/game/phases/nullHandGame/gameOverPhase";
 import { OpeningSplash } from "@/components/game/common/nullHand/openingSplash";
 import { PresenceDuplicateWarning } from "@/components/common/PresenceDuplicateWarning";
+import {
+	getNullHandUserColor,
+	setNullHandUserColor,
+} from "@/lib/local-storage-bridge";
 
 interface NullHandGameProps {
 	room: RoomWithUsersAndReadyStatus;
@@ -159,14 +163,14 @@ export function NullHandGame({
 	const [userColor, setUserColor] = useState<string>("#00FF00");
 
 	useEffect(() => {
-		const savedColor = localStorage.getItem("nullhand_user_color");
+		const savedColor = getNullHandUserColor();
 		if (savedColor) {
 			setUserColor(savedColor);
 		}
 	}, []);
 
 	useEffect(() => {
-		localStorage.setItem("nullhand_user_color", userColor);
+		setNullHandUserColor(userColor);
 	}, [userColor]);
 
 	return (
