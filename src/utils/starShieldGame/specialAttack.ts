@@ -44,7 +44,7 @@ export function createSpecialAttackBullets(params: {
 	const spreadRad = (spreadDeg * Math.PI) / 180;
 
 	const yellowDamage =
-		tech && (tech.id as TechniqueId) === "yellow_beam"
+		tech && (tech.id as TechniqueId) === "yellow"
 			? LEVEL_YELLOW_DAMAGE[normalAttackLevel]
 			: undefined;
 	const orangeDamage =

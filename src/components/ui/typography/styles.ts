@@ -16,7 +16,8 @@ export type TypographyFont =
     | "dot-gothic-16"
     | "rubik-puddles"
     | "honk"
-    | "sans";
+    | "sans"
+    | "mono";
 
 export const typography = tv({
     variants: {
@@ -37,6 +38,7 @@ export const typography = tv({
             "rubik-puddles": "font-rubik-puddles",
             honk: "font-honk",
             sans: "font-sans",
+            mono: "font-['Courier_New',monospace]",
         },
     },
 });
@@ -47,6 +49,7 @@ export const FONT_VARIANTS = {
     "dot-gothic-16": ["h4", "body", "small", "label", "caption"],
     honk: [],
     sans: [],
+    mono: [],
 } as const satisfies Record<TypographyFont, readonly TypographyVariant[]>;
 
 export function getDefaultFont(variant: TypographyVariant): TypographyFont {

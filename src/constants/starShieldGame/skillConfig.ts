@@ -25,10 +25,10 @@ export const PROGRESSION_DEBUG =
 export const NORMAL_ATTACK_UNLOCK_COSTS: Record<string, number> = {
 	red: 0, // 初期所持
 	blue: 200,
-	pink: 400,
-	yellow_beam: 600,
-	purple: 600,
-	orange: 600,
+	pink: 800,
+	yellow: 400,
+	purple: 400,
+	orange: 400,
 };
 
 // ============================================
@@ -48,7 +48,7 @@ export const NORMAL_ATTACK_LEVEL_UP_COSTS: Record<string, LevelUpCosts> = {
 	red: createLevelUpCosts(100),
 	blue: createLevelUpCosts(NORMAL_ATTACK_UNLOCK_COSTS.blue),
 	pink: createLevelUpCosts(NORMAL_ATTACK_UNLOCK_COSTS.pink),
-	yellow_beam: createLevelUpCosts(NORMAL_ATTACK_UNLOCK_COSTS.yellow_beam),
+	yellow: createLevelUpCosts(NORMAL_ATTACK_UNLOCK_COSTS.yellow),
 	purple: createLevelUpCosts(NORMAL_ATTACK_UNLOCK_COSTS.purple),
 	orange: createLevelUpCosts(NORMAL_ATTACK_UNLOCK_COSTS.orange),
 };
@@ -72,7 +72,7 @@ export const SPECIAL_ATTACK_LEVEL_UP_COSTS: Record<
 	6: 1500,
 	7: 1750,
 	8: 2000,
-	9: 3000,
+	9: 2500,
 	10: 5000,
 };
 
@@ -89,7 +89,7 @@ export const STAR_HP_LEVEL_UP_COSTS: Record<2 | 3 | 4 | 5, number> = {
 // ============================================
 // ヒールスキル ※ Typist 用
 // ============================================
-export const HEAL_UNLOCK_COST = 3000;
+export const HEAL_UNLOCK_COST = 500;
 export const HEAL_LEVEL_UP_COSTS: Record<2 | 3 | 4 | 5 | 6, number> = {
 	2: 500,
 	3: 1000,

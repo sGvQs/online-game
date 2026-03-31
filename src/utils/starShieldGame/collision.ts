@@ -220,7 +220,7 @@ export function getContactAsteroids(params: {
 	});
 }
 
-/** 寿命切れの弾 ID 一覧。ベジェ弾は軌道終点到達時に即削除 */
+/** 寿命切れの弾 ID 一覧。ベジェのうち curveContinueStraight でない弾は終点到達で削除 */
 export function getExpiredBulletIds(
 	bullets: Bullet[],
 	now: number,
@@ -230,7 +230,12 @@ export function getExpiredBulletIds(
 		bullets
 			.filter((b) => {
 				const elapsed = now - b.firedAt;
-				if (b.curveDurationMs != null) return elapsed >= b.curveDurationMs;
+				if (
+					b.curveDurationMs != null &&
+					!b.curveContinueStraight
+				) {
+					return elapsed >= b.curveDurationMs;
+				}
 				return elapsed > maxAgeMs;
 			})
 			.map((b) => b.id),

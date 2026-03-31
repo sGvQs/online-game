@@ -115,53 +115,54 @@ export const DIFFICULTY_META: Record<
 		border: string;
 		text: string;
 		glow: string;
-		emoji: string;
+		/** HOME 軌道オブジェクトと同じ天体 SVG */
+		orbitIconSrc: string;
 	}
 > = {
 	EASY: {
 		label: "かんたん",
 		rate: "+1pt",
-		emoji: "🌿",
 		bg: "rgba(134,239,172,0.12)",
 		border: "rgba(134,239,172,0.5)",
 		text: "#86efac",
 		glow: "0 0 12px rgba(134,239,172,0.4)",
+		orbitIconSrc: "/svg/object/earth.svg",
 	},
 	NORMAL: {
 		label: "ふつう",
 		rate: "+2pt",
-		emoji: "🌟",
 		bg: "rgba(253,224,71,0.12)",
 		border: "rgba(253,224,71,0.5)",
 		text: "#fde047",
 		glow: "0 0 12px rgba(253,224,71,0.4)",
+		orbitIconSrc: "/svg/object/sun.svg",
 	},
 	HARD: {
 		label: "むずかしい",
 		rate: "+3pt",
-		emoji: "🔥",
 		bg: "rgba(248,113,113,0.12)",
 		border: "rgba(248,113,113,0.5)",
 		text: "#f87171",
 		glow: "0 0 12px rgba(248,113,113,0.4)",
+		orbitIconSrc: "/svg/object/mars.svg",
 	},
 	HELL: {
 		label: "じこく",
 		rate: "+4pt",
-		emoji: "💀",
 		bg: "rgba(139,92,246,0.12)",
 		border: "rgba(139,92,246,0.6)",
 		text: "#8b5cf6",
 		glow: "0 0 12px rgba(139,92,246,0.4)",
+		orbitIconSrc: "/svg/object/neptune.svg",
 	},
 	ABYSS: {
 		label: "しんえん",
 		rate: "+5pt/波",
-		emoji: "🌑",
 		bg: "rgba(15,10,30,0.6)",
 		border: "rgba(100,50,200,0.7)",
 		text: "#c084fc",
 		glow: "0 0 18px rgba(100,50,200,0.6)",
+		orbitIconSrc: "/svg/object/death-star.svg",
 	},
 };
 

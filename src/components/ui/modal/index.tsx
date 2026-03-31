@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useContext, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { modal } from "./styles";
 import { Button } from "@/components/ui/button";
 import { Typography } from "@/components/ui/typography";
+import { SoundContext } from "@/lib/sound-context";
 
 interface ModalProps {
 	isOpen: boolean;
@@ -27,6 +28,15 @@ export function Modal({
 	showCloseButton = true,
 }: ModalProps) {
 	const styles = modal();
+	const sound = useContext(SoundContext);
+
+	useEffect(() => {
+		if (!isOpen) return;
+		if (!sound?.isPlaying) return;
+		const audio = new Audio("/se/modal-se.mp3");
+		audio.volume = 0.1;
+		audio.play().catch(() => {});
+	}, [isOpen, sound]);
 
 	// ESCキーでモーダルを閉じる
 	useEffect(() => {

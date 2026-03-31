@@ -1,3 +1,6 @@
+"use client";
+
+import { useContext } from "react";
 import Image from "next/image";
 import { Crown, UserMinus, UserRound } from "lucide-react";
 import { RoomUserWithUser, UserRanking } from "@/types";
@@ -7,6 +10,7 @@ import {
 } from "@/constants/common/faceIcon";
 import { memberItem } from "./styles";
 import { IconButton } from "@/components/ui/iconButton";
+import { SoundContext } from "@/lib/sound-context";
 
 const styles = memberItem();
 
@@ -31,6 +35,17 @@ export function MemberItem({
 	onKick,
 	isKicking,
 }: MemberItemProps) {
+	const sound = useContext(SoundContext);
+
+	const handleKick = () => {
+		if (sound?.isPlaying) {
+			const audio = new Audio("/se/leave-se.mp3");
+			audio.volume = 0.1;
+			audio.play().catch(() => {});
+		}
+		onKick?.();
+	};
+
 	const statusText = ranking
 		? `${ranking.rank}位 ${ranking.points}pt`
 		: "参加中";
@@ -64,7 +79,7 @@ export function MemberItem({
 					size="sm"
 					icon={<UserMinus className="w-4 h-4" />}
 					tooltip="ルームから追放"
-					onClick={onKick}
+					onClick={handleKick}
 					disabled={isKicking}
 				/>
 			) : (

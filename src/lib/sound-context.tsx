@@ -7,7 +7,7 @@ interface SoundContextType {
 	setIsPlaying: (isPlaying: boolean) => void;
 }
 
-const SoundContext = createContext<SoundContextType | undefined>(undefined);
+export const SoundContext = createContext<SoundContextType | undefined>(undefined);
 
 export function SoundProvider({ children }: { children: ReactNode }) {
 	const [isPlaying, setIsPlaying] = useState(false);

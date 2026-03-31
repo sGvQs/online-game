@@ -14,6 +14,9 @@ import {
 	LEVEL_BULLET_COUNT,
 	LEVEL_ORANGE_DAMAGE,
 	LEVEL_PINK_COUNT,
+	PINK_CURVE_BULGE_FRACTION,
+	PINK_CURVE_PEAK_T,
+	PINK_ROCKET_SPREAD_HALF_DEG,
 	LEVEL_PURPLE_SIZE,
 	LEVEL_SPREAD_DEG,
 	LEVEL_YELLOW_DAMAGE,
@@ -107,7 +110,7 @@ export function createDefaultSpreadBullets(params: {
 
 /**
  * 通常攻撃の弾を生成する（純粋関数）
- * pink の円弧軌道用に targetX, targetY（照準座標）を渡すこと
+ * pink は照準が有効なときのみ（恐竜口元共通出発・二次ベジェで照準へ）。targetX, targetY 必須
  */
 export function createNormalAttackBullets(params: {
 	tech: TechniqueConfig | null;
@@ -116,14 +119,14 @@ export function createNormalAttackBullets(params: {
 	dirY: number;
 	level: NormalAttackLevel;
 	now: number;
-	/** 照準座標（pink の円弧終点用） */
+	/** 照準座標（pink の終着点） */
 	targetX?: number;
 	targetY?: number;
 }): Bullet[] {
-	const { tech, centerAngle, dirX, dirY, level, now, targetX, targetY } =
+	const { tech, dirX, dirY, level, now, targetX, targetY, centerAngle } =
 		params;
 
-	// ピンク: 円弧軌道。恐竜の口から発射 → 弧を描いてターゲットへ
+	// ピンク: 口元共通 p0、二次ベジェで照準 p2。PINK_CURVE_PEAK_T で横膨らみピーク、p1 は解析式で決定
 	if (
 		tech &&
 		(tech.id as TechniqueId) === "pink" &&
@@ -131,31 +134,50 @@ export function createNormalAttackBullets(params: {
 		targetY != null
 	) {
 		const count = LEVEL_PINK_COUNT[level];
-		const perpX = -dirY;
-		const perpY = dirX;
-		const result: Bullet[] = [];
 		const p0 = {
 			x: DINO_X + dirX * BULLET_SPAWN_OFFSET_X,
 			y: DINO_Y + dirY * BULLET_SPAWN_OFFSET_Y,
 		};
 		const p2 = { x: targetX, y: targetY };
+		const chordX = p2.x - p0.x;
+		const chordY = p2.y - p0.y;
+		let chordLen = Math.hypot(chordX, chordY);
+		let ux: number;
+		let uy: number;
+		if (chordLen < 1e-6) {
+			ux = dirX;
+			uy = dirY;
+			chordLen = 1e-3;
+		} else {
+			ux = chordX / chordLen;
+			uy = chordY / chordLen;
+		}
+		const nx = -uy;
+		const ny = ux;
+		const spreadHalfRad = (PINK_ROCKET_SPREAD_HALF_DEG * Math.PI) / 180;
+		const bMax =
+			PINK_CURVE_BULGE_FRACTION > 0 && chordLen >= 1e-6
+				? chordLen *
+					Math.tan(spreadHalfRad) *
+					PINK_CURVE_BULGE_FRACTION
+				: 0;
+		const tPeak = PINK_CURVE_PEAK_T;
+		const denom = Math.max(1e-9, 2 * (1 - tPeak) * tPeak);
+		const speedMult = tech.speed ?? 1;
+		const curveDurationMs =
+			(chordLen * 1.3) / (BULLET_SPEED * speedMult);
+		const result: Bullet[] = [];
 		for (let i = 0; i < count; i++) {
-			const sign = Math.random() > 0.5 ? 1 : -1;
-			const arcStrength = 0.15 + Math.random() * 0.3;
-			const midX = (p0.x + p2.x) / 2;
-			const midY = (p0.y + p2.y) / 2;
+			const s = count > 1 ? (2 * i) / (count - 1) - 1 : 0;
+			const p1Off = (s * bMax) / denom;
 			const p1 = {
-				x: midX + sign * arcStrength * perpX,
-				y: midY + sign * arcStrength * perpY,
+				x: 0.5 * (p0.x + p2.x) + nx * p1Off,
+				y: 0.5 * (p0.y + p2.y) + ny * p1Off,
 			};
-			const chordLen = Math.hypot(p2.x - p0.x, p2.y - p0.y);
-			const curveDurationMs = (chordLen * 1.3) / BULLET_SPEED;
-
 			const bullet = createBaseBullet(
-				{ dirX: 1, dirY: 0, startX: p0.x, startY: p0.y },
+				{ dirX: ux, dirY: uy, startX: p0.x, startY: p0.y },
 				tech,
 				now,
-				tech.damage,
 			);
 			result.push({
 				...bullet,
@@ -164,6 +186,7 @@ export function createNormalAttackBullets(params: {
 				curveP1: p1,
 				curveP2: p2,
 				curveDurationMs,
+				curveContinueStraight: true,
 			});
 		}
 		return result;
@@ -172,7 +195,7 @@ export function createNormalAttackBullets(params: {
 	if (tech?.count && tech.count > 1) {
 		const verticalOffset = tech.verticalOffset ?? 0;
 		const yellowDamage =
-			(tech.id as TechniqueId) === "yellow_beam"
+			(tech.id as TechniqueId) === "yellow"
 				? LEVEL_YELLOW_DAMAGE[level]
 				: undefined;
 		const result: Bullet[] = [];
@@ -200,7 +223,7 @@ export function createNormalAttackBullets(params: {
 	}
 
 	const yellowDamage =
-		(tech.id as TechniqueId) === "yellow_beam"
+		(tech.id as TechniqueId) === "yellow"
 			? LEVEL_YELLOW_DAMAGE[level]
 			: undefined;
 	const orangeDamage =

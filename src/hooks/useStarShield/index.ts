@@ -380,6 +380,14 @@ export function useStarShield({
 
 			sendFire(payload);
 			playVoice("shooting");
+			if (
+				!isShooter &&
+				isLastChar &&
+				payload.healLevel != null &&
+				starHp < maxStarHp
+			) {
+				playVoice("heal");
+			}
 
 			if (isLastChar) {
 				setCurrentLine(pickRandomDialogue());

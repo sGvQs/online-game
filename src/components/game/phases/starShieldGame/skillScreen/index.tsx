@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, type CSSProperties } from "react";
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from "@/components/ui/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { ProtectedStar } from "../playing/protectedStar";
 import { AuroraGlow } from "@/components/game/common/starShield/auroraGlow";
@@ -35,6 +35,7 @@ import { SkillPreviewModal } from "./modal/SkillPreviewModal";
 import { StarShieldTitle } from "@/components/game/common/starShield/starShieldTitle";
 import { Typography } from "@/components/ui/typography";
 import { button } from "@/components/ui/button/styles";
+import { RoleBadge } from "@/components/game/common/starShield/roleBadge";
 
 // ============================================================
 // 定数
@@ -42,7 +43,7 @@ import { button } from "@/components/ui/button/styles";
 const NORMAL_ATTACK_IDS: TechniqueId[] = [
 	"red",
 	"blue",
-	"yellow_beam",
+	"yellow",
 	"purple",
 	"orange",
 	"pink",
@@ -53,17 +54,6 @@ const SPECIAL_LABELS: Record<string, string> = {
 	all_destruction: "全破壊",
 };
 
-function getTechEffectLabel(techniqueId: TechniqueId): string {
-	const effects: Partial<Record<TechniqueId, string>> = {
-		red: "スタンダード",
-		blue: "スロー効果",
-		yellow_beam: "ビーム状",
-		purple: "貫通効果",
-		orange: "連鎖",
-		pink: "円弧軌道",
-	};
-	return effects[techniqueId] ?? "";
-}
 
 // ============================================================
 // Main Component
@@ -205,7 +195,7 @@ export function StarShieldSkill({
 								height={24}
 								className="select-none"
 							/>
-							<Typography variant="h2" font="dot-gothic-16" className="text-yellow-400 font-bold">
+							<Typography variant="h3" font="cherry-bomb-one" className="text-yellow-400 font-bold">
 							{typingCount.toLocaleString()}
 							</Typography>
 						</div>
@@ -242,16 +232,9 @@ export function StarShieldSkill({
 					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 						{/* ===================== ATTACK COLUMN ===================== */}
 						<div className="flex flex-col gap-4 p-4 rounded-xl bg-indigo-500/5 border border-indigo-500/10 overflow-hidden h-full">
-							<h3 className="text-indigo-400 text-xs font-bold flex items-center gap-2 font-dot-gothic-16 mb-1">
-								<Image
-									src={ICONS.SHOOTER}
-									alt="Shooter"
-									width={16}
-									height={16}
-									className="opacity-80"
-								/>
-								ATTACK（Shooter）
-							</h3>
+							<div className="flex items-center gap-2 mb-1.5">
+								<RoleBadge role="SHOOTER" />
+							</div>
 
 							{/* 通常攻撃 */}
 							<div>
@@ -302,16 +285,9 @@ export function StarShieldSkill({
 
 						{/* ===================== DEFENCE COLUMN ===================== */}
 						<div className="flex flex-col gap-4 p-4 rounded-xl bg-emerald-500/5 border border-emerald-500/10 overflow-hidden h-full">
-							<h3 className="text-emerald-400 text-xs font-bold flex items-center gap-2 font-dot-gothic-16 mb-1">
-								<Image
-									src={ICONS.TYPIST}
-									alt="Typist"
-									width={16}
-									height={16}
-									className="opacity-80"
-								/>
-								DEFENCE（Typist）
-							</h3>
+							<div className="flex items-center gap-2 mb-1.5">
+								<RoleBadge role="TYPIST" />
+							</div>
 
 							{/* 星のHP */}
 							<div>
@@ -441,7 +417,7 @@ export function StarShieldSkill({
 						icon={ICONS.SHOOTER}
 						label="ATTACK"
 						color="indigo"
-						desc="Shooter・攻撃担当"
+						desc="攻撃担当"
 					/>
 
 					{/* 通常攻撃 */}
@@ -468,7 +444,7 @@ export function StarShieldSkill({
 												</span>
 											</div>
 										}
-										detail={getTechEffectLabel(techniqueId)}
+										detail={TECHNIQUES[techniqueId].specialEffect?.label ?? "スタンダード"}
 										currentLevel={currentLevel}
 										maxLevel={5}
 										onClick={() =>
@@ -512,7 +488,7 @@ export function StarShieldSkill({
 						icon={ICONS.TYPIST}
 						label="DEFENCE"
 						color="emerald"
-						desc="Typist・守護担当"
+						desc="守護担当"
 					/>
 
 					{/* 星のHP */}

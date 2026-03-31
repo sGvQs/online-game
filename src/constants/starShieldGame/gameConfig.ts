@@ -172,14 +172,31 @@ export const LEVEL_PURPLE_SIZE: Record<NormalAttackLevel, number> = {
 	4: 4,
 	5: 5,
 };
-/** ピンク: 1発撃ちあたりの弾数（円弧軌道。レベルで増加） */
+/** ピンク通常：レベル別弾数（扇状ベジェを均等配置） */
 export const LEVEL_PINK_COUNT: Record<NormalAttackLevel, number> = {
-	1: 5,
-	2: 20,
-	3: 40,
-	4: 80,
-	5: 160,
+	1: 9,
+	2: 16,
+	3: 25,
+	4: 36,
+	5: 49,
 };
+
+/** ピンク通常：扇の半角（度）。総幅は 2× ここ（±15° = 30°） */
+export const PINK_ROCKET_SPREAD_HALF_DEG = 15;
+/**
+ * ピンク通常：二次ベジェの横膨らみ。B_max = 弦長 × tan(扇半角) × この値。0 で膨らみなし
+ */
+export const PINK_CURVE_BULGE_FRACTION = 1;
+/**
+ * ピンク通常：曲線パラメータ t で横膨らみが最大になる位置（0〜1）。0.2 なら出発から曲線上 20% 付近
+ */
+export const PINK_CURVE_PEAK_T = 0.2;
+
+/**
+ * ピンク弾の見た目：進行方向に対する長さ倍率（カプセル長 = 直径 × この値）。
+ * 当たり判定は BULLET_RADIUS ベースの円のまま
+ */
+export const PINK_ROCKET_VISUAL_LENGTH_RATIO = 3;
 
 /** オレンジ: 連鎖範囲（正規化座標。固定） */
 export const ORANGE_CHAIN_RADIUS = 0.5;

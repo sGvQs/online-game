@@ -10,10 +10,24 @@ import { ICONS } from "@/constants/starShieldGame/constants";
 import {
 	LEVEL_BULLET_COUNT,
 	LEVEL_PINK_COUNT,
+	PINK_CURVE_BULGE_FRACTION,
+	PINK_CURVE_PEAK_T,
+	PINK_ROCKET_SPREAD_HALF_DEG,
 	LEVEL_SPREAD_DEG,
 	LEVEL_PURPLE_SIZE,
 	LEVEL_YELLOW_DAMAGE,
 } from "@/constants/starShieldGame/gameConfig";
+
+type PinkBezier = {
+	p0: { x: number; y: number };
+	p1: { x: number; y: number };
+	p2: { x: number; y: number };
+	t0: number;
+	durationMs: number;
+	/** t=1 での接線方向（正規化） */
+	exitVx: number;
+	exitVy: number;
+};
 
 type Bullet = {
 	x: number;
@@ -23,15 +37,9 @@ type Bullet = {
 	color: string;
 	alpha: number;
 	radius: number;
+	pinkBezier?: PinkBezier;
 };
 
-const EFFECT_LABEL: Partial<Record<TechniqueId, string>> = {
-	blue: "スロー効果",
-	yellow_beam: "ビーム（30連射）",
-	purple: "貫通",
-	orange: "一段連鎖",
-	pink: "円弧軌道",
-};
 
 export function LoadoutAnimPreview({
 	techniqueId,
@@ -73,26 +81,66 @@ export function LoadoutAnimPreview({
 		let lastFire = -FIRE_INTERVAL;
 		let animId: number;
 
-		function fire() {
+		function fire(nowMs: number) {
 			if (techniqueId === "pink") {
-				const displayCount = Math.min(bulletCount, 8);
-				const startX = DINO_X + 18;
-				for (let i = 0; i < displayCount; i++) {
-					const sign = i % 2 === 0 ? 1 : -1;
+				const p0x = DINO_X + 18;
+				const p0y = ORIGIN_Y;
+				const p2x = W - 24;
+				const p2y = ORIGIN_Y;
+				let chordLen = Math.hypot(p2x - p0x, p2y - p0y);
+				const ux =
+					chordLen < 1e-6 ? 1 : (p2x - p0x) / chordLen;
+				const uy =
+					chordLen < 1e-6 ? 0 : (p2y - p0y) / chordLen;
+				if (chordLen < 1e-6) chordLen = 1;
+				const nx = -uy;
+				const ny = ux;
+				const spreadHalfRad =
+					(PINK_ROCKET_SPREAD_HALF_DEG * Math.PI) / 180;
+				const bMax =
+					PINK_CURVE_BULGE_FRACTION > 0
+						? chordLen *
+							Math.tan(spreadHalfRad) *
+							PINK_CURVE_BULGE_FRACTION
+						: 0;
+				const tPeak = PINK_CURVE_PEAK_T;
+				const denom = Math.max(1e-9, 2 * (1 - tPeak) * tPeak);
+				const durationMs = 1000;
+				for (let i = 0; i < bulletCount; i++) {
+					const s = bulletCount > 1 ? (2 * i) / (bulletCount - 1) - 1 : 0;
+					const p1Off = (s * bMax) / denom;
+					const p1 = {
+						x: 0.5 * (p0x + p2x) + nx * p1Off,
+						y: 0.5 * (p0y + p2y) + ny * p1Off,
+					};
+					const tgx = 2 * (p2x - p1.x);
+					const tgy = 2 * (p2y - p1.y);
+					const tgLen = Math.hypot(tgx, tgy);
+					const exitVx = tgLen < 1e-9 ? ux : tgx / tgLen;
+					const exitVy = tgLen < 1e-9 ? uy : tgy / tgLen;
 					bullets.push({
-						x: startX,
-						y: ORIGIN_Y,
-						vx: 2.8,
-						vy: -sign * 0.4,
+						x: p0x,
+						y: p0y,
+						vx: 0,
+						vy: 0,
 						color: tech.color,
 						alpha: 0.9,
 						radius: 2.2,
+						pinkBezier: {
+							p0: { x: p0x, y: p0y },
+							p1,
+							p2: { x: p2x, y: p2y },
+							t0: nowMs,
+							durationMs,
+							exitVx,
+							exitVy,
+						},
 					});
 				}
 				return;
 			}
 
-			if (techniqueId === "yellow_beam") {
+			if (techniqueId === "yellow") {
 				const count = 12;
 				for (let i = 0; i < count; i++) {
 					const delay = i * 40;
@@ -145,7 +193,7 @@ export function LoadoutAnimPreview({
 			c.clearRect(0, 0, W, H);
 
 			if (now - lastFire >= FIRE_INTERVAL) {
-				fire();
+				fire(now);
 				lastFire = now;
 			}
 
@@ -168,12 +216,31 @@ export function LoadoutAnimPreview({
 
 			for (let i = bullets.length - 1; i >= 0; i--) {
 				const b = bullets[i]!;
-				if (techniqueId === "pink") {
-					b.vy += 0.012 * (ORIGIN_Y - b.y);
+				if (b.pinkBezier) {
+					const pb = b.pinkBezier;
+					const elapsed = now - pb.t0;
+					if (elapsed <= pb.durationMs) {
+						const te = Math.max(0, elapsed / pb.durationMs);
+						const u = 1 - te;
+						b.x =
+							u * u * pb.p0.x +
+							2 * u * te * pb.p1.x +
+							te * te * pb.p2.x;
+						b.y =
+							u * u * pb.p0.y +
+							2 * u * te * pb.p1.y +
+							te * te * pb.p2.y;
+					} else {
+						const extra = elapsed - pb.durationMs;
+						const speedPx = 0.45;
+						b.x = pb.p2.x + pb.exitVx * speedPx * extra;
+						b.y = pb.p2.y + pb.exitVy * speedPx * extra;
+					}
+				} else {
+					b.x += b.vx;
+					b.y += b.vy;
 				}
-				b.x += b.vx;
-				b.y += b.vy;
-				b.alpha -= techniqueId === "yellow_beam" ? 0.028 : 0.015;
+				b.alpha -= techniqueId === "yellow" ? 0.028 : 0.015;
 
 				if (b.alpha <= 0 || b.x > W + 12 || b.y < -12 || b.y > H + 12) {
 					bullets.splice(i, 1);
@@ -183,6 +250,37 @@ export function LoadoutAnimPreview({
 				const alphaHex = Math.round(Math.max(0, b.alpha) * 255)
 					.toString(16)
 					.padStart(2, "0");
+
+				if (b.pinkBezier) {
+					const pb = b.pinkBezier;
+					const elapsed = now - pb.t0;
+					let dx: number, dy: number;
+					if (elapsed <= pb.durationMs) {
+						const te = Math.max(0, elapsed / pb.durationMs);
+						dx = 2 * (1 - te) * (pb.p1.x - pb.p0.x) + 2 * te * (pb.p2.x - pb.p1.x);
+						dy = 2 * (1 - te) * (pb.p1.y - pb.p0.y) + 2 * te * (pb.p2.y - pb.p1.y);
+					} else {
+						dx = pb.exitVx;
+						dy = pb.exitVy;
+					}
+					const angle = Math.atan2(dy, dx);
+					const capsuleLen = b.radius * 3;
+					const alpha = Math.max(0, b.alpha);
+					c.save();
+					c.translate(b.x, b.y);
+					c.rotate(angle);
+					c.shadowBlur = 8;
+					c.shadowColor = b.color;
+					const grad = c.createLinearGradient(-capsuleLen / 2, 0, capsuleLen / 2, 0);
+					grad.addColorStop(0, `rgba(254,249,195,${alpha})`);
+					grad.addColorStop(1, `rgba(236,72,153,${alpha})`);
+					c.beginPath();
+					c.roundRect(-capsuleLen / 2, -b.radius, capsuleLen, b.radius * 2, b.radius);
+					c.fillStyle = grad;
+					c.fill();
+					c.restore();
+					continue;
+				}
 
 				c.save();
 				c.shadowBlur = techniqueId === "purple" ? 16 : 8;
@@ -237,9 +335,8 @@ export function LoadoutAnimPreview({
 					className="w-1.5 h-1.5 rounded-full shrink-0"
 					style={{ backgroundColor: tech.color }}
 				/>
-				<span className="text-[9px] text-white/25 font-dot-gothic-16">
-					{tech.label} Lv. {level}
-					{EFFECT_LABEL[techniqueId] ? ` · ${EFFECT_LABEL[techniqueId]}` : ""}
+				<span className="text-[9px] text-white font-dot-gothic-16">
+					{tech.specialEffect ? tech.specialEffect.label: tech.label} Lv.{level}
 				</span>
 			</div>
 		</div>

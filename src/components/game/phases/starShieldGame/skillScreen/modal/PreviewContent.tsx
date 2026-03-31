@@ -72,7 +72,7 @@ export function PreviewContent({
 				label: "減速割合",
 				value: `${Math.round((1 - LEVEL_BLUE_SLOW_MULTIPLIER[displayLevel]) * 100)}%`,
 			},
-			yellow_beam: {
+			yellow: {
 				label: "火力",
 				value: `${LEVEL_YELLOW_DAMAGE[displayLevel]} × 30発`,
 			},
@@ -88,19 +88,7 @@ export function PreviewContent({
 		};
 		const trait = traitByTech[preview.techniqueId];
 
-		const specialEffects: Partial<
-			Record<TechniqueId, { label: string; desc: string }>
-		> = {
-			blue: { label: "スロー", desc: "命中した隕石の速度を下げる" },
-			yellow_beam: { label: "ビーム", desc: "30発が前方に連続して飛ぶ" },
-			purple: { label: "貫通", desc: "隕石を貫通し複数を同時に攻撃" },
-			orange: { label: "一段連鎖", desc: "直撃から近隣に一段連鎖" },
-			pink: {
-				label: "円弧軌道",
-				desc: "ターゲットの上下から弧を描いて着弾する",
-			},
-		};
-		const fx = specialEffects[preview.techniqueId];
+		const fx = tech.specialEffect;
 
 		return (
 			<div>
@@ -169,18 +157,10 @@ export function PreviewContent({
 						blue: normLevels.map((l) =>
 							Math.round((1 - LEVEL_BLUE_SLOW_MULTIPLIER[l]) * 100),
 						),
-						yellow_beam: normLevels.map((l) => LEVEL_YELLOW_DAMAGE[l] * 30),
+						yellow: normLevels.map((l) => LEVEL_YELLOW_DAMAGE[l]),
 						purple: normLevels.map((l) => LEVEL_PURPLE_SIZE[l]),
 						orange: normLevels.map((l) => LEVEL_ORANGE_CHAIN_COUNT[l]),
 						pink: normLevels.map((l) => LEVEL_PINK_COUNT[l]),
-					};
-					const formatByTech: Record<TechniqueId, (v: number) => string> = {
-						red: (v) => `${v} 発`,
-						blue: (v) => `${v}%`,
-						yellow_beam: (v) => `${v}`,
-						purple: (v) => `${v}x`,
-						orange: (v) => `${v} 体`,
-						pink: (v) => `${v} 発`,
 					};
 					return (
 						<div className="mt-4 rounded-2xl bg-indigo-500/5 border border-indigo-500/20 p-4 flex justify-center">
@@ -189,7 +169,7 @@ export function PreviewContent({
 								currentLevel={displayLevel}
 								maxLevel={5}
 								color={tech.color}
-								formatValue={(v, _l) => formatByTech[preview.techniqueId](v)}
+								formatValue={(v) => `${v}${tech.levelUnit}`}
 							/>
 						</div>
 					);

@@ -47,7 +47,7 @@ export const PROGRESSION_DEBUG =
 |----------|------------|------|
 | red | 0（初期所持） | 赤い球・散弾 |
 | blue | 1000 | 青い球・減速 |
-| yellow_beam | 3000 | 黄色いビーム |
+| yellow | 3000 | 黄色いビーム |
 | purple | 500 | 紫の球・貫通 |
 | orange | 5000 | オレンジの球・連鎖 |
 
