@@ -29,6 +29,7 @@ import type { StarShieldProgress } from "@/types/starShieldGame";
 import { LEVEL_STAR_HP } from "@/constants/starShieldGame/gameConfig";
 import { LEVEL_HEAL_RECOVERY } from "@/constants/starShieldGame/skillConfig";
 import { FloatGlow, GlowVariant } from "@/components/ui/floatGlow";
+import { DifficultyOrbitIcon } from "@/components/game/common/starShield/difficultyOrbitIcon";
 
 interface RoleSelectionScreenProps {
 	room: RoomWithUsersAndReadyStatus;
@@ -170,13 +171,11 @@ export function RoleSelectionScreen({
 												: COLORS.WHITE_15,
 										}}
 									>
-										<Typography
-											variant="body"
-											as="span"
-											className="text-lg leading-none w-5 text-center shrink-0"
-										>
-											{meta.emoji}
-										</Typography>
+										<DifficultyOrbitIcon
+											src={meta.orbitIconSrc}
+											glowBoxShadow={isActive ? meta.glow : undefined}
+											dimmed={isLocked}
+										/>
 										<Typography
 											variant="body"
 											as="span"
