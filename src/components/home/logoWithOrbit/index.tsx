@@ -9,7 +9,13 @@ import { useSyncHomeOrbitHud } from "@/lib/home-orbit-hud-context";
 import { orbitBridge } from "@/components/home/orbitBridge";
 import { HomeAchievementToast } from "@/components/home/homeAchievementToast";
 import { StarHpBar } from "@/components/game/phases/starShieldGame/playing/typistView/StarHpBar";
-import { tryUnlockEnemyOfHumanityAchievement } from "@/lib/local-storage-bridge";
+import { tryUnlockAchievement } from "@/lib/local-storage-bridge";
+
+/** 軌道オブジェクト破壊で解除する実績（任意）。`id` は永続化用の安定スラッグ */
+export interface HomeOrbitAchievement {
+	id: string;
+	toastMessage: string;
+}
 
 /** ホーム軌道上の1オブジェクト（SVG・HP・公転周期・基準サイズ） */
 export interface HomeOrbitObject {
@@ -21,6 +27,8 @@ export interface HomeOrbitObject {
 	healIntervalMs: number;
 	/** 軌道上の基準サイズ（px）。{@link resolveStarBaseSizePx} で 24〜128 に収める */
 	starBaseSizePx: number;
+	/** 破壊時に解除する実績（任意） */
+	achievement?: HomeOrbitAchievement;
 }
 
 /** デフォルトの星ベース幅・高さ（px）。比例計算の基準にも使う */
@@ -43,6 +51,10 @@ export const HOME_ORBIT_OBJECTS = [
 		periodMs: 30000,
 		healIntervalMs: 10000,
 		starBaseSizePx: 30,
+		achievement: {
+			id: "enemy-of-humanity",
+			toastMessage: "人類の敵",
+		},
 	},
 	{
 		src: "/svg/object/sun.svg",
@@ -51,6 +63,10 @@ export const HOME_ORBIT_OBJECTS = [
 		periodMs: 30000,
 		healIntervalMs: 10000,
 		starBaseSizePx: 90,
+		achievement: {
+			id: "enemy-of-humanity",
+			toastMessage: "氷河期時代の到来",
+		},
 	},
 	{
 		src: "/svg/object/mars.svg",
@@ -59,6 +75,10 @@ export const HOME_ORBIT_OBJECTS = [
 		periodMs: 3000,
 		healIntervalMs: 1000,
 		starBaseSizePx: 50,
+		achievement: {
+			id: "enemy-of-humanity",
+			toastMessage: "未来の地球の破壊",
+		},
 	},
 	{
 		src: "/svg/object/neptune.svg",
@@ -67,6 +87,10 @@ export const HOME_ORBIT_OBJECTS = [
 		periodMs: 30000,
 		healIntervalMs: 50,
 		starBaseSizePx: 100,
+		achievement: {
+			id: "enemy-of-humanity",
+			toastMessage: "連打の達人",
+		},
 	},
 	{
 		src: "/svg/object/death-star.svg",
@@ -75,6 +99,10 @@ export const HOME_ORBIT_OBJECTS = [
 		periodMs: 3000,
 		healIntervalMs: 200,
 		starBaseSizePx: 30,
+		achievement: {
+			id: "enemy-of-humanity",
+			toastMessage: "狙撃の達人",
+		},
 	},
 ] as const satisfies readonly HomeOrbitObject[];
 
@@ -159,9 +187,11 @@ export function LogoWithOrbit({
 	const [explosionStarDisplayPx, setExplosionStarDisplayPx] = useState(() =>
 		resolveStarBaseSizePx(objects[0]),
 	);
-	const [achievementToastOpen, setAchievementToastOpen] = useState(false);
+	const [achievementToastMessage, setAchievementToastMessage] = useState<
+		string | null
+	>(null);
 	const dismissAchievementToast = useCallback(() => {
-		setAchievementToastOpen(false);
+		setAchievementToastMessage(null);
 	}, []);
 
 	const handleHit = useCallback(
@@ -181,14 +211,12 @@ export function LogoWithOrbit({
 			if (hpRef.current <= 0) {
 				// 爆発開始
 				explodingRef.current = true;
-				const hitObject = list[idx];
+				const hitObject = list[idx] as HomeOrbitObject;
 				explodingSrcRef.current = hitObject.src;
 				setExplosionStarDisplayPx(resolveStarBaseSizePx(hitObject));
-				if (
-					hitObject.label === "earth" &&
-					tryUnlockEnemyOfHumanityAchievement()
-				) {
-					setAchievementToastOpen(true);
+				const ach = hitObject.achievement;
+				if (ach && tryUnlockAchievement(ach.id)) {
+					setAchievementToastMessage(ach.toastMessage);
 				}
 				if (objectRef.current) objectRef.current.style.visibility = "hidden";
 
@@ -345,8 +373,8 @@ export function LogoWithOrbit({
 	return (
 		<div className="flex flex-col items-center gap-3">
 			<HomeAchievementToast
-				open={achievementToastOpen}
-				message="「人類の敵」を獲得しました。"
+				open={achievementToastMessage !== null}
+				message={achievementToastMessage ?? ""}
 				onDismiss={dismissAchievementToast}
 			/>
 		<div className="relative inline-flex items-center justify-center">

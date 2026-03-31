@@ -7,8 +7,9 @@ const LOCAL_KEY_HAS_LOGGED_IN = "zero-g-has-logged-in";
 const LOCAL_KEY_LOGIN_VISIT_COUNT = "zero-g-login-visit-count";
 const LOCAL_KEY_HAS_VISITED = "zero-g-has-visited";
 const LOCAL_KEY_NULLHAND_USER_COLOR = "nullhand_user_color";
-const LOCAL_KEY_ACHIEVEMENT_ENEMY_OF_HUMANITY =
-	"zero-g-achievement-enemy-of-humanity";
+
+/** 実績 ID ごとに `zero-g-achievement-{id}`（キー文字列は export しない） */
+const ACHIEVEMENT_KEY_PREFIX = "zero-g-achievement-";
 
 function getLocalStorage(): Storage | null {
 	if (typeof window === "undefined") return null;
@@ -79,13 +80,22 @@ export function setNullHandUserColor(color: string): void {
 	s.setItem(LOCAL_KEY_NULLHAND_USER_COLOR, color);
 }
 
-/** 初回解除時のみ `true`（スナックバー表示用）。既に解除済みなら `false` */
-export function tryUnlockEnemyOfHumanityAchievement(): boolean { 
+function achievementStorageKey(achievementId: string): string {
+	return `${ACHIEVEMENT_KEY_PREFIX}${achievementId}`;
+}
+
+/**
+ * 軌道などの実績を初回解除時のみ `true` を localStorage に保存する。
+ * 戻り値が `true` のときだけトースト等を出す。既解除なら `false`。
+ * `achievementId` は安定したスラッグ（例: `enemy-of-humanity`）。
+ */
+export function tryUnlockAchievement(achievementId: string): boolean {
 	const s = getLocalStorage();
 	if (!s) return false;
-	if (s.getItem(LOCAL_KEY_ACHIEVEMENT_ENEMY_OF_HUMANITY) === "true") {
+	const key = achievementStorageKey(achievementId);
+	if (s.getItem(key) === "true") {
 		return false;
 	}
-	s.setItem(LOCAL_KEY_ACHIEVEMENT_ENEMY_OF_HUMANITY, "true");
+	s.setItem(key, "true");
 	return true;
 }
