@@ -4,11 +4,25 @@ import {
 	Keyboard,
 	MousePointerClick,
 	RotateCcw,
+	type LucideIcon,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useHomeAmmo } from "@/lib/home-ammo-context";
+import {
+	HOME_SHOOTER_LEGEND_ORDER,
+	HOME_SHOOTER_MODES,
+	type HomeShooterModeKey,
+} from "@/lib/home-shooter-config";
 
 const iconClass = "size-3.5 shrink-0 text-slate-200/90";
+
+const LEGEND_INPUT_ICONS: Record<
+	(typeof HOME_SHOOTER_MODES)[HomeShooterModeKey]["legendInput"],
+	LucideIcon
+> = {
+	keyboard: Keyboard,
+	mouse: MousePointerClick,
+};
 
 const segmentFrame =
 	"inline-flex items-center gap-1.5 rounded-xl border border-white/15 bg-slate-900/85 backdrop-blur-md shadow-md px-2 py-1 text-xs";
@@ -37,26 +51,30 @@ export function HomeShooterLegend() {
 	const ammoCtx = useHomeAmmo();
 	const isAmmoEmpty = ammoCtx !== undefined && ammoCtx.ammo < 1;
 
+	const a11ySummary = [
+		...HOME_SHOOTER_LEGEND_ORDER.map(
+			(key) => HOME_SHOOTER_MODES[key].a11yBulletLabel,
+		),
+		"スペースキーで弾をリロード",
+	].join("、");
+
 	return (
 		<div className="w-full pointer-events-none opacity-85">
-			<span className="sr-only">
-				赤い球はキーボード、黄色い球はクリック、スペースキーで弾をリロード
-			</span>
+			<span className="sr-only">{a11ySummary}</span>
 			<div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1">
-				<span className={segmentFrame}>
-					<span
-						className="h-1.5 w-5 shrink-0 rounded-full bg-red-500 shadow-[0_0_4px_rgba(239,68,68,0.6)]"
-						aria-hidden
-					/>
-					<Keyboard className={iconClass} strokeWidth={2} aria-hidden />
-				</span>
-				<span className={segmentFrame}>
-					<span
-						className="h-1.5 w-5 shrink-0 rounded-full bg-yellow-400 shadow-[0_0_4px_rgba(250,204,21,0.55)]"
-						aria-hidden
-					/>
-					<MousePointerClick className={iconClass} strokeWidth={2} aria-hidden />
-				</span>
+				{HOME_SHOOTER_LEGEND_ORDER.map((modeKey) => {
+					const cfg = HOME_SHOOTER_MODES[modeKey];
+					const Icon = LEGEND_INPUT_ICONS[cfg.legendInput];
+					return (
+						<span key={modeKey} className={segmentFrame}>
+							<span
+								className={cfg.legendChipClassName}
+								aria-hidden
+							/>
+							<Icon className={iconClass} strokeWidth={2} aria-hidden />
+						</span>
+					);
+				})}
 				{isAmmoEmpty ? (
 					<motion.span
 						className={reloadSegmentFrame}

@@ -6,23 +6,15 @@ import { motion, useMotionValue } from "framer-motion";
 import { SoundContext } from "@/lib/sound-context";
 import { AMMO_MAX, HomeAmmoProvider } from "@/lib/home-ammo-context";
 import {
+	HOME_SHOOTER_MODES,
+	HOME_SHOOTER_SE,
+	type HomeShooterModeKey,
+} from "@/lib/home-shooter-config";
+import {
 	HomeModalOpenProvider,
 	useHomeModalOpen,
 } from "@/lib/home-modal-context";
 import { orbitBridge } from "@/components/home/orbitBridge";
-
-const BALL_W = 6; // 球の幅 (px)
-const BALL_H = 22; // 基準の高さ (px)
-const BALL_RED_H = BALL_H * 5; // キーボード赤（従来の赤の5倍）
-const BALL_LONG_H = BALL_H * 5; // クリック黄（赤と同じ倍率の細長い弾）
-const BALL_DURATION = 0.45; // 飛行時間 (秒)
-
-const DAMAGE_KEYBOARD = 1;
-const DAMAGE_CLICK = 5;
-
-const SE_SHOOT = "/se/shooting-se.mp3";
-const SE_CANNOT_SHOOT = "/se/cannot-shoot-se.mp3";
-const SE_RELOAD = "/se/reload-se.mp3";
 
 interface Ball {
 	id: number;
@@ -31,8 +23,12 @@ interface Ball {
 	toX: number;
 	toY: number;
 	angle: number;
+	widthPx: number;
 	height: number;
 	bulletClassName: string;
+	durationSec: number;
+	ease: "linear";
+	initialScale: number;
 }
 
 interface Collision {
@@ -104,7 +100,7 @@ function HomeCursorInner({ children }: { children: React.ReactNode }) {
 			toY: number,
 			options?: {
 				syntheticClickTarget?: HTMLElement;
-				mode?: "keyboard" | "click";
+				mode?: HomeShooterModeKey;
 			},
 		): boolean => {
 			const rect = containerRef.current?.getBoundingClientRect();
@@ -116,25 +112,24 @@ function HomeCursorInner({ children }: { children: React.ReactNode }) {
 			const inside = toX >= 0 && toY >= 0 && toX <= w && toY <= h;
 			if (!inside) return false;
 
-			const mode = options?.mode ?? "keyboard";
-			const isClick = mode === "click";
-			if (!isClick) {
-				if (ammoRef.current <= 0) {
+			const modeKey: HomeShooterModeKey = options?.mode ?? "keyboard";
+			const cfg = HOME_SHOOTER_MODES[modeKey];
+
+			if (cfg.ammo.consumes) {
+				const cost = cfg.ammo.cost;
+				if (ammoRef.current < cost) {
 					if (sound?.isPlaying) {
-						const audio = new Audio(SE_CANNOT_SHOOT);
+						const audio = new Audio(HOME_SHOOTER_SE.cannotShoot);
 						audio.volume = 0.12;
 						audio.play().catch(() => {});
 					}
 					return false;
 				}
-				ammoRef.current -= 1;
+				ammoRef.current -= cost;
 				setAmmo(ammoRef.current);
 			}
-			const damage = isClick ? DAMAGE_CLICK : DAMAGE_KEYBOARD;
-			const ballHeight = isClick ? BALL_LONG_H : BALL_RED_H;
-			const bulletClassName = isClick
-				? "bg-yellow-400 shadow-[0_0_6px_rgba(250,204,21,0.55)]"
-				: "bg-red-500";
+
+			const { damage, durationSec, ball, bulletClassName } = cfg;
 
 			const sources = [
 				{ fromX: 0, fromY: h },
@@ -147,13 +142,17 @@ function HomeCursorInner({ children }: { children: React.ReactNode }) {
 				toX,
 				toY,
 				angle: Math.atan2(toY - fromY, toX - fromX) * (180 / Math.PI) + 90,
-				height: ballHeight,
+				widthPx: ball.widthPx,
+				height: ball.heightPx,
 				bulletClassName,
+				durationSec,
+				ease: ball.ease,
+				initialScale: ball.initialScale,
 			}));
 			setBalls((prev) => [...prev, ...newBalls]);
 
 			if (sound?.isPlaying) {
-				const audio = new Audio(SE_SHOOT);
+				const audio = new Audio(HOME_SHOOTER_SE.shoot);
 				audio.volume = 0.1;
 				audio.play().catch(() => {});
 			}
@@ -177,7 +176,7 @@ function HomeCursorInner({ children }: { children: React.ReactNode }) {
 					target.click();
 					delayedClickRef.current = false;
 				}
-			}, BALL_DURATION * 1000);
+			}, durationSec * 1000);
 			return true;
 		},
 		[sound],
@@ -213,7 +212,7 @@ function HomeCursorInner({ children }: { children: React.ReactNode }) {
 				ammoRef.current = AMMO_MAX;
 				setAmmo(AMMO_MAX);
 				if (sound?.isPlaying) {
-					const audio = new Audio(SE_RELOAD);
+					const audio = new Audio(HOME_SHOOTER_SE.reload);
 					audio.volume = 0.12;
 					audio.play().catch(() => {});
 				}
@@ -296,21 +295,21 @@ function HomeCursorInner({ children }: { children: React.ReactNode }) {
 					key={b.id}
 					className={`absolute top-0 left-0 pointer-events-none z-9998 rounded-full ${b.bulletClassName}`}
 					style={{
-						width: BALL_W,
+						width: b.widthPx,
 						height: b.height,
 						rotate: b.angle,
 					}}
 					initial={{
-						x: b.fromX - BALL_W / 2,
+						x: b.fromX - b.widthPx / 2,
 						y: b.fromY - b.height / 2,
-						scale: 2.5,
+						scale: b.initialScale,
 					}}
 					animate={{
-						x: b.toX - BALL_W / 2,
+						x: b.toX - b.widthPx / 2,
 						y: b.toY - b.height / 2,
 						scale: 0,
 					}}
-					transition={{ duration: BALL_DURATION, ease: "linear" }}
+					transition={{ duration: b.durationSec, ease: b.ease }}
 					onAnimationComplete={() => removeBall(b.id)}
 				/>
 			))}
