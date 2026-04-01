@@ -54,38 +54,17 @@ export function resolveStarBaseSizePx(entry: HomeOrbitObject): number {
 	return clampStarBaseSizePx(entry.starBaseSizePx);
 }
 
-/**
- * 同一 `performance.timeOrigin`（＝通常は1回のフルページロード）につき1回だけランダムを決める。
- * sessionStorage はタブを閉じるまでリロード後も残るため、毎回同じ星に見える不具合の原因になっていた。
- * Strict Mode の二重マウントでは timeOrigin が同じなので同じ値を再利用する。
- */
-let homeOrbitRandomForPageLoad: { timeOrigin: number; index: number } | null =
-	null;
-
-function getRandomOrbitIndexForAllUnlocked(listLength: number): number {
-	const origin =
-		typeof performance !== "undefined" &&
-		Number.isFinite(performance.timeOrigin)
-			? performance.timeOrigin
-			: Date.now();
-	if (
-		homeOrbitRandomForPageLoad !== null &&
-		homeOrbitRandomForPageLoad.timeOrigin === origin
-	) {
-		return homeOrbitRandomForPageLoad.index;
-	}
-	const index = Math.floor(Math.random() * listLength);
-	homeOrbitRandomForPageLoad = { timeOrigin: origin, index };
-	return index;
-}
+type HomeOrbitStartResolution =
+	| { kind: "progress"; index: number }
+	| { kind: "allAchievementsUnlocked"; listLength: number };
 
 /**
- * ホーム初回表示で使う軌道インデックス。
- * - 全実績解除済み: ランダム（ページロードごとに変わる）
- * - それ以外: 配列順で最初の「未解除実績」の星（地球を破壊済みなら次の星から再開）
+ * 実績状態から「進行中なら開始インデックス」「すべて解除済みならランダムが必要」を返す（ランダムは呼び出し側の ref で1回だけ）。
  */
-function getInitialHomeOrbitIndex(list: readonly HomeOrbitObject[]): number {
-	if (list.length === 0) return 0;
+function resolveHomeOrbitStart(
+	list: readonly HomeOrbitObject[],
+): HomeOrbitStartResolution {
+	if (list.length === 0) return { kind: "progress", index: 0 };
 
 	const withAchievement = list
 		.map((o, i) => ({ o, i }))
@@ -98,19 +77,21 @@ function getInitialHomeOrbitIndex(list: readonly HomeOrbitObject[]): number {
 			} => Boolean(x.o.achievement),
 		);
 
-	if (withAchievement.length === 0) return 0;
+	if (withAchievement.length === 0) return { kind: "progress", index: 0 };
 
 	const ids = withAchievement.map((x) => x.o.achievement.id);
 	const allUnlocked = ids.every((id) => isAchievementUnlocked(id));
 
 	if (allUnlocked) {
-		return getRandomOrbitIndexForAllUnlocked(list.length);
+		return { kind: "allAchievementsUnlocked", listLength: list.length };
 	}
 
 	for (const { o, i } of withAchievement) {
-		if (!isAchievementUnlocked(o.achievement.id)) return i;
+		if (!isAchievementUnlocked(o.achievement.id)) {
+			return { kind: "progress", index: i };
+		}
 	}
-	return 0;
+	return { kind: "progress", index: 0 };
 }
 
 export const HOME_ORBIT_OBJECTS = [
@@ -264,8 +245,23 @@ export function LogoWithOrbit({
 		setAchievementToastMessage(null);
 	}, []);
 
+	/** 全実績解除時の開始位置ランダム（このマウントで1回だけ） */
+	const allUnlockedOrbitRandomRef = useRef<number | null>(null);
+
 	useLayoutEffect(() => {
-		const i = getInitialHomeOrbitIndex(objects);
+		const resolved = resolveHomeOrbitStart(objects);
+		let i: number;
+		if (resolved.kind === "progress") {
+			allUnlockedOrbitRandomRef.current = null;
+			i = resolved.index;
+		} else {
+			if (allUnlockedOrbitRandomRef.current === null) {
+				allUnlockedOrbitRandomRef.current = Math.floor(
+					Math.random() * resolved.listLength,
+				);
+			}
+			i = allUnlockedOrbitRandomRef.current;
+		}
 		currentIndexRef.current = i;
 		setCurrentIndex(i);
 		const entry = objects[i];
