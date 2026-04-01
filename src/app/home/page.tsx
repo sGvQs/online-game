@@ -63,7 +63,7 @@ export default async function HomePage({
 						/>
 						<HomeActions />
 					</div>
-					<div className="pointer-events-none fixed inset-x-0 bottom-0 z-20 w-full pt-2 pb-[calc(1rem+env(safe-area-inset-bottom))]">
+					<div className="pointer-events-none fixed inset-x-0 bottom-0 z-[60] w-full pt-2 pb-[calc(1rem+env(safe-area-inset-bottom))]">
 						<HomeOrbitHud />
 					</div>
 				</div>
