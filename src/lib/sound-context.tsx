@@ -32,7 +32,13 @@ export const soundOutputRef: { isPlaying: boolean; masterVolume: number } = {
 
 export function SoundProvider({ children }: { children: ReactNode }) {
 	const [isPlaying, setIsPlaying] = useState(false);
-	const [volume, setVolumeState] = useState(() => getSoundMasterVolume());
+	// SSR と初回クライアント描画を一致させる（localStorage はマウント後のみ反映）
+	const [volume, setVolumeState] = useState(1);
+
+	useEffect(() => {
+		// eslint-disable-next-line react-hooks/set-state-in-effect -- localStorage はクライアント専用。ハイドレーション整合のためマウント時に同期
+		setVolumeState(getSoundMasterVolume());
+	}, []);
 
 	const setVolume = useCallback((next: number) => {
 		const v = Math.min(1, Math.max(0, next));

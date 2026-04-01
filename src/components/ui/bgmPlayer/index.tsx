@@ -15,6 +15,19 @@ const BGM_BASE_VOLUME = 0.2;
 /** 縦セグメント本数（左＝低・右＝高）。タップで (index+1)/N の音量になる */
 const VOLUME_SEGMENT_COUNT = 10;
 
+/** 左端・右端のセグメントの高さ（px）。左が小さく右へいくほど高い */
+const SEG_HEIGHT_MIN_PX = 10;
+const SEG_HEIGHT_MAX_PX = 36;
+
+function segmentHeightPx(index: number): number {
+	if (VOLUME_SEGMENT_COUNT <= 1) return SEG_HEIGHT_MAX_PX;
+	return (
+		SEG_HEIGHT_MIN_PX +
+		(index / (VOLUME_SEGMENT_COUNT - 1)) *
+			(SEG_HEIGHT_MAX_PX - SEG_HEIGHT_MIN_PX)
+	);
+}
+
 const BGM_CONFIG = {
 	ERROR_HUNTER: {
 		check: (path: string) => path.includes("error-hunter"),
@@ -143,10 +156,12 @@ export default function BGMPlayer() {
 				{Array.from({ length: VOLUME_SEGMENT_COUNT }, (_, i) => {
 					const level = (i + 1) / VOLUME_SEGMENT_COUNT;
 					const isActive = i < lit;
+					const h = Math.round(segmentHeightPx(i));
 					return (
 						<button
 							key={i}
 							type="button"
+							style={{ height: h }}
 							className={cn(
 								styles.segment(),
 								isActive && styles.segmentActive(),
