@@ -5,6 +5,7 @@ import { Clipboard, ClipboardCheck } from "lucide-react";
 import { Typography } from "@/components/ui/typography";
 import { roomIdCopy } from "./styles";
 import { SoundContext } from "@/lib/sound-context";
+import { effectiveSeVolume } from "@/lib/sound-volume";
 
 interface RoomIdCopyProps {
 	roomId: string;
@@ -22,7 +23,7 @@ export function RoomIdCopy({ roomId }: RoomIdCopyProps) {
 			setTimeout(() => setCopied(false), 1500);
 			if (sound?.isPlaying) {
 				const audio = new Audio("/se/switch-se.mp3");
-				audio.volume = 0.1;
+				audio.volume = effectiveSeVolume(0.1, sound.volume);
 				audio.play().catch(() => {});
 			}
 		} catch {

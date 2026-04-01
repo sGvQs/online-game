@@ -6,6 +6,7 @@ import { modal } from "./styles";
 import { Button } from "@/components/ui/button";
 import { Typography } from "@/components/ui/typography";
 import { SoundContext } from "@/lib/sound-context";
+import { effectiveSeVolume } from "@/lib/sound-volume";
 
 interface ModalProps {
 	isOpen: boolean;
@@ -34,7 +35,7 @@ export function Modal({
 		if (!isOpen) return;
 		if (!sound?.isPlaying) return;
 		const audio = new Audio("/se/modal-se.mp3");
-		audio.volume = 0.1;
+		audio.volume = effectiveSeVolume(0.1, sound.volume);
 		audio.play().catch(() => {});
 	}, [isOpen, sound]);
 

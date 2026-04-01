@@ -3,6 +3,7 @@
 import { useState, useEffect, useContext } from "react";
 import { useLoading } from "@/lib/loading-context";
 import { SoundContext } from "@/lib/sound-context";
+import { effectiveSeVolume } from "@/lib/sound-volume";
 import { Users } from "lucide-react";
 import { gameCarouselSection } from "./styles";
 import { Modal } from "@/components/ui/modal";
@@ -110,7 +111,7 @@ export function GameCarouselSection({
 	const playSE = (file: string) => {
 		if (!sound?.isPlaying) return;
 		const audio = new Audio(file);
-		audio.volume = 0.1;
+		audio.volume = effectiveSeVolume(0.1, sound.volume);
 		audio.play().catch(() => {});
 	};
 	const [activeIndex, setActiveIndex] = useState(0);

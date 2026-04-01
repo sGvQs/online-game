@@ -4,124 +4,160 @@ import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { useSound } from "@/lib/sound-context";
 import { Volume2, VolumeOff } from "lucide-react";
+import { effectiveSeVolume } from "@/lib/sound-volume";
 import { bgmPlayer } from "./styles";
+import { cn } from "@/lib/utils";
 
 const styles = bgmPlayer();
 
+const BGM_BASE_VOLUME = 0.2;
+
+/** 縦セグメント本数（左＝低・右＝高）。タップで (index+1)/N の音量になる */
+const VOLUME_SEGMENT_COUNT = 10;
+
 const BGM_CONFIG = {
-    ERROR_HUNTER: {
-        check: (path: string) => path.includes("error-hunter"),
-        srcs: ["/music/error-hunter.mp3"],
-        label: "error-hunter",
-    },
-    NULL_HAND: {
-        check: (path: string) => path.includes("null-hand"),
-        srcs: ["/music/null-hand-opening.mp3", "/music/null-hand-playing.mp3"],
-        label: "null-hand",
-    },
-    MAIN_SYSTEM: {
-        check: (path: string) =>
-            path.includes("/home") || path.includes("/room/"),
-        srcs: [
-            "/music/title-sleep.mp3",
-            "/music/title-sky.mp3",
-            "/music/title-night.mp3",
-        ],
-        label: "default",
-    },
-    DEFAULT: {
-        check: () => true,
-        srcs: [
-            "/music/title-sleep.mp3",
-            "/music/title-sky.mp3",
-            "/music/title-night.mp3",
-        ],
-        label: "default",
-    },
+	ERROR_HUNTER: {
+		check: (path: string) => path.includes("error-hunter"),
+		srcs: ["/music/error-hunter.mp3"],
+		label: "error-hunter",
+	},
+	NULL_HAND: {
+		check: (path: string) => path.includes("null-hand"),
+		srcs: ["/music/null-hand-opening.mp3", "/music/null-hand-playing.mp3"],
+		label: "null-hand",
+	},
+	MAIN_SYSTEM: {
+		check: (path: string) =>
+			path.includes("/home") || path.includes("/room/"),
+		srcs: [
+			"/music/title-sleep.mp3",
+			"/music/title-sky.mp3",
+			"/music/title-night.mp3",
+		],
+		label: "default",
+	},
+	DEFAULT: {
+		check: () => true,
+		srcs: [
+			"/music/title-sleep.mp3",
+			"/music/title-sky.mp3",
+			"/music/title-night.mp3",
+		],
+		label: "default",
+	},
 } as const;
 
+function activeSegmentCount(volume: number): number {
+	return Math.min(
+		VOLUME_SEGMENT_COUNT,
+		Math.max(0, Math.round(volume * VOLUME_SEGMENT_COUNT)),
+	);
+}
+
 export default function BGMPlayer() {
-    const pathname = usePathname();
-    const audioRef = useRef<HTMLAudioElement>(null);
-    const { isPlaying, setIsPlaying } = useSound();
+	const pathname = usePathname();
+	const audioRef = useRef<HTMLAudioElement>(null);
+	const { isPlaying, setIsPlaying, volume, setVolume } = useSound();
+	const [trackIndex, setTrackIndex] = useState(0);
 
-    // 現在どの曲を再生しているかのインデックス管理
-    const [trackIndex, setTrackIndex] = useState(0);
+	const activeConfig =
+		Object.values(BGM_CONFIG).find((config) => config.check(pathname)) ??
+		BGM_CONFIG.DEFAULT;
 
-    const activeConfig =
-        Object.values(BGM_CONFIG).find((config) => config.check(pathname)) ??
-        BGM_CONFIG.DEFAULT;
+	const currentSrc = activeConfig.srcs[trackIndex % activeConfig.srcs.length];
 
-    // 現在流すべきソース
-    const currentSrc = activeConfig.srcs[trackIndex % activeConfig.srcs.length];
+	// ルート変更で BGM セットが変わったら先頭トラックへ
+	useEffect(() => {
+		// eslint-disable-next-line react-hooks/set-state-in-effect -- label 変更時のみトラックを同期リセット
+		setTrackIndex(0);
+	}, [activeConfig.label]);
 
-    // パスが変わったときにインデックスをリセット（別のモードに移動した場合）
-    useEffect(() => {
-        setTrackIndex(0);
-    }, [activeConfig.label]);
+	useEffect(() => {
+		if (!audioRef.current) return;
+		audioRef.current.volume = effectiveSeVolume(BGM_BASE_VOLUME, volume);
+	}, [activeConfig.label, volume]);
 
-    // 音量設定
-    useEffect(() => {
-        if (audioRef.current) {
-            audioRef.current.volume = 0.2;
-        }
-    }, [activeConfig.label]);
+	useEffect(() => {
+		if (!audioRef.current) return;
+		if (isPlaying) {
+			audioRef.current.play().catch(console.error);
+		} else {
+			audioRef.current.pause();
+		}
+	}, [isPlaying]);
 
-    // isPlaying の外部変更（LogoWithOrbit 等）にも追従して play/pause
-    useEffect(() => {
-        if (!audioRef.current) return;
-        if (isPlaying) {
-            audioRef.current.play().catch(console.error);
-        } else {
-            audioRef.current.pause();
-        }
-    }, [isPlaying]);
+	useEffect(() => {
+		if (!audioRef.current) return;
 
-    // ソースの切り替えと再生
-    useEffect(() => {
-        if (!audioRef.current) return;
+		if (audioRef.current.src.endsWith(currentSrc)) {
+			return;
+		}
 
-        // すでに現在のソースが設定されているならリロードしない
-        if (audioRef.current.src.endsWith(currentSrc)) {
-            return;
-        }
+		audioRef.current.src = currentSrc;
+		audioRef.current.load();
 
-        audioRef.current.src = currentSrc;
-        audioRef.current.load();
+		if (isPlaying) {
+			audioRef.current.play().catch(console.error);
+		}
+	}, [currentSrc, isPlaying]);
 
-        if (isPlaying) {
-            audioRef.current.play().catch(console.error);
-        }
-    }, [currentSrc, isPlaying]);
+	const handleEnded = () => {
+		setTrackIndex((prev) => (prev + 1) % activeConfig.srcs.length);
+	};
 
-    // 曲が終了した時の処理
-    const handleEnded = () => {
-        // 次の曲へ（配列の最後までいったら0に戻る）
-        setTrackIndex((prev) => (prev + 1) % activeConfig.srcs.length);
-    };
+	const isSingleTrack = activeConfig.srcs.length === 1;
 
-    const isSingleTrack = activeConfig.srcs.length === 1;
+	const playSwitchSe = () => {
+		const audio = new Audio("/se/switch-se.mp3");
+		audio.volume = effectiveSeVolume(0.1, volume);
+		audio.play().catch(() => {});
+	};
 
-    return (
-        <div className={styles.wrapper()} >
-            <audio
-                ref={audioRef}
-                loop={isSingleTrack}
-                onEnded={isSingleTrack ? undefined : handleEnded}
-            />
-            <button
-                className={styles.button()}
-                onClick={() => {
-                    const next = !isPlaying;
-                    if (next) {
-                        const audio = new Audio("/se/switch-se.mp3");
-                        audio.volume = 0.1;
-                        audio.play().catch(() => {});
-                    }
-                    setIsPlaying(next);
-                }}>
-                {!isPlaying ? <VolumeOff /> : <Volume2 />}
-            </button>
-        </div>
-    );
+	const soundAudible = isPlaying && volume > 0.0001;
+	const lit = activeSegmentCount(volume);
+
+	return (
+		<div className={styles.wrapper()}>
+			<audio
+				ref={audioRef}
+				loop={isSingleTrack}
+				onEnded={isSingleTrack ? undefined : handleEnded}
+			/>
+			<button
+				type="button"
+				className={styles.button()}
+				aria-label={isPlaying ? "音をオフにする" : "音をオンにする"}
+				onClick={() => {
+					const next = !isPlaying;
+					if (next) playSwitchSe();
+					setIsPlaying(next);
+				}}
+			>
+				{soundAudible ? <Volume2 /> : <VolumeOff />}
+			</button>
+			<div
+				className={styles.segments()}
+				role="group"
+				aria-label="音量（左が小さく右が大きい）"
+			>
+				{Array.from({ length: VOLUME_SEGMENT_COUNT }, (_, i) => {
+					const level = (i + 1) / VOLUME_SEGMENT_COUNT;
+					const isActive = i < lit;
+					return (
+						<button
+							key={i}
+							type="button"
+							className={cn(
+								styles.segment(),
+								isActive && styles.segmentActive(),
+							)}
+							aria-label={"音量レベル " + String(i + 1) + " / " + String(VOLUME_SEGMENT_COUNT)}
+							aria-pressed={lit > 0 && i === lit - 1}
+							onClick={() => setVolume(level)}
+						/>
+					);
+				})}
+			</div>
+		</div>
+	);
 }

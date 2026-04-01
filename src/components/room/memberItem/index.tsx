@@ -11,6 +11,7 @@ import {
 import { memberItem } from "./styles";
 import { IconButton } from "@/components/ui/iconButton";
 import { SoundContext } from "@/lib/sound-context";
+import { effectiveSeVolume } from "@/lib/sound-volume";
 
 const styles = memberItem();
 
@@ -40,7 +41,7 @@ export function MemberItem({
 	const handleKick = () => {
 		if (sound?.isPlaying) {
 			const audio = new Audio("/se/leave-se.mp3");
-			audio.volume = 0.1;
+			audio.volume = effectiveSeVolume(0.1, sound.volume);
 			audio.play().catch(() => {});
 		}
 		onKick?.();

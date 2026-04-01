@@ -4,6 +4,7 @@ import { type ButtonHTMLAttributes, forwardRef, useCallback, useContext } from "
 import { cn } from "@/lib/utils";
 import { button } from "./styles";
 import { SoundContext } from "@/lib/sound-context";
+import { effectiveSeVolume } from "@/lib/sound-volume";
 
 type ButtonScreen = "default" | "null-hand" | "error-hunter" | "star-shield";
 type ButtonVariant =
@@ -44,7 +45,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
             (e: React.MouseEvent<HTMLButtonElement>) => {
                 if (sound?.isPlaying && se !== null) {
                     const audio = new Audio(SE_FILES[se]);
-                    audio.volume = 0.1;
+                    audio.volume = effectiveSeVolume(0.1, sound.volume);
                     audio.play().catch(() => {});
                 }
                 onClick?.(e);
