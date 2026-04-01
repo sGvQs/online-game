@@ -183,12 +183,23 @@ const SIN_TILT = Math.sin(TILT);
 /** 星破壊から次の軌道星が出るまで（隕石フェーズ） */
 const NEXT_STAR_AFTER_DESTROY_MS = 45_000;
 const DEFAULT_HOME_ORBIT_METEOR_COUNT = 72;
-/** 隕石のうち「手前に来る」方向の割合（固定） */
-const METEOR_TOWARD_CAMERA_RATIO = 0.15;
-const METEOR_BOX_PX_MIN = 16;
-const METEOR_BOX_PX_MAX = 44;
+/** 画面直進の「脅威」隕石の割合（残りは従来の toward / lateral / away） */
+const METEOR_HEAD_ON_THREAT_RATIO = 0.05;
+/** 隕石のうち「手前に来る」方向の割合（脅威除外後の母集団に対して） */
+const METEOR_TOWARD_CAMERA_RATIO = 0.3;
+const METEOR_BOX_PX_MIN = 24;
+const METEOR_BOX_PX_MAX = 64;
+/** 脅威隕石の描画箱（px）。ほぼ 1px からスケールで成長 */
+const METEOR_THREAT_BASE_PX = 1;
+/** 脅威のみ: 中央へ向かう速度（他隕石より遥かに遅い px/s） */
+const METEOR_THREAT_SPEED_MIN = 2.5;
+const METEOR_THREAT_SPEED_MAX = 12;
 const METEOR_MAX_LIFE_SEC = 28;
 const METEOR_OFFSCREEN_MARGIN_PX = 420;
+/** 「手前」隕石のスケール増分係数（秒に対して線形・頭打ちなし。旧 6.5s で +2.75 相当の傾き） */
+const METEOR_TOWARD_SCALE_PER_SEC = 2.75 / 6.5;
+/** 脅威隕石がこれより中央に近づいたら到達扱い（画面を覆う） */
+const THREAT_CENTER_REMOVE_PX = 28;
 
 const EXPLOSION_STAR_SCALE_END = 4;
 const EXPLOSION_STAR_DURATION_SEC = 0.5;
@@ -196,7 +207,7 @@ const EXPLOSION_STAR_DURATION_SEC = 0.5;
 const METEOR_SRC = "/svg/object/metor.svg";
 const EXPLOSION_STAR_EASE = "easeOut" as const;
 
-type MeteorDepth = "toward" | "away" | "lateral";
+type MeteorDepth = "threat" | "toward" | "away" | "lateral";
 
 interface MeteorSim {
 	id: number;
@@ -212,11 +223,48 @@ interface MeteorSim {
 	rot: number;
 	spin: number;
 	alive: boolean;
+	/** 脅威のみ: スポーン時の中心からの距離（接近に応じて SVG を大きくする） */
+	threatSpawnDist?: number;
+	/** 脅威のみ: 中央へ向かう速度 (px/s) */
+	threatSpeed?: number;
 }
 
 function spawnMeteors(count: number): MeteorSim[] {
 	const out: MeteorSim[] = [];
 	for (let i = 0; i < count; i++) {
+		if (Math.random() < METEOR_HEAD_ON_THREAT_RATIO) {
+			const a = Math.random() * 2 * Math.PI;
+			const r = 52 + Math.random() * 128;
+			const x = Math.cos(a) * r;
+			const y = Math.sin(a) * r;
+			const threatSpeed =
+				METEOR_THREAT_SPEED_MIN +
+				Math.random() *
+					(METEOR_THREAT_SPEED_MAX - METEOR_THREAT_SPEED_MIN);
+			const inv = Math.hypot(x, y) || 1;
+			const vx = (-x / inv) * threatSpeed;
+			const vy = (-y / inv) * threatSpeed;
+			const scale0 = 0.92 + Math.random() * 0.08;
+			out.push({
+				id: i,
+				x,
+				y,
+				vx,
+				vy,
+				depth: "threat",
+				t0: performance.now(),
+				baseSizePx: METEOR_THREAT_BASE_PX,
+				scale0,
+				scale: scale0 * 0.65,
+				rot: 0,
+				spin: ((Math.random() - 0.5) * 90 * Math.PI) / 180,
+				alive: true,
+				threatSpawnDist: r,
+				threatSpeed,
+			});
+			continue;
+		}
+
 		const toward = Math.random() < METEOR_TOWARD_CAMERA_RATIO;
 		const u = Math.random() * 2 * Math.PI;
 		const v = Math.random() * 2 - 1;
@@ -272,21 +320,50 @@ function stepMeteors(
 ): void {
 	for (const m of sims) {
 		if (!m.alive) continue;
+
+		if (m.depth === "threat") {
+			const dist0 = Math.hypot(m.x, m.y);
+			const spd = m.threatSpeed ?? METEOR_THREAT_SPEED_MIN;
+			if (dist0 > THREAT_CENTER_REMOVE_PX) {
+				const inv = dist0 > 1e-6 ? 1 / dist0 : 0;
+				m.vx = -m.x * inv * spd;
+				m.vy = -m.y * inv * spd;
+			} else {
+				m.vx = 0;
+				m.vy = 0;
+			}
+		}
+
 		m.x += m.vx * dt;
 		m.y += m.vy * dt;
+
 		const t = (nowMs - m.t0) / 1000;
-		if (m.depth === "toward") {
-			m.scale = m.scale0 * (0.32 + 2.75 * Math.min(1, t / 6.5));
+
+		if (m.depth === "threat") {
+			const dist = Math.hypot(m.x, m.y);
+			const d0 = m.threatSpawnDist ?? Math.max(dist, 1);
+			const u = Math.min(1, Math.max(0, 1 - dist / d0));
+			m.scale = m.scale0 * (0.5 + u * 92);
+			if (dist < THREAT_CENTER_REMOVE_PX) {
+				m.alive = false;
+				orbitBridge.onScreenShake?.();
+			}
+		} else if (m.depth === "toward") {
+			m.scale = m.scale0 * (0.32 + METEOR_TOWARD_SCALE_PER_SEC * t);
 		} else if (m.depth === "away") {
 			m.scale = m.scale0 * Math.max(0.035, 1.08 * Math.exp(-t * 1.08));
 		} else {
 			m.scale = m.scale0 * (0.7 + 0.3 * (1 - Math.min(1, t / 8.5)));
 		}
 		m.rot += m.spin * dt;
-		if (
-			Math.hypot(m.x, m.y) > maxDistFromCenterPx ||
-			t > METEOR_MAX_LIFE_SEC
-		) {
+		if (m.depth !== "threat") {
+			if (
+				Math.hypot(m.x, m.y) > maxDistFromCenterPx ||
+				t > METEOR_MAX_LIFE_SEC
+			) {
+				m.alive = false;
+			}
+		} else if (t > METEOR_MAX_LIFE_SEC) {
 			m.alive = false;
 		}
 	}
@@ -473,8 +550,15 @@ export function LogoWithOrbit({
 				if (!m.alive) continue;
 				const mcx = rect.left + rect.width / 2 + fx + m.x;
 				const mcy = rect.top + rect.height / 2 + fy + m.y;
-				const rad = m.baseSizePx * m.scale * 0.45 + bulletRadiusPx;
+				const rawR = m.baseSizePx * m.scale * 0.45;
+				const rad =
+					(m.depth === "threat"
+						? Math.max(12, rawR)
+						: rawR) + bulletRadiusPx;
 				if (Math.hypot(clientX - mcx, clientY - mcy) < rad) {
+					if (m.depth === "threat") {
+						orbitBridge.onScreenShake?.();
+					}
 					m.alive = false;
 					bumpMeteorFrame();
 					return true;
@@ -688,7 +772,11 @@ export function LogoWithOrbit({
 					.map((m) => (
 								<div
 									key={m.id}
-									className="absolute top-1/2 left-1/2 pointer-events-none z-30"
+									className={
+										m.depth === "threat"
+											? "absolute top-1/2 left-1/2 pointer-events-none z-40 drop-shadow-[0_0_12px_rgba(255,90,40,0.45)]"
+											: "absolute top-1/2 left-1/2 pointer-events-none z-30"
+									}
 									style={{
 										width: m.baseSizePx,
 										height: m.baseSizePx,

@@ -24,4 +24,6 @@ export const orbitBridge = {
 				bulletRadiusPx: number,
 		  ) => boolean)
 		| null,
+	/** 脅威隕石命中・中央到達時に HomeCursor が登録して画面全体を揺らす */
+	onScreenShake: null as (() => void) | null,
 };
