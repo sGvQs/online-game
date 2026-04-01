@@ -159,16 +159,33 @@ function HomeCursorInner({ children }: { children: React.ReactNode }) {
 
 			const target = options?.syntheticClickTarget;
 			setTimeout(() => {
-				const starX = orbitBridge.clientX - rect.left;
-				const starY = orbitBridge.clientY - rect.top;
-				const dist = Math.hypot(toX - starX, toY - starY);
-				if (dist < orbitBridge.hitRadius) {
-					orbitBridge.triggerHit?.(damage);
+				const clientHitX = rect.left + toX;
+				const clientHitY = rect.top + toY;
+				const bulletR = Math.max(ball.widthPx, ball.heightPx) * 0.35;
+
+				const hitMeteor = orbitBridge.tryHitMeteor?.(
+					clientHitX,
+					clientHitY,
+					bulletR,
+				);
+				if (hitMeteor) {
 					const colId = nextId++;
 					setCollisions((prev) => [...prev, { id: colId, x: toX, y: toY }]);
 					setTimeout(() => {
 						setCollisions((prev) => prev.filter((c) => c.id !== colId));
 					}, 600);
+				} else if (!orbitBridge.isMeteorPhase) {
+					const starX = orbitBridge.clientX - rect.left;
+					const starY = orbitBridge.clientY - rect.top;
+					const dist = Math.hypot(toX - starX, toY - starY);
+					if (dist < orbitBridge.hitRadius) {
+						orbitBridge.triggerHit?.(damage);
+						const colId = nextId++;
+						setCollisions((prev) => [...prev, { id: colId, x: toX, y: toY }]);
+						setTimeout(() => {
+							setCollisions((prev) => prev.filter((c) => c.id !== colId));
+						}, 600);
+					}
 				}
 
 				if (target) {
