@@ -191,15 +191,12 @@ const METEOR_BOX_PX_MIN = 24;
 const METEOR_BOX_PX_MAX = 64;
 /** 脅威隕石の描画箱（px）。ほぼ 1px からスケールで成長 */
 const METEOR_THREAT_BASE_PX = 1;
-/** 脅威のみ: 中央へ向かう速度（他隕石より遥かに遅い px/s） */
-const METEOR_THREAT_SPEED_MIN = 2.5;
-const METEOR_THREAT_SPEED_MAX = 12;
+/** 脅威: 爆発起点で時間とともに拡大し、この秒数で到達（消滅・シェイク） */
+const METEOR_THREAT_IMPACT_SEC = 10;
 const METEOR_MAX_LIFE_SEC = 28;
 const METEOR_OFFSCREEN_MARGIN_PX = 420;
 /** 「手前」隕石のスケール増分係数（秒に対して線形・頭打ちなし。旧 6.5s で +2.75 相当の傾き） */
 const METEOR_TOWARD_SCALE_PER_SEC = 2.75 / 6.5;
-/** 脅威隕石がこれより中央に近づいたら到達扱い（画面を覆う） */
-const THREAT_CENTER_REMOVE_PX = 28;
 
 const EXPLOSION_STAR_SCALE_END = 4;
 const EXPLOSION_STAR_DURATION_SEC = 0.5;
@@ -223,44 +220,27 @@ interface MeteorSim {
 	rot: number;
 	spin: number;
 	alive: boolean;
-	/** 脅威のみ: スポーン時の中心からの距離（接近に応じて SVG を大きくする） */
-	threatSpawnDist?: number;
-	/** 脅威のみ: 中央へ向かう速度 (px/s) */
-	threatSpeed?: number;
 }
 
 function spawnMeteors(count: number): MeteorSim[] {
 	const out: MeteorSim[] = [];
 	for (let i = 0; i < count; i++) {
 		if (Math.random() < METEOR_HEAD_ON_THREAT_RATIO) {
-			const a = Math.random() * 2 * Math.PI;
-			const r = 52 + Math.random() * 128;
-			const x = Math.cos(a) * r;
-			const y = Math.sin(a) * r;
-			const threatSpeed =
-				METEOR_THREAT_SPEED_MIN +
-				Math.random() *
-					(METEOR_THREAT_SPEED_MAX - METEOR_THREAT_SPEED_MIN);
-			const inv = Math.hypot(x, y) || 1;
-			const vx = (-x / inv) * threatSpeed;
-			const vy = (-y / inv) * threatSpeed;
 			const scale0 = 0.92 + Math.random() * 0.08;
 			out.push({
 				id: i,
-				x,
-				y,
-				vx,
-				vy,
+				x: 0,
+				y: 0,
+				vx: 0,
+				vy: 0,
 				depth: "threat",
 				t0: performance.now(),
 				baseSizePx: METEOR_THREAT_BASE_PX,
 				scale0,
-				scale: scale0 * 0.65,
+				scale: scale0 * 0.5,
 				rot: 0,
 				spin: ((Math.random() - 0.5) * 90 * Math.PI) / 180,
 				alive: true,
-				threatSpawnDist: r,
-				threatSpeed,
 			});
 			continue;
 		}
@@ -292,8 +272,8 @@ function spawnMeteors(count: number): MeteorSim[] {
 		const scale0 = 0.2 + Math.random() * 0.58;
 		out.push({
 			id: i,
-			x: (Math.random() - 0.5) * 12,
-			y: (Math.random() - 0.5) * 12,
+			x: depth === "toward" ? 0 : (Math.random() - 0.5) * 12,
+			y: depth === "toward" ? 0 : (Math.random() - 0.5) * 12,
 			vx,
 			vy,
 			depth,
@@ -321,30 +301,15 @@ function stepMeteors(
 	for (const m of sims) {
 		if (!m.alive) continue;
 
-		if (m.depth === "threat") {
-			const dist0 = Math.hypot(m.x, m.y);
-			const spd = m.threatSpeed ?? METEOR_THREAT_SPEED_MIN;
-			if (dist0 > THREAT_CENTER_REMOVE_PX) {
-				const inv = dist0 > 1e-6 ? 1 / dist0 : 0;
-				m.vx = -m.x * inv * spd;
-				m.vy = -m.y * inv * spd;
-			} else {
-				m.vx = 0;
-				m.vy = 0;
-			}
-		}
-
 		m.x += m.vx * dt;
 		m.y += m.vy * dt;
 
 		const t = (nowMs - m.t0) / 1000;
 
 		if (m.depth === "threat") {
-			const dist = Math.hypot(m.x, m.y);
-			const d0 = m.threatSpawnDist ?? Math.max(dist, 1);
-			const u = Math.min(1, Math.max(0, 1 - dist / d0));
+			const u = Math.min(1, t / METEOR_THREAT_IMPACT_SEC);
 			m.scale = m.scale0 * (0.5 + u * 92);
-			if (dist < THREAT_CENTER_REMOVE_PX) {
+			if (t >= METEOR_THREAT_IMPACT_SEC) {
 				m.alive = false;
 				orbitBridge.onScreenShake?.();
 			}
