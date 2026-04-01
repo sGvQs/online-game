@@ -3,7 +3,7 @@
  * React state を使わず module-level の mutable object で管理（RAF から毎フレーム更新）。
  */
 
-export type OrbitScreenShakeStrength = "small" | "large";
+export type OrbitScreenShakeStrength = "small" | "medium" | "large";
 
 export const orbitBridge = {
 	/** 星の画面上の座標 (clientX/Y) - LogoWithOrbit の RAF が毎フレーム更新 */
@@ -27,7 +27,7 @@ export const orbitBridge = {
 				bulletRadiusPx: number,
 		  ) => boolean)
 		| null,
-	/** 画面揺れ（星破壊時は small、隕石衝突・脅威到達は large）。省略時は large */
+	/** 画面揺れ（隕石破壊 small / 星破壊 medium / 脅威激突 large）。省略時は large */
 	onScreenShake: null as
 		| ((strength?: OrbitScreenShakeStrength) => void)
 		| null,

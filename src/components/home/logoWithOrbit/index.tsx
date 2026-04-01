@@ -190,7 +190,9 @@ const METEOR_BOX_PX_MAX = 64;
 /** 脅威隕石の描画箱（px）。ほぼ 1px からスケールで成長 */
 const METEOR_THREAT_BASE_PX = 1;
 /** 脅威: この秒数で画面を覆うサイズまで線形成長（未到達時のフォールバックにも使用） */
-const METEOR_THREAT_IMPACT_SEC = 10;
+const METEOR_THREAT_IMPACT_SEC = 30;
+/** 脅威のみ。IMPACT 秒より長くし、到達前に消えないようにする */
+const METEOR_THREAT_MAX_LIFE_SEC = 50;
 const METEOR_MAX_LIFE_SEC = 28;
 const METEOR_OFFSCREEN_MARGIN_PX = 420;
 /** 「手前」隕石のスケール増分係数（秒に対して線形・頭打ちなし。旧 6.5s で +2.75 相当の傾き） */
@@ -327,7 +329,7 @@ function stepMeteors(
 				m.alive = false;
 				playStarDamageSe();
 				orbitBridge.onScreenShake?.("large");
-			} else if (t > METEOR_MAX_LIFE_SEC) {
+			} else if (t > METEOR_THREAT_MAX_LIFE_SEC) {
 				m.alive = false;
 			}
 		} else if (m.depth === "toward") {
@@ -468,7 +470,7 @@ export function LogoWithOrbit({
 				if (objectRef.current) objectRef.current.style.visibility = "hidden";
 
 				playStarDamageSe();
-				orbitBridge.onScreenShake?.("small");
+				orbitBridge.onScreenShake?.("medium");
 
 				const mCount =
 					hitObject.meteorCount ?? DEFAULT_HOME_ORBIT_METEOR_COUNT;
@@ -536,7 +538,7 @@ export function LogoWithOrbit({
 						: rawR) + bulletRadiusPx;
 				if (Math.hypot(clientX - mcx, clientY - mcy) < rad) {
 					playStarDamageSe();
-					orbitBridge.onScreenShake?.("large");
+					orbitBridge.onScreenShake?.("small");
 					m.alive = false;
 					bumpMeteorFrame();
 					return true;
