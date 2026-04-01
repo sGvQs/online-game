@@ -183,15 +183,13 @@ const SIN_TILT = Math.sin(TILT);
 /** 星破壊から次の軌道星が出るまで（隕石フェーズ） */
 const NEXT_STAR_AFTER_DESTROY_MS = 45_000;
 const DEFAULT_HOME_ORBIT_METEOR_COUNT = 72;
-/** 画面直進の「脅威」隕石の割合（残りは従来の toward / lateral / away） */
-const METEOR_HEAD_ON_THREAT_RATIO = 0.05;
-/** 隕石のうち「手前に来る」方向の割合（脅威除外後の母集団に対して） */
+/** 隕石のうち「手前に来る」方向の割合（脅威1体を除いた母集団に対して） */
 const METEOR_TOWARD_CAMERA_RATIO = 0.3;
 const METEOR_BOX_PX_MIN = 24;
 const METEOR_BOX_PX_MAX = 64;
 /** 脅威隕石の描画箱（px）。ほぼ 1px からスケールで成長 */
 const METEOR_THREAT_BASE_PX = 1;
-/** 脅威: 爆発起点で時間とともに拡大し、この秒数で到達（消滅・シェイク） */
+/** 脅威: この秒数で画面を覆うサイズまで線形成長（未到達時のフォールバックにも使用） */
 const METEOR_THREAT_IMPACT_SEC = 10;
 const METEOR_MAX_LIFE_SEC = 28;
 const METEOR_OFFSCREEN_MARGIN_PX = 420;
@@ -222,29 +220,39 @@ interface MeteorSim {
 	alive: boolean;
 }
 
+function viewportCoverPx(): number {
+	if (typeof window === "undefined") return 1200;
+	return Math.hypot(window.innerWidth, window.innerHeight);
+}
+
+function playStarDamageSe(): void {
+	const audio = new Audio("/se/star-damage-se.mp3");
+	audio.volume = 0.3;
+	audio.play().catch(() => {});
+}
+
 function spawnMeteors(count: number): MeteorSim[] {
 	const out: MeteorSim[] = [];
-	for (let i = 0; i < count; i++) {
-		if (Math.random() < METEOR_HEAD_ON_THREAT_RATIO) {
-			const scale0 = 0.92 + Math.random() * 0.08;
-			out.push({
-				id: i,
-				x: 0,
-				y: 0,
-				vx: 0,
-				vy: 0,
-				depth: "threat",
-				t0: performance.now(),
-				baseSizePx: METEOR_THREAT_BASE_PX,
-				scale0,
-				scale: scale0 * 0.5,
-				rot: 0,
-				spin: ((Math.random() - 0.5) * 90 * Math.PI) / 180,
-				alive: true,
-			});
-			continue;
-		}
+	if (count <= 0) return out;
 
+	const threatScale0 = 0.92 + Math.random() * 0.08;
+	out.push({
+		id: 0,
+		x: 0,
+		y: 0,
+		vx: 0,
+		vy: 0,
+		depth: "threat",
+		t0: performance.now(),
+		baseSizePx: METEOR_THREAT_BASE_PX,
+		scale0: threatScale0,
+		scale: threatScale0 * 0.5,
+		rot: 0,
+		spin: ((Math.random() - 0.5) * 90 * Math.PI) / 180,
+		alive: true,
+	});
+
+	for (let i = 1; i < count; i++) {
 		const toward = Math.random() < METEOR_TOWARD_CAMERA_RATIO;
 		const u = Math.random() * 2 * Math.PI;
 		const v = Math.random() * 2 - 1;
@@ -307,11 +315,20 @@ function stepMeteors(
 		const t = (nowMs - m.t0) / 1000;
 
 		if (m.depth === "threat") {
+			const coverPx = viewportCoverPx();
+			const scaleEnd = coverPx / METEOR_THREAT_BASE_PX;
+			const scaleStart = m.scale0 * 0.5;
 			const u = Math.min(1, t / METEOR_THREAT_IMPACT_SEC);
-			m.scale = m.scale0 * (0.5 + u * 92);
-			if (t >= METEOR_THREAT_IMPACT_SEC) {
+			m.scale = scaleStart + u * (scaleEnd - scaleStart);
+			const rendered = m.baseSizePx * m.scale;
+			const covered = rendered >= coverPx;
+			const timeFallback = t >= METEOR_THREAT_IMPACT_SEC;
+			if (covered || timeFallback) {
 				m.alive = false;
-				orbitBridge.onScreenShake?.();
+				playStarDamageSe();
+				orbitBridge.onScreenShake?.("large");
+			} else if (t > METEOR_MAX_LIFE_SEC) {
+				m.alive = false;
 			}
 		} else if (m.depth === "toward") {
 			m.scale = m.scale0 * (0.32 + METEOR_TOWARD_SCALE_PER_SEC * t);
@@ -328,8 +345,6 @@ function stepMeteors(
 			) {
 				m.alive = false;
 			}
-		} else if (t > METEOR_MAX_LIFE_SEC) {
-			m.alive = false;
 		}
 	}
 }
@@ -452,9 +467,8 @@ export function LogoWithOrbit({
 				}
 				if (objectRef.current) objectRef.current.style.visibility = "hidden";
 
-				const dmgAudio = new Audio("/se/star-damage-se.mp3");
-				dmgAudio.volume = 0.3;
-				dmgAudio.play().catch(() => {});
+				playStarDamageSe();
+				orbitBridge.onScreenShake?.("small");
 
 				const mCount =
 					hitObject.meteorCount ?? DEFAULT_HOME_ORBIT_METEOR_COUNT;
@@ -521,9 +535,8 @@ export function LogoWithOrbit({
 						? Math.max(12, rawR)
 						: rawR) + bulletRadiusPx;
 				if (Math.hypot(clientX - mcx, clientY - mcy) < rad) {
-					if (m.depth === "threat") {
-						orbitBridge.onScreenShake?.();
-					}
+					playStarDamageSe();
+					orbitBridge.onScreenShake?.("large");
 					m.alive = false;
 					bumpMeteorFrame();
 					return true;

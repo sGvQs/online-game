@@ -14,7 +14,10 @@ import {
 	HomeModalOpenProvider,
 	useHomeModalOpen,
 } from "@/lib/home-modal-context";
-import { orbitBridge } from "@/components/home/orbitBridge";
+import {
+	orbitBridge,
+	type OrbitScreenShakeStrength,
+} from "@/components/home/orbitBridge";
 
 /** 隕石（z-30〜40）より手前。下部 HUD（z-[60]）より下にして UI を隠さない */
 const HOME_BULLET_Z = "z-[45]";
@@ -83,12 +86,23 @@ function HomeCursorInner({ children }: { children: React.ReactNode }) {
 	const screenShake = useAnimationControls();
 
 	useEffect(() => {
-		orbitBridge.onScreenShake = () => {
-			void screenShake.start({
-				x: [0, -11, 11, -8, 8, -5, 5, 0],
-				y: [0, 9, -9, -7, 7, 5, -5, 0],
-				transition: { duration: 0.58, ease: "easeOut" },
-			}).then(() => screenShake.set({ x: 0, y: 0 }));
+		orbitBridge.onScreenShake = (strength: OrbitScreenShakeStrength = "large") => {
+			const isSmall = strength === "small";
+			void screenShake
+				.start(
+					isSmall
+						? {
+								x: [0, -4, 4, -3, 3, 0],
+								y: [0, 3, -3, -2, 2, 0],
+								transition: { duration: 0.4, ease: "easeOut" },
+							}
+						: {
+								x: [0, -11, 11, -8, 8, -5, 5, 0],
+								y: [0, 9, -9, -7, 7, 5, -5, 0],
+								transition: { duration: 0.58, ease: "easeOut" },
+							},
+				)
+				.then(() => screenShake.set({ x: 0, y: 0 }));
 		};
 		return () => {
 			orbitBridge.onScreenShake = null;
