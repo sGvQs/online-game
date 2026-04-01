@@ -1,13 +1,32 @@
 "use client";
 
-import { useContext, useEffect, useRef, useState, useCallback, type ReactNode } from "react";
+import {
+	useContext,
+	useEffect,
+	useLayoutEffect,
+	useRef,
+	useState,
+	useCallback,
+	type ReactNode,
+} from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { PukapukaLogo } from "@/components/common/logo/pukapukaLogo";
 import { SoundContext } from "@/lib/sound-context";
 import { useSyncHomeOrbitHud } from "@/lib/home-orbit-hud-context";
 import { orbitBridge } from "@/components/home/orbitBridge";
+import { HomeAchievementToast } from "@/components/home/homeAchievementToast";
 import { StarHpBar } from "@/components/game/phases/starShieldGame/playing/typistView/StarHpBar";
+import {
+	isAchievementUnlocked,
+	tryUnlockAchievement,
+} from "@/lib/local-storage-bridge";
+
+/** 軌道オブジェクト破壊で解除する実績（任意）。`id` は永続化用の安定スラッグ */
+export interface HomeOrbitAchievement {
+	id: string;
+	toastMessage: string;
+}
 
 /** ホーム軌道上の1オブジェクト（SVG・HP・公転周期・基準サイズ） */
 export interface HomeOrbitObject {
@@ -19,6 +38,10 @@ export interface HomeOrbitObject {
 	healIntervalMs: number;
 	/** 軌道上の基準サイズ（px）。{@link resolveStarBaseSizePx} で 24〜128 に収める */
 	starBaseSizePx: number;
+	/** 破壊時に解除する実績（任意） */
+	achievement?: HomeOrbitAchievement;
+	/** 破壊時に飛ばす隕石の数（未指定時はデフォルト） */
+	meteorCount?: number;
 }
 
 /** デフォルトの星ベース幅・高さ（px）。比例計算の基準にも使う */
@@ -33,46 +56,111 @@ export function resolveStarBaseSizePx(entry: HomeOrbitObject): number {
 	return clampStarBaseSizePx(entry.starBaseSizePx);
 }
 
+type HomeOrbitStartResolution =
+	| { kind: "progress"; index: number }
+	| { kind: "allAchievementsUnlocked"; listLength: number };
+
+/**
+ * 実績状態から「進行中なら開始インデックス」「すべて解除済みならランダムが必要」を返す（ランダムは呼び出し側の ref で1回だけ）。
+ */
+function resolveHomeOrbitStart(
+	list: readonly HomeOrbitObject[],
+): HomeOrbitStartResolution {
+	if (list.length === 0) return { kind: "progress", index: 0 };
+
+	const withAchievement = list
+		.map((o, i) => ({ o, i }))
+		.filter(
+			(
+				x,
+			): x is {
+				o: HomeOrbitObject & { achievement: HomeOrbitAchievement };
+				i: number;
+			} => Boolean(x.o.achievement),
+		);
+
+	if (withAchievement.length === 0) return { kind: "progress", index: 0 };
+
+	const ids = withAchievement.map((x) => x.o.achievement.id);
+	const allUnlocked = ids.every((id) => isAchievementUnlocked(id));
+
+	if (allUnlocked) {
+		return { kind: "allAchievementsUnlocked", listLength: list.length };
+	}
+
+	for (const { o, i } of withAchievement) {
+		if (!isAchievementUnlocked(o.achievement.id)) {
+			return { kind: "progress", index: i };
+		}
+	}
+	return { kind: "progress", index: 0 };
+}
+
 export const HOME_ORBIT_OBJECTS = [
 	{
 		src: "/svg/object/earth.svg",
 		label: "earth",
 		maxHp: 100,
+		meteorCount: 100,
 		periodMs: 30000,
 		healIntervalMs: 10000,
 		starBaseSizePx: 30,
+		achievement: {
+			id: "enemy-of-humanity",
+			toastMessage: "人類の敵",
+		},
 	},
 	{
 		src: "/svg/object/sun.svg",
 		label: "sun",
 		maxHp: 300,
+		meteorCount: 300,
 		periodMs: 30000,
 		healIntervalMs: 10000,
 		starBaseSizePx: 90,
+		achievement: {
+			id: "ice-age-onset",
+			toastMessage: "氷河期時代の到来",
+		},
 	},
 	{
 		src: "/svg/object/mars.svg",
 		label: "mars",
 		maxHp: 150,
+		meteorCount: 150,
 		periodMs: 3000,
 		healIntervalMs: 1000,
 		starBaseSizePx: 50,
+		achievement: {
+			id: "future-earth-destruction",
+			toastMessage: "残された文明の道の破壊",
+		},
 	},
 	{
 		src: "/svg/object/neptune.svg",
 		label: "neptune",
 		maxHp: 300,
+		meteorCount: 300,
 		periodMs: 30000,
 		healIntervalMs: 50,
 		starBaseSizePx: 100,
+		achievement: {
+			id: "rapid-tap-master",
+			toastMessage: "連打の達人",
+		},
 	},
 	{
 		src: "/svg/object/death-star.svg",
 		label: "death-star",
 		maxHp: 30,
+		meteorCount: 30,
 		periodMs: 3000,
 		healIntervalMs: 200,
 		starBaseSizePx: 30,
+		achievement: {
+			id: "sniping-master",
+			toastMessage: "狙撃の達人",
+		},
 	},
 ] as const satisfies readonly HomeOrbitObject[];
 
@@ -92,33 +180,204 @@ const COS_TILT = Math.cos(TILT);
 const SIN_TILT = Math.sin(TILT);
 
 // ── HP / 破壊演出（微調整用）──────────────────────────────────
-const RESPAWN_DELAY_MS = 2000;
+/** 星破壊から次の軌道星が出るまで（隕石フェーズ） */
+const NEXT_STAR_AFTER_DESTROY_MS = 45_000;
+/** 実績に応じた開始インデックス確定後、この時間だけ待ってから星を表示しバウンス（初回のみ） */
+const HOME_ORBIT_STAR_INTRO_DELAY_MS = 900;
+const DEFAULT_HOME_ORBIT_METEOR_COUNT = 72;
+/** 隕石のうち「手前に来る」方向の割合（脅威1体を除いた母集団に対して） */
+const METEOR_TOWARD_CAMERA_RATIO = 0.3;
+const METEOR_BOX_PX_MIN = 24;
+const METEOR_BOX_PX_MAX = 64;
+/** 隕石の命中判定（見た目より少し厳しめにする係数）。半径= (base*scale/2) * factor */
+const METEOR_HIT_RADIUS_FACTOR = 0.82;
+/** 弾側の命中半径をどれだけ加算するか（小さいほど厳しい） */
+const BULLET_HIT_RADIUS_FACTOR = 0.55;
+/** 脅威隕石の描画箱（px）。ほぼ 1px からスケールで成長 */
+const METEOR_THREAT_BASE_PX = 1;
+/** 脅威: この秒数で画面を覆うサイズまで線形成長（未到達時のフォールバックにも使用） */
+const METEOR_THREAT_IMPACT_SEC = 40;
+/** 脅威のみ。IMPACT 秒より長くし、到達前に消えないようにする */
+const METEOR_THREAT_MAX_LIFE_SEC = 50;
+const METEOR_MAX_LIFE_SEC = 28;
+const METEOR_OFFSCREEN_MARGIN_PX = 420;
+/** 「手前」隕石のスケール増分係数（秒に対して線形・頭打ちなし。旧 6.5s で +2.75 相当の傾き） */
+const METEOR_TOWARD_SCALE_PER_SEC = 2.75 / 6.5;
 
 const EXPLOSION_STAR_SCALE_END = 4;
 const EXPLOSION_STAR_DURATION_SEC = 0.5;
 
-/** 飛び散る隕石 SVG */
 const METEOR_SRC = "/svg/object/metor.svg";
-const METEOR_COUNT = 100;
-const METEOR_BOX_PX = 32; // 1個あたりの表示枠（旧 w-8）
-const METEOR_DIST_MIN_PX = 45;
-const METEOR_DIST_SPREAD_PX = 140; // 上に加算するランダム幅
-const METEOR_SPIN_RANGE_DEG = 1080; // (random - 0.5) * これ
-const METEOR_DURATION_MIN_SEC = 0.5;
-const METEOR_DURATION_SPREAD_SEC = 0.55;
-const METEOR_START_SCALE_MIN = 0.45;
-const METEOR_START_SCALE_SPREAD = 0.75;
-const METEOR_MOTION_EASE = "easeOut" as const;
-// ─────────────────────────────────────────────────────────────
+/** 手前方向（toward）隕石撃破時の爆発 SVG（表示サイズは命中時の base×scale） */
+const TOWARD_METEOR_EXPLOSION_SRC = "/svg/object/collision.svg";
+const TOWARD_METEOR_EXPLOSION_DURATION_SEC = 0.48;
+const EXPLOSION_STAR_EASE = "easeOut" as const;
 
-interface MeteorParticle {
+/** 軌道星のバウンス登場（初回・次星共通）。 damping を下げるほどオーバーシュートが大きい */
+const STAR_ENTRANCE_INITIAL_Y = "-38%";
+const STAR_ENTRANCE_INITIAL_SCALE = 0.58;
+const STAR_ENTRANCE_SPRING = {
+	type: "spring" as const,
+	stiffness: 240,
+	damping: 9,
+	mass: 0.58,
+};
+
+type MeteorDepth = "threat" | "toward" | "away" | "lateral";
+
+interface MeteorSim {
 	id: number;
-	angleRad: number;
-	dist: number;
-	spinDeg: number;
-	duration: number;
-	startScale: number;
+	x: number;
+	y: number;
+	vx: number;
+	vy: number;
+	depth: MeteorDepth;
+	t0: number;
+	baseSizePx: number;
+	scale0: number;
+	scale: number;
+	rot: number;
+	spin: number;
+	alive: boolean;
 }
+
+interface TowardHitExplosion {
+	id: number;
+	x: number;
+	y: number;
+	sizePx: number;
+	rot: number;
+}
+
+function viewportCoverPx(): number {
+	if (typeof window === "undefined") return 1200;
+	return Math.hypot(window.innerWidth, window.innerHeight);
+}
+
+function playStarDamageSe(): void {
+	const audio = new Audio("/se/star-damage-se.mp3");
+	audio.volume = 0.3;
+	audio.play().catch(() => {});
+}
+
+function spawnMeteors(count: number): MeteorSim[] {
+	const out: MeteorSim[] = [];
+	if (count <= 0) return out;
+
+	const threatScale0 = 0.92 + Math.random() * 0.08;
+	out.push({
+		id: 0,
+		x: 0,
+		y: 0,
+		vx: 0,
+		vy: 0,
+		depth: "threat",
+		t0: performance.now(),
+		baseSizePx: METEOR_THREAT_BASE_PX,
+		scale0: threatScale0,
+		scale: threatScale0 * 0.5,
+		rot: 0,
+		spin: ((Math.random() - 0.5) * 90 * Math.PI) / 180,
+		alive: true,
+	});
+
+	for (let i = 1; i < count; i++) {
+		const toward = Math.random() < METEOR_TOWARD_CAMERA_RATIO;
+		const u = Math.random() * 2 * Math.PI;
+		const v = Math.random() * 2 - 1;
+		const phi = Math.acos(v);
+		let dx = Math.sin(phi) * Math.cos(u);
+		let dy = Math.sin(phi) * Math.sin(u);
+		let dz = Math.cos(phi);
+		if (toward) {
+			dz = 0.35 + Math.random() * 0.65;
+			const horiz = Math.hypot(dx, dy) || 1;
+			dx = (dx / horiz) * (0.2 + Math.random() * 0.55);
+			dy = (dy / horiz) * (0.2 + Math.random() * 0.55) + 0.38;
+			const nn = Math.hypot(dx, dy, dz) || 1;
+			dx /= nn;
+			dy /= nn;
+			dz /= nn;
+		}
+		const speed = 95 + Math.random() * 215;
+		const vx = dx * speed;
+		const vy = (dy + dz * 0.92) * speed;
+		let depth: MeteorDepth;
+		if (toward) depth = "toward";
+		else if (dz < -0.12) depth = "away";
+		else depth = "lateral";
+		const scale0 = 0.2 + Math.random() * 0.58;
+		out.push({
+			id: i,
+			x: depth === "toward" ? 0 : (Math.random() - 0.5) * 12,
+			y: depth === "toward" ? 0 : (Math.random() - 0.5) * 12,
+			vx,
+			vy,
+			depth,
+			t0: performance.now(),
+			baseSizePx: Math.round(
+				METEOR_BOX_PX_MIN +
+					Math.random() * (METEOR_BOX_PX_MAX - METEOR_BOX_PX_MIN),
+			),
+			scale0,
+			scale: scale0,
+			rot: 0,
+			spin: ((Math.random() - 0.5) * 1080 * Math.PI) / 180,
+			alive: true,
+		});
+	}
+	return out;
+}
+
+function stepMeteors(
+	sims: MeteorSim[],
+	dt: number,
+	nowMs: number,
+	maxDistFromCenterPx: number,
+): void {
+	for (const m of sims) {
+		if (!m.alive) continue;
+
+		m.x += m.vx * dt;
+		m.y += m.vy * dt;
+
+		const t = (nowMs - m.t0) / 1000;
+
+		if (m.depth === "threat") {
+			const coverPx = viewportCoverPx();
+			const scaleEnd = coverPx / METEOR_THREAT_BASE_PX;
+			const scaleStart = m.scale0 * 0.5;
+			const u = Math.min(1, t / METEOR_THREAT_IMPACT_SEC);
+			m.scale = scaleStart + u * (scaleEnd - scaleStart);
+			const rendered = m.baseSizePx * m.scale;
+			const covered = rendered >= coverPx;
+			const timeFallback = t >= METEOR_THREAT_IMPACT_SEC;
+			if (covered || timeFallback) {
+				m.alive = false;
+				playStarDamageSe();
+				orbitBridge.onScreenShake?.("large");
+			} else if (t > METEOR_THREAT_MAX_LIFE_SEC) {
+				m.alive = false;
+			}
+		} else if (m.depth === "toward") {
+			m.scale = m.scale0 * (0.32 + METEOR_TOWARD_SCALE_PER_SEC * t);
+		} else if (m.depth === "away") {
+			m.scale = m.scale0 * Math.max(0.035, 1.08 * Math.exp(-t * 1.08));
+		} else {
+			m.scale = m.scale0 * (0.7 + 0.3 * (1 - Math.min(1, t / 8.5)));
+		}
+		m.rot += m.spin * dt;
+		if (m.depth !== "threat") {
+			if (
+				Math.hypot(m.x, m.y) > maxDistFromCenterPx ||
+				t > METEOR_MAX_LIFE_SEC
+			) {
+				m.alive = false;
+			}
+		}
+	}
+}
+// ─────────────────────────────────────────────────────────────
 
 export interface LogoWithOrbitProps {
 	/** 省略時は {@link HOME_ORBIT_OBJECTS} */
@@ -134,33 +393,122 @@ export function LogoWithOrbit({
 	const objects =
 		objectsProp.length > 0 ? objectsProp : HOME_ORBIT_OBJECTS;
 	const objectsRef = useRef(objects);
-	objectsRef.current = objects;
 
 	const sound = useContext(SoundContext);
 	const setOrbitHud = useSyncHomeOrbitHud();
-	const [currentIndex, setCurrentIndex] = useState(0);
-	const currentIndexRef = useRef(0);
+	const [currentIndex, setCurrentIndex] = useState<number | null>(null);
+	const currentIndexRef = useRef(-1);
 	const objectRef = useRef<HTMLDivElement>(null);
 	const angleRef = useRef(0);
 	const lastTimeRef = useRef<number | null>(null);
 	const rafRef = useRef<number | null>(null);
 
-	// HP system
-	const hpRef = useRef<number>(objects[0].maxHp);
-	const [displayHp, setDisplayHp] = useState<number>(objects[0].maxHp);
+	// HP system（開始インデックス確定までは 0。useLayoutEffect で同期）
+	const hpRef = useRef<number>(0);
+	const [displayHp, setDisplayHp] = useState<number>(0);
 	const explodingRef = useRef(false);
 	const [exploding, setExploding] = useState(false);
 	const lastPosRef = useRef({ x: 0, y: 0 });
-	const [meteors, setMeteors] = useState<MeteorParticle[]>([]);
-	// 爆発時に表示する星のsrcを保持（exploding中にcurrentIndexが変わっても表示が崩れないよう）
-	const explodingSrcRef = useRef<string>(objects[0].src);
+	const frozenExplosionPosRef = useRef({ x: 0, y: 0 });
+	const orbitFieldRef = useRef<HTMLDivElement>(null);
+	const meteorSimsRef = useRef<MeteorSim[]>([]);
+	const meteorPhaseRef = useRef(false);
+	const lastMeteorPhysicsAtRef = useRef<number | null>(null);
+	const [meteorPhase, setMeteorPhase] = useState(false);
+	const [meteorsForRender, setMeteorsForRender] = useState<MeteorSim[]>([]);
+	const [explosionAnchorFrozen, setExplosionAnchorFrozen] = useState<{
+		x: number;
+		y: number;
+	} | null>(null);
+	const bumpMeteorFrame = useCallback(() => {
+		setMeteorsForRender((prev) => [...prev]);
+	}, []);
+	const [starEntranceSeq, setStarEntranceSeq] = useState(0);
+	const [starSurfaceVisible, setStarSurfaceVisible] = useState(false);
+	const starSurfaceVisibleRef = useRef(false);
+	const introTimerRef = useRef<number | null>(null);
+	const hasCompletedIntroDelayRef = useRef(false);
+	const [towardHitExplosions, setTowardHitExplosions] = useState<
+		TowardHitExplosion[]
+	>([]);
+	const towardExplosionNextIdRef = useRef(0);
+	// 爆発オーバーレイ用（exploding 中に currentIndex が変わっても表示が崩れないよう state）
+	const [explosionOverlaySrc, setExplosionOverlaySrc] = useState(
+		objects[0].src,
+	);
 	const [explosionStarDisplayPx, setExplosionStarDisplayPx] = useState(() =>
 		resolveStarBaseSizePx(objects[0]),
 	);
+	const [achievementToastMessage, setAchievementToastMessage] = useState<
+		string | null
+	>(null);
+	const dismissAchievementToast = useCallback(() => {
+		setAchievementToastMessage(null);
+	}, []);
+
+	/** 全実績解除時の開始位置ランダム（このマウントで1回だけ） */
+	const allUnlockedOrbitRandomRef = useRef<number | null>(null);
+
+	useEffect(() => {
+		starSurfaceVisibleRef.current = starSurfaceVisible;
+	}, [starSurfaceVisible]);
+
+	/* objects / 実績に応じた開始インデックス・HP・表示を同期（親の objects 変更時も再計算） */
+	/* eslint-disable react-hooks/set-state-in-effect -- 実績・objects に応じた軌道状態の一括同期 */
+	useLayoutEffect(() => {
+		if (introTimerRef.current !== null) {
+			clearTimeout(introTimerRef.current);
+			introTimerRef.current = null;
+		}
+
+		objectsRef.current = objects;
+		const resolved = resolveHomeOrbitStart(objects);
+		let i: number;
+		if (resolved.kind === "progress") {
+			allUnlockedOrbitRandomRef.current = null;
+			i = resolved.index;
+		} else {
+			if (allUnlockedOrbitRandomRef.current === null) {
+				allUnlockedOrbitRandomRef.current = Math.floor(
+					Math.random() * resolved.listLength,
+				);
+			}
+			i = allUnlockedOrbitRandomRef.current;
+		}
+		currentIndexRef.current = i;
+		setCurrentIndex(i);
+		const entry = objects[i];
+		if (!entry) return;
+		hpRef.current = entry.maxHp;
+		setDisplayHp(entry.maxHp);
+		setExplosionOverlaySrc(entry.src);
+		setExplosionStarDisplayPx(resolveStarBaseSizePx(entry));
+
+		if (!hasCompletedIntroDelayRef.current) {
+			setStarSurfaceVisible(false);
+			introTimerRef.current = window.setTimeout(() => {
+				introTimerRef.current = null;
+				hasCompletedIntroDelayRef.current = true;
+				setStarSurfaceVisible(true);
+				setStarEntranceSeq((s) => s + 1);
+			}, HOME_ORBIT_STAR_INTRO_DELAY_MS);
+		} else {
+			setStarSurfaceVisible(true);
+		}
+
+		return () => {
+			if (introTimerRef.current !== null) {
+				clearTimeout(introTimerRef.current);
+				introTimerRef.current = null;
+			}
+		};
+	}, [objects]);
+	/* eslint-enable react-hooks/set-state-in-effect */
 
 	const handleHit = useCallback(
 		(damage: number) => {
 			if (explodingRef.current) return;
+			if (currentIndex === null) return;
 
 			// 音はONのみ（OFFにはしない）。switch-se は BGM 音量ボタン ON 時のみ
 			if (!sound?.isPlaying) {
@@ -173,41 +521,44 @@ export function LogoWithOrbit({
 			hpRef.current -= damage;
 			setDisplayHp(Math.max(0, hpRef.current));
 			if (hpRef.current <= 0) {
-				// 爆発開始
+				// 爆発開始 → 隕石フェーズ（NEXT_STAR_AFTER_DESTROY_MS 後に次の星）
 				explodingRef.current = true;
-				const hitObject = list[idx];
-				explodingSrcRef.current = hitObject.src;
+				const hitObject = list[idx] as HomeOrbitObject;
+				setExplosionOverlaySrc(hitObject.src);
 				setExplosionStarDisplayPx(resolveStarBaseSizePx(hitObject));
+				frozenExplosionPosRef.current = { ...lastPosRef.current };
+				setExplosionAnchorFrozen({ ...lastPosRef.current });
+				const ach = hitObject.achievement;
+				if (ach && tryUnlockAchievement(ach.id)) {
+					setAchievementToastMessage(ach.toastMessage);
+				}
 				if (objectRef.current) objectRef.current.style.visibility = "hidden";
 
-				// 爆発SE
-				const dmgAudio = new Audio("/se/star-damage-se.mp3");
-				dmgAudio.volume = 0.3;
-				dmgAudio.play().catch(() => {});
+				playStarDamageSe();
+				orbitBridge.onScreenShake?.("medium");
 
-				const newMeteors: MeteorParticle[] = Array.from(
-					{ length: METEOR_COUNT },
-					(_, i) => ({
-						id: i,
-						angleRad: Math.random() * Math.PI * 2,
-						dist:
-							METEOR_DIST_MIN_PX + Math.random() * METEOR_DIST_SPREAD_PX,
-						spinDeg: (Math.random() - 0.5) * METEOR_SPIN_RANGE_DEG,
-						duration:
-							METEOR_DURATION_MIN_SEC +
-							Math.random() * METEOR_DURATION_SPREAD_SEC,
-						startScale:
-							METEOR_START_SCALE_MIN +
-							Math.random() * METEOR_START_SCALE_SPREAD,
-					}),
-				);
-				setMeteors(newMeteors);
+				const mCount =
+					hitObject.meteorCount ?? DEFAULT_HOME_ORBIT_METEOR_COUNT;
+				const spawned = spawnMeteors(mCount);
+				meteorSimsRef.current = spawned;
+				setMeteorsForRender(spawned);
+				meteorPhaseRef.current = true;
+				orbitBridge.isMeteorPhase = true;
+				setMeteorPhase(true);
+				lastMeteorPhysicsAtRef.current = null;
 				setExploding(true);
 
-				setTimeout(() => {
+				window.setTimeout(() => {
+					meteorPhaseRef.current = false;
+					orbitBridge.isMeteorPhase = false;
+					setMeteorPhase(false);
+					meteorSimsRef.current = [];
+					setMeteorsForRender([]);
+					setTowardHitExplosions([]);
+					setExplosionAnchorFrozen(null);
 					setCurrentIndex((prev) => {
 						const len = objectsRef.current.length;
-						const next = (prev + 1) % len;
+						const next = ((prev ?? 0) + 1) % len;
 						const maxHp = objectsRef.current[next].maxHp;
 						hpRef.current = maxHp;
 						setDisplayHp(maxHp);
@@ -215,9 +566,9 @@ export function LogoWithOrbit({
 					});
 					explodingRef.current = false;
 					setExploding(false);
-					setMeteors([]);
 					if (objectRef.current) objectRef.current.style.visibility = "visible";
-				}, RESPAWN_DELAY_MS);
+					setStarEntranceSeq((s) => s + 1);
+				}, NEXT_STAR_AFTER_DESTROY_MS);
 			}
 		},
 		[sound, currentIndex],
@@ -231,8 +582,64 @@ export function LogoWithOrbit({
 		};
 	}, [handleHit]);
 
+	useEffect(() => {
+		orbitBridge.tryHitMeteor = (
+			clientX: number,
+			clientY: number,
+			bulletRadiusPx: number,
+		) => {
+			const field = orbitFieldRef.current;
+			if (!field || !meteorPhaseRef.current) return false;
+			const rect = field.getBoundingClientRect();
+			const fx = frozenExplosionPosRef.current.x;
+			const fy = frozenExplosionPosRef.current.y;
+			const sims = meteorSimsRef.current;
+			for (const m of sims) {
+				if (!m.alive) continue;
+				const mcx = rect.left + rect.width / 2 + fx + m.x;
+				const mcy = rect.top + rect.height / 2 + fy + m.y;
+				const halfSide = (m.baseSizePx * m.scale) / 2;
+				const meteorR = halfSide * METEOR_HIT_RADIUS_FACTOR;
+				const bulletR = bulletRadiusPx * BULLET_HIT_RADIUS_FACTOR;
+				const rad = meteorR + bulletR;
+				if (Math.hypot(clientX - mcx, clientY - mcy) < rad) {
+					playStarDamageSe();
+					orbitBridge.onScreenShake?.("small");
+					if (m.depth === "toward") {
+						const eid = ++towardExplosionNextIdRef.current;
+						const sizePx = m.baseSizePx * m.scale;
+						setTowardHitExplosions((prev) => [
+							...prev,
+							{ id: eid, x: m.x, y: m.y, sizePx, rot: m.rot },
+						]);
+						window.setTimeout(() => {
+							setTowardHitExplosions((prev) =>
+								prev.filter((e) => e.id !== eid),
+							);
+						}, TOWARD_METEOR_EXPLOSION_DURATION_SEC * 1000 + 80);
+					}
+					m.alive = false;
+					bumpMeteorFrame();
+					return true;
+				}
+			}
+			return false;
+		};
+		return () => {
+			orbitBridge.tryHitMeteor = null;
+		};
+	}, [bumpMeteorFrame]);
+
+	useEffect(() => {
+		return () => {
+			orbitBridge.isMeteorPhase = false;
+			orbitBridge.tryHitMeteor = null;
+		};
+	}, []);
+
 	// 現在の星を自動回復（+1 / healIntervalMs）
 	useEffect(() => {
+		if (currentIndex === null || !starSurfaceVisible) return;
 		const entry = objects[currentIndex];
 		if (!entry) return;
 		const intervalMs =
@@ -250,55 +657,86 @@ export function LogoWithOrbit({
 		}, intervalMs);
 
 		return () => window.clearInterval(id);
-	}, [objects, currentIndex]);
+	}, [objects, currentIndex, starSurfaceVisible]);
 
 	useEffect(() => {
-		currentIndexRef.current = currentIndex;
+		currentIndexRef.current = currentIndex ?? -1;
 	}, [currentIndex]);
 
 	useEffect(() => {
 		const animate = (time: number) => {
-			if (lastTimeRef.current !== null) {
-				const delta = time - lastTimeRef.current;
-				const speedMult = Math.sin(angleRef.current) > 0 ? SPEED_LEFT : SPEED_RIGHT;
-				const list = objectsRef.current;
-				const idx = currentIndexRef.current % list.length;
-				const periodMs = list[idx]?.periodMs ?? 10000;
-				angleRef.current += (delta / periodMs) * 2 * Math.PI * speedMult;
-			}
-			lastTimeRef.current = time;
+			if (!explodingRef.current) {
+				const idxRaw = currentIndexRef.current;
+				if (lastTimeRef.current !== null && idxRaw >= 0) {
+					const delta = time - lastTimeRef.current;
+					const speedMult =
+						Math.sin(angleRef.current) > 0 ? SPEED_LEFT : SPEED_RIGHT;
+					const list = objectsRef.current;
+					const idx = idxRaw % list.length;
+					const periodMs = list[idx]?.periodMs ?? 10000;
+					angleRef.current +=
+						(delta / periodMs) * 2 * Math.PI * speedMult;
+				}
 
-			const t = angleRef.current;
-			const xLocal = A * Math.cos(t);
-			const yLocal = B * Math.sin(t);
-			const x = xLocal * COS_TILT - yLocal * SIN_TILT + ORBIT_CENTER_X;
-			const y = xLocal * SIN_TILT + yLocal * COS_TILT + ORBIT_CENTER_Y;
+				const ta = angleRef.current;
+				const xLocal = A * Math.cos(ta);
+				const yLocal = B * Math.sin(ta);
+				const x = xLocal * COS_TILT - yLocal * SIN_TILT + ORBIT_CENTER_X;
+				const y = xLocal * SIN_TILT + yLocal * COS_TILT + ORBIT_CENTER_Y;
 
-			const depth = (Math.sin(t) + 1) / 2;
-			const scale = SCALE_MIN + depth * (SCALE_MAX - SCALE_MIN);
-			const zIndex = Math.sin(t) > 0 ? 10 : 1;
+				const depth = (Math.sin(ta) + 1) / 2;
+				const scale = SCALE_MIN + depth * (SCALE_MAX - SCALE_MIN);
+				const zIndex = Math.sin(ta) > 0 ? 10 : 1;
 
-			if (objectRef.current) {
-				objectRef.current.style.transform = `translate(calc(-50% + ${x}px), calc(-50% + ${y}px)) scale(${scale})`;
-				objectRef.current.style.zIndex = String(zIndex);
+				if (
+					objectRef.current &&
+					idxRaw >= 0 &&
+					starSurfaceVisibleRef.current
+				) {
+					objectRef.current.style.transform = `translate(calc(-50% + ${x}px), calc(-50% + ${y}px)) scale(${scale})`;
+					objectRef.current.style.zIndex = String(zIndex);
 
-				const containerEl = objectRef.current.parentElement;
-				const rect = containerEl?.getBoundingClientRect();
-				if (rect) {
-					if (!explodingRef.current) {
+					const containerEl = objectRef.current.parentElement;
+					const rect = containerEl?.getBoundingClientRect();
+					if (rect) {
 						orbitBridge.clientX = rect.left + rect.width / 2 + x;
 						orbitBridge.clientY = rect.top + rect.height / 2 + y;
 						const list = objectsRef.current;
-						const idx = currentIndexRef.current % list.length;
+						const idx = idxRaw % list.length;
 						const entry = list[idx];
 						if (entry) {
-							// 見た目の外接正方形の半分を半径（深度 scale 込み）
 							orbitBridge.hitRadius =
 								(resolveStarBaseSizePx(entry) * scale) / 2;
 						}
+						lastPosRef.current = { x, y };
 					}
-					lastPosRef.current = { x, y };
 				}
+			}
+
+			lastTimeRef.current = time;
+
+			if (
+				meteorPhaseRef.current &&
+				meteorSimsRef.current.some((m) => m.alive)
+			) {
+				if (lastMeteorPhysicsAtRef.current === null) {
+					lastMeteorPhysicsAtRef.current = time;
+				}
+				const dt = Math.min(
+					0.055,
+					(time - lastMeteorPhysicsAtRef.current) / 1000,
+				);
+				lastMeteorPhysicsAtRef.current = time;
+				const maxD =
+					(typeof window !== "undefined"
+						? Math.max(window.innerWidth, window.innerHeight)
+						: 1200) *
+						0.92 +
+					METEOR_OFFSCREEN_MARGIN_PX;
+				stepMeteors(meteorSimsRef.current, dt, time, maxD);
+				setMeteorsForRender([...meteorSimsRef.current]);
+			} else {
+				lastMeteorPhysicsAtRef.current = null;
 			}
 
 			rafRef.current = requestAnimationFrame(animate);
@@ -312,11 +750,31 @@ export function LogoWithOrbit({
 		};
 	}, []);
 
-	const currentObject = objects[currentIndex];
+	const currentObject =
+		currentIndex !== null ? objects[currentIndex] : undefined;
 	useEffect(() => {
 		if (!setOrbitHud) return;
+		if (meteorPhase) {
+			setOrbitHud(null);
+			return;
+		}
+		if (
+			currentIndex === null ||
+			!starSurfaceVisible ||
+			currentObject === undefined
+		) {
+			setOrbitHud(null);
+			return;
+		}
 		setOrbitHud({ starHp: displayHp, maxStarHp: currentObject.maxHp });
-	}, [setOrbitHud, displayHp, currentObject.maxHp]);
+	}, [
+		meteorPhase,
+		setOrbitHud,
+		displayHp,
+		currentObject,
+		currentIndex,
+		starSurfaceVisible,
+	]);
 
 	useEffect(() => {
 		return () => {
@@ -324,113 +782,150 @@ export function LogoWithOrbit({
 		};
 	}, [setOrbitHud]);
 
-	const orbitStarSizePx = resolveStarBaseSizePx(currentObject);
-	const explosionMeteorBoxPx = Math.round(
-		METEOR_BOX_PX * (explosionStarDisplayPx / DEFAULT_STAR_BASE_SIZE_PX),
-	);
-	const explosionPos = lastPosRef.current;
+	const orbitStarSizePx = currentObject
+		? resolveStarBaseSizePx(currentObject)
+		: 0;
+	const explosionPos = explosionAnchorFrozen ?? { x: 0, y: 0 };
 
 	return (
 		<div className="flex flex-col items-center gap-3">
-		<div className="relative inline-flex items-center justify-center">
+			<HomeAchievementToast
+				open={achievementToastMessage !== null}
+				message={achievementToastMessage ?? ""}
+				onDismiss={dismissAchievementToast}
+			/>
+		<div ref={orbitFieldRef} className="relative inline-flex items-center justify-center">
 			{/* z-5: ロゴ文字のスタッキングコンテキスト */}
 			<PukapukaLogo size="large" className="relative z-5" disableInteraction />
-			<div
-				ref={objectRef}
-				className="absolute top-1/2 left-1/2 opacity-100"
-				style={{ width: orbitStarSizePx, height: orbitStarSizePx }}
-			>
-				<Image
-					src={currentObject.src}
-					alt={currentObject.label}
-					fill
-					className="object-contain"
-				/>
-				<div className="pointer-events-none absolute bottom-full left-1/2 z-10 flex -translate-x-1/2 justify-center whitespace-nowrap">
-					<StarHpBar
-						variant="home"
-						starHp={displayHp}
-						maxStarHp={currentObject.maxHp}
-					/>
-				</div>
-			</div>
-
-			{/* 爆発オーバーレイ */}
-			{exploding && (
-				<>
-					{/* 星がドカンと膨らんで消える */}
+			{currentIndex !== null &&
+				starSurfaceVisible &&
+				currentObject !== undefined &&
+				orbitStarSizePx > 0 && (
 					<div
-						className="absolute top-1/2 left-1/2 pointer-events-none z-20"
+						ref={objectRef}
+						className="absolute top-1/2 left-1/2 opacity-100"
 						style={{
-							width: explosionStarDisplayPx,
-							height: explosionStarDisplayPx,
-							transform: `translate(calc(-50% + ${explosionPos.x}px), calc(-50% + ${explosionPos.y}px))`,
+							width: orbitStarSizePx,
+							height: orbitStarSizePx,
 						}}
 					>
 						<motion.div
-							className="w-full h-full"
-							initial={{ scale: 1, opacity: 1 }}
+							key={starEntranceSeq}
+							className="relative h-full w-full"
+							initial={{
+								y: STAR_ENTRANCE_INITIAL_Y,
+								scale: STAR_ENTRANCE_INITIAL_SCALE,
+								opacity: 0.82,
+							}}
+							animate={{ y: 0, scale: 1, opacity: 1 }}
+							transition={STAR_ENTRANCE_SPRING}
+						>
+							<Image
+								src={currentObject.src}
+								alt={currentObject.label}
+								fill
+								className="object-contain"
+							/>
+							<div className="pointer-events-none absolute bottom-full left-1/2 z-10 flex -translate-x-1/2 justify-center whitespace-nowrap">
+								<StarHpBar
+									variant="home"
+									starHp={displayHp}
+									maxStarHp={currentObject.maxHp}
+								/>
+							</div>
+						</motion.div>
+					</div>
+				)}
+
+			{/* 爆発オーバーレイ（星の一瞬の膨張） */}
+			{exploding && (
+				<div
+					className="absolute top-1/2 left-1/2 pointer-events-none z-20"
+					style={{
+						width: explosionStarDisplayPx,
+						height: explosionStarDisplayPx,
+						transform: `translate(calc(-50% + ${explosionPos.x}px), calc(-50% + ${explosionPos.y}px))`,
+					}}
+				>
+					<motion.div
+						className="h-full w-full"
+						initial={{ scale: 1, opacity: 1 }}
+						animate={{
+							scale: EXPLOSION_STAR_SCALE_END,
+							opacity: 0,
+						}}
+						transition={{
+							duration: EXPLOSION_STAR_DURATION_SEC,
+							ease: EXPLOSION_STAR_EASE,
+						}}
+					>
+						<Image
+							src={explosionOverlaySrc}
+							alt="explosion"
+							fill
+							className="object-contain"
+						/>
+					</motion.div>
+				</div>
+			)}
+
+			{meteorPhase &&
+				towardHitExplosions.map((ex) => (
+					<div
+						key={`toward-boom-${ex.id}`}
+						className="absolute top-1/2 left-1/2 pointer-events-none z-[32]"
+						style={{
+							width: ex.sizePx,
+							height: ex.sizePx,
+							transform: `translate(calc(-50% + ${explosionPos.x + ex.x}px), calc(-50% + ${explosionPos.y + ex.y}px)) rotate(${ex.rot}rad)`,
+						}}
+					>
+						<motion.div
+							className="h-full w-full"
+							initial={{ scale: 0.88, opacity: 1 }}
 							animate={{
-								scale: EXPLOSION_STAR_SCALE_END,
+								scale: 1.45,
 								opacity: 0,
 							}}
 							transition={{
-								duration: EXPLOSION_STAR_DURATION_SEC,
-								ease: METEOR_MOTION_EASE,
+								duration: TOWARD_METEOR_EXPLOSION_DURATION_SEC,
+								ease: EXPLOSION_STAR_EASE,
 							}}
 						>
 							<Image
-								src={explodingSrcRef.current}
-								alt="explosion"
+								src={TOWARD_METEOR_EXPLOSION_SRC}
+								alt=""
 								fill
 								className="object-contain"
 							/>
 						</motion.div>
 					</div>
-
-					{/* 隕石パーティクル */}
-					{meteors.map((p) => (
-						<div
-							key={p.id}
-							className="absolute top-1/2 left-1/2 pointer-events-none z-20"
-							style={{
-								width: explosionMeteorBoxPx,
-								height: explosionMeteorBoxPx,
-								transform: `translate(calc(-50% + ${explosionPos.x}px), calc(-50% + ${explosionPos.y}px))`,
-							}}
-						>
-							<motion.div
-								className="relative w-full h-full"
-								initial={{
-									x: 0,
-									y: 0,
-									opacity: 1,
-									scale: p.startScale,
-									rotate: 0,
-								}}
-								animate={{
-									x: Math.cos(p.angleRad) * p.dist,
-									y: Math.sin(p.angleRad) * p.dist,
-									opacity: 0,
-									scale: 0,
-									rotate: p.spinDeg,
-								}}
-								transition={{
-									duration: p.duration,
-									ease: METEOR_MOTION_EASE,
-								}}
-							>
-								<Image
-									src={METEOR_SRC}
-									alt=""
-									fill
-									className="object-contain"
-								/>
-							</motion.div>
-						</div>
-					))}
-				</>
-			)}
+				))}
+			{meteorPhase &&
+				meteorsForRender
+					.filter((m) => m.alive)
+					.map((m) => (
+								<div
+									key={m.id}
+									className={
+										m.depth === "threat"
+											? "absolute top-1/2 left-1/2 pointer-events-none z-40 drop-shadow-[0_0_12px_rgba(255,90,40,0.45)]"
+											: "absolute top-1/2 left-1/2 pointer-events-none z-30"
+									}
+									style={{
+										width: m.baseSizePx,
+										height: m.baseSizePx,
+										transform: `translate(calc(-50% + ${explosionPos.x + m.x}px), calc(-50% + ${explosionPos.y + m.y}px)) scale(${m.scale}) rotate(${m.rot}rad)`,
+									}}
+								>
+									<Image
+										src={METEOR_SRC}
+										alt=""
+										fill
+										className="object-contain"
+									/>
+					</div>
+				))}
 		</div>
 
 		{children}

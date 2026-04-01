@@ -15,10 +15,12 @@ import {
 	SUCKED_IN_AFTERMATH_MESSAGES,
 } from "@/constants/login/dinosaurLoginMessages";
 import {
-	SESSION_KEY_HAS_LOGGED_IN,
-	SESSION_KEY_LOGIN_VISIT_COUNT,
-	LOCAL_KEY_HAS_VISITED,
-} from "@/constants/common/storage";
+	getHasLoggedInSession,
+	getHasVisitedSite,
+	getLoginVisitCount,
+	setHasVisitedSite,
+	setLoginVisitCount,
+} from "@/lib/local-storage-bridge";
 import { useSE } from "@/hooks/useSE";
 import { Typography } from "@/components/ui/typography";
 const ENTER_DURATION = 3;
@@ -38,15 +40,12 @@ const SUCKED_IN_DURATION = 15;
 
 function getDialogueMessages(): string[] {
 	if (typeof window === "undefined") return DIALOGUE_MESSAGES_VISIT_0;
-	if (sessionStorage.getItem(SESSION_KEY_HAS_LOGGED_IN) === "true") {
+	if (getHasLoggedInSession()) {
 		return DIALOGUE_MESSAGES_RETURNING;
 	}
-	const count = parseInt(
-		sessionStorage.getItem(SESSION_KEY_LOGIN_VISIT_COUNT) ?? "0",
-		10,
-	);
-	// キャッシュリセット検出：sessionStorageは0だがlocalStorageに訪問履歴あり
-	if (count === 0 && localStorage.getItem(LOCAL_KEY_HAS_VISITED) === "true") {
+	const count = getLoginVisitCount();
+	// キャッシュリセット検出：訪問回数が0だが訪問履歴フラグあり
+	if (count === 0 && getHasVisitedSite()) {
 		return DIALOGUE_MESSAGES_CACHE_RESET;
 	}
 	return count === 0
@@ -56,16 +55,12 @@ function getDialogueMessages(): string[] {
 
 function markAsVisited(): void {
 	if (typeof window === "undefined") return;
-	localStorage.setItem(LOCAL_KEY_HAS_VISITED, "true");
+	setHasVisitedSite(true);
 }
 
 function incrementVisitCount(): void {
 	if (typeof window === "undefined") return;
-	const count = parseInt(
-		sessionStorage.getItem(SESSION_KEY_LOGIN_VISIT_COUNT) ?? "0",
-		10,
-	);
-	sessionStorage.setItem(SESSION_KEY_LOGIN_VISIT_COUNT, String(count + 1));
+	setLoginVisitCount(getLoginVisitCount() + 1);
 }
 
 /**

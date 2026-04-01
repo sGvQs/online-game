@@ -2,7 +2,7 @@
 
 import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import Image from "next/image";
-import { motion, useMotionValue } from "framer-motion";
+import { motion, useAnimationControls, useMotionValue } from "framer-motion";
 import { SoundContext } from "@/lib/sound-context";
 import { AMMO_MAX, HomeAmmoProvider } from "@/lib/home-ammo-context";
 import {
@@ -14,7 +14,15 @@ import {
 	HomeModalOpenProvider,
 	useHomeModalOpen,
 } from "@/lib/home-modal-context";
-import { orbitBridge } from "@/components/home/orbitBridge";
+import {
+	orbitBridge,
+	type OrbitScreenShakeStrength,
+} from "@/components/home/orbitBridge";
+import { HOME_ORBIT_SCREEN_SHAKE } from "@/lib/home-orbit-screen-shake";
+
+/** 隕石（z-30〜40）より手前。下部 HUD（z-[60]）より下にして UI を隠さない */
+const HOME_BULLET_Z = "z-[45]";
+const HOME_CURSOR_AND_FX_Z = "z-[46]";
 
 interface Ball {
 	id: number;
@@ -76,6 +84,25 @@ function HomeCursorInner({ children }: { children: React.ReactNode }) {
 	const ammoRef = useRef(AMMO_MAX);
 	const containerRef = useRef<HTMLDivElement>(null);
 	const delayedClickRef = useRef(false);
+	const screenShake = useAnimationControls();
+
+	useEffect(() => {
+		orbitBridge.onScreenShake = (
+			strength: OrbitScreenShakeStrength = "large",
+		) => {
+			const preset = HOME_ORBIT_SCREEN_SHAKE[strength];
+			void screenShake
+				.start({
+					x: [...preset.x],
+					y: [...preset.y],
+					transition: { duration: preset.durationSec, ease: "easeOut" },
+				})
+				.then(() => screenShake.set({ x: 0, y: 0 }));
+		};
+		return () => {
+			orbitBridge.onScreenShake = null;
+		};
+	}, [screenShake]);
 
 	const handleMouseMove = useCallback(
 		(e: React.MouseEvent) => {
@@ -159,16 +186,33 @@ function HomeCursorInner({ children }: { children: React.ReactNode }) {
 
 			const target = options?.syntheticClickTarget;
 			setTimeout(() => {
-				const starX = orbitBridge.clientX - rect.left;
-				const starY = orbitBridge.clientY - rect.top;
-				const dist = Math.hypot(toX - starX, toY - starY);
-				if (dist < orbitBridge.hitRadius) {
-					orbitBridge.triggerHit?.(damage);
+				const clientHitX = rect.left + toX;
+				const clientHitY = rect.top + toY;
+				const bulletR = Math.max(ball.widthPx, ball.heightPx) * 0.35;
+
+				const hitMeteor = orbitBridge.tryHitMeteor?.(
+					clientHitX,
+					clientHitY,
+					bulletR,
+				);
+				if (hitMeteor) {
 					const colId = nextId++;
 					setCollisions((prev) => [...prev, { id: colId, x: toX, y: toY }]);
 					setTimeout(() => {
 						setCollisions((prev) => prev.filter((c) => c.id !== colId));
 					}, 600);
+				} else if (!orbitBridge.isMeteorPhase) {
+					const starX = orbitBridge.clientX - rect.left;
+					const starY = orbitBridge.clientY - rect.top;
+					const dist = Math.hypot(toX - starX, toY - starY);
+					if (dist < orbitBridge.hitRadius) {
+						orbitBridge.triggerHit?.(damage);
+						const colId = nextId++;
+						setCollisions((prev) => [...prev, { id: colId, x: toX, y: toY }]);
+						setTimeout(() => {
+							setCollisions((prev) => prev.filter((c) => c.id !== colId));
+						}, 600);
+					}
 				}
 
 				if (target) {
@@ -239,12 +283,13 @@ function HomeCursorInner({ children }: { children: React.ReactNode }) {
 	}, []);
 
 	return (
-		<div
+		<motion.div
 			ref={containerRef}
 			className={`relative h-screen w-full outline-none select-none ${isModalOpen ? "cursor-auto" : "cursor-none"}`}
 			onMouseMove={handleMouseMove}
 			onMouseLeave={handleMouseLeave}
 			onClickCapture={handleClickCapture}
+			animate={screenShake}
 		>
 			<HomeAmmoProvider ammo={ammo} ammoMax={AMMO_MAX}>
 				{children}
@@ -253,7 +298,7 @@ function HomeCursorInner({ children }: { children: React.ReactNode }) {
 			{/* target cursor */}
 			{!isModalOpen && (
 				<motion.div
-					className="absolute top-0 left-0 w-12 h-12 pointer-events-none z-9999"
+					className={`absolute top-0 left-0 w-12 h-12 pointer-events-none ${HOME_CURSOR_AND_FX_Z}`}
 					style={{
 						x: cursorX,
 						y: cursorY,
@@ -274,7 +319,7 @@ function HomeCursorInner({ children }: { children: React.ReactNode }) {
 			{collisions.map((c) => (
 				<motion.div
 					key={c.id}
-					className="absolute top-0 left-0 w-16 h-16 pointer-events-none z-9999"
+					className={`absolute top-0 left-0 w-16 h-16 pointer-events-none ${HOME_CURSOR_AND_FX_Z}`}
 					style={{ x: c.x, y: c.y, translateX: "-50%", translateY: "-50%" }}
 					initial={{ scale: 0.5, opacity: 1 }}
 					animate={{ scale: 1.4, opacity: 0 }}
@@ -293,7 +338,7 @@ function HomeCursorInner({ children }: { children: React.ReactNode }) {
 			{balls.map((b) => (
 				<motion.div
 					key={b.id}
-					className={`absolute top-0 left-0 pointer-events-none z-9998 rounded-full ${b.bulletClassName}`}
+					className={`absolute top-0 left-0 pointer-events-none ${HOME_BULLET_Z} rounded-full ${b.bulletClassName}`}
 					style={{
 						width: b.widthPx,
 						height: b.height,
@@ -313,6 +358,6 @@ function HomeCursorInner({ children }: { children: React.ReactNode }) {
 					onAnimationComplete={() => removeBall(b.id)}
 				/>
 			))}
-		</div>
+		</motion.div>
 	);
 }
