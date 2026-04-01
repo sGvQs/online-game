@@ -1,6 +1,14 @@
 "use client";
 
-import { useContext, useEffect, useRef, useState, useCallback, type ReactNode } from "react";
+import {
+	useContext,
+	useEffect,
+	useLayoutEffect,
+	useRef,
+	useState,
+	useCallback,
+	type ReactNode,
+} from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { PukapukaLogo } from "@/components/common/logo/pukapukaLogo";
@@ -9,7 +17,10 @@ import { useSyncHomeOrbitHud } from "@/lib/home-orbit-hud-context";
 import { orbitBridge } from "@/components/home/orbitBridge";
 import { HomeAchievementToast } from "@/components/home/homeAchievementToast";
 import { StarHpBar } from "@/components/game/phases/starShieldGame/playing/typistView/StarHpBar";
-import { tryUnlockAchievement } from "@/lib/local-storage-bridge";
+import {
+	isAchievementUnlocked,
+	tryUnlockAchievement,
+} from "@/lib/local-storage-bridge";
 
 /** 軌道オブジェクト破壊で解除する実績（任意）。`id` は永続化用の安定スラッグ */
 export interface HomeOrbitAchievement {
@@ -41,6 +52,65 @@ function clampStarBaseSizePx(px: number): number {
 /** `entry.starBaseSizePx` を 24〜128px に収めて返す */
 export function resolveStarBaseSizePx(entry: HomeOrbitObject): number {
 	return clampStarBaseSizePx(entry.starBaseSizePx);
+}
+
+/**
+ * 同一 `performance.timeOrigin`（＝通常は1回のフルページロード）につき1回だけランダムを決める。
+ * sessionStorage はタブを閉じるまでリロード後も残るため、毎回同じ星に見える不具合の原因になっていた。
+ * Strict Mode の二重マウントでは timeOrigin が同じなので同じ値を再利用する。
+ */
+let homeOrbitRandomForPageLoad: { timeOrigin: number; index: number } | null =
+	null;
+
+function getRandomOrbitIndexForAllUnlocked(listLength: number): number {
+	const origin =
+		typeof performance !== "undefined" &&
+		Number.isFinite(performance.timeOrigin)
+			? performance.timeOrigin
+			: Date.now();
+	if (
+		homeOrbitRandomForPageLoad !== null &&
+		homeOrbitRandomForPageLoad.timeOrigin === origin
+	) {
+		return homeOrbitRandomForPageLoad.index;
+	}
+	const index = Math.floor(Math.random() * listLength);
+	homeOrbitRandomForPageLoad = { timeOrigin: origin, index };
+	return index;
+}
+
+/**
+ * ホーム初回表示で使う軌道インデックス。
+ * - 全実績解除済み: ランダム（ページロードごとに変わる）
+ * - それ以外: 配列順で最初の「未解除実績」の星（地球を破壊済みなら次の星から再開）
+ */
+function getInitialHomeOrbitIndex(list: readonly HomeOrbitObject[]): number {
+	if (list.length === 0) return 0;
+
+	const withAchievement = list
+		.map((o, i) => ({ o, i }))
+		.filter(
+			(
+				x,
+			): x is {
+				o: HomeOrbitObject & { achievement: HomeOrbitAchievement };
+				i: number;
+			} => Boolean(x.o.achievement),
+		);
+
+	if (withAchievement.length === 0) return 0;
+
+	const ids = withAchievement.map((x) => x.o.achievement.id);
+	const allUnlocked = ids.every((id) => isAchievementUnlocked(id));
+
+	if (allUnlocked) {
+		return getRandomOrbitIndexForAllUnlocked(list.length);
+	}
+
+	for (const { o, i } of withAchievement) {
+		if (!isAchievementUnlocked(o.achievement.id)) return i;
+	}
+	return 0;
 }
 
 export const HOME_ORBIT_OBJECTS = [
@@ -193,6 +263,18 @@ export function LogoWithOrbit({
 	const dismissAchievementToast = useCallback(() => {
 		setAchievementToastMessage(null);
 	}, []);
+
+	useLayoutEffect(() => {
+		const i = getInitialHomeOrbitIndex(objects);
+		currentIndexRef.current = i;
+		setCurrentIndex(i);
+		const entry = objects[i];
+		if (!entry) return;
+		hpRef.current = entry.maxHp;
+		setDisplayHp(entry.maxHp);
+		explodingSrcRef.current = entry.src;
+		setExplosionStarDisplayPx(resolveStarBaseSizePx(entry));
+	}, [objects]);
 
 	const handleHit = useCallback(
 		(damage: number) => {

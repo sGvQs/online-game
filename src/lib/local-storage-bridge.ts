@@ -99,3 +99,10 @@ export function tryUnlockAchievement(achievementId: string): boolean {
 	s.setItem(key, "true");
 	return true;
 }
+
+/** 実績が既に解除済みか（読み取りのみ） */
+export function isAchievementUnlocked(achievementId: string): boolean {
+	const s = getLocalStorage();
+	if (!s) return false;
+	return s.getItem(achievementStorageKey(achievementId)) === "true";
+}
