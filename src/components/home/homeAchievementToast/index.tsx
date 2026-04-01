@@ -35,7 +35,7 @@ export function HomeAchievementToast({
 					exit={{ y: -12, opacity: 0 }}
 					transition={{ type: "spring", stiffness: 380, damping: 28 }}
 				>
-					『{message}』を達成しました！
+					『{message}』の実績を解除しました！
 				</motion.div>
 			) : null}
 		</AnimatePresence>
