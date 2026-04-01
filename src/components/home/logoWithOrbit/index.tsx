@@ -189,6 +189,10 @@ const DEFAULT_HOME_ORBIT_METEOR_COUNT = 72;
 const METEOR_TOWARD_CAMERA_RATIO = 0.3;
 const METEOR_BOX_PX_MIN = 24;
 const METEOR_BOX_PX_MAX = 64;
+/** 隕石の命中判定（見た目より少し厳しめにする係数）。半径= (base*scale/2) * factor */
+const METEOR_HIT_RADIUS_FACTOR = 0.82;
+/** 弾側の命中半径をどれだけ加算するか（小さいほど厳しい） */
+const BULLET_HIT_RADIUS_FACTOR = 0.55;
 /** 脅威隕石の描画箱（px）。ほぼ 1px からスケールで成長 */
 const METEOR_THREAT_BASE_PX = 1;
 /** 脅威: この秒数で画面を覆うサイズまで線形成長（未到達時のフォールバックにも使用） */
@@ -595,7 +599,9 @@ export function LogoWithOrbit({
 				const mcx = rect.left + rect.width / 2 + fx + m.x;
 				const mcy = rect.top + rect.height / 2 + fy + m.y;
 				const halfSide = (m.baseSizePx * m.scale) / 2;
-				const rad = halfSide + bulletRadiusPx;
+				const meteorR = halfSide * METEOR_HIT_RADIUS_FACTOR;
+				const bulletR = bulletRadiusPx * BULLET_HIT_RADIUS_FACTOR;
+				const rad = meteorR + bulletR;
 				if (Math.hypot(clientX - mcx, clientY - mcy) < rad) {
 					playStarDamageSe();
 					orbitBridge.onScreenShake?.("small");
