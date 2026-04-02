@@ -12,7 +12,8 @@ import {
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { PukapukaLogo } from "@/components/common/logo/pukapukaLogo";
-import { SoundContext } from "@/lib/sound-context";
+import { SoundContext, soundOutputRef } from "@/lib/sound-context";
+import { effectiveSeVolume } from "@/lib/sound-volume";
 import { useSyncHomeOrbitHud } from "@/lib/home-orbit-hud-context";
 import { orbitBridge } from "@/components/home/orbitBridge";
 import { HomeAchievementToast } from "@/components/home/homeAchievementToast";
@@ -255,8 +256,9 @@ function viewportCoverPx(): number {
 }
 
 function playStarDamageSe(): void {
+	if (!soundOutputRef.isPlaying) return;
 	const audio = new Audio("/se/star-damage-se.mp3");
-	audio.volume = 0.3;
+	audio.volume = effectiveSeVolume(0.3, soundOutputRef.masterVolume);
 	audio.play().catch(() => {});
 }
 
