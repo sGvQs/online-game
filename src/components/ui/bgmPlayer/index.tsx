@@ -168,7 +168,11 @@ export default function BGMPlayer() {
 							)}
 							aria-label={"音量レベル " + String(i + 1) + " / " + String(VOLUME_SEGMENT_COUNT)}
 							aria-pressed={lit > 0 && i === lit - 1}
-							onClick={() => setVolume(level)}
+							onClick={() => {
+								if (Math.abs(level - volume) < 1e-5) return;
+								if (isPlaying) playSwitchSe();
+								setVolume(level);
+							}}
 						/>
 					);
 				})}
