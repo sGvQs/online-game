@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import { Typography } from "@/components/ui/typography";
 import type { GradientColor } from "@/components/ui/typography/styles";
 import { SoundContext } from "@/lib/sound-context";
+import { effectiveSeVolume } from "@/lib/sound-volume";
 
 const PukapukaLogoSize = {
     medium: {
@@ -28,10 +29,10 @@ export function PukapukaLogo({ className, size = "medium", disableInteraction = 
     const sizeProps = PukapukaLogoSize[size];
     const sound = useContext(SoundContext);
 
-    const playSE = (file: string, volume = 0.1) => {
+    const playSE = (file: string, baseVolume = 0.1) => {
         if (!sound?.isPlaying) return;
         const audio = new Audio(file);
-        audio.volume = volume;
+        audio.volume = effectiveSeVolume(baseVolume, sound.volume);
         audio.play().catch(() => {});
     };
     const renderChars = (text: string, gradient: GradientColor) => {

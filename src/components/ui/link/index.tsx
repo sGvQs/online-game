@@ -3,6 +3,7 @@
 import { useCallback, useContext, type ComponentProps } from "react";
 import NextLink from "next/link";
 import { SoundContext } from "@/lib/sound-context";
+import { effectiveSeVolume } from "@/lib/sound-volume";
 import type { ButtonSE } from "@/components/ui/button";
 
 const SE_FILES: Record<Exclude<ButtonSE, null>, string> = {
@@ -24,7 +25,7 @@ export function Link({ se = "submit", onClick, ...props }: LinkProps) {
         (e: React.MouseEvent<HTMLAnchorElement>) => {
             if (sound?.isPlaying && se !== null) {
                 const audio = new Audio(SE_FILES[se]);
-                audio.volume = 0.1;
+                audio.volume = effectiveSeVolume(0.1, sound.volume);
                 audio.play().catch(() => {});
             }
             onClick?.(e);

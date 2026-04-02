@@ -1,19 +1,61 @@
 "use client";
 
-import React, { createContext, useContext, useState, ReactNode } from "react";
+import React, {
+	createContext,
+	useCallback,
+	useContext,
+	useEffect,
+	useState,
+	type ReactNode,
+} from "react";
+import {
+	DEFAULT_SOUND_MASTER_VOLUME,
+	getSoundMasterVolume,
+	setSoundMasterVolume,
+} from "@/lib/local-storage-bridge";
 
 interface SoundContextType {
 	isPlaying: boolean;
 	setIsPlaying: (isPlaying: boolean) => void;
+	volume: number;
+	setVolume: (volume: number) => void;
 }
 
-export const SoundContext = createContext<SoundContextType | undefined>(undefined);
+export const SoundContext = createContext<SoundContextType | undefined>(
+	undefined,
+);
+
+/** RAF / コールバック外から SE 実効可否・マスターを参照する（LogoWithOrbit の隕石 SE 等） */
+export const soundOutputRef: { isPlaying: boolean; masterVolume: number } = {
+	isPlaying: false,
+	masterVolume: DEFAULT_SOUND_MASTER_VOLUME,
+};
 
 export function SoundProvider({ children }: { children: ReactNode }) {
 	const [isPlaying, setIsPlaying] = useState(false);
+	// SSR と初回クライアント描画を一致させる（localStorage はマウント後のみ反映）
+	const [volume, setVolumeState] = useState(DEFAULT_SOUND_MASTER_VOLUME);
+
+	useEffect(() => {
+		// eslint-disable-next-line react-hooks/set-state-in-effect -- localStorage はクライアント専用。ハイドレーション整合のためマウント時に同期
+		setVolumeState(getSoundMasterVolume());
+	}, []);
+
+	const setVolume = useCallback((next: number) => {
+		const v = Math.min(1, Math.max(0, next));
+		setVolumeState(v);
+		setSoundMasterVolume(v);
+	}, []);
+
+	useEffect(() => {
+		soundOutputRef.isPlaying = isPlaying;
+		soundOutputRef.masterVolume = volume;
+	}, [isPlaying, volume]);
 
 	return (
-		<SoundContext.Provider value={{ isPlaying, setIsPlaying }}>
+		<SoundContext.Provider
+			value={{ isPlaying, setIsPlaying, volume, setVolume }}
+		>
 			{children}
 		</SoundContext.Provider>
 	);

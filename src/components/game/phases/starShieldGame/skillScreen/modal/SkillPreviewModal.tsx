@@ -4,6 +4,7 @@ import { useContext } from "react";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 import { SoundContext } from "@/lib/sound-context";
+import { effectiveSeVolume } from "@/lib/sound-volume";
 import { TECHNIQUES } from "@/constants/starShieldGame/techniques";
 import {
 	NORMAL_ATTACK_UNLOCK_COSTS,
@@ -196,7 +197,7 @@ export function SkillPreviewModal({
 								if (purchaseFn) {
 									if (sound?.isPlaying) {
 										const audio = new Audio("/se/buy-se.mp3");
-										audio.volume = 0.1;
+										audio.volume = effectiveSeVolume(0.1, sound.volume);
 										audio.play().catch(() => {});
 									}
 									handlePurchase(purchaseFn, purchaseLabelForFn);

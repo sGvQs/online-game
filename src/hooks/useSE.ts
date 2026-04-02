@@ -1,4 +1,5 @@
 import { useSound } from "@/lib/sound-context";
+import { effectiveSeVolume } from "@/lib/sound-volume";
 import { useCallback, useEffect, useRef } from "react";
 
 type SEName =
@@ -76,7 +77,7 @@ function getNextShootingAudio(): HTMLAudioElement | null {
 }
 
 export const useSE = () => {
-	const { isPlaying } = useSound();
+	const { isPlaying, volume } = useSound();
 	const preloadStarted = useRef(false);
 
 	useEffect(() => {
@@ -106,6 +107,7 @@ export const useSE = () => {
 			if (name === "dinosaur") {
 				const audio = getNextDinosaurAudio();
 				if (audio) {
+					audio.volume = effectiveSeVolume(VOICE_VOLUME, volume);
 					audio.currentTime = 0;
 					audio.play().catch(() => {});
 				}
@@ -115,6 +117,7 @@ export const useSE = () => {
 			if (name === "shooting") {
 				const audio = getNextShootingAudio();
 				if (audio) {
+					audio.volume = effectiveSeVolume(DEFAULT_VOLUME, volume);
 					audio.currentTime = 0;
 					audio.play().catch(() => {});
 				}
@@ -122,10 +125,13 @@ export const useSE = () => {
 			}
 
 			const audio = new Audio(files[name]);
-			audio.volume = SE_VOLUMES[name] ?? DEFAULT_VOLUME;
+			audio.volume = effectiveSeVolume(
+				SE_VOLUMES[name] ?? DEFAULT_VOLUME,
+				volume,
+			);
 			audio.play().catch(() => {});
 		},
-		[isPlaying],
+		[isPlaying, volume],
 	);
 
 	return { play };

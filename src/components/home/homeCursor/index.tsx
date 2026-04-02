@@ -4,6 +4,7 @@ import { useCallback, useContext, useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { motion, useAnimationControls, useMotionValue } from "framer-motion";
 import { SoundContext } from "@/lib/sound-context";
+import { effectiveSeVolume } from "@/lib/sound-volume";
 import { AMMO_MAX, HomeAmmoProvider } from "@/lib/home-ammo-context";
 import {
 	HOME_SHOOTER_MODES,
@@ -147,7 +148,7 @@ function HomeCursorInner({ children }: { children: React.ReactNode }) {
 				if (ammoRef.current < cost) {
 					if (sound?.isPlaying) {
 						const audio = new Audio(HOME_SHOOTER_SE.cannotShoot);
-						audio.volume = 0.12;
+						audio.volume = effectiveSeVolume(0.12, sound.volume);
 						audio.play().catch(() => {});
 					}
 					return false;
@@ -180,7 +181,7 @@ function HomeCursorInner({ children }: { children: React.ReactNode }) {
 
 			if (sound?.isPlaying) {
 				const audio = new Audio(HOME_SHOOTER_SE.shoot);
-				audio.volume = 0.1;
+				audio.volume = effectiveSeVolume(0.1, sound.volume);
 				audio.play().catch(() => {});
 			}
 
@@ -257,7 +258,7 @@ function HomeCursorInner({ children }: { children: React.ReactNode }) {
 				setAmmo(AMMO_MAX);
 				if (sound?.isPlaying) {
 					const audio = new Audio(HOME_SHOOTER_SE.reload);
-					audio.volume = 0.12;
+					audio.volume = effectiveSeVolume(0.12, sound.volume);
 					audio.play().catch(() => {});
 				}
 				return;
