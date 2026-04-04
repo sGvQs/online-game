@@ -39,21 +39,22 @@
 - Tailwind CSS v4
 - Supabase
 
-## リファクタリングの重点項目
+## コーディング方針
 
-### 1. スタイリングの再定義 (Clean Style Logic)
-- JSX内にTailwindのクラスを直接記述するのを止め、`styles.ts` などの別ファイルに定義を分離する。
-- `tailwind-variants`（tv）を使用し、コンポーネントの状態に応じたバリアント管理を導入する。
-- 古いTailwindの記述やワーニングをすべて解消する。
+### 1. スタイリング
+- スタイルは `styles.ts` に分離し、`tailwind-variants`（tv）でバリアント管理する
+- JSX内への直接クラス記述は禁止（`coding-conventions.md` 参照）
+- Tailwind v4 canonical class 記法を使用する
 
-### 2. React / Next.js ベストプラクティス
-- コンポーネントを役割（UI、ロジック、データフェッチ）ごとに分離する。
-- サーバーコンポーネント（RSC）で実行すべきデータ取得がクライアントサイドに漏れていないか確認し、適切なサーバーサイド実行に移行する。
-- リアルタイム通信（Supabase Realtime等）は独立したモジュールやカスタムフックとして抽出する。
+### 2. React / Next.js
+- データ取得はサーバーコンポーネント（RSC）を優先する
+- リアルタイム通信（Supabase Realtime）はカスタムフックに抽出する
+- コンポーネントは UI / ロジック / データフェッチの役割で分離する
 
-### 3. DB設計とPrismaの最適化
-- `schema.prisma` をレビューし、正規化・インデックス・リレーションが最適か確認する。
-- N+1問題の発生箇所や、パフォーマンス低下の懸念があるクエリを修正する。
+### 3. DB / Prisma
+- N+1クエリを避け、`include` や `select` を適切に使用する
+- Prisma 操作は必ず `src/server/actions/` に集約する（ページからの直接呼び出し禁止）
 
-### 4. デザインパターンの適用
-- このスタックに最適なデザインパターン（Atomic Designの簡略版、Feature-based Architectureなど）を提案・適用する。
+### 4. アーキテクチャ原則
+- Feature-based 構成（`layout/` + `phases/` + `common/`）を維持する
+- 定数は `src/constants/{gameName}/`、ユーティリティは `src/utils/{gameName}/` に配置する

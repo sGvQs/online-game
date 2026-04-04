@@ -9,39 +9,51 @@
 
 ```
 src/
-├── app/                  # Next.js App Router
-├── server/              # サーバーサイドロジック
-├── components/           # UIコンポーネント
-├── shared/               # 共有モジュール
-├── proxy.ts              # Next.js ミドルウェア
-└── types.ts              # 後方互換性のための再エクスポート（非推奨）
+├── app/          # Next.js App Router（ページ・ルーティング）
+├── components/   # UIコンポーネント
+├── constants/    # ゲーム固有の定数
+├── hooks/        # カスタムフック
+├── lib/          # フロントエンド専用ライブラリ（Context等）
+├── server/       # サーバーサイドロジック
+├── types/        # 型定義
+├── utils/        # ユーティリティ関数
+├── logHelper.ts  # ログユーティリティ
+└── proxy.ts      # Next.js ミドルウェア
 ```
 
 ---
 
 ## `/src/app` - Next.js App Router
 
-Next.js 13+ のApp Routerに準拠したルーティング構造。
-
 ```
 app/
-├── api/                  # API Routes
-├── auth/                 # 認証関連ページ
-├── home/            # ダッシュボードページ
-├── game/                 # ゲーム関連ページ
+├── api/                        # API Routes
+├── auth/
+│   └── callback/               # 認証コールバック
+├── game/
 │   └── [roomId]/
-│       └── error-hunter/
-├── room/                 # ルーム関連ページ
-│   └── [id]/
-├── login/                # ログインページ
-├── globals.css           # グローバルスタイル
-├── layout.tsx            # ルートレイアウト
-└── page.tsx              # ホームページ
+│       ├── error-hunter/       # Error Hunter ゲーム
+│       ├── null-hand/          # Null Hand ゲーム
+│       └── star-shield/        # Star Shield ゲーム
+│           ├── ranking/        # ランキング画面
+│           ├── settings/       # 設定画面
+│           └── skill/          # スキル・ショップ画面
+├── home/                       # ホーム（ダッシュボード）
+├── login/                      # ログインページ
+├── privacy/                    # プライバシーポリシー
+├── ranking/                    # 世界ランキング
+├── room/
+│   ├── [id]/                   # ルーム詳細
+│   └── search/                 # ルーム検索
+├── terms/                      # 利用規約
+├── globals.css
+├── layout.tsx
+└── page.tsx
 ```
 
 ### ルール
 - 各ページは `page.tsx` で実装
-- **Prismaの直接呼び出し禁止** - 必ずServer Actions経由
+- **Prismaの直接呼び出し禁止** — 必ず Server Actions 経由
 - Client Components は `@/components/` から import
 - Server Actions は `@/server/actions/` を使用
 
@@ -49,32 +61,26 @@ app/
 
 ## `/src/server` - サーバーサイドロジック
 
-### 構造
 ```
 server/
-├── actions/              # Server Actions (機能別ディレクトリ)
-│   ├── index.ts          # 一括エクスポート
-│   ├── _helpers/         # 内部ヘルパー（外部非公開）
+├── actions/
+│   ├── _helpers/               # 内部ヘルパー（外部非公開）
 │   │   └── getAuthenticatedUser.ts
-│   ├── user/             # ユーザー関連
-│   │   ├── index.ts
-│   │   ├── getCurrentUser.ts
-│   │   └── getMe.ts
-│   ├── room/             # ルーム関連
-│   │   ├── index.ts
-│   │   ├── getRooms.ts
-│   │   ├── getRoom.ts
-│   │   ├── createRoom.ts
-│   │   ├── deleteRoom.ts
-│   │   ├── joinLeaveRoom.ts
-│   │   └── gameActions.ts
-│   └── auth/             # 認証関連
-│       ├── index.ts
-│       ├── syncUser.ts
-│       └── signOut.ts
-└── lib/                  # バックエンド専用ライブラリ
-    ├── prisma.ts         # Prismaクライアント
-    └── supabase/         # Supabase Admin クライアント
+│   ├── auth/                   # 認証関連
+│   ├── game/                   # ゲームロジック
+│   │   ├── errorHunterActions.ts
+│   │   ├── nullHandActions.ts
+│   │   ├── rankingActions.ts
+│   │   ├── starShieldActions.ts
+│   │   ├── starShieldProgressionActions.ts
+│   │   └── starShieldRankingActions.ts
+│   ├── home/                   # ホーム関連
+│   ├── room/                   # ルーム関連
+│   ├── user/                   # ユーザー関連
+│   └── index.ts                # 一括エクスポート
+└── lib/
+    ├── prisma.ts               # Prismaクライアント
+    └── supabase/               # Supabase Admin クライアント
 ```
 
 ### Server Actions ルール
@@ -83,87 +89,87 @@ server/
 - 認証済みユーザー取得は `_helpers/getAuthenticatedUser` を使用
 - クライアントからは `@/server/actions` を import
 
-### インポート例
-```typescript
-// 推奨: index.ts からの一括インポート
-import { createRoom, getRooms, getCurrentUser } from '@/server/actions'
-
-// 特定のアクションのみ
-import { getRoomWithUsers } from '@/server/actions/room'
-```
-
 ---
 
 ## `/src/components` - UIコンポーネント
 
-### 構造
 ```
 components/
-├── auth/             # 認証コンポーネント
-├── game/             # ゲーム関連コンポーネント
-├── room/             # ルーム関連コンポーネント
-├── ui/               # 汎用UIコンポーネント
-└── user/             # ユーザー関連コンポーネント
+├── auth/         # 認証コンポーネント
+├── common/       # 汎用共有コンポーネント
+├── decorations/  # 装飾系コンポーネント
+├── game/         # ゲーム関連コンポーネント
+│   ├── layout/   # ゲームレイアウト（orchestrator）
+│   ├── phases/   # フェーズ別UI
+│   └── common/   # ゲーム固有の共有UI
+├── home/         # ホーム画面コンポーネント
+├── legal/        # 法的文書コンポーネント
+├── login/        # ログインコンポーネント
+├── lp/           # ランディングページ
+├── ranking/      # ランキングコンポーネント
+├── room/         # ルーム関連コンポーネント
+└── ui/           # 汎用UIパーツ
 ```
 
-### コンポーネント構造パターン
+### game/ の構造パターン
 
-#### パターンA: フォルダ分離（推奨）
-複雑なコンポーネントには以下の構造を使用：
 ```
-ComponentName/
-├── index.tsx             # コンポーネント本体
-└── styles.ts             # tailwind-variants スタイル
+game/
+├── layout/{gameName}/    # app から呼ばれる orchestrator
+├── phases/{gameName}/    # 各フェーズのUI
+└── common/{gameName}/    # ゲーム固有の共有コンポーネント
 ```
 
-#### パターンB: 単一ファイル
-シンプルなコンポーネントは単一ファイルで管理：
+各コンポーネントフォルダは `index.tsx` + `styles.ts` で構成（`coding-conventions.md` 参照）。
+
+---
+
+## `/src/types` - 型定義
+
 ```
-SimpleComponent.tsx
+types/
+├── index.ts          # 一括エクスポート
+├── prisma/           # Prismaモデルベースの型（game, room, user）
+└── starShieldGame/   # Star Shield 固有の型
 ```
 
 ---
 
-## `/src/shared` - 共有モジュール
+## `/src/lib` - フロントエンド専用ライブラリ
 
-フロントエンドとバックエンドの両方で使用する共通コード。
-
-### 構造
 ```
-shared/
-└── types/                # 型定義
-    ├── index.ts          # 一括エクスポート
-    ├── user.ts           # User, UserIDP, UserBasic 等
-    ├── room.ts           # Room, RoomUser, RoomStatus 等
-    └── game.ts           # Match, ErrorEvent 等
-```
-
-### 使用方法
-```typescript
-// 推奨
-import { Room, User, RoomStatus } from '@/shared/types'
-
-// 非推奨（後方互換性のため残存）
-import { Room } from '@/types'
+lib/
+├── *-context.tsx     # React Context（home, loading, sound等）
+├── sound-context.tsx
+└── utils.ts
 ```
 
 ---
 
-## スタイリング規約
+## `/src/constants` と `/src/utils`
 
-### tailwind-variants の使用
-- slots 機能で構成要素を分離
-- スタイルは `styles.ts` に集約
-- コンポーネントからは `import { xxx } from './styles'`
+```
+constants/
+├── starShieldGame/   # Star Shield 定数（gameConfig, techniques, shopConfig等）
+├── nullHandGame/     # Null Hand 定数
+└── errorHunterGame/  # Error Hunter 定数
+
+utils/
+└── starShieldGame/   # Star Shield ユーティリティ（collision, physics等）
+```
+
+### ルール
+- ゲーム固有の定数・ユーティリティはそれぞれのフォルダに配置
+- コンポーネントフォルダ内に `constants.ts` / `utils.ts` を置かない
 
 ---
 
 ## 命名規則
 
 | 対象 | 規則 | 例 |
-|-----|-----|-----|
-| コンポーネント | PascalCase | `RoomCard.tsx` |
+|------|------|-----|
+| コンポーネント（export） | PascalCase | `export function RoomCard` |
+| ファイル・ディレクトリ | camelCase（先頭小文字） | `roomCard.tsx`, `starShieldGame/` |
 | スタイルファイル | `styles.ts` | `styles.ts` |
 | Server Actions | camelCase | `createRoom` |
 | 型定義ファイル | camelCase | `room.ts` |
-| ヘルパー | camelCase | `getAuthenticatedUser.ts` |
