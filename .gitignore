@@ -43,3 +43,7 @@ yarn-error.log*
 next-env.d.ts
 
 /src/generated/prisma
+
+# note scripts
+note/scripts/session.json
+note/scripts/chrome_profile/
