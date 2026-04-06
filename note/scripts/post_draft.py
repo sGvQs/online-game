@@ -110,29 +110,27 @@ def update_articles_md(title: str) -> None:
     target_line = None
     target_idx = None
     for i, line in enumerate(lines):
-        if f"| {title} |" in line and "ローカル" in line:
-            target_line = line.replace("| ローカル |", "| note下書き |")
+        if f"| {title} |" in line:
+            target_line = f"| {title} |"
             target_idx = i
             break
 
     if target_idx is None:
-        print(f"articles.md に「{title}」（ローカル）が見つかりませんでした。手動で更新してください。")
+        print(f"articles.md に「{title}」が見つかりませんでした。手動で更新してください。")
         return
 
     # 元の行を削除
     lines.pop(target_idx)
 
-    # 「## note下書き」セクションのテーブル末尾に挿入
+    # 「## note」セクションのテーブル末尾に挿入
     insert_idx = None
     in_section = False
     for i, line in enumerate(lines):
-        if line.strip() == "## note下書き":
+        if line.strip() == "## note":
             in_section = True
             continue
         if in_section and line.startswith("##"):
-            # 次のセクションに入った → その直前の空行の前に挿入
             insert_idx = i - 1
-            # 空行をスキップして最後の表行の次を探す
             for j in range(i - 1, -1, -1):
                 if lines[j].startswith("|"):
                     insert_idx = j + 1
@@ -140,12 +138,12 @@ def update_articles_md(title: str) -> None:
             break
 
     if insert_idx is None:
-        print("articles.md の「note下書き」セクションが見つかりませんでした。")
+        print("articles.md の「note」セクションが見つかりませんでした。")
         return
 
     lines.insert(insert_idx, target_line)
     ARTICLES_MD.write_text("\n".join(lines) + "\n", encoding="utf-8")
-    print(f"articles.md を更新しました: 「{title}」→ note下書き")
+    print(f"articles.md を更新しました: 「{title}」→ note")
 
 
 def post_draft(filepath: str) -> None:
