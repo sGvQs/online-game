@@ -12,7 +12,7 @@ import {
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { PukapukaLogo } from "@/components/common/logo/pukapukaLogo";
-import { SoundContext, soundOutputRef } from "@/lib/sound-context";
+import { soundOutputRef } from "@/lib/sound-context";
 import { effectiveSeVolume } from "@/lib/sound-volume";
 import { useSyncHomeOrbitHud } from "@/lib/home-orbit-hud-context";
 import { orbitBridge } from "@/components/home/orbitBridge";
@@ -396,7 +396,6 @@ export function LogoWithOrbit({
 		objectsProp.length > 0 ? objectsProp : HOME_ORBIT_OBJECTS;
 	const objectsRef = useRef(objects);
 
-	const sound = useContext(SoundContext);
 	const setOrbitHud = useSyncHomeOrbitHud();
 	const [currentIndex, setCurrentIndex] = useState<number | null>(null);
 	const currentIndexRef = useRef(-1);
@@ -512,11 +511,6 @@ export function LogoWithOrbit({
 			if (explodingRef.current) return;
 			if (currentIndex === null) return;
 
-			// 音はONのみ（OFFにはしない）。switch-se は BGM 音量ボタン ON 時のみ
-			if (!sound?.isPlaying) {
-				sound?.setIsPlaying(true);
-			}
-
 			const list = objectsRef.current;
 			const idx = currentIndex;
 
@@ -573,7 +567,7 @@ export function LogoWithOrbit({
 				}, NEXT_STAR_AFTER_DESTROY_MS);
 			}
 		},
-		[sound, currentIndex],
+		[currentIndex],
 	);
 
 	// orbitBridge に triggerHit をセット・クリーンアップ
