@@ -88,6 +88,14 @@ function HomeCursorInner({ children }: { children: React.ReactNode }) {
 	const screenShake = useAnimationControls();
 
 	useEffect(() => {
+		const prev = document.body.style.overflow;
+		document.body.style.overflow = "hidden";
+		return () => {
+			document.body.style.overflow = prev;
+		};
+	}, []);
+
+	useEffect(() => {
 		orbitBridge.onScreenShake = (
 			strength: OrbitScreenShakeStrength = "large",
 		) => {
@@ -286,7 +294,7 @@ function HomeCursorInner({ children }: { children: React.ReactNode }) {
 	return (
 		<motion.div
 			ref={containerRef}
-			className={`relative h-screen w-full outline-none select-none ${isModalOpen ? "cursor-auto" : "cursor-none"}`}
+			className={`relative h-screen w-full overflow-hidden outline-none select-none ${isModalOpen ? "cursor-auto" : "cursor-none"}`}
 			onMouseMove={handleMouseMove}
 			onMouseLeave={handleMouseLeave}
 			onClickCapture={handleClickCapture}
