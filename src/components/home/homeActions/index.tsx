@@ -23,14 +23,13 @@ export function HomeActions() {
 	const router = useRouter();
 	const [isPending, startTransition] = useTransition();
 
-	if (!hasStarted) return null;
-
 	return (
 		<motion.div
 			className="flex items-center gap-10 mt-20"
 			initial={{ scale: 0.3, opacity: 0 }}
-			animate={{ scale: 1, opacity: 1 }}
+			animate={hasStarted ? { scale: 1, opacity: 1 } : { scale: 0.3, opacity: 0 }}
 			transition={BOUNCE_SPRING}
+			style={{ visibility: hasStarted ? "visible" : "hidden" }}
 		>
 			<Button
 				variant="success"

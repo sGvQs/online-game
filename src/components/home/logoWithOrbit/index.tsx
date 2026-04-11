@@ -21,6 +21,9 @@ import { StarHpBar } from "@/components/game/phases/starShieldGame/playing/typis
 import {
 	isAchievementUnlocked,
 	tryUnlockAchievement,
+	getActiveOrbitStar,
+	setActiveOrbitStar,
+	clearActiveOrbitStar,
 } from "@/lib/local-storage-bridge";
 
 /** 軌道オブジェクト破壊で解除する実績（任意）。`id` は永続化用の安定スラッグ */
@@ -63,19 +66,26 @@ export function resolveStarBaseSizePx(entry: HomeOrbitObject): number {
 }
 
 type HomeOrbitStartResolution =
-	| { kind: "show"; index: number }
+	| { kind: "show"; index: number; fromSaved: boolean }
 	| { kind: "none" };
 
 /**
  * ページ訪問時に表示する星を決定する。
- * - 未開始（最初の実績未解除）: 常に最初の星を表示
+ * - 出現中の星が localStorage に保存されていればそれを優先（破壊されるまで維持）
+ * - 未開始（最初の実績未解除）: 常に最初の星を表示して保存
  * - 全実績解除済み: 星なし
- * - それ以外: 各星の `appearProbability` で独立抽選し、当選した中からランダムに1つ
+ * - それ以外: 各星の `appearProbability` で独立抽選し、当選した中からランダムに1つ保存
  */
 function resolveHomeOrbitStart(
 	list: readonly HomeOrbitObject[],
 ): HomeOrbitStartResolution {
 	if (list.length === 0) return { kind: "none" };
+
+	// 出現中の星が保存されていればそれを使う（演出スキップ）
+	const saved = getActiveOrbitStar();
+	if (saved !== null && saved >= 0 && saved < list.length) {
+		return { kind: "show", index: saved, fromSaved: true };
+	}
 
 	const withAchievement = list
 		.map((o, i) => ({ o, i }))
@@ -88,13 +98,15 @@ function resolveHomeOrbitStart(
 			} => Boolean(x.o.achievement),
 		);
 
-	if (withAchievement.length === 0) return { kind: "show", index: 0 };
+	if (withAchievement.length === 0) {
+		return { kind: "show", index: 0, fromSaved: false };
+	}
 
 	const firstAchId = withAchievement[0].o.achievement.id;
 
 	// 未開始ユーザー: 常に最初の星
 	if (!isAchievementUnlocked(firstAchId)) {
-		return { kind: "show", index: withAchievement[0].i };
+		return { kind: "show", index: withAchievement[0].i, fromSaved: false };
 	}
 
 	// 全実績解除済み: 星なし
@@ -109,19 +121,20 @@ function resolveHomeOrbitStart(
 	}
 	if (candidates.length === 0) return { kind: "none" };
 
-	return { kind: "show", index: candidates[Math.floor(Math.random() * candidates.length)] };
+	const idx = candidates[Math.floor(Math.random() * candidates.length)];
+	return { kind: "show", index: idx, fromSaved: false };
 }
 
 export const HOME_ORBIT_OBJECTS = [
 	{
 		src: "/svg/object/earth.svg",
 		label: "earth",
-		maxHp: 100,
+		maxHp: 50,
 		meteorCount: 100,
 		periodMs: 30000,
 		healIntervalMs: 10000,
 		starBaseSizePx: 30,
-		appearProbability: 0.35,
+		appearProbability: 0,
 		achievement: {
 			id: "enemy-of-humanity",
 			toastMessage: "人類の敵",
@@ -149,7 +162,7 @@ export const HOME_ORBIT_OBJECTS = [
 		periodMs: 3000,
 		healIntervalMs: 1000,
 		starBaseSizePx: 50,
-		appearProbability: 0.4,
+		appearProbability: 0.04,
 		achievement: {
 			id: "future-earth-destruction",
 			toastMessage: "残された文明の道の破壊",
@@ -163,7 +176,7 @@ export const HOME_ORBIT_OBJECTS = [
 		periodMs: 30000,
 		healIntervalMs: 50,
 		starBaseSizePx: 100,
-		appearProbability: 0.18,
+		appearProbability: 0.018,
 		achievement: {
 			id: "rapid-tap-master",
 			toastMessage: "連打の達人",
@@ -177,7 +190,7 @@ export const HOME_ORBIT_OBJECTS = [
 		periodMs: 3000,
 		healIntervalMs: 200,
 		starBaseSizePx: 30,
-		appearProbability: 0.5,
+		appearProbability: 0.005,
 		achievement: {
 			id: "sniping-master",
 			toastMessage: "狙撃の達人",
@@ -239,15 +252,15 @@ const TOWARD_METEOR_EXPLOSION_SRC = "/svg/object/collision.svg";
 const TOWARD_METEOR_EXPLOSION_DURATION_SEC = 0.48;
 const EXPLOSION_STAR_EASE = "easeOut" as const;
 
-/** 軌道星のバウンス登場（初回・次星共通）。 damping を下げるほどオーバーシュートが大きい */
-const STAR_ENTRANCE_INITIAL_Y = "-38%";
-const STAR_ENTRANCE_INITIAL_SCALE = 0.58;
-const STAR_ENTRANCE_SPRING = {
-	type: "spring" as const,
-	stiffness: 240,
-	damping: 9,
-	mass: 0.58,
-};
+/** 星が軌道中心から接近してフルサイズに到達するまでの秒数（警告フェーズ1と同期） */
+const STAR_APPROACH_DURATION_SEC = 15;
+/** ease-in: 遠くからゆっくり加速しながら接近する感覚 */
+const STAR_APPROACH_TRANSITION = {
+	duration: STAR_APPROACH_DURATION_SEC,
+	ease: [0.4, 0, 1, 1],
+} as const;
+/** 接近中の固定角速度（rad/s）: π rad = 後方→前方を APPROACH 秒で通過 */
+const APPROACH_ANGULAR_VEL = Math.PI / STAR_APPROACH_DURATION_SEC;
 
 type MeteorDepth = "threat" | "toward" | "away" | "lateral";
 
@@ -435,6 +448,7 @@ export function LogoWithOrbit({
 	const [displayHp, setDisplayHp] = useState<number>(0);
 	const explodingRef = useRef(false);
 	const [exploding, setExploding] = useState(false);
+	const approachingRef = useRef(false);
 	const lastPosRef = useRef({ x: 0, y: 0 });
 	const frozenExplosionPosRef = useRef({ x: 0, y: 0 });
 	const orbitFieldRef = useRef<HTMLDivElement>(null);
@@ -482,9 +496,12 @@ export function LogoWithOrbit({
 		starSurfaceVisibleRef.current = starSurfaceVisible;
 	}, [starSurfaceVisible]);
 
-	// 星が出現するたびに警告スナックバーをフェーズ1から開始
+	// 星が出現するたびに接近フェーズ開始 + 警告スナックバーフェーズ1
 	useEffect(() => {
 		if (currentIndex === null) return;
+		// 軌道の最遠点（後方）を開始角度に設定
+		angleRef.current = -Math.PI / 2;
+		approachingRef.current = true;
 		setWarningMessage(WARNING_MSG_1);
 		// starEntranceSeq が変化したときのみ発火させる
 		// eslint-disable-next-line react-hooks/exhaustive-deps
@@ -567,6 +584,7 @@ export function LogoWithOrbit({
 						notifyStarted();
 					}
 				}
+				clearActiveOrbitStar();
 				setWarningMessage(null);
 				setAchievementToastMessage("任務完了。重力の正常を確認。");
 				if (objectRef.current) objectRef.current.style.visibility = "hidden";
@@ -702,15 +720,21 @@ export function LogoWithOrbit({
 		const animate = (time: number) => {
 			if (!explodingRef.current) {
 				const idxRaw = currentIndexRef.current;
+
 				if (lastTimeRef.current !== null && idxRaw >= 0) {
 					const delta = time - lastTimeRef.current;
-					const speedMult =
-						Math.sin(angleRef.current) > 0 ? SPEED_LEFT : SPEED_RIGHT;
-					const list = objectsRef.current;
-					const idx = idxRaw % list.length;
-					const periodMs = list[idx]?.periodMs ?? 10000;
-					angleRef.current +=
-						(delta / periodMs) * 2 * Math.PI * speedMult;
+					if (approachingRef.current) {
+						// 接近中: 後方→前方を固定角速度で通過
+						angleRef.current += APPROACH_ANGULAR_VEL * (delta / 1000);
+					} else {
+						const speedMult =
+							Math.sin(angleRef.current) > 0 ? SPEED_LEFT : SPEED_RIGHT;
+						const list = objectsRef.current;
+						const idx = idxRaw % list.length;
+						const periodMs = list[idx]?.periodMs ?? 10000;
+						angleRef.current +=
+							(delta / periodMs) * 2 * Math.PI * speedMult;
+					}
 				}
 
 				const ta = angleRef.current;
@@ -856,7 +880,7 @@ export function LogoWithOrbit({
 				message={warningMessage ?? ""}
 				onDismiss={dismissWarning}
 				variant={warningMessage === WARNING_MSG_1 ? "danger" : "warning"}
-				autoHideMs={warningMessage === WARNING_MSG_1 ? 3000 : 0}
+				autoHideMs={warningMessage === WARNING_MSG_1 ? STAR_APPROACH_DURATION_SEC * 1000 : 0}
 			/>
 		<div ref={orbitFieldRef} className="relative inline-flex items-center justify-center">
 			{/* z-5: ロゴ文字のスタッキングコンテキスト */}
@@ -876,13 +900,12 @@ export function LogoWithOrbit({
 						<motion.div
 							key={starEntranceSeq}
 							className="relative h-full w-full"
-							initial={{
-								y: STAR_ENTRANCE_INITIAL_Y,
-								scale: STAR_ENTRANCE_INITIAL_SCALE,
-								opacity: 0.82,
+							initial={{ scale: 0.02, opacity: 1 }}
+							animate={{ scale: 1, opacity: 1 }}
+							transition={STAR_APPROACH_TRANSITION}
+							onAnimationComplete={() => {
+								approachingRef.current = false;
 							}}
-							animate={{ y: 0, scale: 1, opacity: 1 }}
-							transition={STAR_ENTRANCE_SPRING}
 						>
 							<Image
 								src={currentObject.src}
@@ -937,7 +960,7 @@ export function LogoWithOrbit({
 				towardHitExplosions.map((ex) => (
 					<div
 						key={`toward-boom-${ex.id}`}
-						className="absolute top-1/2 left-1/2 pointer-events-none z-[32]"
+						className="absolute top-1/2 left-1/2 pointer-events-none z-32"
 						style={{
 							width: ex.sizePx,
 							height: ex.sizePx,
