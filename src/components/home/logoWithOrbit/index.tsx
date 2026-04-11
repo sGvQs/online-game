@@ -961,13 +961,17 @@ export function LogoWithOrbit({
 								fill
 								className="object-contain"
 							/>
-							<div className="pointer-events-none absolute bottom-full left-1/2 z-10 flex -translate-x-1/2 justify-center whitespace-nowrap">
+							<motion.div
+								className="pointer-events-none absolute bottom-full left-1/2 z-10 flex -translate-x-1/2 justify-center whitespace-nowrap"
+								animate={{ opacity: isReadyToShoot ? 1 : 0 }}
+								transition={{ duration: 0.4, ease: "easeIn" }}
+							>
 								<StarHpBar
 									variant="home"
 									starHp={displayHp}
 									maxStarHp={currentObject.maxHp}
 								/>
-							</div>
+							</motion.div>
 						</motion.div>
 					</div>
 				)}
