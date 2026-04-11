@@ -13,7 +13,7 @@ import { motion } from "framer-motion";
 import { PukapukaLogo } from "@/components/common/logo/pukapukaLogo";
 import { soundOutputRef } from "@/lib/sound-context";
 import { effectiveSeVolume } from "@/lib/sound-volume";
-import { useSyncHomeOrbitHud } from "@/lib/home-orbit-hud-context";
+import { useSyncHomeOrbitHud, useSyncIsEmergencyMode } from "@/lib/home-orbit-hud-context";
 import { useHomeStarted, HOME_FIRST_ACHIEVEMENT_ID } from "@/lib/home-started-context";
 import { orbitBridge } from "@/components/home/orbitBridge";
 import { HomeAchievementToast } from "@/components/home/homeAchievementToast";
@@ -436,6 +436,7 @@ export function LogoWithOrbit({
 
 	const { notifyStarted } = useHomeStarted();
 	const setOrbitHud = useSyncHomeOrbitHud();
+	const setIsEmergencyMode = useSyncIsEmergencyMode();
 	const [currentIndex, setCurrentIndex] = useState<number | null>(null);
 	const currentIndexRef = useRef(-1);
 	const objectRef = useRef<HTMLDivElement>(null);
@@ -878,6 +879,17 @@ export function LogoWithOrbit({
 			setOrbitHud?.(null);
 		};
 	}, [setOrbitHud]);
+
+	// 緊急モード同期: 星が軌道に乗っているか隕石フェーズ中なら true
+	useEffect(() => {
+		setIsEmergencyMode?.((starSurfaceVisible && currentIndex !== null) || meteorPhase);
+	}, [starSurfaceVisible, currentIndex, meteorPhase, setIsEmergencyMode]);
+
+	useEffect(() => {
+		return () => {
+			setIsEmergencyMode?.(false);
+		};
+	}, [setIsEmergencyMode]);
 
 	const orbitStarSizePx = currentObject
 		? resolveStarBaseSizePx(currentObject)

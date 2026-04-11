@@ -76,7 +76,7 @@ export function HomeProfile({
 	};
 
 	return (
-		<>
+		<div data-action-button="true">
 			<button className={styles.profileCard()} onClick={openModal}>
 				<Image
 					src={FACE_ICON_PATHS[initialFaceIcon]}
@@ -167,6 +167,6 @@ export function HomeProfile({
 					</div>
 				</div>
 			</Modal>
-		</>
+		</div>
 	);
 }

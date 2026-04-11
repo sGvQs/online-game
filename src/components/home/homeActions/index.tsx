@@ -25,6 +25,7 @@ export function HomeActions() {
 
 	return (
 		<motion.div
+			data-action-button="true"
 			className="flex items-center gap-10 mt-20"
 			initial={{ scale: 0.3, opacity: 0 }}
 			animate={hasStarted ? { scale: 1, opacity: 1 } : { scale: 0.3, opacity: 0 }}

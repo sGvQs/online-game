@@ -15,6 +15,7 @@ import {
 	HomeModalOpenProvider,
 	useHomeModalOpen,
 } from "@/lib/home-modal-context";
+import { useIsEmergencyMode } from "@/lib/home-orbit-hud-context";
 import {
 	orbitBridge,
 	type OrbitScreenShakeStrength,
@@ -76,6 +77,7 @@ export function HomeCursor({ children }: { children: React.ReactNode }) {
 
 function HomeCursorInner({ children }: { children: React.ReactNode }) {
 	const { isModalOpen } = useHomeModalOpen();
+	const isEmergencyMode = useIsEmergencyMode();
 	const sound = useContext(SoundContext);
 	const cursorX = useMotionValue(-100);
 	const cursorY = useMotionValue(-100);
@@ -86,6 +88,7 @@ function HomeCursorInner({ children }: { children: React.ReactNode }) {
 	const containerRef = useRef<HTMLDivElement>(null);
 	const delayedClickRef = useRef(false);
 	const screenShake = useAnimationControls();
+	const [isHoveringAction, setIsHoveringAction] = useState(false);
 
 	useEffect(() => {
 		const prev = document.body.style.overflow;
@@ -120,6 +123,8 @@ function HomeCursorInner({ children }: { children: React.ReactNode }) {
 			if (!rect) return;
 			cursorX.set(e.clientX - rect.left);
 			cursorY.set(e.clientY - rect.top);
+			const over = !!(e.target as Element)?.closest?.("[data-action-button]");
+			setIsHoveringAction(over);
 		},
 		[cursorX, cursorY, isModalOpen],
 	);
@@ -128,6 +133,7 @@ function HomeCursorInner({ children }: { children: React.ReactNode }) {
 		if (isModalOpen) return;
 		cursorX.set(-100);
 		cursorY.set(-100);
+		setIsHoveringAction(false);
 	}, [cursorX, cursorY, isModalOpen]);
 
 	const fireToward = useCallback(
@@ -239,6 +245,10 @@ function HomeCursorInner({ children }: { children: React.ReactNode }) {
 		(e: React.MouseEvent) => {
 			if (isModalOpen) return;
 			if (delayedClickRef.current) return;
+			// 通常モード or アクションボタン上: 弾なし・即時クリック通過
+			if (!isEmergencyMode) return;
+			if ((e.target as Element)?.closest?.("[data-action-button]")) return;
+
 			e.stopPropagation();
 
 			const rect = containerRef.current?.getBoundingClientRect();
@@ -251,12 +261,13 @@ function HomeCursorInner({ children }: { children: React.ReactNode }) {
 				mode: "click",
 			});
 		},
-		[fireToward, isModalOpen],
+		[fireToward, isModalOpen, isEmergencyMode],
 	);
 
 	useEffect(() => {
 		const onKeyDown = (e: KeyboardEvent) => {
 			if (isModalOpen) return;
+			if (!isEmergencyMode) return;
 			if (isEditableFocusTarget(document.activeElement)) return;
 
 			if (e.code === "Space" || e.key === " ") {
@@ -285,7 +296,7 @@ function HomeCursorInner({ children }: { children: React.ReactNode }) {
 
 		window.addEventListener("keydown", onKeyDown);
 		return () => window.removeEventListener("keydown", onKeyDown);
-	}, [cursorX, cursorY, fireToward, isModalOpen, sound]);
+	}, [cursorX, cursorY, fireToward, isModalOpen, isEmergencyMode, sound]);
 
 	const removeBall = useCallback((id: number) => {
 		setBalls((prev) => prev.filter((b) => b.id !== id));
@@ -294,7 +305,7 @@ function HomeCursorInner({ children }: { children: React.ReactNode }) {
 	return (
 		<motion.div
 			ref={containerRef}
-			className={`relative h-screen w-full overflow-hidden outline-none select-none ${isModalOpen ? "cursor-auto" : "cursor-none"}`}
+			className={`relative h-screen w-full overflow-hidden outline-none select-none ${isModalOpen || !isEmergencyMode || isHoveringAction ? "cursor-auto" : "cursor-none"}`}
 			onMouseMove={handleMouseMove}
 			onMouseLeave={handleMouseLeave}
 			onClickCapture={handleClickCapture}
@@ -304,8 +315,8 @@ function HomeCursorInner({ children }: { children: React.ReactNode }) {
 				{children}
 			</HomeAmmoProvider>
 
-			{/* target cursor */}
-			{!isModalOpen && (
+			{/* target cursor: 緊急モード中かつアクションボタン外のみ表示 */}
+			{!isModalOpen && isEmergencyMode && !isHoveringAction && (
 				<motion.div
 					className={`absolute top-0 left-0 w-12 h-12 pointer-events-none ${HOME_CURSOR_AND_FX_Z}`}
 					style={{

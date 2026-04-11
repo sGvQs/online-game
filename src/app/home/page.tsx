@@ -42,9 +42,9 @@ export default async function HomePage({
 		DEFAULT_FACE_ICON;
 
 	return (
-		<HomeCursor>
-			<HomeStartedProvider>
-			<HomeOrbitHudProvider>
+		<HomeStartedProvider>
+		<HomeOrbitHudProvider>
+			<HomeCursor>
 				<div className="flex min-h-screen w-full flex-col">
 					<div className="flex flex-1 flex-col items-center justify-center px-4">
 						<LogoWithOrbit>
@@ -69,8 +69,8 @@ export default async function HomePage({
 						<HomeOrbitHud />
 					</div>
 				</div>
-			</HomeOrbitHudProvider>
-			</HomeStartedProvider>
-		</HomeCursor>
+			</HomeCursor>
+		</HomeOrbitHudProvider>
+		</HomeStartedProvider>
 	);
 }
