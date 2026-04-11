@@ -46,6 +46,8 @@ export interface HomeOrbitObject {
 	achievement?: HomeOrbitAchievement;
 	/** 破壊時に飛ばす隕石の数（未指定時はデフォルト） */
 	meteorCount?: number;
+	/** 軌道中心から接近してフルサイズに到達するまでの秒数（警告フェーズ1と同期） */
+	approachDurationSec: number;
 	/**
 	 * ページ訪問時の出現確率（0〜1）。
 	 * 新規ユーザーの最初の星は常時表示のため参照しない。
@@ -135,6 +137,7 @@ export const HOME_ORBIT_OBJECTS = [
 		healIntervalMs: 10000,
 		starBaseSizePx: 30,
 		appearProbability: 0,
+		approachDurationSec: 15,
 		achievement: {
 			id: "enemy-of-humanity",
 			toastMessage: "人類の敵",
@@ -149,6 +152,7 @@ export const HOME_ORBIT_OBJECTS = [
 		healIntervalMs: 10000,
 		starBaseSizePx: 90,
 		appearProbability: 0.12,
+		approachDurationSec: 15,
 		achievement: {
 			id: "ice-age-onset",
 			toastMessage: "氷河期時代の到来",
@@ -162,7 +166,8 @@ export const HOME_ORBIT_OBJECTS = [
 		periodMs: 3000,
 		healIntervalMs: 1000,
 		starBaseSizePx: 50,
-		appearProbability: 0.04,
+		appearProbability: 0.94,
+		approachDurationSec: 1.5,
 		achievement: {
 			id: "future-earth-destruction",
 			toastMessage: "残された文明の道の破壊",
@@ -177,6 +182,7 @@ export const HOME_ORBIT_OBJECTS = [
 		healIntervalMs: 50,
 		starBaseSizePx: 100,
 		appearProbability: 0.018,
+		approachDurationSec: 15,
 		achievement: {
 			id: "rapid-tap-master",
 			toastMessage: "連打の達人",
@@ -191,6 +197,7 @@ export const HOME_ORBIT_OBJECTS = [
 		healIntervalMs: 200,
 		starBaseSizePx: 30,
 		appearProbability: 0.005,
+		approachDurationSec: 15,
 		achievement: {
 			id: "sniping-master",
 			toastMessage: "狙撃の達人",
@@ -252,15 +259,8 @@ const TOWARD_METEOR_EXPLOSION_SRC = "/svg/object/collision.svg";
 const TOWARD_METEOR_EXPLOSION_DURATION_SEC = 0.48;
 const EXPLOSION_STAR_EASE = "easeOut" as const;
 
-/** 星が軌道中心から接近してフルサイズに到達するまでの秒数（警告フェーズ1と同期） */
-const STAR_APPROACH_DURATION_SEC = 15;
-/** ease-in: 遠くからゆっくり加速しながら接近する感覚 */
-const STAR_APPROACH_TRANSITION = {
-	duration: STAR_APPROACH_DURATION_SEC,
-	ease: [0.4, 0, 1, 1],
-} as const;
-/** 接近中の固定角速度（rad/s）: π rad = 後方→前方を APPROACH 秒で通過 */
-const APPROACH_ANGULAR_VEL = Math.PI / STAR_APPROACH_DURATION_SEC;
+/** ease-in: 遠くからゆっくり加速しながら接近する感覚（duration は星ごとに異なる） */
+const STAR_APPROACH_EASE = [0.4, 0, 1, 1] as const;
 
 type MeteorDepth = "threat" | "toward" | "away" | "lateral";
 
@@ -430,7 +430,7 @@ export function LogoWithOrbit({
 	objects: objectsProp = HOME_ORBIT_OBJECTS,
 	children,
 }: LogoWithOrbitProps) {
-	const objects =
+	const objects: readonly HomeOrbitObject[] =
 		objectsProp.length > 0 ? objectsProp : HOME_ORBIT_OBJECTS;
 	const objectsRef = useRef(objects);
 
@@ -467,6 +467,11 @@ export function LogoWithOrbit({
 	const [starEntranceSeq, setStarEntranceSeq] = useState(0);
 	const [starSurfaceVisible, setStarSurfaceVisible] = useState(false);
 	const starSurfaceVisibleRef = useRef(false);
+	/** 現在の星が localStorage から復元されたものなら true（ポップ演出を使う） */
+	const fromSavedRef = useRef(false);
+	const [starIsFromSaved, setStarIsFromSaved] = useState(false);
+	/** 現在の星の接近演出秒数（RAF・transition・autoHideMs で共有） */
+	const approachDurationSecRef = useRef(15);
 	const introTimerRef = useRef<number | null>(null);
 	const hasCompletedIntroDelayRef = useRef(false);
 	const [towardHitExplosions, setTowardHitExplosions] = useState<
@@ -499,10 +504,16 @@ export function LogoWithOrbit({
 	// 星が出現するたびに接近フェーズ開始 + 警告スナックバーフェーズ1
 	useEffect(() => {
 		if (currentIndex === null) return;
-		// 軌道の最遠点（後方）を開始角度に設定
-		angleRef.current = -Math.PI / 2;
-		approachingRef.current = true;
-		setWarningMessage(WARNING_MSG_1);
+		if (fromSavedRef.current) {
+			// localStorage から復元された星: 軌道上の通常位置からポップ表示
+			angleRef.current = Math.PI / 4;
+			approachingRef.current = false;
+		} else {
+			// 新規出現: 後方から接近演出
+			angleRef.current = -Math.PI / 2;
+			approachingRef.current = true;
+			setWarningMessage(WARNING_MSG_1);
+		}
 		// starEntranceSeq が変化したときのみ発火させる
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [starEntranceSeq]);
@@ -537,17 +548,23 @@ export function LogoWithOrbit({
 		setDisplayHp(entry.maxHp);
 		setExplosionOverlaySrc(entry.src);
 		setExplosionStarDisplayPx(resolveStarBaseSizePx(entry));
+		approachDurationSecRef.current = entry.approachDurationSec;
+
+		fromSavedRef.current = resolved.fromSaved;
 
 		if (!hasCompletedIntroDelayRef.current) {
 			setStarSurfaceVisible(false);
 			introTimerRef.current = window.setTimeout(() => {
 				introTimerRef.current = null;
 				hasCompletedIntroDelayRef.current = true;
+				setStarIsFromSaved(fromSavedRef.current);
 				setStarSurfaceVisible(true);
 				setStarEntranceSeq((s) => s + 1);
 			}, HOME_ORBIT_STAR_INTRO_DELAY_MS);
 		} else {
+			setStarIsFromSaved(resolved.fromSaved);
 			setStarSurfaceVisible(true);
+			setStarEntranceSeq((s) => s + 1);
 		}
 
 		return () => {
@@ -725,7 +742,7 @@ export function LogoWithOrbit({
 					const delta = time - lastTimeRef.current;
 					if (approachingRef.current) {
 						// 接近中: 後方→前方を固定角速度で通過
-						angleRef.current += APPROACH_ANGULAR_VEL * (delta / 1000);
+						angleRef.current += (Math.PI / approachDurationSecRef.current) * (delta / 1000);
 					} else {
 						const speedMult =
 							Math.sin(angleRef.current) > 0 ? SPEED_LEFT : SPEED_RIGHT;
@@ -880,7 +897,7 @@ export function LogoWithOrbit({
 				message={warningMessage ?? ""}
 				onDismiss={dismissWarning}
 				variant={warningMessage === WARNING_MSG_1 ? "danger" : "warning"}
-				autoHideMs={warningMessage === WARNING_MSG_1 ? STAR_APPROACH_DURATION_SEC * 1000 : 0}
+				autoHideMs={warningMessage === WARNING_MSG_1 ? (currentObject?.approachDurationSec ?? 15) * 1000 : 0}
 			/>
 		<div ref={orbitFieldRef} className="relative inline-flex items-center justify-center">
 			{/* z-5: ロゴ文字のスタッキングコンテキスト */}
@@ -900,11 +917,23 @@ export function LogoWithOrbit({
 						<motion.div
 							key={starEntranceSeq}
 							className="relative h-full w-full"
-							initial={{ scale: 0.02, opacity: 1 }}
+							initial={starIsFromSaved ? { scale: 0, opacity: 0 } : { scale: 0.02, opacity: 1 }}
 							animate={{ scale: 1, opacity: 1 }}
-							transition={STAR_APPROACH_TRANSITION}
+							transition={
+								starIsFromSaved
+									? { duration: 0.32, ease: [0, 0.8, 0.3, 1.1] }
+									: { duration: currentObject?.approachDurationSec ?? 15, ease: STAR_APPROACH_EASE }
+							}
 							onAnimationComplete={() => {
 								approachingRef.current = false;
+								if (starIsFromSaved) {
+									// ポップ完了 → 黄色スナックバー
+									setWarningMessage(WARNING_MSG_2);
+								} else {
+									// 接近演出完了（軌道に乗ったタイミング）で localStorage に保存
+									const idx = currentIndexRef.current;
+									if (idx >= 0) setActiveOrbitStar(idx);
+								}
 							}}
 						>
 							<Image
