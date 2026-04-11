@@ -17,6 +17,8 @@ export type HomeOrbitHudState = {
 type Ctx = {
 	state: HomeOrbitHudState | null;
 	setState: (next: HomeOrbitHudState | null) => void;
+	isEmergencyMode: boolean;
+	setIsEmergencyMode: (v: boolean) => void;
 };
 
 const HomeOrbitHudContext = createContext<Ctx | null>(null);
@@ -26,9 +28,18 @@ export function HomeOrbitHudProvider({ children }: { children: ReactNode }) {
 	const setStateStable = useCallback((next: HomeOrbitHudState | null) => {
 		setState(next);
 	}, []);
+	const [isEmergencyMode, setIsEmergencyMode] = useState(false);
+	const setIsEmergencyModeStable = useCallback((v: boolean) => {
+		setIsEmergencyMode(v);
+	}, []);
 	const value = useMemo(
-		() => ({ state, setState: setStateStable }),
-		[state, setStateStable],
+		() => ({
+			state,
+			setState: setStateStable,
+			isEmergencyMode,
+			setIsEmergencyMode: setIsEmergencyModeStable,
+		}),
+		[state, setStateStable, isEmergencyMode, setIsEmergencyModeStable],
 	);
 	return (
 		<HomeOrbitHudContext.Provider value={value}>
@@ -46,4 +57,16 @@ export function useSyncHomeOrbitHud() {
 export function useHomeOrbitHudState(): HomeOrbitHudState | null {
 	const ctx = useContext(HomeOrbitHudContext);
 	return ctx?.state ?? null;
+}
+
+/** LogoWithOrbit が緊急モードを同期する（未 Provider 時は no-op） */
+export function useSyncIsEmergencyMode() {
+	const ctx = useContext(HomeOrbitHudContext);
+	return ctx?.setIsEmergencyMode;
+}
+
+/** HomeCursor が緊急モードを読む */
+export function useIsEmergencyMode(): boolean {
+	const ctx = useContext(HomeOrbitHudContext);
+	return ctx?.isEmergencyMode ?? false;
 }
