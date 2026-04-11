@@ -75,8 +75,8 @@ export function PukapukaLogo({ className, size = "medium", disableInteraction = 
                     font="rubik-puddles"
                     gradientColor={gradient}
                     key={`${text}-${index}`}
-                    className={`inline-block ${sizeProps.padding} ${disableInteraction ? "cursor-none" : "cursor-pointer"} select-none font-bold`}
-                    onMouseEnter={disableInteraction ? undefined : () => playSE("/se/logo-hover-se.mp3", 0.01)}
+                    className={`inline-block ${sizeProps.padding} ${disableInteraction ? "" : "cursor-pointer"} select-none font-bold`}
+                    onMouseEnter={disableInteraction ? undefined : () => playSE("/se/hover-se.mp3", 0.01)}
                     {...(motionProps as any)}
                 >
                     {char}

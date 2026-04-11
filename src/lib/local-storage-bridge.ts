@@ -11,6 +11,7 @@ const LOCAL_KEY_SOUND_MASTER_VOLUME = "pukapuka-space-sound-master-volume";
 
 /** 実績 ID ごとに `pukapuka-space-achievement-{id}`（キー文字列は export しない） */
 const ACHIEVEMENT_KEY_PREFIX = "pukapuka-space-achievement-";
+const LOCAL_KEY_ACTIVE_ORBIT_STAR = "pukapuka-space-active-orbit-star";
 
 function getLocalStorage(): Storage | null {
 	if (typeof window === "undefined") return null;
@@ -126,4 +127,28 @@ export function isAchievementUnlocked(achievementId: string): boolean {
 	const s = getLocalStorage();
 	if (!s) return false;
 	return s.getItem(achievementStorageKey(achievementId)) === "true";
+}
+
+/** 現在出現中の軌道星インデックスを取得する。なければ null */
+export function getActiveOrbitStar(): number | null {
+	const s = getLocalStorage();
+	if (!s) return null;
+	const raw = s.getItem(LOCAL_KEY_ACTIVE_ORBIT_STAR);
+	if (raw === null) return null;
+	const n = Number.parseInt(raw, 10);
+	return Number.isFinite(n) ? n : null;
+}
+
+/** 出現中の軌道星インデックスを保存する */
+export function setActiveOrbitStar(index: number): void {
+	const s = getLocalStorage();
+	if (!s) return;
+	s.setItem(LOCAL_KEY_ACTIVE_ORBIT_STAR, String(index));
+}
+
+/** 出現中の軌道星をクリアする（破壊後・抽選外れ時） */
+export function clearActiveOrbitStar(): void {
+	const s = getLocalStorage();
+	if (!s) return;
+	s.removeItem(LOCAL_KEY_ACTIVE_ORBIT_STAR);
 }

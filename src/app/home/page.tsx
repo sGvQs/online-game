@@ -13,6 +13,7 @@ import { HomeProfile } from "@/components/home/homeProfile";
 import { HomeCursor } from "@/components/home/homeCursor";
 import { HomeOrbitHudProvider } from "@/lib/home-orbit-hud-context";
 import { HomeOrbitHud } from "@/components/home/homeOrbitHud";
+import { HomeStartedProvider } from "@/lib/home-started-context";
 
 export default async function HomePage({
 	searchParams,
@@ -41,8 +42,9 @@ export default async function HomePage({
 		DEFAULT_FACE_ICON;
 
 	return (
-		<HomeCursor>
-			<HomeOrbitHudProvider>
+		<HomeStartedProvider>
+		<HomeOrbitHudProvider>
+			<HomeCursor>
 				<div className="flex min-h-screen w-full flex-col">
 					<div className="flex flex-1 flex-col items-center justify-center px-4">
 						<LogoWithOrbit>
@@ -67,7 +69,8 @@ export default async function HomePage({
 						<HomeOrbitHud />
 					</div>
 				</div>
-			</HomeOrbitHudProvider>
-		</HomeCursor>
+			</HomeCursor>
+		</HomeOrbitHudProvider>
+		</HomeStartedProvider>
 	);
 }
