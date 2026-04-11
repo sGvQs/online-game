@@ -1,6 +1,6 @@
 "use client";
 
-import { AnimatePresence, motion } from "framer-motion";
+import { motion } from "framer-motion";
 import { useHomeAmmo } from "@/lib/home-ammo-context";
 import { HOME_AMMO_BAR_ACTIVE_CLASSNAME } from "@/lib/home-shooter-config";
 import { HomeShooterLegend } from "@/components/home/homeShooterLegend";

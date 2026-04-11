@@ -29,7 +29,6 @@ import {
 /** 軌道オブジェクト破壊で解除する実績（任意）。`id` は永続化用の安定スラッグ */
 export interface HomeOrbitAchievement {
 	id: string;
-	toastMessage: string;
 }
 
 /** ホーム軌道上の1オブジェクト（SVG・HP・公転周期・基準サイズ） */
@@ -116,10 +115,12 @@ function resolveHomeOrbitStart(
 		return { kind: "none" };
 	}
 
-	// 各星の appearProbability で独立抽選
+	// 各星の appearProbability で独立抽選（破壊済み＝実績解除済みはスキップ）
 	const candidates: number[] = [];
 	for (let i = 0; i < list.length; i++) {
-		if (Math.random() < list[i].appearProbability) candidates.push(i);
+		const obj = list[i];
+		if (obj.achievement && isAchievementUnlocked(obj.achievement.id)) continue;
+		if (Math.random() < obj.appearProbability) candidates.push(i);
 	}
 	if (candidates.length === 0) return { kind: "none" };
 
@@ -140,7 +141,6 @@ export const HOME_ORBIT_OBJECTS = [
 		approachDurationSec: 15,
 		achievement: {
 			id: "enemy-of-humanity",
-			toastMessage: "人類の敵",
 		},
 	},
 	{
@@ -151,11 +151,10 @@ export const HOME_ORBIT_OBJECTS = [
 		periodMs: 30000,
 		healIntervalMs: 10000,
 		starBaseSizePx: 90,
-		appearProbability: 0.12,
+		appearProbability: 0.16,
 		approachDurationSec: 15,
 		achievement: {
 			id: "ice-age-onset",
-			toastMessage: "氷河期時代の到来",
 		},
 	},
 	{
@@ -166,11 +165,10 @@ export const HOME_ORBIT_OBJECTS = [
 		periodMs: 3000,
 		healIntervalMs: 1000,
 		starBaseSizePx: 50,
-		appearProbability: 0.04,
+		appearProbability: 0.08,
 		approachDurationSec: 1.5,
 		achievement: {
 			id: "future-earth-destruction",
-			toastMessage: "残された文明の道の破壊",
 		},
 	},
 	{
@@ -181,11 +179,10 @@ export const HOME_ORBIT_OBJECTS = [
 		periodMs: 30000,
 		healIntervalMs: 50,
 		starBaseSizePx: 100,
-		appearProbability: 0.018,
+		appearProbability: 0.04,
 		approachDurationSec: 15,
 		achievement: {
 			id: "rapid-tap-master",
-			toastMessage: "連打の達人",
 		},
 	},
 	{
@@ -196,11 +193,10 @@ export const HOME_ORBIT_OBJECTS = [
 		periodMs: 3000,
 		healIntervalMs: 200,
 		starBaseSizePx: 30,
-		appearProbability: 0.005,
+		appearProbability: 0.02,
 		approachDurationSec: 15,
 		achievement: {
 			id: "sniping-master",
-			toastMessage: "狙撃の達人",
 		},
 	},
 ] as const satisfies readonly HomeOrbitObject[];
@@ -226,8 +222,6 @@ const WARNING_MSG_2 = "重力異常を確認。破壊せよ。";
 const METEOR_PHASE_END_MS = 55_000;
 
 // ── HP / 破壊演出（微調整用）──────────────────────────────────
-/** 星破壊から次の軌道星が出るまで（隕石フェーズ） */
-const NEXT_STAR_AFTER_DESTROY_MS = 45_000;
 /** 実績に応じた開始インデックス確定後、この時間だけ待ってから星を表示しバウンス（初回のみ） */
 const HOME_ORBIT_STAR_INTRO_DELAY_MS = 900;
 const DEFAULT_HOME_ORBIT_METEOR_COUNT = 72;
@@ -631,6 +625,9 @@ export function LogoWithOrbit({
 					if (!meteorPhaseRef.current) return;
 					meteorPhaseRef.current = false;
 					orbitBridge.isMeteorPhase = false;
+					orbitBridge.clientX = -1000;
+					orbitBridge.clientY = -1000;
+					orbitBridge.hitRadius = 0;
 					setMeteorPhase(false);
 					meteorSimsRef.current = [];
 					setMeteorsForRender([]);
@@ -643,8 +640,6 @@ export function LogoWithOrbit({
 					setStarSurfaceVisible(false);
 					hpRef.current = 0;
 					setDisplayHp(0);
-					setIsReadyToShoot(false);
-					if (objectRef.current) objectRef.current.style.visibility = "visible";
 				}, METEOR_PHASE_END_MS);
 			}
 		},
@@ -825,6 +820,9 @@ export function LogoWithOrbit({
 				// 全隕石消滅 → クリーンアップ（次の星は出現しない）
 				meteorPhaseRef.current = false;
 				orbitBridge.isMeteorPhase = false;
+				orbitBridge.clientX = -1000;
+				orbitBridge.clientY = -1000;
+				orbitBridge.hitRadius = 0;
 				setMeteorPhase(false);
 				meteorSimsRef.current = [];
 				setMeteorsForRender([]);
@@ -837,8 +835,6 @@ export function LogoWithOrbit({
 				setStarSurfaceVisible(false);
 				hpRef.current = 0;
 				setDisplayHp(0);
-				setIsReadyToShoot(false);
-				if (objectRef.current) objectRef.current.style.visibility = "visible";
 				lastMeteorPhysicsAtRef.current = null;
 			} else {
 				lastMeteorPhysicsAtRef.current = null;
