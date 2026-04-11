@@ -471,6 +471,8 @@ export function LogoWithOrbit({
 	/** 現在の星が localStorage から復元されたものなら true（ポップ演出を使う） */
 	const fromSavedRef = useRef(false);
 	const [starIsFromSaved, setStarIsFromSaved] = useState(false);
+	/** 接近/ポップ演出完了後 true になる。これが true になったタイミングで射撃解禁・HUD 表示 */
+	const [isReadyToShoot, setIsReadyToShoot] = useState(false);
 	/** 現在の星の接近演出秒数（RAF・transition・autoHideMs で共有） */
 	const approachDurationSecRef = useRef(15);
 	const introTimerRef = useRef<number | null>(null);
@@ -526,6 +528,9 @@ export function LogoWithOrbit({
 			clearTimeout(introTimerRef.current);
 			introTimerRef.current = null;
 		}
+
+		// 新しい星のサイクル開始時にリセット
+		setIsReadyToShoot(false);
 
 		objectsRef.current = objects;
 		const resolved = resolveHomeOrbitStart(objects);
@@ -638,6 +643,7 @@ export function LogoWithOrbit({
 					setStarSurfaceVisible(false);
 					hpRef.current = 0;
 					setDisplayHp(0);
+					setIsReadyToShoot(false);
 					if (objectRef.current) objectRef.current.style.visibility = "visible";
 				}, METEOR_PHASE_END_MS);
 			}
@@ -831,6 +837,7 @@ export function LogoWithOrbit({
 				setStarSurfaceVisible(false);
 				hpRef.current = 0;
 				setDisplayHp(0);
+				setIsReadyToShoot(false);
 				if (objectRef.current) objectRef.current.style.visibility = "visible";
 				lastMeteorPhysicsAtRef.current = null;
 			} else {
@@ -857,6 +864,7 @@ export function LogoWithOrbit({
 			return;
 		}
 		if (
+			!isReadyToShoot ||
 			currentIndex === null ||
 			!starSurfaceVisible ||
 			currentObject === undefined
@@ -867,6 +875,7 @@ export function LogoWithOrbit({
 		setOrbitHud({ starHp: displayHp, maxStarHp: currentObject.maxHp });
 	}, [
 		meteorPhase,
+		isReadyToShoot,
 		setOrbitHud,
 		displayHp,
 		currentObject,
@@ -880,10 +889,10 @@ export function LogoWithOrbit({
 		};
 	}, [setOrbitHud]);
 
-	// 緊急モード同期: 星が軌道に乗っているか隕石フェーズ中なら true
+	// 緊急モード同期: 演出完了（射撃解禁）または隕石フェーズ中なら true
 	useEffect(() => {
-		setIsEmergencyMode?.((starSurfaceVisible && currentIndex !== null) || meteorPhase);
-	}, [starSurfaceVisible, currentIndex, meteorPhase, setIsEmergencyMode]);
+		setIsEmergencyMode?.(isReadyToShoot || meteorPhase);
+	}, [isReadyToShoot, meteorPhase, setIsEmergencyMode]);
 
 	useEffect(() => {
 		return () => {
@@ -939,13 +948,15 @@ export function LogoWithOrbit({
 							onAnimationComplete={() => {
 								approachingRef.current = false;
 								if (starIsFromSaved) {
-									// ポップ完了 → 黄色スナックバー
+									// ポップ完了 → 黄色スナックバー + 射撃解禁
 									setWarningMessage(WARNING_MSG_2);
 								} else {
 									// 接近演出完了（軌道に乗ったタイミング）で localStorage に保存
 									const idx = currentIndexRef.current;
 									if (idx >= 0) setActiveOrbitStar(idx);
 								}
+								// 演出完了 = 黄スナックと同時に射撃解禁・HUD 表示
+								setIsReadyToShoot(true);
 							}}
 						>
 							<Image
