@@ -1,7 +1,6 @@
 "use client";
 
 import {
-	useContext,
 	useEffect,
 	useLayoutEffect,
 	useRef,
@@ -15,6 +14,7 @@ import { PukapukaLogo } from "@/components/common/logo/pukapukaLogo";
 import { soundOutputRef } from "@/lib/sound-context";
 import { effectiveSeVolume } from "@/lib/sound-volume";
 import { useSyncHomeOrbitHud } from "@/lib/home-orbit-hud-context";
+import { useHomeStarted, HOME_FIRST_ACHIEVEMENT_ID } from "@/lib/home-started-context";
 import { orbitBridge } from "@/components/home/orbitBridge";
 import { HomeAchievementToast } from "@/components/home/homeAchievementToast";
 import { StarHpBar } from "@/components/game/phases/starShieldGame/playing/typistView/StarHpBar";
@@ -43,6 +43,11 @@ export interface HomeOrbitObject {
 	achievement?: HomeOrbitAchievement;
 	/** 破壊時に飛ばす隕石の数（未指定時はデフォルト） */
 	meteorCount?: number;
+	/**
+	 * ページ訪問時の出現確率（0〜1）。
+	 * 新規ユーザーの最初の星は常時表示のため参照しない。
+	 */
+	appearProbability: number;
 }
 
 /** デフォルトの星ベース幅・高さ（px）。比例計算の基準にも使う */
@@ -58,16 +63,19 @@ export function resolveStarBaseSizePx(entry: HomeOrbitObject): number {
 }
 
 type HomeOrbitStartResolution =
-	| { kind: "progress"; index: number }
-	| { kind: "allAchievementsUnlocked"; listLength: number };
+	| { kind: "show"; index: number }
+	| { kind: "none" };
 
 /**
- * 実績状態から「進行中なら開始インデックス」「すべて解除済みならランダムが必要」を返す（ランダムは呼び出し側の ref で1回だけ）。
+ * ページ訪問時に表示する星を決定する。
+ * - 未開始（最初の実績未解除）: 常に最初の星を表示
+ * - 全実績解除済み: 星なし
+ * - それ以外: 各星の `appearProbability` で独立抽選し、当選した中からランダムに1つ
  */
 function resolveHomeOrbitStart(
 	list: readonly HomeOrbitObject[],
 ): HomeOrbitStartResolution {
-	if (list.length === 0) return { kind: "progress", index: 0 };
+	if (list.length === 0) return { kind: "none" };
 
 	const withAchievement = list
 		.map((o, i) => ({ o, i }))
@@ -80,21 +88,28 @@ function resolveHomeOrbitStart(
 			} => Boolean(x.o.achievement),
 		);
 
-	if (withAchievement.length === 0) return { kind: "progress", index: 0 };
+	if (withAchievement.length === 0) return { kind: "show", index: 0 };
 
-	const ids = withAchievement.map((x) => x.o.achievement.id);
-	const allUnlocked = ids.every((id) => isAchievementUnlocked(id));
+	const firstAchId = withAchievement[0].o.achievement.id;
 
-	if (allUnlocked) {
-		return { kind: "allAchievementsUnlocked", listLength: list.length };
+	// 未開始ユーザー: 常に最初の星
+	if (!isAchievementUnlocked(firstAchId)) {
+		return { kind: "show", index: withAchievement[0].i };
 	}
 
-	for (const { o, i } of withAchievement) {
-		if (!isAchievementUnlocked(o.achievement.id)) {
-			return { kind: "progress", index: i };
-		}
+	// 全実績解除済み: 星なし
+	if (withAchievement.every((x) => isAchievementUnlocked(x.o.achievement.id))) {
+		return { kind: "none" };
 	}
-	return { kind: "progress", index: 0 };
+
+	// 各星の appearProbability で独立抽選
+	const candidates: number[] = [];
+	for (let i = 0; i < list.length; i++) {
+		if (Math.random() < list[i].appearProbability) candidates.push(i);
+	}
+	if (candidates.length === 0) return { kind: "none" };
+
+	return { kind: "show", index: candidates[Math.floor(Math.random() * candidates.length)] };
 }
 
 export const HOME_ORBIT_OBJECTS = [
@@ -106,6 +121,7 @@ export const HOME_ORBIT_OBJECTS = [
 		periodMs: 30000,
 		healIntervalMs: 10000,
 		starBaseSizePx: 30,
+		appearProbability: 0.35,
 		achievement: {
 			id: "enemy-of-humanity",
 			toastMessage: "人類の敵",
@@ -119,6 +135,7 @@ export const HOME_ORBIT_OBJECTS = [
 		periodMs: 30000,
 		healIntervalMs: 10000,
 		starBaseSizePx: 90,
+		appearProbability: 0.12,
 		achievement: {
 			id: "ice-age-onset",
 			toastMessage: "氷河期時代の到来",
@@ -132,6 +149,7 @@ export const HOME_ORBIT_OBJECTS = [
 		periodMs: 3000,
 		healIntervalMs: 1000,
 		starBaseSizePx: 50,
+		appearProbability: 0.4,
 		achievement: {
 			id: "future-earth-destruction",
 			toastMessage: "残された文明の道の破壊",
@@ -145,6 +163,7 @@ export const HOME_ORBIT_OBJECTS = [
 		periodMs: 30000,
 		healIntervalMs: 50,
 		starBaseSizePx: 100,
+		appearProbability: 0.18,
 		achievement: {
 			id: "rapid-tap-master",
 			toastMessage: "連打の達人",
@@ -158,6 +177,7 @@ export const HOME_ORBIT_OBJECTS = [
 		periodMs: 3000,
 		healIntervalMs: 200,
 		starBaseSizePx: 30,
+		appearProbability: 0.5,
 		achievement: {
 			id: "sniping-master",
 			toastMessage: "狙撃の達人",
@@ -179,6 +199,11 @@ const SCALE_MAX = 4;
 const TILT = -Math.PI / 6;
 const COS_TILT = Math.cos(TILT);
 const SIN_TILT = Math.sin(TILT);
+
+const WARNING_MSG_1 = "未知の天体を検出。接近中。";
+const WARNING_MSG_2 = "重力異常を確認。破壊せよ。";
+/** 隕石フェーズが終わるまでの最大待機時間（脅威隕石の最大寿命 + バッファ） */
+const METEOR_PHASE_END_MS = 55_000;
 
 // ── HP / 破壊演出（微調整用）──────────────────────────────────
 /** 星破壊から次の軌道星が出るまで（隕石フェーズ） */
@@ -396,6 +421,7 @@ export function LogoWithOrbit({
 		objectsProp.length > 0 ? objectsProp : HOME_ORBIT_OBJECTS;
 	const objectsRef = useRef(objects);
 
+	const { notifyStarted } = useHomeStarted();
 	const setOrbitHud = useSyncHomeOrbitHud();
 	const [currentIndex, setCurrentIndex] = useState<number | null>(null);
 	const currentIndexRef = useRef(-1);
@@ -446,13 +472,23 @@ export function LogoWithOrbit({
 	const dismissAchievementToast = useCallback(() => {
 		setAchievementToastMessage(null);
 	}, []);
-
-	/** 全実績解除時の開始位置ランダム（このマウントで1回だけ） */
-	const allUnlockedOrbitRandomRef = useRef<number | null>(null);
+	const [warningMessage, setWarningMessage] = useState<string | null>(null);
+	const dismissWarning = useCallback(() => {
+		// フェーズ1が消えたらフェーズ2へ、フェーズ2は手動クリアのみ
+		setWarningMessage((prev) => (prev === WARNING_MSG_1 ? WARNING_MSG_2 : null));
+	}, []);
 
 	useEffect(() => {
 		starSurfaceVisibleRef.current = starSurfaceVisible;
 	}, [starSurfaceVisible]);
+
+	// 星が出現するたびに警告スナックバーをフェーズ1から開始
+	useEffect(() => {
+		if (currentIndex === null) return;
+		setWarningMessage(WARNING_MSG_1);
+		// starEntranceSeq が変化したときのみ発火させる
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [starEntranceSeq]);
 
 	/* objects / 実績に応じた開始インデックス・HP・表示を同期（親の objects 変更時も再計算） */
 	/* eslint-disable react-hooks/set-state-in-effect -- 実績・objects に応じた軌道状態の一括同期 */
@@ -464,18 +500,18 @@ export function LogoWithOrbit({
 
 		objectsRef.current = objects;
 		const resolved = resolveHomeOrbitStart(objects);
-		let i: number;
-		if (resolved.kind === "progress") {
-			allUnlockedOrbitRandomRef.current = null;
-			i = resolved.index;
-		} else {
-			if (allUnlockedOrbitRandomRef.current === null) {
-				allUnlockedOrbitRandomRef.current = Math.floor(
-					Math.random() * resolved.listLength,
-				);
-			}
-			i = allUnlockedOrbitRandomRef.current;
+
+		// 星なし（全実績解除済み or 確率外れ）
+		if (resolved.kind === "none") {
+			currentIndexRef.current = -1;
+			setCurrentIndex(null);
+			setStarSurfaceVisible(false);
+			hpRef.current = 0;
+			setDisplayHp(0);
+			return;
 		}
+
+		const i = resolved.index;
 		currentIndexRef.current = i;
 		setCurrentIndex(i);
 		const entry = objects[i];
@@ -517,7 +553,7 @@ export function LogoWithOrbit({
 			hpRef.current -= damage;
 			setDisplayHp(Math.max(0, hpRef.current));
 			if (hpRef.current <= 0) {
-				// 爆発開始 → 隕石フェーズ（NEXT_STAR_AFTER_DESTROY_MS 後に次の星）
+				// 爆発開始 → 隕石フェーズ（全隕石消滅後またはフォールバックで自動クリーンアップ）
 				explodingRef.current = true;
 				const hitObject = list[idx] as HomeOrbitObject;
 				setExplosionOverlaySrc(hitObject.src);
@@ -525,9 +561,14 @@ export function LogoWithOrbit({
 				frozenExplosionPosRef.current = { ...lastPosRef.current };
 				setExplosionAnchorFrozen({ ...lastPosRef.current });
 				const ach = hitObject.achievement;
-				if (ach && tryUnlockAchievement(ach.id)) {
-					setAchievementToastMessage(ach.toastMessage);
+				if (ach) {
+					const isFirst = tryUnlockAchievement(ach.id);
+					if (isFirst && ach.id === HOME_FIRST_ACHIEVEMENT_ID) {
+						notifyStarted();
+					}
 				}
+				setWarningMessage(null);
+				setAchievementToastMessage("任務完了。重力の正常を確認。");
 				if (objectRef.current) objectRef.current.style.visibility = "hidden";
 
 				playStarDamageSe();
@@ -543,8 +584,10 @@ export function LogoWithOrbit({
 				setMeteorPhase(true);
 				lastMeteorPhysicsAtRef.current = null;
 				setExploding(true);
-
+				// 星は自動復活しない。全隕石消滅時に RAF ループがクリーンアップする。
+				// フォールバックとして最大待機時間後に強制クリーンアップ
 				window.setTimeout(() => {
+					if (!meteorPhaseRef.current) return;
 					meteorPhaseRef.current = false;
 					orbitBridge.isMeteorPhase = false;
 					setMeteorPhase(false);
@@ -552,22 +595,18 @@ export function LogoWithOrbit({
 					setMeteorsForRender([]);
 					setTowardHitExplosions([]);
 					setExplosionAnchorFrozen(null);
-					setCurrentIndex((prev) => {
-						const len = objectsRef.current.length;
-						const next = ((prev ?? 0) + 1) % len;
-						const maxHp = objectsRef.current[next].maxHp;
-						hpRef.current = maxHp;
-						setDisplayHp(maxHp);
-						return next;
-					});
 					explodingRef.current = false;
 					setExploding(false);
+					currentIndexRef.current = -1;
+					setCurrentIndex(null);
+					setStarSurfaceVisible(false);
+					hpRef.current = 0;
+					setDisplayHp(0);
 					if (objectRef.current) objectRef.current.style.visibility = "visible";
-					setStarEntranceSeq((s) => s + 1);
-				}, NEXT_STAR_AFTER_DESTROY_MS);
+				}, METEOR_PHASE_END_MS);
 			}
 		},
-		[currentIndex],
+		[currentIndex, notifyStarted],
 	);
 
 	// orbitBridge に triggerHit をセット・クリーンアップ
@@ -731,6 +770,27 @@ export function LogoWithOrbit({
 					METEOR_OFFSCREEN_MARGIN_PX;
 				stepMeteors(meteorSimsRef.current, dt, time, maxD);
 				setMeteorsForRender([...meteorSimsRef.current]);
+			} else if (
+				meteorPhaseRef.current &&
+				meteorSimsRef.current.length > 0
+			) {
+				// 全隕石消滅 → クリーンアップ（次の星は出現しない）
+				meteorPhaseRef.current = false;
+				orbitBridge.isMeteorPhase = false;
+				setMeteorPhase(false);
+				meteorSimsRef.current = [];
+				setMeteorsForRender([]);
+				setTowardHitExplosions([]);
+				setExplosionAnchorFrozen(null);
+				explodingRef.current = false;
+				setExploding(false);
+				currentIndexRef.current = -1;
+				setCurrentIndex(null);
+				setStarSurfaceVisible(false);
+				hpRef.current = 0;
+				setDisplayHp(0);
+				if (objectRef.current) objectRef.current.style.visibility = "visible";
+				lastMeteorPhysicsAtRef.current = null;
 			} else {
 				lastMeteorPhysicsAtRef.current = null;
 			}
@@ -789,6 +849,14 @@ export function LogoWithOrbit({
 				open={achievementToastMessage !== null}
 				message={achievementToastMessage ?? ""}
 				onDismiss={dismissAchievementToast}
+				variant="success"
+			/>
+			<HomeAchievementToast
+				open={warningMessage !== null}
+				message={warningMessage ?? ""}
+				onDismiss={dismissWarning}
+				variant={warningMessage === WARNING_MSG_1 ? "danger" : "warning"}
+				autoHideMs={warningMessage === WARNING_MSG_1 ? 3000 : 0}
 			/>
 		<div ref={orbitFieldRef} className="relative inline-flex items-center justify-center">
 			{/* z-5: ロゴ文字のスタッキングコンテキスト */}
