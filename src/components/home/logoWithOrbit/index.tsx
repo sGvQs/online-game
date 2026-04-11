@@ -166,7 +166,7 @@ export const HOME_ORBIT_OBJECTS = [
 		periodMs: 3000,
 		healIntervalMs: 1000,
 		starBaseSizePx: 50,
-		appearProbability: 0.94,
+		appearProbability: 0.04,
 		approachDurationSec: 1.5,
 		achievement: {
 			id: "future-earth-destruction",
