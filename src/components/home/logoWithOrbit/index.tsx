@@ -467,6 +467,10 @@ export function LogoWithOrbit({
 	const [starIsFromSaved, setStarIsFromSaved] = useState(false);
 	/** 接近/ポップ演出完了後 true になる。これが true になったタイミングで射撃解禁・HUD 表示 */
 	const [isReadyToShoot, setIsReadyToShoot] = useState(false);
+	/** 同セッション内で一度でも星が出現したら true（再抽選を永久にブロック） */
+	const hasEverShownStarRef = useRef(false);
+	/** 通常モード時の再抽選トリガー（60秒ごとにインクリメント） */
+	const [relotterySeq, setRelotterySeq] = useState(0);
 	/** 現在の星の接近演出秒数（RAF・transition・autoHideMs で共有） */
 	const approachDurationSecRef = useRef(15);
 	const introTimerRef = useRef<number | null>(null);
@@ -517,7 +521,22 @@ export function LogoWithOrbit({
 
 	/* objects / 実績に応じた開始インデックス・HP・表示を同期（親の objects 変更時も再計算） */
 	/* eslint-disable react-hooks/set-state-in-effect -- 実績・objects に応じた軌道状態の一括同期 */
+	// 通常モード時の再抽選インターバル（星が一度でも出現したら停止）
+	useEffect(() => {
+		const id = window.setInterval(() => {
+			if (hasEverShownStarRef.current) {
+				clearInterval(id);
+				return;
+			}
+			setRelotterySeq((s) => s + 1);
+		}, 60_000);
+		return () => clearInterval(id);
+	}, []);
+
 	useLayoutEffect(() => {
+		// 一度でも星が出現したら再抽選しない（relotterySeq による再実行時のみガード）
+		if (relotterySeq > 0 && hasEverShownStarRef.current) return;
+
 		if (introTimerRef.current !== null) {
 			clearTimeout(introTimerRef.current);
 			introTimerRef.current = null;
@@ -538,6 +557,8 @@ export function LogoWithOrbit({
 			setDisplayHp(0);
 			return;
 		}
+
+		hasEverShownStarRef.current = true;
 
 		const i = resolved.index;
 		currentIndexRef.current = i;
@@ -573,7 +594,7 @@ export function LogoWithOrbit({
 				introTimerRef.current = null;
 			}
 		};
-	}, [objects]);
+	}, [objects, relotterySeq]);
 	/* eslint-enable react-hooks/set-state-in-effect */
 
 	const handleHit = useCallback(
