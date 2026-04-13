@@ -58,6 +58,17 @@ const GAMES = [
 		roles: ["SHOOTER", "TYPIST"] as const,
 		videos: ["/mp4/shooting.mp4", "/mp4/typing.mp4"] as const,
 	},
+	{
+		type: "meteor-busters",
+		title: "METEOR BUSTERS",
+		icon: "/svg/object/target-circle.svg",
+		desc: "協力して隕石を撃破せよ！",
+		mode: "cooperative",
+		shortDesc:
+			"星の軌道に迫る隕石を仲間と撃破！弾の色を合わせて効率よく破壊しろ。クリアライン80%以上！",
+		roles: null,
+		videos: [] as const,
+	},
 ] as const;
 
 type GameType = (typeof GAMES)[number]["type"];
@@ -87,6 +98,17 @@ function renderGameTitle(type: GameType) {
 					NULL HAND
 				</Typography>
 			);
+		case "meteor-busters":
+			return (
+				<div className="select-none flex flex-col items-center">
+					<Typography variant="display" font="honk" as="span" className="text-5xl block leading-[0.8] [text-shadow:0_0_20px_rgba(255,100,50,0.8)]">
+						METEOR
+					</Typography>
+					<Typography variant="display" font="honk" as="span" className="text-5xl block leading-[0.8] [text-shadow:0_0_20px_rgba(255,100,50,0.8)]">
+						BUSTERS
+					</Typography>
+				</div>
+			);
 	}
 }
 
@@ -96,6 +118,8 @@ const CARD_THEME: Record<GameType, string> = {
 		"border-[#FF4444] bg-black/80 text-[#FF4444] shadow-[0_0_20px_rgba(255,68,68,0.3)]",
 	"star-shield":
 		"border-brand-500/60 bg-brand-50/80 text-brand-500 shadow-[0_0_20px_rgba(129,140,248,0.3)]",
+	"meteor-busters":
+		"border-orange-500/60 bg-black/80 text-orange-400 shadow-[0_0_20px_rgba(255,100,50,0.3)]",
 };
 
 export function GameCarouselSection({
@@ -129,18 +153,20 @@ export function GameCarouselSection({
 	const [gameStartErrorType, setGameStartErrorType] = useState<string>("");
 	const [showHostOnlyModal, setShowHostOnlyModal] = useState(false);
 
-	const getPosition = (i: number): "center" | "left" | "right" => {
-		const diff = ((i - activeIndex) % 3 + 3) % 3;
+	const getPosition = (i: number): "center" | "left" | "right" | "hidden" => {
+		const n = GAMES.length;
+		const diff = ((i - activeIndex) % n + n) % n;
 		if (diff === 0) return "center";
 		if (diff === 1) return "right";
-		return "left";
+		if (diff === n - 1) return "left";
+		return "hidden";
 	};
 
 	const handleGameStart = async () => {
 		const game = GAMES[activeIndex];
 		if (
 			!isPlayerCountValid(
-				game.type as "error-hunter" | "null-hand" | "star-shield",
+				game.type,
 				memberCount,
 			)
 		) {
@@ -175,6 +201,7 @@ export function GameCarouselSection({
 		center: styles.cardCenter(),
 		left: styles.cardLeft(),
 		right: styles.cardRight(),
+		hidden: styles.cardHidden(),
 	};
 
 	return (

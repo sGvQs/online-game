@@ -158,3 +158,54 @@ export type UserRanking = {
 	points: number;
 	rank: number;
 };
+
+// ============================================
+// METEOR BUSTERS types
+// ============================================
+
+export type MeteorBustersMatch = Prisma.MeteorBustersMatchGetPayload<{}>;
+
+export type MeteorDifficulty = "EASY" | "NORMAL" | "HARD";
+
+export type MeteorBulletType = "A" | "B" | "C";
+
+export type MeteorBustersPhase = "TITLE" | "PLAYING" | "RESULT";
+
+export interface MeteorObject {
+	id: string;
+	type: MeteorBulletType;
+	hp: number;
+	maxHp: number;
+	/** 軌道上の現在角度（ラジアン） */
+	angle: number;
+	/** Y方向のオフセット（px）バラつき演出用 */
+	yOffset: number;
+	/** スポーン時刻（performance.now() ベース） */
+	spawnTime: number;
+	/** 軌道の所要時間（ms） */
+	orbitDurationMs: number;
+	destroyed: boolean;
+}
+
+export interface PlayerCursorState {
+	playerId: string;
+	x: number;
+	y: number;
+	bulletType: MeteorBulletType;
+}
+
+export interface MeteorBustersResult {
+	destroyedCount: number;
+	spawnedCount: number;
+	destroyRate: number;
+	isCleared: boolean;
+}
+
+export interface BulletAnim {
+	id: string;
+	type: MeteorBulletType;
+	fromX: number;
+	fromY: number;
+	toMeteorId: string;
+	startedAt: number;
+}

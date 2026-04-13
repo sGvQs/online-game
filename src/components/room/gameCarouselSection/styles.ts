@@ -16,6 +16,8 @@ export const gameCarouselSection = tv({
 			"scale-75 opacity-50 z-10 [transform:rotateY(20deg)_translateX(-80%)]",
 		cardRight:
 			"scale-75 opacity-50 z-10 [transform:rotateY(-20deg)_translateX(80%)]",
+		cardHidden:
+			"scale-50 opacity-0 z-0 pointer-events-none [transform:translateX(0)] invisible",
 		navButton:
 			"p-2 rounded-full glass-card text-brand-600 hover:text-brand-900 transition-colors",
 		gameIcon: "w-10 h-10 relative",

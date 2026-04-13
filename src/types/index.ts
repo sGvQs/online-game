@@ -50,6 +50,14 @@ export type {
 	RoundResult,
 	JankenPhase,
 	UserRanking,
+	MeteorBustersMatch,
+	MeteorDifficulty,
+	MeteorBulletType,
+	MeteorBustersPhase,
+	MeteorObject,
+	PlayerCursorState,
+	MeteorBustersResult,
+	BulletAnim,
 } from "./prisma/game";
 // enumは値としてexportが必要
 export { HandType } from "./prisma/game";
