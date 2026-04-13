@@ -1,4 +1,4 @@
-import { useSound } from "@/lib/sound-context";
+import { useSound, soundOutputRef } from "@/lib/sound-context";
 import { effectiveSeVolume } from "@/lib/sound-volume";
 import { useCallback, useEffect, useRef } from "react";
 
@@ -12,7 +12,9 @@ type SEName =
 	| "shooting"
 	| "star-damage"
 	| "heal"
-	| "modal";
+	| "modal"
+	| "reload"
+	| "cannot-shoot";
 
 const DEFAULT_VOLUME = 0.1;
 const VOICE_VOLUME = 0.01;
@@ -77,7 +79,11 @@ function getNextShootingAudio(): HTMLAudioElement | null {
 }
 
 export const useSE = () => {
-	const { isPlaying, volume } = useSound();
+	// isPlaying / volume はプリロード用にのみ購読。
+	// play 関数は soundOutputRef 経由で参照することで安定した関数参照を保つ。
+	// （isPlaying/volume を deps に入れると useCallback が再生成 → applyDamage 再生成
+	//   → メインの useEffect クリーンアップ → RAF ループがキャンセルされる問題を防ぐ）
+	useSound(); // コンテキストの購読自体は維持（SoundProvider 外でのエラー検出のため）
 	const preloadStarted = useRef(false);
 
 	useEffect(() => {
@@ -89,7 +95,9 @@ export const useSE = () => {
 
 	const play = useCallback(
 		(name: SEName) => {
-			if (!isPlaying) return;
+			// soundOutputRef は SoundProvider の useEffect で isPlaying/volume と同期済み
+			if (!soundOutputRef.isPlaying) return;
+			const volume = soundOutputRef.masterVolume;
 
 			const files: Record<SEName, string> = {
 				error: "/se/error-se.mp3",
@@ -102,6 +110,8 @@ export const useSE = () => {
 				dinosaur: "/se/dinosaur-voice-se.mp3",
 				shooting: "/se/shooting-se.mp3",
 				"star-damage": "/se/star-damage-se.mp3",
+				reload: "/se/reload-se.mp3",
+				"cannot-shoot": "/se/cannot-shoot-se.mp3",
 			};
 
 			if (name === "dinosaur") {
@@ -131,7 +141,7 @@ export const useSE = () => {
 			);
 			audio.play().catch(() => {});
 		},
-		[isPlaying, volume],
+		[], // soundOutputRef はミュータブルオブジェクトのため deps 不要。参照は常に最新値を持つ
 	);
 
 	return { play };

@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useCallback, useRef } from "react";
+import { useEffect, useCallback, useRef, useState } from "react";
+import { motion, useAnimationControls } from "framer-motion";
 import { useMeteorBusters } from "@/hooks/useMeteorBusters";
 import { useGameRoom } from "@/hooks/useGameRoom";
 import { returnToRoom } from "@/server/actions/room";
@@ -9,6 +10,7 @@ import { TitlePhase } from "@/components/game/phases/meteorBustersGame/titlePhas
 import { PlayingPhase } from "@/components/game/phases/meteorBustersGame/playingPhase";
 import { ResultPhase } from "@/components/game/phases/meteorBustersGame/resultPhase";
 import { PresenceDuplicateWarning } from "@/components/common/PresenceDuplicateWarning";
+import { SCREEN_SHAKE_PRESETS, type ScreenShakeStrength } from "@/lib/shooter/screen-shake";
 import type { RoomWithUsersAndReadyStatus, MeteorDifficulty } from "@/types";
 
 interface MeteorBustersGameProps {
@@ -34,6 +36,25 @@ export function MeteorBustersGame({
 		currentUserId,
 	});
 
+	const containerRef = useRef<HTMLDivElement>(null);
+	const lastCursorRef = useRef({ x: 0, y: 0 });
+	const [cursorPos, setCursorPos] = useState({ x: -100, y: -100 });
+
+	// スクリーンシェイク
+	const shakeControls = useAnimationControls();
+	const handleShake = useCallback(
+		async (strength: ScreenShakeStrength) => {
+			const preset = SCREEN_SHAKE_PRESETS[strength];
+			await shakeControls.start({
+				x: [...preset.x],
+				y: [...preset.y],
+				transition: { duration: preset.durationSec, ease: "easeOut" },
+			});
+			shakeControls.set({ x: 0, y: 0 });
+		},
+		[shakeControls],
+	);
+
 	const {
 		phase,
 		difficulty,
@@ -42,6 +63,7 @@ export function MeteorBustersGame({
 		ammoRemaining,
 		playerCursors,
 		bulletAnims,
+		collisions,
 		result,
 		destroyedCount,
 		spawnedCount,
@@ -53,9 +75,14 @@ export function MeteorBustersGame({
 		handleSwitchBullet,
 		handleCursorMove,
 		handleReturnToTitle,
-	} = useMeteorBusters({ roomId, isHost, initialMatchId, currentUserId });
-
-	const containerRef = useRef<HTMLDivElement>(null);
+	} = useMeteorBusters({
+		roomId,
+		isHost,
+		initialMatchId,
+		currentUserId,
+		containerRef,
+		onShake: handleShake,
+	});
 
 	const handleClose = async () => {
 		await returnToRoom(roomId);
@@ -73,18 +100,13 @@ export function MeteorBustersGame({
 				return;
 			}
 
-			// スペース以外のキーで射撃
 			const rect = containerRef.current?.getBoundingClientRect();
 			if (!rect) return;
-
-			// 最後のカーソル位置を使って射撃
 			const cursorPos = lastCursorRef.current;
 			handleShoot(cursorPos.x, cursorPos.y, rect);
 		},
 		[phase, handleReload, handleShoot],
 	);
-
-	const lastCursorRef = useRef({ x: 0, y: 0 });
 
 	const handleMouseMove = useCallback(
 		(e: MouseEvent) => {
@@ -93,6 +115,7 @@ export function MeteorBustersGame({
 			const x = e.clientX - rect.left;
 			const y = e.clientY - rect.top;
 			lastCursorRef.current = { x, y };
+			setCursorPos({ x, y });
 			handleCursorMove(x, y);
 		},
 		[handleCursorMove],
@@ -127,7 +150,11 @@ export function MeteorBustersGame({
 
 	return (
 		<PresenceDuplicateWarning roomId={roomId} currentUserId={currentUserId}>
-			<div ref={containerRef} className={styles.container()}>
+			<motion.div
+				ref={containerRef}
+				className={styles.container()}
+				animate={shakeControls}
+			>
 				{phase === "TITLE" && (
 					<TitlePhase
 						room={room}
@@ -150,6 +177,9 @@ export function MeteorBustersGame({
 						ammoRemaining={ammoRemaining}
 						playerCursors={playerCursors}
 						bulletAnims={bulletAnims}
+						collisions={collisions}
+						cursorX={cursorPos.x}
+						cursorY={cursorPos.y}
 						destroyedCount={destroyedCount}
 						spawnedCount={spawnedCount}
 						totalSpawnCount={totalSpawnCount}
@@ -165,7 +195,7 @@ export function MeteorBustersGame({
 						onReturnToTitle={handleReturnToTitle}
 					/>
 				)}
-			</div>
+			</motion.div>
 		</PresenceDuplicateWarning>
 	);
 }

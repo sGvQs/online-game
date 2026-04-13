@@ -203,9 +203,11 @@ export interface MeteorBustersResult {
 
 export interface BulletAnim {
 	id: string;
-	type: MeteorBulletType;
 	fromX: number;
 	fromY: number;
-	toMeteorId: string;
-	startedAt: number;
+	toX: number;
+	toY: number;
+	angle: number;       // rotation in degrees (toward target)
+	durationSec: number;
+	color: string;       // CSS color value (matches active bullet type)
 }

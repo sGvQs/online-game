@@ -8,10 +8,10 @@ export const playingPhase = tv({
 			"absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2",
 			"z-10 pointer-events-none",
 		],
-		// HUD（右上）
+		// HUD（下部中央 — HOME 緊急モードと同じ配置）
 		hud: [
-			"absolute top-4 right-4 z-30",
-			"flex flex-col items-end gap-3",
+			"absolute bottom-4 left-0 right-0 z-30",
+			"flex flex-col items-center",
 		],
 		// スコア（左上）
 		score: [

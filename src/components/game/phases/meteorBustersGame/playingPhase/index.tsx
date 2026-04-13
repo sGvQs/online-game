@@ -2,16 +2,22 @@
 
 import { useRef, useEffect, useState } from "react";
 import { playingPhase } from "./styles";
-import { BulletHud } from "@/components/game/common/meteorBusters/bulletHud";
 import { MeteorRenderer } from "@/components/game/common/meteorBusters/meteorRenderer";
 import { PlayerCursors } from "@/components/game/common/meteorBusters/playerCursor";
+import { ShooterBullets } from "@/components/game/common/shooter/ShooterBullets";
+import { ShooterCursor } from "@/components/game/common/shooter/ShooterCursor";
+import { ShooterCollisionFx } from "@/components/game/common/shooter/ShooterCollisionFx";
+import { ShooterAmmoHud } from "@/components/game/common/shooter/ShooterAmmoHud";
+import { GLOW_COLORS } from "@/constants/meteorBustersGame/gameConfig";
+import { SHOOTER_AMMO_MAX } from "@/lib/shooter/config";
 import type {
 	MeteorObject,
 	PlayerCursorState,
 	MeteorBulletType,
 	MeteorDifficulty,
+	BulletAnim,
 } from "@/types";
-import type { BulletAnim } from "@/types";
+import type { CollisionFx } from "@/components/game/common/shooter/ShooterCollisionFx";
 
 interface PlayingPhaseProps {
 	meteors: MeteorObject[];
@@ -19,11 +25,37 @@ interface PlayingPhaseProps {
 	ammoRemaining: number;
 	playerCursors: PlayerCursorState[];
 	bulletAnims: BulletAnim[];
+	collisions: CollisionFx[];
+	cursorX: number;
+	cursorY: number;
 	destroyedCount: number;
 	spawnedCount: number;
 	totalSpawnCount: number;
 	difficulty: MeteorDifficulty;
 	currentUserId: string;
+}
+
+/** 弾種バッジ（ShooterAmmoHud の slot に渡す） */
+function BulletTypeBadge({ bulletType }: { bulletType: MeteorBulletType }) {
+	const color = GLOW_COLORS[bulletType];
+	return (
+		<div className="flex items-center gap-2">
+			<div
+				className="w-5 h-5 rounded-full border-2 transition-all duration-200"
+				style={{
+					borderColor: color,
+					backgroundColor: `${color}33`,
+					boxShadow: `0 0 8px ${color}88`,
+				}}
+			/>
+			<span
+				className="text-sm font-bold font-dot-gothic-16"
+				style={{ color }}
+			>
+				TYPE {bulletType}
+			</span>
+		</div>
+	);
 }
 
 export function PlayingPhase({
@@ -32,6 +64,9 @@ export function PlayingPhase({
 	ammoRemaining,
 	playerCursors,
 	bulletAnims,
+	collisions,
+	cursorX,
+	cursorY,
 	destroyedCount,
 	spawnedCount,
 	totalSpawnCount,
@@ -84,13 +119,21 @@ export function PlayingPhase({
 				/>
 			</div>
 
-			{/* 隕石・弾アニメ */}
+			{/* 隕石レンダラー */}
 			<MeteorRenderer
 				meteors={meteors}
-				bulletAnims={bulletAnims}
 				containerWidth={containerSize.w}
 				containerHeight={containerSize.h}
 			/>
+
+			{/* 弾ビーム（HOME 緊急モードと同一実装） */}
+			<ShooterBullets bullets={bulletAnims} />
+
+			{/* 衝突エフェクト */}
+			<ShooterCollisionFx collisions={collisions} />
+
+			{/* 照準カーソル */}
+			<ShooterCursor x={cursorX} y={cursorY} visible={cursorX >= 0} />
 
 			{/* 他プレイヤーカーソル */}
 			<PlayerCursors
@@ -116,18 +159,18 @@ export function PlayingPhase({
 					/>
 				</div>
 				<p className={styles.difficultyLabel()}>
-					{difficulty === "EASY" ? "EASY" : difficulty === "NORMAL" ? "NORMAL" : "HARD"}
+					{difficulty}
 				</p>
 			</div>
 
-			{/* 右上 弾HUD */}
+			{/* 右下 弾数HUD（HOME と同じスタイル） */}
 			<div className={styles.hud()}>
-				<BulletHud bulletType={bulletType} ammoRemaining={ammoRemaining} />
-				<div className="text-[10px] text-brand-500/40 font-dot-gothic-16 text-right space-y-0.5">
-					<p>クリック: 弾切替</p>
-					<p>スペース: リロード</p>
-					<p>任意キー: 射撃</p>
-				</div>
+				<ShooterAmmoHud
+					ammo={ammoRemaining}
+					ammoMax={SHOOTER_AMMO_MAX}
+					activeColor={GLOW_COLORS[bulletType]}
+					slot={<BulletTypeBadge bulletType={bulletType} />}
+				/>
 			</div>
 		</div>
 	);

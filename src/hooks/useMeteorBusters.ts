@@ -11,14 +11,16 @@ import {
 	DIFFICULTY_CONFIG,
 	SPAWN_ANGLE,
 	COLLISION_ANGLE,
-	MAX_AMMO,
 	DAMAGE_MATCH,
 	DAMAGE_MISMATCH,
 	BULLET_HIT_RADIUS,
 	MAX_Y_OFFSET,
 	GAME_END_DELAY_MS,
 	CLEAR_RATE,
+	GLOW_COLORS,
 } from "@/constants/meteorBustersGame/gameConfig";
+import { makeBulletAnims } from "@/lib/shooter/trajectory";
+import { SHOOTER_AMMO_MAX, SHOOTER_BULLET_SPEED_PX_S } from "@/lib/shooter/config";
 import { useSE } from "./useSE";
 import type {
 	MeteorObject,
@@ -29,6 +31,7 @@ import type {
 	MeteorBustersResult,
 	BulletAnim,
 } from "@/types";
+import type { CollisionFx } from "@/components/game/common/shooter/ShooterCollisionFx";
 
 export type { BulletAnim };
 
@@ -39,9 +42,9 @@ export type { BulletAnim };
 interface ShotPayload {
 	playerId: string;
 	bulletType: MeteorBulletType;
-	meteorId: string;
-	originX: number;
-	originY: number;
+	cursorXPct: number; // cursor X as fraction 0-1 of container width
+	cursorYPct: number; // cursor Y as fraction 0-1 of container height
+	meteorId: string | null;
 }
 
 interface CursorPayload {
@@ -58,7 +61,7 @@ interface MeteorSpawnPayload {
 	maxHp: number;
 	yOffset: number;
 	orbitDurationMs: number;
-	spawnTime: number; // performance.now() 相当（ホスト基準）
+	spawnTime: number;
 }
 
 interface MeteorUpdatePayload {
@@ -82,15 +85,6 @@ interface GameEndPayload {
 	isCleared: boolean;
 }
 
-interface BulletAnimPayload {
-	playerId: string;
-	bulletType: MeteorBulletType;
-	originX: number;
-	originY: number;
-	meteorId: string;
-}
-
-
 // ============================================
 // Hook の戻り値
 // ============================================
@@ -103,6 +97,7 @@ export interface UseMeteorBustersReturn {
 	ammoRemaining: number;
 	playerCursors: PlayerCursorState[];
 	bulletAnims: BulletAnim[];
+	collisions: CollisionFx[];
 	result: MeteorBustersResult | null;
 	destroyedCount: number;
 	spawnedCount: number;
@@ -116,6 +111,7 @@ export interface UseMeteorBustersReturn {
 	handleReturnToTitle: () => void;
 }
 
+
 // ============================================
 // Hook 本体
 // ============================================
@@ -125,11 +121,16 @@ export function useMeteorBusters({
 	isHost,
 	initialMatchId,
 	currentUserId,
+	containerRef,
+	onShake,
 }: {
 	roomId: string;
 	isHost: boolean;
 	initialMatchId: string | null;
 	currentUserId: string;
+	containerRef: React.RefObject<HTMLDivElement | null>;
+	/** 隕石撃破時などに呼ぶスクリーンシェイクコールバック */
+	onShake?: (strength: "small" | "medium" | "large") => void;
 }): UseMeteorBustersReturn {
 	const supabase = createClient();
 	const { play } = useSE();
@@ -139,9 +140,10 @@ export function useMeteorBusters({
 	const [difficulty, setDifficulty] = useState<MeteorDifficulty>("NORMAL");
 	const [meteors, setMeteors] = useState<MeteorObject[]>([]);
 	const [bulletType, setBulletType] = useState<MeteorBulletType>("A");
-	const [ammoRemaining, setAmmoRemaining] = useState(MAX_AMMO);
+	const [ammoRemaining, setAmmoRemaining] = useState(SHOOTER_AMMO_MAX);
 	const [playerCursors, setPlayerCursors] = useState<PlayerCursorState[]>([]);
 	const [bulletAnims, setBulletAnims] = useState<BulletAnim[]>([]);
+	const [collisions, setCollisions] = useState<CollisionFx[]>([]);
 	const [result, setResult] = useState<MeteorBustersResult | null>(null);
 	const [destroyedCount, setDestroyedCount] = useState(0);
 	const [spawnedCount, setSpawnedCount] = useState(0);
@@ -157,15 +159,16 @@ export function useMeteorBusters({
 	const totalSpawnCountRef = useRef(0);
 	const meteorsRef = useRef<Map<string, MeteorObject>>(new Map());
 	const bulletTypeRef = useRef<MeteorBulletType>("A");
-	const ammoRef = useRef(MAX_AMMO);
+	const ammoRef = useRef(SHOOTER_AMMO_MAX);
 	const spawnTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 	const endTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 	const rafRef = useRef<number | null>(null);
 	const gameStartTimeRef = useRef<number>(0);
 	const phaseRef = useRef<MeteorBustersPhase>("TITLE");
 	const cursorThrottleRef = useRef<number>(0);
+	/** 最後の射撃カーソル位置（命中FX表示に使用） */
+	const lastShotCursorRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
 
-	// state の最新値を ref に同期
 	useEffect(() => {
 		phaseRef.current = phase;
 	}, [phase]);
@@ -177,7 +180,6 @@ export function useMeteorBusters({
 	const generateMeteorId = () =>
 		`meteor_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
 
-	/** 隕石の軌道角度から画面上の位置を計算 */
 	const getMeteorScreenPos = useCallback(
 		(angle: number, yOffset: number, containerRect: DOMRect) => {
 			const cx = containerRect.width / 2;
@@ -191,10 +193,8 @@ export function useMeteorBusters({
 		[],
 	);
 
-	/** アニメーション: 隕石の角度を時刻に基づいて更新 */
 	const tickMeteors = useCallback(() => {
 		const now = performance.now();
-		const updated: MeteorObject[] = [];
 		let hasChange = false;
 
 		for (const meteor of meteorsRef.current.values()) {
@@ -206,7 +206,6 @@ export function useMeteorBusters({
 				SPAWN_ANGLE + progress * (COLLISION_ANGLE - SPAWN_ANGLE);
 
 			if (progress >= 1) {
-				// 衝突判定（ホストのみ broadcast）
 				if (isHost) {
 					channelRef.current?.send({
 						type: "broadcast",
@@ -221,7 +220,6 @@ export function useMeteorBusters({
 
 			const updatedMeteor = { ...meteor, angle };
 			meteorsRef.current.set(meteor.id, updatedMeteor);
-			updated.push(updatedMeteor);
 			hasChange = true;
 		}
 
@@ -261,7 +259,6 @@ export function useMeteorBusters({
 			payload: meteor,
 		});
 
-		// 自分自身にも追加
 		const meteorObj: MeteorObject = {
 			...meteor,
 			angle: SPAWN_ANGLE,
@@ -272,14 +269,12 @@ export function useMeteorBusters({
 		spawnedCountRef.current += 1;
 		setSpawnedCount(spawnedCountRef.current);
 
-		// 次のスポーンをスケジュール
 		if (spawnedCountRef.current < totalSpawnCountRef.current) {
 			spawnTimerRef.current = setTimeout(
 				spawnNextMeteor,
 				config.spawnIntervalMs,
 			);
 		} else {
-			// 全スポーン完了 → 一定時間後にゲーム終了
 			endTimerRef.current = setTimeout(() => {
 				if (phaseRef.current !== "PLAYING") return;
 				const destroyed = destroyedCountRef.current;
@@ -317,7 +312,6 @@ export function useMeteorBusters({
 			setPhase("RESULT");
 			setResult(payload);
 
-			// タイマーをクリア
 			if (spawnTimerRef.current) clearTimeout(spawnTimerRef.current);
 			if (endTimerRef.current) clearTimeout(endTimerRef.current);
 			if (rafRef.current) cancelAnimationFrame(rafRef.current);
@@ -351,7 +345,6 @@ export function useMeteorBusters({
 				const match = await startMeteorBustersMatch(roomId, selectedDifficulty);
 				matchIdRef.current = match.id;
 
-				// ゲーム開始を全員に broadcast
 				channelRef.current?.send({
 					type: "broadcast",
 					event: "game_start",
@@ -361,7 +354,6 @@ export function useMeteorBusters({
 					} satisfies GameStartPayload,
 				});
 
-				// 自分自身もゲーム開始処理
 				initGame(selectedDifficulty);
 			} catch (err) {
 				console.error("ゲーム開始失敗:", err);
@@ -388,39 +380,61 @@ export function useMeteorBusters({
 		setMeteors([]);
 		setBulletType("A");
 		bulletTypeRef.current = "A";
-		setAmmoRemaining(MAX_AMMO);
-		ammoRef.current = MAX_AMMO;
+		setAmmoRemaining(SHOOTER_AMMO_MAX);
+		ammoRef.current = SHOOTER_AMMO_MAX;
+		setBulletAnims([]);
 		setPhase("PLAYING");
 		phaseRef.current = "PLAYING";
 
-		// アニメーションループ開始
 		if (rafRef.current) cancelAnimationFrame(rafRef.current);
 		rafRef.current = requestAnimationFrame(tickMeteors);
 
-		// ホストのみスポーン開始
 		if (isHost) {
 			if (spawnTimerRef.current) clearTimeout(spawnTimerRef.current);
 			spawnTimerRef.current = setTimeout(spawnNextMeteor, 500);
 		}
 	}, [isHost, tickMeteors, spawnNextMeteor]);
 
+	/** 弾アニメを追加してタイムアウトで削除 */
+	const addBulletAnims = useCallback((anims: BulletAnim[]) => {
+		setBulletAnims((prev) => [...prev, ...anims]);
+		const maxDuration = Math.max(...anims.map((a) => a.durationSec));
+		const ids = new Set(anims.map((a) => a.id));
+		setTimeout(() => {
+			setBulletAnims((prev) => prev.filter((a) => !ids.has(a.id)));
+		}, maxDuration * 1000 + 150);
+	}, []);
+
 	/** 射撃 */
 	const handleShoot = useCallback(
 		(cursorX: number, cursorY: number, containerRect: DOMRect) => {
 			if (phaseRef.current !== "PLAYING") return;
-			if (ammoRef.current <= 0) return;
+
+			if (ammoRef.current <= 0) {
+				play("cannot-shoot");
+				return;
+			}
+
+			const w = containerRect.width;
+			const h = containerRect.height;
+
+			// 弾数消費 & 発射SE
+			ammoRef.current = Math.max(0, ammoRef.current - 1);
+			setAmmoRemaining(ammoRef.current);
+			play("shooting");
+
+			// 両下角から弾アニメ生成（弾種色で色付け）
+			const idPrefix = `anim_${Date.now()}`;
+			const bulletColor = GLOW_COLORS[bulletTypeRef.current];
+			const anims = makeBulletAnims(cursorX, cursorY, w, h, idPrefix, bulletColor);
+			addBulletAnims(anims);
 
 			// カーソル付近の隕石を探す
 			let closestMeteor: MeteorObject | null = null;
 			let closestDist = BULLET_HIT_RADIUS;
-
 			for (const meteor of meteorsRef.current.values()) {
 				if (meteor.destroyed) continue;
-				const pos = getMeteorScreenPos(
-					meteor.angle,
-					meteor.yOffset,
-					containerRect,
-				);
+				const pos = getMeteorScreenPos(meteor.angle, meteor.yOffset, containerRect);
 				const dist = Math.hypot(pos.x - cursorX, pos.y - cursorY);
 				if (dist < closestDist) {
 					closestDist = dist;
@@ -428,52 +442,34 @@ export function useMeteorBusters({
 				}
 			}
 
-			if (!closestMeteor) return;
-
 			const currentBulletType = bulletTypeRef.current;
 
-			// 弾数消費
-			ammoRef.current = Math.max(0, ammoRef.current - 1);
-			setAmmoRemaining(ammoRef.current);
-
-			// 弾アニメ追加（自分）
-			const animId = `anim_${Date.now()}`;
-			setBulletAnims((prev) => [
-				...prev,
-				{
-					id: animId,
-					type: currentBulletType,
-					fromX: cursorX,
-					fromY: cursorY,
-					toMeteorId: closestMeteor!.id,
-					startedAt: performance.now(),
-				},
-			]);
-			// 300ms後にアニメ削除
-			setTimeout(() => {
-				setBulletAnims((prev) => prev.filter((a) => a.id !== animId));
-			}, 300);
+			// 命中FX・シェイク用にカーソル位置を記憶
+			lastShotCursorRef.current = { x: cursorX, y: cursorY };
 
 			// Broadcast
-			const payload: ShotPayload = {
-				playerId: currentUserId,
-				bulletType: currentBulletType,
-				meteorId: closestMeteor.id,
-				originX: cursorX,
-				originY: cursorY,
-			};
 			channelRef.current?.send({
 				type: "broadcast",
 				event: "shot",
-				payload,
+				payload: {
+					playerId: currentUserId,
+					bulletType: currentBulletType,
+					cursorXPct: cursorX / w,
+					cursorYPct: cursorY / h,
+					meteorId: closestMeteor?.id ?? null,
+				} satisfies ShotPayload,
 			});
 
-			// 自分がホストなら即ダメージ計算
-			if (isHost) {
-				applyDamage(closestMeteor.id, currentBulletType, currentUserId);
+			// ホストがダメージ計算（弾の飛行時間だけ遅延させて視覚と同期）
+			if (isHost && closestMeteor) {
+				const travelMs = Math.max(...anims.map((a) => a.durationSec)) * 1000;
+				const meteorId = closestMeteor.id;
+				setTimeout(() => {
+					applyDamage(meteorId, currentBulletType, currentUserId);
+				}, travelMs);
 			}
 		},
-		[isHost, currentUserId, getMeteorScreenPos],
+		[isHost, currentUserId, getMeteorScreenPos, play, addBulletAnims],
 	);
 
 	/** ダメージ適用（ホストのみ） */
@@ -486,8 +482,15 @@ export function useMeteorBusters({
 				meteor.type === bulletType ? DAMAGE_MATCH : DAMAGE_MISMATCH;
 			const newHp = Math.max(0, meteor.hp - damage);
 
+			// 命中FX（カーソル位置）
+			const { x: fx, y: fy } = lastShotCursorRef.current;
+			const fxId = `fx_${Date.now()}_${Math.random().toString(36).slice(2, 5)}`;
+			setCollisions((prev) => [...prev, { id: fxId, x: fx, y: fy }]);
+			setTimeout(() => {
+				setCollisions((prev) => prev.filter((c) => c.id !== fxId));
+			}, 600);
+
 			if (newHp <= 0) {
-				// 撃破
 				const updated = { ...meteor, hp: 0, destroyed: true };
 				meteorsRef.current.set(meteorId, updated);
 				destroyedCountRef.current += 1;
@@ -498,7 +501,8 @@ export function useMeteorBusters({
 					event: "meteor_update",
 					payload: { meteorId, hp: 0 } satisfies MeteorUpdatePayload,
 				});
-				play("shooting");
+				play("star-damage");
+				onShake?.("small");
 			} else {
 				const updated = { ...meteor, hp: newHp };
 				meteorsRef.current.set(meteorId, updated);
@@ -512,15 +516,15 @@ export function useMeteorBusters({
 
 			setMeteors([...meteorsRef.current.values()].filter((m) => !m.destroyed));
 		},
-		[play],
+		[play, onShake],
 	);
 
 	/** リロード */
 	const handleReload = useCallback(() => {
 		if (phaseRef.current !== "PLAYING") return;
-		ammoRef.current = MAX_AMMO;
-		setAmmoRemaining(MAX_AMMO);
-		play("chime");
+		ammoRef.current = SHOOTER_AMMO_MAX;
+		setAmmoRemaining(SHOOTER_AMMO_MAX);
+		play("reload");
 	}, [play]);
 
 	/** 弾切り替え */
@@ -564,8 +568,9 @@ export function useMeteorBusters({
 		setSpawnedCount(0);
 		setBulletType("A");
 		bulletTypeRef.current = "A";
-		setAmmoRemaining(MAX_AMMO);
-		ammoRef.current = MAX_AMMO;
+		setAmmoRemaining(SHOOTER_AMMO_MAX);
+		ammoRef.current = SHOOTER_AMMO_MAX;
+		setBulletAnims([]);
 	}, []);
 
 	// ============================================
@@ -576,59 +581,64 @@ export function useMeteorBusters({
 		const channel = supabase.channel(`meteor-busters-${roomId}`);
 		channelRef.current = channel;
 
-		// ゲーム開始
 		channel.on("broadcast", { event: "game_start" }, ({ payload }: { payload: GameStartPayload }) => {
 			matchIdRef.current = payload.matchId;
 			initGame(payload.difficulty);
 		});
 
-		// 隕石スポーン（ゲスト側）
 		channel.on("broadcast", { event: "meteor_spawn" }, ({ payload }: { payload: MeteorSpawnPayload }) => {
-			if (isHost) return; // ホストは自分でスポーン管理
-			const p = payload;
+			if (isHost) return;
 			const meteor: MeteorObject = {
-				...p,
+				...payload,
 				angle: SPAWN_ANGLE,
 				destroyed: false,
 			};
 			meteorsRef.current.set(meteor.id, meteor);
 			setMeteors([...meteorsRef.current.values()].filter((m) => !m.destroyed));
-
 			spawnedCountRef.current += 1;
 			setSpawnedCount(spawnedCountRef.current);
 		});
 
-		// 射撃（ゲスト → ホスト処理）
 		channel.on("broadcast", { event: "shot" }, ({ payload }: { payload: ShotPayload }) => {
 			const p = payload;
-			if (p.playerId === currentUserId) return; // 自分の分は処理済み
+			if (p.playerId === currentUserId) return;
 
-			// 相手の弾アニメ
-			const animId = `anim_${Date.now()}_${p.playerId}`;
-			setBulletAnims((prev) => [
-				...prev,
-				{
-					id: animId,
-					type: p.bulletType,
-					fromX: p.originX,
-					fromY: p.originY,
-					toMeteorId: p.meteorId,
-					startedAt: performance.now(),
-				},
-			]);
-			setTimeout(() => {
-				setBulletAnims((prev) => prev.filter((a) => a.id !== animId));
-			}, 300);
+			// 相手の弾アニメをコンテナサイズで再現
+			const rect = containerRef.current?.getBoundingClientRect();
+			if (rect) {
+				const cursorX = p.cursorXPct * rect.width;
+				const cursorY = p.cursorYPct * rect.height;
+				const idPrefix = `anim_remote_${Date.now()}_${p.playerId}`;
+				const remoteColor = GLOW_COLORS[p.bulletType];
+				const anims = makeBulletAnims(cursorX, cursorY, rect.width, rect.height, idPrefix, remoteColor);
+				setBulletAnims((prev) => [...prev, ...anims]);
+				const maxDuration = Math.max(...anims.map((a) => a.durationSec));
+				const ids = new Set(anims.map((a) => a.id));
+				setTimeout(() => {
+					setBulletAnims((prev) => prev.filter((a) => !ids.has(a.id)));
+				}, maxDuration * 1000 + 150);
+			}
 
-			// ホストがダメージ計算
-			if (isHost) {
-				applyDamage(p.meteorId, p.bulletType, p.playerId);
+			// ホストがダメージ計算（弾の飛行時間だけ遅延させて視覚と同期）
+			if (isHost && p.meteorId) {
+				const travelMs = (() => {
+					const rect = containerRef.current?.getBoundingClientRect();
+					if (!rect) return 120;
+					const cx = p.cursorXPct * rect.width;
+					const cy = p.cursorYPct * rect.height;
+					// 左下コーナーからの距離で代表して計算（右下とほぼ同じ）
+					const dist = Math.hypot(cx, cy - rect.height);
+					return Math.max(120, (dist / SHOOTER_BULLET_SPEED_PX_S) * 1000);
+				})();
+				const meteorId = p.meteorId;
+				setTimeout(() => {
+					applyDamage(meteorId, p.bulletType, p.playerId);
+				}, travelMs);
 			}
 		});
 
-		// 隕石HP更新（ホスト → 全員）
 		channel.on("broadcast", { event: "meteor_update" }, ({ payload }: { payload: MeteorUpdatePayload }) => {
-			if (isHost) return; // ホストは自分で管理済み
+			if (isHost) return;
 			const p = payload;
 			const meteor = meteorsRef.current.get(p.meteorId);
 			if (!meteor) return;
@@ -644,14 +654,12 @@ export function useMeteorBusters({
 			setMeteors([...meteorsRef.current.values()].filter((m) => !m.destroyed));
 		});
 
-		// 隕石ミス（ホスト → 全員）
 		channel.on("broadcast", { event: "meteor_missed" }, ({ payload }: { payload: MeteorMissedPayload }) => {
 			if (isHost) return;
 			meteorsRef.current.delete(payload.meteorId);
 			setMeteors([...meteorsRef.current.values()].filter((m) => !m.destroyed));
 		});
 
-		// カーソル
 		channel.on("broadcast", { event: "cursor" }, ({ payload }: { payload: CursorPayload }) => {
 			if (payload.playerId === currentUserId) return;
 			setPlayerCursors((prev) => {
@@ -660,9 +668,8 @@ export function useMeteorBusters({
 			});
 		});
 
-		// ゲーム終了
 		channel.on("broadcast", { event: "game_end" }, ({ payload }: { payload: GameEndPayload }) => {
-			if (isHost) return; // ホストは自分で処理済み
+			if (isHost) return;
 			handleGameEnd(payload);
 		});
 
@@ -675,7 +682,7 @@ export function useMeteorBusters({
 			if (endTimerRef.current) clearTimeout(endTimerRef.current);
 			if (rafRef.current) cancelAnimationFrame(rafRef.current);
 		};
-	}, [supabase, roomId, isHost, currentUserId, initGame, applyDamage, handleGameEnd]);
+	}, [supabase, roomId, isHost, currentUserId, initGame, applyDamage, handleGameEnd, containerRef, addBulletAnims]);
 
 	return {
 		phase,
@@ -685,6 +692,7 @@ export function useMeteorBusters({
 		ammoRemaining,
 		playerCursors,
 		bulletAnims,
+		collisions,
 		result,
 		destroyedCount,
 		spawnedCount,
