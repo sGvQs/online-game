@@ -188,8 +188,8 @@ export function useMeteorBusters({
 			const w = containerRect.width;
 			const track = ORBIT_TRACKS[orbitTrack];
 			if (!track) return { x: w / 2, y: containerRect.height * ORBIT_CENTER_Y_RATIO };
-			const cx = w / 2;
-			const cy = containerRect.height * ORBIT_CENTER_Y_RATIO;
+			const cx = w / 2 + w * track.offsetX;
+			const cy = containerRect.height * ORBIT_CENTER_Y_RATIO + containerRect.height * track.offsetY;
 			const rx = w * track.rx;
 			const ry = w * track.ry;
 			const cosTilt = Math.cos(track.tilt);
@@ -443,14 +443,20 @@ export function useMeteorBusters({
 			const anims = makeBulletAnims(cursorX, cursorY, w, h, idPrefix, bulletColor);
 			addBulletAnims(anims);
 
-			// カーソル付近の隕石を探す
+			// カーソル付近の隕石を探す（当たり判定は隕石の表示サイズに比例）
 			let closestMeteor: MeteorObject | null = null;
-			let closestDist = BULLET_HIT_RADIUS;
+			let closestDist = Infinity;
 			for (const meteor of meteorsRef.current.values()) {
 				if (meteor.destroyed) continue;
+				const track = ORBIT_TRACKS[meteor.orbitTrack];
+				if (!track) continue;
+				const depth = Math.sin(meteor.angle);
+				const scale = track.minScale + (track.maxScale - track.minScale) * ((depth + 1) / 2);
+				// sizePx = 48 * scale、その半径分を当たり判定とする（最低 16px）
+				const hitRadius = Math.max(16, 24 * scale);
 				const pos = getMeteorScreenPos(meteor.angle, meteor.yOffset, containerRect, meteor.orbitTrack);
 				const dist = Math.hypot(pos.x - cursorX, pos.y - cursorY);
-				if (dist < closestDist) {
+				if (dist < hitRadius && dist < closestDist) {
 					closestDist = dist;
 					closestMeteor = meteor;
 				}
