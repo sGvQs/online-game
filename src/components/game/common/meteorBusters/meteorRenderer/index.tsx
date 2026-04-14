@@ -1,11 +1,8 @@
 "use client";
 
 import Image from "next/image";
-import { GLOW_COLORS, ORBIT_TRACKS, ORBIT_TILT, ORBIT_CENTER_Y_RATIO } from "@/constants/meteorBustersGame/gameConfig";
+import { GLOW_COLORS, ORBIT_TRACKS, ORBIT_CENTER_Y_RATIO } from "@/constants/meteorBustersGame/gameConfig";
 import type { MeteorObject } from "@/types";
-
-const COS_TILT = Math.cos(ORBIT_TILT);
-const SIN_TILT = Math.sin(ORBIT_TILT);
 
 interface MeteorRendererProps {
 	meteors: MeteorObject[];
@@ -22,14 +19,16 @@ function getMeteorScreenPos(
 ) {
 	const track = ORBIT_TRACKS[orbitTrack];
 	if (!track) return { x: containerWidth / 2, y: containerHeight / 2, scale: 1, zIndex: 20, isVisible: false };
-	const ocx = containerWidth / 2;
-	const ocy = containerHeight * ORBIT_CENTER_Y_RATIO;
+	const ocx = containerWidth / 2 + containerWidth * track.offsetX;
+	const ocy = containerHeight * ORBIT_CENTER_Y_RATIO + containerHeight * track.offsetY;
 	const rx = containerWidth * track.rx;
 	const ry = containerWidth * track.ry;
+	const cosTilt = Math.cos(track.tilt);
+	const sinTilt = Math.sin(track.tilt);
 	const xLocal = rx * Math.cos(angle);
 	const yLocal = ry * Math.sin(angle);
-	const x = ocx + xLocal * COS_TILT - yLocal * SIN_TILT;
-	const y = ocy + xLocal * SIN_TILT + yLocal * COS_TILT + yOffset;
+	const x = ocx + xLocal * cosTilt - yLocal * sinTilt;
+	const y = ocy + xLocal * sinTilt + yLocal * cosTilt + yOffset;
 	const depth = Math.sin(angle); // -1(奥) ～ +1(手前)
 	const scale = track.minScale + (track.maxScale - track.minScale) * ((depth + 1) / 2);
 	const zIndex = Math.round(depth * 10) + 20;
@@ -53,19 +52,21 @@ export function MeteorRenderer({
 			{ORBIT_TRACKS.map((track, i) => {
 				const rx = containerWidth * track.rx;
 				const ry = containerWidth * track.ry;
+				const ocx = cx + containerWidth * track.offsetX;
+				const ocy = cy + containerHeight * track.offsetY;
 				const opacity = i === 3 ? 0.12 : i <= 2 ? 0.08 : 0.05;
 				return (
 					<div
 						key={i}
 						className="absolute pointer-events-none"
 						style={{
-							left: cx - rx,
-							top: cy - ry,
+							left: ocx - rx,
+							top: ocy - ry,
 							width: rx * 2,
 							height: ry * 2,
 							border: `1px solid rgba(129,140,248,${opacity})`,
 							borderRadius: "50%",
-							transform: "rotate(-30deg)",
+							transform: `rotate(${track.tilt * (180 / Math.PI)}deg)`,
 						}}
 					/>
 				);

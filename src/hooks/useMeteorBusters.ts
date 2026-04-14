@@ -17,12 +17,8 @@ import {
 	CLEAR_RATE,
 	GLOW_COLORS,
 	ORBIT_TRACKS,
-	ORBIT_TILT,
 	ORBIT_CENTER_Y_RATIO,
 } from "@/constants/meteorBustersGame/gameConfig";
-
-const ORBIT_COS_TILT = Math.cos(ORBIT_TILT);
-const ORBIT_SIN_TILT = Math.sin(ORBIT_TILT);
 import { makeBulletAnims } from "@/lib/shooter/trajectory";
 import { SHOOTER_AMMO_MAX, SHOOTER_BULLET_SPEED_PX_S } from "@/lib/shooter/config";
 import { useSE } from "./useSE";
@@ -196,10 +192,12 @@ export function useMeteorBusters({
 			const cy = containerRect.height * ORBIT_CENTER_Y_RATIO;
 			const rx = w * track.rx;
 			const ry = w * track.ry;
+			const cosTilt = Math.cos(track.tilt);
+			const sinTilt = Math.sin(track.tilt);
 			const xLocal = rx * Math.cos(angle);
 			const yLocal = ry * Math.sin(angle);
-			const x = cx + xLocal * ORBIT_COS_TILT - yLocal * ORBIT_SIN_TILT;
-			const y = cy + xLocal * ORBIT_SIN_TILT + yLocal * ORBIT_COS_TILT + yOffset;
+			const x = cx + xLocal * cosTilt - yLocal * sinTilt;
+			const y = cy + xLocal * sinTilt + yLocal * cosTilt + yOffset;
 			return { x, y };
 		},
 		[],
