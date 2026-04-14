@@ -36,13 +36,15 @@ export interface OrbitTrackConfig {
 	offsetY: number;
 }
 
+// rx: 0.20〜0.58 を 6 本均等配置（ステップ ≈ 0.076）
+// ry / maxScale も線形補間
 export const ORBIT_TRACKS: OrbitTrackConfig[] = [
-	{ rx: 0.20, ry: 0.028, tilt: -Math.PI / 6, spawnAngle: -Math.PI / 6, collisionAngle: Math.PI * 3 / 2, speedMultiplier: 1.0, minScale: 0.1, maxScale: 0.3, offsetX: 0, offsetY: 0 },
-	{ rx: 0.24, ry: 0.034, tilt: -Math.PI / 6, spawnAngle: -Math.PI / 6, collisionAngle: Math.PI * 3 / 2, speedMultiplier: 1.0, minScale: 0.1, maxScale: 0.5, offsetX: 0, offsetY: 0 },
-	{ rx: 0.28, ry: 0.039, tilt: -Math.PI / 6, spawnAngle: -Math.PI / 6, collisionAngle: Math.PI * 3 / 2, speedMultiplier: 1.0, minScale: 0.1, maxScale: 0.8, offsetX: 0, offsetY: 0 },
-	{ rx: 0.38, ry: 0.050, tilt: -Math.PI / 6, spawnAngle: -Math.PI / 6, collisionAngle: Math.PI * 3 / 2, speedMultiplier: 1.0, minScale: 0.1, maxScale: 1.2, offsetX: 0, offsetY: 0 },
-	{ rx: 0.48, ry: 0.075, tilt: -Math.PI / 6, spawnAngle: -Math.PI / 6, collisionAngle: Math.PI * 3 / 2, speedMultiplier: 1.0, minScale: 0.1, maxScale: 1.8, offsetX: 0, offsetY: 0.05 },
-	{ rx: 0.58, ry: 0.100, tilt: -Math.PI / 6, spawnAngle: -Math.PI / 6, collisionAngle: Math.PI * 3 / 2, speedMultiplier: 0.6, minScale: 0.1, maxScale: 3.0, offsetX: 0, offsetY: 0.1},
+	{ rx: 0.20, ry: 0.028, tilt: -Math.PI / 6, spawnAngle: -Math.PI / 6, collisionAngle: Math.PI * 3 / 2, speedMultiplier: 1.0, minScale: 0.1, maxScale: 0.3, offsetX: 0, offsetY: 0    },
+	{ rx: 0.28, ry: 0.042, tilt: -Math.PI / 6, spawnAngle: -Math.PI / 6, collisionAngle: Math.PI * 3 / 2, speedMultiplier: 1.0, minScale: 0.1, maxScale: 0.8, offsetX: 0, offsetY: 0    },
+	{ rx: 0.35, ry: 0.057, tilt: -Math.PI / 6, spawnAngle: -Math.PI / 6, collisionAngle: Math.PI * 3 / 2, speedMultiplier: 1.0, minScale: 0.1, maxScale: 1.4, offsetX: 0, offsetY: 0    },
+	{ rx: 0.43, ry: 0.071, tilt: -Math.PI / 6, spawnAngle: -Math.PI / 6, collisionAngle: Math.PI * 3 / 2, speedMultiplier: 1.0, minScale: 0.1, maxScale: 1.9, offsetX: 0, offsetY: 0    },
+	{ rx: 0.50, ry: 0.086, tilt: -Math.PI / 6, spawnAngle: -Math.PI / 6, collisionAngle: Math.PI * 3 / 2, speedMultiplier: 1.0, minScale: 0.1, maxScale: 2.5, offsetX: 0, offsetY: 0},
+	{ rx: 0.58, ry: 0.100, tilt: -Math.PI / 6, spawnAngle: -Math.PI / 6, collisionAngle: Math.PI * 3 / 2, speedMultiplier: 0.6, minScale: 0.1, maxScale: 3.0, offsetX: 0, offsetY: 0  },
 ];
 
 /** 弾と隕石のグロー色 */
