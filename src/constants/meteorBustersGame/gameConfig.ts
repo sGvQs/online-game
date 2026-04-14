@@ -11,8 +11,12 @@ export const COLLISION_ANGLE = (7 * Math.PI) / 6; // 210°
 
 /** 軌道楕円の水平半径（コンテナ幅に対する比率） */
 export const ORBIT_RADIUS_X = 0.38;
-/** 軌道楕円の垂直半径（コンテナ高さに対する比率） */
-export const ORBIT_RADIUS_Y = 0.2;
+/** 軌道楕円の垂直半径（コンテナ幅に対する比率 — HOMEの星軌道に合わせて扁平） */
+export const ORBIT_RADIUS_Y = 0.05;
+/** 軌道楕円の傾き（ラジアン）。HOMEの星軌道と同じ -30° */
+export const ORBIT_TILT = -Math.PI / 6;
+/** 軌道中心の垂直位置（コンテナ高さに対する比率）。HUDを避けてやや上寄せ */
+export const ORBIT_CENTER_Y_RATIO = 0.42;
 
 /** 弾と隕石のグロー色 */
 export const GLOW_COLORS: Record<MeteorBulletType, string> = {

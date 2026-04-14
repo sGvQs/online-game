@@ -108,13 +108,13 @@ export function PlayingPhase({
 			{/* 中央の星 */}
 			<div className={styles.star()}>
 				<div
-					className="w-16 h-16 rounded-full"
+					className="w-72 h-72 rounded-full"
 					style={{
 						background:
 							"radial-gradient(circle at 35% 35%, rgb(255,255,230) 0%, rgb(255,220,160) 25%, rgb(220,160,80) 55%, rgb(160,80,20) 80%, rgb(102,51,0) 100%)",
-						filter: "drop-shadow(0 0 50px rgba(180,150,90,0.5))",
+						filter: "drop-shadow(0 0 120px rgba(180,150,90,0.7))",
 						boxShadow:
-							"0 0 20px rgba(255,200,100,0.4), 0 0 60px rgba(200,130,50,0.3), 0 0 120px rgba(150,80,20,0.2)",
+							"0 0 80px rgba(255,200,100,0.6), 0 0 180px rgba(200,130,50,0.4), 0 0 360px rgba(150,80,20,0.3)",
 					}}
 				/>
 			</div>

@@ -18,7 +18,14 @@ import {
 	GAME_END_DELAY_MS,
 	CLEAR_RATE,
 	GLOW_COLORS,
+	ORBIT_RADIUS_X,
+	ORBIT_RADIUS_Y,
+	ORBIT_TILT,
+	ORBIT_CENTER_Y_RATIO,
 } from "@/constants/meteorBustersGame/gameConfig";
+
+const ORBIT_COS_TILT = Math.cos(ORBIT_TILT);
+const ORBIT_SIN_TILT = Math.sin(ORBIT_TILT);
 import { makeBulletAnims } from "@/lib/shooter/trajectory";
 import { SHOOTER_AMMO_MAX, SHOOTER_BULLET_SPEED_PX_S } from "@/lib/shooter/config";
 import { useSE } from "./useSE";
@@ -183,11 +190,13 @@ export function useMeteorBusters({
 	const getMeteorScreenPos = useCallback(
 		(angle: number, yOffset: number, containerRect: DOMRect) => {
 			const cx = containerRect.width / 2;
-			const cy = containerRect.height / 2;
-			const rx = containerRect.width * 0.38;
-			const ry = containerRect.height * 0.2;
-			const x = cx + rx * Math.cos(angle);
-			const y = cy + ry * Math.sin(angle) + yOffset;
+			const cy = containerRect.height * ORBIT_CENTER_Y_RATIO;
+			const rx = containerRect.width * ORBIT_RADIUS_X;
+			const ry = containerRect.width * ORBIT_RADIUS_Y; // 幅基準で扁平楕円
+			const xLocal = rx * Math.cos(angle);
+			const yLocal = ry * Math.sin(angle);
+			const x = cx + xLocal * ORBIT_COS_TILT - yLocal * ORBIT_SIN_TILT;
+			const y = cy + xLocal * ORBIT_SIN_TILT + yLocal * ORBIT_COS_TILT + yOffset;
 			return { x, y };
 		},
 		[],
