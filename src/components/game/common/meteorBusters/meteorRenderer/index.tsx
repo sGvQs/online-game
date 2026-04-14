@@ -1,8 +1,15 @@
 "use client";
 
+import { memo } from "react";
 import Image from "next/image";
 import { GLOW_COLORS, ORBIT_TRACKS, ORBIT_CENTER_Y_RATIO } from "@/constants/meteorBustersGame/gameConfig";
 import type { MeteorObject } from "@/types";
+
+// tilt の cos/sin はトラック定義が変わらない限り不変なので起動時に一度だけ計算
+const TRACK_TRIG = ORBIT_TRACKS.map((t) => ({
+	cos: Math.cos(t.tilt),
+	sin: Math.sin(t.tilt),
+}));
 
 interface MeteorRendererProps {
 	meteors: MeteorObject[];
@@ -18,37 +25,35 @@ function getMeteorScreenPos(
 	orbitTrack: number,
 ) {
 	const track = ORBIT_TRACKS[orbitTrack];
-	if (!track) return { x: containerWidth / 2, y: containerHeight / 2, scale: 1, zIndex: 20, isVisible: false };
+	const trig = TRACK_TRIG[orbitTrack];
+	if (!track || !trig) return { x: containerWidth / 2, y: containerHeight / 2, scale: 1, zIndex: 20, isVisible: false };
 	const ocx = containerWidth / 2 + containerWidth * track.offsetX;
 	const ocy = containerHeight * ORBIT_CENTER_Y_RATIO + containerHeight * track.offsetY;
 	const rx = containerWidth * track.rx;
 	const ry = containerWidth * track.ry;
-	const cosTilt = Math.cos(track.tilt);
-	const sinTilt = Math.sin(track.tilt);
 	const xLocal = rx * Math.cos(angle);
 	const yLocal = ry * Math.sin(angle);
-	const x = ocx + xLocal * cosTilt - yLocal * sinTilt;
-	const y = ocy + xLocal * sinTilt + yLocal * cosTilt + yOffset;
-	const depth = Math.sin(angle); // -1(奥) ～ +1(手前)
+	const x = ocx + xLocal * trig.cos - yLocal * trig.sin;
+	const y = ocy + xLocal * trig.sin + yLocal * trig.cos + yOffset;
+	const depth = Math.sin(angle);
 	const scale = track.minScale + (track.maxScale - track.minScale) * ((depth + 1) / 2);
 	const zIndex = Math.round(depth * 10) + 20;
 	const isVisible = depth > -0.7;
 	return { x, y, scale, zIndex, isVisible };
 }
 
-export function MeteorRenderer({
-	meteors,
+// 軌道ガイド楕円は containerWidth/Height が変わらない限り再描画不要
+const OrbitGuides = memo(function OrbitGuides({
 	containerWidth,
 	containerHeight,
-}: MeteorRendererProps) {
-	if (containerWidth === 0) return null;
-
+}: {
+	containerWidth: number;
+	containerHeight: number;
+}) {
 	const cx = containerWidth / 2;
 	const cy = containerHeight * ORBIT_CENTER_Y_RATIO;
-
 	return (
 		<>
-			{/* 軌道ガイド楕円（全トラック × -30° 傾き） */}
 			{ORBIT_TRACKS.map((track, i) => {
 				const rx = containerWidth * track.rx;
 				const ry = containerWidth * track.ry;
@@ -71,8 +76,22 @@ export function MeteorRenderer({
 					/>
 				);
 			})}
+		</>
+	);
+});
 
-			{/* 隕石 */}
+export function MeteorRenderer({
+	meteors,
+	containerWidth,
+	containerHeight,
+}: MeteorRendererProps) {
+	if (containerWidth === 0) return null;
+
+	return (
+		<>
+			<OrbitGuides containerWidth={containerWidth} containerHeight={containerHeight} />
+
+			{/* 隕石 — left/top ではなく transform で移動（reflow 回避） */}
 			{meteors.map((meteor) => {
 				const { x, y, scale, zIndex, isVisible } = getMeteorScreenPos(
 					meteor.angle,
@@ -90,15 +109,14 @@ export function MeteorRenderer({
 				return (
 					<div
 						key={meteor.id}
-						className="absolute pointer-events-none"
+						className="absolute top-0 left-0 pointer-events-none"
 						style={{
-							left: x,
-							top: y,
-							transform: "translate(-50%, -50%)",
+							transform: `translate(${x}px, ${y}px) translate(-50%, -50%)`,
 							zIndex,
+							willChange: "transform",
 						}}
 					>
-						{/* 本体 — HOME と同じ metor.svg */}
+						{/* 本体 */}
 						<div
 							style={{
 								width: sizePx,

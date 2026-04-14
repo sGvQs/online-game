@@ -39,23 +39,19 @@ export interface OrbitTrackConfig {
 // rx: 0.20〜0.58 を 6 本均等配置（ステップ ≈ 0.076）
 // ry / maxScale も線形補間
 export const ORBIT_TRACKS: OrbitTrackConfig[] = [
-	{ rx: 0.28, ry: 0.042, tilt: -Math.PI / 4, spawnAngle: -Math.PI / 6, collisionAngle: Math.PI * 3 / 2, speedMultiplier: 1.0, minScale: 0.1, maxScale: 0.8, offsetX: 0, offsetY: 0.03 },
-	{ rx: 0.35, ry: 0.057, tilt: -Math.PI / 4, spawnAngle: -Math.PI / 6, collisionAngle: Math.PI * 3 / 2, speedMultiplier: 1.0, minScale: 0.1, maxScale: 1.4, offsetX: 0, offsetY: 0.06 },
-	{ rx: 0.43, ry: 0.071, tilt: -Math.PI / 4, spawnAngle: -Math.PI / 6, collisionAngle: Math.PI * 3 / 2, speedMultiplier: 1.0, minScale: 0.1, maxScale: 1.9, offsetX: 0, offsetY: 0.09 },
-	{ rx: 0.50, ry: 0.086, tilt: -Math.PI / 4, spawnAngle: -Math.PI / 6, collisionAngle: Math.PI * 3 / 2, speedMultiplier: 1.0, minScale: 0.1, maxScale: 2.5, offsetX: 0, offsetY: 0.12 },
-	{ rx: 0.58, ry: 0.100, tilt: -Math.PI / 4, spawnAngle: -Math.PI / 6, collisionAngle: Math.PI * 3 / 2, speedMultiplier: 0.6, minScale: 0.1, maxScale: 3.0, offsetX: 0, offsetY: 0.15 },
-	{ rx: 0.20, ry: 0.028, tilt: -Math.PI / 4, spawnAngle: -Math.PI / 6, collisionAngle: Math.PI * 3 / 2, speedMultiplier: 1.0, minScale: 0.1, maxScale: 0.3, offsetX: 0, offsetY: 0 },
-	{ rx: 0.28, ry: 0.042, tilt: -Math.PI / 6, spawnAngle: -Math.PI / 6, collisionAngle: Math.PI * 3 / 2, speedMultiplier: 1.0, minScale: 0.1, maxScale: 0.8, offsetX: 0, offsetY: 0.03 },
-	{ rx: 0.35, ry: 0.057, tilt: -Math.PI / 6, spawnAngle: -Math.PI / 6, collisionAngle: Math.PI * 3 / 2, speedMultiplier: 1.0, minScale: 0.1, maxScale: 1.4, offsetX: 0, offsetY: 0.06 },
-	{ rx: 0.43, ry: 0.071, tilt: -Math.PI / 6, spawnAngle: -Math.PI / 6, collisionAngle: Math.PI * 3 / 2, speedMultiplier: 1.0, minScale: 0.1, maxScale: 1.9, offsetX: 0, offsetY: 0.09 },
-	{ rx: 0.50, ry: 0.086, tilt: -Math.PI / 6, spawnAngle: -Math.PI / 6, collisionAngle: Math.PI * 3 / 2, speedMultiplier: 1.0, minScale: 0.1, maxScale: 2.5, offsetX: 0, offsetY: 0.12 },
-	{ rx: 0.58, ry: 0.100, tilt: -Math.PI / 6, spawnAngle: -Math.PI / 6, collisionAngle: Math.PI * 3 / 2, speedMultiplier: 0.6, minScale: 0.1, maxScale: 3.0, offsetX: 0, offsetY: 0.15 },
-	{ rx: 0.20, ry: 0.028, tilt: -Math.PI / 9, spawnAngle: -Math.PI / 6, collisionAngle: Math.PI * 3 / 2, speedMultiplier: 1.0, minScale: 0.1, maxScale: 0.3, offsetX: 0, offsetY: 0 },
-	{ rx: 0.28, ry: 0.042, tilt: -Math.PI / 9, spawnAngle: -Math.PI / 6, collisionAngle: Math.PI * 3 / 2, speedMultiplier: 1.0, minScale: 0.1, maxScale: 0.8, offsetX: 0, offsetY: 0.03 },
-	{ rx: 0.35, ry: 0.057, tilt: -Math.PI / 9, spawnAngle: -Math.PI / 6, collisionAngle: Math.PI * 3 / 2, speedMultiplier: 1.0, minScale: 0.1, maxScale: 1.4, offsetX: 0, offsetY: 0.06 },
-	{ rx: 0.43, ry: 0.071, tilt: -Math.PI / 9, spawnAngle: -Math.PI / 6, collisionAngle: Math.PI * 3 / 2, speedMultiplier: 1.0, minScale: 0.1, maxScale: 1.9, offsetX: 0, offsetY: 0.09 },
-	{ rx: 0.50, ry: 0.086, tilt: -Math.PI / 9, spawnAngle: -Math.PI / 6, collisionAngle: Math.PI * 3 / 2, speedMultiplier: 1.0, minScale: 0.1, maxScale: 2.5, offsetX: 0, offsetY: 0.12 },
-	{ rx: 0.58, ry: 0.100, tilt: -Math.PI / 9, spawnAngle: -Math.PI / 6, collisionAngle: Math.PI * 3 / 2, speedMultiplier: 0.6, minScale: 0.1, maxScale: 3.0, offsetX: 0, offsetY: 0.15 },
+	// { rx: 0.28, ry: 0.042, tilt: -Math.PI / 4, spawnAngle: -Math.PI / 6, collisionAngle: Math.PI * 3 / 2, speedMultiplier: 1.0, minScale: 0.1, maxScale: 0.8, offsetX: 0, offsetY: 0.03 },
+	// { rx: 0.35, ry: 0.057, tilt: -Math.PI / 4, spawnAngle: -Math.PI / 6, collisionAngle: Math.PI * 3 / 2, speedMultiplier: 1.0, minScale: 0.1, maxScale: 1.4, offsetX: 0, offsetY: 0.06 },
+	// { rx: 0.43, ry: 0.071, tilt: -Math.PI / 4, spawnAngle: -Math.PI / 6, collisionAngle: Math.PI * 3 / 2, speedMultiplier: 1.0, minScale: 0.1, maxScale: 1.9, offsetX: 0, offsetY: 0.09 },
+	// { rx: 0.20, ry: 0.028, tilt: -Math.PI / 4, spawnAngle: -Math.PI / 6, collisionAngle: Math.PI * 3 / 2, speedMultiplier: 1.0, minScale: 0.1, maxScale: 0.3, offsetX: 0, offsetY: 0 },
+	{ rx: 0.28, ry: 0.042, tilt: -Math.PI / 6, spawnAngle: -Math.PI / 2, collisionAngle: Math.PI * 3 / 2, speedMultiplier: 1.0, minScale: 0.01, maxScale: 0.8, offsetX: 0, offsetY: 0.03 },
+	{ rx: 0.35, ry: 0.057, tilt: -Math.PI / 6, spawnAngle: -Math.PI / 2, collisionAngle: Math.PI * 3 / 2, speedMultiplier: 1.0, minScale: 0.01, maxScale: 1.4, offsetX: 0, offsetY: 0.06 },
+	{ rx: 0.43, ry: 0.071, tilt: -Math.PI / 6, spawnAngle: -Math.PI / 2, collisionAngle: Math.PI * 3 / 2, speedMultiplier: 1.0, minScale: 0.01, maxScale: 1.9, offsetX: 0, offsetY: 0.09 },
+	{ rx: 0.50, ry: 0.086, tilt: -Math.PI / 6, spawnAngle: -Math.PI / 2, collisionAngle: Math.PI * 3 / 2, speedMultiplier: 1.0, minScale: 0.01, maxScale: 2.5, offsetX: 0, offsetY: 0.12 },
+	{ rx: 0.58, ry: 0.100, tilt: -Math.PI / 6, spawnAngle: -Math.PI / 2, collisionAngle: Math.PI * 3 / 2, speedMultiplier: 0.6, minScale: 0.01, maxScale: 3.0, offsetX: 0, offsetY: 0.15 },
+	// { rx: 0.20, ry: 0.028, tilt: -Math.PI / 9, spawnAngle: -Math.PI / 6, collisionAngle: Math.PI * 3 / 2, speedMultiplier: 1.0, minScale: 0.1, maxScale: 0.3, offsetX: 0, offsetY: 0 },
+	// { rx: 0.28, ry: 0.042, tilt: -Math.PI / 9, spawnAngle: -Math.PI / 6, collisionAngle: Math.PI * 3 / 2, speedMultiplier: 1.0, minScale: 0.1, maxScale: 0.8, offsetX: 0, offsetY: 0.03 },
+	// { rx: 0.35, ry: 0.057, tilt: -Math.PI / 9, spawnAngle: -Math.PI / 6, collisionAngle: Math.PI * 3 / 2, speedMultiplier: 1.0, minScale: 0.1, maxScale: 1.4, offsetX: 0, offsetY: 0.06 },
+	// { rx: 0.43, ry: 0.071, tilt: -Math.PI / 9, spawnAngle: -Math.PI / 6, collisionAngle: Math.PI * 3 / 2, speedMultiplier: 1.0, minScale: 0.1, maxScale: 1.9, offsetX: 0, offsetY: 0.09 },
 ];
 
 /** 弾と隕石のグロー色 */
