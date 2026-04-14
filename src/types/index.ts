@@ -54,6 +54,7 @@ export type {
 	MeteorDifficulty,
 	MeteorBulletType,
 	MeteorBustersPhase,
+	MeteorOrbitTrack,
 	MeteorObject,
 	PlayerCursorState,
 	MeteorBustersResult,

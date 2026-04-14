@@ -4,19 +4,37 @@ export const CLEAR_RATE = 0.8; // 80%以上でクリア
 
 export const MAX_AMMO = 12;
 
-/** スポーン開始角度（ラジアン）: 右上付近に登場 */
-export const SPAWN_ANGLE = -Math.PI / 6; // -30°
-/** 衝突判定角度（ラジアン）: 左上から星の裏に回り込んだ地点 */
-export const COLLISION_ANGLE = (7 * Math.PI) / 6; // 210°
-
-/** 軌道楕円の水平半径（コンテナ幅に対する比率） */
-export const ORBIT_RADIUS_X = 0.38;
-/** 軌道楕円の垂直半径（コンテナ幅に対する比率 — HOMEの星軌道に合わせて扁平） */
-export const ORBIT_RADIUS_Y = 0.05;
 /** 軌道楕円の傾き（ラジアン）。HOMEの星軌道と同じ -30° */
 export const ORBIT_TILT = -Math.PI / 6;
 /** 軌道中心の垂直位置（コンテナ高さに対する比率）。HUDを避けてやや上寄せ */
 export const ORBIT_CENTER_Y_RATIO = 0.42;
+
+/**
+ * 軌道トラック定義。
+ * - rx / ry: 楕円半径（コンテナ幅に対する比率）
+ * - spawnAngle: 出発角度（ラジアン）
+ * - collisionAngle: 終着角度（ラジアン）
+ * - speedMultiplier: 難易度 orbitDurationMs に対する速度倍率。2.0=2倍速、省略時=1.0
+ *
+ * 配列なので同サイズ・別角度のトラックも自由に追加できる。
+ * インデックスが MeteorOrbitTrack（number）になる。
+ */
+export interface OrbitTrackConfig {
+	rx: number;
+	ry: number;
+	spawnAngle: number;
+	collisionAngle: number;
+	speedMultiplier: number;
+}
+
+export const ORBIT_TRACKS: OrbitTrackConfig[] = [
+	{ rx: 0.20, ry: 0.028, spawnAngle: -Math.PI / 6, collisionAngle: Math.PI * 7 / 6, speedMultiplier: 1.0 },
+	{ rx: 0.24, ry: 0.034, spawnAngle: -Math.PI / 6, collisionAngle: Math.PI * 7 / 6, speedMultiplier: 1.0 },
+	{ rx: 0.28, ry: 0.039, spawnAngle: -Math.PI / 6, collisionAngle: Math.PI * 7 / 6, speedMultiplier: 1.0 },
+	{ rx: 0.38, ry: 0.050, spawnAngle: -Math.PI / 6, collisionAngle: Math.PI * 3 / 2, speedMultiplier: 1.0 },
+	{ rx: 0.75, ry: 0.100, spawnAngle: -Math.PI / 6, collisionAngle: Math.PI * 3 / 2, speedMultiplier: 1.0 },
+	{ rx: 1.10, ry: 0.154, spawnAngle: -Math.PI / 6, collisionAngle: Math.PI * 3 / 2, speedMultiplier: 0.6 },
+];
 
 /** 弾と隕石のグロー色 */
 export const GLOW_COLORS: Record<MeteorBulletType, string> = {

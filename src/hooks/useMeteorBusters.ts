@@ -9,8 +9,6 @@ import {
 } from "@/server/actions/game";
 import {
 	DIFFICULTY_CONFIG,
-	SPAWN_ANGLE,
-	COLLISION_ANGLE,
 	DAMAGE_MATCH,
 	DAMAGE_MISMATCH,
 	BULLET_HIT_RADIUS,
@@ -18,8 +16,7 @@ import {
 	GAME_END_DELAY_MS,
 	CLEAR_RATE,
 	GLOW_COLORS,
-	ORBIT_RADIUS_X,
-	ORBIT_RADIUS_Y,
+	ORBIT_TRACKS,
 	ORBIT_TILT,
 	ORBIT_CENTER_Y_RATIO,
 } from "@/constants/meteorBustersGame/gameConfig";
@@ -64,10 +61,13 @@ interface CursorPayload {
 interface MeteorSpawnPayload {
 	id: string;
 	type: MeteorBulletType;
+	orbitTrack: number;
 	hp: number;
 	maxHp: number;
 	yOffset: number;
 	orbitDurationMs: number;
+	spawnAngle: number;
+	collisionAngle: number;
 	spawnTime: number;
 }
 
@@ -188,11 +188,14 @@ export function useMeteorBusters({
 		`meteor_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
 
 	const getMeteorScreenPos = useCallback(
-		(angle: number, yOffset: number, containerRect: DOMRect) => {
-			const cx = containerRect.width / 2;
+		(angle: number, yOffset: number, containerRect: DOMRect, orbitTrack: number) => {
+			const w = containerRect.width;
+			const track = ORBIT_TRACKS[orbitTrack];
+			if (!track) return { x: w / 2, y: containerRect.height * ORBIT_CENTER_Y_RATIO };
+			const cx = w / 2;
 			const cy = containerRect.height * ORBIT_CENTER_Y_RATIO;
-			const rx = containerRect.width * ORBIT_RADIUS_X;
-			const ry = containerRect.width * ORBIT_RADIUS_Y; // 幅基準で扁平楕円
+			const rx = w * track.rx;
+			const ry = w * track.ry;
 			const xLocal = rx * Math.cos(angle);
 			const yLocal = ry * Math.sin(angle);
 			const x = cx + xLocal * ORBIT_COS_TILT - yLocal * ORBIT_SIN_TILT;
@@ -212,7 +215,7 @@ export function useMeteorBusters({
 			const elapsed = now - meteor.spawnTime;
 			const progress = Math.min(elapsed / meteor.orbitDurationMs, 1);
 			const angle =
-				SPAWN_ANGLE + progress * (COLLISION_ANGLE - SPAWN_ANGLE);
+				meteor.spawnAngle + progress * (meteor.collisionAngle - meteor.spawnAngle);
 
 			if (progress >= 1) {
 				if (isHost) {
@@ -251,14 +254,18 @@ export function useMeteorBusters({
 		const types: MeteorBulletType[] = ["A", "B", "C"];
 		const type = types[Math.floor(Math.random() * 3)];
 		const yOffset = (Math.random() * 2 - 1) * MAX_Y_OFFSET;
-
+		const orbitTrack = Math.floor(Math.random() * ORBIT_TRACKS.length);
+		const track = ORBIT_TRACKS[orbitTrack];
 		const meteor: MeteorSpawnPayload = {
 			id: generateMeteorId(),
 			type,
+			orbitTrack,
 			hp: config.meteorHp,
 			maxHp: config.meteorHp,
 			yOffset,
-			orbitDurationMs: config.orbitDurationMs,
+			orbitDurationMs: config.orbitDurationMs / track.speedMultiplier,
+			spawnAngle: track.spawnAngle,
+			collisionAngle: track.collisionAngle,
 			spawnTime: performance.now(),
 		};
 
@@ -270,7 +277,7 @@ export function useMeteorBusters({
 
 		const meteorObj: MeteorObject = {
 			...meteor,
-			angle: SPAWN_ANGLE,
+			angle: track.spawnAngle,
 			destroyed: false,
 		};
 		meteorsRef.current.set(meteor.id, meteorObj);
@@ -443,7 +450,7 @@ export function useMeteorBusters({
 			let closestDist = BULLET_HIT_RADIUS;
 			for (const meteor of meteorsRef.current.values()) {
 				if (meteor.destroyed) continue;
-				const pos = getMeteorScreenPos(meteor.angle, meteor.yOffset, containerRect);
+				const pos = getMeteorScreenPos(meteor.angle, meteor.yOffset, containerRect, meteor.orbitTrack);
 				const dist = Math.hypot(pos.x - cursorX, pos.y - cursorY);
 				if (dist < closestDist) {
 					closestDist = dist;
@@ -599,7 +606,7 @@ export function useMeteorBusters({
 			if (isHost) return;
 			const meteor: MeteorObject = {
 				...payload,
-				angle: SPAWN_ANGLE,
+				angle: payload.spawnAngle,
 				destroyed: false,
 			};
 			meteorsRef.current.set(meteor.id, meteor);

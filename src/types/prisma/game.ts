@@ -171,11 +171,16 @@ export type MeteorBulletType = "A" | "B" | "C";
 
 export type MeteorBustersPhase = "TITLE" | "PLAYING" | "RESULT";
 
+/** 隕石の軌道トラックインデックス（ORBIT_TRACKS 配列の添字） */
+export type MeteorOrbitTrack = number;
+
 export interface MeteorObject {
 	id: string;
 	type: MeteorBulletType;
 	hp: number;
 	maxHp: number;
+	/** 軌道トラック（nano / inner / mid / main / outer / huge） */
+	orbitTrack: MeteorOrbitTrack;
 	/** 軌道上の現在角度（ラジアン） */
 	angle: number;
 	/** Y方向のオフセット（px）バラつき演出用 */
@@ -184,6 +189,10 @@ export interface MeteorObject {
 	spawnTime: number;
 	/** 軌道の所要時間（ms） */
 	orbitDurationMs: number;
+	/** 出発角度（ラジアン） */
+	spawnAngle: number;
+	/** 終着角度（ラジアン）。この角度に達したら missed 扱い */
+	collisionAngle: number;
 	destroyed: boolean;
 }
 
