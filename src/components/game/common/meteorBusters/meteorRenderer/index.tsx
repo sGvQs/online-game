@@ -31,7 +31,7 @@ function getMeteorScreenPos(
 	const x = ocx + xLocal * COS_TILT - yLocal * SIN_TILT;
 	const y = ocy + xLocal * SIN_TILT + yLocal * COS_TILT + yOffset;
 	const depth = Math.sin(angle); // -1(奥) ～ +1(手前)
-	const scale = 0.35 + 0.65 * ((depth + 1) / 2);
+	const scale = track.minScale + (track.maxScale - track.minScale) * ((depth + 1) / 2);
 	const zIndex = Math.round(depth * 10) + 20;
 	const isVisible = depth > -0.7;
 	return { x, y, scale, zIndex, isVisible };

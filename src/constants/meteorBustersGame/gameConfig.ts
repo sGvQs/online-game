@@ -10,11 +10,13 @@ export const ORBIT_TILT = -Math.PI / 6;
 export const ORBIT_CENTER_Y_RATIO = 0.42;
 
 /**
- * 軌道トラック定義。
- * - rx / ry: 楕円半径（コンテナ幅に対する比率）
- * - spawnAngle: 出発角度（ラジアン）
- * - collisionAngle: 終着角度（ラジアン）
- * - speedMultiplier: 難易度 orbitDurationMs に対する速度倍率。2.0=2倍速、省略時=1.0
+ * 軌道トラック定義。全フィールド必須。
+ * - rx / ry        : 楕円半径（コンテナ幅に対する比率）
+ * - spawnAngle     : 出発角度（ラジアン）
+ * - collisionAngle : 終着角度（ラジアン）
+ * - speedMultiplier: 難易度 orbitDurationMs に対する速度倍率（2.0=2倍速）
+ * - minScale       : 奥（depth=-1）にいるときの表示スケール
+ * - maxScale       : 手前（depth=+1）にいるときの表示スケール
  *
  * 配列なので同サイズ・別角度のトラックも自由に追加できる。
  * インデックスが MeteorOrbitTrack（number）になる。
@@ -25,15 +27,17 @@ export interface OrbitTrackConfig {
 	spawnAngle: number;
 	collisionAngle: number;
 	speedMultiplier: number;
+	minScale: number;
+	maxScale: number;
 }
 
 export const ORBIT_TRACKS: OrbitTrackConfig[] = [
-	{ rx: 0.20, ry: 0.028, spawnAngle: -Math.PI / 6, collisionAngle: Math.PI * 7 / 6, speedMultiplier: 1.0 },
-	{ rx: 0.24, ry: 0.034, spawnAngle: -Math.PI / 6, collisionAngle: Math.PI * 7 / 6, speedMultiplier: 1.0 },
-	{ rx: 0.28, ry: 0.039, spawnAngle: -Math.PI / 6, collisionAngle: Math.PI * 7 / 6, speedMultiplier: 1.0 },
-	{ rx: 0.38, ry: 0.050, spawnAngle: -Math.PI / 6, collisionAngle: Math.PI * 3 / 2, speedMultiplier: 1.0 },
-	{ rx: 0.75, ry: 0.100, spawnAngle: -Math.PI / 6, collisionAngle: Math.PI * 3 / 2, speedMultiplier: 1.0 },
-	{ rx: 1.10, ry: 0.154, spawnAngle: -Math.PI / 6, collisionAngle: Math.PI * 3 / 2, speedMultiplier: 0.6 },
+	{ rx: 0.20, ry: 0.028, spawnAngle: -Math.PI / 6, collisionAngle: Math.PI * 7 / 6, speedMultiplier: 1.0, minScale: 0.3, maxScale: 0.8 },
+	{ rx: 0.24, ry: 0.034, spawnAngle: -Math.PI / 6, collisionAngle: Math.PI * 7 / 6, speedMultiplier: 1.0, minScale: 0.3, maxScale: 0.9 },
+	{ rx: 0.28, ry: 0.039, spawnAngle: -Math.PI / 6, collisionAngle: Math.PI * 7 / 6, speedMultiplier: 1.0, minScale: 0.3, maxScale: 1.0 },
+	{ rx: 0.38, ry: 0.050, spawnAngle: -Math.PI / 6, collisionAngle: Math.PI * 3 / 2, speedMultiplier: 1.0, minScale: 0.3, maxScale: 1.2 },
+	{ rx: 0.75, ry: 0.100, spawnAngle: -Math.PI / 6, collisionAngle: Math.PI * 3 / 2, speedMultiplier: 1.0, minScale: 0.2, maxScale: 1.6 },
+	{ rx: 1.10, ry: 0.154, spawnAngle: -Math.PI / 6, collisionAngle: Math.PI * 3 / 2, speedMultiplier: 0.6, minScale: 0.2, maxScale: 2.2 },
 ];
 
 /** 弾と隕石のグロー色 */
@@ -67,8 +71,8 @@ export const DIFFICULTY_CONFIG: Record<MeteorDifficulty, DifficultyConfig> = {
 		pointsOnClear: 5,
 	},
 	HARD: {
-		totalSpawnCount: 30,
-		spawnIntervalMs: 2000,
+		totalSpawnCount: 300,
+		spawnIntervalMs: 500,
 		meteorHp: 150,
 		orbitDurationMs: 5000,
 		pointsOnClear: 8,
