@@ -220,3 +220,13 @@ export interface BulletAnim {
 	durationSec: number;
 	color: string;       // CSS color value (matches active bullet type)
 }
+
+/** 恐竜が発射する赤い球のアニメーション */
+export interface DinoShotAnim {
+	id: string;
+	fromX: number;
+	fromY: number;
+	toX: number;
+	toY: number;
+	durationSec: number;
+}

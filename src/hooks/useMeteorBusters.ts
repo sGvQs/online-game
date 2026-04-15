@@ -206,6 +206,7 @@ export function useMeteorBusters({
 	const tickMeteors = useCallback(() => {
 		const now = performance.now();
 		let hasChange = false;
+		const newCollisionFxs: CollisionFx[] = [];
 
 		for (const meteor of meteorsRef.current.values()) {
 			if (meteor.destroyed) continue;
@@ -216,6 +217,12 @@ export function useMeteorBusters({
 				meteor.spawnAngle + progress * (meteor.collisionAngle - meteor.spawnAngle);
 
 			if (progress >= 1) {
+				// 執着地点で爆発（恐竜が壊した演出）
+				const rect = containerRef.current?.getBoundingClientRect();
+				if (rect) {
+					const pos = getMeteorScreenPos(meteor.collisionAngle, 0, rect, meteor.orbitTrack);
+					newCollisionFxs.push({ id: `dino_fx_${meteor.id}_${now}`, x: pos.x, y: pos.y });
+				}
 				if (isHost) {
 					channelRef.current?.send({
 						type: "broadcast",
@@ -233,12 +240,21 @@ export function useMeteorBusters({
 			hasChange = true;
 		}
 
+		if (newCollisionFxs.length > 0) {
+			setCollisions((prev) => [...prev, ...newCollisionFxs]);
+			for (const fx of newCollisionFxs) {
+				setTimeout(() => {
+					setCollisions((prev) => prev.filter((c) => c.id !== fx.id));
+				}, 600);
+			}
+		}
+
 		if (hasChange) {
 			setMeteors([...meteorsRef.current.values()].filter((m) => !m.destroyed));
 		}
 
 		rafRef.current = requestAnimationFrame(tickMeteors);
-	}, [isHost]);
+	}, [isHost, getMeteorScreenPos]);
 
 	// ============================================
 	// ホスト: 隕石スポーン管理
@@ -263,7 +279,7 @@ export function useMeteorBusters({
 			yOffset,
 			orbitDurationMs: config.orbitDurationMs / track.speedMultiplier,
 			spawnAngle: track.spawnAngle,
-			collisionAngle: track.collisionAngle,
+			collisionAngle: track.collisionAngles[Math.floor(Math.random() * track.collisionAngles.length)],
 			spawnTime: performance.now(),
 		};
 
