@@ -17,6 +17,8 @@ import type {
 	MeteorDifficulty,
 	BulletAnim,
 } from "@/types";
+
+const BULLET_ORDER: readonly MeteorBulletType[] = ["A", "B", "C"];
 import type { CollisionFx } from "@/components/game/common/shooter/ShooterCollisionFx";
 
 interface PlayingPhaseProps {
@@ -35,28 +37,6 @@ interface PlayingPhaseProps {
 	currentUserId: string;
 }
 
-/** 弾種バッジ（ShooterAmmoHud の slot に渡す） */
-function BulletTypeBadge({ bulletType }: { bulletType: MeteorBulletType }) {
-	const color = GLOW_COLORS[bulletType];
-	return (
-		<div className="flex items-center gap-2">
-			<div
-				className="w-5 h-5 rounded-full border-2 transition-all duration-200"
-				style={{
-					borderColor: color,
-					backgroundColor: `${color}33`,
-					boxShadow: `0 0 8px ${color}88`,
-				}}
-			/>
-			<span
-				className="text-sm font-bold font-dot-gothic-16"
-				style={{ color }}
-			>
-				TYPE {bulletType}
-			</span>
-		</div>
-	);
-}
 
 export function PlayingPhase({
 	meteors,
@@ -92,6 +72,9 @@ export function PlayingPhase({
 		obs.observe(el);
 		return () => obs.disconnect();
 	}, []);
+
+	const nextBulletType = BULLET_ORDER[(BULLET_ORDER.indexOf(bulletType) + 1) % BULLET_ORDER.length]!;
+	const nextColor = GLOW_COLORS[nextBulletType];
 
 	const destroyRate =
 		spawnedCount > 0 ? Math.round((destroyedCount / spawnedCount) * 100) : 0;
@@ -169,7 +152,7 @@ export function PlayingPhase({
 					ammo={ammoRemaining}
 					ammoMax={SHOOTER_AMMO_MAX}
 					activeColor={GLOW_COLORS[bulletType]}
-					slot={<BulletTypeBadge bulletType={bulletType} />}
+					nextColor={nextColor}
 				/>
 			</div>
 		</div>
