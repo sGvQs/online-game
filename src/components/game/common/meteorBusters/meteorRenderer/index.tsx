@@ -1,6 +1,6 @@
 "use client";
 
-import { memo } from "react";
+import { memo, useState, useEffect } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { GLOW_COLORS, ORBIT_TRACKS, ORBIT_CENTER_Y_RATIO } from "@/constants/meteorBustersGame/gameConfig";
@@ -88,7 +88,7 @@ const DINO_BALL_DURATION = 1.2;
 const STAR_RADIUS_PX = 144;
 const DINO_GAP = 4;
 /** 恐竜の縦位置調整。負の値で上に移動（px） */
-const DINO_Y_OFFSET = -15;
+const DINO_Y_OFFSET = -18;
 const BALL_TRAVEL_PX = 220;
 // 恐竜ガード（星の表面に接する位置に1匹配置し、常時球を発射）
 const DinoGuard = memo(function DinoGuard({
@@ -98,6 +98,15 @@ const DinoGuard = memo(function DinoGuard({
 	containerWidth: number;
 	containerHeight: number;
 }) {
+	// delay の代わりに時間差で DOM に追加することで初回の口への溜まりを防ぐ
+	const [activeBalls, setActiveBalls] = useState(0);
+	useEffect(() => {
+		setActiveBalls(1);
+		const t1 = setTimeout(() => setActiveBalls(2), DINO_BALL_INTERVAL * 1000);
+		const t2 = setTimeout(() => setActiveBalls(3), DINO_BALL_INTERVAL * 2 * 1000);
+		return () => { clearTimeout(t1); clearTimeout(t2); };
+	}, []);
+
 	const track = ORBIT_TRACKS[0];
 	const trig = TRACK_TRIG[0];
 	if (!track || !trig) return null;
@@ -166,8 +175,8 @@ const DinoGuard = memo(function DinoGuard({
 				/>
 			</div>
 
-			{/* 常時ループする球（3球を0.5秒ずつずらして発射） */}
-			{Array.from({ length: DINO_BALL_COUNT }, (_, i) => (
+			{/* 常時ループする球（時間差で DOM 追加してスタッガー、溜まり防止） */}
+			{Array.from({ length: activeBalls }, (_, i) => (
 				<motion.div
 					key={`dino-ball-${i}`}
 					className="absolute top-0 left-0 rounded-full pointer-events-none"
@@ -184,7 +193,6 @@ const DinoGuard = memo(function DinoGuard({
 						duration: DINO_BALL_DURATION,
 						ease: "linear",
 						repeat: Infinity,
-						delay: i * DINO_BALL_INTERVAL,
 					}}
 				/>
 			))}
