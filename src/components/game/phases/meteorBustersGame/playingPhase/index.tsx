@@ -73,8 +73,11 @@ export function PlayingPhase({
 		return () => obs.disconnect();
 	}, []);
 
-	const nextBulletType = BULLET_ORDER[(BULLET_ORDER.indexOf(bulletType) + 1) % BULLET_ORDER.length]!;
+	const currentIdx = BULLET_ORDER.indexOf(bulletType);
+	const nextBulletType = BULLET_ORDER[(currentIdx + 1) % BULLET_ORDER.length]!;
+	const nextNextBulletType = BULLET_ORDER[(currentIdx + 2) % BULLET_ORDER.length]!;
 	const nextColor = GLOW_COLORS[nextBulletType];
+	const nextNextColor = GLOW_COLORS[nextNextBulletType];
 
 	const destroyRate =
 		spawnedCount > 0 ? Math.round((destroyedCount / spawnedCount) * 100) : 0;
@@ -153,6 +156,7 @@ export function PlayingPhase({
 					ammoMax={SHOOTER_AMMO_MAX}
 					activeColor={GLOW_COLORS[bulletType]}
 					nextColor={nextColor}
+					nextNextColor={nextNextColor}
 				/>
 			</div>
 		</div>

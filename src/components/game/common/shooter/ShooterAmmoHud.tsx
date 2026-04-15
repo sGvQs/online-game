@@ -10,6 +10,8 @@ interface ShooterAmmoHudProps {
 	activeColor: string;
 	/** 次の弾種の色。CSS color 値 */
 	nextColor: string;
+	/** 2つ先の弾種の色。CSS color 値 */
+	nextNextColor: string;
 }
 
 const segmentFrame =
@@ -24,7 +26,7 @@ const reloadPulseStrong =
  * HOME 緊急モードと同じ弾数バー + 操作説明 HUD。
  * ammoMax 個の pill を横並びで表示し、弾切れ時はリロード案内をパルス。
  */
-export function ShooterAmmoHud({ ammo, ammoMax, activeColor, nextColor }: ShooterAmmoHudProps) {
+export function ShooterAmmoHud({ ammo, ammoMax, activeColor, nextColor, nextNextColor }: ShooterAmmoHudProps) {
 	const isEmpty = ammo < 1;
 
 	return (
@@ -66,6 +68,15 @@ export function ShooterAmmoHud({ ammo, ammoMax, activeColor, nextColor }: Shoote
 						style={{ backgroundColor: nextColor, boxShadow: `0 0 4px ${nextColor}` }}
 						aria-hidden
 					/>
+					<MousePointerClick className="size-3.5 shrink-0 text-slate-200/90" strokeWidth={2} aria-hidden />
+				</span>
+				<span className={segmentFrame}>
+					<span
+						className="w-2 h-2 rounded-full shrink-0"
+						style={{ backgroundColor: nextNextColor, boxShadow: `0 0 4px ${nextNextColor}` }}
+						aria-hidden
+					/>
+					<MousePointerClick className="size-3.5 shrink-0 text-slate-200/90" strokeWidth={2} aria-hidden />
 					<MousePointerClick className="size-3.5 shrink-0 text-slate-200/90" strokeWidth={2} aria-hidden />
 				</span>
 				{isEmpty ? (
