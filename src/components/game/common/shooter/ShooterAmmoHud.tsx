@@ -56,7 +56,7 @@ export function ShooterAmmoHud({ ammo, ammoMax, activeColor, nextColor, nextNext
 			<div className="flex flex-wrap justify-center gap-1.5">
 				<span className={segmentFrame}>
 					<span
-						className="w-2 h-2 rounded-full shrink-0"
+						className="w-5 h-2 rounded-full shrink-0"
 						style={{ backgroundColor: activeColor, boxShadow: `0 0 4px ${activeColor}` }}
 						aria-hidden
 					/>
@@ -64,7 +64,7 @@ export function ShooterAmmoHud({ ammo, ammoMax, activeColor, nextColor, nextNext
 				</span>
 				<span className={segmentFrame}>
 					<span
-						className="w-2 h-2 rounded-full shrink-0"
+						className="w-5 h-2 rounded-full shrink-0"
 						style={{ backgroundColor: nextColor, boxShadow: `0 0 4px ${nextColor}` }}
 						aria-hidden
 					/>
@@ -72,7 +72,7 @@ export function ShooterAmmoHud({ ammo, ammoMax, activeColor, nextColor, nextNext
 				</span>
 				<span className={segmentFrame}>
 					<span
-						className="w-2 h-2 rounded-full shrink-0"
+						className="w-5 h-2 rounded-full shrink-0"
 						style={{ backgroundColor: nextNextColor, boxShadow: `0 0 4px ${nextNextColor}` }}
 						aria-hidden
 					/>

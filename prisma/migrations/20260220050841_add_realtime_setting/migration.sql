@@ -11,5 +11,7 @@ BEGIN
             RAISE NOTICE 'publication "supabase_realtime" does not exist, skipping...';
         WHEN duplicate_object THEN
             NULL; -- すでに追加されていれば何もしない
+        WHEN OTHERS THEN
+            NULL; -- FOR ALL TABLES パブリケーションへの追加エラー等を無視
     END;
 END $$;
