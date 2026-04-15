@@ -27,7 +27,7 @@ function getMeteorScreenPos(
 ) {
 	const track = ORBIT_TRACKS[orbitTrack];
 	const trig = TRACK_TRIG[orbitTrack];
-	if (!track || !trig) return { x: containerWidth / 2, y: containerHeight / 2, scale: 1, zIndex: 20 };
+	if (!track || !trig) return { x: containerWidth / 2, y: containerHeight / 2, scale: 1, zIndex: 11 };
 	const ocx = containerWidth / 2 + containerWidth * track.offsetX;
 	const ocy = containerHeight * ORBIT_CENTER_Y_RATIO + containerHeight * track.offsetY;
 	const rx = containerWidth * track.rx;
@@ -38,8 +38,9 @@ function getMeteorScreenPos(
 	const y = ocy + xLocal * trig.sin + yLocal * trig.cos + yOffset;
 	const depth = Math.sin(angle);
 	const scale = track.minScale + (track.maxScale - track.minScale) * ((depth + 1) / 2);
-	// zIndex: 奥(depth=-1)→10、星(depth=0)→20、手前(depth=+1)→30 の自然な前後順
-	const zIndex = Math.round(depth * 10) + 20;
+	// 星は z-10（zIndex:10）。奥(depth=-1)→0、星面(depth=0)→10、手前(depth=+1)→20
+	// depth < 0 のとき zIndex < 10 → 星の裏に隠れる
+	const zIndex = Math.round(depth * 10) + 10;
 	return { x, y, scale, zIndex };
 }
 
@@ -224,7 +225,7 @@ export function MeteorRenderer({
 
 				const color = GLOW_COLORS[meteor.type];
 				const hpRate = meteor.hp / meteor.maxHp;
-				const sizePx = Math.round(48 * scale);
+				const sizePx = Math.max(4, Math.round(48 * scale));
 
 				return (
 					<div
