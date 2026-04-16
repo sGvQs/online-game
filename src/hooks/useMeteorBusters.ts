@@ -6,6 +6,7 @@ import { resetAllReady } from "@/server/actions/room";
 import {
 	startMeteorBustersMatch,
 	finishMeteorBustersMatch,
+	getMeteorBustersMatch,
 } from "@/server/actions/game";
 import {
 	DIFFICULTY_CONFIG,
@@ -173,6 +174,9 @@ export function useMeteorBusters({
 	/** 最後の射撃カーソル位置（命中FX表示に使用） */
 	const lastShotCursorRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
 	const checkGameEndRef = useRef<() => void>(() => {});
+	const initGameRef = useRef<(diff: MeteorDifficulty) => void>(() => {});
+	/** ホストとしてリロード復帰した場合に true（subscribe 完了後に host_resumed を broadcast するため） */
+	const resumedAsHostRef = useRef(false);
 	const getMeteorScreenPosRef = useRef<typeof getMeteorScreenPos | null>(null);
 	const playRef = useRef<typeof play>(play);
 	const onShakeRef = useRef<typeof onShake>(onShake);
@@ -458,6 +462,11 @@ export function useMeteorBusters({
 		}
 	}, [isHost, tickMeteors, spawnNextMeteor]);
 
+	// initGame を ref に同期（マウント時復帰 useEffect から deps なしで呼べるように）
+	useEffect(() => {
+		initGameRef.current = initGame;
+	}, [initGame]);
+
 	/** 弾アニメを追加してタイムアウトで削除 */
 	const addBulletAnims = useCallback((anims: BulletAnim[]) => {
 		setBulletAnims((prev) => [...prev, ...anims]);
@@ -659,6 +668,25 @@ export function useMeteorBusters({
 	}, []);
 
 	// ============================================
+	// マウント時リロード復帰チェック
+	// ============================================
+
+	useEffect(() => {
+		if (!initialMatchId) return;
+		getMeteorBustersMatch(initialMatchId).then((match) => {
+			if (!match || match.endedAt !== null) return;
+			// endedAt が null → ゲーム継続中 → PLAYING に復帰
+			if (isHost) {
+				// ホストとして復帰した場合、subscribe 完了後に host_resumed を broadcast する
+				resumedAsHostRef.current = true;
+			}
+			initGameRef.current(match.difficulty as MeteorDifficulty);
+		});
+		// マウント時のみ実行
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, []);
+
+	// ============================================
 	// Supabase Realtime
 	// ============================================
 
@@ -779,7 +807,29 @@ export function useMeteorBusters({
 			handleGameEnd(payload);
 		});
 
-		channel.subscribe();
+		// ホストがリロード復帰した際に非ホストの古い隕石状態をリセットする
+		channel.on("broadcast", { event: "host_resumed" }, () => {
+			if (isHost) return;
+			meteorsRef.current.clear();
+			setMeteors([]);
+			spawnedCountRef.current = 0;
+			setSpawnedCount(0);
+			destroyedCountRef.current = 0;
+			setDestroyedCount(0);
+			missedCountRef.current = 0;
+		});
+
+		channel.subscribe((status: string) => {
+			// ホストとしてリロード復帰した場合、subscribe 完了後に非ホストへリセットを通知
+			if (status === "SUBSCRIBED" && resumedAsHostRef.current) {
+				resumedAsHostRef.current = false;
+				channel.send({
+					type: "broadcast",
+					event: "host_resumed",
+					payload: {},
+				});
+			}
+		});
 
 		return () => {
 			supabase.removeChannel(channel);
