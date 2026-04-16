@@ -49,8 +49,8 @@ interface ShotPayload {
 
 interface CursorPayload {
 	playerId: string;
-	x: number;
-	y: number;
+	xPct: number;
+	yPct: number;
 	bulletType: MeteorBulletType;
 }
 
@@ -173,6 +173,9 @@ export function useMeteorBusters({
 	/** 最後の射撃カーソル位置（命中FX表示に使用） */
 	const lastShotCursorRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
 	const checkGameEndRef = useRef<() => void>(() => {});
+	const getMeteorScreenPosRef = useRef<typeof getMeteorScreenPos | null>(null);
+	const playRef = useRef<typeof play>(play);
+	const onShakeRef = useRef<typeof onShake>(onShake);
 
 	useEffect(() => {
 		phaseRef.current = phase;
@@ -380,6 +383,17 @@ export function useMeteorBusters({
 		checkGameEndRef.current = checkGameEnd;
 	}, [checkGameEnd]);
 
+	// getMeteorScreenPos / play / onShake を ref に同期（Realtime useEffect から deps なしで呼べるように）
+	useEffect(() => {
+		getMeteorScreenPosRef.current = getMeteorScreenPos;
+	}, [getMeteorScreenPos]);
+	useEffect(() => {
+		playRef.current = play;
+	}, [play]);
+	useEffect(() => {
+		onShakeRef.current = onShake;
+	}, [onShake]);
+
 	// ============================================
 	// アクションハンドラ
 	// ============================================
@@ -473,7 +487,7 @@ export function useMeteorBusters({
 			play("shooting");
 
 			// 両下角から弾アニメ生成（弾種色で色付け）
-			const idPrefix = `anim_${Date.now()}`;
+			const idPrefix = `anim_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
 			const bulletColor = GLOW_COLORS[bulletTypeRef.current];
 			const anims = makeBulletAnims(cursorX, cursorY, w, h, idPrefix, bulletColor);
 			addBulletAnims(anims);
@@ -515,13 +529,25 @@ export function useMeteorBusters({
 				} satisfies ShotPayload,
 			});
 
-			// ホストがダメージ計算（弾の飛行時間だけ遅延させて視覚と同期）
-			if (isHost && closestMeteor) {
-				const travelMs = Math.max(...anims.map((a) => a.durationSec)) * 1000;
-				const meteorId = closestMeteor.id;
-				setTimeout(() => {
-					applyDamage(meteorId, currentBulletType, currentUserId);
-				}, travelMs);
+			const travelMs = Math.max(...anims.map((a) => a.durationSec)) * 1000;
+
+			if (closestMeteor) {
+				if (isHost) {
+					// ホストがダメージ計算（弾の飛行時間だけ遅延させて視覚と同期）
+					const meteorId = closestMeteor.id;
+					setTimeout(() => {
+						applyDamage(meteorId, currentBulletType, currentUserId);
+					}, travelMs);
+				} else {
+					// 非ホストは命中FXだけローカルで生成（ダメージはホストが処理）
+					setTimeout(() => {
+						const fxId = `fx_${Date.now()}_${Math.random().toString(36).slice(2, 5)}`;
+						setCollisions((prev) => [...prev, { id: fxId, x: cursorX, y: cursorY }]);
+						setTimeout(() => {
+							setCollisions((prev) => prev.filter((c) => c.id !== fxId));
+						}, 600);
+					}, travelMs);
+				}
 			}
 		},
 		[isHost, currentUserId, getMeteorScreenPos, play, addBulletAnims],
@@ -599,18 +625,21 @@ export function useMeteorBusters({
 			if (now - cursorThrottleRef.current < 50) return;
 			cursorThrottleRef.current = now;
 
+			const rect = containerRef.current?.getBoundingClientRect();
+			if (!rect) return;
+
 			channelRef.current?.send({
 				type: "broadcast",
 				event: "cursor",
 				payload: {
 					playerId: currentUserId,
-					x,
-					y,
+					xPct: x / rect.width,
+					yPct: y / rect.height,
 					bulletType: bulletTypeRef.current,
 				} satisfies CursorPayload,
 			});
 		},
-		[currentUserId],
+		[currentUserId, containerRef],
 	);
 
 	/** タイトルに戻る */
@@ -646,6 +675,7 @@ export function useMeteorBusters({
 			if (isHost) return;
 			const meteor: MeteorObject = {
 				...payload,
+				spawnTime: performance.now(), // ホストのクロックではなく自分のクロックで起算
 				angle: payload.spawnAngle,
 				destroyed: false,
 			};
@@ -664,7 +694,7 @@ export function useMeteorBusters({
 			if (rect) {
 				const cursorX = p.cursorXPct * rect.width;
 				const cursorY = p.cursorYPct * rect.height;
-				const idPrefix = `anim_remote_${Date.now()}_${p.playerId}`;
+				const idPrefix = `anim_remote_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
 				const remoteColor = GLOW_COLORS[p.bulletType];
 				const anims = makeBulletAnims(cursorX, cursorY, rect.width, rect.height, idPrefix, remoteColor);
 				setBulletAnims((prev) => [...prev, ...anims]);
@@ -704,6 +734,19 @@ export function useMeteorBusters({
 				meteorsRef.current.set(p.meteorId, updated);
 				destroyedCountRef.current += 1;
 				setDestroyedCount(destroyedCountRef.current);
+
+				// 破壊FX・SE・シェイク（非ホスト側）
+				const rect = containerRef.current?.getBoundingClientRect();
+				if (rect && getMeteorScreenPosRef.current) {
+					const pos = getMeteorScreenPosRef.current(meteor.angle, meteor.yOffset, rect, meteor.orbitTrack);
+					const fxId = `fx_remote_${Date.now()}_${Math.random().toString(36).slice(2, 5)}`;
+					setCollisions((prev) => [...prev, { id: fxId, x: pos.x, y: pos.y }]);
+					setTimeout(() => {
+						setCollisions((prev) => prev.filter((c) => c.id !== fxId));
+					}, 600);
+				}
+				playRef.current("star-damage");
+				onShakeRef.current?.("small");
 			} else {
 				meteorsRef.current.set(p.meteorId, { ...meteor, hp: p.hp });
 			}
@@ -718,9 +761,16 @@ export function useMeteorBusters({
 
 		channel.on("broadcast", { event: "cursor" }, ({ payload }: { payload: CursorPayload }) => {
 			if (payload.playerId === currentUserId) return;
+			const rect = containerRef.current?.getBoundingClientRect();
+			if (!rect) return;
 			setPlayerCursors((prev) => {
 				const filtered = prev.filter((c) => c.playerId !== payload.playerId);
-				return [...filtered, payload];
+				return [...filtered, {
+					playerId: payload.playerId,
+					x: payload.xPct * rect.width,
+					y: payload.yPct * rect.height,
+					bulletType: payload.bulletType,
+				}];
 			});
 		});
 

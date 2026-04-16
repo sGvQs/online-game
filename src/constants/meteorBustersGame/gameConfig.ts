@@ -5,7 +5,8 @@ export const CLEAR_RATE = 0.8; // 80%以上でクリア
 export const MAX_AMMO = 12;
 
 /** 軌道中心の垂直位置（コンテナ高さに対する比率）。HUDを避けてやや上寄せ */
-export const ORBIT_CENTER_Y_RATIO = 0.42;
+/** 軌道・星・恐竜の垂直中心位置（コンテナ高さに対する比率）。小さくするほど上に移動 */
+export const ORBIT_CENTER_Y_RATIO = 0.32;
 
 /**
  * 軌道トラック定義。全フィールド必須。

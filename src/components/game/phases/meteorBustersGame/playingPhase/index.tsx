@@ -8,7 +8,7 @@ import { ShooterBullets } from "@/components/game/common/shooter/ShooterBullets"
 import { ShooterCursor } from "@/components/game/common/shooter/ShooterCursor";
 import { ShooterCollisionFx } from "@/components/game/common/shooter/ShooterCollisionFx";
 import { ShooterAmmoHud } from "@/components/game/common/shooter/ShooterAmmoHud";
-import { GLOW_COLORS } from "@/constants/meteorBustersGame/gameConfig";
+import { GLOW_COLORS, ORBIT_CENTER_Y_RATIO } from "@/constants/meteorBustersGame/gameConfig";
 import { SHOOTER_AMMO_MAX } from "@/lib/shooter/config";
 import type {
 	MeteorObject,
@@ -92,7 +92,7 @@ export function PlayingPhase({
 	return (
 		<div ref={containerRef} className={styles.container()}>
 			{/* 中央の星 */}
-			<div className={styles.star()}>
+			<div className={styles.star()} style={{ top: `${ORBIT_CENTER_Y_RATIO * 100}%` }}>
 				<div
 					className="w-72 h-72 rounded-full"
 					style={{

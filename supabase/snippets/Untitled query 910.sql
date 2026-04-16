@@ -1,0 +1,1 @@
+SELECT pubname, puballtables FROM pg_publication WHERE pubname = 'supabase_realtime';
