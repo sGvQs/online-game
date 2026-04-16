@@ -221,7 +221,7 @@ const DinoGuard = memo(function DinoGuard({
 	);
 });
 
-export function MeteorRenderer({
+export const MeteorRenderer = memo(function MeteorRenderer({
 	meteors,
 	containerWidth,
 	containerHeight,
@@ -295,4 +295,4 @@ export function MeteorRenderer({
 			})}
 		</>
 	);
-}
+});

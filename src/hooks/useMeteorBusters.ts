@@ -177,6 +177,10 @@ export function useMeteorBusters({
 	const initGameRef = useRef<(diff: MeteorDifficulty) => void>(() => {});
 	/** ホストとしてリロード復帰した場合に true（subscribe 完了後に host_resumed を broadcast するため） */
 	const resumedAsHostRef = useRef(false);
+	/** RAF フレームカウンタ（setMeteors 間引き用） */
+	const rafFrameCountRef = useRef(0);
+	/** ボット tick 関数（tickMeteors RAF に統合するための ref） */
+	const botTickRef = useRef<(() => void) | null>(null);
 	const getMeteorScreenPosRef = useRef<typeof getMeteorScreenPos | null>(null);
 	const playRef = useRef<typeof play>(play);
 	const onShakeRef = useRef<typeof onShake>(onShake);
@@ -213,6 +217,11 @@ export function useMeteorBusters({
 	);
 
 	const tickMeteors = useCallback(() => {
+		rafFrameCountRef.current++;
+
+		// ボット tick を統合実行（別 RAF ループを持たないようにする）
+		botTickRef.current?.();
+
 		const now = performance.now();
 		let hasChange = false;
 		const newCollisionFxs: CollisionFx[] = [];
@@ -260,7 +269,8 @@ export function useMeteorBusters({
 			}
 		}
 
-		if (hasChange) {
+		// setMeteors は2フレームに1回に間引いて React 再レンダーコストを半減
+		if (hasChange && rafFrameCountRef.current % 2 === 0) {
 			setMeteors([...meteorsRef.current.values()].filter((m) => !m.destroyed));
 		}
 
@@ -666,6 +676,165 @@ export function useMeteorBusters({
 		ammoRef.current = SHOOTER_AMMO_MAX;
 		setBulletAnims([]);
 	}, []);
+
+	// ============================================
+	// 開発環境ボット（非ホスト自動射撃・人間らしい挙動）
+	// ============================================
+
+	useEffect(() => {
+		if (process.env.NODE_ENV !== "development" || isHost) return;
+
+		// クロージャ内で持ち続けるボット状態
+		const botCursor = { x: 0, y: 0 };
+		const aimTarget = { x: 0, y: 0 };
+		let aimOffset = { x: 0, y: 0 };
+		let lastTargetId: string | null = null;
+		let lastCursorBroadcast = 0;
+		let nextShootTime = Date.now() + 800; // 最初だけ少し待つ
+
+		const tick = () => {
+			if (phaseRef.current !== "PLAYING") return;
+
+			const now = Date.now();
+			const perfNow = performance.now();
+			const rect = containerRef.current?.getBoundingClientRect();
+			if (!rect) return;
+
+			// ── 1. ターゲット選定（軌道進行度が最大の隕石） ──
+			let bestMeteor: MeteorObject | null = null;
+			let bestProgress = -1;
+			for (const meteor of meteorsRef.current.values()) {
+				if (meteor.destroyed) continue;
+				const progress = (perfNow - meteor.spawnTime) / meteor.orbitDurationMs;
+				if (progress > bestProgress) {
+					bestProgress = progress;
+					bestMeteor = meteor;
+				}
+			}
+
+			// ── 2. エイム目標を更新（新ターゲットでオフセット再抽選） ──
+			if (bestMeteor && getMeteorScreenPosRef.current) {
+				if (bestMeteor.id !== lastTargetId) {
+					lastTargetId = bestMeteor.id;
+					// ターゲット切替時に ±15px のランダムなズレを設定（上手い人レベル）
+					aimOffset = {
+						x: (Math.random() - 0.5) * 30,
+						y: (Math.random() - 0.5) * 30,
+					};
+				}
+				const pos = getMeteorScreenPosRef.current(
+					bestMeteor.angle, bestMeteor.yOffset, rect, bestMeteor.orbitTrack,
+				);
+				aimTarget.x = pos.x + aimOffset.x;
+				aimTarget.y = pos.y + aimOffset.y;
+			}
+
+			// ── 3. カーソルを目標へ緩やかに近づける（lerp + 微ジッター） ──
+			const lerp = 0.14;
+			botCursor.x += (aimTarget.x - botCursor.x) * lerp + (Math.random() - 0.5) * 1.5;
+			botCursor.y += (aimTarget.y - botCursor.y) * lerp + (Math.random() - 0.5) * 1.5;
+
+			// ── 4. カーソル位置を broadcast（他プレイヤーに動きが見える） ──
+			if (now - lastCursorBroadcast > 50) {
+				lastCursorBroadcast = now;
+				channelRef.current?.send({
+					type: "broadcast",
+					event: "cursor",
+					payload: {
+						playerId: currentUserId,
+						xPct: botCursor.x / rect.width,
+						yPct: botCursor.y / rect.height,
+						bulletType: bulletTypeRef.current,
+					} satisfies CursorPayload,
+				});
+			}
+
+			// ── 5. 射撃タイミング ──
+			if (now < nextShootTime) return;
+
+			// 弾切れ → 自動リロード（リロード後は少し間を置く）
+			if (ammoRef.current <= 0) {
+				ammoRef.current = SHOOTER_AMMO_MAX;
+				setAmmoRemaining(SHOOTER_AMMO_MAX);
+				playRef.current("reload");
+				nextShootTime = now + 600;
+				return;
+			}
+
+			if (!bestMeteor) return;
+
+			// 弾種切替（90%確率で即切替）
+			if (bulletTypeRef.current !== bestMeteor.type && Math.random() < 0.9) {
+				bulletTypeRef.current = bestMeteor.type;
+				setBulletType(bestMeteor.type);
+			}
+
+			const cursorX = botCursor.x;
+			const cursorY = botCursor.y;
+
+			// 弾数消費 & 発射SE
+			ammoRef.current = Math.max(0, ammoRef.current - 1);
+			setAmmoRemaining(ammoRef.current);
+			playRef.current("shooting");
+
+			// 弾アニメ
+			const idPrefix = `anim_bot_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+			const bulletColor = GLOW_COLORS[bulletTypeRef.current];
+			const anims = makeBulletAnims(cursorX, cursorY, rect.width, rect.height, idPrefix, bulletColor);
+			addBulletAnims(anims);
+
+			// 現在のカーソル位置で命中判定（ズレていれば miss になる）
+			let hitMeteorId: string | null = null;
+			if (getMeteorScreenPosRef.current) {
+				for (const meteor of meteorsRef.current.values()) {
+					if (meteor.destroyed) continue;
+					const track = ORBIT_TRACKS[meteor.orbitTrack];
+					if (!track) continue;
+					const depth = Math.sin(meteor.angle);
+					const scale = track.minScale + (track.maxScale - track.minScale) * ((depth + 1) / 2);
+					const hitRadius = Math.max(16, 24 * scale);
+					const pos = getMeteorScreenPosRef.current(meteor.angle, meteor.yOffset, rect, meteor.orbitTrack);
+					if (Math.hypot(pos.x - cursorX, pos.y - cursorY) < hitRadius) {
+						hitMeteorId = meteor.id;
+						break;
+					}
+				}
+			}
+
+			// Broadcast（ホストがダメージ処理）
+			channelRef.current?.send({
+				type: "broadcast",
+				event: "shot",
+				payload: {
+					playerId: currentUserId,
+					bulletType: bulletTypeRef.current,
+					cursorXPct: cursorX / rect.width,
+					cursorYPct: cursorY / rect.height,
+					meteorId: hitMeteorId,
+				} satisfies ShotPayload,
+			});
+
+			// 命中FXは当たったときのみ
+			if (hitMeteorId) {
+				const travelMs = Math.max(...anims.map((a) => a.durationSec)) * 1000;
+				setTimeout(() => {
+					const fxId = `fx_bot_${Date.now()}_${Math.random().toString(36).slice(2, 5)}`;
+					setCollisions((prev) => [...prev, { id: fxId, x: cursorX, y: cursorY }]);
+					setTimeout(() => {
+						setCollisions((prev) => prev.filter((c) => c.id !== fxId));
+					}, 600);
+				}, travelMs);
+			}
+
+			// 次の射撃タイミング（150〜300ms 連打）
+			nextShootTime = now + 150 + Math.random() * 150;
+		};
+
+		// tickMeteors の RAF に統合して二重 RAF を回避
+		botTickRef.current = tick;
+		return () => { botTickRef.current = null; };
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [isHost, currentUserId, containerRef, addBulletAnims]);
 
 	// ============================================
 	// マウント時リロード復帰チェック
