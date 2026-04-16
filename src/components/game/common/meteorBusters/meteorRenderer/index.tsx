@@ -1,6 +1,6 @@
 "use client";
 
-import { memo, useState, useEffect } from "react";
+import { memo, useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { GLOW_COLORS, ORBIT_TRACKS, ORBIT_CENTER_Y_RATIO } from "@/constants/meteorBustersGame/gameConfig";
@@ -82,15 +82,20 @@ const OrbitGuides = memo(function OrbitGuides({
 	);
 });
 
-const DINO_BALL_COUNT = 3;
-const DINO_BALL_INTERVAL = 0.5;
+/** 球の発射間隔（秒）。小さくするほど連射が速い */
+const DINO_BALL_INTERVAL = 0.2;
+/** 球が飛ぶ時間（秒）。小さくするほど球が速い */
 const DINO_BALL_DURATION = 1.2;
+/** 継続的に見えるために必要な球数（duration / interval で自動計算） */
+const DINO_BALL_COUNT = Math.ceil(DINO_BALL_DURATION / DINO_BALL_INTERVAL);
 /** w-72 = 288px → 半径 144px（固定サイズ） */
 const STAR_RADIUS_PX = 144;
 const DINO_GAP = 4;
 /** 恐竜の縦位置調整。containerHeight に対する比率（負の値で上に移動） */
 const DINO_Y_OFFSET_RATIO = -0.028;
 const BALL_TRAVEL_PX = 220;
+/** 恐竜の球の照射角度のランダム幅（±度数）*/
+const DINO_BALL_SPREAD_DEG = 10;
 // 恐竜ガード（星の表面に接する位置に1匹配置し、常時球を発射）
 const DinoGuard = memo(function DinoGuard({
 	containerWidth,
@@ -101,11 +106,16 @@ const DinoGuard = memo(function DinoGuard({
 }) {
 	// delay の代わりに時間差で DOM に追加することで初回の口への溜まりを防ぐ
 	const [activeBalls, setActiveBalls] = useState(0);
+	// 各ボールのランダム角度オフセット（±2度、マウント時に1回生成）
+	const ballAnglesRef = useRef<number[]>(
+		Array.from({ length: DINO_BALL_COUNT }, () => (Math.random() * 2 - 1) * DINO_BALL_SPREAD_DEG * (Math.PI / 180))
+	);
 	useEffect(() => {
 		setActiveBalls(1);
-		const t1 = setTimeout(() => setActiveBalls(2), DINO_BALL_INTERVAL * 1000);
-		const t2 = setTimeout(() => setActiveBalls(3), DINO_BALL_INTERVAL * 2 * 1000);
-		return () => { clearTimeout(t1); clearTimeout(t2); };
+		const timers = Array.from({ length: DINO_BALL_COUNT - 1 }, (_, i) =>
+			setTimeout(() => setActiveBalls(i + 2), DINO_BALL_INTERVAL * (i + 1) * 1000)
+		);
+		return () => timers.forEach(clearTimeout);
 	}, []);
 
 	const track = ORBIT_TRACKS[0];
@@ -153,8 +163,9 @@ const DinoGuard = memo(function DinoGuard({
 
 	const mouthX = dinoX - bnx * sizePx * 0.45;
 	const mouthY = dinoY - bny * sizePx * 0.45;
-	const ballToX = mouthX - bnx * BALL_TRAVEL_PX;
-	const ballToY = mouthY - bny * BALL_TRAVEL_PX;
+	// 基準方向（spawn 方向の逆）
+	const baseDx = -bnx;
+	const baseDy = -bny;
 
 	return (
 		<>
@@ -177,26 +188,35 @@ const DinoGuard = memo(function DinoGuard({
 			</div>
 
 			{/* 常時ループする球（時間差で DOM 追加してスタッガー、溜まり防止） */}
-			{Array.from({ length: activeBalls }, (_, i) => (
-				<motion.div
-					key={`dino-ball-${i}`}
-					className="absolute top-0 left-0 rounded-full pointer-events-none"
-					style={{
-						width: 8,
-						height: 8,
-						background: "#ff4444",
-						boxShadow: "0 0 8px #ff4444, 0 0 16px #ff444466",
-						zIndex: 35,
-					}}
-					initial={{ x: mouthX, y: mouthY, translateX: "-50%", translateY: "-50%", opacity: 1, scale: 1 }}
-					animate={{ x: ballToX, y: ballToY, opacity: 0, scale: 0.3 }}
-					transition={{
-						duration: DINO_BALL_DURATION,
-						ease: "linear",
-						repeat: Infinity,
-					}}
-				/>
-			))}
+			{Array.from({ length: activeBalls }, (_, i) => {
+				const angleOffset = ballAnglesRef.current[i] ?? 0;
+				const cos = Math.cos(angleOffset);
+				const sin = Math.sin(angleOffset);
+				const rotDx = baseDx * cos - baseDy * sin;
+				const rotDy = baseDx * sin + baseDy * cos;
+				const ballToX = mouthX + rotDx * BALL_TRAVEL_PX;
+				const ballToY = mouthY + rotDy * BALL_TRAVEL_PX;
+				return (
+					<motion.div
+						key={`dino-ball-${i}`}
+						className="absolute top-0 left-0 rounded-full pointer-events-none"
+						style={{
+							width: 8,
+							height: 8,
+							background: "#ff4444",
+							boxShadow: "0 0 8px #ff4444, 0 0 16px #ff444466",
+							zIndex: 35,
+						}}
+						initial={{ x: mouthX, y: mouthY, translateX: "-50%", translateY: "-50%", opacity: 1, scale: 1 }}
+						animate={{ x: ballToX, y: ballToY, opacity: 0, scale: 0.3 }}
+						transition={{
+							duration: DINO_BALL_DURATION,
+							ease: "linear",
+							repeat: Infinity,
+						}}
+					/>
+				);
+			})}
 		</>
 	);
 });
