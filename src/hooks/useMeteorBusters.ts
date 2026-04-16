@@ -159,6 +159,7 @@ export function useMeteorBusters({
 	const difficultyRef = useRef<MeteorDifficulty>("NORMAL");
 	const spawnedCountRef = useRef(0);
 	const destroyedCountRef = useRef(0);
+	const missedCountRef = useRef(0);
 	const totalSpawnCountRef = useRef(0);
 	const meteorsRef = useRef<Map<string, MeteorObject>>(new Map());
 	const bulletTypeRef = useRef<MeteorBulletType>("A");
@@ -171,6 +172,7 @@ export function useMeteorBusters({
 	const cursorThrottleRef = useRef<number>(0);
 	/** 最後の射撃カーソル位置（命中FX表示に使用） */
 	const lastShotCursorRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+	const checkGameEndRef = useRef<() => void>(() => {});
 
 	useEffect(() => {
 		phaseRef.current = phase;
@@ -229,6 +231,8 @@ export function useMeteorBusters({
 						event: "meteor_missed",
 						payload: { meteorId: meteor.id } satisfies MeteorMissedPayload,
 					});
+					missedCountRef.current += 1;
+					checkGameEndRef.current();
 				}
 				meteorsRef.current.delete(meteor.id);
 				hasChange = true;
@@ -304,31 +308,6 @@ export function useMeteorBusters({
 				spawnNextMeteor,
 				config.spawnIntervalMs,
 			);
-		} else {
-			endTimerRef.current = setTimeout(() => {
-				if (phaseRef.current !== "PLAYING") return;
-				const destroyed = destroyedCountRef.current;
-				const spawned = spawnedCountRef.current;
-				const rate = spawned > 0 ? destroyed / spawned : 0;
-				const isCleared = rate >= CLEAR_RATE;
-
-				channelRef.current?.send({
-					type: "broadcast",
-					event: "game_end",
-					payload: {
-						destroyedCount: destroyed,
-						spawnedCount: spawned,
-						destroyRate: rate,
-						isCleared,
-					} satisfies GameEndPayload,
-				});
-				handleGameEnd({
-					destroyedCount: destroyed,
-					spawnedCount: spawned,
-					destroyRate: rate,
-					isCleared,
-				});
-			}, GAME_END_DELAY_MS + config.orbitDurationMs);
 		}
 	}, []);
 
@@ -361,6 +340,45 @@ export function useMeteorBusters({
 		},
 		[isHost, roomId, play],
 	);
+
+	// ============================================
+	// 全隕石消滅チェック（ホストのみ）
+	// ============================================
+
+	const checkGameEnd = useCallback(() => {
+		if (!isHost) return;
+		if (phaseRef.current !== "PLAYING") return;
+		if (spawnedCountRef.current < totalSpawnCountRef.current) return;
+		const eliminated = destroyedCountRef.current + missedCountRef.current;
+		if (eliminated < totalSpawnCountRef.current) return;
+
+		const destroyed = destroyedCountRef.current;
+		const spawned = spawnedCountRef.current;
+		const rate = spawned > 0 ? destroyed / spawned : 0;
+		const isCleared = rate >= CLEAR_RATE;
+
+		channelRef.current?.send({
+			type: "broadcast",
+			event: "game_end",
+			payload: {
+				destroyedCount: destroyed,
+				spawnedCount: spawned,
+				destroyRate: rate,
+				isCleared,
+			} satisfies GameEndPayload,
+		});
+		handleGameEnd({
+			destroyedCount: destroyed,
+			spawnedCount: spawned,
+			destroyRate: rate,
+			isCleared,
+		});
+	}, [isHost, handleGameEnd]);
+
+	// checkGameEnd を ref に同期（tickMeteors から deps なしで呼べるように）
+	useEffect(() => {
+		checkGameEndRef.current = checkGameEnd;
+	}, [checkGameEnd]);
 
 	// ============================================
 	// アクションハンドラ
@@ -400,6 +418,7 @@ export function useMeteorBusters({
 		totalSpawnCountRef.current = config.totalSpawnCount;
 		spawnedCountRef.current = 0;
 		destroyedCountRef.current = 0;
+		missedCountRef.current = 0;
 		meteorsRef.current.clear();
 		gameStartTimeRef.current = performance.now();
 
@@ -539,6 +558,7 @@ export function useMeteorBusters({
 				});
 				play("star-damage");
 				onShake?.("small");
+				checkGameEnd();
 			} else {
 				const updated = { ...meteor, hp: newHp };
 				meteorsRef.current.set(meteorId, updated);
@@ -552,7 +572,7 @@ export function useMeteorBusters({
 
 			setMeteors([...meteorsRef.current.values()].filter((m) => !m.destroyed));
 		},
-		[play, onShake],
+		[play, onShake, checkGameEnd],
 	);
 
 	/** リロード */

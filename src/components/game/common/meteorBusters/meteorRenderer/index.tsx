@@ -88,8 +88,8 @@ const DINO_BALL_DURATION = 1.2;
 /** w-72 = 288px → 半径 144px（固定サイズ） */
 const STAR_RADIUS_PX = 144;
 const DINO_GAP = 4;
-/** 恐竜の縦位置調整。負の値で上に移動（px） */
-const DINO_Y_OFFSET = -18;
+/** 恐竜の縦位置調整。containerHeight に対する比率（負の値で上に移動） */
+const DINO_Y_OFFSET_RATIO = -0.028;
 const BALL_TRAVEL_PX = 220;
 // 恐竜ガード（星の表面に接する位置に1匹配置し、常時球を発射）
 const DinoGuard = memo(function DinoGuard({
@@ -133,7 +133,7 @@ const DinoGuard = memo(function DinoGuard({
 	const dndx = dcLen > 0 ? dcx / dcLen : 1;
 	const dndy = dcLen > 0 ? dcy / dcLen : 0;
 	const dinoX = starCX + dndx * (STAR_RADIUS_PX + DINO_GAP);
-	const dinoY = starCY + dndy * (STAR_RADIUS_PX + DINO_GAP) + DINO_Y_OFFSET;
+	const dinoY = starCY + dndy * (STAR_RADIUS_PX + DINO_GAP) + containerHeight * DINO_Y_OFFSET_RATIO;
 
 	const depth = Math.sin(collisionAngle);
 	const scale = track.minScale + (track.maxScale - track.minScale) * ((depth + 1) / 2);

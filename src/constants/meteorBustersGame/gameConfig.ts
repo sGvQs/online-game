@@ -40,19 +40,11 @@ export interface OrbitTrackConfig {
 // rx: 0.20〜0.58 を 6 本均等配置（ステップ ≈ 0.076）
 // ry / maxScale も線形補間
 export const ORBIT_TRACKS: OrbitTrackConfig[] = [
-	// { rx: 0.28, ry: 0.042, tilt: -Math.PI / 4, spawnAngle: -Math.PI / 6, collisionAngles: [Math.PI * 3 / 2], speedMultiplier: 1.0, minScale: 0.1, maxScale: 0.8, offsetX: 0, offsetY: 0.03 },
-	// { rx: 0.35, ry: 0.057, tilt: -Math.PI / 4, spawnAngle: -Math.PI / 6, collisionAngles: [Math.PI * 3 / 2], speedMultiplier: 1.0, minScale: 0.1, maxScale: 1.4, offsetX: 0, offsetY: 0.06 },
-	// { rx: 0.43, ry: 0.071, tilt: -Math.PI / 4, spawnAngle: -Math.PI / 6, collisionAngles: [Math.PI * 3 / 2], speedMultiplier: 1.0, minScale: 0.1, maxScale: 1.9, offsetX: 0, offsetY: 0.09 },
-	// { rx: 0.20, ry: 0.028, tilt: -Math.PI / 4, spawnAngle: -Math.PI / 6, collisionAngles: [Math.PI * 3 / 2], speedMultiplier: 1.0, minScale: 0.1, maxScale: 0.3, offsetX: 0, offsetY: 0 },
-	{ rx: 0.28, ry: 0.042, tilt: -Math.PI / 6, spawnAngle: -Math.PI / 2, collisionAngles: [Math.PI * 4 / 3], speedMultiplier: 1.0, minScale: 0.01, maxScale: 0.8, offsetX: 0, offsetY: 0.03 },
-	{ rx: 0.35, ry: 0.057, tilt: -Math.PI / 6, spawnAngle: -Math.PI / 2, collisionAngles: [Math.PI * 4 / 3], speedMultiplier: 1.0, minScale: 0.01, maxScale: 1.4, offsetX: 0, offsetY: 0.06 },
-	{ rx: 0.43, ry: 0.071, tilt: -Math.PI / 6, spawnAngle: -Math.PI / 2, collisionAngles: [Math.PI * 4 / 3], speedMultiplier: 1.0, minScale: 0.01, maxScale: 1.9, offsetX: 0, offsetY: 0.09 },
-	{ rx: 0.50, ry: 0.086, tilt: -Math.PI / 6, spawnAngle: -Math.PI / 2, collisionAngles: [Math.PI * 4 / 3], speedMultiplier: 1.0, minScale: 0.01, maxScale: 2.5, offsetX: 0, offsetY: 0.12 },
-	{ rx: 0.58, ry: 0.100, tilt: -Math.PI / 6, spawnAngle: -Math.PI / 2, collisionAngles: [Math.PI * 4 / 3], speedMultiplier: 0.6, minScale: 0.01, maxScale: 3.0, offsetX: 0, offsetY: 0.15 },
-	// { rx: 0.20, ry: 0.028, tilt: -Math.PI / 9, spawnAngle: -Math.PI / 6, collisionAngles: [Math.PI * 3 / 2], speedMultiplier: 1.0, minScale: 0.1, maxScale: 0.3, offsetX: 0, offsetY: 0 },
-	// { rx: 0.28, ry: 0.042, tilt: -Math.PI / 9, spawnAngle: -Math.PI / 6, collisionAngles: [Math.PI * 3 / 2], speedMultiplier: 1.0, minScale: 0.1, maxScale: 0.8, offsetX: 0, offsetY: 0.03 },
-	// { rx: 0.35, ry: 0.057, tilt: -Math.PI / 9, spawnAngle: -Math.PI / 6, collisionAngles: [Math.PI * 3 / 2], speedMultiplier: 1.0, minScale: 0.1, maxScale: 1.4, offsetX: 0, offsetY: 0.06 },
-	// { rx: 0.43, ry: 0.071, tilt: -Math.PI / 9, spawnAngle: -Math.PI / 6, collisionAngles: [Math.PI * 3 / 2], speedMultiplier: 1.0, minScale: 0.1, maxScale: 1.9, offsetX: 0, offsetY: 0.09 },
+	{ rx: 0.28, ry: 0.042, tilt: -Math.PI / 6, spawnAngle: -Math.PI / 2, collisionAngles: [Math.PI * 4 / 3], speedMultiplier: 0.2, minScale: 0.01, maxScale: 0.4, offsetX: 0, offsetY: 0.03 },
+	{ rx: 0.35, ry: 0.057, tilt: -Math.PI / 6, spawnAngle: -Math.PI / 2, collisionAngles: [Math.PI * 4 / 3], speedMultiplier: 0.22, minScale: 0.01, maxScale: 0.8, offsetX: 0, offsetY: 0.06 },
+	{ rx: 0.43, ry: 0.071, tilt: -Math.PI / 6, spawnAngle: -Math.PI / 2, collisionAngles: [Math.PI * 4 / 3], speedMultiplier: 0.24, minScale: 0.01, maxScale: 1.6, offsetX: 0, offsetY: 0.09 },
+	{ rx: 0.50, ry: 0.086, tilt: -Math.PI / 6, spawnAngle: -Math.PI / 2, collisionAngles: [Math.PI * 4 / 3], speedMultiplier: 0.26, minScale: 0.01, maxScale: 3.2, offsetX: 0, offsetY: 0.12 },
+	{ rx: 0.58, ry: 0.100, tilt: -Math.PI / 6, spawnAngle: -Math.PI / 2, collisionAngles: [Math.PI * 4 / 3], speedMultiplier: 0.28, minScale: 0.01, maxScale: 6.4, offsetX: 0, offsetY: 0.15 },
 ];
 
 /** 弾と隕石のグロー色 */
@@ -72,25 +64,25 @@ export interface DifficultyConfig {
 
 export const DIFFICULTY_CONFIG: Record<MeteorDifficulty, DifficultyConfig> = {
 	EASY: {
-		totalSpawnCount: 15,
-		spawnIntervalMs: 4000,
-		meteorHp: 75,
-		orbitDurationMs: 8000,
-		pointsOnClear: 3,
+		totalSpawnCount: 50,
+		spawnIntervalMs: 1500,
+		meteorHp: 8,
+		orbitDurationMs: 7000,
+		pointsOnClear: 1,
 	},
 	NORMAL: {
-		totalSpawnCount: 20,
-		spawnIntervalMs: 3000,
-		meteorHp: 100,
+		totalSpawnCount: 100,
+		spawnIntervalMs: 1000,
+		meteorHp: 8,
 		orbitDurationMs: 6000,
-		pointsOnClear: 5,
+		pointsOnClear: 2,
 	},
 	HARD: {
 		totalSpawnCount: 300,
 		spawnIntervalMs: 500,
-		meteorHp: 150,
+		meteorHp: 15,
 		orbitDurationMs: 5000,
-		pointsOnClear: 8,
+		pointsOnClear: 5,
 	},
 };
 
