@@ -68,22 +68,72 @@ export const DIFFICULTY_CONFIG: Record<MeteorDifficulty, DifficultyConfig> = {
 		totalSpawnCount: 50,
 		spawnIntervalMs: 1500,
 		meteorHp: 8,
-		orbitDurationMs: 7000,
+		orbitDurationMs: 10000,
 		pointsOnClear: 1,
 	},
 	NORMAL: {
 		totalSpawnCount: 100,
-		spawnIntervalMs: 1000,
+		spawnIntervalMs: 1200,
 		meteorHp: 8,
-		orbitDurationMs: 6000,
+		orbitDurationMs: 9000,
 		pointsOnClear: 2,
 	},
 	HARD: {
-		totalSpawnCount: 300,
-		spawnIntervalMs: 500,
-		meteorHp: 15,
-		orbitDurationMs: 5000,
-		pointsOnClear: 5,
+		totalSpawnCount: 150,
+		spawnIntervalMs: 1000,
+		meteorHp: 50,
+		orbitDurationMs: 8000,
+		pointsOnClear: 3,
+	},
+};
+
+/**
+ * ボス隕石設定
+ * - regularInterval: HARD での通常ボスのスポーン間隔（有効隕石数）。0=なし
+ * - regularHp      : 通常ボスの HP
+ * - finalHp        : 最終ボスの HP
+ * - finalTriggerRemaining: 最終ボスを出す「残り有効隕石数」のトリガー値
+ * - effectiveCount : ボス1体が担う有効隕石数（破壊/逃したときの加算値）
+ */
+export interface BossConfig {
+	regularInterval: number;
+	regularHp: number;
+	finalHp: number;
+	finalTriggerRemaining: number;
+	effectiveCount: number;
+	/** 通常ボスの軌道時間倍率（大きいほど遅い） */
+	regularSpeedFactor: number;
+	/** 最終ボスの軌道時間倍率（大きいほど遅い） */
+	finalSpeedFactor: number;
+	/** 通常ボスの表示サイズ倍率 */
+	regularSizeFactor: number;
+	/** 最終ボスの表示サイズ倍率 */
+	finalSizeFactor: number;
+}
+
+export const BOSS_CONFIG: Partial<Record<MeteorDifficulty, BossConfig>> = {
+	// EASY にはボスなし
+	NORMAL: {
+		regularInterval: 0,
+		regularHp: 0,
+		finalHp: 500,
+		finalTriggerRemaining: 10,
+		effectiveCount: 10,
+		regularSpeedFactor: 2.0,
+		finalSpeedFactor: 3.0,
+		regularSizeFactor: 1.5,
+		finalSizeFactor: 3.0,
+	},
+	HARD: {
+		regularInterval: 50,   // 有効カウント 50 ごとに通常ボス
+		regularHp: 500,
+		finalHp: 5000,
+		finalTriggerRemaining: 10,
+		effectiveCount: 10,
+		regularSpeedFactor: 2.0,
+		finalSpeedFactor: 5.0,
+		regularSizeFactor: 1.5,
+		finalSizeFactor: 3.0,
 	},
 };
 

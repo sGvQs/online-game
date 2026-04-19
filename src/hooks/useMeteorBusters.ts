@@ -10,6 +10,7 @@ import {
 } from "@/server/actions/game";
 import {
 	DIFFICULTY_CONFIG,
+	BOSS_CONFIG,
 	DAMAGE_MATCH,
 	DAMAGE_MISMATCH,
 	BULLET_HIT_RADIUS,
@@ -66,6 +67,9 @@ interface MeteorSpawnPayload {
 	spawnAngle: number;
 	collisionAngle: number;
 	spawnTime: number;
+	isBoss: boolean;
+	isFinalBoss: boolean;
+	sizeFactor: number;
 }
 
 interface MeteorUpdatePayload {
@@ -247,7 +251,10 @@ export function useMeteorBusters({
 						event: "meteor_missed",
 						payload: { meteorId: meteor.id } satisfies MeteorMissedPayload,
 					});
-					missedCountRef.current += 1;
+					const effectiveCount = meteor.isBoss
+						? (BOSS_CONFIG[difficultyRef.current]?.effectiveCount ?? 1)
+						: 1;
+					missedCountRef.current += effectiveCount;
 					checkGameEndRef.current();
 				}
 				meteorsRef.current.delete(meteor.id);
@@ -285,7 +292,38 @@ export function useMeteorBusters({
 		if (phaseRef.current !== "PLAYING") return;
 		if (spawnedCountRef.current >= totalSpawnCountRef.current) return;
 
-		const config = DIFFICULTY_CONFIG[difficultyRef.current];
+		const diff = difficultyRef.current;
+		const config = DIFFICULTY_CONFIG[diff];
+		const bossConfig = BOSS_CONFIG[diff];
+		const remaining = totalSpawnCountRef.current - spawnedCountRef.current;
+
+		// ボス判定
+		let isBoss = false;
+		let isFinalBoss = false;
+		let meteorHp = config.meteorHp;
+		let bossSpeedFactor = 1.0;
+		let sizeFactor = 1.0;
+		if (bossConfig) {
+			if (remaining <= bossConfig.finalTriggerRemaining) {
+				// 最終ボス
+				isBoss = true;
+				isFinalBoss = true;
+				meteorHp = bossConfig.finalHp;
+				bossSpeedFactor = bossConfig.finalSpeedFactor;
+				sizeFactor = bossConfig.finalSizeFactor;
+			} else if (
+				bossConfig.regularInterval > 0 &&
+				spawnedCountRef.current > 0 &&
+				spawnedCountRef.current % bossConfig.regularInterval === 0
+			) {
+				// 通常ボス（HARD のみ）
+				isBoss = true;
+				meteorHp = bossConfig.regularHp;
+				bossSpeedFactor = bossConfig.regularSpeedFactor;
+				sizeFactor = bossConfig.regularSizeFactor;
+			}
+		}
+
 		const types: MeteorBulletType[] = ["A", "B", "C"];
 		const type = types[Math.floor(Math.random() * 3)];
 		const yOffset = (Math.random() * 2 - 1) * MAX_Y_OFFSET;
@@ -295,13 +333,16 @@ export function useMeteorBusters({
 			id: generateMeteorId(),
 			type,
 			orbitTrack,
-			hp: config.meteorHp,
-			maxHp: config.meteorHp,
+			hp: meteorHp,
+			maxHp: meteorHp,
 			yOffset,
-			orbitDurationMs: config.orbitDurationMs / track.speedMultiplier,
+			orbitDurationMs: (config.orbitDurationMs / track.speedMultiplier) * bossSpeedFactor,
 			spawnAngle: track.spawnAngle,
 			collisionAngle: track.collisionAngles[Math.floor(Math.random() * track.collisionAngles.length)],
 			spawnTime: performance.now(),
+			isBoss,
+			isFinalBoss,
+			sizeFactor,
 		};
 
 		channelRef.current?.send({
@@ -317,7 +358,9 @@ export function useMeteorBusters({
 		};
 		meteorsRef.current.set(meteor.id, meteorObj);
 
-		spawnedCountRef.current += 1;
+		// ボスは有効隕石換算 effectiveCount 個分をカウント
+		const effectiveCount = isBoss ? (bossConfig?.effectiveCount ?? 1) : 1;
+		spawnedCountRef.current += effectiveCount;
 		setSpawnedCount(spawnedCountRef.current);
 
 		if (spawnedCountRef.current < totalSpawnCountRef.current) {
@@ -520,8 +563,8 @@ export function useMeteorBusters({
 				if (!track) continue;
 				const depth = Math.sin(meteor.angle);
 				const scale = track.minScale + (track.maxScale - track.minScale) * ((depth + 1) / 2);
-				// sizePx = 48 * scale、その半径分を当たり判定とする（最低 16px）
-				const hitRadius = Math.max(16, 24 * scale);
+				// sizePx = 48 * scale * sizeFactor、その半径分を当たり判定とする（最低 16px）
+				const hitRadius = Math.max(16, 24 * scale * meteor.sizeFactor);
 				const pos = getMeteorScreenPos(meteor.angle, meteor.yOffset, containerRect, meteor.orbitTrack);
 				const dist = Math.hypot(pos.x - cursorX, pos.y - cursorY);
 				if (dist < hitRadius && dist < closestDist) {
@@ -593,7 +636,10 @@ export function useMeteorBusters({
 			if (newHp <= 0) {
 				const updated = { ...meteor, hp: 0, destroyed: true };
 				meteorsRef.current.set(meteorId, updated);
-				destroyedCountRef.current += 1;
+				const effectiveCount = meteor.isBoss
+					? (BOSS_CONFIG[difficultyRef.current]?.effectiveCount ?? 1)
+					: 1;
+				destroyedCountRef.current += effectiveCount;
 				setDestroyedCount(destroyedCountRef.current);
 
 				channelRef.current?.send({
@@ -685,7 +731,10 @@ export function useMeteorBusters({
 		if (process.env.NODE_ENV !== "development" || isHost) return;
 
 		// クロージャ内で持ち続けるボット状態
+		const BOT_PLAYER_ID = `__bot__${currentUserId}`;
 		const botCursor = { x: 0, y: 0 };
+		// ボット専用アモ（プレイヤーの ammoRef と独立させて干渉防止）
+		let botAmmo = SHOOTER_AMMO_MAX;
 		const aimTarget = { x: 0, y: 0 };
 		let aimOffset = { x: 0, y: 0 };
 		let lastTargetId: string | null = null;
@@ -741,7 +790,7 @@ export function useMeteorBusters({
 					type: "broadcast",
 					event: "cursor",
 					payload: {
-						playerId: currentUserId,
+						playerId: BOT_PLAYER_ID,
 						xPct: botCursor.x / rect.width,
 						yPct: botCursor.y / rect.height,
 						bulletType: bulletTypeRef.current,
@@ -753,9 +802,8 @@ export function useMeteorBusters({
 			if (now < nextShootTime) return;
 
 			// 弾切れ → 自動リロード（リロード後は少し間を置く）
-			if (ammoRef.current <= 0) {
-				ammoRef.current = SHOOTER_AMMO_MAX;
-				setAmmoRemaining(SHOOTER_AMMO_MAX);
+			if (botAmmo <= 0) {
+				botAmmo = SHOOTER_AMMO_MAX;
 				playRef.current("reload");
 				nextShootTime = now + 600;
 				return;
@@ -772,9 +820,8 @@ export function useMeteorBusters({
 			const cursorX = botCursor.x;
 			const cursorY = botCursor.y;
 
-			// 弾数消費 & 発射SE
-			ammoRef.current = Math.max(0, ammoRef.current - 1);
-			setAmmoRemaining(ammoRef.current);
+			// 弾数消費 & 発射SE（ボット専用カウンター）
+			botAmmo = Math.max(0, botAmmo - 1);
 			playRef.current("shooting");
 
 			// 弾アニメ
@@ -792,7 +839,7 @@ export function useMeteorBusters({
 					if (!track) continue;
 					const depth = Math.sin(meteor.angle);
 					const scale = track.minScale + (track.maxScale - track.minScale) * ((depth + 1) / 2);
-					const hitRadius = Math.max(16, 24 * scale);
+					const hitRadius = Math.max(16, 24 * scale * meteor.sizeFactor);
 					const pos = getMeteorScreenPosRef.current(meteor.angle, meteor.yOffset, rect, meteor.orbitTrack);
 					if (Math.hypot(pos.x - cursorX, pos.y - cursorY) < hitRadius) {
 						hitMeteorId = meteor.id;
@@ -806,7 +853,7 @@ export function useMeteorBusters({
 				type: "broadcast",
 				event: "shot",
 				payload: {
-					playerId: currentUserId,
+					playerId: BOT_PLAYER_ID,
 					bulletType: bulletTypeRef.current,
 					cursorXPct: cursorX / rect.width,
 					cursorYPct: cursorY / rect.height,
@@ -827,7 +874,7 @@ export function useMeteorBusters({
 			}
 
 			// 次の射撃タイミング（150〜300ms 連打）
-			nextShootTime = now + 150 + Math.random() * 150;
+			nextShootTime = now + 60 + Math.random() * 60;
 		};
 
 		// tickMeteors の RAF に統合して二重 RAF を回避
@@ -878,7 +925,11 @@ export function useMeteorBusters({
 			};
 			meteorsRef.current.set(meteor.id, meteor);
 			setMeteors([...meteorsRef.current.values()].filter((m) => !m.destroyed));
-			spawnedCountRef.current += 1;
+			// ボスは有効隕石換算分を加算
+			const effectiveCount = payload.isBoss
+				? (BOSS_CONFIG[difficultyRef.current]?.effectiveCount ?? 1)
+				: 1;
+			spawnedCountRef.current += effectiveCount;
 			setSpawnedCount(spawnedCountRef.current);
 		});
 
@@ -929,7 +980,10 @@ export function useMeteorBusters({
 			if (p.hp <= 0) {
 				const updated = { ...meteor, hp: 0, destroyed: true };
 				meteorsRef.current.set(p.meteorId, updated);
-				destroyedCountRef.current += 1;
+				const effectiveCount = meteor.isBoss
+					? (BOSS_CONFIG[difficultyRef.current]?.effectiveCount ?? 1)
+					: 1;
+				destroyedCountRef.current += effectiveCount;
 				setDestroyedCount(destroyedCountRef.current);
 
 				// 破壊FX・SE・シェイク（非ホスト側）

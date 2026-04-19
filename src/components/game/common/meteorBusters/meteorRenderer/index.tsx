@@ -245,7 +245,8 @@ export const MeteorRenderer = memo(function MeteorRenderer({
 
 				const color = GLOW_COLORS[meteor.type];
 				const hpRate = meteor.hp / meteor.maxHp;
-				const sizePx = Math.max(4, Math.round(48 * scale));
+				// ボスは 1.5 倍サイズ
+				const sizePx = Math.max(4, Math.round(48 * scale * meteor.sizeFactor));
 
 				return (
 					<div
@@ -257,13 +258,15 @@ export const MeteorRenderer = memo(function MeteorRenderer({
 							willChange: "transform",
 						}}
 					>
-						{/* 本体 */}
+						{/* 本体（ボスはオーラなし） */}
 						<div
 							style={{
 								width: sizePx,
 								height: sizePx,
 								position: "relative",
-								filter: `drop-shadow(0 0 ${Math.round(10 * scale)}px ${color}) drop-shadow(0 0 ${Math.round(20 * scale)}px ${color}66)`,
+								filter: meteor.isBoss
+									? undefined
+									: `drop-shadow(0 0 ${Math.round(10 * scale)}px ${color}) drop-shadow(0 0 ${Math.round(20 * scale)}px ${color}66)`,
 							}}
 						>
 							<Image
@@ -274,18 +277,21 @@ export const MeteorRenderer = memo(function MeteorRenderer({
 							/>
 						</div>
 
-						{/* HP バー */}
+						{/* HP バー（ボスは緑・太め） */}
 						<div
 							className="absolute left-1/2 -translate-x-1/2"
 							style={{ bottom: -6 - sizePx * 0.1, width: Math.max(24, sizePx * 0.8) }}
 						>
-							<div className="w-full h-1 bg-white/10 rounded-full overflow-hidden">
+							<div
+								className="w-full bg-white/10 rounded-full overflow-hidden"
+								style={{ height: meteor.isBoss ? 4 : 4 }}
+							>
 								<div
 									className="h-full rounded-full transition-all duration-100"
 									style={{
 										width: `${hpRate * 100}%`,
-										backgroundColor: color,
-										boxShadow: `0 0 4px ${color}`,
+										backgroundColor: meteor.isBoss ? "#22c55e" : color,
+										boxShadow: meteor.isBoss ? "0 0 6px #22c55e88" : `0 0 4px ${color}`,
 									}}
 								/>
 							</div>

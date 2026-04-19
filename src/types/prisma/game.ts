@@ -194,6 +194,12 @@ export interface MeteorObject {
 	/** 終着角度（ラジアン）。この角度に達したら missed 扱い */
 	collisionAngle: number;
 	destroyed: boolean;
+	/** ボス隕石フラグ。隕石換算10個分としてカウントされる */
+	isBoss: boolean;
+	/** 最終ボスフラグ。isBoss=true かつこれが true のとき最大サイズ・最低速度 */
+	isFinalBoss: boolean;
+	/** 表示サイズ倍率（通常=1.0、ボスは BOSS_CONFIG から設定） */
+	sizeFactor: number;
 }
 
 export interface PlayerCursorState {
