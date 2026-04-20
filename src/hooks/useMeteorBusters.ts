@@ -20,6 +20,9 @@ import {
 	GLOW_COLORS,
 	ORBIT_TRACKS,
 	ORBIT_CENTER_Y_RATIO,
+	RIPPLE_SIZE_RATIO,
+	RIPPLE_DURATION_MS,
+	RIPPLE_CHAIN_DAMAGE,
 } from "@/constants/meteorBustersGame/gameConfig";
 import { makeBulletAnims } from "@/lib/shooter/trajectory";
 import { SHOOTER_AMMO_MAX, SHOOTER_BULLET_SPEED_PX_S } from "@/lib/shooter/config";
@@ -32,6 +35,7 @@ import type {
 	MeteorBustersPhase,
 	MeteorBustersResult,
 	BulletAnim,
+	RippleEffect,
 } from "@/types";
 import type { CollisionFx } from "@/components/game/common/shooter/ShooterCollisionFx";
 
@@ -106,6 +110,7 @@ export interface UseMeteorBustersReturn {
 	playerCursors: PlayerCursorState[];
 	bulletAnims: BulletAnim[];
 	collisions: CollisionFx[];
+	rippleEffects: RippleEffect[];
 	result: MeteorBustersResult | null;
 	destroyedCount: number;
 	spawnedCount: number;
@@ -152,6 +157,7 @@ export function useMeteorBusters({
 	const [playerCursors, setPlayerCursors] = useState<PlayerCursorState[]>([]);
 	const [bulletAnims, setBulletAnims] = useState<BulletAnim[]>([]);
 	const [collisions, setCollisions] = useState<CollisionFx[]>([]);
+	const [rippleEffects, setRippleEffects] = useState<RippleEffect[]>([]);
 	const [result, setResult] = useState<MeteorBustersResult | null>(null);
 	const [destroyedCount, setDestroyedCount] = useState(0);
 	const [spawnedCount, setSpawnedCount] = useState(0);
@@ -617,12 +623,11 @@ export function useMeteorBusters({
 
 	/** ダメージ適用（ホストのみ） */
 	const applyDamage = useCallback(
-		(meteorId: string, bulletType: MeteorBulletType, _shooterId: string) => {
+		(meteorId: string, bulletType: MeteorBulletType, _shooterId: string, overrideDamage?: number) => {
 			const meteor = meteorsRef.current.get(meteorId);
 			if (!meteor || meteor.destroyed) return;
 
-			const damage =
-				meteor.type === bulletType ? DAMAGE_MATCH : DAMAGE_MISMATCH;
+			const damage = overrideDamage ?? (meteor.type === bulletType ? DAMAGE_MATCH : DAMAGE_MISMATCH);
 			const newHp = Math.max(0, meteor.hp - damage);
 
 			// 命中FX（カーソル位置）
@@ -641,6 +646,48 @@ export function useMeteorBusters({
 					: 1;
 				destroyedCountRef.current += effectiveCount;
 				setDestroyedCount(destroyedCountRef.current);
+
+				// 中ボス破壊時: 波紋エフェクト + 連鎖破壊
+				if (meteor.isBoss && !meteor.isFinalBoss && getMeteorScreenPosRef.current) {
+					const rect = containerRef.current?.getBoundingClientRect();
+					if (rect) {
+						const bossPos = getMeteorScreenPosRef.current(meteor.angle, meteor.yOffset, rect, meteor.orbitTrack);
+						const track = ORBIT_TRACKS[meteor.orbitTrack];
+						const maxRxPx = rect.width * RIPPLE_SIZE_RATIO;
+						const maxRyPx = track ? maxRxPx * (track.ry / track.rx) : maxRxPx;
+						const tilt = track?.tilt ?? 0;
+						const rippleId = `ripple_${meteorId}_${Date.now()}`;
+						setRippleEffects((prev) => [...prev, { id: rippleId, x: bossPos.x, y: bossPos.y, maxRxPx, maxRyPx, tilt }]);
+						setTimeout(() => setRippleEffects((prev) => prev.filter((r) => r.id !== rippleId)), RIPPLE_DURATION_MS + 200);
+
+						// ホストのみ連鎖破壊をスケジュール
+						if (isHost) {
+							const cosTilt = Math.cos(tilt);
+							const sinTilt = Math.sin(tilt);
+							const inRange: { id: string; type: MeteorBulletType; dist: number }[] = [];
+							for (const m of meteorsRef.current.values()) {
+								if (m.destroyed || m.id === meteorId) continue;
+								const mPos = getMeteorScreenPosRef.current!(m.angle, m.yOffset, rect, m.orbitTrack);
+								const dx = mPos.x - bossPos.x;
+								const dy = mPos.y - bossPos.y;
+								const dxRot = dx * cosTilt + dy * sinTilt;
+								const dyRot = -dx * sinTilt + dy * cosTilt;
+								const normalizedDist = Math.sqrt((dxRot / maxRxPx) ** 2 + (dyRot / maxRyPx) ** 2);
+								if (normalizedDist <= 1.0) {
+									inRange.push({ id: m.id, type: m.type, dist: normalizedDist });
+								}
+							}
+							inRange.sort((a, b) => a.dist - b.dist);
+							for (const target of inRange) {
+								const delay = Math.max(50, target.dist * 1000);
+								setTimeout(() => {
+									if (phaseRef.current !== "PLAYING") return;
+									applyDamage(target.id, target.type, "__chain__", RIPPLE_CHAIN_DAMAGE);
+								}, delay);
+							}
+						}
+					}
+				}
 
 				channelRef.current?.send({
 					type: "broadcast",
@@ -995,6 +1042,17 @@ export function useMeteorBusters({
 					setTimeout(() => {
 						setCollisions((prev) => prev.filter((c) => c.id !== fxId));
 					}, 600);
+
+					// 中ボス破壊時: 波紋エフェクト（非ホストは視覚のみ）
+					if (meteor.isBoss && !meteor.isFinalBoss) {
+						const track = ORBIT_TRACKS[meteor.orbitTrack];
+						const maxRxPx = rect.width * RIPPLE_SIZE_RATIO;
+						const maxRyPx = track ? maxRxPx * (track.ry / track.rx) : maxRxPx;
+						const tilt = track?.tilt ?? 0;
+						const rippleId = `ripple_remote_${p.meteorId}_${Date.now()}`;
+						setRippleEffects((prev) => [...prev, { id: rippleId, x: pos.x, y: pos.y, maxRxPx, maxRyPx, tilt }]);
+						setTimeout(() => setRippleEffects((prev) => prev.filter((r) => r.id !== rippleId)), RIPPLE_DURATION_MS + 200);
+					}
 				}
 				playRef.current("star-damage");
 				onShakeRef.current?.("small");
@@ -1072,6 +1130,7 @@ export function useMeteorBusters({
 		playerCursors,
 		bulletAnims,
 		collisions,
+		rippleEffects,
 		result,
 		destroyedCount,
 		spawnedCount,

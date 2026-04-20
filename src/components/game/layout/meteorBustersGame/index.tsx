@@ -64,6 +64,7 @@ export function MeteorBustersGame({
 		playerCursors,
 		bulletAnims,
 		collisions,
+		rippleEffects,
 		result,
 		destroyedCount,
 		spawnedCount,
@@ -178,6 +179,7 @@ export function MeteorBustersGame({
 						playerCursors={playerCursors}
 						bulletAnims={bulletAnims}
 						collisions={collisions}
+						rippleEffects={rippleEffects}
 						cursorX={cursorPos.x}
 						cursorY={cursorPos.y}
 						destroyedCount={destroyedCount}

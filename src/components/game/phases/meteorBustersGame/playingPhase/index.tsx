@@ -16,6 +16,7 @@ import type {
 	MeteorBulletType,
 	MeteorDifficulty,
 	BulletAnim,
+	RippleEffect,
 } from "@/types";
 
 const BULLET_ORDER: readonly MeteorBulletType[] = ["A", "B", "C"];
@@ -28,6 +29,7 @@ interface PlayingPhaseProps {
 	playerCursors: PlayerCursorState[];
 	bulletAnims: BulletAnim[];
 	collisions: CollisionFx[];
+	rippleEffects: RippleEffect[];
 	cursorX: number;
 	cursorY: number;
 	destroyedCount: number;
@@ -45,6 +47,7 @@ export function PlayingPhase({
 	playerCursors,
 	bulletAnims,
 	collisions,
+	rippleEffects,
 	cursorX,
 	cursorY,
 	destroyedCount,
@@ -108,6 +111,7 @@ export function PlayingPhase({
 			{/* 隕石レンダラー */}
 			<MeteorRenderer
 				meteors={meteors}
+				rippleEffects={rippleEffects}
 				containerWidth={containerSize.w}
 				containerHeight={containerSize.h}
 			/>

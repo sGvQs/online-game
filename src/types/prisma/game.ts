@@ -236,3 +236,18 @@ export interface DinoShotAnim {
 	toY: number;
 	durationSec: number;
 }
+
+/** 中ボス破壊時の波紋エフェクト */
+export interface RippleEffect {
+	id: string;
+	/** 中心 X（画面座標 px） */
+	x: number;
+	/** 中心 Y（画面座標 px） */
+	y: number;
+	/** 最終楕円の水平半径（px） */
+	maxRxPx: number;
+	/** 最終楕円の垂直半径（px） */
+	maxRyPx: number;
+	/** 楕円の傾き（ラジアン） */
+	tilt: number;
+}

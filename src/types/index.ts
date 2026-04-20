@@ -60,6 +60,7 @@ export type {
 	MeteorBustersResult,
 	BulletAnim,
 	DinoShotAnim,
+	RippleEffect,
 } from "./prisma/game";
 // enumは値としてexportが必要
 export { HandType } from "./prisma/game";

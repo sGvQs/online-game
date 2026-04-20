@@ -150,3 +150,18 @@ export const MAX_Y_OFFSET = 28;
 
 /** ゲーム終了後の待機時間（ms） */
 export const GAME_END_DELAY_MS = 3000;
+
+// ============================================
+// 中ボス破壊波紋エフェクト設定
+// ============================================
+
+/**
+ * 波紋の基準サイズ（コンテナ幅に対する比率）。
+ * 水平半径 rx はこの値。垂直半径 ry は軌道トラックの rx:ry 比から自動計算。
+ * 傾きも軌道トラックの tilt をそのまま使う。
+ */
+export const RIPPLE_SIZE_RATIO = 0.33;
+/** 波紋アニメーション時間（ms） */
+export const RIPPLE_DURATION_MS = 1000;
+/** 波紋の連鎖ダメージ（固定値） */
+export const RIPPLE_CHAIN_DAMAGE = 100;

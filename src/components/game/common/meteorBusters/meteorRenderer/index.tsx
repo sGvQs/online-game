@@ -3,8 +3,8 @@
 import { memo, useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { GLOW_COLORS, ORBIT_TRACKS, ORBIT_CENTER_Y_RATIO } from "@/constants/meteorBustersGame/gameConfig";
-import type { MeteorObject } from "@/types";
+import { GLOW_COLORS, ORBIT_TRACKS, ORBIT_CENTER_Y_RATIO, RIPPLE_DURATION_MS } from "@/constants/meteorBustersGame/gameConfig";
+import type { MeteorObject, RippleEffect } from "@/types";
 
 // tilt の cos/sin はトラック定義が変わらない限り不変なので起動時に一度だけ計算
 const TRACK_TRIG = ORBIT_TRACKS.map((t) => ({
@@ -14,6 +14,7 @@ const TRACK_TRIG = ORBIT_TRACKS.map((t) => ({
 
 interface MeteorRendererProps {
 	meteors: MeteorObject[];
+	rippleEffects: RippleEffect[];
 	containerWidth: number;
 	containerHeight: number;
 }
@@ -223,6 +224,7 @@ const DinoGuard = memo(function DinoGuard({
 
 export const MeteorRenderer = memo(function MeteorRenderer({
 	meteors,
+	rippleEffects,
 	containerWidth,
 	containerHeight,
 }: MeteorRendererProps) {
@@ -232,6 +234,29 @@ export const MeteorRenderer = memo(function MeteorRenderer({
 		<>
 			<OrbitGuides containerWidth={containerWidth} containerHeight={containerHeight} />
 			<DinoGuard containerWidth={containerWidth} containerHeight={containerHeight} />
+
+			{/* 中ボス破壊波紋エフェクト */}
+			{rippleEffects.map((ripple) => (
+				<motion.div
+					key={ripple.id}
+					className="absolute pointer-events-none"
+					style={{
+						left: ripple.x - ripple.maxRxPx,
+						top: ripple.y - ripple.maxRyPx,
+						width: ripple.maxRxPx * 2,
+						height: ripple.maxRyPx * 2,
+						borderRadius: "50%",
+						border: "2px solid rgba(34,197,94,0.9)",
+						boxShadow: "0 0 16px rgba(34,197,94,0.7), 0 0 32px rgba(34,197,94,0.3)",
+						transform: `rotate(${ripple.tilt * (180 / Math.PI)}deg)`,
+						transformOrigin: "center",
+						zIndex: 25,
+					}}
+					initial={{ scale: 0, opacity: 1 }}
+					animate={{ scale: 1, opacity: 0 }}
+					transition={{ duration: RIPPLE_DURATION_MS / 1000, ease: "easeOut" }}
+				/>
+			))}
 
 			{/* 隕石 — left/top ではなく transform で移動（reflow 回避） */}
 			{meteors.map((meteor) => {
