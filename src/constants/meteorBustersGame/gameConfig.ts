@@ -125,7 +125,7 @@ export const BOSS_CONFIG: Partial<Record<MeteorDifficulty, BossConfig>> = {
 		finalSizeFactor: 3.0,
 	},
 	HARD: {
-		regularInterval: 50,   // 有効カウント 50 ごとに通常ボス
+		regularInterval: 10,   // 有効カウント 10 ごとに通常ボス
 		regularHp: 500,
 		finalHp: 5000,
 		finalTriggerRemaining: 10,
@@ -156,12 +156,12 @@ export const GAME_END_DELAY_MS = 3000;
 // ============================================
 
 /**
- * 波紋の基準サイズ（コンテナ幅に対する比率）。
+ * 連鎖破壊の有効範囲（コンテナ幅に対する比率）。
  * 水平半径 rx はこの値。垂直半径 ry は軌道トラックの rx:ry 比から自動計算。
  * 傾きも軌道トラックの tilt をそのまま使う。
  */
-export const RIPPLE_SIZE_RATIO = 0.33;
-/** 波紋アニメーション時間（ms） */
-export const RIPPLE_DURATION_MS = 1000;
-/** 波紋の連鎖ダメージ（固定値） */
-export const RIPPLE_CHAIN_DAMAGE = 100;
+export const CHAIN_RANGE_RATIO = 0.33;
+/** 連鎖破壊の伝播時間（ms）。この時間をかけて端の隕石まで波が届く */
+export const CHAIN_SPREAD_MS = 1000;
+/** 連鎖ダメージ（固定値） */
+export const CHAIN_DAMAGE = 100;
