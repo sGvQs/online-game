@@ -2,26 +2,27 @@ import { tv } from "tailwind-variants";
 
 export const titlePhase = tv({
 	slots: {
-		title: [
-			"text-6xl font-cherry-bomb-one tracking-[0.1em] uppercase",
-			"text-transparent bg-clip-text",
-			"bg-linear-to-b from-white via-brand-500 to-brand-400",
-			"drop-shadow-[0_0_40px_rgba(129,140,248,0.5)]",
-		],
+		titleWrapper: "leading-[0.8] select-none flex flex-col",
+		titleLine1: "block font-honk text-[5.5rem]",
+		titleLine2: "block font-honk text-[5.5rem]",
 		subtitle: "flex gap-2 text-sm mt-6 text-brand-500 font-bold w-full justify-center",
-		sectionLabel: "text-[10px] tracking-[0.4em] uppercase text-[rgba(129,140,248,0.6)]",
-		difficultyCard: [
-			"rounded-2xl p-5 bg-[rgba(129,140,248,0.05)] border border-[rgba(129,140,248,0.18)]",
+		// 難易度カード
+		difficultyCard:
+			"rounded-2xl p-5 flex flex-col gap-3 transition-opacity bg-white/3 border border-white/8",
+		difficultyCardTitle:
+			"text-[11px] font-cherry-bomb-one text-[rgba(129,140,248,0.6)]",
+		difficultyButton: [
+			"flex items-center gap-3 px-3 py-2 rounded-xl transition-all duration-200 cursor-pointer",
+			"hover:scale-[1.02] hover:brightness-110",
+			"font-cherry-bomb-one",
+			"[background:var(--diff-bg)] [border:var(--diff-border)] [box-shadow:var(--diff-glow)] [color:var(--diff-color)]",
 		],
-		difficultyBtn: [
-			"py-3 px-4 rounded-xl",
-			"text-sm font-dot-gothic-16",
-			"transition-all duration-200",
-			"cursor-pointer w-full",
-		],
-		controls: [
-			"text-xs text-brand-500/40 font-dot-gothic-16 text-center leading-relaxed",
-		],
+		rateLabel:
+			"text-[10px] shrink-0 tabular-nums font-dot-gothic-16 [color:var(--diff-rate-color)]",
+		successHint:
+			"text-[10px] leading-relaxed mt-1 font-cherry-bomb-one [color:var(--diff-hint-color)] opacity-70",
+		hostWaiting: "text-[10px] mt-1 font-cherry-bomb-one text-white/15",
+		// プレイヤーカード
 		playerCard:
 			"rounded-2xl p-5 bg-[rgba(129,140,248,0.05)] border border-[rgba(129,140,248,0.18)]",
 		playerCardTitle:
@@ -36,10 +37,5 @@ export const titlePhase = tv({
 		progressTrack: "mt-4 h-1 rounded-full overflow-hidden bg-white/6",
 		progressBar:
 			"h-full rounded-full transition-all duration-500 [width:var(--progress-pct)] bg-linear-to-r from-indigo-400 to-purple-400 [box-shadow:0_0_8px_rgba(129,140,248,0.6)]",
-		howToCard:
-			"rounded-2xl p-5 bg-[rgba(192,132,252,0.05)] border border-[rgba(192,132,252,0.18)]",
-		howToTitle:
-			"text-[10px] tracking-[0.4em] uppercase mb-4 text-[rgba(192,132,252,0.6)]",
-		howToText: "text-xs leading-5 text-[rgba(203,213,225,0.7)]",
 	},
 });

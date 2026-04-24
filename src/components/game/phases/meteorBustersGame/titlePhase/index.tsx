@@ -10,6 +10,7 @@ import { Modal } from "@/components/ui/modal";
 import { Typography } from "@/components/ui/typography";
 import { AuroraGlow } from "@/components/game/common/starShield/auroraGlow";
 import { DinosaurWithBalls } from "@/components/game/common/starShield/dinosaurWithBalls";
+import { DifficultyOrbitIcon } from "@/components/game/common/starShield/difficultyOrbitIcon";
 import type { RoomWithUsersAndReadyStatus, MeteorDifficulty } from "@/types";
 
 interface TitlePhaseProps {
@@ -25,24 +26,43 @@ interface TitlePhaseProps {
 	onToggleReady: () => void;
 }
 
-const DIFFICULTY_LABELS: Record<MeteorDifficulty, string> = {
-	EASY: "易しい",
-	NORMAL: "普通",
-	HARD: "難しい",
+const DIFFICULTY_META: Record<MeteorDifficulty, {
+	label: string;
+	rate: string;
+	bg: string;
+	border: string;
+	text: string;
+	glow: string;
+	orbitIconSrc: string;
+}> = {
+	EASY: {
+		label: "易しい",
+		rate: "+1pt",
+		bg: "rgba(134,239,172,0.12)",
+		border: "rgba(134,239,172,0.5)",
+		text: "#86efac",
+		glow: "0 0 12px rgba(134,239,172,0.4)",
+		orbitIconSrc: "/svg/object/earth.svg",
+	},
+	NORMAL: {
+		label: "普通",
+		rate: "+2pt",
+		bg: "rgba(253,224,71,0.12)",
+		border: "rgba(253,224,71,0.5)",
+		text: "#fde047",
+		glow: "0 0 12px rgba(253,224,71,0.4)",
+		orbitIconSrc: "/svg/object/sun.svg",
+	},
+	HARD: {
+		label: "難しい",
+		rate: "+3pt",
+		bg: "rgba(248,113,113,0.12)",
+		border: "rgba(248,113,113,0.5)",
+		text: "#f87171",
+		glow: "0 0 12px rgba(248,113,113,0.4)",
+		orbitIconSrc: "/svg/object/mars.svg",
+	},
 };
-
-const DIFFICULTY_COLORS: Record<MeteorDifficulty, { bg: string; border: string; text: string; glow: string }> = {
-	EASY:   { bg: "rgba(16,185,129,0.08)",  border: "rgba(16,185,129,0.35)",  text: "text-emerald-400", glow: "rgba(16,185,129,0.4)" },
-	NORMAL: { bg: "rgba(129,140,248,0.08)", border: "rgba(129,140,248,0.35)", text: "text-indigo-400",  glow: "rgba(129,140,248,0.4)" },
-	HARD:   { bg: "rgba(239,68,68,0.08)",   border: "rgba(239,68,68,0.35)",   text: "text-red-400",    glow: "rgba(239,68,68,0.4)" },
-};
-
-const HOW_TO_PLAY = [
-	{ iconSrc: "/svg/object/target-circle.svg", text: "カーソルを隕石に合わせて任意キーで射撃。" },
-	{ iconSrc: "/svg/object/collision.svg",     text: "弾の色を隕石の色に合わせると25倍ダメージ！" },
-	{ iconSrc: "/svg/object/metor.svg",         text: "中ボスを倒すと周囲の隕石を連鎖破壊。" },
-	{ iconSrc: "/svg/charactor/annoying-dinosaur.svg", text: "隕石が星に到達する前に80%以上撃破でクリア！" },
-];
 
 export function TitlePhase({
 	room,
@@ -60,9 +80,24 @@ export function TitlePhase({
 	const [selectedDifficulty, setSelectedDifficulty] = useState<MeteorDifficulty>("NORMAL");
 	const [showCannotStartModal, setShowCannotStartModal] = useState(false);
 
-	const canStart = isHost && allUsersReady && !isProcessing;
+	// ホストは ready → start を自動化するので、他プレイヤー全員が ready かどうかで判定
+	const othersAllReady = room.users
+		.filter((u) => u.userId !== currentUserId)
+		.every((u) => u.isReady);
+	const canStart = isHost && othersAllReady && !isProcessing;
+
 	const readyCount = room.users.filter((u) => u.isReady).length;
 	const totalUsers = room.users.length;
+	const activeMeta = DIFFICULTY_META[selectedDifficulty];
+
+	const handleHostStart = async () => {
+		if (!canStart) {
+			setShowCannotStartModal(true);
+			return;
+		}
+		if (!isReady) onToggleReady();
+		await onStartGame(selectedDifficulty);
+	};
 
 	return (
 		<>
@@ -73,117 +108,30 @@ export function TitlePhase({
 			<div className="relative z-10 w-full max-w-5xl mx-auto px-6 py-10 flex flex-col gap-8">
 				<div className="grid grid-cols-[1fr_auto_1fr] gap-10 items-start">
 
-					{/* 左カラム: タイトル + 難易度 + ボタン */}
+					{/* 左カラム: タイトル + プレイヤー + ボタン */}
 					<div className="flex flex-col gap-5">
 						<motion.div
 							initial={{ opacity: 0, y: -20 }}
 							animate={{ opacity: 1, y: 0 }}
 							transition={{ duration: 0.8, ease: "easeOut" }}
 						>
-							<h1 className={styles.title()}>METEOR BUSTERS</h1>
+							<h1 className={styles.titleWrapper()}>
+								<span className={styles.titleLine1()}>METEOR</span>
+								<span className={styles.titleLine2()}>BUSTERS</span>
+							</h1>
 							<Typography variant="small" className={styles.subtitle()}>
 								<Image src="/svg/object/metor.svg" alt="" width={16} height={16} className="shrink-0 opacity-80" />
 								協力して隕石を撃破せよ
 							</Typography>
 						</motion.div>
 
-						{/* 難易度選択（ホストのみ） */}
-						{isHost && (
-							<motion.div
-								initial={{ opacity: 0 }}
-								animate={{ opacity: 1 }}
-								transition={{ duration: 0.8, delay: 0.2 }}
-								className={styles.difficultyCard()}
-							>
-								<Typography variant="label" className={styles.sectionLabel()}>
-									DIFFICULTY
-								</Typography>
-								<div className="grid grid-cols-3 gap-3 mt-3">
-									{(["EASY", "NORMAL", "HARD"] as MeteorDifficulty[]).map((diff) => {
-										const c = DIFFICULTY_COLORS[diff];
-										const isActive = selectedDifficulty === diff;
-										return (
-											<button
-												key={diff}
-												onClick={() => setSelectedDifficulty(diff)}
-												className={styles.difficultyBtn()}
-												style={{
-													background: isActive ? c.bg : "transparent",
-													border: `1px solid ${isActive ? c.border : "rgba(255,255,255,0.08)"}`,
-													boxShadow: isActive ? `0 0 10px ${c.glow}` : "none",
-												}}
-											>
-												<span className={isActive ? c.text : "text-white/30"}>
-													{DIFFICULTY_LABELS[diff]}
-												</span>
-											</button>
-										);
-									})}
-								</div>
-							</motion.div>
-						)}
-
-						<motion.div
-							className="flex flex-col gap-3 mt-2"
-							initial={{ opacity: 0 }}
-							animate={{ opacity: 1 }}
-							transition={{ duration: 0.8, delay: 0.4 }}
-						>
-							<FloatGlow active={!isReady} variant={GlowVariant.Secondary}>
-								<Button
-									variant="secondary"
-									onClick={() => !isReady && onToggleReady()}
-									disabled={isReady || isTogglingReady}
-									size="lg"
-									className="w-full"
-								>
-									{isReady ? "✓ 準備完了" : "いけます！"}
-								</Button>
-							</FloatGlow>
-
-							{isHost && (
-								<>
-									<Button variant="success" onClick={onClose} size="lg">
-										もどる
-									</Button>
-									<FloatGlow active={canStart} variant={GlowVariant.Primary}>
-										<Button
-											variant="primary"
-											onClick={() => canStart ? onStartGame(selectedDifficulty) : setShowCannotStartModal(true)}
-											disabled={isProcessing}
-											size="lg"
-											className="w-full"
-										>
-											{isProcessing ? "開始中..." : "スタート"}
-										</Button>
-									</FloatGlow>
-								</>
-							)}
-						</motion.div>
-
-						{/* 操作説明 */}
-						<motion.p
-							className={styles.controls()}
-							initial={{ opacity: 0 }}
-							animate={{ opacity: 1 }}
-							transition={{ duration: 0.8, delay: 0.6 }}
-						>
-							任意キー: 射撃　スペース: リロード　クリック: 弾切り替え
-						</motion.p>
-					</div>
-
-					{/* 縦区切り線 */}
-					<div className="w-px self-stretch bg-linear-to-b from-transparent via-brand-500/30 to-transparent" />
-
-					{/* 右カラム: プレイヤー + How to Play */}
-					<motion.div
-						className="flex flex-col gap-6"
-						initial={{ opacity: 0, x: 20 }}
-						animate={{ opacity: 1, x: 0 }}
-						transition={{ duration: 0.8, delay: 0.6 }}
-					>
 						{/* プレイヤーカード */}
-						<div className={styles.playerCard()}>
+						<motion.div
+							initial={{ opacity: 0 }}
+							animate={{ opacity: 1 }}
+							transition={{ duration: 0.8, delay: 0.3 }}
+							className={styles.playerCard()}
+						>
 							<Typography variant="h4" className={styles.playerCardTitle()}>
 								Players {readyCount}/{totalUsers}
 							</Typography>
@@ -204,27 +152,15 @@ export function TitlePhase({
 											}}
 										>
 											<div className={styles.statusDot()} />
-											<Typography
-												variant="small"
-												as="span"
-												className={styles.playerName()}
-											>
+											<Typography variant="small" as="span" className={styles.playerName()}>
 												{u.user?.name ?? u.userId.slice(0, 8)}
 												{isMe && (
-													<Typography
-														variant="caption"
-														as="span"
-														className={styles.playerNameSuffix()}
-													>
+													<Typography variant="caption" as="span" className={styles.playerNameSuffix()}>
 														(あなた)
 													</Typography>
 												)}
 												{u.userId === room.createdBy && (
-													<Typography
-														variant="caption"
-														as="span"
-														className="text-brand-500/70 ml-1 tracking-widest"
-													>
+													<Typography variant="caption" as="span" className="text-brand-500/70 ml-1 tracking-widest">
 														HOST
 													</Typography>
 												)}
@@ -243,34 +179,119 @@ export function TitlePhase({
 							<div className={styles.progressTrack()}>
 								<div
 									className={styles.progressBar()}
-									style={{
-										["--progress-pct" as string]: `${totalUsers > 0 ? (readyCount / totalUsers) * 100 : 0}%`,
-									}}
+									style={{ ["--progress-pct" as string]: `${totalUsers > 0 ? (readyCount / totalUsers) * 100 : 0}%` }}
 								/>
 							</div>
-						</div>
+						</motion.div>
 
-						{/* How to Play */}
-						<div className={styles.howToCard()}>
-							<Typography variant="h4" className={styles.howToTitle()}>
-								How to Play
+						<motion.div
+							className="flex flex-col gap-3"
+							initial={{ opacity: 0 }}
+							animate={{ opacity: 1 }}
+							transition={{ duration: 0.8, delay: 0.4 }}
+						>
+							{/* 非ホストのみ ready ボタン */}
+							{!isHost && (
+								<FloatGlow active={!isReady} variant={GlowVariant.Secondary}>
+									<Button
+										variant="secondary"
+										onClick={() => !isReady && onToggleReady()}
+										disabled={isReady || isTogglingReady}
+										size="lg"
+										className="w-full"
+									>
+										{isReady ? "✓ 準備完了" : "いけます！"}
+									</Button>
+								</FloatGlow>
+							)}
+
+							{isHost && (
+								<>
+									<Button variant="success" onClick={onClose} size="lg">
+										もどる
+									</Button>
+									<FloatGlow active={canStart} variant={GlowVariant.Primary}>
+										<Button
+											variant="primary"
+											onClick={handleHostStart}
+											disabled={isProcessing}
+											size="lg"
+											className="w-full"
+										>
+											{isProcessing ? "開始中..." : "スタート"}
+										</Button>
+									</FloatGlow>
+								</>
+							)}
+						</motion.div>
+					</div>
+
+					{/* 縦区切り線 */}
+					<div className="w-px self-stretch bg-linear-to-b from-transparent via-brand-500/30 to-transparent" />
+
+					{/* 右カラム: 難易度 */}
+					<motion.div
+						className="flex flex-col gap-6"
+						initial={{ opacity: 0, x: 20 }}
+						animate={{ opacity: 1, x: 0 }}
+						transition={{ duration: 0.8, delay: 0.5 }}
+					>
+						<div className={`${styles.difficultyCard()} ${!isHost ? "opacity-70" : ""}`}>
+							<Typography variant="small" as="p" font="cherry-bomb-one" className={styles.difficultyCardTitle()}>
+								難易度
 							</Typography>
-							<div className="flex flex-col gap-2.5">
-								{HOW_TO_PLAY.map(({ iconSrc, text }) => (
-									<div key={text} className="flex items-start gap-2.5">
-										<Image
-											src={iconSrc}
-											alt=""
-											width={20}
-											height={20}
-											className="mt-0.5 shrink-0 opacity-90"
-										/>
-										<Typography variant="body" as="span" className={styles.howToText()}>
-											{text}
-										</Typography>
-									</div>
-								))}
+							<div className="flex flex-col gap-2">
+								{(["EASY", "NORMAL", "HARD"] as MeteorDifficulty[]).map((diff) => {
+									const meta = DIFFICULTY_META[diff];
+									const isActive = selectedDifficulty === diff;
+									const canSelect = isHost;
+									const isSelectableInactive = canSelect && !isActive;
+									return (
+										<button
+											key={diff}
+											onClick={() => canSelect && setSelectedDifficulty(diff)}
+											disabled={!canSelect}
+											className={`${styles.difficultyButton()} ${isSelectableInactive ? "hover:bg-white/5 hover:border-white/25" : ""}`}
+											style={{
+												["--diff-bg" as string]: isActive ? meta.bg : "transparent",
+												["--diff-border" as string]: isActive
+													? `1.5px solid ${meta.border}`
+													: isSelectableInactive
+														? "1.5px solid rgba(255,255,255,0.12)"
+														: "1.5px solid rgba(255,255,255,0.07)",
+												["--diff-glow" as string]: isActive ? meta.glow : "none",
+												["--diff-color" as string]: isActive ? meta.text : "rgba(255,255,255,0.35)",
+												["--diff-rate-color" as string]: isActive ? meta.text : "rgba(255,255,255,0.15)",
+											}}
+										>
+											<DifficultyOrbitIcon
+												src={meta.orbitIconSrc}
+												glowBoxShadow={isActive ? meta.glow : undefined}
+											/>
+											<Typography variant="body" as="span" font="cherry-bomb-one" className="font-bold flex-1 text-left">
+												{meta.label}
+											</Typography>
+											<Typography variant="caption" as="span" className={styles.rateLabel()}>
+												{meta.rate}
+											</Typography>
+										</button>
+									);
+								})}
 							</div>
+							<Typography
+								variant="caption"
+								as="p"
+								font="cherry-bomb-one"
+								className={styles.successHint()}
+								style={{ ["--diff-hint-color" as string]: activeMeta.text }}
+							>
+								クリアすると {activeMeta.rate} もらえるよ。
+							</Typography>
+							{!isHost && (
+								<Typography variant="caption" as="p" font="cherry-bomb-one" className={styles.hostWaiting()}>
+									ほすとがせんたくちゅう…
+								</Typography>
+							)}
 						</div>
 					</motion.div>
 
