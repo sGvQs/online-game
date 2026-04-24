@@ -67,21 +67,21 @@ export const DIFFICULTY_CONFIG: Record<MeteorDifficulty, DifficultyConfig> = {
 	EASY: {
 		totalSpawnCount: 50,
 		spawnIntervalMs: 1500,
-		meteorHp: 8,
+		meteorHp: 5,
 		orbitDurationMs: 10000,
 		pointsOnClear: 1,
 	},
 	NORMAL: {
 		totalSpawnCount: 100,
 		spawnIntervalMs: 1000,
-		meteorHp: 8,
+		meteorHp: 5,
 		orbitDurationMs: 9000,
 		pointsOnClear: 2,
 	},
 	HARD: {
 		totalSpawnCount: 150,
 		spawnIntervalMs: 500,
-		meteorHp: 50,
+		meteorHp: 10,
 		orbitDurationMs: 8000,
 		pointsOnClear: 3,
 	},
@@ -138,7 +138,7 @@ export const BOSS_CONFIG: Partial<Record<MeteorDifficulty, BossConfig>> = {
 };
 
 /** 一致時ダメージ */
-export const DAMAGE_MATCH = 25;
+export const DAMAGE_MATCH = 5;
 /** 不一致時ダメージ */
 export const DAMAGE_MISMATCH = 1;
 
