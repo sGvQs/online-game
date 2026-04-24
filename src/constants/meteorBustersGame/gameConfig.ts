@@ -73,14 +73,14 @@ export const DIFFICULTY_CONFIG: Record<MeteorDifficulty, DifficultyConfig> = {
 	},
 	NORMAL: {
 		totalSpawnCount: 100,
-		spawnIntervalMs: 1200,
+		spawnIntervalMs: 1000,
 		meteorHp: 8,
 		orbitDurationMs: 9000,
 		pointsOnClear: 2,
 	},
 	HARD: {
 		totalSpawnCount: 150,
-		spawnIntervalMs: 1000,
+		spawnIntervalMs: 500,
 		meteorHp: 50,
 		orbitDurationMs: 8000,
 		pointsOnClear: 3,
@@ -160,7 +160,7 @@ export const GAME_END_DELAY_MS = 3000;
  * 水平半径 rx はこの値。垂直半径 ry は軌道トラックの rx:ry 比から自動計算。
  * 傾きも軌道トラックの tilt をそのまま使う。
  */
-export const CHAIN_RANGE_RATIO = 0.33;
+export const CHAIN_RANGE_RATIO = 0.65;
 /** 連鎖破壊の伝播時間（ms）。この時間をかけて端の隕石まで波が届く */
 export const CHAIN_SPREAD_MS = 1000;
 /** 連鎖ダメージ（固定値） */
