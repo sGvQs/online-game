@@ -117,9 +117,10 @@ export function TitlePhase({
 			<div className="relative z-10 w-full max-w-5xl mx-auto px-6 py-10 flex flex-col gap-8">
 				<div className="grid grid-cols-[1fr_auto_1fr] gap-10 items-start">
 
-					{/* 左カラム: タイトル + プレイヤー + ボタン */}
-					<div className="flex flex-col gap-5">
+					{/* 左カラム: タイトル（中央寄せ）+ ボタン */}
+					<div className="flex flex-col gap-10 items-center">
 						<motion.div
+							className="text-center"
 							initial={{ opacity: 0, y: -20 }}
 							animate={{ opacity: 1, y: 0 }}
 							transition={{ duration: 0.8, ease: "easeOut" }}
@@ -134,13 +135,60 @@ export function TitlePhase({
 							</Typography>
 						</motion.div>
 
-						{/* プレイヤーカード */}
 						<motion.div
+							className="flex gap-3"
 							initial={{ opacity: 0 }}
 							animate={{ opacity: 1 }}
-							transition={{ duration: 0.8, delay: 0.3 }}
-							className={styles.playerCard()}
+							transition={{ duration: 0.8, delay: 0.4 }}
 						>
+							{/* 非ホストのみ ready ボタン */}
+							{!isHost && (
+								<FloatGlow active={!isReady} variant={GlowVariant.Secondary}>
+									<Button
+										variant="secondary"
+										onClick={() => !isReady && onToggleReady()}
+										disabled={isReady || isTogglingReady}
+										size="lg"
+										className="w-full"
+									>
+										{isReady ? "✓ 準備完了" : "いけます！"}
+									</Button>
+								</FloatGlow>
+							)}
+
+							{isHost && (
+								<>
+									<Button variant="success" onClick={onClose} size="lg">
+										もどる
+									</Button>
+									<FloatGlow active={canStart} variant={GlowVariant.Primary}>
+										<Button
+											variant="primary"
+											onClick={handleHostStart}
+											disabled={isProcessing}
+											size="lg"
+											className="w-full"
+										>
+											{isProcessing ? "開始中..." : "スタート"}
+										</Button>
+									</FloatGlow>
+								</>
+							)}
+						</motion.div>
+					</div>
+
+					{/* 縦区切り線 */}
+					<div className="w-px self-stretch bg-linear-to-b from-transparent via-brand-500/30 to-transparent" />
+
+					{/* 右カラム: プレイヤー + 難易度 */}
+					<motion.div
+						className="flex flex-col gap-6"
+						initial={{ opacity: 0, x: 20 }}
+						animate={{ opacity: 1, x: 0 }}
+						transition={{ duration: 0.8, delay: 0.5 }}
+					>
+						{/* プレイヤーカード */}
+						<div className={styles.playerCard()}>
 							<Typography variant="h4" className={styles.playerCardTitle()}>
 								Players {readyCount}/{totalUsers}
 							</Typography>
@@ -191,60 +239,8 @@ export function TitlePhase({
 									style={{ ["--progress-pct" as string]: `${totalUsers > 0 ? (readyCount / totalUsers) * 100 : 0}%` }}
 								/>
 							</div>
-						</motion.div>
+						</div>
 
-						<motion.div
-							className="flex flex-col gap-3"
-							initial={{ opacity: 0 }}
-							animate={{ opacity: 1 }}
-							transition={{ duration: 0.8, delay: 0.4 }}
-						>
-							{/* 非ホストのみ ready ボタン */}
-							{!isHost && (
-								<FloatGlow active={!isReady} variant={GlowVariant.Secondary}>
-									<Button
-										variant="secondary"
-										onClick={() => !isReady && onToggleReady()}
-										disabled={isReady || isTogglingReady}
-										size="lg"
-										className="w-full"
-									>
-										{isReady ? "✓ 準備完了" : "いけます！"}
-									</Button>
-								</FloatGlow>
-							)}
-
-							{isHost && (
-								<>
-									<Button variant="success" onClick={onClose} size="lg">
-										もどる
-									</Button>
-									<FloatGlow active={canStart} variant={GlowVariant.Primary}>
-										<Button
-											variant="primary"
-											onClick={handleHostStart}
-											disabled={isProcessing}
-											size="lg"
-											className="w-full"
-										>
-											{isProcessing ? "開始中..." : "スタート"}
-										</Button>
-									</FloatGlow>
-								</>
-							)}
-						</motion.div>
-					</div>
-
-					{/* 縦区切り線 */}
-					<div className="w-px self-stretch bg-linear-to-b from-transparent via-brand-500/30 to-transparent" />
-
-					{/* 右カラム: 難易度 */}
-					<motion.div
-						className="flex flex-col gap-6"
-						initial={{ opacity: 0, x: 20 }}
-						animate={{ opacity: 1, x: 0 }}
-						transition={{ duration: 0.8, delay: 0.5 }}
-					>
 						<div className={`${styles.difficultyCard()} ${!isHost ? "opacity-70" : ""}`}>
 							<Typography variant="small" as="p" font="cherry-bomb-one" className={styles.difficultyCardTitle()}>
 								難易度
