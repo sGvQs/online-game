@@ -165,7 +165,7 @@ export type UserRanking = {
 
 export type MeteorBustersMatch = Prisma.MeteorBustersMatchGetPayload<{}>;
 
-export type MeteorDifficulty = "EASY" | "NORMAL" | "HARD";
+export type MeteorDifficulty = "TUTORIAL" | "EASY" | "NORMAL" | "HARD";
 
 export type MeteorBulletType = "A" | "B" | "C";
 

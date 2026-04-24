@@ -35,6 +35,15 @@ const DIFFICULTY_META: Record<MeteorDifficulty, {
 	glow: string;
 	orbitIconSrc: string;
 }> = {
+	TUTORIAL: {
+		label: "チュートリアル",
+		rate: "+0pt",
+		bg: "rgba(129,140,248,0.12)",
+		border: "rgba(129,140,248,0.5)",
+		text: "#818cf8",
+		glow: "0 0 12px rgba(129,140,248,0.4)",
+		orbitIconSrc: "/svg/object/metor.svg",
+	},
 	EASY: {
 		label: "易しい",
 		rate: "+1pt",
@@ -241,7 +250,7 @@ export function TitlePhase({
 								難易度
 							</Typography>
 							<div className="flex flex-col gap-2">
-								{(["EASY", "NORMAL", "HARD"] as MeteorDifficulty[]).map((diff) => {
+								{(["TUTORIAL", "EASY", "NORMAL", "HARD"] as MeteorDifficulty[]).map((diff) => {
 									const meta = DIFFICULTY_META[diff];
 									const isActive = selectedDifficulty === diff;
 									const canSelect = isHost;

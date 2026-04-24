@@ -6,12 +6,14 @@ import { getAuthenticatedUser } from "../_helpers/getAuthenticatedUser";
 import type { MeteorDifficulty } from "@/types";
 
 const DIFFICULTY_POINTS: Record<MeteorDifficulty, number> = {
+	TUTORIAL: 0,
 	EASY: 3,
 	NORMAL: 5,
 	HARD: 8,
 };
 
 const DIFFICULTY_SPAWN_COUNT: Record<MeteorDifficulty, number> = {
+	TUTORIAL: 10,
 	EASY: 15,
 	NORMAL: 20,
 	HARD: 30,

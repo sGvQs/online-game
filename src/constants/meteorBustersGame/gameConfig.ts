@@ -64,6 +64,13 @@ export interface DifficultyConfig {
 }
 
 export const DIFFICULTY_CONFIG: Record<MeteorDifficulty, DifficultyConfig> = {
+	TUTORIAL: {
+		totalSpawnCount: 10,
+		spawnIntervalMs: 3000,
+		meteorHp: 5,
+		orbitDurationMs: 15000,
+		pointsOnClear: 0,
+	},
 	EASY: {
 		totalSpawnCount: 50,
 		spawnIntervalMs: 1500,
