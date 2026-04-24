@@ -172,6 +172,7 @@ export function PlayingPhase({
 					ammoRemaining={ammoRemaining}
 					bulletType={bulletType}
 					destroyedCount={destroyedCount}
+					totalSpawnCount={totalSpawnCount}
 					onUnlockSpawn={onUnlockSpawn}
 				/>
 			)}

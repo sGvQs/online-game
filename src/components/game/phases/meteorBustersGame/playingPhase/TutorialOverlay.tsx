@@ -12,6 +12,7 @@ interface TutorialOverlayProps {
 	ammoRemaining: number;
 	bulletType: MeteorBulletType;
 	destroyedCount: number;
+	totalSpawnCount: number;
 	onUnlockSpawn: () => void;
 }
 
@@ -33,6 +34,7 @@ export function TutorialOverlay({
 	ammoRemaining,
 	bulletType,
 	destroyedCount,
+	totalSpawnCount,
 	onUnlockSpawn,
 }: TutorialOverlayProps) {
 	const [step, setStep] = useState(0);
@@ -104,7 +106,13 @@ export function TutorialOverlay({
 	if (!currentStep) return null;
 
 	const isAmmoEmpty = step === 2 && ammoRemaining === 0 && stepState === "HINT";
-	const displayText = isAmmoEmpty ? "スペースキーでリロード！" : currentStep.text;
+	const remaining = Math.max(0, totalSpawnCount - destroyedCount);
+	const isGoal = step === 5;
+	const displayText = isGoal
+		? `隕石をなるべく全て破壊しよう。残り ${remaining} 個`
+		: isAmmoEmpty
+			? "スペースキーでリロード！"
+			: currentStep.text;
 	const isCleared = stepState === "CLEARED";
 
 	return (
@@ -169,9 +177,11 @@ export function TutorialOverlay({
 						>
 							{displayText}
 						</span>
-						<span className="text-xs ml-2 shrink-0 tabular-nums" style={{ color: "rgba(129,140,248,0.5)" }}>
-							{step + 1} / {STEPS.length}
-						</span>
+						{!isGoal && (
+							<span className="text-xs ml-2 shrink-0 tabular-nums" style={{ color: "rgba(129,140,248,0.5)" }}>
+								{step + 1} / {STEPS.length}
+							</span>
+						)}
 					</motion.div>
 				)}
 			</AnimatePresence>
