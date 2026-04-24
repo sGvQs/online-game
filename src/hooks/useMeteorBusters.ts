@@ -120,6 +120,8 @@ export interface UseMeteorBustersReturn {
 	handleSwitchBullet: () => void;
 	handleCursorMove: (x: number, y: number) => void;
 	handleReturnToTitle: () => void;
+	/** チュートリアル用: ステップ4完了時に呼ぶと隕石スポーンが開始される */
+	unlockTutorialSpawn: () => void;
 }
 
 
@@ -188,6 +190,8 @@ export function useMeteorBusters({
 	const rafFrameCountRef = useRef(0);
 	/** spawnNextMeteor の実呼び出し回数（ボスの effectiveCount に左右されないインターバル判定用） */
 	const spawnCallCountRef = useRef(0);
+	/** チュートリアル用スポーンゲート。TUTORIAL 難易度では unlockTutorialSpawn() が呼ばれるまで隕石を出さない */
+	const tutorialSpawnUnlockedRef = useRef(false);
 	/** ボット tick 関数（tickMeteors RAF に統合するための ref） */
 	const botTickRef = useRef<(() => void) | null>(null);
 	const getMeteorScreenPosRef = useRef<typeof getMeteorScreenPos | null>(null);
@@ -296,6 +300,7 @@ export function useMeteorBusters({
 	const spawnNextMeteor = useCallback(() => {
 		if (phaseRef.current !== "PLAYING") return;
 		if (spawnedCountRef.current >= totalSpawnCountRef.current) return;
+		if (difficultyRef.current === "TUTORIAL" && !tutorialSpawnUnlockedRef.current) return;
 
 		const diff = difficultyRef.current;
 		const config = DIFFICULTY_CONFIG[diff];
@@ -496,6 +501,7 @@ export function useMeteorBusters({
 		destroyedCountRef.current = 0;
 		missedCountRef.current = 0;
 		spawnCallCountRef.current = 0;
+		tutorialSpawnUnlockedRef.current = false;
 		meteorsRef.current.clear();
 		gameStartTimeRef.current = performance.now();
 
@@ -719,6 +725,12 @@ export function useMeteorBusters({
 		setAmmoRemaining(SHOOTER_AMMO_MAX);
 		play("reload");
 	}, [play]);
+
+	/** チュートリアル用スポーン開放 */
+	const unlockTutorialSpawn = useCallback(() => {
+		tutorialSpawnUnlockedRef.current = true;
+		spawnNextMeteor();
+	}, [spawnNextMeteor]);
 
 	/** 弾切り替え */
 	const handleSwitchBullet = useCallback(() => {
@@ -1130,5 +1142,6 @@ export function useMeteorBusters({
 		handleSwitchBullet,
 		handleCursorMove,
 		handleReturnToTitle,
+		unlockTutorialSpawn,
 	};
 }

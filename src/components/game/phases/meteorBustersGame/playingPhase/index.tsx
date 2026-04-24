@@ -20,6 +20,7 @@ import type {
 
 const BULLET_ORDER: readonly MeteorBulletType[] = ["A", "B", "C"];
 import type { CollisionFx } from "@/components/game/common/shooter/ShooterCollisionFx";
+import { TutorialOverlay } from "./TutorialOverlay";
 
 interface PlayingPhaseProps {
 	meteors: MeteorObject[];
@@ -35,6 +36,7 @@ interface PlayingPhaseProps {
 	totalSpawnCount: number;
 	difficulty: MeteorDifficulty;
 	currentUserId: string;
+	onUnlockSpawn: () => void;
 }
 
 
@@ -52,6 +54,7 @@ export function PlayingPhase({
 	totalSpawnCount,
 	difficulty,
 	currentUserId,
+	onUnlockSpawn,
 }: PlayingPhaseProps) {
 	const styles = playingPhase();
 	const containerRef = useRef<HTMLDivElement>(null);
@@ -159,6 +162,19 @@ export function PlayingPhase({
 					nextNextColor={nextNextColor}
 				/>
 			</div>
+
+			{/* チュートリアルオーバーレイ */}
+			{difficulty === "TUTORIAL" && (
+				<TutorialOverlay
+					cursorX={cursorX}
+					cursorY={cursorY}
+					bulletAnims={bulletAnims}
+					ammoRemaining={ammoRemaining}
+					bulletType={bulletType}
+					destroyedCount={destroyedCount}
+					onUnlockSpawn={onUnlockSpawn}
+				/>
+			)}
 		</div>
 	);
 }

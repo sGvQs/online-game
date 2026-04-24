@@ -65,6 +65,7 @@ export function MeteorBustersGame({
 		bulletAnims,
 		collisions,
 		result,
+		unlockTutorialSpawn,
 		destroyedCount,
 		spawnedCount,
 		totalSpawnCount,
@@ -185,6 +186,7 @@ export function MeteorBustersGame({
 						totalSpawnCount={totalSpawnCount}
 						difficulty={difficulty}
 						currentUserId={currentUserId}
+						onUnlockSpawn={unlockTutorialSpawn}
 					/>
 				)}
 
