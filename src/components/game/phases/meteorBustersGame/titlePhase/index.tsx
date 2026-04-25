@@ -9,8 +9,8 @@ import { Button } from "@/components/ui/button";
 import { Modal } from "@/components/ui/modal";
 import { Typography } from "@/components/ui/typography";
 import { AuroraGlow } from "@/components/game/common/starShield/auroraGlow";
-import { DinosaurWithBalls } from "@/components/game/common/starShield/dinosaurWithBalls";
 import { DifficultyOrbitIcon } from "@/components/game/common/starShield/difficultyOrbitIcon";
+import { MeteorOrbitStar } from "./MeteorOrbitStar";
 import { FACE_ICON_PATHS, DEFAULT_FACE_ICON } from "@/constants/common/faceIcon";
 import type { RoomWithUsersAndReadyStatus, MeteorDifficulty, UserRanking } from "@/types";
 
@@ -120,7 +120,7 @@ export function TitlePhase({
 	return (
 		<>
 		<div className="relative min-h-screen overflow-hidden flex flex-col items-center justify-center">
-			<DinosaurWithBalls size="w-28 h-28" />
+			<MeteorOrbitStar />
 			<AuroraGlow width={700} height={350} opacity={0.25} blur={50} />
 
 			<div className="relative z-10 w-full max-w-5xl mx-auto px-6 py-10 flex flex-col gap-8">
