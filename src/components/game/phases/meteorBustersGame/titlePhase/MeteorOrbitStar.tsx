@@ -13,6 +13,9 @@ const TRACK_TRIG = ORBIT_TRACKS.map((t) => ({
 	sin: Math.sin(t.tilt),
 }));
 
+/** 装飾用スケール倍率。ゲームの rx/ry はゲーム画面用の値なので拡大して使う */
+const ORBIT_SCALE = 1.6;
+
 // 装飾用ボス隕石。STAR_POSITION に合わせて外側のトラックを使う
 const DECO_METEORS: {
 	type: MeteorBulletType;
@@ -46,8 +49,8 @@ function getMeteorPos(
 	const trig = TRACK_TRIG[trackIdx];
 	if (!track || !trig) return { x: 0, y: 0, scale: 1, zIndex: 10 };
 	// offsetX/Y は星起点では使わない（ゲームの orbit center 補正のため）
-	const rx = cw * track.rx;
-	const ry = cw * track.ry;
+	const rx = cw * track.rx * ORBIT_SCALE;
+	const ry = cw * track.ry * ORBIT_SCALE;
 	const xLocal = rx * Math.cos(angle);
 	const yLocal = ry * Math.sin(angle);
 	const x = sc.cx + xLocal * trig.cos - yLocal * trig.sin;
@@ -68,10 +71,11 @@ const OrbitGuides = memo(function OrbitGuides({
 }) {
 	return (
 		<>
-			{ORBIT_TRACKS.map((track, i) => {
-				const rx = cw * track.rx;
-				const ry = cw * track.ry;
-				const opacity = i === 3 ? 0.12 : i <= 2 ? 0.08 : 0.05;
+			{ORBIT_TRACKS.slice(1).map((track, i) => {
+				const i_ = i + 1; // 元のインデックス（opacity 計算用）
+				const rx = cw * track.rx * ORBIT_SCALE;
+				const ry = cw * track.ry * ORBIT_SCALE;
+				const opacity = i_ === 3 ? 0.12 : i_ <= 2 ? 0.08 : 0.05;
 				return (
 					<div
 						key={i}
@@ -142,7 +146,11 @@ export function MeteorOrbitStar() {
 
 	return (
 		<div ref={containerRef} className="absolute inset-0 pointer-events-none">
-			<StarVisual position={STAR_POSITION} />
+			{/* inset-0 ラッパーで stacking context を z-10 に固定。
+			    depth<0 の隕石 (zIndex<10) は星の裏に隠れ、depth>=0 (zIndex>=10) は手前に出る */}
+			<div className="absolute inset-0 pointer-events-none" style={{ zIndex: 10 }}>
+				<StarVisual position={STAR_POSITION} />
+			</div>
 			{sc && (
 				<>
 					<OrbitGuides cw={size.w} sc={sc} />
