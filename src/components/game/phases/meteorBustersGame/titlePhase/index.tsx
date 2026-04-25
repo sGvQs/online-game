@@ -123,7 +123,7 @@ export function TitlePhase({
 			<MeteorOrbitStar />
 			<AuroraGlow width={700} height={350} opacity={0.25} blur={50} />
 
-			<div className="relative z-10 w-full max-w-5xl mx-auto px-6 py-10 flex flex-col gap-8">
+			<div className="relative z-25 w-full max-w-5xl mx-auto px-6 py-10 flex flex-col gap-8">
 				<div className="grid grid-cols-[1fr_auto_1fr] gap-10 items-start">
 
 					{/* 左カラム: タイトル（中央寄せ）+ ボタン */}
