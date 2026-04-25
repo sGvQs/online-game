@@ -11,6 +11,7 @@ import { Typography } from "@/components/ui/typography";
 import { AuroraGlow } from "@/components/game/common/starShield/auroraGlow";
 import { DinosaurWithBalls } from "@/components/game/common/starShield/dinosaurWithBalls";
 import { DifficultyOrbitIcon } from "@/components/game/common/starShield/difficultyOrbitIcon";
+import { FACE_ICON_PATHS, DEFAULT_FACE_ICON } from "@/constants/common/faceIcon";
 import type { RoomWithUsersAndReadyStatus, MeteorDifficulty, UserRanking } from "@/types";
 
 interface TitlePhaseProps {
@@ -195,39 +196,23 @@ export function TitlePhase({
 						<div className={styles.playerCard()}>
 							<div className="flex flex-col gap-3">
 								{room.users.map((u) => {
-									const isMe = u.userId === currentUserId;
 									const ranking = rankingsMap.get(u.userId);
+									const faceIconSrc = FACE_ICON_PATHS[u.user?.faceIcon ?? DEFAULT_FACE_ICON];
 									return (
 										<div
 											key={u.userId}
-											className="flex items-center gap-3"
-											style={{
-												["--status-dot-color" as string]: u.isReady
-													? "#818cf8"
-													: "rgba(255,255,255,0.15)",
-												["--player-name-color" as string]: isMe
-													? "#ffffff"
-													: "rgba(255,255,255,0.65)",
-											}}
+											className="flex items-center gap-2"
 										>
-											<div className={styles.statusDot()} />
-											<Typography variant="small" as="span" className={styles.playerName()}>
+											<Image src={faceIconSrc} alt="" width={28} height={28} className="shrink-0 rounded-full" />
+											<Typography variant="small" as="span" style={{ color: "rgba(255,255,255,0.85)" }}>
 												{u.user?.name ?? u.userId.slice(0, 8)}
-												{isMe && (
-													<Typography variant="caption" as="span" className={styles.playerNameSuffix()}>
-														(あなた)
-													</Typography>
-												)}
-												{u.userId === room.createdBy && (
-													<Typography variant="caption" as="span" className="text-brand-500/70 ml-1 tracking-widest">
-														HOST
-													</Typography>
-												)}
 											</Typography>
 											{ranking && (
-												<Typography variant="caption" as="span" className="ml-auto tabular-nums" style={{ color: "rgba(255,255,255,0.4)" }}>
-													{ranking.rank}位 · {ranking.points}pt
-												</Typography>
+												<span className="ml-auto flex items-center gap-1 tabular-nums" style={{ color: "rgba(255,255,255,0.4)" }}>
+													<Typography variant="caption" as="span">{ranking.rank}位</Typography>
+													<span style={{ color: "rgba(255,255,255,0.2)" }}>·</span>
+													<Typography variant="caption" as="span">{ranking.points}pt</Typography>
+												</span>
 											)}
 											<Typography
 												variant="label"
