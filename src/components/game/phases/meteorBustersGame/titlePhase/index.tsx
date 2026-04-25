@@ -118,7 +118,7 @@ export function TitlePhase({
 				<div className="grid grid-cols-[1fr_auto_1fr] gap-10 items-start">
 
 					{/* 左カラム: タイトル（中央寄せ）+ ボタン */}
-					<div className="flex flex-col gap-10 items-center">
+					<div className="flex flex-col gap-10 items-center justify-center h-full">
 						<motion.div
 							className="text-center"
 							initial={{ opacity: 0, y: -20 }}
@@ -189,9 +189,6 @@ export function TitlePhase({
 					>
 						{/* プレイヤーカード */}
 						<div className={styles.playerCard()}>
-							<Typography variant="h4" className={styles.playerCardTitle()}>
-								Players {readyCount}/{totalUsers}
-							</Typography>
 							<div className="flex flex-col gap-3">
 								{room.users.map((u) => {
 									const isMe = u.userId === currentUserId;
@@ -232,12 +229,6 @@ export function TitlePhase({
 										</div>
 									);
 								})}
-							</div>
-							<div className={styles.progressTrack()}>
-								<div
-									className={styles.progressBar()}
-									style={{ ["--progress-pct" as string]: `${totalUsers > 0 ? (readyCount / totalUsers) * 100 : 0}%` }}
-								/>
 							</div>
 						</div>
 
