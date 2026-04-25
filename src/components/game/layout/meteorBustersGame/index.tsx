@@ -189,6 +189,7 @@ export function MeteorBustersGame({
 						cursorX={cursorPos.x}
 						cursorY={cursorPos.y}
 						destroyedCount={destroyedCount}
+						spawnedCount={spawnedCount}
 						totalSpawnCount={totalSpawnCount}
 						difficulty={difficulty}
 						currentUserId={currentUserId}

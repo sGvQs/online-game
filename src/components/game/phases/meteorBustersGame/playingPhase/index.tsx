@@ -2,7 +2,6 @@
 
 import { useRef, useEffect, useState } from "react";
 import Image from "next/image";
-import { motion } from "framer-motion";
 import { playingPhase } from "./styles";
 import { Typography } from "@/components/ui/typography";
 import { MeteorRenderer } from "@/components/game/common/meteorBusters/meteorRenderer";
@@ -35,6 +34,7 @@ interface PlayingPhaseProps {
 	cursorX: number;
 	cursorY: number;
 	destroyedCount: number;
+	spawnedCount: number;
 	totalSpawnCount: number;
 	difficulty: MeteorDifficulty;
 	currentUserId: string;
@@ -52,6 +52,7 @@ export function PlayingPhase({
 	cursorX,
 	cursorY,
 	destroyedCount,
+	spawnedCount,
 	totalSpawnCount,
 	difficulty,
 	currentUserId,
@@ -84,7 +85,7 @@ export function PlayingPhase({
 	const nextColor = GLOW_COLORS[nextBulletType];
 	const nextNextColor = GLOW_COLORS[nextNextBulletType];
 
-	const remaining = Math.max(0, totalSpawnCount - destroyedCount);
+	const remaining = Math.max(0, totalSpawnCount - spawnedCount);
 
 	return (
 		<div ref={containerRef} className={styles.container()}>
@@ -136,16 +137,9 @@ export function PlayingPhase({
 							<Image src="/svg/object/metor.svg" alt="" fill className="object-contain" />
 						</div>
 						<span className="text-white/60 text-2xl">×</span>
-						<motion.div
-							key={remaining}
-							initial={{ scale: 1 }}
-							animate={{ scale: [1, 2, 1], x: [0, -3, 3, -3, 3, 0] }}
-							transition={{ duration: 0.25, ease: "easeOut" }}
-						>
-							<Typography variant="h2" as="span" font="cherry-bomb-one" className={styles.remainingCount()}>
-								{remaining}
-							</Typography>
-						</motion.div>
+						<Typography variant="h2" as="span" font="cherry-bomb-one" className={styles.remainingCount()}>
+							{remaining}
+						</Typography>
 					</div>
 				</div>
 			)}
