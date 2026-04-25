@@ -11,7 +11,7 @@ import { PlayingPhase } from "@/components/game/phases/meteorBustersGame/playing
 import { ResultPhase } from "@/components/game/phases/meteorBustersGame/resultPhase";
 import { PresenceDuplicateWarning } from "@/components/common/PresenceDuplicateWarning";
 import { SCREEN_SHAKE_PRESETS, type ScreenShakeStrength } from "@/lib/shooter/screen-shake";
-import type { RoomWithUsersAndReadyStatus, MeteorDifficulty } from "@/types";
+import type { RoomWithUsersAndReadyStatus, MeteorDifficulty, UserRanking } from "@/types";
 
 interface MeteorBustersGameProps {
 	room: RoomWithUsersAndReadyStatus;
@@ -19,6 +19,7 @@ interface MeteorBustersGameProps {
 	roomId: string;
 	initialMatchId: string | null;
 	currentUserId: string;
+	rankings: UserRanking[];
 }
 
 export function MeteorBustersGame({
@@ -27,6 +28,7 @@ export function MeteorBustersGame({
 	roomId,
 	initialMatchId,
 	currentUserId,
+	rankings,
 }: MeteorBustersGameProps) {
 	const styles = meteorBustersGame();
 
@@ -165,6 +167,7 @@ export function MeteorBustersGame({
 						allUsersReady={allUsersReady}
 						isProcessing={isProcessing}
 						currentUserId={currentUserId}
+						rankings={rankings}
 						onStartGame={onStartGame}
 						onClose={handleClose}
 						onToggleReady={toggleReady}

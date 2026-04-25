@@ -11,7 +11,7 @@ import { Typography } from "@/components/ui/typography";
 import { AuroraGlow } from "@/components/game/common/starShield/auroraGlow";
 import { DinosaurWithBalls } from "@/components/game/common/starShield/dinosaurWithBalls";
 import { DifficultyOrbitIcon } from "@/components/game/common/starShield/difficultyOrbitIcon";
-import type { RoomWithUsersAndReadyStatus, MeteorDifficulty } from "@/types";
+import type { RoomWithUsersAndReadyStatus, MeteorDifficulty, UserRanking } from "@/types";
 
 interface TitlePhaseProps {
 	room: RoomWithUsersAndReadyStatus;
@@ -21,6 +21,7 @@ interface TitlePhaseProps {
 	allUsersReady: boolean;
 	isProcessing: boolean;
 	currentUserId: string;
+	rankings: UserRanking[];
 	onStartGame: (difficulty: MeteorDifficulty) => Promise<void>;
 	onClose: () => void;
 	onToggleReady: () => void;
@@ -81,6 +82,7 @@ export function TitlePhase({
 	allUsersReady,
 	isProcessing,
 	currentUserId,
+	rankings,
 	onStartGame,
 	onClose,
 	onToggleReady,
@@ -88,6 +90,8 @@ export function TitlePhase({
 	const styles = titlePhase();
 	const [selectedDifficulty, setSelectedDifficulty] = useState<MeteorDifficulty>("NORMAL");
 	const [showCannotStartModal, setShowCannotStartModal] = useState(false);
+
+	const rankingsMap = new Map(rankings.map((r) => [r.userId, r]));
 
 	// ホストは ready → start を自動化するので、他プレイヤー全員が ready かどうかで判定
 	const othersAllReady = room.users
@@ -192,6 +196,7 @@ export function TitlePhase({
 							<div className="flex flex-col gap-3">
 								{room.users.map((u) => {
 									const isMe = u.userId === currentUserId;
+									const ranking = rankingsMap.get(u.userId);
 									return (
 										<div
 											key={u.userId}
@@ -219,6 +224,11 @@ export function TitlePhase({
 													</Typography>
 												)}
 											</Typography>
+											{ranking && (
+												<Typography variant="caption" as="span" className="ml-auto tabular-nums" style={{ color: "rgba(255,255,255,0.4)" }}>
+													{ranking.rank}位 · {ranking.points}pt
+												</Typography>
+											)}
 											<Typography
 												variant="label"
 												as="span"

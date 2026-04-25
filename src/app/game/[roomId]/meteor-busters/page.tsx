@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/server/actions";
 import { getRoomWithReadyStatus } from "@/server/actions/room";
+import { getNullHandRankings } from "@/server/actions/game/rankingActions";
 import { MeteorBustersGame } from "@/components/game/layout/meteorBustersGame";
 import { RoomUserWithReadyStatus } from "@/types";
 
@@ -25,6 +26,8 @@ export default async function MeteorBustersPage({
 	if (!room.activeGameType) redirect(`/room/${roomId}`);
 
 	const isHost = room.createdBy === currentUser.user.id;
+	const userIds = room.users.map((u: RoomUserWithReadyStatus) => u.userId);
+	const rankings = await getNullHandRankings(userIds);
 
 	return (
 		<div className="relative min-h-screen">
@@ -34,6 +37,7 @@ export default async function MeteorBustersPage({
 				roomId={roomId}
 				initialMatchId={room.currentMatchId}
 				currentUserId={currentUser.user.id}
+				rankings={rankings}
 			/>
 		</div>
 	);
