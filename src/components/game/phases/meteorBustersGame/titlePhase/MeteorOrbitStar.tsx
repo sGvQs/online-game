@@ -166,7 +166,6 @@ export function MeteorOrbitStar() {
 								style={{
 									transform: `translate(${x}px, ${y}px) translate(-50%, -50%)`,
 									zIndex,
-									willChange: "transform",
 								}}
 							>
 								{/* ボス外見 = glow filter なし（ゲームの isBoss と同じ） */}

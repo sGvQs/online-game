@@ -231,7 +231,7 @@ export function TitlePhase({
 							</div>
 						</div>
 
-						<div className={`${styles.difficultyCard()} ${!isHost ? "opacity-70" : ""}`}>
+						<div className={styles.difficultyCard({ guest: !isHost })}>
 							<Typography variant="small" as="p" font="cherry-bomb-one" className={styles.difficultyCardTitle()}>
 								むずかしさ
 							</Typography>

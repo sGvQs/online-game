@@ -8,7 +8,7 @@ export const titlePhase = tv({
 		subtitle: "flex gap-2 text-sm mt-6 text-brand-500 font-bold w-full justify-center",
 		// 難易度カード
 		difficultyCard:
-			"rounded-2xl p-5 flex flex-col gap-3 transition-opacity bg-white/3 border border-white/8 backdrop-blur-md",
+			"rounded-2xl p-5 flex flex-col gap-3 bg-white/3 border border-white/8 backdrop-blur-xl",
 		difficultyCardTitle:
 			"text-[11px] font-cherry-bomb-one text-[rgba(129,140,248,0.6)]",
 		difficultyButton: [
@@ -24,7 +24,7 @@ export const titlePhase = tv({
 		hostWaiting: "text-[10px] mt-1 font-cherry-bomb-one text-white/15",
 		// プレイヤーカード
 		playerCard:
-			"rounded-2xl p-5 bg-[rgba(129,140,248,0.05)] border border-[rgba(129,140,248,0.18)] backdrop-blur-md",
+			"rounded-2xl p-5 bg-[rgba(129,140,248,0.05)] border border-[rgba(129,140,248,0.18)] backdrop-blur-xl",
 		playerCardTitle:
 			"text-[10px] tracking-[0.4em] uppercase mb-4 text-[rgba(129,140,248,0.6)]",
 		statusDot:
@@ -37,5 +37,12 @@ export const titlePhase = tv({
 		progressTrack: "mt-4 h-1 rounded-full overflow-hidden bg-white/6",
 		progressBar:
 			"h-full rounded-full transition-all duration-500 [width:var(--progress-pct)] bg-linear-to-r from-indigo-400 to-purple-400 [box-shadow:0_0_8px_rgba(129,140,248,0.6)]",
+	},
+	variants: {
+		guest: {
+			true: {
+				difficultyCard: "[&>*]:opacity-70",
+			},
+		},
 	},
 });
