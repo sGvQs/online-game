@@ -23,6 +23,8 @@ interface TitlePhaseProps {
 	isProcessing: boolean;
 	currentUserId: string;
 	rankings: UserRanking[];
+	selectedDifficulty: MeteorDifficulty;
+	onDifficultyChange: (difficulty: MeteorDifficulty) => void;
 	onStartGame: (difficulty: MeteorDifficulty) => Promise<void>;
 	onClose: () => void;
 	onToggleReady: () => void;
@@ -84,13 +86,15 @@ export function TitlePhase({
 	isProcessing,
 	currentUserId,
 	rankings,
+	selectedDifficulty,
+	onDifficultyChange,
 	onStartGame,
 	onClose,
 	onToggleReady,
 }: TitlePhaseProps) {
 	const styles = titlePhase();
-	const [selectedDifficulty, setSelectedDifficulty] = useState<MeteorDifficulty>("NORMAL");
 	const [showCannotStartModal, setShowCannotStartModal] = useState(false);
+	const [showCancelReadyModal, setShowCancelReadyModal] = useState(false);
 
 	const rankingsMap = new Map(rankings.map((r) => [r.userId, r]));
 
@@ -150,13 +154,13 @@ export function TitlePhase({
 							{!isHost && (
 								<FloatGlow active={!isReady} variant={GlowVariant.Secondary}>
 									<Button
-										variant="secondary"
-										onClick={() => !isReady && onToggleReady()}
-										disabled={isReady || isTogglingReady}
+										variant={isReady ? "success" : "secondary"}
+										onClick={() => isReady ? setShowCancelReadyModal(true) : onToggleReady()}
+										disabled={isTogglingReady}
 										size="lg"
 										className="w-full"
 									>
-										{isReady ? "✓ 準備完了" : "いけます！"}
+										{isReady ? "やっぱいけません！" : "いけます！"}
 									</Button>
 								</FloatGlow>
 							)}
@@ -240,7 +244,7 @@ export function TitlePhase({
 									return (
 										<button
 											key={diff}
-											onClick={() => canSelect && setSelectedDifficulty(diff)}
+											onClick={() => canSelect && onDifficultyChange(diff)}
 											disabled={!canSelect}
 											className={`${styles.difficultyButton()} ${isSelectableInactive ? "hover:bg-white/5 hover:border-white/25" : ""}`}
 											style={{
@@ -305,6 +309,33 @@ export function TitlePhase({
 				<div className="flex justify-end">
 					<Button variant="success" onClick={() => setShowCannotStartModal(false)}>
 						とじる
+					</Button>
+				</div>
+			</div>
+		</Modal>
+
+		<Modal
+			isOpen={showCancelReadyModal}
+			onClose={() => setShowCancelReadyModal(false)}
+			title="じゅんびをやめる？"
+		>
+			<div className="flex flex-col gap-4">
+				<Typography variant="body" className="text-white/80">
+					「やっぱいけません！」を取り消して、準備をやめますか？
+				</Typography>
+				<div className="flex justify-end gap-3">
+					<Button variant="success" onClick={() => setShowCancelReadyModal(false)}>
+						やっぱいける！
+					</Button>
+					<Button
+						variant="danger"
+						disabled={isTogglingReady}
+						onClick={() => {
+							onToggleReady();
+							setShowCancelReadyModal(false);
+						}}
+					>
+						やめる
 					</Button>
 				</div>
 			</div>

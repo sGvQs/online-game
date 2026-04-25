@@ -60,6 +60,7 @@ export function MeteorBustersGame({
 	const {
 		phase,
 		difficulty,
+		titleDifficulty,
 		meteors,
 		bulletType,
 		ammoRemaining,
@@ -78,6 +79,7 @@ export function MeteorBustersGame({
 		handleSwitchBullet,
 		handleCursorMove,
 		handleReturnToTitle,
+		handleDifficultySelect,
 	} = useMeteorBusters({
 		roomId,
 		isHost,
@@ -168,6 +170,8 @@ export function MeteorBustersGame({
 						isProcessing={isProcessing}
 						currentUserId={currentUserId}
 						rankings={rankings}
+						selectedDifficulty={titleDifficulty}
+						onDifficultyChange={handleDifficultySelect}
 						onStartGame={onStartGame}
 						onClose={handleClose}
 						onToggleReady={toggleReady}

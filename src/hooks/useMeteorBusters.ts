@@ -89,6 +89,10 @@ interface GameStartPayload {
 	difficulty: MeteorDifficulty;
 }
 
+interface DifficultySelectPayload {
+	difficulty: MeteorDifficulty;
+}
+
 interface GameEndPayload {
 	destroyedCount: number;
 	spawnedCount: number;
@@ -103,6 +107,8 @@ interface GameEndPayload {
 export interface UseMeteorBustersReturn {
 	phase: MeteorBustersPhase;
 	difficulty: MeteorDifficulty;
+	titleDifficulty: MeteorDifficulty;
+	handleDifficultySelect: (difficulty: MeteorDifficulty) => void;
 	meteors: MeteorObject[];
 	bulletType: MeteorBulletType;
 	ammoRemaining: number;
@@ -151,6 +157,7 @@ export function useMeteorBusters({
 	// ---- State ----
 	const [phase, setPhase] = useState<MeteorBustersPhase>("TITLE");
 	const [difficulty, setDifficulty] = useState<MeteorDifficulty>("NORMAL");
+	const [titleDifficulty, setTitleDifficulty] = useState<MeteorDifficulty>("NORMAL");
 	const [meteors, setMeteors] = useState<MeteorObject[]>([]);
 	const [bulletType, setBulletType] = useState<MeteorBulletType>("A");
 	const [ammoRemaining, setAmmoRemaining] = useState(SHOOTER_AMMO_MAX);
@@ -765,6 +772,17 @@ export function useMeteorBusters({
 		[currentUserId, containerRef],
 	);
 
+	/** 難易度選択（ホストのみ broadcast、ゲストは受信して表示を同期） */
+	const handleDifficultySelect = useCallback((diff: MeteorDifficulty) => {
+		if (!isHost) return;
+		setTitleDifficulty(diff);
+		channelRef.current?.send({
+			type: "broadcast",
+			event: "difficulty_select",
+			payload: { difficulty: diff } satisfies DifficultySelectPayload,
+		});
+	}, [isHost]);
+
 	/** タイトルに戻る */
 	const handleReturnToTitle = useCallback(() => {
 		if (isHost) {
@@ -1101,6 +1119,11 @@ export function useMeteorBusters({
 			handleReturnToTitle();
 		});
 
+		channel.on("broadcast", { event: "difficulty_select" }, ({ payload }: { payload: DifficultySelectPayload }) => {
+			if (isHost) return;
+			setTitleDifficulty(payload.difficulty);
+		});
+
 		// ホストがリロード復帰した際に非ホストの古い隕石状態をリセットする
 		channel.on("broadcast", { event: "host_resumed" }, () => {
 			if (isHost) return;
@@ -1148,12 +1171,14 @@ export function useMeteorBusters({
 		spawnedCount,
 		totalSpawnCount,
 		isProcessing,
+		titleDifficulty,
 		handleStartGame,
 		handleShoot,
 		handleReload,
 		handleSwitchBullet,
 		handleCursorMove,
 		handleReturnToTitle,
+		handleDifficultySelect,
 		unlockTutorialSpawn,
 	};
 }
