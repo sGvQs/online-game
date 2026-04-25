@@ -1,12 +1,10 @@
-import { GLOW_COLORS } from "@/constants/meteorBustersGame/gameConfig";
+import Image from "next/image";
 import type { PlayerCursorState } from "@/types";
-
-const PLAYER_COLORS = ["#00ccff", "#ff66cc", "#66ff88", "#ffaa00"];
 
 interface PlayerCursorProps {
 	cursors: PlayerCursorState[];
 	currentUserId: string;
-	players: { userId: string }[];
+	players: { userId: string; name?: string | null }[];
 }
 
 export function PlayerCursors({
@@ -19,38 +17,35 @@ export function PlayerCursors({
 	return (
 		<>
 			{otherCursors.map((cursor) => {
-				const playerIdx = players.findIndex((p) => p.userId === cursor.playerId);
-				const playerColor = PLAYER_COLORS[playerIdx % PLAYER_COLORS.length] ?? "#ffffff";
-				const bulletColor = GLOW_COLORS[cursor.bulletType];
+				const player = players.find((p) => p.userId === cursor.playerId);
+				const name = player?.name ?? cursor.playerId.slice(0, 6);
 
 				return (
 					<div
 						key={cursor.playerId}
-						className="pointer-events-none absolute z-50"
+						className="pointer-events-none absolute z-50 flex flex-col items-center"
 						style={{
 							left: cursor.x,
 							top: cursor.y,
 							transform: "translate(-50%, -50%)",
 						}}
 					>
-						{/* カーソル本体 */}
-						<div
-							className="w-5 h-5 rounded-full border-2 opacity-80"
-							style={{
-								borderColor: playerColor,
-								boxShadow: `0 0 6px ${playerColor}`,
-							}}
-						/>
-						{/* 現在の弾タイプ表示 */}
-						<div
-							className="absolute -top-4 left-1/2 -translate-x-1/2 text-[9px] font-bold px-1 rounded"
-							style={{
-								color: bulletColor,
-								textShadow: `0 0 4px ${bulletColor}`,
-							}}
-						>
-							{cursor.bulletType}
+						{/* target-circle.svg を 1/4 サイズ（12px）で表示 */}
+						<div className="relative w-3 h-3 opacity-70">
+							<Image
+								src="/svg/object/target-circle.svg"
+								alt=""
+								fill
+								className="object-contain"
+							/>
 						</div>
+						{/* プレイヤー名 */}
+						<span
+							className="mt-0.5 text-[8px] leading-none whitespace-nowrap text-white/70 font-dot-gothic-16"
+							style={{ textShadow: "0 0 4px rgba(0,0,0,0.8)" }}
+						>
+							{name}
+						</span>
 					</div>
 				);
 			})}

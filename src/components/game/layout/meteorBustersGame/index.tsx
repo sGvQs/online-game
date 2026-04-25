@@ -193,6 +193,7 @@ export function MeteorBustersGame({
 						totalSpawnCount={totalSpawnCount}
 						difficulty={difficulty}
 						currentUserId={currentUserId}
+						players={room.users.map((u) => ({ userId: u.userId, name: u.user?.name }))}
 						onUnlockSpawn={unlockTutorialSpawn}
 					/>
 				)}

@@ -36,6 +36,7 @@ interface PlayingPhaseProps {
 	totalSpawnCount: number;
 	difficulty: MeteorDifficulty;
 	currentUserId: string;
+	players: { userId: string; name?: string | null }[];
 	onUnlockSpawn: () => void;
 }
 
@@ -54,6 +55,7 @@ export function PlayingPhase({
 	totalSpawnCount,
 	difficulty,
 	currentUserId,
+	players,
 	onUnlockSpawn,
 }: PlayingPhaseProps) {
 	const styles = playingPhase();
@@ -128,7 +130,7 @@ export function PlayingPhase({
 			<PlayerCursors
 				cursors={playerCursors}
 				currentUserId={currentUserId}
-				players={[]}
+				players={players}
 			/>
 
 			{/* 左上スコア */}
