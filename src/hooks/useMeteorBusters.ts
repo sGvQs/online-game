@@ -434,22 +434,24 @@ export function useMeteorBusters({
 		const rate = spawned > 0 ? destroyed / spawned : 0;
 		const isCleared = rate >= CLEAR_RATE;
 
-		channelRef.current?.send({
-			type: "broadcast",
-			event: "game_end",
-			payload: {
-				destroyedCount: destroyed,
-				spawnedCount: spawned,
-				destroyRate: rate,
-				isCleared,
-			} satisfies GameEndPayload,
-		});
-		handleGameEnd({
+		const endPayload = {
 			destroyedCount: destroyed,
 			spawnedCount: spawned,
 			destroyRate: rate,
 			isCleared,
+		} satisfies GameEndPayload;
+
+		channelRef.current?.send({ type: "broadcast", event: "game_end", payload: endPayload });
+
+		// fire-and-forget の欠損リスクに備えてリトライ（ゲスト側リスナーは冪等）
+		[600, 1500].forEach((delay) => {
+			setTimeout(() => {
+				if (phaseRef.current !== "RESULT") return;
+				channelRef.current?.send({ type: "broadcast", event: "game_end", payload: endPayload });
+			}, delay);
 		});
+
+		handleGameEnd(endPayload);
 	}, [isHost, handleGameEnd]);
 
 	// checkGameEnd を ref に同期（tickMeteors から deps なしで呼べるように）
@@ -791,6 +793,17 @@ export function useMeteorBusters({
 				event: "return_to_title",
 				payload: {},
 			});
+			// fire-and-forget の欠損リスクに備えてリトライ
+			[600, 1500].forEach((delay) => {
+				setTimeout(() => {
+					if (phaseRef.current !== "TITLE") return;
+					channelRef.current?.send({
+						type: "broadcast",
+						event: "return_to_title",
+						payload: {},
+					});
+				}, delay);
+			});
 		}
 		meteorsRef.current.clear();
 		setMeteors([]);
@@ -1111,11 +1124,13 @@ export function useMeteorBusters({
 
 		channel.on("broadcast", { event: "game_end" }, ({ payload }: { payload: GameEndPayload }) => {
 			if (isHost) return;
+			if (phaseRef.current !== "PLAYING") return; // リトライが新ゲーム中に届いた場合を無視
 			handleGameEnd(payload);
 		});
 
 		channel.on("broadcast", { event: "return_to_title" }, () => {
 			if (isHost) return;
+			if (phaseRef.current !== "RESULT") return; // リトライがゲーム中に届いた場合を無視
 			handleReturnToTitle();
 		});
 
