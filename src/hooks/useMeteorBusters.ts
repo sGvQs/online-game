@@ -767,6 +767,13 @@ export function useMeteorBusters({
 
 	/** タイトルに戻る */
 	const handleReturnToTitle = useCallback(() => {
+		if (isHost) {
+			channelRef.current?.send({
+				type: "broadcast",
+				event: "return_to_title",
+				payload: {},
+			});
+		}
 		meteorsRef.current.clear();
 		setMeteors([]);
 		setResult(null);
@@ -779,7 +786,7 @@ export function useMeteorBusters({
 		setAmmoRemaining(SHOOTER_AMMO_MAX);
 		ammoRef.current = SHOOTER_AMMO_MAX;
 		setBulletAnims([]);
-	}, []);
+	}, [isHost]);
 
 	// ============================================
 	// 開発環境ボット（非ホスト自動射撃・人間らしい挙動）
@@ -1087,6 +1094,11 @@ export function useMeteorBusters({
 		channel.on("broadcast", { event: "game_end" }, ({ payload }: { payload: GameEndPayload }) => {
 			if (isHost) return;
 			handleGameEnd(payload);
+		});
+
+		channel.on("broadcast", { event: "return_to_title" }, () => {
+			if (isHost) return;
+			handleReturnToTitle();
 		});
 
 		// ホストがリロード復帰した際に非ホストの古い隕石状態をリセットする
