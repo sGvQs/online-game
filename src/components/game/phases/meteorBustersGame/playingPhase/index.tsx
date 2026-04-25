@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useEffect, useState } from "react";
+import Image from "next/image";
 import { playingPhase } from "./styles";
 import { MeteorRenderer } from "@/components/game/common/meteorBusters/meteorRenderer";
 import { PlayerCursors } from "@/components/game/common/meteorBusters/playerCursor";
@@ -32,14 +33,12 @@ interface PlayingPhaseProps {
 	cursorX: number;
 	cursorY: number;
 	destroyedCount: number;
-	spawnedCount: number;
 	totalSpawnCount: number;
 	difficulty: MeteorDifficulty;
 	currentUserId: string;
 	players: { userId: string; name?: string | null }[];
 	onUnlockSpawn: () => void;
 }
-
 
 export function PlayingPhase({
 	meteors,
@@ -51,7 +50,6 @@ export function PlayingPhase({
 	cursorX,
 	cursorY,
 	destroyedCount,
-	spawnedCount,
 	totalSpawnCount,
 	difficulty,
 	currentUserId,
@@ -84,15 +82,7 @@ export function PlayingPhase({
 	const nextColor = GLOW_COLORS[nextBulletType];
 	const nextNextColor = GLOW_COLORS[nextNextBulletType];
 
-	const destroyRate =
-		spawnedCount > 0 ? Math.round((destroyedCount / spawnedCount) * 100) : 0;
-
-	const progressBarColor =
-		destroyRate >= 80
-			? "bg-linear-to-r from-indigo-400 to-purple-400 shadow-[0_0_8px_rgba(129,140,248,0.6)]"
-			: destroyRate >= 60
-				? "bg-linear-to-r from-yellow-400 to-orange-400"
-				: "bg-linear-to-r from-red-400 to-rose-500";
+	const remaining = Math.max(0, totalSpawnCount - destroyedCount);
 
 	return (
 		<div ref={containerRef} className={styles.container()}>
@@ -133,26 +123,15 @@ export function PlayingPhase({
 				players={players}
 			/>
 
-			{/* 左上スコア */}
-			<div className={styles.score()}>
-				<p className={styles.scoreLabel()}>撃破率</p>
-				<p className={styles.scoreValue()}>{destroyRate}%</p>
-				<p className={styles.scoreProgress()}>
-					{destroyedCount} / {spawnedCount} 撃破 (残り{" "}
-					{totalSpawnCount - spawnedCount})
-				</p>
-				<div className={styles.progressBarWrap()}>
-					<div
-						className={`${styles.progressBarFill()} ${progressBarColor}`}
-						style={{
-							width: `${Math.min(100, (spawnedCount / totalSpawnCount) * 100)}%`,
-						}}
-					/>
+			{/* 中央上: のこり隕石数（スナックバーの下・チュートリアル以外） */}
+			{difficulty !== "TUTORIAL" && (
+				<div className={styles.remainingHud()}>
+					<span className={styles.remainingLabel()}>のこり</span>
+					<Image src="/svg/object/metor.svg" alt="" width={16} height={16} className="shrink-0" />
+					<span className={styles.remainingX()}>×</span>
+					<span className={styles.remainingCount()}>{remaining}</span>
 				</div>
-				<p className={styles.difficultyLabel()}>
-					{difficulty}
-				</p>
-			</div>
+			)}
 
 			{/* 右下 弾数HUD（HOME と同じスタイル） */}
 			<div className={styles.hud()}>
