@@ -16,18 +16,9 @@ export const playingPhase = tv({
 		// のこり隕石数（中央上・スナックバー下）
 		remainingHud: [
 			"absolute top-14 left-1/2 -translate-x-1/2 z-30",
-			"flex items-center gap-1.5",
-			"bg-[rgba(15,23,42,0.5)] border border-white/10 backdrop-blur-md",
-			"rounded-full px-3 py-1.5 pointer-events-none",
+			"flex flex-col items-center gap-2 pointer-events-none",
 		],
-		remainingLabel: [
-			"text-[11px] text-white/60 font-cherry-bomb-one",
-		],
-		remainingX: [
-			"text-[11px] text-white/40 font-dot-gothic-16",
-		],
-		remainingCount: [
-			"text-sm text-white font-dot-gothic-16 tabular-nums min-w-[1.5ch] text-center",
-		],
+		remainingLabel: "text-base text-brand-500/80",
+		remainingCount: "text-brand-500 font-bold text-4xl tabular-nums",
 	},
 });

@@ -2,7 +2,9 @@
 
 import { useRef, useEffect, useState } from "react";
 import Image from "next/image";
+import { motion } from "framer-motion";
 import { playingPhase } from "./styles";
+import { Typography } from "@/components/ui/typography";
 import { MeteorRenderer } from "@/components/game/common/meteorBusters/meteorRenderer";
 import { PlayerCursors } from "@/components/game/common/meteorBusters/playerCursor";
 import { ShooterBullets } from "@/components/game/common/shooter/ShooterBullets";
@@ -126,10 +128,25 @@ export function PlayingPhase({
 			{/* 中央上: のこり隕石数（スナックバーの下・チュートリアル以外） */}
 			{difficulty !== "TUTORIAL" && (
 				<div className={styles.remainingHud()}>
-					<span className={styles.remainingLabel()}>のこり</span>
-					<Image src="/svg/object/metor.svg" alt="" width={16} height={16} className="shrink-0" />
-					<span className={styles.remainingX()}>×</span>
-					<span className={styles.remainingCount()}>{remaining}</span>
+					<Typography variant="label" as="span" font="cherry-bomb-one" className={styles.remainingLabel()}>
+						のこり
+					</Typography>
+					<div className="flex items-center gap-3">
+						<div className="relative w-10 h-10">
+							<Image src="/svg/object/metor.svg" alt="" fill className="object-contain" />
+						</div>
+						<span className="text-white/60 text-2xl">×</span>
+						<motion.div
+							key={remaining}
+							initial={{ scale: 1 }}
+							animate={{ scale: [1, 2, 1], x: [0, -3, 3, -3, 3, 0] }}
+							transition={{ duration: 0.25, ease: "easeOut" }}
+						>
+							<Typography variant="h2" as="span" font="cherry-bomb-one" className={styles.remainingCount()}>
+								{remaining}
+							</Typography>
+						</motion.div>
+					</div>
 				</div>
 			)}
 
