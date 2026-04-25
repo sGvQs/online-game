@@ -45,7 +45,7 @@ const DIFFICULTY_META: Record<MeteorDifficulty, {
 		orbitIconSrc: "/svg/object/metor.svg",
 	},
 	EASY: {
-		label: "易しい",
+		label: "かんたん",
 		rate: "+1pt",
 		bg: "rgba(134,239,172,0.12)",
 		border: "rgba(134,239,172,0.5)",
@@ -54,7 +54,7 @@ const DIFFICULTY_META: Record<MeteorDifficulty, {
 		orbitIconSrc: "/svg/object/earth.svg",
 	},
 	NORMAL: {
-		label: "普通",
+		label: "ふつう",
 		rate: "+2pt",
 		bg: "rgba(253,224,71,0.12)",
 		border: "rgba(253,224,71,0.5)",
@@ -63,7 +63,7 @@ const DIFFICULTY_META: Record<MeteorDifficulty, {
 		orbitIconSrc: "/svg/object/sun.svg",
 	},
 	HARD: {
-		label: "難しい",
+		label: "むずかしい",
 		rate: "+3pt",
 		bg: "rgba(248,113,113,0.12)",
 		border: "rgba(248,113,113,0.5)",
@@ -234,7 +234,7 @@ export function TitlePhase({
 
 						<div className={`${styles.difficultyCard()} ${!isHost ? "opacity-70" : ""}`}>
 							<Typography variant="small" as="p" font="cherry-bomb-one" className={styles.difficultyCardTitle()}>
-								難易度
+								むずかしさ
 							</Typography>
 							<div className="flex flex-col gap-2">
 								{(["TUTORIAL", "EASY", "NORMAL", "HARD"] as MeteorDifficulty[]).map((diff) => {
