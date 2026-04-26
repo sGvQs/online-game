@@ -20,5 +20,11 @@ export const playingPhase = tv({
 		],
 		remainingLabel: "text-base text-brand-500/80",
 		remainingCount: "text-brand-500 font-bold text-4xl tabular-nums",
+		// プレイヤースコアリスト
+		playerScoreList: "flex flex-col gap-2 mt-3",
+		playerScoreItem: "flex flex-col gap-0.5",
+		playerScoreName: "text-[10px] leading-none text-white/60 font-dot-gothic-16 whitespace-nowrap",
+		playerScoreSep: "text-white/50 text-sm leading-none",
+		playerScoreCount: "text-white font-cherry-bomb-one text-lg tabular-nums leading-none",
 	},
 });

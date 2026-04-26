@@ -80,6 +80,7 @@ interface MeteorUpdatePayload {
 	meteorId: string;
 	hp: number;
 	totalSpawned: number; // ホストの累積 spawnedCount（ゲスト側の自己修正用）
+	shooterId?: string; // hp === 0 のときのみ付与（ゲスト側スコア同期用）
 }
 
 interface MeteorMissedPayload {
@@ -122,6 +123,8 @@ export interface UseMeteorBustersReturn {
 	destroyedCount: number;
 	spawnedCount: number;
 	totalSpawnCount: number;
+	/** プレイヤーごとの撃破数 (userId → count) */
+	playerScores: Record<string, number>;
 	isProcessing: boolean;
 	handleStartGame: (difficulty: MeteorDifficulty) => Promise<void>;
 	handleShoot: (cursorX: number, cursorY: number, containerRect: DOMRect) => void;
@@ -171,6 +174,7 @@ export function useMeteorBusters({
 	const [destroyedCount, setDestroyedCount] = useState(0);
 	const [spawnedCount, setSpawnedCount] = useState(0);
 	const [totalSpawnCount, setTotalSpawnCount] = useState(0);
+	const [playerScores, setPlayerScores] = useState<Record<string, number>>({});
 	const [isProcessing, setIsProcessing] = useState(false);
 
 	// ---- Refs ----
@@ -180,6 +184,7 @@ export function useMeteorBusters({
 	const spawnedCountRef = useRef(0);
 	const destroyedCountRef = useRef(0);
 	const missedCountRef = useRef(0);
+	const playerScoresRef = useRef<Record<string, number>>({});
 	const totalSpawnCountRef = useRef(0);
 	const meteorsRef = useRef<Map<string, MeteorObject>>(new Map());
 	/** ゲスト側: 受信済み meteor_spawn の ID セット（リトライ重複排除用） */
@@ -525,10 +530,13 @@ export function useMeteorBusters({
 		receivedMeteorIdsRef.current.clear();
 		gameStartTimeRef.current = performance.now();
 
+		playerScoresRef.current = {};
+
 		setDifficulty(diff);
 		setTotalSpawnCount(config.totalSpawnCount);
 		setSpawnedCount(0);
 		setDestroyedCount(0);
+		setPlayerScores({});
 		setMeteors([]);
 		setBulletType("A");
 		bulletTypeRef.current = "A";
@@ -673,6 +681,15 @@ export function useMeteorBusters({
 				destroyedCountRef.current += effectiveCount;
 				setDestroyedCount(destroyedCountRef.current);
 
+				// ホスト側プレイヤースコア更新（連鎖は "__chain__" のため除外）
+				if (_shooterId !== "__chain__") {
+					playerScoresRef.current = {
+						...playerScoresRef.current,
+						[_shooterId]: (playerScoresRef.current[_shooterId] ?? 0) + effectiveCount,
+					};
+					setPlayerScores({ ...playerScoresRef.current });
+				}
+
 				// 中ボス破壊時: 連鎖破壊（ホストのみ、波紋リングなし）
 				if (meteor.isBoss && !meteor.isFinalBoss && isHost && getMeteorScreenPosRef.current) {
 					const rect = containerRef.current?.getBoundingClientRect();
@@ -717,7 +734,7 @@ export function useMeteorBusters({
 				channelRef.current?.send({
 					type: "broadcast",
 					event: "meteor_update",
-					payload: { meteorId, hp: 0, totalSpawned: spawnedCountRef.current } satisfies MeteorUpdatePayload,
+					payload: { meteorId, hp: 0, totalSpawned: spawnedCountRef.current, shooterId: _shooterId !== "__chain__" ? _shooterId : undefined } satisfies MeteorUpdatePayload,
 				});
 				play("star-damage");
 				onShake?.("small");
@@ -818,8 +835,10 @@ export function useMeteorBusters({
 		}
 		meteorsRef.current.clear();
 		receivedMeteorIdsRef.current.clear();
+		playerScoresRef.current = {};
 		setMeteors([]);
 		setResult(null);
+		setPlayerScores({});
 		setPhase("TITLE");
 		phaseRef.current = "TITLE";
 		setDestroyedCount(0);
@@ -1102,6 +1121,15 @@ export function useMeteorBusters({
 				destroyedCountRef.current += effectiveCount;
 				setDestroyedCount(destroyedCountRef.current);
 
+				// ゲスト側プレイヤースコア更新
+				if (p.shooterId) {
+					playerScoresRef.current = {
+						...playerScoresRef.current,
+						[p.shooterId]: (playerScoresRef.current[p.shooterId] ?? 0) + effectiveCount,
+					};
+					setPlayerScores({ ...playerScoresRef.current });
+				}
+
 				// 破壊FX・SE・シェイク（非ホスト側）
 				const rect = containerRef.current?.getBoundingClientRect();
 				if (rect && getMeteorScreenPosRef.current) {
@@ -1210,6 +1238,7 @@ export function useMeteorBusters({
 		destroyedCount,
 		spawnedCount,
 		totalSpawnCount,
+		playerScores,
 		isProcessing,
 		titleDifficulty,
 		handleStartGame,

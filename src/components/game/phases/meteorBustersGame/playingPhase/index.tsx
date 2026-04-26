@@ -38,7 +38,8 @@ interface PlayingPhaseProps {
 	totalSpawnCount: number;
 	difficulty: MeteorDifficulty;
 	currentUserId: string;
-	players: { userId: string; name?: string | null }[];
+	players: { userId: string; name?: string | null; faceIconPath?: string }[];
+	playerScores: Record<string, number>;
 	onUnlockSpawn: () => void;
 }
 
@@ -57,6 +58,7 @@ export function PlayingPhase({
 	difficulty,
 	currentUserId,
 	players,
+	playerScores,
 	onUnlockSpawn,
 }: PlayingPhaseProps) {
 	const styles = playingPhase();
@@ -140,6 +142,29 @@ export function PlayingPhase({
 						<Typography variant="h2" as="span" font="cherry-bomb-one" className={styles.remainingCount()}>
 							{remaining}
 						</Typography>
+					</div>
+
+					{/* プレイヤースコア */}
+					<div className={styles.playerScoreList()}>
+						{players.map((player) => (
+							<div key={player.userId} className={styles.playerScoreItem()}>
+								<span className={styles.playerScoreName()}>{player.name ?? player.userId.slice(0, 6)}</span>
+								<div className="flex items-center gap-1.5">
+									<div className="relative w-6 h-6 shrink-0">
+										<Image
+											src={player.faceIconPath ?? "/svg/face/boy-face.svg"}
+											alt=""
+											fill
+											className="object-contain"
+										/>
+									</div>
+									<span className={styles.playerScoreSep()}>×</span>
+									<span className={styles.playerScoreCount()}>
+										{playerScores[player.userId] ?? 0}
+									</span>
+								</div>
+							</div>
+						))}
 					</div>
 				</div>
 			)}

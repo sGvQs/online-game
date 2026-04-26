@@ -11,6 +11,7 @@ import { PlayingPhase } from "@/components/game/phases/meteorBustersGame/playing
 import { ResultPhase } from "@/components/game/phases/meteorBustersGame/resultPhase";
 import { PresenceDuplicateWarning } from "@/components/common/PresenceDuplicateWarning";
 import { SCREEN_SHAKE_PRESETS, type ScreenShakeStrength } from "@/lib/shooter/screen-shake";
+import { FACE_ICON_PATHS, DEFAULT_FACE_ICON } from "@/constants/common/faceIcon";
 import type { RoomWithUsersAndReadyStatus, MeteorDifficulty, UserRanking } from "@/types";
 
 interface MeteorBustersGameProps {
@@ -72,6 +73,7 @@ export function MeteorBustersGame({
 		destroyedCount,
 		spawnedCount,
 		totalSpawnCount,
+		playerScores,
 		isProcessing,
 		handleStartGame,
 		handleShoot,
@@ -190,10 +192,15 @@ export function MeteorBustersGame({
 						cursorY={cursorPos.y}
 						destroyedCount={destroyedCount}
 						spawnedCount={spawnedCount}
+					playerScores={playerScores}
 						totalSpawnCount={totalSpawnCount}
 						difficulty={difficulty}
 						currentUserId={currentUserId}
-						players={room.users.map((u) => ({ userId: u.userId, name: u.user?.name }))}
+						players={room.users.map((u) => ({
+						userId: u.userId,
+						name: u.user?.name,
+						faceIconPath: FACE_ICON_PATHS[u.user?.faceIcon ?? DEFAULT_FACE_ICON],
+					}))}
 						onUnlockSpawn={unlockTutorialSpawn}
 					/>
 				)}
