@@ -73,15 +73,18 @@ interface MeteorSpawnPayload {
 	isBoss: boolean;
 	isFinalBoss: boolean;
 	sizeFactor: number;
+	totalSpawned: number; // ホストの累積 spawnedCount（ゲスト側の自己修正用）
 }
 
 interface MeteorUpdatePayload {
 	meteorId: string;
 	hp: number;
+	totalSpawned: number; // ホストの累積 spawnedCount（ゲスト側の自己修正用）
 }
 
 interface MeteorMissedPayload {
 	meteorId: string;
+	totalSpawned: number; // 同上
 }
 
 interface GameStartPayload {
@@ -179,6 +182,8 @@ export function useMeteorBusters({
 	const missedCountRef = useRef(0);
 	const totalSpawnCountRef = useRef(0);
 	const meteorsRef = useRef<Map<string, MeteorObject>>(new Map());
+	/** ゲスト側: 受信済み meteor_spawn の ID セット（リトライ重複排除用） */
+	const receivedMeteorIdsRef = useRef<Set<string>>(new Set());
 	const bulletTypeRef = useRef<MeteorBulletType>("A");
 	const ammoRef = useRef(SHOOTER_AMMO_MAX);
 	const spawnTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -265,7 +270,7 @@ export function useMeteorBusters({
 					channelRef.current?.send({
 						type: "broadcast",
 						event: "meteor_missed",
-						payload: { meteorId: meteor.id } satisfies MeteorMissedPayload,
+						payload: { meteorId: meteor.id, totalSpawned: spawnedCountRef.current } satisfies MeteorMissedPayload,
 					});
 					const effectiveCount = meteor.isBoss
 						? (BOSS_CONFIG[difficultyRef.current]?.effectiveCount ?? 1)
@@ -346,7 +351,7 @@ export function useMeteorBusters({
 		const yOffset = (Math.random() * 2 - 1) * MAX_Y_OFFSET;
 		const orbitTrack = Math.floor(Math.random() * ORBIT_TRACKS.length);
 		const track = ORBIT_TRACKS[orbitTrack];
-		const meteor: MeteorSpawnPayload = {
+		const meteor: Omit<MeteorSpawnPayload, "totalSpawned"> = {
 			id: generateMeteorId(),
 			type,
 			orbitTrack,
@@ -362,12 +367,6 @@ export function useMeteorBusters({
 			sizeFactor,
 		};
 
-		channelRef.current?.send({
-			type: "broadcast",
-			event: "meteor_spawn",
-			payload: meteor,
-		});
-
 		const meteorObj: MeteorObject = {
 			...meteor,
 			angle: track.spawnAngle,
@@ -379,6 +378,17 @@ export function useMeteorBusters({
 		const effectiveCount = isBoss ? (bossConfig?.effectiveCount ?? 1) : 1;
 		spawnedCountRef.current += effectiveCount;
 		setSpawnedCount(spawnedCountRef.current);
+
+		const spawnPayload = { ...meteor, totalSpawned: spawnedCountRef.current };
+		channelRef.current?.send({ type: "broadcast", event: "meteor_spawn", payload: spawnPayload });
+
+		// fire-and-forget 欠損対策リトライ（ゲスト側は receivedMeteorIdsRef で重複排除）
+		[700, 1800].forEach((delay) => {
+			setTimeout(() => {
+				if (phaseRef.current !== "PLAYING") return;
+				channelRef.current?.send({ type: "broadcast", event: "meteor_spawn", payload: spawnPayload });
+			}, delay);
+		});
 
 		if (spawnedCountRef.current < totalSpawnCountRef.current) {
 			spawnTimerRef.current = setTimeout(
@@ -512,6 +522,7 @@ export function useMeteorBusters({
 		spawnCallCountRef.current = 0;
 		tutorialSpawnUnlockedRef.current = false;
 		meteorsRef.current.clear();
+		receivedMeteorIdsRef.current.clear();
 		gameStartTimeRef.current = performance.now();
 
 		setDifficulty(diff);
@@ -706,7 +717,7 @@ export function useMeteorBusters({
 				channelRef.current?.send({
 					type: "broadcast",
 					event: "meteor_update",
-					payload: { meteorId, hp: 0 } satisfies MeteorUpdatePayload,
+					payload: { meteorId, hp: 0, totalSpawned: spawnedCountRef.current } satisfies MeteorUpdatePayload,
 				});
 				play("star-damage");
 				onShake?.("small");
@@ -718,7 +729,7 @@ export function useMeteorBusters({
 				channelRef.current?.send({
 					type: "broadcast",
 					event: "meteor_update",
-					payload: { meteorId, hp: newHp } satisfies MeteorUpdatePayload,
+					payload: { meteorId, hp: newHp, totalSpawned: spawnedCountRef.current } satisfies MeteorUpdatePayload,
 				});
 			}
 
@@ -806,6 +817,7 @@ export function useMeteorBusters({
 			});
 		}
 		meteorsRef.current.clear();
+		receivedMeteorIdsRef.current.clear();
 		setMeteors([]);
 		setResult(null);
 		setPhase("TITLE");
@@ -1013,6 +1025,12 @@ export function useMeteorBusters({
 
 		channel.on("broadcast", { event: "meteor_spawn" }, ({ payload }: { payload: MeteorSpawnPayload }) => {
 			if (isHost) return;
+			// ホストの累積値で上書き（常に最新値に同期）
+			spawnedCountRef.current = payload.totalSpawned;
+			setSpawnedCount(payload.totalSpawned);
+			// 受信済み ID の場合はリトライによる重複 → 隕石は再生成しない
+			if (receivedMeteorIdsRef.current.has(payload.id)) return;
+			receivedMeteorIdsRef.current.add(payload.id);
 			const meteor: MeteorObject = {
 				...payload,
 				spawnTime: performance.now(), // ホストのクロックではなく自分のクロックで起算
@@ -1021,12 +1039,6 @@ export function useMeteorBusters({
 			};
 			meteorsRef.current.set(meteor.id, meteor);
 			setMeteors([...meteorsRef.current.values()].filter((m) => !m.destroyed));
-			// ボスは有効隕石換算分を加算
-			const effectiveCount = payload.isBoss
-				? (BOSS_CONFIG[difficultyRef.current]?.effectiveCount ?? 1)
-				: 1;
-			spawnedCountRef.current += effectiveCount;
-			setSpawnedCount(spawnedCountRef.current);
 		});
 
 		channel.on("broadcast", { event: "shot" }, ({ payload }: { payload: ShotPayload }) => {
@@ -1070,8 +1082,16 @@ export function useMeteorBusters({
 		channel.on("broadcast", { event: "meteor_update" }, ({ payload }: { payload: MeteorUpdatePayload }) => {
 			if (isHost) return;
 			const p = payload;
+			// ホストの累積値で上書き（meteor_spawn 欠損の自己修正）
+			spawnedCountRef.current = p.totalSpawned;
+			setSpawnedCount(p.totalSpawned);
 			const meteor = meteorsRef.current.get(p.meteorId);
-			if (!meteor) return;
+			if (!meteor) {
+				// meteor_spawn が欠損していて隕石が未登録の場合でも、
+				// 破壊済みIDを記録して後のリトライで幽霊隕石が生成されるのを防ぐ
+				if (p.hp <= 0) receivedMeteorIdsRef.current.add(p.meteorId);
+				return;
+			}
 
 			if (p.hp <= 0) {
 				const updated = { ...meteor, hp: 0, destroyed: true };
@@ -1103,6 +1123,11 @@ export function useMeteorBusters({
 
 		channel.on("broadcast", { event: "meteor_missed" }, ({ payload }: { payload: MeteorMissedPayload }) => {
 			if (isHost) return;
+			// ホストの累積値で上書き（meteor_spawn 欠損の自己修正）
+			spawnedCountRef.current = payload.totalSpawned;
+			setSpawnedCount(payload.totalSpawned);
+			// miss 済み ID を記録: meteor_spawn リトライで幽霊隕石が生成されるのを防ぐ
+			receivedMeteorIdsRef.current.add(payload.meteorId);
 			meteorsRef.current.delete(payload.meteorId);
 			setMeteors([...meteorsRef.current.values()].filter((m) => !m.destroyed));
 		});
