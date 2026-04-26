@@ -13,10 +13,10 @@ export const playingPhase = tv({
 			"absolute bottom-4 left-0 right-0 z-30",
 			"flex flex-col items-center",
 		],
-		// のこり隕石数（中央上・スナックバー下）
+		// のこり隕石数（左上・スナックバー下）
 		remainingHud: [
-			"absolute top-14 left-1/2 -translate-x-1/2 z-30",
-			"flex flex-col items-center gap-2 pointer-events-none",
+			"absolute top-20 left-20 z-30",
+			"flex flex-col items-start gap-2 pointer-events-none",
 		],
 		remainingLabel: "text-base text-brand-500/80",
 		remainingCount: "text-brand-500 font-bold text-4xl tabular-nums",
