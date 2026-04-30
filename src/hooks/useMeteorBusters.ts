@@ -102,6 +102,7 @@ interface GameEndPayload {
 	spawnedCount: number;
 	destroyRate: number;
 	isCleared: boolean;
+	playerScores: Record<string, number>;
 }
 
 // ============================================
@@ -454,6 +455,7 @@ export function useMeteorBusters({
 			spawnedCount: spawned,
 			destroyRate: rate,
 			isCleared,
+			playerScores: { ...playerScoresRef.current },
 		} satisfies GameEndPayload;
 
 		channelRef.current?.send({ type: "broadcast", event: "game_end", payload: endPayload });

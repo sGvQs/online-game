@@ -209,6 +209,13 @@ export function MeteorBustersGame({
 					<ResultPhase
 						result={result}
 						isHost={isHost}
+						difficulty={difficulty}
+						beforePoints={rankings.find((r) => r.userId === currentUserId)?.points ?? 0}
+						players={room.users.map((u) => ({
+							userId: u.userId,
+							name: u.user?.name,
+							faceIconPath: FACE_ICON_PATHS[u.user?.faceIcon ?? DEFAULT_FACE_ICON],
+						}))}
 						onReturnToTitle={handleReturnToTitle}
 					/>
 				)}

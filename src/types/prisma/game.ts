@@ -214,6 +214,8 @@ export interface MeteorBustersResult {
 	spawnedCount: number;
 	destroyRate: number;
 	isCleared: boolean;
+	/** プレイヤーごとの撃破数 (userId → count) */
+	playerScores: Record<string, number>;
 }
 
 export interface BulletAnim {
