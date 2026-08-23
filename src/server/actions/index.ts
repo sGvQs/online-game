@@ -34,11 +34,4 @@ export {
 export { syncUser } from "./auth";
 
 // Game関連
-export {
-	startGame,
-	clickError,
-	getMatchWithEvents,
-	finishGame,
-	getMonthlyRanking,
-	getTopRankings,
-} from "./game";
+export { getMonthlyRanking, getTopRankings } from "./game";

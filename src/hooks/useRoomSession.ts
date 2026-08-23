@@ -4,7 +4,7 @@ import { useEffect, useState, useMemo, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
 import { getRoomWithUsers } from "@/server/actions";
-import { getNullHandRankings } from "@/server/actions/game/rankingActions";
+import { getRoomMemberRankings } from "@/server/actions/game/rankingActions";
 import type { RoomUserWithUser, UserRanking } from "@/types";
 
 interface RoomRecord {
@@ -51,7 +51,7 @@ export function useRoomSession({
 				navigateHome.current();
 				return;
 			}
-			const rankings = await getNullHandRankings(
+			const rankings = await getRoomMemberRankings(
 				room.users.map((u) => u.userId),
 			);
 			setMembers(room.users);

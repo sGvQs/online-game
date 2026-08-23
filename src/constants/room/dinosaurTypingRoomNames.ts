@@ -2,7 +2,7 @@
 export const DINOSAUR_TYPING_ROOM_NAMES = [
 	"むかし、にんげんがいた",
 	"windows95くれた",
-	"NULL HANDおそわった",
+	"あそびかた、おそわった",
 	"ルール、あいまいだった",
 	"なまえ、わすれた",
 	"かおは、たぶんおぼえてる",

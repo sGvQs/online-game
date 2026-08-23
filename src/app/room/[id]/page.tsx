@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { getCurrentUser, getRoomWithUsers } from "@/server/actions";
 import { RoomUserWithReadyStatus } from "@/types";
-import { getNullHandRankings } from "@/server/actions/game/rankingActions";
+import { getRoomMemberRankings } from "@/server/actions/game/rankingActions";
 import { RoomClient } from "@/components/room/roomClient";
 
 export default async function RoomPage({
@@ -30,7 +30,7 @@ export default async function RoomPage({
 		redirect(`/game/${room.id}/${room.activeGameType}`);
 	}
 
-	const rankings = await getNullHandRankings(room.users.map((u) => u.userId));
+	const rankings = await getRoomMemberRankings(room.users.map((u) => u.userId));
 	const isHost = room.createdBy === currentUser.user.id;
 
 	return (

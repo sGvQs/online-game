@@ -10,7 +10,6 @@ import { Modal } from "@/components/ui/modal";
 import { LeaveRoomButton } from "../leaveRoomButton";
 import { Button } from "@/components/ui/button";
 import { Typography } from "@/components/ui/typography";
-import { ASCII_ART } from "@/constants/errorHunterGame/constants";
 import { selectGame } from "@/server/actions/room";
 import {
 	isPlayerCountValid,
@@ -25,28 +24,6 @@ interface GameCarouselSectionProps {
 }
 
 const GAMES = [
-	{
-		type: "error-hunter",
-		title: "ERROR HUNTER",
-		icon: "/svg/object/old-pc.svg",
-		desc: "バグを最速で潰せ！",
-		mode: "competitive",
-		shortDesc:
-			"エラーダイアログが突然出現！最速でエラーをたくさん潰した人が勝ち！",
-		roles: null,
-		videos: ["/mp4/error-hunter.mp4"] as const,
-	},
-	{
-		type: "null-hand",
-		title: "NULL HAND",
-		icon: "/svg/object/null-hand.svg",
-		desc: "心理戦で相手を欺け",
-		mode: "competitive",
-		shortDesc:
-			"ホストは裏で手を選択。ゲストはその心理を読んで勝て。その確率本当に信じていいのかな？",
-		roles: ["HOST", "GUEST"] as const,
-		videos: ["/mp4/null-hand-host.mp4", "/mp4/null-hand-guest.mp4"] as const,
-	},
 	{
 		type: "star-shield",
 		title: "STAR SHIELD",
@@ -64,12 +41,6 @@ type GameType = (typeof GAMES)[number]["type"];
 
 function renderGameTitle(type: GameType) {
 	switch (type) {
-		case "error-hunter":
-			return (
-				<pre className="font-['Courier_New',monospace] text-[5px] leading-[1.2] font-bold whitespace-pre overflow-hidden mx-auto">
-					{ASCII_ART}
-				</pre>
-			);
 		case "star-shield":
 			return (
 				<div className="select-none flex flex-col items-center">
@@ -81,19 +52,10 @@ function renderGameTitle(type: GameType) {
 					</Typography>
 				</div>
 			);
-		case "null-hand":
-			return (
-				<Typography variant="display" font="sans" as="div" className="font-black text-3xl tracking-widest text-center drop-shadow-[2px_2px_0_rgba(255,68,68,0.4)] leading-loose">
-					NULL HAND
-				</Typography>
-			);
 	}
 }
 
 const CARD_THEME: Record<GameType, string> = {
-	"error-hunter": "border-teal-600 bg-teal-700/80 text-white",
-	"null-hand":
-		"border-[#FF4444] bg-black/80 text-[#FF4444] shadow-[0_0_20px_rgba(255,68,68,0.3)]",
 	"star-shield":
 		"border-brand-500/60 bg-brand-50/80 text-brand-500 shadow-[0_0_20px_rgba(129,140,248,0.3)]",
 };
@@ -138,12 +100,7 @@ export function GameCarouselSection({
 
 	const handleGameStart = async () => {
 		const game = GAMES[activeIndex];
-		if (
-			!isPlayerCountValid(
-				game.type as "error-hunter" | "null-hand" | "star-shield",
-				memberCount,
-			)
-		) {
+		if (!isPlayerCountValid(game.type, memberCount)) {
 			setGameStartErrorType(game.type);
 			setShowGameStartError(true);
 			return;
@@ -276,10 +233,6 @@ export function GameCarouselSection({
 						人）では、このゲームをプレイできません。
 					</Typography>
 					<Typography variant="small" className={styles.errorModalSub()}>
-						{gameStartErrorType === "error-hunter" &&
-							`ERROR HUNTER は ${getPlayerRangeLabel("error-hunter")}でプレイできます。`}
-						{gameStartErrorType === "null-hand" &&
-							`NULL HAND は ${getPlayerRangeLabel("null-hand")}でプレイできます。`}
 						{gameStartErrorType === "star-shield" &&
 							"STAR SHIELD は 2人のみでプレイできます。"}
 					</Typography>

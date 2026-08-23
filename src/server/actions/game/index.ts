@@ -2,32 +2,12 @@
  * Game関連アクションの一括エクスポート
  */
 
-// Error Hunter
+// ランキング（ゲーム共通）
 export {
-	startGame,
-	clickError,
-	getMatchWithEvents,
-	finishGame,
-	getMatchProgress,
-	checkAutoFinish,
-} from "./errorHunterActions";
-
-// NULL HAND
-export {
-	startJankenMatch,
-	getHostStats,
-	setHostChoice,
-	setGuestHand,
-	getJankenEvent,
-	getLatestJankenEvent,
-	getLatestJankenEventWithStats,
-	getMatchScores,
-	startNextTurn,
-	finishJanken,
-	markNextRoundReady,
+	getRoomMemberRankings,
+	getTopRankings,
 	getMonthlyRanking,
-} from "./nullHandActions";
-export { getTopRankings } from "./rankingActions";
+} from "./rankingActions";
 
 // STAR SHIELD
 export { getStarShieldPairRankings } from "./starShieldRankingActions";

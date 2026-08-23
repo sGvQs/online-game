@@ -6,7 +6,7 @@ import { button } from "./styles";
 import { SoundContext } from "@/lib/sound-context";
 import { effectiveSeVolume } from "@/lib/sound-volume";
 
-type ButtonScreen = "default" | "null-hand" | "error-hunter" | "star-shield";
+type ButtonScreen = "default" | "star-shield";
 type ButtonVariant =
     | "solid"
     | "outline"

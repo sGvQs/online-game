@@ -22,15 +22,6 @@ export const gameCarouselSection = tv({
 		gameDesc: "text-xs opacity-70 tracking-wider",
 		cardInfo: "flex items-center gap-2 text-[10px] opacity-80 mt-auto",
 		actionRow: "flex items-center gap-3",
-		errorHunterCard: "border-teal-600 bg-teal-700/80 text-white",
-		nullHandCard: [
-			"border-[#FF4444] bg-black/80 text-[#FF4444]",
-			"shadow-[0_0_20px_rgba(255,68,68,0.3)]",
-		],
-		starShieldCard: [
-			"border-brand-500/60 bg-brand-50/80 text-brand-500",
-			"shadow-[0_0_20px_rgba(129,140,248,0.3)]",
-		],
 		errorModalContent: "flex flex-col gap-4 p-2",
 		errorModalText: "text-brand-700",
 		errorModalSub: "text-brand-600",

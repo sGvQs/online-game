@@ -6,7 +6,6 @@
 const LOCAL_KEY_HAS_LOGGED_IN = "pukapuka-space-has-logged-in";
 const LOCAL_KEY_LOGIN_VISIT_COUNT = "pukapuka-space-login-visit-count";
 const LOCAL_KEY_HAS_VISITED = "pukapuka-space-has-visited";
-const LOCAL_KEY_NULLHAND_USER_COLOR = "nullhand_user_color";
 const LOCAL_KEY_SOUND_MASTER_VOLUME = "pukapuka-space-sound-master-volume";
 
 /** 実績 ID ごとに `pukapuka-space-achievement-{id}`（キー文字列は export しない） */
@@ -68,18 +67,6 @@ export function setHasVisitedSite(value: boolean): void {
 	} else {
 		s.removeItem(LOCAL_KEY_HAS_VISITED);
 	}
-}
-
-export function getNullHandUserColor(): string | null {
-	const s = getLocalStorage();
-	if (!s) return null;
-	return s.getItem(LOCAL_KEY_NULLHAND_USER_COLOR);
-}
-
-export function setNullHandUserColor(color: string): void {
-	const s = getLocalStorage();
-	if (!s) return;
-	s.setItem(LOCAL_KEY_NULLHAND_USER_COLOR, color);
 }
 
 /** マスター音量 0〜1。未設定時は 0.5（UI 10 段の 5 段目相当） */

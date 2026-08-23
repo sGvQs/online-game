@@ -18,8 +18,6 @@ enum FaceIcon {
 
 enum GameType {
   STAR_SHIELD
-  NULL_HAND
-  ERROR_HUNTER
 }
 
 enum MatchStatus {
@@ -38,14 +36,10 @@ model User {
   createdAt DateTime @default(now()) @map("created_at")
 
   // リレーション名をキャメルケースに統一
-  errorEvents     ErrorEvent[]
   matches         Match[]
   joinedRooms     RoomUser[]
   createdRooms    Room[]           @relation("CreatedRooms")
   userIDPs        UserIDP[]
-  guestHands      GuestHand[]
-  jankenLogs      JankenLog[]
-  matchScores     MatchScore[]
   monthlyRankings           MonthlyRanking[]
   pointLogs                 PointLog[]
   roomDeletedNotifications RoomDeletedNotification[]
@@ -121,22 +115,6 @@ model UserIDP {
   @@map("user_idp")
 }
 
-model ErrorEvent {
-  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  matchId      String    @map("match_id") @db.Uuid
-  appearanceAt DateTime  @map("appearance_at")
-  closedAt     DateTime? @map("closed_at")
-  closedBy     String?   @map("closed_by") @db.Uuid
-  positionX    Float     @map("position_x") // 画面上の位置
-  positionY    Float     @map("position_y") // 画面上の位置
-  user         User?     @relation(fields: [closedBy], references: [id])
-  match        Match     @relation(fields: [matchId], references: [id], onDelete: Cascade)
-
-  @@index([matchId])
-  @@index([matchId, closedAt])
-  @@map("error_events")
-}
-
 model Match {
   id        String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   roomId    String      @map("room_id") @db.Uuid
@@ -145,100 +123,12 @@ model Match {
   winnerId  String?     @map("winner_id") @db.Uuid
   createdAt DateTime    @default(now()) @map("created_at")
 
-  errorEvents      ErrorEvent[]
-  jankenEvents     JankenEvent[]
-  jankenLogs       JankenLog[]
-  matchScores      MatchScore[]
-  nullHandMatch    NullHandMatch?
   typingShootMatch TypingShootMatch?
   room             Room              @relation(fields: [roomId], references: [id], onDelete: Cascade)
   winner           User?             @relation(fields: [winnerId], references: [id], onDelete: SetNull)
 
   @@index([roomId])
   @@map("matches")
-}
-
-// NULL HAND ゲーム用モデル
-
-// Null Hand 専用のマッチメタデータ（Match の extension table）
-model NullHandMatch {
-  id               String @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  matchId          String @unique @map("match_id") @db.Uuid
-  currentTurnIndex Int    @default(1) @map("current_turn_index")
-  totalTurns       Int    @default(1) @map("total_turns")
-
-  match Match @relation(fields: [matchId], references: [id], onDelete: Cascade)
-
-  @@map("null_hand_matches")
-}
-
-// 1ターンの状態管理
-model JankenEvent {
-  id              String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  matchId         String  @map("match_id") @db.Uuid
-  currentHostId   String  @map("current_host_id") @db.Uuid
-  turnNumber      Int     @default(1) @map("turn_number")
-  phase           String  @default("DEAL")
-  systemRealHand  String? @map("system_real_hand") // システムが生成した勝ち手
-  systemBluffHand String? @map("system_bluff_hand") // システムが生成した負け手
-  hostChoice      String? @map("host_choice") // "STAY" | "REVERSE"
-  finalHostHand   String? @map("final_host_hand") // 実際に提出された手（計算結果）
-
-  match      Match       @relation(fields: [matchId], references: [id], onDelete: Cascade)
-  guestHands GuestHand[]
-  jankenLogs JankenLog[]
-
-  @@map("janken_events")
-}
-
-// ゲスト各人の手を記録
-model GuestHand {
-  id            String  @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  jankenEventId String  @map("janken_event_id") @db.Uuid
-  userId        String  @map("user_id") @db.Uuid
-  hand          String
-  isConfirmed   Boolean @default(false) @map("is_confirmed")
-
-  jankenEvent JankenEvent @relation(fields: [jankenEventId], references: [id], onDelete: Cascade)
-  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([jankenEventId, userId])
-  @@map("guest_hands")
-}
-
-// 統計データ蓄積（ホストのSTAY/REVERSE選択ログ）
-model JankenLog {
-  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  userId        String   @map("user_id") @db.Uuid
-  isHost        Boolean  @default(false) @map("is_host")
-  hostChoice    String?  @map("host_choice") // "STAY" | "REVERSE" (ホスト時のみ)
-  matchId       String?  @map("match_id") @db.Uuid
-  jankenEventId String?  @map("janken_event_id") @db.Uuid
-  createdAt     DateTime @default(now()) @map("created_at")
-  isWinning     Boolean  @default(false) @map("is_winning")
-
-  match       Match?       @relation(fields: [matchId], references: [id], onDelete: SetNull)
-  jankenEvent JankenEvent? @relation(fields: [jankenEventId], references: [id], onDelete: SetNull)
-  user        User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId, isHost])
-  @@map("janken_logs")
-}
-
-// ポイント管理（ターン制ゲーム用）
-model MatchScore {
-  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  matchId   String   @map("match_id") @db.Uuid
-  userId    String   @map("user_id") @db.Uuid
-  points    Int      @default(0)
-  turnOrder Int      @default(0) @map("turn_order")
-  createdAt DateTime @default(now()) @map("created_at")
-
-  match Match @relation(fields: [matchId], references: [id], onDelete: Cascade)
-  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([matchId, userId])
-  @@map("match_scores")
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -266,7 +156,7 @@ model PointLog {
   id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   userId    String   @map("user_id") @db.Uuid
   amount    Int // 獲得（または消費）した量
-  gameType  String   @map("game_type") // "NULL_HAND", "ERROR_HUNTER" など
+  gameType  String   @map("game_type") // "STAR_SHIELD" など
   reason    String? // "MATCH_WIN", "GAMBLE_LOSS" など
   createdAt DateTime @default(now()) @map("created_at")
 

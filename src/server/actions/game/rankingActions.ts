@@ -4,12 +4,12 @@ import { prisma } from "@/server/lib/prisma";
 import { UserRanking } from "@/types";
 
 /**
- * 指定されたユーザーIDの月間ランキング情報を取得する
+ * 指定されたユーザーIDの月間ランキング情報を取得する（ゲーム共通）
  *
  * @param userIds - ランキングを取得したいユーザーのIDリスト
  * @returns ユーザーごとのランキング情報
  */
-export async function getNullHandRankings(
+export async function getRoomMemberRankings(
 	userIds: string[],
 ): Promise<UserRanking[]> {
 	if (userIds.length === 0) return [];
@@ -112,4 +112,63 @@ export async function getTopRankings(limit?: number): Promise<UserRanking[]> {
 			winRate: 0,
 		};
 	});
+}
+
+// ============================================
+// 世界ランキング関連取得（ユーザー単体）
+// ============================================
+
+export type UserRankingInfo = {
+	rank: number;
+	totalPoints: number;
+	year: number;
+	month: number;
+};
+
+/**
+ * ユーザーの現在の月間ランキングと累計ポイントを取得
+ */
+export async function getMonthlyRanking(
+	userId: string,
+): Promise<UserRankingInfo | null> {
+	const now = new Date();
+	const year = now.getFullYear();
+	const month = now.getMonth() + 1;
+
+	const userRanking = await prisma.monthlyRanking.findUnique({
+		where: {
+			userId_year_month: {
+				userId,
+				year,
+				month,
+			},
+		},
+	});
+
+	if (!userRanking) {
+		return {
+			rank: 0,
+			totalPoints: 0,
+			year,
+			month,
+		};
+	}
+
+	// 自分より高いポイントを持っている人の数を数える（+1で順位になる）
+	const higherRankingCount = await prisma.monthlyRanking.count({
+		where: {
+			year,
+			month,
+			totalPoints: {
+				gt: userRanking.totalPoints,
+			},
+		},
+	});
+
+	return {
+		rank: higherRankingCount + 1,
+		totalPoints: userRanking.totalPoints,
+		year,
+		month,
+	};
 }

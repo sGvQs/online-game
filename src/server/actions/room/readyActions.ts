@@ -38,7 +38,6 @@ export async function toggleReady(roomId: string): Promise<boolean> {
 	});
 
 	revalidatePath(`/room/${roomId}`);
-	revalidatePath(`/game/${roomId}/error-hunter`);
 
 	return updated.isReady;
 }
@@ -89,6 +88,4 @@ export async function resetAllReady(roomId: string): Promise<void> {
 	});
 
 	revalidatePath(`/room/${roomId}`);
-	revalidatePath(`/game/${roomId}/error-hunter`);
-	revalidatePath(`/game/${roomId}/null-hand`);
 }

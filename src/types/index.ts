@@ -28,31 +28,7 @@ export { RoomStatus } from "./prisma/room";
 export type { RoomStatus as RoomStatusType } from "./prisma/room";
 
 // Game関連
-export type {
-	ErrorEvent,
-	Match,
-	MatchWithErrorEvents,
-	MatchWithRoom,
-	ErrorEventWithMatch,
-	ErrorEventWithUser,
-	MatchWithErrorEventsAndUsers,
-	MatchProgress,
-	JankenEvent,
-	GuestHand,
-	JankenLog,
-	MatchScore,
-	JankenEventWithGuests,
-	MatchWithJankenEvents,
-	MatchWithScores,
-	MatchScoreWithUser,
-	HostStats,
-	HostChoice,
-	RoundResult,
-	JankenPhase,
-	UserRanking,
-} from "./prisma/game";
-// enumは値としてexportが必要
-export { HandType } from "./prisma/game";
+export type { Match, MatchWithRoom, UserRanking } from "./prisma/game";
 
 // StarShieldGame
 export type {

@@ -29,16 +29,6 @@ function segmentHeightPx(index: number): number {
 }
 
 const BGM_CONFIG = {
-	ERROR_HUNTER: {
-		check: (path: string) => path.includes("error-hunter"),
-		srcs: ["/music/error-hunter.mp3"],
-		label: "error-hunter",
-	},
-	NULL_HAND: {
-		check: (path: string) => path.includes("null-hand"),
-		srcs: ["/music/null-hand-opening.mp3", "/music/null-hand-playing.mp3"],
-		label: "null-hand",
-	},
 	MAIN_SYSTEM: {
 		check: (path: string) =>
 			path.includes("/home") || path.includes("/room/"),
@@ -118,7 +108,7 @@ export default function BGMPlayer() {
 		setTrackIndex((prev) => (prev + 1) % activeConfig.srcs.length);
 	};
 
-	const isSingleTrack = activeConfig.srcs.length === 1;
+	const isSingleTrack = activeConfig.srcs.length <= 1;
 
 	const playSwitchSe = () => {
 		const audio = new Audio("/se/switch-se.mp3");

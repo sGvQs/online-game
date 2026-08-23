@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import { getCurrentUser } from "@/server/actions";
 import { getRoomWithReadyStatus } from "@/server/actions/room";
-import { getNullHandRankings } from "@/server/actions/game/rankingActions";
+import { getRoomMemberRankings } from "@/server/actions/game/rankingActions";
 import { getStarShieldPairRankings } from "@/server/actions/game/starShieldRankingActions";
 import type { PairRanking } from "@/server/actions/game/starShieldRankingActions";
 import { RoomUserWithReadyStatus } from "@/types";
@@ -49,7 +49,7 @@ export default async function StarShieldPage({
 	const isHost = room.createdBy === currentUser.user.id;
 	const userIds = room.users.map((u) => u.userId);
 	const [initialRankings, allPairRankings] = await Promise.all([
-		getNullHandRankings(userIds),
+		getRoomMemberRankings(userIds),
 		getStarShieldPairRankings(),
 	]);
 	const memberPairRank = findMemberPairRank(allPairRankings, userIds);
